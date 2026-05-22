@@ -1,0 +1,123 @@
+﻿<UserControl x:Class="SOLUM_UI.Controls.TopBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="56">
+    <UserControl.Resources>
+        <Style x:Key="TopBarIconButton" TargetType="Button">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Ellipse x:Name="Bg" Width="36" Height="36" Fill="Transparent"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Fill" Value="#F0E4E4"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bg" Property="Fill" Value="#D4A0B0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid VerticalAlignment="Center">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="320"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Column="0"
+                   x:Name="PageTitleText"
+                   FontFamily="Segoe UI"
+                   FontSize="20"
+                   FontWeight="Bold"
+                   Foreground="#702943"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   Margin="0,0,20,0"/>
+
+        <StackPanel Grid.Column="1"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    Margin="0,0,40,0">
+
+            <Rectangle Width="2"
+                       Height="32"
+                       Fill="#D4A0B0"
+                       RadiusX="1" RadiusY="1"
+                       VerticalAlignment="Center"
+                       Margin="0,0,24,0"/>
+
+            <Border x:Name="ProfilePill"
+                    Background="#F5ECEE"
+                    CornerRadius="20"
+                    Padding="10,6,14,6"
+                    BorderBrush="#E8D0D8"
+                    BorderThickness="1"
+                    Cursor="Hand"
+                    Margin="0,0,24,0">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#EDD8DF"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="28" Height="28"
+                            CornerRadius="14"
+                            Background="#702943"
+                            Margin="0,0,10,0">
+                        <TextBlock x:Name="UserInitial"
+                                   Text="U"
+                                   FontFamily="Segoe UI"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="UserNameText"
+                                   Text="Sua, Renzo B."
+                                   FontFamily="Segoe UI"
+                                   FontSize="11"
+                                   FontWeight="Bold"
+                                   Foreground="#702943"/>
+                        <TextBlock x:Name="UserRoleText"
+                                   Text="Admin"
+                                   FontFamily="Segoe UI"
+                                   FontWeight="Medium"
+                                   FontSize="9"
+                                   Foreground="#A06080"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Button Style="{StaticResource TopBarIconButton}"
+                    Margin="0,0,10,0">
+                <Path Stretch="Uniform" Width="20" Height="20"
+                      Fill="#702943"
+                      Data="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21"/>
+            </Button>
+
+            <Button Style="{StaticResource TopBarIconButton}">
+                <Path Stretch="Uniform" Width="22" Height="22"
+                      Fill="#702943"
+                      Data="M11.5,2C6.81,2 3,5.81 3,10.5S6.81,19 11.5,19H12V22C14.86,20.28 19,17.5 19,10.5C19,5.81 15.19,2 11.5,2M12.5,16.5H10.5V14.5H12.5V16.5M12.5,13H10.5C10.5,9.75 13.5,10 13.5,8C13.5,6.9 12.6,6 11.5,6C10.4,6 9.5,6.9 9.5,8H7.5C7.5,5.79 9.29,4 11.5,4C13.71,4 15.5,5.79 15.5,8C15.5,10.5 12.5,10.75 12.5,13Z"/>
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>
