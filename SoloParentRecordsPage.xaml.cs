@@ -33,11 +33,71 @@ namespace SOLUM_UI
         {
             List<SoloParentRecord> raw = new List<SoloParentRecord>
             {
-                new SoloParentRecord { Id = "SP-001", Surname = "Santos",    FirstName = "Maria", MiddleName = "L.", Name = "Santos, Maria L.",    Barangay = "San Roque",  Gender = "Female", CivilStatus = "Single",    DateOfBirth = new DateTime(1990, 3, 12), Children = 2, Status = "Active",   LastUpdated = new DateTime(2025, 3, 15) },
-                new SoloParentRecord { Id = "SP-002", Surname = "Dela Cruz", FirstName = "Juan",  MiddleName = "R.", Name = "Dela Cruz, Juan R.",  Barangay = "Poblacion",  Gender = "Male",   CivilStatus = "Widowed",   DateOfBirth = new DateTime(1985, 7, 22), Children = 3, Status = "Active",   LastUpdated = new DateTime(2025, 3, 12) },
-                new SoloParentRecord { Id = "SP-003", Surname = "Reyes",     FirstName = "Ana",   MiddleName = "M.", Name = "Reyes, Ana M.",       Barangay = "Maligaya",   Gender = "Female", CivilStatus = "Separated", DateOfBirth = new DateTime(1993, 1,  5), Children = 1, Status = "Pending",  LastUpdated = new DateTime(2025, 3, 14) },
-                new SoloParentRecord { Id = "SP-004", Surname = "Garcia",    FirstName = "Pedro", MiddleName = "T.", Name = "Garcia, Pedro T.",    Barangay = "San Isidro", Gender = "Male",   CivilStatus = "Single",    DateOfBirth = new DateTime(1988, 9, 30), Children = 2, Status = "Active",   LastUpdated = new DateTime(2025, 3,  9) },
-                new SoloParentRecord { Id = "SP-005", Surname = "Martinez",  FirstName = "Rosa",  MiddleName = "C.", Name = "Martinez, Rosa C.",   Barangay = "San Roque",  Gender = "Female", CivilStatus = "Widowed",   DateOfBirth = new DateTime(1979, 5, 18), Children = 4, Status = "Inactive", LastUpdated = new DateTime(2025, 3, 28) },
+                new SoloParentRecord
+                {
+                    Id = "SP-001", Surname = "Santos", FirstName = "Maria", MiddleName = "Lim",
+                    ExtensionName = "", Name = "Santos, Maria Lim",
+                    DateOfBirth = new DateTime(1990, 3, 12), PlaceOfBirth = "Quezon City",
+                    Gender = "Female", CivilStatus = "Single", Citizenship = "Filipino",
+                    BloodType = "O+", Height = "158", Weight = "52",
+                    Address = "123 Rizal St., Brgy. San Roque", Barangay = "San Roque",
+                    ContactNumber = "09171234567", SourceOfReferral = "DSWD",
+                    DateAdmitted = new DateTime(2024, 1, 10), CaseNo = "2024-001",
+                    OffenseCommitted = "", NatureOfReferral = "Financial Assistance",
+                    Children = 2, Status = "Active", LastUpdated = new DateTime(2025, 3, 15)
+                },
+                new SoloParentRecord
+                {
+                    Id = "SP-002", Surname = "Dela Cruz", FirstName = "Juan", MiddleName = "Reyes",
+                    ExtensionName = "Jr.", Name = "Dela Cruz, Juan Reyes Jr.",
+                    DateOfBirth = new DateTime(1985, 7, 22), PlaceOfBirth = "Manila",
+                    Gender = "Male", CivilStatus = "Widowed", Citizenship = "Filipino",
+                    BloodType = "A+", Height = "170", Weight = "68",
+                    Address = "456 Mabini Ave., Brgy. Poblacion", Barangay = "Poblacion",
+                    ContactNumber = "09281234567", SourceOfReferral = "LGU",
+                    DateAdmitted = new DateTime(2023, 6, 5), CaseNo = "2023-045",
+                    OffenseCommitted = "", NatureOfReferral = "Livelihood Program",
+                    Children = 3, Status = "Active", LastUpdated = new DateTime(2025, 3, 12)
+                },
+                new SoloParentRecord
+                {
+                    Id = "SP-003", Surname = "Reyes", FirstName = "Ana", MiddleName = "Mendoza",
+                    ExtensionName = "", Name = "Reyes, Ana Mendoza",
+                    DateOfBirth = new DateTime(1993, 1, 5), PlaceOfBirth = "Caloocan",
+                    Gender = "Female", CivilStatus = "Separated", Citizenship = "Filipino",
+                    BloodType = "B+", Height = "155", Weight = "49",
+                    Address = "789 Luna St., Brgy. Maligaya", Barangay = "Maligaya",
+                    ContactNumber = "09391234567", SourceOfReferral = "Barangay",
+                    DateAdmitted = new DateTime(2024, 3, 20), CaseNo = "2024-012",
+                    OffenseCommitted = "", NatureOfReferral = "Solo Parent ID",
+                    Children = 1, Status = "Pending", LastUpdated = new DateTime(2025, 3, 14)
+                },
+                new SoloParentRecord
+                {
+                    Id = "SP-004", Surname = "Garcia", FirstName = "Pedro", MiddleName = "Torres",
+                    ExtensionName = "III", Name = "Garcia, Pedro Torres III",
+                    DateOfBirth = new DateTime(1988, 9, 30), PlaceOfBirth = "Pasig",
+                    Gender = "Male", CivilStatus = "Single", Citizenship = "Filipino",
+                    BloodType = "AB+", Height = "172", Weight = "74",
+                    Address = "321 Bonifacio Rd., Brgy. San Isidro", Barangay = "San Isidro",
+                    ContactNumber = "09501234567", SourceOfReferral = "DSWD",
+                    DateAdmitted = new DateTime(2023, 11, 15), CaseNo = "2023-089",
+                    OffenseCommitted = "", NatureOfReferral = "Educational Assistance",
+                    Children = 2, Status = "Active", LastUpdated = new DateTime(2025, 3, 9)
+                },
+                new SoloParentRecord
+                {
+                    Id = "SP-005", Surname = "Martinez", FirstName = "Rosa", MiddleName = "Cruz",
+                    ExtensionName = "", Name = "Martinez, Rosa Cruz",
+                    DateOfBirth = new DateTime(1979, 5, 18), PlaceOfBirth = "Marikina",
+                    Gender = "Female", CivilStatus = "Widowed", Citizenship = "Filipino",
+                    BloodType = "O-", Height = "152", Weight = "55",
+                    Address = "654 Aguinaldo Blvd., Brgy. San Roque", Barangay = "San Roque",
+                    ContactNumber = "09611234567", SourceOfReferral = "NGO",
+                    DateAdmitted = new DateTime(2022, 8, 3), CaseNo = "2022-034",
+                    OffenseCommitted = "", NatureOfReferral = "Medical Assistance",
+                    Children = 4, Status = "Inactive", LastUpdated = new DateTime(2025, 3, 28)
+                },
             };
 
             _allRecords = new List<SoloParentRecordViewModel>();
@@ -47,7 +107,6 @@ namespace SOLUM_UI
             ApplyFilters();
         }
 
-       //toolbar funct
         private void ApplyFilters()
         {
             if (_allRecords == null) return;
@@ -92,7 +151,6 @@ namespace SOLUM_UI
             RecordsList.ItemsSource = filtered;
         }
 
-       //toolbars
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             ApplyFilters();
@@ -140,14 +198,32 @@ namespace SOLUM_UI
             SoloParentRecordViewModel vm = RecordsList.SelectedItem as SoloParentRecordViewModel;
             if (vm == null) return;
 
-            
             AuditLogService.Instance.LogView(vm.Name, GetCurrentUser());
 
-            //open the activity detail window for this record
-            
+            MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
+            if (mainWindow != null)
+                mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
+
+            RecordDialog dialog = new RecordDialog(vm.RawModel) { Owner = Window.GetWindow(this) };
+
+            dialog.Closed += (s, args) =>
+            {
+                if (mainWindow != null)
+                    mainWindow.MainContent.Effect = null;
+            };
+
+            if (dialog.ShowDialog() == true && dialog.Result != null)
+            {
+                int idx = _allRecords.FindIndex(r => r.Id == vm.Id);
+                if (idx >= 0)
+                    _allRecords[idx] = new SoloParentRecordViewModel(dialog.Result);
+
+                AuditLogService.Instance.LogUpdate(dialog.Result.Name, GetCurrentUser());
+
+                ApplyFilters();
+            }
         }
 
-        
         private void AddNewRecord_Click(object sender, RoutedEventArgs e)
         {
             MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
@@ -172,7 +248,6 @@ namespace SOLUM_UI
             }
         }
 
-      
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
             string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
@@ -203,7 +278,6 @@ namespace SOLUM_UI
             }
         }
 
-       
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
@@ -221,13 +295,11 @@ namespace SOLUM_UI
 
             _allRecords.RemoveAll(r => r.Id == id);
 
-            
             AuditLogService.Instance.LogDelete(recordName, GetCurrentUser());
 
             ApplyFilters();
         }
 
-       
         private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             ResizeNameColumn();
@@ -240,7 +312,7 @@ namespace SOLUM_UI
                 double totalFixed = 80 + 80 + 110 + 115 + 120 + 80 + 110 + 120 + 90;
                 double available = RecordsList.ActualWidth - totalFixed - 20;
                 if (available > 100)
-                    gv.Columns[1].Width = available;
+                    gv.Columns[1].Width = available + 30;
             }
         }
         private string GetCurrentUser()

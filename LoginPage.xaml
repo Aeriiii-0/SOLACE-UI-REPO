@@ -5,8 +5,293 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SOLUM_UI"
         mc:Ignorable="d"
-        Title="LoginPage" Height="450" Width="800">
-    <Grid>
-        
+        Title="Solace"
+        MinHeight="420" MinWidth="680"
+        Height="450" Width="800"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        KeyDown="Window_KeyDown">
+
+    <Grid MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left decorative panel — always 40% of window -->
+        <Grid Grid.Column="0" ClipToBounds="True">
+            <Image Source="pack://application:,,,/Assets/LoginDesign.png"
+                   Stretch="UniformToFill"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- Right login panel — Viewbox scales all content with window size -->
+        <Grid Grid.Column="1" Background="White">
+            <Viewbox Stretch="Uniform"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     MaxWidth="420"
+                     MaxHeight="520">
+                <StackPanel Width="300" VerticalAlignment="Center">
+
+                    <!-- Logo circle -->
+                    <Border Width="90" Height="90"
+                            CornerRadius="45"
+                            Background="White"
+                            HorizontalAlignment="Center"
+                            Margin="0,0,0,10">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#CCCCCC" BlurRadius="12" ShadowDepth="2" Opacity="0.4"/>
+                        </Border.Effect>
+                        <Image Source="pack://application:,,,/Assets/Logo.png"
+                               Width="70" Height="70"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Stretch="Uniform"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Border>
+
+                    <!-- App name -->
+                    <TextBlock Text="SOLACE"
+                               FontFamily="Segoe UI Semibold"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="#8B1A4A"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,24"/>
+
+                    <!-- Email label -->
+                    <TextBlock Text="EMAIL ADDRESS"
+                               FontFamily="Segoe UI"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="#222222"
+                               Margin="0,0,0,4"/>
+
+                    <!-- Email field -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.ColumnSpan="2" BorderBrush="#CCCCCC" BorderThickness="0,0,0,1"/>
+                        <TextBlock Grid.Column="0"
+                                   Text="&#xE77B;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="16"
+                                   Foreground="#888888"
+                                   VerticalAlignment="Center"
+                                   Margin="0,6,8,6"/>
+                        <Grid Grid.Column="1">
+                            <TextBlock x:Name="PlaceholderEmail"
+                                       Text="Email or Username"
+                                       Foreground="#AAAAAA"
+                                       FontFamily="Segoe UI"
+                                       FontSize="13"
+                                       VerticalAlignment="Center"
+                                       Margin="2,0,0,0"
+                                       IsHitTestVisible="False"/>
+                            <TextBox x:Name="TxtEmail"
+                                     FontFamily="Segoe UI"
+                                     FontSize="13"
+                                     Foreground="#444444"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     VerticalAlignment="Center"
+                                     Padding="0,6"
+                                     TextChanged="TxtEmail_TextChanged"/>
+                        </Grid>
+                    </Grid>
+
+                    <!-- Password label -->
+                    <TextBlock Text="PASSWORD"
+                               FontFamily="Segoe UI"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="#222222"
+                               Margin="0,0,0,4"/>
+
+                    <!-- Password field -->
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.ColumnSpan="3" BorderBrush="#CCCCCC" BorderThickness="0,0,0,1"/>
+                        <TextBlock Grid.Column="0"
+                                   Text="&#xE72E;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="16"
+                                   Foreground="#888888"
+                                   VerticalAlignment="Center"
+                                   Margin="0,6,8,6"/>
+                        <Grid Grid.Column="1">
+                            <TextBlock x:Name="PlaceholderPassword"
+                                       Text="Password"
+                                       Foreground="#AAAAAA"
+                                       FontFamily="Segoe UI"
+                                       FontSize="13"
+                                       VerticalAlignment="Center"
+                                       Margin="2,0,0,0"
+                                       IsHitTestVisible="False"/>
+                            <PasswordBox x:Name="TxtPassword"
+                                         FontFamily="Segoe UI"
+                                         FontSize="13"
+                                         Foreground="#444444"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         VerticalAlignment="Center"
+                                         Padding="0,6"
+                                         PasswordChanged="TxtPassword_PasswordChanged"/>
+                            <TextBox x:Name="TxtPasswordVisible"
+                                     FontFamily="Segoe UI"
+                                     FontSize="13"
+                                     Foreground="#444444"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     VerticalAlignment="Center"
+                                     Padding="0,6"
+                                     Visibility="Collapsed"
+                                     TextChanged="TxtPasswordVisible_TextChanged"/>
+                        </Grid>
+                        <Button x:Name="BtnTogglePassword"
+                                Grid.Column="2"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                VerticalAlignment="Center"
+                                Padding="4,0"
+                                Click="BtnTogglePassword_Click">
+                            <TextBlock x:Name="TxtToggleIcon"
+                                       Text="&#xED1A;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="16"
+                                       Foreground="#888888"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- Forgot password -->
+                    <TextBlock HorizontalAlignment="Right"
+                               Margin="0,2,0,20">
+                        <Hyperlink x:Name="LinkForgotPassword"
+                                   Foreground="#8B1A4A"
+                                   TextDecorations="None"
+                                   FontFamily="Segoe UI"
+                                   FontSize="12">
+                            Forgot Password?
+                        </Hyperlink>
+                    </TextBlock>
+
+                    <!-- Error message -->
+                    <TextBlock x:Name="TxtError"
+                               Foreground="#C0392B"
+                               FontFamily="Segoe UI"
+                               FontSize="11"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,8"
+                               Visibility="Collapsed"
+                               TextWrapping="Wrap"/>
+
+                    <!-- Login button -->
+                    <Button x:Name="BtnLogin"
+                            Content="LOGIN"
+                            Height="42"
+                            FontFamily="Segoe UI"
+                            FontSize="14"
+                            FontWeight="Bold"
+                            Foreground="White"
+                            Cursor="Hand"
+                            BorderThickness="0"
+                            Click="BtnLogin_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="ButtonBorder"
+                                        Background="#A03060"
+                                        CornerRadius="21"
+                                        Padding="0">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="ButtonBorder" Property="Background" Value="#8B1A4A"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="ButtonBorder" Property="Background" Value="#6D1039"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                </StackPanel>
+            </Viewbox>
+        </Grid>
+
+        <!-- Title bar controls -->
+        <StackPanel Grid.Column="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="0,12,16,0"
+                    Panel.ZIndex="10">
+            <Button x:Name="BtnMinimize"
+                    Width="16" Height="16"
+                    Background="#A8A8A8"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Margin="0,0,10,0"
+                    Click="BtnMinimize_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Ellipse x:Name="Dot" Width="16" Height="16" Fill="{TemplateBinding Background}"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Dot" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            <Button x:Name="BtnMaximize"
+                    Width="16" Height="16"
+                    Background="#28C840"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Margin="0,0,10,0"
+                    Click="BtnMaximize_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Ellipse x:Name="Dot" Width="16" Height="16" Fill="{TemplateBinding Background}"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Dot" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            <Button x:Name="BtnClose"
+                    Width="16" Height="16"
+                    Background="#FF5F57"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Click="BtnClose_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Ellipse x:Name="Dot" Width="16" Height="16" Fill="{TemplateBinding Background}"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Dot" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </StackPanel>
+
     </Grid>
 </Window>

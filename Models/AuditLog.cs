@@ -21,7 +21,7 @@ namespace SOLUM_UI.Models
         public string OldValue { get; set; }        
         public string NewValue { get; set; }       
 
-        // Computed: whether detail info is available
+      
         public bool HasChangeDetail =>
             !string.IsNullOrWhiteSpace(FieldChanged) ||
             !string.IsNullOrWhiteSpace(OldValue) ||

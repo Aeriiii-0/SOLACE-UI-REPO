@@ -1,27 +1,139 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace SOLUM_UI
 {
-    /// <summary>
-    /// Interaction logic for LoginPage.xaml
-    /// </summary>
     public partial class LoginPage : Window
     {
+        private bool _isPasswordVisible = false;
+
         public LoginPage()
         {
             InitializeComponent();
+        }
+
+        
+
+        private void TxtEmail_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            PlaceholderEmail.Visibility = string.IsNullOrEmpty(TxtEmail.Text)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        private void TxtPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            PlaceholderPassword.Visibility = string.IsNullOrEmpty(TxtPassword.Password)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        private void TxtPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            PlaceholderPassword.Visibility = string.IsNullOrEmpty(TxtPasswordVisible.Text)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        
+
+        private void BtnLogin_Click(object sender, RoutedEventArgs e) => AttemptLogin();
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                AttemptLogin();
+        }
+
+        private void AttemptLogin()
+        {
+            string email = TxtEmail.Text.Trim();
+            string password = _isPasswordVisible
+                ? TxtPasswordVisible.Text
+                : TxtPassword.Password;
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ShowError("Please enter your email address.");
+                return;
+            }
+
+            if (!email.EndsWith("@gmail.com", System.StringComparison.OrdinalIgnoreCase))
+            {
+                ShowError("Please use a valid email address.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                ShowError("Please enter your password.");
+                return;
+            }
+
+        
+            MainWindow.CurrentUserName = email;
+            MainWindow.CurrentUserRole = "Administrator";
+
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
+            this.Close();
+        }
+
+        private void ShowError(string message)
+        {
+            TxtError.Text = message;
+            TxtError.Visibility = Visibility.Visible;
+        }
+
+        
+
+        private void BtnTogglePassword_Click(object sender, RoutedEventArgs e)
+        {
+            _isPasswordVisible = !_isPasswordVisible;
+
+            if (_isPasswordVisible)
+            {
+                TxtPasswordVisible.Text = TxtPassword.Password;
+                TxtPassword.Visibility = Visibility.Collapsed;
+                TxtPasswordVisible.Visibility = Visibility.Visible;
+                TxtToggleIcon.Text = "\uE7B3";
+                TxtPasswordVisible.Focus();
+                TxtPasswordVisible.CaretIndex = TxtPasswordVisible.Text.Length;
+            }
+            else
+            {
+                TxtPassword.Password = TxtPasswordVisible.Text;
+                TxtPasswordVisible.Visibility = Visibility.Collapsed;
+                TxtPassword.Visibility = Visibility.Visible;
+                TxtToggleIcon.Text = "\uED1A";
+                TxtPassword.Focus();
+            }
+        }
+
+        
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == MouseButtonState.Pressed)
+                this.DragMove();
+        }
+
+        private void BtnMinimize_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void BtnMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = this.WindowState == WindowState.Maximized
+                ? WindowState.Normal
+                : WindowState.Maximized;
+        }
+
+        private void BtnClose_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }
