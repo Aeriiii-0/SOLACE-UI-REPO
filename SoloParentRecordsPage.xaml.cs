@@ -111,7 +111,9 @@ namespace SOLUM_UI
         {
             if (_allRecords == null) return;
 
-            string query = SearchBox?.Text?.ToLower().Trim() ?? string.Empty;
+            string idQuery       = SearchId?.Text?.Trim() ?? string.Empty;
+            string nameQuery     = SearchName?.Text?.ToLower().Trim() ?? string.Empty;
+            string barangayQuery = SearchBarangay?.Text?.ToLower().Trim() ?? string.Empty;
 
             List<SoloParentRecordViewModel> filtered = new List<SoloParentRecordViewModel>();
 
@@ -120,16 +122,15 @@ namespace SOLUM_UI
                 if (_statusFilter != "All" && (r.Status ?? string.Empty) != _statusFilter) continue;
                 if (_sexFilter != "All" && (r.Sex ?? string.Empty) != _sexFilter) continue;
 
-                if (!string.IsNullOrEmpty(query))
+                if (!string.IsNullOrEmpty(idQuery))
                 {
-                    bool match =
-                        (r.Name ?? "").ToLower().Contains(query) ||
-                        (r.Id ?? "").ToLower().Contains(query) ||
-                        (r.Barangay ?? "").ToLower().Contains(query) ||
-                        (r.Status ?? "").ToLower().Contains(query) ||
-                        (r.CivilStatus ?? "").ToLower().Contains(query) ||
-                        (r.Sex ?? "").ToLower().Contains(query);
-                    if (!match) continue;
+                    if (!(r.Id ?? "").ToLower().Contains(idQuery.ToLower())) continue;
+                }
+                else
+                {
+                    bool nameMatch     = string.IsNullOrEmpty(nameQuery)     || (r.Name ?? "").ToLower().Contains(nameQuery);
+                    bool barangayMatch = string.IsNullOrEmpty(barangayQuery) || (r.Barangay ?? "").ToLower().Contains(barangayQuery);
+                    if (!nameMatch || !barangayMatch) continue;
                 }
 
                 filtered.Add(r);
@@ -139,8 +140,8 @@ namespace SOLUM_UI
             {
                 case "Name A-Z": filtered.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase)); break;
                 case "Name Z-A": filtered.Sort((a, b) => string.Compare(b.Name, a.Name, StringComparison.OrdinalIgnoreCase)); break;
-                case "Newest": filtered.Sort((a, b) => string.Compare(b.LastUpdatedFormatted, a.LastUpdatedFormatted, StringComparison.OrdinalIgnoreCase)); break;
-                case "Oldest": filtered.Sort((a, b) => string.Compare(a.LastUpdatedFormatted, b.LastUpdatedFormatted, StringComparison.OrdinalIgnoreCase)); break;
+                case "Newest":   filtered.Sort((a, b) => string.Compare(b.LastUpdatedFormatted, a.LastUpdatedFormatted, StringComparison.OrdinalIgnoreCase)); break;
+                case "Oldest":   filtered.Sort((a, b) => string.Compare(a.LastUpdatedFormatted, b.LastUpdatedFormatted, StringComparison.OrdinalIgnoreCase)); break;
                 case "Barangay": filtered.Sort((a, b) => string.Compare(a.Barangay, b.Barangay, StringComparison.OrdinalIgnoreCase)); break;
             }
 
@@ -149,11 +150,20 @@ namespace SOLUM_UI
 
             RecordsList.ItemsSource = null;
             RecordsList.ItemsSource = filtered;
+
+            if (NoResultsText != null)
+                NoResultsText.Visibility = filtered.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void SearchBtn_Click(object sender, RoutedEventArgs e)
         {
             ApplyFilters();
+        }
+
+        private void SearchBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                ApplyFilters();
         }
 
         private void FilterDrop_Click(object sender, RoutedEventArgs e)

@@ -172,6 +172,10 @@
 
         <!-- ══ Toolbar ══ -->
         <Grid Grid.Row="0" Margin="20,16,20,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -180,39 +184,51 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Search -->
-            <Border Grid.Column="0"
+            <!-- Multi-field Search Bar -->
+            <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5"
                     Background="#FFFFFF"
-                    CornerRadius="22"
+                    CornerRadius="14"
                     BorderBrush="#E0D0D5"
                     BorderThickness="1.5"
-                    Margin="0,0,10,0">
+                    Margin="0,0,0,10">
                 <Border.Effect>
                     <DropShadowEffect Color="#C0A0AA" BlurRadius="15" ShadowDepth="3" Opacity="0.08"/>
                 </Border.Effect>
-                <Grid Margin="16,0,12,0">
+                <Grid Margin="4,0,4,0" Height="52">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="1"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="1"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox x:Name="SearchBox"
-                             Grid.Column="0"
+
+                    <!-- Record ID field -->
+                    <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center" Margin="12,0,8,0">
+                        <TextBlock Text="RECORD ID" FontSize="9" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,2"/>
+                        <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"
+                              Fill="#C0A0AA" Stretch="Uniform" Width="13" Height="13"/>
+                    </StackPanel>
+                    <TextBox x:Name="SearchId"
+                             Grid.Column="1"
                              BorderThickness="0"
                              Background="Transparent"
                              FontSize="13"
                              Foreground="#333333"
                              VerticalAlignment="Center"
-                             Height="42"
-                             TextChanged="SearchBox_TextChanged">
+                             KeyDown="SearchBox_KeyDown">
                         <TextBox.Style>
                             <Style TargetType="TextBox">
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="TextBox">
                                             <Grid>
-                                                <TextBlock Text="Search records..."
-                                                           Foreground="#C0A8B0"
-                                                           FontSize="13"
+                                                <TextBlock Text="e.g. SP-001"
+                                                           Foreground="#C0A8B0" FontSize="13"
                                                            VerticalAlignment="Center"
                                                            IsHitTestVisible="False">
                                                     <TextBlock.Style>
@@ -234,284 +250,420 @@
                             </Style>
                         </TextBox.Style>
                     </TextBox>
-                    <Path Grid.Column="1"
-                          Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"
-                          Fill="#C0A0AA" Stretch="Uniform" Width="16" Height="16" VerticalAlignment="Center"/>
+
+                    <!-- Divider -->
+                    <Rectangle Grid.Column="2" Fill="#E0D0D5" Width="1" Margin="0,10"/>
+
+                    <!-- Name field -->
+                    <StackPanel Grid.Column="3" Orientation="Vertical" VerticalAlignment="Center" Margin="12,0,8,0">
+                        <TextBlock Text="NAME" FontSize="9" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,2"/>
+                        <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"
+                              Fill="#C0A0AA" Stretch="Uniform" Width="13" Height="13"/>
+                    </StackPanel>
+                    <TextBox x:Name="SearchName"
+                             Grid.Column="4"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             FontSize="13"
+                             Foreground="#333333"
+                             VerticalAlignment="Center"
+                             KeyDown="SearchBox_KeyDown">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TextBox">
+                                            <Grid>
+                                                <TextBlock Text="Search by name..."
+                                                           Foreground="#C0A8B0" FontSize="13"
+                                                           VerticalAlignment="Center"
+                                                           IsHitTestVisible="False">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+
+                    <!-- Divider -->
+                    <Rectangle Grid.Column="5" Fill="#E0D0D5" Width="1" Margin="0,10"/>
+
+                    <!-- Barangay field -->
+                    <StackPanel Grid.Column="6" Orientation="Vertical" VerticalAlignment="Center" Margin="12,0,8,0">
+                        <TextBlock Text="BARANGAY" FontSize="9" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,2"/>
+                        <Path Data="M12,3L2,12H5V20H19V12H22L12,3M12,8.5C14.34,8.5 16.46,9.55 17.9,11.2L12,14.35L6.1,11.2C7.54,9.55 9.66,8.5 12,8.5M5.63,13.17L12,16.5L18.37,13.17C18.78,14 19,14.97 19,16H5C5,14.97 5.22,14 5.63,13.17Z"
+                              Fill="#C0A0AA" Stretch="Uniform" Width="13" Height="13"/>
+                    </StackPanel>
+                    <TextBox x:Name="SearchBarangay"
+                             Grid.Column="7"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             FontSize="13"
+                             Foreground="#333333"
+                             VerticalAlignment="Center"
+                             KeyDown="SearchBox_KeyDown">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TextBox">
+                                            <Grid>
+                                                <TextBlock Text="Search by barangay..."
+                                                           Foreground="#C0A8B0" FontSize="13"
+                                                           VerticalAlignment="Center"
+                                                           IsHitTestVisible="False">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+
+                    <!-- Search Button -->
+                    <Button Grid.Column="8"
+                            Height="36" Padding="16,0"
+                            Margin="6,0,4,0"
+                            Cursor="Hand"
+                            Click="SearchBtn_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="#702943" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.88"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"
+                                  Fill="White" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0"/>
+                            <TextBlock Text="Search" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Border>
 
-            <!-- Filter pill -->
-            <Border Grid.Column="1"
-        Background="#FFFFFF" CornerRadius="22"
-        BorderBrush="#E0D0D5" BorderThickness="1.5"
-        Margin="0,0,8,0">
-                <Button x:Name="FilterDropBtn"
-            Background="Transparent" BorderThickness="0"
-            Cursor="Hand" Height="42" Padding="14,0"
-            Click="FilterDrop_Click">
+            <!-- Row 2: Filter, Sort, Add, Export -->
+            <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- No-results feedback -->
+                <TextBlock x:Name="NoResultsText"
+                           Grid.Column="0"
+                           Text="No records match your search criteria."
+                           FontSize="13" Foreground="#C0A0AA"
+                           VerticalAlignment="Center"
+                           Margin="4,0,0,0"
+                           Visibility="Collapsed"/>
+
+                <!-- Filter pill -->
+                <Border Grid.Column="1"
+                        Background="#FFFFFF" CornerRadius="22"
+                        BorderBrush="#E0D0D5" BorderThickness="1.5"
+                        Margin="0,0,8,0">
+                    <Button x:Name="FilterDropBtn"
+                            Background="Transparent" BorderThickness="0"
+                            Cursor="Hand" Height="42" Padding="14,0"
+                            Click="FilterDrop_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="Transparent" CornerRadius="22" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z"
+                                  Fill="#702943" Stretch="Uniform"
+                                  Width="13" Height="13"
+                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock x:Name="FilterDropLabel" Text="Filter"
+                                       FontSize="13" FontWeight="SemiBold"
+                                       Foreground="#702943" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Border>
+
+                <Popup x:Name="FilterPopup"
+                       PlacementTarget="{Binding ElementName=FilterDropBtn}"
+                       Placement="Bottom" StaysOpen="False"
+                       AllowsTransparency="True" PopupAnimation="Fade">
+                    <Border Background="White" CornerRadius="12"
+                            BorderBrush="#E0D0D5" BorderThickness="1" Padding="12,10">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.18"/>
+                        </Border.Effect>
+                        <StackPanel MinWidth="160">
+                            <TextBlock Text="STATUS" FontSize="10" FontWeight="Bold"
+                                       Foreground="#702943" Margin="2,0,0,6"/>
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="StatusOpt_Click" Tag="All">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="All Status" FontSize="13" Foreground="#333333" Padding="10,7"/>
+                            </Border>
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="StatusOpt_Click" Tag="Active">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="Active" FontSize="13" Foreground="#27AE60" FontWeight="SemiBold" Padding="10,7"/>
+                            </Border>
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="StatusOpt_Click" Tag="Pending">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="Pending" FontSize="13" Foreground="#702943" FontWeight="SemiBold" Padding="10,7"/>
+                            </Border>
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="StatusOpt_Click" Tag="Inactive">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="Inactive" FontSize="13" Foreground="#999999" FontWeight="SemiBold" Padding="10,7"/>
+                            </Border>
+
+                            <Separator Background="#F0E8EC" Margin="0,8"/>
+
+                            <TextBlock Text="SEX" FontSize="10" FontWeight="Bold"
+                                       Foreground="#702943" Margin="2,0,0,6"/>
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SexOpt_Click" Tag="All">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="All" FontSize="13" Foreground="#333333" Padding="10,7"/>
+                            </Border>
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SexOpt_Click" Tag="Male">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="Male" FontSize="13" Foreground="#333333" Padding="10,7"/>
+                            </Border>
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SexOpt_Click" Tag="Female">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="Female" FontSize="13" Foreground="#333333" Padding="10,7"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </Popup>
+
+                <!-- Sort icon -->
+                <Border Grid.Column="2"
+                        Background="#FFFFFF" CornerRadius="22"
+                        BorderBrush="#E0D0D5" BorderThickness="1.5"
+                        Margin="0,0,10,0">
+                    <Button x:Name="SortDropBtn"
+                            Background="Transparent" BorderThickness="0"
+                            Cursor="Hand" Width="42" Height="42"
+                            Click="SortDrop_Click" ToolTip="Sort">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="Transparent" CornerRadius="22">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <Path Data="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z"
+                              Fill="#702943" Stretch="Uniform" Width="18" Height="18"/>
+                    </Button>
+                </Border>
+
+                <Popup x:Name="SortPopup"
+                       PlacementTarget="{Binding ElementName=SortDropBtn}"
+                       Placement="Bottom" StaysOpen="False"
+                       AllowsTransparency="True" PopupAnimation="Fade">
+                    <Border Background="White" CornerRadius="12"
+                            BorderBrush="#E0D0D5" BorderThickness="1" Padding="4">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.18"/>
+                        </Border.Effect>
+                        <StackPanel MinWidth="160">
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Name A-Z">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="Name A → Z" FontSize="13" Foreground="#333333" Padding="12,9"/>
+                            </Border>
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Name Z-A">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="Name Z → A" FontSize="13" Foreground="#333333" Padding="12,9"/>
+                            </Border>
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Newest">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="Newest First" FontSize="13" Foreground="#333333" Padding="12,9"/>
+                            </Border>
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Oldest">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="Oldest First" FontSize="13" Foreground="#333333" Padding="12,9"/>
+                            </Border>
+                            <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Barangay">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FDF3F5"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="By Barangay" FontSize="13" Foreground="#333333" Padding="12,9"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </Popup>
+
+                <!-- Add New Record -->
+                <Button Grid.Column="3"
+                        Height="42" Padding="18,0"
+                        Margin="0,0,10,0" Cursor="Hand"
+                        Click="AddNewRecord_Click">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="Transparent" CornerRadius="22" Padding="{TemplateBinding Padding}">
+                            <Border Background="#702943" CornerRadius="22" Padding="{TemplateBinding Padding}">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="2" Opacity="0.22"/>
+                                </Border.Effect>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Opacity" Value="0.88"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Button.Template>
-                    <StackPanel Orientation="Horizontal">
-                        <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z"
-                  Fill="#702943" Stretch="Uniform"
-                  Width="13" Height="13"
-                  VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <TextBlock x:Name="FilterDropLabel" Text="Filter"
-                       FontSize="13" FontWeight="SemiBold"
-                       Foreground="#702943" VerticalAlignment="Center"/>
-                    </StackPanel>
+                    <TextBlock Text="+ Add New Record" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
                 </Button>
-            </Border>
 
-            <Popup x:Name="FilterPopup"
-       PlacementTarget="{Binding ElementName=FilterDropBtn}"
-       Placement="Bottom" StaysOpen="False"
-       AllowsTransparency="True" PopupAnimation="Fade">
-                <Border Background="White" CornerRadius="12"
-            BorderBrush="#E0D0D5" BorderThickness="1" Padding="12,10">
-                    <Border.Effect>
-                        <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.18"/>
-                    </Border.Effect>
-                    <StackPanel MinWidth="160">
-                        <TextBlock Text="STATUS" FontSize="10" FontWeight="Bold"
-                       Foreground="#702943" Margin="2,0,0,6"/>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="StatusOpt_Click" Tag="All">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="All Status" FontSize="13" Foreground="#333333" Padding="10,7"/>
-                        </Border>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="StatusOpt_Click" Tag="Active">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="Active" FontSize="13" Foreground="#27AE60" FontWeight="SemiBold" Padding="10,7"/>
-                        </Border>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="StatusOpt_Click" Tag="Pending">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="Pending" FontSize="13" Foreground="#702943" FontWeight="SemiBold" Padding="10,7"/>
-                        </Border>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="StatusOpt_Click" Tag="Inactive">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="Inactive" FontSize="13" Foreground="#999999" FontWeight="SemiBold" Padding="10,7"/>
-                        </Border>
-
-                        <Separator Background="#F0E8EC" Margin="0,8"/>
-
-                        <TextBlock Text="SEX" FontSize="10" FontWeight="Bold"
-                       Foreground="#702943" Margin="2,0,0,6"/>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SexOpt_Click" Tag="All">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="All" FontSize="13" Foreground="#333333" Padding="10,7"/>
-                        </Border>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SexOpt_Click" Tag="Male">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="Male" FontSize="13" Foreground="#333333" Padding="10,7"/>
-                        </Border>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SexOpt_Click" Tag="Female">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="Female" FontSize="13" Foreground="#333333" Padding="10,7"/>
-                        </Border>
-                    </StackPanel>
-                </Border>
-            </Popup>
-
-            <!-- Sort icon -->
-            <Border Grid.Column="2"
-                    Background="#FFFFFF" CornerRadius="22"
-                    BorderBrush="#E0D0D5" BorderThickness="1.5"
-                    Margin="0,0,10,0">
-                <Button x:Name="SortDropBtn"
-                        Background="Transparent" BorderThickness="0"
-                        Cursor="Hand" Width="42" Height="42"
-                        Click="SortDrop_Click" ToolTip="Sort">
+                <!-- Export -->
+                <Button Grid.Column="4"
+                        Width="42" Height="42"
+                        BorderThickness="0" Background="#FFFFFF"
+                        Cursor="Hand" ToolTip="Export">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="Transparent" CornerRadius="22">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="22" BorderBrush="#E0D0D5" BorderThickness="1.5">
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F5ECEE"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Button.Template>
-                    <Path Data="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z"
-                          Fill="#702943" Stretch="Uniform" Width="18" Height="18"/>
+                    <Path Data="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"
+                          Fill="#702943" Stretch="Uniform" Width="16" Height="16"/>
                 </Button>
-            </Border>
-
-            <Popup x:Name="SortPopup"
-                   PlacementTarget="{Binding ElementName=SortDropBtn}"
-                   Placement="Bottom" StaysOpen="False"
-                   AllowsTransparency="True" PopupAnimation="Fade">
-                <Border Background="White" CornerRadius="12"
-                        BorderBrush="#E0D0D5" BorderThickness="1" Padding="4">
-                    <Border.Effect>
-                        <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.18"/>
-                    </Border.Effect>
-                    <StackPanel MinWidth="160">
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Name A-Z">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="Name A → Z" FontSize="13" Foreground="#333333" Padding="12,9"/>
-                        </Border>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Name Z-A">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="Name Z → A" FontSize="13" Foreground="#333333" Padding="12,9"/>
-                        </Border>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Newest">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="Newest First" FontSize="13" Foreground="#333333" Padding="12,9"/>
-                        </Border>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Oldest">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="Oldest First" FontSize="13" Foreground="#333333" Padding="12,9"/>
-                        </Border>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Barangay">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="By Barangay" FontSize="13" Foreground="#333333" Padding="12,9"/>
-                        </Border>
-                    </StackPanel>
-                </Border>
-            </Popup>
-
-            <!-- Add New Record -->
-            <Button Grid.Column="3"
-                    Height="42" Padding="18,0"
-                    Margin="0,0,10,0" Cursor="Hand"
-                    Click="AddNewRecord_Click">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="#702943" CornerRadius="22" Padding="{TemplateBinding Padding}">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="2" Opacity="0.22"/>
-                            </Border.Effect>
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" Value="0.88"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
-                <TextBlock Text="+ Add New Record" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
-            </Button>
-
-            <!-- Export -->
-            <Button Grid.Column="4"
-                    Width="42" Height="42"
-                    BorderThickness="0" Background="#FFFFFF"
-                    Cursor="Hand" ToolTip="Export">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                CornerRadius="22" BorderBrush="#E0D0D5" BorderThickness="1.5">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F5ECEE"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
-                <Path Data="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"
-                      Fill="#702943" Stretch="Uniform" Width="16" Height="16"/>
-            </Button>
+            </Grid>
         </Grid>
 
         <!-- table -->
