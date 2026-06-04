@@ -150,9 +150,6 @@ namespace SOLUM_UI
 
             RecordsList.ItemsSource = null;
             RecordsList.ItemsSource = filtered;
-
-            if (NoResultsText != null)
-                NoResultsText.Visibility = filtered.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void SearchBtn_Click(object sender, RoutedEventArgs e)
@@ -164,6 +161,28 @@ namespace SOLUM_UI
         {
             if (e.Key == Key.Enter)
                 ApplyFilters();
+        }
+
+        private void SearchFields_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            bool hasText = !string.IsNullOrEmpty(SearchId?.Text)
+                        || !string.IsNullOrEmpty(SearchName?.Text)
+                        || !string.IsNullOrEmpty(SearchBarangay?.Text);
+
+            if (ClearSearchBtn != null)
+                ClearSearchBtn.Visibility = hasText ? Visibility.Visible : Visibility.Collapsed;
+
+            if (!hasText)
+                ApplyFilters();
+        }
+
+        private void ClearSearch_Click(object sender, RoutedEventArgs e)
+        {
+            SearchId.Text        = string.Empty;
+            SearchName.Text      = string.Empty;
+            SearchBarangay.Text  = string.Empty;
+            ClearSearchBtn.Visibility = Visibility.Collapsed;
+            ApplyFilters();
         }
 
         private void FilterDrop_Click(object sender, RoutedEventArgs e)
