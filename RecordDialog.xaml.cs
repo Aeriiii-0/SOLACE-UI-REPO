@@ -96,7 +96,7 @@ namespace SOLUM_UI
             if (r.DateOfBirth   != DateTime.MinValue) DpBirthdate.SelectedDate    = r.DateOfBirth;
             if (r.DateAdmitted  != DateTime.MinValue) DpDateAdmitted.SelectedDate = r.DateAdmitted;
 
-            SetComboByContent(CmbSex,         r.Gender);
+            SetComboByContent(CmbSex,         r.Sex);
             SetComboByContent(CmbCivilStatus, r.CivilStatus);
             SetComboByContent(CmbBloodType,   r.BloodType);
             SetComboByContent(CmbStatus,      r.Status);
@@ -334,7 +334,7 @@ namespace SOLUM_UI
                 Name             = surname + ", " + first + (string.IsNullOrEmpty(middle) ? "" : " " + middle),
                 DateOfBirth      = DpBirthdate.SelectedDate.Value,
                 PlaceOfBirth     = TxtPlaceOfBirth.Text.Trim(),
-                Gender           = GetComboValue(CmbSex),
+                Sex              = GetComboValue(CmbSex),
                 CivilStatus      = GetComboValue(CmbCivilStatus),
                 Citizenship      = TxtCitizenship.Text.Trim(),
                 BloodType        = GetComboValue(CmbBloodType),
@@ -381,7 +381,7 @@ namespace SOLUM_UI
             Add(sec, "First Name",    r.FirstName,    _existing?.FirstName);
             Add(sec, "Middle Name",   r.MiddleName,   _existing?.MiddleName);
             Add(sec, "Extension",     r.ExtensionName, _existing?.ExtensionName);
-            Add(sec, "Sex",           r.Gender,       _existing?.Gender);
+            Add(sec, "Sex",           r.Sex,          _existing?.Sex);
             Add(sec, "Civil Status",  r.CivilStatus,  _existing?.CivilStatus);
             Add(sec, "Date of Birth", r.DateOfBirth.ToString("MMMM d, yyyy"),
                                       _existing?.DateOfBirth.ToString("MMMM d, yyyy"));

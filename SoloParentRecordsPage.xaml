@@ -556,10 +556,10 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Header="GENDER" Width="80">
+                        <GridViewColumn Header="SEX" Width="80">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Gender}" Style="{StaticResource CellText}"/>
+                                    <TextBlock Text="{Binding Sex}" Style="{StaticResource CellText}"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>

@@ -12,7 +12,7 @@ namespace SOLUM_UI.Models
         public string ExtensionName { get; set; }      
         public DateTime DateOfBirth { get; set; }
         public string PlaceOfBirth { get; set; }
-        public string Gender { get; set; }       
+        public string Sex { get; set; }       
         public string CivilStatus { get; set; }      
         public string Citizenship { get; set; }
         public string BloodType { get; set; }

@@ -17,7 +17,7 @@ namespace SOLUM_UI
 
         private List<SoloParentRecordViewModel> _allRecords;
         private string _statusFilter = "All";
-        private string _genderFilter = "All";
+        private string _sexFilter = "All";
         private string _sortOption = "Name A-Z";
 
         public SoloParentRecordsPage()
@@ -38,7 +38,7 @@ namespace SOLUM_UI
                     Id = "SP-001", Surname = "Santos", FirstName = "Maria", MiddleName = "Lim",
                     ExtensionName = "", Name = "Santos, Maria Lim",
                     DateOfBirth = new DateTime(1990, 3, 12), PlaceOfBirth = "Quezon City",
-                    Gender = "Female", CivilStatus = "Single", Citizenship = "Filipino",
+                    Sex = "Female", CivilStatus = "Single", Citizenship = "Filipino",
                     BloodType = "O+", Height = "158", Weight = "52",
                     Address = "123 Rizal St., Brgy. San Roque", Barangay = "San Roque",
                     ContactNumber = "09171234567", SourceOfReferral = "DSWD",
@@ -51,7 +51,7 @@ namespace SOLUM_UI
                     Id = "SP-002", Surname = "Dela Cruz", FirstName = "Juan", MiddleName = "Reyes",
                     ExtensionName = "Jr.", Name = "Dela Cruz, Juan Reyes Jr.",
                     DateOfBirth = new DateTime(1985, 7, 22), PlaceOfBirth = "Manila",
-                    Gender = "Male", CivilStatus = "Widowed", Citizenship = "Filipino",
+                    Sex = "Male", CivilStatus = "Widowed", Citizenship = "Filipino",
                     BloodType = "A+", Height = "170", Weight = "68",
                     Address = "456 Mabini Ave., Brgy. Poblacion", Barangay = "Poblacion",
                     ContactNumber = "09281234567", SourceOfReferral = "LGU",
@@ -64,7 +64,7 @@ namespace SOLUM_UI
                     Id = "SP-003", Surname = "Reyes", FirstName = "Ana", MiddleName = "Mendoza",
                     ExtensionName = "", Name = "Reyes, Ana Mendoza",
                     DateOfBirth = new DateTime(1993, 1, 5), PlaceOfBirth = "Caloocan",
-                    Gender = "Female", CivilStatus = "Separated", Citizenship = "Filipino",
+                    Sex = "Female", CivilStatus = "Separated", Citizenship = "Filipino",
                     BloodType = "B+", Height = "155", Weight = "49",
                     Address = "789 Luna St., Brgy. Maligaya", Barangay = "Maligaya",
                     ContactNumber = "09391234567", SourceOfReferral = "Barangay",
@@ -77,7 +77,7 @@ namespace SOLUM_UI
                     Id = "SP-004", Surname = "Garcia", FirstName = "Pedro", MiddleName = "Torres",
                     ExtensionName = "III", Name = "Garcia, Pedro Torres III",
                     DateOfBirth = new DateTime(1988, 9, 30), PlaceOfBirth = "Pasig",
-                    Gender = "Male", CivilStatus = "Single", Citizenship = "Filipino",
+                    Sex = "Male", CivilStatus = "Single", Citizenship = "Filipino",
                     BloodType = "AB+", Height = "172", Weight = "74",
                     Address = "321 Bonifacio Rd., Brgy. San Isidro", Barangay = "San Isidro",
                     ContactNumber = "09501234567", SourceOfReferral = "DSWD",
@@ -90,7 +90,7 @@ namespace SOLUM_UI
                     Id = "SP-005", Surname = "Martinez", FirstName = "Rosa", MiddleName = "Cruz",
                     ExtensionName = "", Name = "Martinez, Rosa Cruz",
                     DateOfBirth = new DateTime(1979, 5, 18), PlaceOfBirth = "Marikina",
-                    Gender = "Female", CivilStatus = "Widowed", Citizenship = "Filipino",
+                    Sex = "Female", CivilStatus = "Widowed", Citizenship = "Filipino",
                     BloodType = "O-", Height = "152", Weight = "55",
                     Address = "654 Aguinaldo Blvd., Brgy. San Roque", Barangay = "San Roque",
                     ContactNumber = "09611234567", SourceOfReferral = "NGO",
@@ -118,7 +118,7 @@ namespace SOLUM_UI
             foreach (SoloParentRecordViewModel r in _allRecords)
             {
                 if (_statusFilter != "All" && (r.Status ?? string.Empty) != _statusFilter) continue;
-                if (_genderFilter != "All" && (r.Gender ?? string.Empty) != _genderFilter) continue;
+                if (_sexFilter != "All" && (r.Sex ?? string.Empty) != _sexFilter) continue;
 
                 if (!string.IsNullOrEmpty(query))
                 {
@@ -128,7 +128,7 @@ namespace SOLUM_UI
                         (r.Barangay ?? "").ToLower().Contains(query) ||
                         (r.Status ?? "").ToLower().Contains(query) ||
                         (r.CivilStatus ?? "").ToLower().Contains(query) ||
-                        (r.Gender ?? "").ToLower().Contains(query);
+                        (r.Sex ?? "").ToLower().Contains(query);
                     if (!match) continue;
                 }
 
@@ -177,7 +177,7 @@ namespace SOLUM_UI
         private void SexOpt_Click(object sender, MouseButtonEventArgs e)
         {
             string tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "All";
-            _genderFilter = tag;
+            _sexFilter = tag;
             FilterPopup.IsOpen = false;
             ApplyFilters();
         }

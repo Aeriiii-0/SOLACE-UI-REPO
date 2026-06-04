@@ -27,7 +27,7 @@ namespace SOLUM_UI.ViewModels
         public string FirstName => _model.FirstName;
         public string MiddleName => _model.MiddleName;
         public string Barangay => _model.Barangay;
-        public string Gender => _model.Gender;
+        public string Sex => _model.Sex;
         public string CivilStatus => _model.CivilStatus;
         public string ContactNumber => _model.ContactNumber;
         public string Address => _model.Address;
