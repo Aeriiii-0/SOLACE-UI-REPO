@@ -160,10 +160,25 @@ namespace SOLUM_UI
 
         private void HandleLogout()
         {
-            MessageBoxResult result = MessageBox.Show("Are you sure you want to logout?", "Logout",
-                MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
-                Application.Current.Shutdown();
+            LogoutOverlay.Visibility = Visibility.Visible;
+        }
+
+        private void LogoutCancel_Click(object sender, RoutedEventArgs e)
+        {
+            LogoutOverlay.Visibility = Visibility.Collapsed;
+            ActivateButton(_activeButton?.Tag?.ToString() ?? "Dashboard");
+        }
+
+        private async void LogoutConfirm_Click(object sender, RoutedEventArgs e)
+        {
+            LogoutOverlay.Visibility = Visibility.Collapsed;
+            LogoutLoadingOverlay.Visibility = Visibility.Visible;
+
+            await System.Threading.Tasks.Task.Delay(1200);
+
+            var login = new LoginPage();
+            login.Show();
+            this.Close();
         }
     }
 }

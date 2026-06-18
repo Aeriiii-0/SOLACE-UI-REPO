@@ -271,5 +271,96 @@
 
             </Grid>
         </Grid>
+
+        <Grid x:Name="LogoutOverlay" Visibility="Collapsed" Panel.ZIndex="50">
+            <Rectangle Fill="#88000000"/>
+            <Border Background="White" CornerRadius="16" Padding="32,28" Width="340"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect Color="#702943" BlurRadius="28" ShadowDepth="4" Opacity="0.18"/>
+                </Border.Effect>
+                <StackPanel>
+                    <Border Width="48" Height="48" CornerRadius="24"
+                            Background="#FDF0F4" HorizontalAlignment="Center" Margin="0,0,0,16">
+                        <Path Data="M17,7L15.59,8.41L18.17,11H8V13H18.17L15.59,15.58L17,17L22,12M4,5H12V3H4A2,2 0 0,0 2,5V19A2,2 0 0,0 4,21H12V19H4V5Z"
+                              Fill="#702943" Stretch="Uniform" Width="22" Height="22"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="Confirm Logout" FontFamily="Segoe UI" FontSize="16"
+                               FontWeight="Bold" Foreground="#702943"
+                               HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                    <TextBlock Text="Are you sure you want to logout?" FontFamily="Segoe UI"
+                               FontSize="12" Foreground="#666666" TextWrapping="Wrap"
+                               HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,24"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Height="42" Cursor="Hand" Click="LogoutCancel_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#F5EEF1" CornerRadius="10"
+                                            BorderBrush="#DCC8CE" BorderThickness="1.5">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#EDD8DE"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="Cancel" FontFamily="Segoe UI" FontSize="13"
+                                       FontWeight="SemiBold" Foreground="#702943"/>
+                        </Button>
+                        <Button Grid.Column="2" Height="42" Cursor="Hand" Click="LogoutConfirm_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#702943" CornerRadius="10">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="2" Opacity="0.25"/>
+                                        </Border.Effect>
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="Logout" FontFamily="Segoe UI" FontSize="13"
+                                       FontWeight="SemiBold" Foreground="White"/>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="LogoutLoadingOverlay" Visibility="Collapsed" Panel.ZIndex="60">
+            <Rectangle Fill="#AA1A0A14"/>
+            <TextBlock Text="&#xE916;" FontFamily="Segoe MDL2 Assets" FontSize="36"
+                       Foreground="#F4A0BC"
+                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock.RenderTransform>
+                    <RotateTransform x:Name="LogoutSpinner" CenterX="18" CenterY="18"/>
+                </TextBlock.RenderTransform>
+                <TextBlock.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever">
+                                <DoubleAnimation
+                                    Storyboard.TargetName="LogoutSpinner"
+                                    Storyboard.TargetProperty="Angle"
+                                    From="0" To="360" Duration="0:0:0.9"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </TextBlock.Triggers>
+            </TextBlock>
+        </Grid>
+
     </Grid>
 </Window>

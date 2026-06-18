@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -12,8 +13,6 @@ namespace SOLUM_UI
         {
             InitializeComponent();
         }
-
-        
 
         private void TxtEmail_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -36,8 +35,6 @@ namespace SOLUM_UI
                 : Visibility.Collapsed;
         }
 
-        
-
         private void BtnLogin_Click(object sender, RoutedEventArgs e) => AttemptLogin();
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -46,7 +43,7 @@ namespace SOLUM_UI
                 AttemptLogin();
         }
 
-        private void AttemptLogin()
+        private async void AttemptLogin()
         {
             string email = TxtEmail.Text.Trim();
             string password = _isPasswordVisible
@@ -70,6 +67,11 @@ namespace SOLUM_UI
                 ShowError("Please enter your password.");
                 return;
             }
+
+            BtnLogin.IsEnabled = false;
+            LoadingOverlay.Visibility = Visibility.Visible;
+
+            await Task.Delay(1500);
 
             MainWindow.CurrentUserName = email;
             MainWindow.CurrentUserRole = "Administrator";
@@ -110,8 +112,6 @@ namespace SOLUM_UI
             TermsOverlay.Visibility = Visibility.Collapsed;
         }
 
-        
-
         private void BtnTogglePassword_Click(object sender, RoutedEventArgs e)
         {
             _isPasswordVisible = !_isPasswordVisible;
@@ -134,8 +134,6 @@ namespace SOLUM_UI
                 TxtPassword.Focus();
             }
         }
-
-        
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
