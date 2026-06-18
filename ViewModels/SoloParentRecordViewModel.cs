@@ -72,8 +72,7 @@ namespace SOLUM_UI.ViewModels
             {
                 switch (_model.Status)
                 {
-                    case "Active": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
-                    case "Pending": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF0F5"));
+                    case "Valid": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
                     case "Inactive": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F5F5F5"));
                     default: return new SolidColorBrush(Colors.Transparent);
                 }
@@ -86,8 +85,7 @@ namespace SOLUM_UI.ViewModels
             {
                 switch (_model.Status)
                 {
-                    case "Active": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
-                    case "Pending": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943"));
+                    case "Valid": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
                     case "Inactive": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#999999"));
                     default: return new SolidColorBrush(Colors.Black);
                 }

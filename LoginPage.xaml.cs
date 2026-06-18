@@ -61,7 +61,7 @@ namespace SOLUM_UI
 
             if (!email.EndsWith("@gmail.com", System.StringComparison.OrdinalIgnoreCase))
             {
-                ShowError("Please use a valid email address.");
+                ShowError("Invalid email or password. Please check your credentials and try again.");
                 return;
             }
 
@@ -71,7 +71,6 @@ namespace SOLUM_UI
                 return;
             }
 
-        
             MainWindow.CurrentUserName = email;
             MainWindow.CurrentUserRole = "Administrator";
 
@@ -82,8 +81,33 @@ namespace SOLUM_UI
 
         private void ShowError(string message)
         {
-            TxtError.Text = message;
-            TxtError.Visibility = Visibility.Visible;
+            TxtErrorModal.Text = message;
+            ErrorModalOverlay.Visibility = Visibility.Visible;
+        }
+
+        private void BtnErrorClose_Click(object sender, RoutedEventArgs e)
+        {
+            ErrorModalOverlay.Visibility = Visibility.Collapsed;
+            TxtEmail.Text = string.Empty;
+            TxtPassword.Password = string.Empty;
+            TxtPasswordVisible.Text = string.Empty;
+            if (_isPasswordVisible)
+            {
+                TxtPasswordVisible.Visibility = Visibility.Collapsed;
+                TxtPassword.Visibility = Visibility.Visible;
+                TxtToggleIcon.Text = "\uED1A";
+                _isPasswordVisible = false;
+            }
+        }
+
+        private void LinkTerms_Click(object sender, RoutedEventArgs e)
+        {
+            TermsOverlay.Visibility = Visibility.Visible;
+        }
+
+        private void BtnTermsClose_Click(object sender, RoutedEventArgs e)
+        {
+            TermsOverlay.Visibility = Visibility.Collapsed;
         }
 
         

@@ -105,6 +105,18 @@ namespace SOLUM_UI
                 case "SoloParentRecords":
                     TopBarControl.PageTitle = "Solo Parent Records";
                     break;
+                case "UserAdministration":
+                    TopBarControl.PageTitle = "User Administration";
+                    break;
+                case "Analytics":
+                    TopBarControl.PageTitle = "Analytics";
+                    break;
+                case "SubsidyRecommendation":
+                    TopBarControl.PageTitle = "Subsidy Recommendation";
+                    break;
+                case "UserProfile":
+                    TopBarControl.PageTitle = "User Profile";
+                    break;
                 default:
                     TopBarControl.PageTitle = tag;
                     break;
@@ -120,9 +132,17 @@ namespace SOLUM_UI
                     SoloParentRecordsPage.CurrentUserRole = CurrentUserRole;
                     MainFrame.Navigate(new SoloParentRecordsPage());
                     break;
-                case "Wallet":
+                case "UserAdministration":
+                    MainFrame.Navigate(new UserAdministrationPage());
                     break;
                 case "Analytics":
+                    MainFrame.Navigate(new AnalyticsPage());
+                    break;
+                case "SubsidyRecommendation":
+                   // MainFrame.Navigate(new SubsidyRecommendationPage());
+                    break;
+                case "UserProfile":
+                    MainFrame.Navigate(new UserProfilePage());
                     break;
                 case "Settings":
                     break;
@@ -132,6 +152,12 @@ namespace SOLUM_UI
             }
         }
 
+        private void TopBarControl_ProfileClicked(object sender, RoutedEventArgs e)
+        {
+            ActivateButton("UserProfile");
+            NavigateTo("UserProfile");
+        }
+
         private void HandleLogout()
         {
             MessageBoxResult result = MessageBox.Show("Are you sure you want to logout?", "Logout",
@@ -139,7 +165,5 @@ namespace SOLUM_UI
             if (result == MessageBoxResult.Yes)
                 Application.Current.Shutdown();
         }
-
-        private void TopBarControl_Loaded(object sender, RoutedEventArgs e) { }
     }
 }

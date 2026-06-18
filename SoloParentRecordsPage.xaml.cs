@@ -16,97 +16,144 @@ namespace SOLUM_UI
         public static string CurrentUserRole { get; set; } = string.Empty;
 
         private List<SoloParentRecordViewModel> _allRecords;
+        private List<SoloParentRecordViewModel> _filteredRecords;
+
         private string _statusFilter = "All";
         private string _sexFilter = "All";
+        private string _barangayFilter = "All";
         private string _sortOption = "Name A-Z";
+
+        private const int PageSize = 10;
+        private int _currentPage = 1;
+
+        private bool IsEncoder => string.Equals(CurrentUserRole, "Encoder", StringComparison.OrdinalIgnoreCase);
 
         public SoloParentRecordsPage()
         {
             InitializeComponent();
             LoadRecords();
-            Loaded += (s, e) => ResizeNameColumn();
+            Loaded += (s, e) =>
+            {
+                ApplyRoleView();
+                ResizeNameColumn();
+            };
             SizeChanged += Page_SizeChanged;
+        }
+
+        private void ApplyRoleView()
+        {
+            if (IsEncoder)
+            {
+                AdminToolbar.Visibility = Visibility.Collapsed;
+                EncoderSearchPanel.Visibility = Visibility.Visible;
+                PagingRow.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                AdminToolbar.Visibility = Visibility.Visible;
+                EncoderSearchPanel.Visibility = Visibility.Collapsed;
+                PagingRow.Visibility = Visibility.Visible;
+            }
         }
 
         private void LoadRecords()
         {
             List<SoloParentRecord> raw = new List<SoloParentRecord>
             {
-                new SoloParentRecord
-                {
-                    Id = "SP-001", Surname = "Santos", FirstName = "Maria", MiddleName = "Lim",
-                    ExtensionName = "", Name = "Santos, Maria Lim",
-                    DateOfBirth = new DateTime(1990, 3, 12), PlaceOfBirth = "Quezon City",
-                    Sex = "Female", CivilStatus = "Single", Citizenship = "Filipino",
-                    BloodType = "O+", Height = "158", Weight = "52",
-                    Address = "123 Rizal St., Brgy. San Roque", Barangay = "San Roque",
-                    ContactNumber = "09171234567", SourceOfReferral = "DSWD",
-                    DateAdmitted = new DateTime(2024, 1, 10), CaseNo = "2024-001",
-                    OffenseCommitted = "", NatureOfReferral = "Financial Assistance",
-                    Children = 2, Status = "Active", LastUpdated = new DateTime(2025, 3, 15)
-                },
-                new SoloParentRecord
-                {
-                    Id = "SP-002", Surname = "Dela Cruz", FirstName = "Juan", MiddleName = "Reyes",
-                    ExtensionName = "Jr.", Name = "Dela Cruz, Juan Reyes Jr.",
-                    DateOfBirth = new DateTime(1985, 7, 22), PlaceOfBirth = "Manila",
-                    Sex = "Male", CivilStatus = "Widowed", Citizenship = "Filipino",
-                    BloodType = "A+", Height = "170", Weight = "68",
-                    Address = "456 Mabini Ave., Brgy. Poblacion", Barangay = "Poblacion",
-                    ContactNumber = "09281234567", SourceOfReferral = "LGU",
-                    DateAdmitted = new DateTime(2023, 6, 5), CaseNo = "2023-045",
-                    OffenseCommitted = "", NatureOfReferral = "Livelihood Program",
-                    Children = 3, Status = "Active", LastUpdated = new DateTime(2025, 3, 12)
-                },
-                new SoloParentRecord
-                {
-                    Id = "SP-003", Surname = "Reyes", FirstName = "Ana", MiddleName = "Mendoza",
-                    ExtensionName = "", Name = "Reyes, Ana Mendoza",
-                    DateOfBirth = new DateTime(1993, 1, 5), PlaceOfBirth = "Caloocan",
-                    Sex = "Female", CivilStatus = "Separated", Citizenship = "Filipino",
-                    BloodType = "B+", Height = "155", Weight = "49",
-                    Address = "789 Luna St., Brgy. Maligaya", Barangay = "Maligaya",
-                    ContactNumber = "09391234567", SourceOfReferral = "Barangay",
-                    DateAdmitted = new DateTime(2024, 3, 20), CaseNo = "2024-012",
-                    OffenseCommitted = "", NatureOfReferral = "Solo Parent ID",
-                    Children = 1, Status = "Pending", LastUpdated = new DateTime(2025, 3, 14)
-                },
-                new SoloParentRecord
-                {
-                    Id = "SP-004", Surname = "Garcia", FirstName = "Pedro", MiddleName = "Torres",
-                    ExtensionName = "III", Name = "Garcia, Pedro Torres III",
-                    DateOfBirth = new DateTime(1988, 9, 30), PlaceOfBirth = "Pasig",
-                    Sex = "Male", CivilStatus = "Single", Citizenship = "Filipino",
-                    BloodType = "AB+", Height = "172", Weight = "74",
-                    Address = "321 Bonifacio Rd., Brgy. San Isidro", Barangay = "San Isidro",
-                    ContactNumber = "09501234567", SourceOfReferral = "DSWD",
-                    DateAdmitted = new DateTime(2023, 11, 15), CaseNo = "2023-089",
-                    OffenseCommitted = "", NatureOfReferral = "Educational Assistance",
-                    Children = 2, Status = "Active", LastUpdated = new DateTime(2025, 3, 9)
-                },
-                new SoloParentRecord
-                {
-                    Id = "SP-005", Surname = "Martinez", FirstName = "Rosa", MiddleName = "Cruz",
-                    ExtensionName = "", Name = "Martinez, Rosa Cruz",
-                    DateOfBirth = new DateTime(1979, 5, 18), PlaceOfBirth = "Marikina",
-                    Sex = "Female", CivilStatus = "Widowed", Citizenship = "Filipino",
-                    BloodType = "O-", Height = "152", Weight = "55",
-                    Address = "654 Aguinaldo Blvd., Brgy. San Roque", Barangay = "San Roque",
-                    ContactNumber = "09611234567", SourceOfReferral = "NGO",
-                    DateAdmitted = new DateTime(2022, 8, 3), CaseNo = "2022-034",
-                    OffenseCommitted = "", NatureOfReferral = "Medical Assistance",
-                    Children = 4, Status = "Inactive", LastUpdated = new DateTime(2025, 3, 28)
-                },
+                new SoloParentRecord { Id = "SP-001", Surname = "Santos", FirstName = "Maria", MiddleName = "Lim",
+                    Name = "Santos, Maria Lim", DateOfBirth = new DateTime(1990, 3, 12), PlaceOfBirth = "Biñan",
+                    Sex = "Female", CivilStatus = "Single", Citizenship = "Filipino", BloodType = "O+",
+                    Height = "158", Weight = "52", Address = "123 Rizal St.", Barangay = "Biñan Poblacion",
+                    ContactNumber = "09171234567", SourceOfReferral = "DSWD", DateAdmitted = new DateTime(2024, 1, 10),
+                    CaseNo = "2024-001", NatureOfReferral = "Financial Assistance", Children = 2, Status = "Valid",
+                    LastUpdated = new DateTime(2025, 3, 15) },
+                new SoloParentRecord { Id = "SP-002", Surname = "Dela Cruz", FirstName = "Juan", MiddleName = "Reyes",
+                    ExtensionName = "Jr.", Name = "Dela Cruz, Juan Reyes Jr.", DateOfBirth = new DateTime(1985, 7, 22),
+                    PlaceOfBirth = "Biñan", Sex = "Male", CivilStatus = "Widowed", Citizenship = "Filipino",
+                    BloodType = "A+", Height = "170", Weight = "68", Address = "456 Mabini Ave.", Barangay = "Malaban",
+                    ContactNumber = "09281234567", SourceOfReferral = "LGU", DateAdmitted = new DateTime(2023, 6, 5),
+                    CaseNo = "2023-045", NatureOfReferral = "Livelihood Program", Children = 3, Status = "Valid",
+                    LastUpdated = new DateTime(2025, 3, 12) },
+                new SoloParentRecord { Id = "SP-003", Surname = "Reyes", FirstName = "Ana", MiddleName = "Mendoza",
+                    Name = "Reyes, Ana Mendoza", DateOfBirth = new DateTime(1993, 1, 5), PlaceOfBirth = "Biñan",
+                    Sex = "Female", CivilStatus = "Separated", Citizenship = "Filipino", BloodType = "B+",
+                    Height = "155", Weight = "49", Address = "789 Luna St.", Barangay = "Canlalay",
+                    ContactNumber = "09391234567", SourceOfReferral = "Barangay", DateAdmitted = new DateTime(2024, 3, 20),
+                    CaseNo = "2024-012", NatureOfReferral = "Solo Parent ID", Children = 1, Status = "Inactive",
+                    LastUpdated = new DateTime(2025, 3, 14) },
+                new SoloParentRecord { Id = "SP-004", Surname = "Garcia", FirstName = "Pedro", MiddleName = "Torres",
+                    ExtensionName = "III", Name = "Garcia, Pedro Torres III", DateOfBirth = new DateTime(1988, 9, 30),
+                    PlaceOfBirth = "Biñan", Sex = "Male", CivilStatus = "Single", Citizenship = "Filipino",
+                    BloodType = "AB+", Height = "172", Weight = "74", Address = "321 Bonifacio Rd.", Barangay = "San Antonio",
+                    ContactNumber = "09501234567", SourceOfReferral = "DSWD", DateAdmitted = new DateTime(2023, 11, 15),
+                    CaseNo = "2023-089", NatureOfReferral = "Educational Assistance", Children = 2, Status = "Valid",
+                    LastUpdated = new DateTime(2025, 3, 9) },
+                new SoloParentRecord { Id = "SP-005", Surname = "Martinez", FirstName = "Rosa", MiddleName = "Cruz",
+                    Name = "Martinez, Rosa Cruz", DateOfBirth = new DateTime(1979, 5, 18), PlaceOfBirth = "Biñan",
+                    Sex = "Female", CivilStatus = "Widowed", Citizenship = "Filipino", BloodType = "O-",
+                    Height = "152", Weight = "55", Address = "654 Aguinaldo Blvd.", Barangay = "Platero",
+                    ContactNumber = "09611234567", SourceOfReferral = "NGO", DateAdmitted = new DateTime(2022, 8, 3),
+                    CaseNo = "2022-034", NatureOfReferral = "Medical Assistance", Children = 4, Status = "Inactive",
+                    LastUpdated = new DateTime(2025, 3, 28) },
+                new SoloParentRecord { Id = "SP-006", Surname = "Lim", FirstName = "Cynthia", MiddleName = "Tan",
+                    Name = "Lim, Cynthia Tan", DateOfBirth = new DateTime(1991, 8, 14), PlaceOfBirth = "Biñan",
+                    Sex = "Female", CivilStatus = "Separated", Citizenship = "Filipino", BloodType = "A+",
+                    Height = "160", Weight = "53", Address = "11 Taft Ave.", Barangay = "Loma",
+                    ContactNumber = "09711234567", SourceOfReferral = "DSWD", DateAdmitted = new DateTime(2024, 2, 1),
+                    CaseNo = "2024-020", NatureOfReferral = "Financial Assistance", Children = 2, Status = "Valid",
+                    LastUpdated = new DateTime(2025, 4, 1) },
+                new SoloParentRecord { Id = "SP-007", Surname = "Bautista", FirstName = "Carlos", MiddleName = "Ocampo",
+                    Name = "Bautista, Carlos Ocampo", DateOfBirth = new DateTime(1983, 11, 22), PlaceOfBirth = "Biñan",
+                    Sex = "Male", CivilStatus = "Widowed", Citizenship = "Filipino", BloodType = "B-",
+                    Height = "168", Weight = "71", Address = "22 Burgos St.", Barangay = "Tubigan",
+                    ContactNumber = "09821234567", SourceOfReferral = "LGU", DateAdmitted = new DateTime(2023, 9, 10),
+                    CaseNo = "2023-067", NatureOfReferral = "Solo Parent ID", Children = 3, Status = "Valid",
+                    LastUpdated = new DateTime(2025, 4, 5) },
+                new SoloParentRecord { Id = "SP-008", Surname = "Mendoza", FirstName = "Elena", MiddleName = "Flores",
+                    Name = "Mendoza, Elena Flores", DateOfBirth = new DateTime(1995, 4, 7), PlaceOfBirth = "Biñan",
+                    Sex = "Female", CivilStatus = "Single", Citizenship = "Filipino", BloodType = "O+",
+                    Height = "156", Weight = "50", Address = "33 MacArthur Hwy.", Barangay = "De La Paz",
+                    ContactNumber = "09931234567", SourceOfReferral = "Barangay", DateAdmitted = new DateTime(2024, 5, 15),
+                    CaseNo = "2024-033", NatureOfReferral = "Livelihood Program", Children = 1, Status = "Inactive",
+                    LastUpdated = new DateTime(2025, 4, 10) },
+                new SoloParentRecord { Id = "SP-009", Surname = "Torres", FirstName = "Benjamin", MiddleName = "Ramos",
+                    Name = "Torres, Benjamin Ramos", DateOfBirth = new DateTime(1980, 6, 30), PlaceOfBirth = "Biñan",
+                    Sex = "Male", CivilStatus = "Separated", Citizenship = "Filipino", BloodType = "AB-",
+                    Height = "175", Weight = "80", Address = "44 Shaw Blvd.", Barangay = "Casile",
+                    ContactNumber = "09041234567", SourceOfReferral = "DSWD", DateAdmitted = new DateTime(2022, 12, 20),
+                    CaseNo = "2022-055", NatureOfReferral = "Educational Assistance", Children = 2, Status = "Inactive",
+                    LastUpdated = new DateTime(2025, 4, 12) },
+                new SoloParentRecord { Id = "SP-010", Surname = "Navarro", FirstName = "Josephine", MiddleName = "Aquino",
+                    Name = "Navarro, Josephine Aquino", DateOfBirth = new DateTime(1987, 2, 18), PlaceOfBirth = "Biñan",
+                    Sex = "Female", CivilStatus = "Widowed", Citizenship = "Filipino", BloodType = "A-",
+                    Height = "162", Weight = "57", Address = "55 San Jose Rd.", Barangay = "San Jose",
+                    ContactNumber = "09151234567", SourceOfReferral = "NGO", DateAdmitted = new DateTime(2023, 4, 8),
+                    CaseNo = "2023-031", NatureOfReferral = "Medical Assistance", Children = 3, Status = "Valid",
+                    LastUpdated = new DateTime(2025, 4, 15) },
+                new SoloParentRecord { Id = "SP-011", Surname = "Hernandez", FirstName = "Roberto", MiddleName = "Diaz",
+                    Name = "Hernandez, Roberto Diaz", DateOfBirth = new DateTime(1978, 9, 5), PlaceOfBirth = "Biñan",
+                    Sex = "Male", CivilStatus = "Annulled", Citizenship = "Filipino", BloodType = "B+",
+                    Height = "171", Weight = "76", Address = "66 Langkiwa Ave.", Barangay = "Langkiwa",
+                    ContactNumber = "09261234567", SourceOfReferral = "Barangay", DateAdmitted = new DateTime(2022, 7, 14),
+                    CaseNo = "2022-028", NatureOfReferral = "Solo Parent ID", Children = 4, Status = "Valid",
+                    LastUpdated = new DateTime(2025, 4, 18) },
+                new SoloParentRecord { Id = "SP-012", Surname = "Castillo", FirstName = "Patricia", MiddleName = "Villanueva",
+                    Name = "Castillo, Patricia Villanueva", DateOfBirth = new DateTime(1996, 12, 25), PlaceOfBirth = "Biñan",
+                    Sex = "Female", CivilStatus = "Single", Citizenship = "Filipino", BloodType = "O-",
+                    Height = "158", Weight = "51", Address = "77 Malamig St.", Barangay = "Malamig",
+                    ContactNumber = "09371234567", SourceOfReferral = "LGU", DateAdmitted = new DateTime(2024, 8, 22),
+                    CaseNo = "2024-044", NatureOfReferral = "Financial Assistance", Children = 1, Status = "Inactive",
+                    LastUpdated = new DateTime(2025, 4, 20) },
             };
 
             _allRecords = new List<SoloParentRecordViewModel>();
             foreach (SoloParentRecord r in raw)
                 _allRecords.Add(new SoloParentRecordViewModel(r));
 
-            ApplyFilters();
+            ApplyFiltersAndPage();
         }
 
-        private void ApplyFilters()
+        private void ApplyFiltersAndPage()
         {
             if (_allRecords == null) return;
 
@@ -114,12 +161,13 @@ namespace SOLUM_UI
             string nameQuery = SearchName?.Text?.ToLower().Trim() ?? string.Empty;
             string barangayQuery = SearchBarangay?.Text?.ToLower().Trim() ?? string.Empty;
 
-            List<SoloParentRecordViewModel> filtered = new List<SoloParentRecordViewModel>();
+            _filteredRecords = new List<SoloParentRecordViewModel>();
 
             foreach (SoloParentRecordViewModel r in _allRecords)
             {
                 if (_statusFilter != "All" && (r.Status ?? string.Empty) != _statusFilter) continue;
                 if (_sexFilter != "All" && (r.Sex ?? string.Empty) != _sexFilter) continue;
+                if (_barangayFilter != "All" && (r.Barangay ?? string.Empty) != _barangayFilter) continue;
 
                 if (!string.IsNullOrEmpty(idQuery))
                 {
@@ -132,37 +180,83 @@ namespace SOLUM_UI
                     if (!nameMatch || !barangayMatch) continue;
                 }
 
-                filtered.Add(r);
+                _filteredRecords.Add(r);
             }
 
             switch (_sortOption)
             {
-                case "Name A-Z": filtered.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase)); break;
-                case "Name Z-A": filtered.Sort((a, b) => string.Compare(b.Name, a.Name, StringComparison.OrdinalIgnoreCase)); break;
-                case "Newest": filtered.Sort((a, b) => string.Compare(b.LastUpdatedFormatted, a.LastUpdatedFormatted, StringComparison.OrdinalIgnoreCase)); break;
-                case "Oldest": filtered.Sort((a, b) => string.Compare(a.LastUpdatedFormatted, b.LastUpdatedFormatted, StringComparison.OrdinalIgnoreCase)); break;
-                case "Barangay": filtered.Sort((a, b) => string.Compare(a.Barangay, b.Barangay, StringComparison.OrdinalIgnoreCase)); break;
+                case "Name A-Z": _filteredRecords.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase)); break;
+                case "Name Z-A": _filteredRecords.Sort((a, b) => string.Compare(b.Name, a.Name, StringComparison.OrdinalIgnoreCase)); break;
+                case "Newest": _filteredRecords.Sort((a, b) => string.Compare(b.LastUpdatedFormatted, a.LastUpdatedFormatted, StringComparison.OrdinalIgnoreCase)); break;
+                case "Oldest": _filteredRecords.Sort((a, b) => string.Compare(a.LastUpdatedFormatted, b.LastUpdatedFormatted, StringComparison.OrdinalIgnoreCase)); break;
+                case "Barangay": _filteredRecords.Sort((a, b) => string.Compare(a.Barangay, b.Barangay, StringComparison.OrdinalIgnoreCase)); break;
             }
 
-            for (int i = 0; i < filtered.Count; i++)
-                filtered[i].SetAlternate(i % 2 != 0);
+            _currentPage = 1;
+            RenderPage();
+        }
+
+        private void ApplyFilters() => ApplyFiltersAndPage();
+
+        private int TotalPages => Math.Max(1, (int)Math.Ceiling(_filteredRecords.Count / (double)PageSize));
+
+        private void RenderPage()
+        {
+            if (_filteredRecords == null) return;
+
+            int start = (_currentPage - 1) * PageSize;
+            List<SoloParentRecordViewModel> page = _filteredRecords.GetRange(
+                start, Math.Min(PageSize, _filteredRecords.Count - start));
+
+            for (int i = 0; i < page.Count; i++)
+                page[i].SetAlternate(i % 2 != 0);
 
             RecordsList.ItemsSource = null;
-            RecordsList.ItemsSource = filtered;
+            RecordsList.ItemsSource = page;
 
             if (NoResultsPanel != null)
-                NoResultsPanel.Visibility = filtered.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+                NoResultsPanel.Visibility = _filteredRecords.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            UpdatePagingUI();
         }
 
-        private void SearchBtn_Click(object sender, RoutedEventArgs e)
+        private void UpdatePagingUI()
         {
-            ApplyFilters();
+            if (PageInfoText != null)
+                PageInfoText.Text = "Page " + _currentPage + " of " + TotalPages;
+
+            if (BtnBack != null)
+                BtnBack.Visibility = _currentPage > 1 ? Visibility.Visible : Visibility.Collapsed;
+
+            if (BtnNext != null)
+                BtnNext.Visibility = _currentPage < TotalPages ? Visibility.Visible : Visibility.Collapsed;
         }
+
+        private void BtnNext_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPage < TotalPages)
+            {
+                _currentPage++;
+                RenderPage();
+            }
+        }
+
+        private void BtnBack_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPage > 1)
+            {
+                _currentPage--;
+                RenderPage();
+            }
+        }
+
+        private void SearchBtn_Click(object sender, RoutedEventArgs e) => ApplyFiltersAndPage();
+
+        private void EncoderSearchBtn_Click(object sender, RoutedEventArgs e) => ApplyFiltersAndPage();
 
         private void SearchBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
-                ApplyFilters();
+            if (e.Key == Key.Enter) ApplyFiltersAndPage();
         }
 
         private void SearchFields_TextChanged(object sender, TextChangedEventArgs e)
@@ -175,8 +269,10 @@ namespace SOLUM_UI
                 ClearSearchBtn.Visibility = hasText ? Visibility.Visible : Visibility.Collapsed;
 
             if (!hasText)
-                ApplyFilters();
+                ApplyFiltersAndPage();
         }
+
+        private void EncoderFields_TextChanged(object sender, TextChangedEventArgs e) { }
 
         private void ClearSearch_Click(object sender, RoutedEventArgs e)
         {
@@ -184,41 +280,47 @@ namespace SOLUM_UI
             SearchName.Text = string.Empty;
             SearchBarangay.Text = string.Empty;
             ClearSearchBtn.Visibility = Visibility.Collapsed;
-            ApplyFilters();
+            ApplyFiltersAndPage();
         }
 
-        private void FilterDrop_Click(object sender, RoutedEventArgs e)
-        {
-            FilterPopup.IsOpen = true;
-        }
+        private void FilterDrop_Click(object sender, RoutedEventArgs e) => FilterPopup.IsOpen = true;
+        private void SortDrop_Click(object sender, RoutedEventArgs e) => SortPopup.IsOpen = true;
 
-        private void SortDrop_Click(object sender, RoutedEventArgs e)
-        {
-            SortPopup.IsOpen = true;
-        }
+        private void FilterCombo_Changed(object sender, SelectionChangedEventArgs e) { }
 
-        private void StatusOpt_Click(object sender, MouseButtonEventArgs e)
+        private void FilterApply_Click(object sender, RoutedEventArgs e)
         {
-            string tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "All";
-            _statusFilter = tag;
+            string sexVal      = (CmbFilterSex?.SelectedItem      as ComboBoxItem)?.Content?.ToString() ?? "All";
+            string barangayVal = (CmbFilterBarangay?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "All";
+            string statusVal   = (CmbFilterStatus?.SelectedItem   as ComboBoxItem)?.Content?.ToString() ?? "All";
+            _sexFilter      = sexVal;
+            _barangayFilter = barangayVal;
+            _statusFilter   = statusVal;
             FilterPopup.IsOpen = false;
-            ApplyFilters();
+            ApplyFiltersAndPage();
         }
 
-        private void SexOpt_Click(object sender, MouseButtonEventArgs e)
+        private void FilterReset_Click(object sender, RoutedEventArgs e)
         {
-            string tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "All";
-            _sexFilter = tag;
+            if (CmbFilterSex      != null) CmbFilterSex.SelectedIndex      = 0;
+            if (CmbFilterBarangay != null) CmbFilterBarangay.SelectedIndex = 0;
+            if (CmbFilterStatus   != null) CmbFilterStatus.SelectedIndex   = 0;
+            _sexFilter      = "All";
+            _barangayFilter = "All";
+            _statusFilter   = "All";
             FilterPopup.IsOpen = false;
-            ApplyFilters();
+            ApplyFiltersAndPage();
         }
+
+        private void StatusOpt_Click(object sender, MouseButtonEventArgs e) { }
+
+        private void SexOpt_Click(object sender, MouseButtonEventArgs e) { }
 
         private void SortOpt_Click(object sender, MouseButtonEventArgs e)
         {
-            string tag = (sender as FrameworkElement)?.Tag?.ToString() ?? "Name A-Z";
-            _sortOption = tag;
+            _sortOption = (sender as FrameworkElement)?.Tag?.ToString() ?? "Barangay";
             SortPopup.IsOpen = false;
-            ApplyFilters();
+            ApplyFiltersAndPage();
         }
 
         private void RecordsList_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
@@ -235,22 +337,14 @@ namespace SOLUM_UI
                 mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
 
             RecordDialog dialog = new RecordDialog(vm.RawModel) { Owner = Window.GetWindow(this) };
-
-            dialog.Closed += (s, args) =>
-            {
-                if (mainWindow != null)
-                    mainWindow.MainContent.Effect = null;
-            };
+            dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
                 int idx = _allRecords.FindIndex(r => r.Id == vm.Id);
-                if (idx >= 0)
-                    _allRecords[idx] = new SoloParentRecordViewModel(dialog.Result);
-
+                if (idx >= 0) _allRecords[idx] = new SoloParentRecordViewModel(dialog.Result);
                 AuditLogService.Instance.LogUpdate(dialog.Result.Name, GetCurrentUser());
-
-                ApplyFilters();
+                ApplyFiltersAndPage();
             }
         }
 
@@ -261,20 +355,13 @@ namespace SOLUM_UI
                 mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
 
             RecordDialog dialog = new RecordDialog { Owner = Window.GetWindow(this) };
-
-            dialog.Closed += (s, args) =>
-            {
-                if (mainWindow != null)
-                    mainWindow.MainContent.Effect = null;
-            };
+            dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
                 _allRecords.Add(new SoloParentRecordViewModel(dialog.Result));
-
                 AuditLogService.Instance.LogCreate(dialog.Result.Name, GetCurrentUser());
-
-                ApplyFilters();
+                ApplyFiltersAndPage();
             }
         }
 
@@ -289,68 +376,94 @@ namespace SOLUM_UI
                 mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
 
             RecordDialog dialog = new RecordDialog(vm.RawModel) { Owner = Window.GetWindow(this) };
-
-            dialog.Closed += (s, args) =>
-            {
-                if (mainWindow != null)
-                    mainWindow.MainContent.Effect = null;
-            };
+            dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
                 int idx = _allRecords.FindIndex(r => r.Id == id);
-                if (idx >= 0)
-                    _allRecords[idx] = new SoloParentRecordViewModel(dialog.Result);
-
+                if (idx >= 0) _allRecords[idx] = new SoloParentRecordViewModel(dialog.Result);
                 AuditLogService.Instance.LogUpdate(dialog.Result.Name, GetCurrentUser());
-
-                ApplyFilters();
+                ApplyFiltersAndPage();
             }
         }
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
-
             SoloParentRecordViewModel vm = _allRecords.Find(r => r.Id == id);
             string recordName = vm != null ? vm.Name : id;
 
             MessageBoxResult confirm = MessageBox.Show(
-                "Delete record " + id + "?",
-                "Confirm Delete",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-
+                "Delete record " + id + "?", "Confirm Delete",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (confirm != MessageBoxResult.Yes) return;
 
             _allRecords.RemoveAll(r => r.Id == id);
-
             AuditLogService.Instance.LogDelete(recordName, GetCurrentUser());
-
-            ApplyFilters();
+            ApplyFiltersAndPage();
         }
 
-        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void ExportRecord_Click(object sender, RoutedEventArgs e)
         {
-            ResizeNameColumn();
+            string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
+            SoloParentRecordViewModel vm = _allRecords.Find(r => r.Id == id);
+            if (vm == null) return;
+
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                FileName = vm.Id + "_" + (vm.Surname ?? "record"),
+                DefaultExt = ".csv",
+                Filter = "CSV file (*.csv)|*.csv"
+            };
+
+            if (dlg.ShowDialog() != true) return;
+
+            var rec = vm.RawModel;
+            var lines = new System.Text.StringBuilder();
+            lines.AppendLine("Field,Value");
+            lines.AppendLine("ID," + rec.Id);
+            lines.AppendLine("Surname," + rec.Surname);
+            lines.AppendLine("First Name," + rec.FirstName);
+            lines.AppendLine("Middle Name," + rec.MiddleName);
+            lines.AppendLine("Extension," + rec.ExtensionName);
+            lines.AppendLine("Date of Birth," + rec.DateOfBirthFormatted);
+            lines.AppendLine("Place of Birth," + rec.PlaceOfBirth);
+            lines.AppendLine("Sex," + rec.Sex);
+            lines.AppendLine("Civil Status," + rec.CivilStatus);
+            lines.AppendLine("Citizenship," + rec.Citizenship);
+            lines.AppendLine("Blood Type," + rec.BloodType);
+            lines.AppendLine("Height," + rec.Height);
+            lines.AppendLine("Weight," + rec.Weight);
+            lines.AppendLine("Address," + rec.Address);
+            lines.AppendLine("Barangay," + rec.Barangay);
+            lines.AppendLine("Contact Number," + rec.ContactNumber);
+            lines.AppendLine("Source of Referral," + rec.SourceOfReferral);
+            lines.AppendLine("Date Admitted," + rec.DateAdmittedFormatted);
+            lines.AppendLine("Case No.," + rec.CaseNo);
+            lines.AppendLine("Offense Committed," + rec.OffenseCommitted);
+            lines.AppendLine("Nature of Referral," + rec.NatureOfReferral);
+            lines.AppendLine("Children," + rec.Children);
+            lines.AppendLine("Status," + rec.Status);
+            lines.AppendLine("Last Updated," + rec.LastUpdatedFormatted);
+
+            System.IO.File.WriteAllText(dlg.FileName, lines.ToString());
+            MessageBox.Show("Record exported to:\n" + dlg.FileName, "Export Complete",
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e) => ResizeNameColumn();
 
         private void ResizeNameColumn()
         {
             if (RecordsList.View is GridView gv && gv.Columns.Count > 1)
             {
-                double totalFixed = 80 + 80 + 110 + 115 + 120 + 80 + 110 + 120 + 90;
+                double totalFixed = 80 + 80 + 110 + 115 + 120 + 80 + 110 + 120 + 120;
                 double available = RecordsList.ActualWidth - totalFixed - 20;
                 if (available > 100)
                     gv.Columns[1].Width = available + 30;
             }
         }
 
-        private string GetCurrentUser()
-        {
-            if (!string.IsNullOrEmpty(CurrentUserName))
-                return CurrentUserName;
-            return "Admin";
-        }
+        private string GetCurrentUser() => !string.IsNullOrEmpty(CurrentUserName) ? CurrentUserName : "Admin";
     }
 }

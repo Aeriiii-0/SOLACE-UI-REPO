@@ -186,15 +186,19 @@
                         </Hyperlink>
                     </TextBlock>
 
-                    <!-- Error message -->
-                    <TextBlock x:Name="TxtError"
-                               Foreground="#C0392B"
-                               FontFamily="Segoe UI"
-                               FontSize="11"
-                               HorizontalAlignment="Center"
-                               Margin="0,0,0,8"
-                               Visibility="Collapsed"
-                               TextWrapping="Wrap"/>
+                    <!-- Terms and Conditions -->
+                    <TextBlock HorizontalAlignment="Center"
+                               Margin="0,0,0,8">
+                        <Run Text="By signing in you agree to our " Foreground="#888888" FontFamily="Segoe UI" FontSize="11"/>
+                        <Hyperlink x:Name="LinkTerms"
+                                   Foreground="#8B1A4A"
+                                   TextDecorations="Underline"
+                                   FontFamily="Segoe UI"
+                                   FontSize="11"
+                                   Click="LinkTerms_Click">
+                            Terms and Conditions
+                        </Hyperlink>
+                    </TextBlock>
 
                     <!-- Login button -->
                     <Button x:Name="BtnLogin"
@@ -229,6 +233,131 @@
 
                 </StackPanel>
             </Viewbox>
+        </Grid>
+
+        <!-- Error Modal Overlay -->
+        <Grid Grid.Column="1" x:Name="ErrorModalOverlay" Visibility="Collapsed" Panel.ZIndex="20">
+            <Rectangle Fill="#66000000"/>
+            <Border Background="White" CornerRadius="12" Padding="28,24" Width="300"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="3" Opacity="0.22"/>
+                </Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="Sign In Failed" FontFamily="Segoe UI" FontSize="15"
+                               FontWeight="Bold" Foreground="#8B1A4A" Margin="0,0,0,10"/>
+                    <TextBlock x:Name="TxtErrorModal" Text="" FontFamily="Segoe UI" FontSize="12"
+                               Foreground="#444444" TextWrapping="Wrap" Margin="0,0,0,20"/>
+                    <Button Content="Close" Height="38" Cursor="Hand" Click="BtnErrorClose_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="#8B1A4A" CornerRadius="8" Padding="0,10">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                      TextElement.Foreground="White"
+                                                      TextElement.FontFamily="Segoe UI"
+                                                      TextElement.FontSize="13"
+                                                      TextElement.FontWeight="SemiBold"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.85"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Terms and Conditions Overlay -->
+        <Grid Grid.Column="1" x:Name="TermsOverlay" Visibility="Collapsed" Panel.ZIndex="20">
+            <Rectangle Fill="#66000000"/>
+            <Border Background="White" CornerRadius="12" Padding="0" Width="360" MaxHeight="460"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="3" Opacity="0.22"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" CornerRadius="12,12,0,0" Padding="24,18,24,14"
+                            BorderBrush="#EEEEEE" BorderThickness="0,0,0,1">
+                        <Grid>
+                            <TextBlock Text="Terms and Conditions" FontFamily="Segoe UI"
+                                       FontSize="14" FontWeight="Bold" Foreground="#8B1A4A"/>
+                            <Button HorizontalAlignment="Right" Width="28" Height="28"
+                                    Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                    Click="BtnTermsClose_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Cbg" Background="Transparent" CornerRadius="14">
+                                            <TextBlock Text="✕" FontSize="13" Foreground="#AAAAAA"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Cbg" Property="Background" Value="#F0F0F0"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled" Padding="24,16,24,8">
+                        <StackPanel>
+                            <TextBlock FontFamily="Segoe UI" FontSize="11" Foreground="#444444"
+                                       TextWrapping="Wrap" LineHeight="18">
+                                <Run FontWeight="Bold">1. Acceptance of Terms</Run>
+                                <LineBreak/>
+                                By accessing and using the SOLACE Solo Parent Information System, you agree to be bound by these Terms and Conditions.
+                                <LineBreak/><LineBreak/>
+                                <Run FontWeight="Bold">2. Data Privacy</Run>
+                                <LineBreak/>
+                                All personal information collected is governed by the Data Privacy Act of 2012 (RA 10173). Information is collected solely for the administration of the Solo Parent Welfare Program.
+                                <LineBreak/><LineBreak/>
+                                <Run FontWeight="Bold">3. Authorized Use</Run>
+                                <LineBreak/>
+                                Access is restricted to authorized personnel only. Unauthorized access, disclosure, or misuse of data is strictly prohibited and may be subject to legal action.
+                                <LineBreak/><LineBreak/>
+                                <Run FontWeight="Bold">4. Account Responsibility</Run>
+                                <LineBreak/>
+                                Users are responsible for maintaining the confidentiality of their credentials. Any activity performed under your account is your responsibility.
+                                <LineBreak/><LineBreak/>
+                                <Run FontWeight="Bold">5. System Use</Run>
+                                <LineBreak/>
+                                This system must only be used for official duties related to the Solo Parent Welfare Program. Misuse may result in account suspension and disciplinary action.
+                            </TextBlock>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Border Grid.Row="2" CornerRadius="0,0,12,12" Padding="24,14"
+                            BorderBrush="#EEEEEE" BorderThickness="0,1,0,0">
+                        <Button Content="Close" Height="36" Cursor="Hand" Click="BtnTermsClose_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="#8B1A4A" CornerRadius="8" Padding="0,8">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                          TextElement.Foreground="White"
+                                                          TextElement.FontFamily="Segoe UI"
+                                                          TextElement.FontSize="12"
+                                                          TextElement.FontWeight="SemiBold"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="0.85"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Border>
+                </Grid>
+            </Border>
         </Grid>
 
         <!-- Title bar controls -->

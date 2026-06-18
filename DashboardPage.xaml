@@ -18,8 +18,8 @@
                       HorizontalScrollBarVisibility="Disabled">
             <Grid Margin="24,16,24,24">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="280"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="*" MinWidth="220" MaxWidth="320"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- left col -->

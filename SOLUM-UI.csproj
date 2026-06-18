@@ -87,6 +87,18 @@
       <DependentUpon>TopBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\SoloParentRecordViewModel.cs" />
+    <Compile Include="UserAdministrationPage.xaml.cs">
+      <DependentUpon>UserAdministrationPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AnalyticsPage.xaml.cs">
+      <DependentUpon>AnalyticsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserProfilePage.xaml.cs">
+      <DependentUpon>UserProfilePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SubsidyRecommendationPage.xaml.cs">
+      <DependentUpon>SubsidyRecommendationPage.xaml</DependentUpon>
+    </Compile>
     <Page Include="ConfirmDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -124,6 +136,22 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ViewAllLogsOverlay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserAdministrationPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AnalyticsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserProfilePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SubsidyRecommendationPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

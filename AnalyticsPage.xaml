@@ -1,0 +1,36 @@
+<Page x:Class="SOLUM_UI.AnalyticsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Analytics"
+      Background="#FFFFFF">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="24,20,24,16">
+            <TextBlock Text="Analytics"
+                       FontFamily="Segoe UI" FontSize="20" FontWeight="Bold"
+                       Foreground="#702943"/>
+            <TextBlock Text="Program insights and data trends."
+                       FontFamily="Segoe UI" FontSize="12"
+                       Foreground="#A06080" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Margin="24,0,24,24" CornerRadius="14"
+                BorderBrush="#E8D8DC" BorderThickness="1" Background="White">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="📊" FontSize="40" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                <TextBlock Text="Analytics"
+                           FontFamily="Segoe UI" FontSize="16" FontWeight="SemiBold"
+                           Foreground="#702943" HorizontalAlignment="Center"/>
+                <TextBlock Text="This module is under development."
+                           FontFamily="Segoe UI" FontSize="12"
+                           Foreground="#A06080" HorizontalAlignment="Center"
+                           Margin="0,6,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>

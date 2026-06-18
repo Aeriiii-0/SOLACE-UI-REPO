@@ -65,7 +65,8 @@
                     BorderBrush="#E8D0D8"
                     BorderThickness="1"
                     Cursor="Hand"
-                    Margin="0,0,24,0">
+                    Margin="0,0,24,0"
+                    MouseLeftButtonDown="ProfilePill_Click">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Style.Triggers>

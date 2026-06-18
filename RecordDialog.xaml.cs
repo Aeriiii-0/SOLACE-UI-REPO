@@ -241,8 +241,8 @@ namespace SOLUM_UI
 
             if (string.IsNullOrWhiteSpace(TxtContact.Text))
             { MarkError(TxtContact, ErrContact, "Contact number is required."); ok = false; }
-            else if (TxtContact.Text.Trim().Length < 10)
-            { MarkError(TxtContact, ErrContact, "Enter a valid contact number (min 10 digits)."); ok = false; }
+            else if (TxtContact.Text.Trim().Length != 11)
+            { MarkError(TxtContact, ErrContact, "Contact number must be exactly 11 digits."); ok = false; }
 
             if (string.IsNullOrWhiteSpace(TxtBarangay.Text))
             { MarkError(TxtBarangay, ErrBarangay, "Barangay is required."); ok = false; }
@@ -365,7 +365,6 @@ namespace SOLUM_UI
             void Add(string section, string label, string newVal, string oldVal = null)
             {
                 bool changed = isEdit && oldVal != null && oldVal != newVal;
-                if (isEdit && !changed) return;
                 list.Add(new ConfirmField
                 {
                     Section   = section,
@@ -377,40 +376,37 @@ namespace SOLUM_UI
             }
 
             string sec = "Personal Information";
-            Add(sec, "Last Name",     r.Surname,      _existing?.Surname);
-            Add(sec, "First Name",    r.FirstName,    _existing?.FirstName);
-            Add(sec, "Middle Name",   r.MiddleName,   _existing?.MiddleName);
-            Add(sec, "Extension",     r.ExtensionName, _existing?.ExtensionName);
-            Add(sec, "Sex",           r.Sex,          _existing?.Sex);
-            Add(sec, "Civil Status",  r.CivilStatus,  _existing?.CivilStatus);
-            Add(sec, "Date of Birth", r.DateOfBirth.ToString("MMMM d, yyyy"),
-                                      _existing?.DateOfBirth.ToString("MMMM d, yyyy"));
-            Add(sec, "Age",           TxtAge.Text,    null);
-            Add(sec, "Place of Birth", r.PlaceOfBirth, _existing?.PlaceOfBirth);
-            Add(sec, "Citizenship",   r.Citizenship,  _existing?.Citizenship);
-            Add(sec, "Blood Type",    r.BloodType,    _existing?.BloodType);
-            Add(sec, "Height (cm)",   r.Height,       _existing?.Height);
-            Add(sec, "Weight (kg)",   r.Weight,       _existing?.Weight);
+            Add(sec, "Last Name",      r.Surname,       _existing?.Surname);
+            Add(sec, "First Name",     r.FirstName,     _existing?.FirstName);
+            Add(sec, "Middle Name",    r.MiddleName,    _existing?.MiddleName);
+            Add(sec, "Extension",      r.ExtensionName, _existing?.ExtensionName);
+            Add(sec, "Sex",            r.Sex,           _existing?.Sex);
+            Add(sec, "Civil Status",   r.CivilStatus,   _existing?.CivilStatus);
+            Add(sec, "Date of Birth",  r.DateOfBirth.ToString("MMMM d, yyyy"),
+                                       _existing?.DateOfBirth.ToString("MMMM d, yyyy"));
+            Add(sec, "Age",            TxtAge.Text,     null);
+            Add(sec, "Place of Birth", r.PlaceOfBirth,  _existing?.PlaceOfBirth);
+            Add(sec, "Citizenship",    r.Citizenship,   _existing?.Citizenship);
+            Add(sec, "Blood Type",     r.BloodType,     _existing?.BloodType);
+            Add(sec, "Height (cm)",    r.Height,        _existing?.Height);
+            Add(sec, "Weight (kg)",    r.Weight,        _existing?.Weight);
 
             sec = "Contact & Location";
-            Add(sec, "Address",       r.Address,      _existing?.Address);
-            Add(sec, "Barangay",      r.Barangay,     _existing?.Barangay);
-            Add(sec, "Contact No.",   r.ContactNumber, _existing?.ContactNumber);
+            Add(sec, "Address",      r.Address,        _existing?.Address);
+            Add(sec, "Barangay",     r.Barangay,       _existing?.Barangay);
+            Add(sec, "Contact No.",  r.ContactNumber,  _existing?.ContactNumber);
 
             sec = "Referral Information";
             Add(sec, "Source of Referral", r.SourceOfReferral, _existing?.SourceOfReferral);
-            Add(sec, "Date Admitted", r.DateAdmitted.ToString("MMMM d, yyyy"),
-                                      _existing?.DateAdmitted.ToString("MMMM d, yyyy"));
-            Add(sec, "Case No.",      r.CaseNo,           _existing?.CaseNo);
-            Add(sec, "Offense",       r.OffenseCommitted, _existing?.OffenseCommitted);
-            Add(sec, "Nature",        r.NatureOfReferral, _existing?.NatureOfReferral);
+            Add(sec, "Date Admitted",  r.DateAdmitted.ToString("MMMM d, yyyy"),
+                                       _existing?.DateAdmitted.ToString("MMMM d, yyyy"));
+            Add(sec, "Case No.",       r.CaseNo,            _existing?.CaseNo);
+            Add(sec, "Offense",        r.OffenseCommitted,  _existing?.OffenseCommitted);
+            Add(sec, "Nature",         r.NatureOfReferral,  _existing?.NatureOfReferral);
 
             sec = "Status";
             Add(sec, "No. of Children", r.Children.ToString(), _existing?.Children.ToString());
             Add(sec, "Status",          r.Status,               _existing?.Status);
-
-            if (isEdit && list.Count == 0)
-                list.Add(new ConfirmField { Section = "No Changes", Label = "No fields were modified.", NewValue = "" });
 
             return list;
         }
