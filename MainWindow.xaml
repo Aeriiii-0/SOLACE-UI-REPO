@@ -257,8 +257,8 @@
                     <controls:TopBar x:Name="TopBarControl"
                                      Grid.Row="0"
                                      PageTitle="Dashboard"
-                                     Margin="55,0,-60,0"
-                                     ProfileClicked="TopBarControl_ProfileClicked" Loaded="TopBarControl_Loaded"/>
+                                     Margin="60,0,-60,0"
+                                     ProfileClicked="TopBarControl_ProfileClicked"/>
 
                     <Border Grid.Row="1"
                             Background="#FFFFFF"
