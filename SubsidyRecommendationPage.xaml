@@ -1,0 +1,612 @@
+<Page x:Class="SOLUM_UI.SubsidyRecommendationPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Subsidy Recommendation"
+      Background="#FFFFFF">
+    <Page.Resources>
+        <Style x:Key="PriorityBadge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="10,3"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="ColHeader" TargetType="GridViewColumnHeader">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewColumnHeader">
+                        <Border Background="White" BorderBrush="#D4A0B0"
+                                BorderThickness="0,0,1,2" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="SubRow" TargetType="ListViewItem">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#F5EEF1"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border x:Name="Bg" Background="White"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <GridViewRowPresenter VerticalAlignment="Center" Margin="0,10"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="Cell" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#111111"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            <Setter Property="Margin" Value="12,0"/>
+        </Style>
+        <Style x:Key="ApproveBtn" TargetType="Button">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Background" Value="#27AE60"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="RejectBtn" TargetType="Button">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Background" Value="#E53935"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="FilterComboStyle" TargetType="ComboBox">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D0B8C0"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="CmbBg" Background="White" BorderBrush="#D0B8C0"
+                                    BorderThickness="1.5" CornerRadius="8">
+                                <Grid Margin="12,0,36,0">
+                                    <ContentPresenter x:Name="ContentSite"
+                                                      Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                      VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                    <TextBlock x:Name="Placeholder" Text="Select..."
+                                               Foreground="#BBBBBB" FontSize="13"
+                                               VerticalAlignment="Center" IsHitTestVisible="False"
+                                               Visibility="Collapsed"/>
+                                </Grid>
+                            </Border>
+                            <ToggleButton HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                          Background="Transparent" BorderThickness="0"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay,
+                                              RelativeSource={RelativeSource TemplatedParent}}"
+                                          Focusable="False" Opacity="0"/>
+                            <Path HorizontalAlignment="Right" VerticalAlignment="Center"
+                                  Margin="0,0,12,0" Data="M7,10L12,15L17,10H7Z"
+                                  Fill="#702943" Stretch="Uniform" Width="12" Height="12"
+                                  IsHitTestVisible="False"/>
+                            <Popup x:Name="Popup" Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                                <Border Background="White" CornerRadius="10" BorderBrush="#D0B8C0"
+                                        BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}"
+                                        MaxHeight="200" Margin="0,2,0,0">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.14"/>
+                                    </Border.Effect>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CmbBg" Property="BorderBrush" Value="#702943"/>
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="CmbBg" Property="BorderBrush" Value="#702943"/>
+                                <Setter TargetName="CmbBg" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="SelectedIndex" Value="-1">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Resources>
+                <Style TargetType="ComboBoxItem">
+                    <Setter Property="Padding" Value="12,8"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="Foreground" Value="#333333"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ComboBoxItem">
+                                <Border x:Name="ItemBg" Background="Transparent"
+                                        Padding="{TemplateBinding Padding}" CornerRadius="6" Margin="4,2">
+                                    <ContentPresenter/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#FDF0F3"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#F0E4E8"/>
+                                        <Setter Property="Foreground" Value="#702943"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Style.Resources>
+        </Style>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="24,20,24,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Subsidy Recommendation" FontFamily="Segoe UI" FontSize="20"
+                           FontWeight="Bold" Foreground="#702943"/>
+                <TextBlock Text="ML model recommendations awaiting staff review."
+                           FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,4,0,0"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="#FFF0F5" CornerRadius="8" Padding="14,8" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="8" Height="8" Fill="#702943" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtPendingCount" Text="10 pending"
+                                   FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#E8F5E9" CornerRadius="8" Padding="14,8">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="8" Height="8" Fill="#27AE60" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtApprovedCount" Text="0 approved"
+                                   FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#27AE60"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Margin="24,0,24,12" Background="#702943" CornerRadius="12" Padding="14,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Width="34" Height="34" Background="#9B3060"
+                        CornerRadius="17" Margin="0,0,12,0">
+                    <TextBlock Text="🤖" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="ML Model ran 14 new subsidy recommendations"
+                               FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="10 high-priority cases await staff approval · Last retrained 4 hours ago"
+                               FontFamily="Segoe UI" FontSize="10" Foreground="#E8C8D4" Margin="0,2,0,0"/>
+                </StackPanel>
+                <Border Grid.Column="2" Background="#9B3060" CornerRadius="8"
+                        Padding="12,6" VerticalAlignment="Center">
+                    <TextBlock Text="Model v2.4" FontFamily="Segoe UI" FontSize="10"
+                               FontWeight="SemiBold" Foreground="White"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2" Margin="24,0,24,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="22"
+                    BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="0,0,8,0">
+                <Button x:Name="FilterDropBtn" Background="Transparent" BorderThickness="0"
+                        Cursor="Hand" Height="44" Padding="14,0" Click="FilterDrop_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="Transparent" CornerRadius="22" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z"
+                              Fill="#702943" Stretch="Uniform" Width="13" Height="13"
+                              VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="FilterLabel" Text="Filter"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   Foreground="#702943" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Border>
+
+            <Popup x:Name="FilterPopup"
+                   PlacementTarget="{Binding ElementName=FilterDropBtn}"
+                   Placement="Bottom" StaysOpen="False"
+                   AllowsTransparency="True" PopupAnimation="Fade">
+                <Border Background="White" CornerRadius="14"
+                        BorderBrush="#E0D0D5" BorderThickness="1" Padding="20,18,20,18"
+                        MinWidth="280">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="4" Opacity="0.18"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock Text="Priority" FontFamily="Segoe UI" FontSize="13"
+                                   FontWeight="SemiBold" Foreground="#1A1A1A" Margin="0,0,0,8"/>
+                        <ComboBox x:Name="CmbFilterPriority"
+                                  Style="{StaticResource FilterComboStyle}"
+                                  Margin="0,0,0,16">
+                            <ComboBoxItem Content="All" IsSelected="True"/>
+                            <ComboBoxItem Content="High"/>
+                            <ComboBoxItem Content="Medium"/>
+                            <ComboBoxItem Content="Low"/>
+                        </ComboBox>
+
+                        <TextBlock Text="Status" FontFamily="Segoe UI" FontSize="13"
+                                   FontWeight="SemiBold" Foreground="#1A1A1A" Margin="0,0,0,8"/>
+                        <ComboBox x:Name="CmbFilterStatus"
+                                  Style="{StaticResource FilterComboStyle}"
+                                  Margin="0,0,0,16">
+                            <ComboBoxItem Content="All" IsSelected="True"/>
+                            <ComboBoxItem Content="Pending"/>
+                            <ComboBoxItem Content="Approved"/>
+                            <ComboBoxItem Content="Rejected"/>
+                        </ComboBox>
+
+                        <Grid Margin="0,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Height="42" Cursor="Hand" Click="FilterReset_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="#F0F0F0" CornerRadius="10">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="Background" Value="#E0E0E0"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Text="Reset" FontFamily="Segoe UI" FontSize="13"
+                                           FontWeight="SemiBold" Foreground="#555555"/>
+                            </Button>
+                            <Button Grid.Column="2" Height="42" Cursor="Hand" Click="FilterApply_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="#702943" CornerRadius="10">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Text="Apply Now" FontFamily="Segoe UI" FontSize="13"
+                                           FontWeight="SemiBold" Foreground="White"/>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Popup>
+
+            <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="22"
+                    BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="0,0,10,0">
+                <Button x:Name="SortDropBtn" Background="Transparent" BorderThickness="0"
+                        Cursor="Hand" Width="44" Height="44" Click="SortDrop_Click" ToolTip="Sort">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="Transparent" CornerRadius="22">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Path Data="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z"
+                          Fill="#702943" Stretch="Uniform" Width="18" Height="18"/>
+                </Button>
+            </Border>
+
+            <Popup x:Name="SortPopup"
+                   PlacementTarget="{Binding ElementName=SortDropBtn}"
+                   Placement="Bottom" StaysOpen="False"
+                   AllowsTransparency="True" PopupAnimation="Fade">
+                <Border Background="White" CornerRadius="12"
+                        BorderBrush="#E0D0D5" BorderThickness="1" Padding="4">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.18"/>
+                    </Border.Effect>
+                    <StackPanel MinWidth="180">
+                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="By Barangay">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#FDF3F5"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="By Barangay" FontSize="13" Foreground="#333333" Padding="12,9"/>
+                        </Border>
+                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Priority: High First">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#FDF3F5"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="Priority: High First" FontSize="13" Foreground="#333333" Padding="12,9"/>
+                        </Border>
+                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Priority: Low First">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#FDF3F5"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="Priority: Low First" FontSize="13" Foreground="#333333" Padding="12,9"/>
+                        </Border>
+                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Confidence: High First">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#FDF3F5"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="Confidence: High First" FontSize="13" Foreground="#333333" Padding="12,9"/>
+                        </Border>
+                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Name A-Z">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#FDF3F5"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="Name A → Z" FontSize="13" Foreground="#333333" Padding="12,9"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Popup>
+
+            <StackPanel Grid.Column="2"/>
+
+            <Button Grid.Column="3" Height="44" Padding="18,0" Cursor="Hand" Click="ExportAll_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="#702943" CornerRadius="22" Padding="{TemplateBinding Padding}">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="2" Opacity="0.22"/>
+                            </Border.Effect>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.88"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"
+                          Fill="White" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0"/>
+                    <TextBlock Text="Export All" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <Border Grid.Row="3" Margin="24,0,24,24" CornerRadius="14"
+                BorderBrush="#E8D8DC" BorderThickness="1" ClipToBounds="True" Background="White">
+            <ListView x:Name="RecommendationList"
+                      BorderThickness="0" Background="Transparent"
+                      ItemContainerStyle="{StaticResource SubRow}"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      Margin="0,4,0,0">
+                <ListView.View>
+                    <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
+                        <GridViewColumn Header="SP ID" Width="80">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding SpId}" Style="{StaticResource Cell}"
+                                               FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="NAME" Width="190">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" Style="{StaticResource Cell}" FontWeight="Medium"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="BARANGAY" Width="120">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Barangay}" Style="{StaticResource Cell}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="PRIORITY" Width="100">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource PriorityBadge}" Background="{Binding PriorityColor}">
+                                        <TextBlock Text="{Binding Priority}" FontSize="11"
+                                                   FontWeight="SemiBold" Foreground="{Binding PriorityTextColor}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="CONFIDENCE" Width="110">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Confidence}" Style="{StaticResource Cell}"
+                                               Foreground="#702943" FontWeight="SemiBold"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="STATUS" Width="110">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource PriorityBadge}" Background="{Binding StatusColor}">
+                                        <TextBlock Text="{Binding Status}" FontSize="11"
+                                                   FontWeight="SemiBold" Foreground="{Binding StatusTextColor}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="INDICATORS" Width="220">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="8,0" VerticalAlignment="Center">
+                                        <Border Background="#FFF0F5" CornerRadius="8" Padding="7,3" Margin="0,0,4,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="₱ " FontSize="10" Foreground="#702943" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding IncomeLevel}" FontSize="10" Foreground="#702943" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Background="#FFF8E1" CornerRadius="8" Padding="7,3" Margin="0,0,4,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="👶 " FontSize="10" Foreground="#F57F17" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding DependantsLabel}" FontSize="10" Foreground="#F57F17" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Background="#E8F5E9" CornerRadius="8" Padding="7,3">
+                                            <TextBlock Text="{Binding CivilStatusShort}" FontSize="10" Foreground="#27AE60" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="ACTION" Width="200">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                                        <Button Style="{StaticResource ApproveBtn}" Tag="{Binding SpId}"
+                                                Click="Approve_Click" Margin="0,0,6,0" Content="Approve"/>
+                                        <Button Style="{StaticResource RejectBtn}" Tag="{Binding SpId}"
+                                                Click="Reject_Click" Content="Reject" Margin="0,0,6,0"/>
+                                        <Button Height="28" Padding="10,0" Cursor="Hand"
+                                                Tag="{Binding SpId}" Click="ExportRow_Click">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="Transparent" CornerRadius="6"
+                                                            BorderBrush="#D0B8C0" BorderThickness="1"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Opacity" Value="0.75"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                            <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"
+                                                  Fill="#702943" Stretch="Uniform" Width="12" Height="12"/>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Border>
+    </Grid>
+</Page>
