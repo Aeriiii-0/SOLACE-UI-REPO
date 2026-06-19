@@ -93,7 +93,7 @@
                                   IsHitTestVisible="False"/>
                             <Popup x:Name="Popup" Placement="Bottom"
                                    IsOpen="{TemplateBinding IsDropDownOpen}"
-                                   AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                                   AllowsTransparency="True" Focusable="False" PopupAnimation="None">
                                 <Border Background="White" CornerRadius="10" BorderBrush="#E0E0E0"
                                         BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}"
                                         MaxHeight="200" Margin="0,2,0,0">
@@ -278,12 +278,13 @@
     </Window.Resources>
 
     <Border Background="#44000000" Padding="0">
-        <Border x:Name="DialogShell" Background="#F7F7F7" CornerRadius="16"
-                ClipToBounds="True" Width="660"
-                VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Border Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="0" Opacity="0.22"/>
             </Border.Effect>
+        <Border x:Name="DialogShell" Background="#F7F7F7" CornerRadius="16"
+                ClipToBounds="True" Width="660"
+                VerticalAlignment="Center" HorizontalAlignment="Center">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -696,8 +697,7 @@
                             <ComboBox x:Name="CmbStatus" Style="{StaticResource FormCombo}"
                                       Width="220" HorizontalAlignment="Left"
                                       SelectionChanged="CmbStatus_SelectionChanged">
-                                <ComboBoxItem Content="Active"/>
-                                <ComboBoxItem Content="Pending"/>
+                                <ComboBoxItem Content="Valid"/>
                                 <ComboBoxItem Content="Inactive"/>
                             </ComboBox>
                             <TextBlock x:Name="ErrStatus" Text="Required." Style="{StaticResource ErrorText}"/>
@@ -728,6 +728,7 @@
                 </Border>
 
             </Grid>
+        </Border>
         </Border>
     </Border>
 </Window>

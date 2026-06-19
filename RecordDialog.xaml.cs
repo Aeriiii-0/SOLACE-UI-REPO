@@ -24,8 +24,6 @@ namespace SOLUM_UI
             _existing = existing;
             FamilyRows.ItemsSource = new string[5];
 
-            Loaded += OnLoaded;
-
             if (_existing != null)
             {
                 FormSubtitle.Text = "Edit Record — " + _existing.Id;
@@ -37,8 +35,10 @@ namespace SOLUM_UI
             }
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        protected override void OnSourceInitialized(EventArgs e)
         {
+            base.OnSourceInitialized(e);
+
             double screenW, screenH, screenLeft, screenTop;
 
             if (Owner != null && Owner.WindowState == WindowState.Maximized)
