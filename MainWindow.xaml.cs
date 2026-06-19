@@ -24,14 +24,15 @@ namespace SOLUM_UI
         {
             InitializeComponent();
             RegisterNavButtons();
-            Loaded += (s, e) =>
-            {
-                TopBarControl.SetUser(CurrentUserName, CurrentUserRole);
-                ActivateButton("Dashboard");
-                MainFrame.Navigate(new DashboardPage());
-            };
+            Loaded += MainWindow_Loaded;
         }
 
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            TopBarControl.SetUser(CurrentUserName, CurrentUserRole);
+            ActivateButton("Dashboard");
+            MainFrame.Navigate(new DashboardPage());
+        }
         private void RegisterNavButtons()
         {
             foreach (Button btn in FindAllButtons(this))
@@ -112,7 +113,7 @@ namespace SOLUM_UI
                     TopBarControl.PageTitle = "Analytics";
                     break;
                 case "SubsidyRecommendation":
-                    TopBarControl.PageTitle = "Subsidy Recommendation";
+                  //  TopBarControl.PageTitle = "Subsidy Recommendation";
                     break;
                 case "UserProfile":
                     TopBarControl.PageTitle = "User Profile";
