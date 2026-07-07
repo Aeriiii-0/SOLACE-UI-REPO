@@ -76,7 +76,7 @@ namespace SOLUM_UI.ViewModels
                     case "Inactive": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F5F5F5"));
                     default: return new SolidColorBrush(Colors.Transparent);
                 }
-            }
+            } 
         }
 
         public SolidColorBrush StatusTextColor

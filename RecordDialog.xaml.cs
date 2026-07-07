@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +16,9 @@ namespace SOLUM_UI
     {
         public SoloParentRecord Result { get; private set; }
         private readonly SoloParentRecord _existing;
+        private int _currentStep = 1;
+        private bool _savedSuccessfully = false;
+        private readonly ObservableCollection<object> _familyRowData = new ObservableCollection<object>();
 
         private static readonly SolidColorBrush ErrorBrush   = new SolidColorBrush(Color.FromRgb(0xE5, 0x39, 0x35));
         private static readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(0xD0, 0xB8, 0xC0));
@@ -22,7 +28,10 @@ namespace SOLUM_UI
         {
             InitializeComponent();
             _existing = existing;
-            FamilyRows.ItemsSource = new string[5];
+
+            for (int i = 0; i < 5; i++)
+                _familyRowData.Add(new object());
+            FamilyRows.ItemsSource = _familyRowData;
 
             if (_existing != null)
             {
@@ -32,13 +41,20 @@ namespace SOLUM_UI
             else
             {
                 FormSubtitle.Text = "Add New Record";
+                DpDateOfApplication.SelectedDate = DateTime.Today;
             }
         }
 
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
+            ApplySize();
+        }
 
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e) => ApplySize();
+
+        private void ApplySize()
+        {
             double screenW, screenH, screenLeft, screenTop;
 
             if (Owner != null && Owner.WindowState == WindowState.Maximized)
@@ -68,37 +84,73 @@ namespace SOLUM_UI
             Left   = screenLeft;
             Top    = screenTop;
 
-            DialogShell.MaxHeight = screenH * 0.85;
-            DialogShell.Width     = Math.Min(screenW * 0.72, 820);
+            DialogShell.MaxHeight = screenH * 0.90;
+            DialogShell.Width     = Math.Min(screenW * 0.88, 1320);
+            DialogShell.MinWidth  = Math.Max(screenW * 0.60, 680);
         }
 
-        //field population
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (_savedSuccessfully) return;
+            if (!HasAnyInput()) return;
+
+            var result = MessageBox.Show(
+                "You have unsaved information in this form.\n\nDiscard changes and close?",
+                "Unsaved Changes",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.No)
+            {
+                e.Cancel = true;
+                DialogShell.Visibility = Visibility.Visible;
+            }
+        }
+
+        private bool HasAnyInput()
+        {
+            if (!string.IsNullOrWhiteSpace(TxtLastName.Text))   return true;
+            if (!string.IsNullOrWhiteSpace(TxtFirstName.Text))  return true;
+            if (!string.IsNullOrWhiteSpace(TxtMiddleName.Text)) return true;
+            if (!string.IsNullOrWhiteSpace(TxtAddress.Text))    return true;
+            if (!string.IsNullOrWhiteSpace(TxtBarangay.Text))   return true;
+            if (!string.IsNullOrWhiteSpace(TxtContact.Text))    return true;
+            if (DpBirthdate.SelectedDate.HasValue)               return true;
+            if (CmbSex.SelectedItem != null)                     return true;
+            if (CmbCivilStatus.SelectedItem != null)             return true;
+            return false;
+        }
+
+        private void Circumstance_Changed(object sender, RoutedEventArgs e)
+        {
+            PnlA2.Visibility = ChkA2.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PnlA4.Visibility = ChkA4.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PnlA5.Visibility = ChkA5.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PnlB.Visibility  = ChkB.IsChecked  == true ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void AddFamilyRow_Click(object sender, RoutedEventArgs e)
+        {
+            _familyRowData.Add(new object());
+        }
 
         private void PopulateFields(SoloParentRecord r)
         {
-            TxtLastName.Text         = r.Surname        ?? string.Empty;
-            TxtFirstName.Text        = r.FirstName      ?? string.Empty;
-            TxtMiddleName.Text       = r.MiddleName     ?? string.Empty;
-            TxtExtension.Text        = r.ExtensionName  ?? string.Empty;
-            TxtPlaceOfBirth.Text     = r.PlaceOfBirth   ?? string.Empty;
-            TxtCitizenship.Text      = r.Citizenship    ?? string.Empty;
-            TxtHeight.Text           = r.Height         ?? string.Empty;
-            TxtWeight.Text           = r.Weight         ?? string.Empty;
-            TxtAddress.Text          = r.Address        ?? string.Empty;
-            TxtContact.Text          = r.ContactNumber  ?? string.Empty;
-            TxtBarangay.Text         = r.Barangay       ?? string.Empty;
-            TxtSourceOfReferral.Text = r.SourceOfReferral ?? string.Empty;
-            TxtCaseNo.Text           = r.CaseNo         ?? string.Empty;
-            TxtOffense.Text          = r.OffenseCommitted ?? string.Empty;
-            TxtNatureOfReferral.Text = r.NatureOfReferral ?? string.Empty;
-            TxtChildren.Text         = r.Children.ToString();
+            TxtLastName.Text     = r.Surname       ?? string.Empty;
+            TxtFirstName.Text    = r.FirstName     ?? string.Empty;
+            TxtMiddleName.Text   = r.MiddleName    ?? string.Empty;
+            TxtExtension.Text    = r.ExtensionName ?? string.Empty;
+            TxtPlaceOfBirth.Text = r.PlaceOfBirth  ?? string.Empty;
+            TxtAddress.Text      = r.Address       ?? string.Empty;
+            TxtContact.Text      = r.ContactNumber ?? string.Empty;
+            TxtBarangay.Text     = r.Barangay      ?? string.Empty;
 
-            if (r.DateOfBirth   != DateTime.MinValue) DpBirthdate.SelectedDate    = r.DateOfBirth;
-            if (r.DateAdmitted  != DateTime.MinValue) DpDateAdmitted.SelectedDate = r.DateAdmitted;
+            if (r.DateOfBirth != DateTime.MinValue) DpBirthdate.SelectedDate = r.DateOfBirth;
+
+            DpDateOfApplication.SelectedDate = DateTime.Today;
 
             SetComboByContent(CmbSex,         r.Sex);
             SetComboByContent(CmbCivilStatus, r.CivilStatus);
-            SetComboByContent(CmbBloodType,   r.BloodType);
             SetComboByContent(CmbStatus,      r.Status);
 
             UpdateAge(r.DateOfBirth);
@@ -116,8 +168,6 @@ namespace SOLUM_UI
             ComboBoxItem sel = combo.SelectedItem as ComboBoxItem;
             return sel?.Content?.ToString() ?? string.Empty;
         }
-
-        //calculating age
 
         private void UpdateAge(DateTime? dob)
         {
@@ -138,8 +188,6 @@ namespace SOLUM_UI
             ClearDateError(DpBirthdate, ErrBirthdate);
         }
 
-        //filtersw
-
         private void NameOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !Regex.IsMatch(e.Text, @"^[a-zA-Z\s\.\-]+$");
@@ -158,22 +206,15 @@ namespace SOLUM_UI
             else if (clicked == ChkRenewal && ChkRenewal.IsChecked == true) ChkNewApplicant.IsChecked = false;
         }
 
-        //clear on type
-
         private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)       => ClearFieldError(TxtLastName,     ErrLastName);
         private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)      => ClearFieldError(TxtFirstName,    ErrFirstName);
         private void TxtBarangay_TextChanged(object sender, TextChangedEventArgs e)       => ClearFieldError(TxtBarangay,     ErrBarangay);
         private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)        => ClearFieldError(TxtAddress,      ErrAddress);
         private void TxtContact_TextChanged(object sender, TextChangedEventArgs e)        => ClearFieldError(TxtContact,      ErrContact);
-        private void TxtChildren_TextChanged(object sender, TextChangedEventArgs e)       => ClearFieldError(TxtChildren,     ErrChildren);
         private void TxtPlaceOfBirth_TextChanged(object sender, TextChangedEventArgs e)   => ClearFieldError(TxtPlaceOfBirth, ErrPlaceOfBirth);
-        private void TxtCitizenship_TextChanged(object sender, TextChangedEventArgs e)    => ClearFieldError(TxtCitizenship,  ErrCitizenship);
         private void CmbSex_SelectionChanged(object sender, SelectionChangedEventArgs e)         => ClearFieldError(CmbSex,         ErrSex);
         private void CmbCivilStatus_SelectionChanged(object sender, SelectionChangedEventArgs e) => ClearFieldError(CmbCivilStatus, ErrCivilStatus);
         private void CmbStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)      => ClearFieldError(CmbStatus,      ErrStatus);
-        private void DpDateAdmitted_SelectedDateChanged(object sender, SelectionChangedEventArgs e) => ClearDateError(DpDateAdmitted, ErrDateAdmitted);
-
-        //error handling sa ui
 
         private void MarkError(Control ctrl, TextBlock lbl, string msg)
         {
@@ -205,78 +246,124 @@ namespace SOLUM_UI
             lbl.Visibility     = Visibility.Collapsed;
         }
 
-        //vqalidations
-
-        private bool ValidateFields()
+        private bool ValidateStep1()
         {
             bool ok = true;
+            var missing = new List<string>();
 
             if (string.IsNullOrWhiteSpace(TxtLastName.Text))
-            { MarkError(TxtLastName, ErrLastName, "Last name is required."); ok = false; }
+            { MarkError(TxtLastName, ErrLastName, "Required."); missing.Add("Last Name"); ok = false; }
 
             if (string.IsNullOrWhiteSpace(TxtFirstName.Text))
-            { MarkError(TxtFirstName, ErrFirstName, "First name is required."); ok = false; }
+            { MarkError(TxtFirstName, ErrFirstName, "Required."); missing.Add("First Name"); ok = false; }
 
             if (string.IsNullOrWhiteSpace(TxtPlaceOfBirth.Text))
-            { MarkError(TxtPlaceOfBirth, ErrPlaceOfBirth, "Place of birth is required."); ok = false; }
-
-            if (string.IsNullOrWhiteSpace(TxtCitizenship.Text))
-            { MarkError(TxtCitizenship, ErrCitizenship, "Citizenship is required."); ok = false; }
+            { MarkError(TxtPlaceOfBirth, ErrPlaceOfBirth, "Required."); missing.Add("Birthplace"); ok = false; }
 
             if (CmbSex.SelectedItem == null)
-            { MarkError(CmbSex, ErrSex, "Sex is required."); ok = false; }
+            { MarkError(CmbSex, ErrSex, "Required."); missing.Add("Sex"); ok = false; }
 
             if (CmbCivilStatus.SelectedItem == null)
-            { MarkError(CmbCivilStatus, ErrCivilStatus, "Civil status is required."); ok = false; }
+            { MarkError(CmbCivilStatus, ErrCivilStatus, "Required."); missing.Add("Civil Status"); ok = false; }
 
             if (!DpBirthdate.SelectedDate.HasValue)
-            { MarkDateError(DpBirthdate, ErrBirthdate, "Date of birth is required."); ok = false; }
+            { MarkDateError(DpBirthdate, ErrBirthdate, "Required."); missing.Add("Birthdate"); ok = false; }
             else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today)
-            { MarkDateError(DpBirthdate, ErrBirthdate, "Date of birth cannot be in the future."); ok = false; }
+            { MarkDateError(DpBirthdate, ErrBirthdate, "Cannot be in the future."); missing.Add("Birthdate (future date)"); ok = false; }
             else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today.AddYears(-15))
-            { MarkDateError(DpBirthdate, ErrBirthdate, "Registrant must be at least 15 years old."); ok = false; }
+            { MarkDateError(DpBirthdate, ErrBirthdate, "Must be at least 15 years old."); missing.Add("Birthdate (must be 15+)"); ok = false; }
 
             if (string.IsNullOrWhiteSpace(TxtAddress.Text))
-            { MarkError(TxtAddress, ErrAddress, "Address is required."); ok = false; }
+            { MarkError(TxtAddress, ErrAddress, "Required."); missing.Add("Address"); ok = false; }
 
             if (string.IsNullOrWhiteSpace(TxtContact.Text))
-            { MarkError(TxtContact, ErrContact, "Contact number is required."); ok = false; }
+            { MarkError(TxtContact, ErrContact, "Required."); missing.Add("Contact Number"); ok = false; }
             else if (TxtContact.Text.Trim().Length != 11)
-            { MarkError(TxtContact, ErrContact, "Contact number must be exactly 11 digits."); ok = false; }
+            { MarkError(TxtContact, ErrContact, "Must be 11 digits."); missing.Add("Contact Number (11 digits)"); ok = false; }
 
             if (string.IsNullOrWhiteSpace(TxtBarangay.Text))
-            { MarkError(TxtBarangay, ErrBarangay, "Barangay is required."); ok = false; }
+            { MarkError(TxtBarangay, ErrBarangay, "Required."); missing.Add("Barangay"); ok = false; }
 
-            if (!DpDateAdmitted.SelectedDate.HasValue)
-            { MarkDateError(DpDateAdmitted, ErrDateAdmitted, "Date admitted is required."); ok = false; }
-            else if (DpDateAdmitted.SelectedDate.Value.Date > DateTime.Today)
-            { MarkDateError(DpDateAdmitted, ErrDateAdmitted, "Date admitted cannot be in the future."); ok = false; }
-
-            if (string.IsNullOrWhiteSpace(TxtChildren.Text))
-            { MarkError(TxtChildren, ErrChildren, "Number of children is required."); ok = false; }
-            else
-            {
-                int ch;
-                if (!int.TryParse(TxtChildren.Text.Trim(), out ch) || ch < 0)
-                { MarkError(TxtChildren, ErrChildren, "Must be a valid non-negative number."); ok = false; }
-            }
-
-            if (CmbStatus.SelectedItem == null)
-            { MarkError(CmbStatus, ErrStatus, "Status is required."); ok = false; }
+            if (!ok)
+                SetValidationMessage(missing);
 
             return ok;
         }
 
+        private bool ValidateFields()
+        {
+            bool ok = ValidateStep1();
+            var missing = new List<string>();
 
+            if (CmbStatus.SelectedItem == null)
+            { MarkError(CmbStatus, ErrStatus, "Required."); missing.Add("Application Status"); ok = false; }
+
+            if (!ok && missing.Count > 0)
+                SetValidationMessage(missing);
+
+            return ok;
+        }
+
+        private void SetValidationMessage(List<string> missing)
+        {
+            if (missing.Count == 0) return;
+            var sb = new StringBuilder("Missing required fields: ");
+            sb.Append(string.Join(", ", missing));
+            sb.Append(".");
+            ValidationMessage.Text       = sb.ToString();
+            ValidationMessage.Visibility = Visibility.Visible;
+        }
+
+        private void Next_Click(object sender, RoutedEventArgs e)
+        {
+            ValidationMessage.Visibility = Visibility.Collapsed;
+            if (!ValidateStep1()) return;
+            GoToStep(2);
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            ValidationMessage.Visibility = Visibility.Collapsed;
+            GoToStep(1);
+        }
+
+        private void GoToStep(int step)
+        {
+            _currentStep = step;
+            bool onStep1 = step == 1;
+
+            ScrollStep1.Visibility = onStep1 ? Visibility.Visible  : Visibility.Collapsed;
+            ScrollStep2.Visibility = onStep1 ? Visibility.Collapsed : Visibility.Visible;
+            BtnNext.Visibility     = onStep1 ? Visibility.Visible  : Visibility.Collapsed;
+            BtnSave.Visibility     = onStep1 ? Visibility.Collapsed : Visibility.Visible;
+            BtnBack.Visibility     = onStep1 ? Visibility.Collapsed : Visibility.Visible;
+
+            FormStepHint.Text = onStep1
+                ? "Step 1 of 2 — Personal Information"
+                : "Step 2 of 2 — Circumstances & Status";
+
+            Step1Dot.Background = onStep1
+                ? new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43))
+                : new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
+
+            if (!onStep1)
+            {
+                Step2Dot.Background      = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
+                Step2DotLabel.Foreground = new SolidColorBrush(Colors.White);
+                Step2Title.Foreground    = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
+            }
+            else
+            {
+                Step2Dot.Background      = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
+                Step2DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
+                Step2Title.Foreground    = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
+            }
+        }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
-            if (!ValidateFields())
-            {
-                ValidationMessage.Visibility = Visibility.Visible;
-                return;
-            }
+            if (!ValidateFields()) return;
 
             var preview = BuildRecord();
             var fields  = BuildConfirmFields(preview);
@@ -285,9 +372,9 @@ namespace SOLUM_UI
             DialogShell.Visibility = Visibility.Hidden;
 
             var confirm = new ConfirmDialog(
-                isEdit ? "Confirm Changes" : "Confirm New Record",
+                isEdit ? "Confirm Changes"  : "Confirm New Record",
                 isEdit ? "Review your changes before saving." : "Review the information below before saving.",
-                isEdit ? "Confirm Changes" : "Confirm & Save",
+                isEdit ? "Confirm Changes"  : "Confirm & Save",
                 fields,
                 screenW: Width, screenH: Height,
                 screenLeft: Left, screenTop: Top
@@ -304,6 +391,7 @@ namespace SOLUM_UI
             try
             {
                 Result = preview;
+                _savedSuccessfully = true;
                 DialogResult = true;
                 Close();
             }
@@ -319,47 +407,39 @@ namespace SOLUM_UI
 
         private SoloParentRecord BuildRecord()
         {
-            int.TryParse(TxtChildren.Text.Trim(), out int children);
             string surname = TxtLastName.Text.Trim();
             string first   = TxtFirstName.Text.Trim();
             string middle  = TxtMiddleName.Text.Trim();
 
             return new SoloParentRecord
             {
-                Id               = _existing != null ? _existing.Id : "SP-" + DateTime.Now.ToString("yyMMddHHmm"),
-                Surname          = surname,
-                FirstName        = first,
-                MiddleName       = middle,
-                ExtensionName    = TxtExtension.Text.Trim(),
-                Name             = surname + ", " + first + (string.IsNullOrEmpty(middle) ? "" : " " + middle),
-                DateOfBirth      = DpBirthdate.SelectedDate.Value,
-                PlaceOfBirth     = TxtPlaceOfBirth.Text.Trim(),
-                Sex              = GetComboValue(CmbSex),
-                CivilStatus      = GetComboValue(CmbCivilStatus),
-                Citizenship      = TxtCitizenship.Text.Trim(),
-                BloodType        = GetComboValue(CmbBloodType),
-                Height           = TxtHeight.Text.Trim(),
-                Weight           = TxtWeight.Text.Trim(),
-                Address          = TxtAddress.Text.Trim(),
-                ContactNumber    = TxtContact.Text.Trim(),
-                Barangay         = TxtBarangay.Text.Trim(),
-                SourceOfReferral = TxtSourceOfReferral.Text.Trim(),
-                DateAdmitted     = DpDateAdmitted.SelectedDate.Value,
-                CaseNo           = TxtCaseNo.Text.Trim(),
-                OffenseCommitted = TxtOffense.Text.Trim(),
-                NatureOfReferral = TxtNatureOfReferral.Text.Trim(),
-                Status           = GetComboValue(CmbStatus),
-                Children         = children,
-                LastUpdated      = DateTime.Now
+                Id            = _existing != null ? _existing.Id : "SP-" + DateTime.Now.ToString("yyMMddHHmm"),
+                Surname       = surname,
+                FirstName     = first,
+                MiddleName    = middle,
+                ExtensionName = TxtExtension.Text.Trim(),
+                Name          = surname + ", " + first + (string.IsNullOrEmpty(middle) ? "" : " " + middle),
+                DateOfBirth   = DpBirthdate.SelectedDate.Value,
+                PlaceOfBirth  = TxtPlaceOfBirth.Text.Trim(),
+                Sex           = GetComboValue(CmbSex),
+                CivilStatus   = GetComboValue(CmbCivilStatus),
+                Citizenship   = string.Empty,
+                BloodType     = string.Empty,
+                Height        = string.Empty,
+                Weight        = string.Empty,
+                Address       = TxtAddress.Text.Trim(),
+                ContactNumber = TxtContact.Text.Trim(),
+                Barangay      = TxtBarangay.Text.Trim(),
+                DateAdmitted  = DateTime.MinValue,
+                Status        = GetComboValue(CmbStatus),
+                LastUpdated   = DateTime.Now
             };
         }
 
         private List<ConfirmField> BuildConfirmFields(SoloParentRecord r)
         {
             bool isEdit = _existing != null;
-
             string F(string v) => string.IsNullOrWhiteSpace(v) ? "—" : v;
-
             var list = new List<ConfirmField>();
 
             void Add(string section, string label, string newVal, string oldVal = null)
@@ -376,45 +456,29 @@ namespace SOLUM_UI
             }
 
             string sec = "Personal Information";
-            Add(sec, "Last Name",      r.Surname,       _existing?.Surname);
-            Add(sec, "First Name",     r.FirstName,     _existing?.FirstName);
-            Add(sec, "Middle Name",    r.MiddleName,    _existing?.MiddleName);
-            Add(sec, "Extension",      r.ExtensionName, _existing?.ExtensionName);
-            Add(sec, "Sex",            r.Sex,           _existing?.Sex);
-            Add(sec, "Civil Status",   r.CivilStatus,   _existing?.CivilStatus);
-            Add(sec, "Date of Birth",  r.DateOfBirth.ToString("MMMM d, yyyy"),
-                                       _existing?.DateOfBirth.ToString("MMMM d, yyyy"));
-            Add(sec, "Age",            TxtAge.Text,     null);
-            Add(sec, "Place of Birth", r.PlaceOfBirth,  _existing?.PlaceOfBirth);
-            Add(sec, "Citizenship",    r.Citizenship,   _existing?.Citizenship);
-            Add(sec, "Blood Type",     r.BloodType,     _existing?.BloodType);
-            Add(sec, "Height (cm)",    r.Height,        _existing?.Height);
-            Add(sec, "Weight (kg)",    r.Weight,        _existing?.Weight);
+            Add(sec, "Last Name",    r.Surname,       _existing?.Surname);
+            Add(sec, "First Name",   r.FirstName,     _existing?.FirstName);
+            Add(sec, "Middle Name",  r.MiddleName,    _existing?.MiddleName);
+            Add(sec, "Extension",    r.ExtensionName, _existing?.ExtensionName);
+            Add(sec, "Sex",          r.Sex,           _existing?.Sex);
+            Add(sec, "Civil Status", r.CivilStatus,   _existing?.CivilStatus);
+            Add(sec, "Date of Birth",
+                r.DateOfBirth.ToString("MMMM d, yyyy"),
+                _existing?.DateOfBirth.ToString("MMMM d, yyyy"));
+            Add(sec, "Age",       TxtAge.Text,    null);
+            Add(sec, "Birthplace", r.PlaceOfBirth, _existing?.PlaceOfBirth);
 
-            sec = "Contact & Location";
-            Add(sec, "Address",      r.Address,        _existing?.Address);
-            Add(sec, "Barangay",     r.Barangay,       _existing?.Barangay);
-            Add(sec, "Contact No.",  r.ContactNumber,  _existing?.ContactNumber);
-
-            sec = "Referral Information";
-            Add(sec, "Source of Referral", r.SourceOfReferral, _existing?.SourceOfReferral);
-            Add(sec, "Date Admitted",  r.DateAdmitted.ToString("MMMM d, yyyy"),
-                                       _existing?.DateAdmitted.ToString("MMMM d, yyyy"));
-            Add(sec, "Case No.",       r.CaseNo,            _existing?.CaseNo);
-            Add(sec, "Offense",        r.OffenseCommitted,  _existing?.OffenseCommitted);
-            Add(sec, "Nature",         r.NatureOfReferral,  _existing?.NatureOfReferral);
+            sec = "Address & Contact";
+            Add(sec, "Address",     r.Address,       _existing?.Address);
+            Add(sec, "Barangay",    r.Barangay,      _existing?.Barangay);
+            Add(sec, "Contact No.", r.ContactNumber, _existing?.ContactNumber);
 
             sec = "Status";
-            Add(sec, "No. of Children", r.Children.ToString(), _existing?.Children.ToString());
-            Add(sec, "Status",          r.Status,               _existing?.Status);
+            Add(sec, "Status", r.Status, _existing?.Status);
 
             return list;
         }
 
-        private void Close_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-            Close();
-        }
+        private void Close_Click(object sender, RoutedEventArgs e) => Close();
     }
 }

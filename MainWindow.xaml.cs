@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace SOLUM_UI
 {
@@ -24,12 +25,31 @@ namespace SOLUM_UI
         {
             InitializeComponent();
             RegisterNavButtons();
+            MainFrame.Navigated += MainFrame_Navigated;
             Loaded += (s, e) =>
             {
                 TopBarControl.SetUser(CurrentUserName, CurrentUserRole);
                 ActivateButton("Dashboard");
-                MainFrame.Navigate(new DashboardPage());
+                NavigatePage(new DashboardPage());
             };
+        }
+
+        private void MainFrame_Navigated(object sender, NavigationEventArgs e)
+        {
+            while (MainFrame.CanGoBack)
+                MainFrame.RemoveBackEntry();
+            while (MainFrame.CanGoForward)
+                MainFrame.RemoveBackEntry();
+        }
+
+        private void NavigatePage(Page page)
+        {
+            if (MainFrame.Content is Page current)
+            {
+                if (current.GetType() == page.GetType() && !(page is SoloParentRecordsPage))
+                    return;
+            }
+            MainFrame.Navigate(page);
         }
 
         private void RegisterNavButtons()
@@ -125,24 +145,24 @@ namespace SOLUM_UI
             switch (tag)
             {
                 case "Dashboard":
-                    MainFrame.Navigate(new DashboardPage());
+                    NavigatePage(new DashboardPage());
                     break;
                 case "SoloParentRecords":
                     SoloParentRecordsPage.CurrentUserName = CurrentUserName;
                     SoloParentRecordsPage.CurrentUserRole = CurrentUserRole;
-                    MainFrame.Navigate(new SoloParentRecordsPage());
+                    NavigatePage(new SoloParentRecordsPage());
                     break;
                 case "UserAdministration":
-                    MainFrame.Navigate(new UserAdministrationPage());
+                    NavigatePage(new UserAdministrationPage());
                     break;
                 case "Analytics":
-                    MainFrame.Navigate(new AnalyticsPage());
+                    NavigatePage(new AnalyticsPage());
                     break;
                 case "SubsidyRecommendation":
-                   // MainFrame.Navigate(new SubsidyRecommendationPage());
+                    NavigatePage(new SubsidyRecommendationPage());
                     break;
                 case "UserProfile":
-                    MainFrame.Navigate(new UserProfilePage());
+                    NavigatePage(new UserProfilePage());
                     break;
                 case "Settings":
                     break;
@@ -178,7 +198,19 @@ namespace SOLUM_UI
 
             var login = new LoginPage();
             login.Show();
+            ToastNotification.Show("Logged Out", "You have been logged out.", ToastType.Info);
             this.Close();
+        }
+
+        public void NavigateToRecord(string spId)
+        {
+            ActivateButton("SoloParentRecords");
+            SoloParentRecordsPage.CurrentUserName = CurrentUserName;
+            SoloParentRecordsPage.CurrentUserRole = CurrentUserRole;
+            TopBarControl.PageTitle = "Solo Parent Records";
+            var page = new SoloParentRecordsPage();
+            page.HighlightRecord(spId);
+            NavigatePage(page);
         }
     }
 }

@@ -78,6 +78,7 @@ namespace SOLUM_UI
 
             var mainWindow = new MainWindow();
             mainWindow.Show();
+            ToastNotification.Show("Welcome", "Logged in as " + email + ".", ToastType.Success);
             this.Close();
         }
 

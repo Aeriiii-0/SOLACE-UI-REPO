@@ -1,0 +1,140 @@
+<Window x:Class="SOLUM_UI.RecordViewDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        SizeChanged="Window_SizeChanged"
+        Closing="Window_Closing"
+        Width="900" Height="760">
+
+    <Border Background="#55000000">
+        <Border Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="0" Opacity="0.20"/>
+            </Border.Effect>
+            <Border x:Name="DialogShell" Background="White" CornerRadius="16"
+                    ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="White" CornerRadius="16,16,0,0"
+                            BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="32,18">
+                        <Grid>
+                            <TextBlock Text="Profile Details"
+                                       FontSize="17" FontWeight="Bold" Foreground="#111111"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Width="30" Height="30" Background="Transparent"
+                                    BorderThickness="0" Cursor="Hand" Click="Close_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="Transparent" CornerRadius="15">
+                                            <TextBlock Text="&#x2715;" FontSize="13" Foreground="#AAAAAA"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="Background" Value="#F0F0F0"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Background="#F6F7F9">
+                        <StackPanel Margin="32,24,32,24">
+
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" Width="88" Height="88" CornerRadius="10"
+                                        BorderBrush="#E2E8F0" BorderThickness="1"
+                                        Background="#F0EFF4" Margin="0,0,20,0"
+                                        VerticalAlignment="Top">
+                                    <TextBlock Text="&#xE77B;" FontFamily="Segoe MDL2 Assets"
+                                               FontSize="40" Foreground="#C0B4BE"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock x:Name="TxtRecordName" Text=""
+                                               FontSize="22" FontWeight="Bold" Foreground="#111111"/>
+                                    <StackPanel Margin="0,8,0,0">
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                                            <TextBlock Text="Gender: " FontSize="13" Foreground="#888888"/>
+                                            <TextBlock x:Name="TxtSex" Text="" FontSize="13" FontWeight="SemiBold" Foreground="#222222"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                                            <TextBlock Text="Age: " FontSize="13" Foreground="#888888"/>
+                                            <TextBlock x:Name="TxtAge" Text="" FontSize="13" FontWeight="SemiBold" Foreground="#222222"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Birthday: " FontSize="13" Foreground="#888888"/>
+                                            <TextBlock x:Name="TxtDob" Text="" FontSize="13" FontWeight="SemiBold" Foreground="#222222"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel x:Name="CardPanel"/>
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <Border Grid.Row="2" Background="White" BorderBrush="#EEEEEE"
+                            BorderThickness="0,1,0,0" CornerRadius="0,0,16,16" Padding="32,14">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button x:Name="BtnEdit" Height="36" Padding="20,0" Cursor="Hand"
+                                    Click="Edit_Click" Margin="0,0,10,0">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="White" CornerRadius="8"
+                                                BorderBrush="#D0D0D0" BorderThickness="1"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Text="Edit Record" FontSize="13" FontWeight="SemiBold" Foreground="#555555"/>
+                            </Button>
+                            <Button Height="36" Padding="20,0" Cursor="Hand" Click="Close_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="#702943" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Opacity" Value="0.88"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Text="Close" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Border>
+    </Border>
+</Window>

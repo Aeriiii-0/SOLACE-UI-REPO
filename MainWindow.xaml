@@ -265,6 +265,7 @@
                             CornerRadius="0,0,16,16">
                         <Frame x:Name="MainFrame"
                                NavigationUIVisibility="Hidden"
+                               JournalOwnership="OwnsJournal"
                                Background="Transparent"/>
                     </Border>
                 </Grid>

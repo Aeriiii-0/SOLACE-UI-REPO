@@ -58,6 +58,12 @@
     <Compile Include="ConfirmDialog.xaml.cs">
       <DependentUpon>ConfirmDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EntryMethodDialog.xaml.cs">
+      <DependentUpon>EntryMethodDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="OcrScanDialog.xaml.cs">
+      <DependentUpon>OcrScanDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="DashboardPage.xaml.cs">
       <DependentUpon>DashboardPage.xaml</DependentUpon>
@@ -80,6 +86,9 @@
     <Compile Include="RecordDialog.xaml.cs">
       <DependentUpon>RecordDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RecordViewDialog.xaml.cs">
+      <DependentUpon>RecordViewDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SoloParentRecordsPage.xaml.cs">
       <DependentUpon>SoloParentRecordsPage.xaml</DependentUpon>
     </Compile>
@@ -99,7 +108,18 @@
     <Compile Include="SubsidyRecommendationPage.xaml.cs">
       <DependentUpon>SubsidyRecommendationPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ToastNotification.xaml.cs">
+      <DependentUpon>ToastNotification.xaml</DependentUpon>
+    </Compile>
     <Page Include="ConfirmDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EntryMethodDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="OcrScanDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -124,6 +144,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="RecordDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RecordViewDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -154,6 +178,10 @@
     <Page Include="SubsidyRecommendationPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ToastNotification.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
