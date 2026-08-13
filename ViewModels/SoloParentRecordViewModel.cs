@@ -35,6 +35,10 @@ namespace SOLUM_UI.ViewModels
         public string Status => _model.Status;
         public string LastUpdatedFormatted => _model.LastUpdatedFormatted;
         public string DateOfBirthFormatted => _model.DateOfBirthFormatted;
+        public string ValidUntilFormatted  =>
+            _model.LastUpdated != System.DateTime.MinValue
+                ? _model.LastUpdated.AddYears(1).ToString("yyyy-MM-dd")
+                : "—";
         public SoloParentRecord RawModel => _model;
 
         public bool IsSelected

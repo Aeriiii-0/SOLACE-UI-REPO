@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -18,6 +19,7 @@ namespace SOLUM_UI
 
         public static string CurrentUserName { get; set; } = "Admin User";
         public static string CurrentUserRole { get; set; } = "Administrator";
+        public static string CurrentUserBarangay { get; set; } = string.Empty;
 
         private Dictionary<string, Button> _navButtons = new Dictionary<string, Button>();
 
@@ -29,9 +31,21 @@ namespace SOLUM_UI
             Loaded += (s, e) =>
             {
                 TopBarControl.SetUser(CurrentUserName, CurrentUserRole);
+                ApplyRoleNavVisibility();
                 ActivateButton("Dashboard");
                 NavigatePage(new DashboardPage());
             };
+        }
+
+        private void ApplyRoleNavVisibility()
+        {
+            bool isAdmin = string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase);
+            if (_navButtons.ContainsKey("UserAdministration"))
+                _navButtons["UserAdministration"].Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+            if (_navButtons.ContainsKey("SubsidyRecommendation"))
+                _navButtons["SubsidyRecommendation"].Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+            if (_navButtons.ContainsKey("Analytics"))
+                _navButtons["Analytics"].Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void MainFrame_Navigated(object sender, NavigationEventArgs e)
@@ -148,8 +162,9 @@ namespace SOLUM_UI
                     NavigatePage(new DashboardPage());
                     break;
                 case "SoloParentRecords":
-                    SoloParentRecordsPage.CurrentUserName = CurrentUserName;
-                    SoloParentRecordsPage.CurrentUserRole = CurrentUserRole;
+                    SoloParentRecordsPage.CurrentUserName     = CurrentUserName;
+                    SoloParentRecordsPage.CurrentUserRole     = CurrentUserRole;
+                    SoloParentRecordsPage.CurrentUserBarangay = CurrentUserBarangay;
                     NavigatePage(new SoloParentRecordsPage());
                     break;
                 case "UserAdministration":
@@ -205,8 +220,9 @@ namespace SOLUM_UI
         public void NavigateToRecord(string spId)
         {
             ActivateButton("SoloParentRecords");
-            SoloParentRecordsPage.CurrentUserName = CurrentUserName;
-            SoloParentRecordsPage.CurrentUserRole = CurrentUserRole;
+            SoloParentRecordsPage.CurrentUserName     = CurrentUserName;
+            SoloParentRecordsPage.CurrentUserRole     = CurrentUserRole;
+            SoloParentRecordsPage.CurrentUserBarangay = CurrentUserBarangay;
             TopBarControl.PageTitle = "Solo Parent Records";
             var page = new SoloParentRecordsPage();
             page.HighlightRecord(spId);

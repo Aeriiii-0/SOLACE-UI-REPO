@@ -12,13 +12,32 @@ using SOLUM_UI.Models;
 
 namespace SOLUM_UI
 {
+    public class FamilyMemberRow : INotifyPropertyChanged
+    {
+        private string _memberName; private string _sex; private string _age;
+        private string _birthdate;  private string _civilStatus; private string _relationship;
+        private string _educationEmployment; private string _income;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void N(string p) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(p));
+
+        public string MemberName          { get => _memberName;          set { _memberName = value;          N(nameof(MemberName)); } }
+        public string Sex                 { get => _sex;                 set { _sex = value;                 N(nameof(Sex)); } }
+        public string Age                 { get => _age;                 set { _age = value;                 N(nameof(Age)); } }
+        public string Birthdate           { get => _birthdate;           set { _birthdate = value;           N(nameof(Birthdate)); } }
+        public string CivilStatus         { get => _civilStatus;         set { _civilStatus = value;         N(nameof(CivilStatus)); } }
+        public string Relationship        { get => _relationship;        set { _relationship = value;        N(nameof(Relationship)); } }
+        public string EducationEmployment { get => _educationEmployment; set { _educationEmployment = value; N(nameof(EducationEmployment)); } }
+        public string Income              { get => _income;              set { _income = value;              N(nameof(Income)); } }
+    }
+
     public partial class RecordDialog : Window
     {
         public SoloParentRecord Result { get; private set; }
         private readonly SoloParentRecord _existing;
         private int _currentStep = 1;
         private bool _savedSuccessfully = false;
-        private readonly ObservableCollection<object> _familyRowData = new ObservableCollection<object>();
+        private readonly ObservableCollection<FamilyMemberRow> _familyRowData = new ObservableCollection<FamilyMemberRow>();
 
         private static readonly SolidColorBrush ErrorBrush   = new SolidColorBrush(Color.FromRgb(0xE5, 0x39, 0x35));
         private static readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(0xD0, 0xB8, 0xC0));
@@ -30,7 +49,7 @@ namespace SOLUM_UI
             _existing = existing;
 
             for (int i = 0; i < 5; i++)
-                _familyRowData.Add(new object());
+                _familyRowData.Add(new FamilyMemberRow());
             FamilyRows.ItemsSource = _familyRowData;
 
             if (_existing != null)
@@ -131,7 +150,7 @@ namespace SOLUM_UI
 
         private void AddFamilyRow_Click(object sender, RoutedEventArgs e)
         {
-            _familyRowData.Add(new object());
+            _familyRowData.Add(new FamilyMemberRow());
         }
 
         private void PopulateFields(SoloParentRecord r)
@@ -146,13 +165,52 @@ namespace SOLUM_UI
             TxtBarangay.Text     = r.Barangay      ?? string.Empty;
 
             if (r.DateOfBirth != DateTime.MinValue) DpBirthdate.SelectedDate = r.DateOfBirth;
+            DpDateOfApplication.SelectedDate = r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication : DateTime.Today;
 
-            DpDateOfApplication.SelectedDate = DateTime.Today;
+            ChkNewApplicant.IsChecked = r.IsNewApplicant;
+            ChkRenewal.IsChecked      = r.IsRenewal;
 
             SetComboByContent(CmbSex,         r.Sex);
             SetComboByContent(CmbCivilStatus, r.CivilStatus);
             SetComboByContent(CmbStatus,      r.Status);
+            SetComboByContent(CmbEducation,   r.EducationalAttainment);
 
+            TxtPhilSys.Text        = r.PhilSysNumber   ?? string.Empty;
+            TxtReligion.Text       = r.Religion         ?? string.Empty;
+            TxtOccupation.Text     = r.Occupation       ?? string.Empty;
+            TxtMonthlyIncome.Text  = r.MonthlyIncome    ?? string.Empty;
+
+            ChkEmployed.IsChecked    = r.IsEmployed;
+            ChkSelfEmployed.IsChecked = r.IsSelfEmployed;
+            ChkNotEmployed.IsChecked  = r.IsNotEmployed;
+
+            TxtEmergencyContact.Text = r.EmergencyContactName   ?? string.Empty;
+            TxtRelationship.Text     = r.EmergencyRelationship  ?? string.Empty;
+            TxtEmergencyAddress.Text = r.EmergencyAddress       ?? string.Empty;
+            TxtEmergencyNumber.Text  = r.EmergencyContactNumber ?? string.Empty;
+
+            ChkA1.IsChecked = r.CircumstanceA1;
+            ChkA2.IsChecked = r.CircumstanceA2;
+            TxtA2Cause.Text = r.CircumstanceA2Cause ?? string.Empty;
+            if (r.CircumstanceA2Date != DateTime.MinValue) DpA2Date.SelectedDate = r.CircumstanceA2Date;
+            ChkA3.IsChecked = r.CircumstanceA3;
+            ChkA4.IsChecked = r.CircumstanceA4;
+            TxtA4Disability.Text = r.CircumstanceA4Disability ?? string.Empty;
+            ChkA5.IsChecked = r.CircumstanceA5;
+            TxtA5Period.Text = r.CircumstanceA5Period ?? string.Empty;
+            ChkA6.IsChecked = r.CircumstanceA6;
+            ChkA7.IsChecked = r.CircumstanceA7;
+            ChkB.IsChecked  = r.CircumstanceB;
+            TxtBStayAbroad.Text = r.CircumstanceBStayAbroad ?? string.Empty;
+            ChkC.IsChecked = r.CircumstanceC;
+            ChkD.IsChecked = r.CircumstanceD;
+            ChkE.IsChecked = r.CircumstanceE;
+            ChkF.IsChecked = r.CircumstanceF;
+
+            TxtNeeds.Text       = r.NeedsAndProblems  ?? string.Empty;
+            TxtOtherIncome.Text = r.OtherIncomeSource ?? string.Empty;
+
+            Circumstance_Changed(null, null);
             UpdateAge(r.DateOfBirth);
         }
 
@@ -411,6 +469,24 @@ namespace SOLUM_UI
             string first   = TxtFirstName.Text.Trim();
             string middle  = TxtMiddleName.Text.Trim();
 
+            var members = new System.Collections.Generic.List<FamilyMember>();
+            foreach (var item in _familyRowData)
+            {
+                var row = item as FamilyMemberRow;
+                if (row != null && !string.IsNullOrWhiteSpace(row.MemberName))
+                    members.Add(new FamilyMember
+                    {
+                        MemberName          = row.MemberName,
+                        Sex                 = row.Sex,
+                        Age                 = row.Age,
+                        Birthdate           = row.Birthdate,
+                        CivilStatus         = row.CivilStatus,
+                        Relationship        = row.Relationship,
+                        EducationEmployment = row.EducationEmployment,
+                        Income              = row.Income
+                    });
+            }
+
             return new SoloParentRecord
             {
                 Id            = _existing != null ? _existing.Id : "SP-" + DateTime.Now.ToString("yyMMddHHmm"),
@@ -432,7 +508,47 @@ namespace SOLUM_UI
                 Barangay      = TxtBarangay.Text.Trim(),
                 DateAdmitted  = DateTime.MinValue,
                 Status        = GetComboValue(CmbStatus),
-                LastUpdated   = DateTime.Now
+                LastUpdated   = DateTime.Now,
+
+                IsNewApplicant      = ChkNewApplicant.IsChecked == true,
+                IsRenewal           = ChkRenewal.IsChecked == true,
+                DateOfApplication   = DpDateOfApplication.SelectedDate ?? DateTime.Today,
+
+                EducationalAttainment = GetComboValue(CmbEducation),
+                PhilSysNumber         = TxtPhilSys.Text.Trim(),
+                Religion              = TxtReligion.Text.Trim(),
+                Occupation            = TxtOccupation.Text.Trim(),
+                MonthlyIncome         = TxtMonthlyIncome.Text.Trim(),
+                IsEmployed            = ChkEmployed.IsChecked == true,
+                IsSelfEmployed        = ChkSelfEmployed.IsChecked == true,
+                IsNotEmployed         = ChkNotEmployed.IsChecked == true,
+
+                EmergencyContactName   = TxtEmergencyContact.Text.Trim(),
+                EmergencyRelationship  = TxtRelationship.Text.Trim(),
+                EmergencyAddress       = TxtEmergencyAddress.Text.Trim(),
+                EmergencyContactNumber = TxtEmergencyNumber.Text.Trim(),
+
+                CircumstanceA1             = ChkA1.IsChecked == true,
+                CircumstanceA2             = ChkA2.IsChecked == true,
+                CircumstanceA2Cause        = TxtA2Cause.Text.Trim(),
+                CircumstanceA2Date         = DpA2Date.SelectedDate ?? DateTime.MinValue,
+                CircumstanceA3             = ChkA3.IsChecked == true,
+                CircumstanceA4             = ChkA4.IsChecked == true,
+                CircumstanceA4Disability   = TxtA4Disability.Text.Trim(),
+                CircumstanceA5             = ChkA5.IsChecked == true,
+                CircumstanceA5Period       = TxtA5Period.Text.Trim(),
+                CircumstanceA6             = ChkA6.IsChecked == true,
+                CircumstanceA7             = ChkA7.IsChecked == true,
+                CircumstanceB              = ChkB.IsChecked == true,
+                CircumstanceBStayAbroad    = TxtBStayAbroad.Text.Trim(),
+                CircumstanceC              = ChkC.IsChecked == true,
+                CircumstanceD              = ChkD.IsChecked == true,
+                CircumstanceE              = ChkE.IsChecked == true,
+                CircumstanceF              = ChkF.IsChecked == true,
+
+                FamilyMembers   = members,
+                NeedsAndProblems  = TxtNeeds.Text.Trim(),
+                OtherIncomeSource = TxtOtherIncome.Text.Trim(),
             };
         }
 
@@ -455,25 +571,62 @@ namespace SOLUM_UI
                 });
             }
 
-            string sec = "Personal Information";
+            string sec = "Applicant Type";
+            string appType = r.IsNewApplicant ? "New Applicant" : r.IsRenewal ? "For Renewal" : "—";
+            Add(sec, "Application Type",    appType, null);
+            Add(sec, "Date of Application", r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("MMMM d, yyyy") : "—", null);
+
+            sec = "Personal Information";
             Add(sec, "Last Name",    r.Surname,       _existing?.Surname);
             Add(sec, "First Name",   r.FirstName,     _existing?.FirstName);
             Add(sec, "Middle Name",  r.MiddleName,    _existing?.MiddleName);
             Add(sec, "Extension",    r.ExtensionName, _existing?.ExtensionName);
             Add(sec, "Sex",          r.Sex,           _existing?.Sex);
             Add(sec, "Civil Status", r.CivilStatus,   _existing?.CivilStatus);
-            Add(sec, "Date of Birth",
-                r.DateOfBirth.ToString("MMMM d, yyyy"),
-                _existing?.DateOfBirth.ToString("MMMM d, yyyy"));
-            Add(sec, "Age",       TxtAge.Text,    null);
-            Add(sec, "Birthplace", r.PlaceOfBirth, _existing?.PlaceOfBirth);
+            Add(sec, "Date of Birth", r.DateOfBirth.ToString("MMMM d, yyyy"), _existing?.DateOfBirth.ToString("MMMM d, yyyy"));
+            Add(sec, "Age",           TxtAge.Text,     null);
+            Add(sec, "Birthplace",    r.PlaceOfBirth,  _existing?.PlaceOfBirth);
+            Add(sec, "Educational Attainment", r.EducationalAttainment, _existing?.EducationalAttainment);
+            Add(sec, "PhilSys Card No.", r.PhilSysNumber, _existing?.PhilSysNumber);
+            Add(sec, "Religion",     r.Religion,   _existing?.Religion);
+            Add(sec, "Occupation",   r.Occupation, _existing?.Occupation);
+            Add(sec, "Monthly Income", string.IsNullOrWhiteSpace(r.MonthlyIncome) ? "—" : "₱ " + r.MonthlyIncome, null);
+            Add(sec, "Employment Status", r.EmploymentStatusDisplay, null);
 
             sec = "Address & Contact";
             Add(sec, "Address",     r.Address,       _existing?.Address);
             Add(sec, "Barangay",    r.Barangay,      _existing?.Barangay);
             Add(sec, "Contact No.", r.ContactNumber, _existing?.ContactNumber);
 
-            sec = "Status";
+            sec = "Emergency Contact";
+            Add(sec, "Contact Person", r.EmergencyContactName,   _existing?.EmergencyContactName);
+            Add(sec, "Relationship",   r.EmergencyRelationship,  _existing?.EmergencyRelationship);
+            Add(sec, "Address",        r.EmergencyAddress,       _existing?.EmergencyAddress);
+            Add(sec, "Contact No.",    r.EmergencyContactNumber, _existing?.EmergencyContactNumber);
+
+            sec = "Circumstances";
+            Add(sec, "Circumstances of Being Solo Parent", r.CircumstancesDisplay, null);
+
+            if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
+            {
+                sec = "Family Composition";
+                for (int i = 0; i < r.FamilyMembers.Count; i++)
+                {
+                    var m = r.FamilyMembers[i];
+                    string memberLabel = "Member " + (i + 1);
+                    string memberSummary = m.MemberName
+                        + (string.IsNullOrWhiteSpace(m.Relationship) ? "" : " (" + m.Relationship + ")")
+                        + (string.IsNullOrWhiteSpace(m.Age) ? "" : ", Age " + m.Age)
+                        + (string.IsNullOrWhiteSpace(m.Sex) ? "" : ", " + m.Sex);
+                    Add(sec, memberLabel, memberSummary, null);
+                }
+            }
+
+            sec = "Needs & Income";
+            Add(sec, "Needs and Problems",      r.NeedsAndProblems,  _existing?.NeedsAndProblems);
+            Add(sec, "Other Sources of Income", r.OtherIncomeSource, _existing?.OtherIncomeSource);
+
+            sec = "Application Status";
             Add(sec, "Status", r.Status, _existing?.Status);
 
             return list;

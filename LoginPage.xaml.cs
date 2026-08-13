@@ -74,7 +74,17 @@ namespace SOLUM_UI
             await Task.Delay(1500);
 
             MainWindow.CurrentUserName = email;
-            MainWindow.CurrentUserRole = "Administrator";
+
+            if (email.StartsWith("admin", System.StringComparison.OrdinalIgnoreCase))
+            {
+                MainWindow.CurrentUserRole     = "Administrator";
+                MainWindow.CurrentUserBarangay = string.Empty;
+            }
+            else
+            {
+                MainWindow.CurrentUserRole     = "BasicUser";
+                MainWindow.CurrentUserBarangay = "De La Paz";
+            }
 
             var mainWindow = new MainWindow();
             mainWindow.Show();

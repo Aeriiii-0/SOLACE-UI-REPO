@@ -273,9 +273,34 @@ namespace SOLUM_UI
         private void ViewRecord_Click(object sender, RoutedEventArgs e)
         {
             string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
+            SubsidyItem item = _allItems.Find(x => x.SpId == id);
+            if (item == null) return;
+
+            SoloParentRecordsPage.CurrentUserName     = MainWindow.CurrentUserName;
+            SoloParentRecordsPage.CurrentUserRole     = MainWindow.CurrentUserRole;
+            SoloParentRecordsPage.CurrentUserBarangay = MainWindow.CurrentUserBarangay;
+
+            var tempPage = new SoloParentRecordsPage();
+            var vm = tempPage.FindRecord(id);
+            if (vm == null) return;
+
             MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
             if (mainWindow != null)
-                mainWindow.NavigateToRecord(id);
+                mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
+
+            var view = new RecordViewDialog(vm.RawModel) { Owner = Window.GetWindow(this) };
+            view.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
+            view.ShowDialog();
+
+            if (view.OpenedEdit)
+            {
+                if (mainWindow != null)
+                    mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
+
+                RecordDialog dialog = new RecordDialog(vm.RawModel) { Owner = Window.GetWindow(this) };
+                dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
+                dialog.ShowDialog();
+            }
         }
 
         private void ExportAll_Click(object sender, RoutedEventArgs e)

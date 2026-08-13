@@ -12,21 +12,24 @@ namespace SOLUM_UI
 {
     public partial class SoloParentRecordsPage : Page
     {
-        public static string CurrentUserName { get; set; } = string.Empty;
-        public static string CurrentUserRole { get; set; } = string.Empty;
+        public static string CurrentUserName    { get; set; } = string.Empty;
+        public static string CurrentUserRole    { get; set; } = string.Empty;
+        public static string CurrentUserBarangay { get; set; } = string.Empty;
 
         private List<SoloParentRecordViewModel> _allRecords;
         private List<SoloParentRecordViewModel> _filteredRecords;
 
-        private string _statusFilter = "All";
-        private string _sexFilter = "All";
+        private string _statusFilter  = "All";
+        private string _sexFilter     = "All";
         private string _barangayFilter = "All";
-        private string _sortOption = "Name A-Z";
+        private string _sortOption    = "Name A-Z";
 
-        private const int PageSize = 10;
-        private int _currentPage = 1;
+        private const int PageSize   = 10;
+        private int _currentPage     = 1;
 
-        private bool IsEncoder => string.Equals(CurrentUserRole, "Encoder", StringComparison.OrdinalIgnoreCase);
+        private bool IsAdmin      => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase);
+        private bool IsBasicUser  => string.Equals(CurrentUserRole, "BasicUser",     StringComparison.OrdinalIgnoreCase);
+        private bool IsEncoder    => string.Equals(CurrentUserRole, "Encoder",       StringComparison.OrdinalIgnoreCase);
 
         public SoloParentRecordsPage()
         {
@@ -42,17 +45,34 @@ namespace SOLUM_UI
 
         private void ApplyRoleView()
         {
-            if (IsEncoder)
+            if (IsBasicUser)
             {
-                AdminToolbar.Visibility = Visibility.Collapsed;
+                AdminToolbar.Visibility      = Visibility.Collapsed;
+                BasicUserToolbar.Visibility  = Visibility.Visible;
+                EncoderSearchPanel.Visibility = Visibility.Collapsed;
+                PagingRow.Visibility         = Visibility.Visible;
+                _barangayFilter              = CurrentUserBarangay;
+
+                if (ColSex         != null) ColSex.Width         = 0;
+                if (ColCivilStatus != null) ColCivilStatus.Width = 0;
+                if (ColChildren    != null) ColChildren.Width    = 0;
+                if (ColLastUpdated != null) ColLastUpdated.Width = 0;
+                if (ColBarangay    != null) ColBarangay.Width    = 0;
+                if (ColActions     != null) ColActions.Width     = 80;
+            }
+            else if (IsEncoder)
+            {
+                AdminToolbar.Visibility      = Visibility.Collapsed;
+                BasicUserToolbar.Visibility  = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Visible;
-                PagingRow.Visibility = Visibility.Collapsed;
+                PagingRow.Visibility         = Visibility.Collapsed;
             }
             else
             {
-                AdminToolbar.Visibility = Visibility.Visible;
+                AdminToolbar.Visibility      = Visibility.Visible;
+                BasicUserToolbar.Visibility  = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Collapsed;
-                PagingRow.Visibility = Visibility.Visible;
+                PagingRow.Visibility         = Visibility.Visible;
             }
         }
 
@@ -145,25 +165,43 @@ namespace SOLUM_UI
         {
             if (_allRecords == null) return;
 
-            string idQuery = SearchId?.Text?.Trim() ?? string.Empty;
-            string nameQuery = SearchName?.Text?.ToLower().Trim() ?? string.Empty;
+            string effectiveBarangay = IsBasicUser ? CurrentUserBarangay : _barangayFilter;
+
+            string idQuery       = SearchId?.Text?.Trim()        ?? string.Empty;
+            string nameQuery     = SearchName?.Text?.ToLower().Trim()     ?? string.Empty;
             string barangayQuery = SearchBarangay?.Text?.ToLower().Trim() ?? string.Empty;
+
+            if (IsBasicUser)
+            {
+                idQuery       = BasicSearchName?.Text?.ToLower().Trim() ?? string.Empty;
+                nameQuery     = BasicSearchName?.Text?.ToLower().Trim() ?? string.Empty;
+                barangayQuery = string.Empty;
+            }
 
             _filteredRecords = new List<SoloParentRecordViewModel>();
 
             foreach (SoloParentRecordViewModel r in _allRecords)
             {
-                if (_statusFilter != "All" && (r.Status ?? string.Empty) != _statusFilter) continue;
-                if (_sexFilter != "All" && (r.Sex ?? string.Empty) != _sexFilter) continue;
-                if (_barangayFilter != "All" && (r.Barangay ?? string.Empty) != _barangayFilter) continue;
+                if (_statusFilter != "All" && !IsBasicUser && (r.Status ?? string.Empty) != _statusFilter) continue;
+                if (_sexFilter    != "All" && !IsBasicUser && (r.Sex    ?? string.Empty) != _sexFilter)    continue;
 
-                if (!string.IsNullOrEmpty(idQuery))
+                if (!string.IsNullOrEmpty(effectiveBarangay) && effectiveBarangay != "All")
+                {
+                    if (!string.Equals(r.Barangay ?? string.Empty, effectiveBarangay, StringComparison.OrdinalIgnoreCase))
+                        continue;
+                }
+
+                if (IsBasicUser)
+                {
+                    if (!string.IsNullOrEmpty(nameQuery) && !(r.Name ?? "").ToLower().Contains(nameQuery)) continue;
+                }
+                else if (!string.IsNullOrEmpty(idQuery))
                 {
                     if (!(r.Id ?? "").ToLower().Contains(idQuery.ToLower())) continue;
                 }
                 else
                 {
-                    bool nameMatch = string.IsNullOrEmpty(nameQuery) || (r.Name ?? "").ToLower().Contains(nameQuery);
+                    bool nameMatch     = string.IsNullOrEmpty(nameQuery)     || (r.Name     ?? "").ToLower().Contains(nameQuery);
                     bool barangayMatch = string.IsNullOrEmpty(barangayQuery) || (r.Barangay ?? "").ToLower().Contains(barangayQuery);
                     if (!nameMatch || !barangayMatch) continue;
                 }
@@ -392,6 +430,12 @@ namespace SOLUM_UI
             SoloParentRecordViewModel vm = _allRecords.Find(r => r.Id == id);
             if (vm == null) return;
 
+            if (IsBasicUser && !string.Equals(vm.RawModel.CreatedBy ?? string.Empty, CurrentUserName, StringComparison.OrdinalIgnoreCase))
+            {
+                ToastNotification.Show("Access Denied", "You can only edit records you created.", ToastType.Warning);
+                return;
+            }
+
             MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
             if (mainWindow != null)
                 mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
@@ -411,6 +455,12 @@ namespace SOLUM_UI
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
+            if (IsBasicUser)
+            {
+                ToastNotification.Show("Access Denied", "Basic users cannot delete records.", ToastType.Warning);
+                return;
+            }
+
             string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
             SoloParentRecordViewModel vm = _allRecords.Find(r => r.Id == id);
             string recordName = vm != null ? vm.Name : id;
@@ -480,17 +530,65 @@ namespace SOLUM_UI
         {
             if (RecordsList.View is GridView gv && gv.Columns.Count >= 10)
             {
-                double totalFixed = 80 + 80 + 110 + 115 + 80 + 110 + 120 + 100;
-                double available = RecordsList.ActualWidth - totalFixed - 28;
-                if (available < 300) available = 300;
-                gv.Columns[1].Width = available * 0.44;
-                gv.Columns[2].Width = available * 0.26;
-                gv.Columns[3].Width = available * 0.15;
-                gv.Columns[4].Width = available * 0.15;
+                const double id         = 72;
+                const double sex        = 90;
+                const double civil      = 120;
+                const double dob        = 110;
+                const double lastUpd    = 112;
+                const double validUntil = 110;
+                const double status     = 96;
+                const double actions    = 66;
+                const double scrollbar  = 18;
+
+                double totalFixed = id + sex + civil + dob + lastUpd + validUntil + status + actions;
+                double flex = Math.Max(240, RecordsList.ActualWidth - totalFixed - scrollbar);
+
+                gv.Columns[0].Width = id;
+                gv.Columns[1].Width = flex * 0.52;
+                gv.Columns[2].Width = flex * 0.48;
+                gv.Columns[3].Width = sex;
+                gv.Columns[4].Width = civil;
+                gv.Columns[5].Width = dob;
+                gv.Columns[6].Width = lastUpd;
+                gv.Columns[7].Width = validUntil;
+                gv.Columns[8].Width = status;
+                gv.Columns[9].Width = actions;
+            }
+        }
+
+        private void BasicSearchName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyFiltersAndPage();
+        }
+
+        private void BasicUserAddRecord_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
+            if (mainWindow != null)
+                mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
+
+            RecordDialog dialog = new RecordDialog { Owner = Window.GetWindow(this) };
+            dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
+
+            if (dialog.ShowDialog() == true && dialog.Result != null)
+            {
+                dialog.Result.CreatedBy = CurrentUserName;
+                dialog.Result.Barangay  = string.IsNullOrEmpty(dialog.Result.Barangay)
+                    ? CurrentUserBarangay : dialog.Result.Barangay;
+
+                _allRecords.Add(new SoloParentRecordViewModel(dialog.Result));
+                ToastNotification.Show("Record Added", dialog.Result.Name + " was added successfully.", ToastType.Success);
+                AuditLogService.Instance.LogCreate(dialog.Result.Name, GetCurrentUser());
+                ApplyFiltersAndPage();
             }
         }
 
         private string GetCurrentUser() => !string.IsNullOrEmpty(CurrentUserName) ? CurrentUserName : "Admin";
+
+        public SoloParentRecordViewModel FindRecord(string spId)
+        {
+            return _allRecords?.Find(r => r.Id == spId);
+        }
 
         public void HighlightRecord(string spId)
         {

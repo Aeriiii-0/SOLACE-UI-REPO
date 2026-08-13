@@ -4,33 +4,301 @@
       Title="Analytics"
       Background="#FFFFFF">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Page.Resources>
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="22,18"/>
+        </Style>
+        <Style x:Key="StatNum" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="32"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+        </Style>
+        <Style x:Key="StatLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#888888"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
+        </Style>
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Margin" Value="0,0,0,14"/>
+        </Style>
+        <Style x:Key="BarLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="BarCount" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="6,0,0,0"/>
+        </Style>
+    </Page.Resources>
 
-        <StackPanel Grid.Row="0" Margin="24,20,24,16">
-            <TextBlock Text="Analytics"
-                       FontFamily="Segoe UI" FontSize="20" FontWeight="Bold"
-                       Foreground="#702943"/>
-            <TextBlock Text="Program insights and data trends."
-                       FontFamily="Segoe UI" FontSize="12"
-                       Foreground="#A06080" Margin="0,4,0,0"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="24,20,24,24">
+
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Analytics" FontFamily="Segoe UI" FontSize="20"
+                               FontWeight="Bold" Foreground="#702943"/>
+                    <TextBlock Text="Program insights and data trends."
+                               FontFamily="Segoe UI" FontSize="12"
+                               Foreground="#A06080" Margin="0,4,0,0"/>
+                </StackPanel>
+                <Border Grid.Column="1" Background="#FFF0F5" CornerRadius="8"
+                        Padding="12,6" VerticalAlignment="Center">
+                    <TextBlock x:Name="TxtLastRefresh" Text=""
+                               FontSize="11" Foreground="#702943" FontFamily="Segoe UI"/>
+                </Border>
+            </Grid>
+
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock x:Name="TxtTotalRecords" Style="{StaticResource StatNum}" Text="0"/>
+                        <TextBlock Text="Total Records" Style="{StaticResource StatLabel}"/>
+                        <Border Background="#F4F6F9" CornerRadius="6" Padding="8,4" Margin="0,10,0,0"
+                                HorizontalAlignment="Left">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
+                                      Fill="#702943" Stretch="Uniform" Width="12" Height="12" Margin="0,0,5,0"/>
+                                <TextBlock x:Name="TxtNewThisMonth" Text="0 this month"
+                                           FontSize="10" Foreground="#702943" FontFamily="Segoe UI"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock x:Name="TxtActiveRecords" Style="{StaticResource StatNum}" Text="0"/>
+                        <TextBlock Text="Active (Valid)" Style="{StaticResource StatLabel}"/>
+                        <Border Background="#E8F5E9" CornerRadius="6" Padding="8,4" Margin="0,10,0,0"
+                                HorizontalAlignment="Left">
+                            <TextBlock x:Name="TxtActiveRate" Text="0% of total"
+                                       FontSize="10" Foreground="#27AE60" FontFamily="Segoe UI"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="4" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock x:Name="TxtInactiveRecords" Style="{StaticResource StatNum}" Text="0"/>
+                        <TextBlock Text="Inactive" Style="{StaticResource StatLabel}"/>
+                        <Border Background="#FFF3F3" CornerRadius="6" Padding="8,4" Margin="0,10,0,0"
+                                HorizontalAlignment="Left">
+                            <TextBlock x:Name="TxtInactiveRate" Text="0% of total"
+                                       FontSize="10" Foreground="#E53935" FontFamily="Segoe UI"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="6" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock x:Name="TxtAvgChildren" Style="{StaticResource StatNum}" Text="0"/>
+                        <TextBlock Text="Avg. Dependants" Style="{StaticResource StatLabel}"/>
+                        <Border Background="#FFF8E1" CornerRadius="6" Padding="8,4" Margin="0,10,0,0"
+                                HorizontalAlignment="Left">
+                            <TextBlock x:Name="TxtTotalChildren" Text="0 total"
+                                       FontSize="10" Foreground="#F57F17" FontFamily="Segoe UI"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock Text="Records by Barangay" Style="{StaticResource SectionTitle}"/>
+                        <ItemsControl x:Name="BarangayChart" Margin="0,0,0,4">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="130"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="28"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding Label}"
+                                                   Style="{StaticResource BarLabel}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <Border Grid.Column="1" Height="18" CornerRadius="4"
+                                                Background="#F0E4E8" VerticalAlignment="Center">
+                                            <Border x:Name="Fill" Height="18" CornerRadius="4"
+                                                    Background="#702943"
+                                                    HorizontalAlignment="Left"
+                                                    Width="{Binding BarWidth}"/>
+                                        </Border>
+                                        <TextBlock Grid.Column="2" Text="{Binding Count}"
+                                                   Style="{StaticResource BarCount}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock Text="Civil Status Breakdown" Style="{StaticResource SectionTitle}"/>
+                        <ItemsControl x:Name="CivilStatusChart">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="110"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="28"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding Label}"
+                                                   Style="{StaticResource BarLabel}"/>
+                                        <Border Grid.Column="1" Height="18" CornerRadius="4"
+                                                Background="#F0E4E8" VerticalAlignment="Center">
+                                            <Border Height="18" CornerRadius="4"
+                                                    Background="{Binding BarColor}"
+                                                    HorizontalAlignment="Left"
+                                                    Width="{Binding BarWidth}"/>
+                                        </Border>
+                                        <TextBlock Grid.Column="2" Text="{Binding Count}"
+                                                   Style="{StaticResource BarCount}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock Text="Sex Distribution" Style="{StaticResource SectionTitle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                <Border Width="90" Height="90" CornerRadius="45"
+                                        Background="#FDF0F3" Margin="0,0,0,8"
+                                        HorizontalAlignment="Center">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock x:Name="TxtFemaleCount" Text="0"
+                                                   FontSize="26" FontWeight="Bold"
+                                                   Foreground="#702943" FontFamily="Segoe UI"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Female" FontSize="10"
+                                                   Foreground="#A06080" FontFamily="Segoe UI"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <TextBlock x:Name="TxtFemaleRate" Text="0%"
+                                           FontSize="12" FontWeight="SemiBold"
+                                           Foreground="#702943" FontFamily="Segoe UI"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <Border Width="90" Height="90" CornerRadius="45"
+                                        Background="#EEF2FF" Margin="0,0,0,8"
+                                        HorizontalAlignment="Center">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock x:Name="TxtMaleCount" Text="0"
+                                                   FontSize="26" FontWeight="Bold"
+                                                   Foreground="#3B5BDB" FontFamily="Segoe UI"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Male" FontSize="10"
+                                                   Foreground="#7088E0" FontFamily="Segoe UI"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <TextBlock x:Name="TxtMaleRate" Text="0%"
+                                           FontSize="12" FontWeight="SemiBold"
+                                           Foreground="#3B5BDB" FontFamily="Segoe UI"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <TextBlock Text="Recent Updates" Style="{StaticResource SectionTitle}"/>
+                        <ItemsControl x:Name="RecentList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,8" Padding="12,10"
+                                            Background="#F9FAFB" CornerRadius="8"
+                                            BorderBrush="#E2E8F0" BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontSize="13" FontWeight="SemiBold"
+                                                           Foreground="#111111" FontFamily="Segoe UI"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding Barangay}"
+                                                           FontSize="11" Foreground="#888888"
+                                                           FontFamily="Segoe UI" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                            <Border Grid.Column="1" CornerRadius="8"
+                                                    Background="{Binding StatusColor}"
+                                                    Padding="8,3" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Status}"
+                                                           FontSize="10" FontWeight="SemiBold"
+                                                           Foreground="{Binding StatusText}"
+                                                           FontFamily="Segoe UI"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
         </StackPanel>
-
-        <Border Grid.Row="1" Margin="24,0,24,24" CornerRadius="14"
-                BorderBrush="#E8D8DC" BorderThickness="1" Background="White">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="📊" FontSize="40" HorizontalAlignment="Center" Margin="0,0,0,12"/>
-                <TextBlock Text="Analytics"
-                           FontFamily="Segoe UI" FontSize="16" FontWeight="SemiBold"
-                           Foreground="#702943" HorizontalAlignment="Center"/>
-                <TextBlock Text="This module is under development."
-                           FontFamily="Segoe UI" FontSize="12"
-                           Foreground="#A06080" HorizontalAlignment="Center"
-                           Margin="0,6,0,0"/>
-            </StackPanel>
-        </Border>
-    </Grid>
+    </ScrollViewer>
 </Page>

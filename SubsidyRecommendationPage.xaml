@@ -11,21 +11,32 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         <Style x:Key="ColHeader" TargetType="GridViewColumnHeader">
-            <Setter Property="Background" Value="White"/>
+            <Setter Property="Background" Value="#FBF5F7"/>
             <Setter Property="Foreground" Value="#702943"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Height" Value="44"/>
-            <Setter Property="Padding" Value="12,0"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="GridViewColumnHeader">
-                        <Border Background="White" BorderBrush="#D4A0B0"
-                                BorderThickness="0,0,1,2" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="HeaderBg" Background="#FBF5F7"
+                                BorderBrush="#702943"
+                                BorderThickness="0,0,1,1"
+                                Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalAlignment="Center"/>
+                                              VerticalAlignment="Center"
+                                              TextBlock.Foreground="#702943"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HeaderBg" Property="Background" Value="#F0E4E8"/>
+                            </Trigger>
+                            <Trigger Property="Column" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -33,7 +44,7 @@
         <Style x:Key="SubRow" TargetType="ListViewItem">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
-            <Setter Property="BorderBrush" Value="#F5EEF1"/>
+            <Setter Property="BorderBrush" Value="#D4A0B0"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -43,11 +54,15 @@
                         <Border x:Name="Bg" Background="White"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}">
-                            <GridViewRowPresenter VerticalAlignment="Center" Margin="0,10"/>
+                            <GridViewRowPresenter VerticalAlignment="Center" Margin="0,9"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#F5E2E8"/>
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#C4788E"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -58,8 +73,8 @@
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="#111111"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-            <Setter Property="Margin" Value="12,0"/>
+            <Setter Property="TextTrimming" Value="None"/>
+            <Setter Property="Margin" Value="10,0"/>
         </Style>
         <Style x:Key="ApproveBtn" TargetType="Button">
             <Setter Property="Height" Value="28"/>
@@ -451,8 +466,8 @@
             </Button>
         </Grid>
 
-        <Border Grid.Row="2" Margin="24,0,24,0" CornerRadius="14"
-                BorderBrush="#E8D8DC" BorderThickness="1" ClipToBounds="True" Background="White">
+        <Border Grid.Row="2" Margin="24,0,24,0" CornerRadius="0"
+                BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True" Background="White">
             <ListView x:Name="RecommendationList"
                       BorderThickness="0" Background="Transparent"
                       ItemContainerStyle="{StaticResource SubRow}"
@@ -466,31 +481,40 @@
                         <GridViewColumn x:Name="ColSpId" Header="SP ID" Width="80">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding SpId}" Style="{StaticResource Cell}"
-                                               FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <TextBlock Text="{Binding SpId}" Style="{StaticResource Cell}"
+                                                   FontSize="12" FontWeight="SemiBold" Foreground="#702943"
+                                                   HorizontalAlignment="Center"/>
+                                    </Border>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
                         <GridViewColumn x:Name="ColName" Header="NAME" Width="200">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Name}" Style="{StaticResource Cell}" FontWeight="Medium"/>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <TextBlock Text="{Binding Name}" Style="{StaticResource Cell}" FontWeight="Medium"/>
+                                    </Border>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
                         <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="120">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Barangay}" Style="{StaticResource Cell}"/>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <TextBlock Text="{Binding Barangay}" Style="{StaticResource Cell}"/>
+                                    </Border>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
                         <GridViewColumn x:Name="ColPriority" Header="PRIORITY" Width="100">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Border Style="{StaticResource PriorityBadge}" Background="{Binding PriorityColor}">
-                                        <TextBlock Text="{Binding Priority}" FontSize="11"
-                                                   FontWeight="SemiBold" Foreground="{Binding PriorityTextColor}"/>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <Border Style="{StaticResource PriorityBadge}" Background="{Binding PriorityColor}" HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding Priority}" FontSize="11"
+                                                       FontWeight="SemiBold" Foreground="{Binding PriorityTextColor}"/>
+                                        </Border>
                                     </Border>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
@@ -498,9 +522,11 @@
                         <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="110">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Border Style="{StaticResource PriorityBadge}" Background="{Binding StatusColor}">
-                                        <TextBlock Text="{Binding Status}" FontSize="11"
-                                                   FontWeight="SemiBold" Foreground="{Binding StatusTextColor}"/>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <Border Style="{StaticResource PriorityBadge}" Background="{Binding StatusColor}" HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding Status}" FontSize="11"
+                                                       FontWeight="SemiBold" Foreground="{Binding StatusTextColor}"/>
+                                        </Border>
                                     </Border>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
@@ -508,23 +534,12 @@
                         <GridViewColumn x:Name="ColIndicators" Header="INDICATORS" Width="220">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Margin="8,0" VerticalAlignment="Center">
-                                        <Border Background="#FFF0F5" CornerRadius="8" Padding="7,3" Margin="0,0,4,0">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="₱ " FontSize="10" Foreground="#702943" FontWeight="Bold" VerticalAlignment="Center"/>
-                                                <TextBlock Text="{Binding IncomeLevel}" FontSize="10" Foreground="#702943" VerticalAlignment="Center"/>
-                                            </StackPanel>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <Border Background="#F5F0F3" CornerRadius="6" Padding="10,4" Margin="8,0" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Text="placeholder muna mamsh" FontSize="10"
+                                                       Foreground="#A06080" FontStyle="Italic" VerticalAlignment="Center"/>
                                         </Border>
-                                        <Border Background="#FFF8E1" CornerRadius="8" Padding="7,3" Margin="0,0,4,0">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="👶 " FontSize="10" Foreground="#F57F17" VerticalAlignment="Center"/>
-                                                <TextBlock Text="{Binding DependantsLabel}" FontSize="10" Foreground="#F57F17" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <Border Background="#E8F5E9" CornerRadius="8" Padding="7,3">
-                                            <TextBlock Text="{Binding CivilStatusShort}" FontSize="10" Foreground="#27AE60" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </StackPanel>
+                                    </Border>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
@@ -535,7 +550,7 @@
                                         <Button Style="{StaticResource ApproveBtn}" Tag="{Binding SpId}"
                                                 Click="Approve_Click" Margin="0,0,5,0" Content="Approve"/>
                                         <Button Style="{StaticResource RejectBtn}" Tag="{Binding SpId}"
-                                                Click="Reject_Click" Content="Reject" Margin="0,0,50,0"/>
+                                                Click="Reject_Click" Content="Reject" Margin="0,0,8,0"/>
                                         <Button Height="28" Padding="8,0" Cursor="Hand"
                                                 Tag="{Binding SpId}" Click="ExportRow_Click" Margin="0,0,8,0">
                                             <Button.Template>
