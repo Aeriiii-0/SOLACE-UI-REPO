@@ -5,6 +5,7 @@
         xmlns:local="clr-namespace:SOLUM_UI"
         Title="Solum" Height="700" Width="1200"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         Background="#FFFFFF"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -199,16 +200,6 @@
                             </Button>
 
                             <Button Style="{StaticResource NavButton}"
-                                    Tag="Analytics" Click="NavButton_Click" Margin="0,10,0,15">
-                                <Button.ToolTip>
-                                    <ToolTip Style="{StaticResource SideTooltip}" Content="Analytics"/>
-                                </Button.ToolTip>
-                                <Path Stretch="Uniform" Width="20" Height="20"
-                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                      Data="M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z"/>
-                            </Button>
-
-                            <Button Style="{StaticResource NavButton}"
                                     Tag="SubsidyRecommendation" Click="NavButton_Click" Margin="0,10,0,15">
                                 <Button.ToolTip>
                                     <ToolTip Style="{StaticResource SideTooltip}" Content="Subsidy Recommendation"/>
@@ -216,6 +207,16 @@
                                 <Path Stretch="Uniform" Width="20" Height="20"
                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                       Data="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8L6,7M4,19H8L6,17M4,14H8L6,12Z"/>
+                            </Button>
+
+                            <Button Style="{StaticResource NavButton}"
+                                    Tag="Analytics" Click="NavButton_Click" Margin="0,10,0,15">
+                                <Button.ToolTip>
+                                    <ToolTip Style="{StaticResource SideTooltip}" Content="Analytics"/>
+                                </Button.ToolTip>
+                                <Path Stretch="Uniform" Width="20" Height="20"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      Data="M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z"/>
                             </Button>
 
                         </StackPanel>

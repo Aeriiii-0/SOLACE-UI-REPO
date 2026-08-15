@@ -356,7 +356,7 @@ namespace SOLUM_UI
             SoloParentRecordViewModel vm = RecordsList.SelectedItem as SoloParentRecordViewModel;
             if (vm == null) return;
 
-            AuditLogService.Instance.LogView(vm.Name, GetCurrentUser());
+            AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
             OpenViewDialog(vm);
         }
 
@@ -383,7 +383,9 @@ namespace SOLUM_UI
                     int idx = _allRecords.FindIndex(r => r.Id == vm.Id);
                     if (idx >= 0) _allRecords[idx] = new SoloParentRecordViewModel(dialog.Result);
                     ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
-                    AuditLogService.Instance.LogUpdate(dialog.Result.Name, GetCurrentUser());
+                    AuditLogService.Instance.LogUpdate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole,
+                        BuildDiff(vm.RawModel, dialog.Result));
+                    AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
                     ApplyFiltersAndPage();
                 }
             }
@@ -419,7 +421,7 @@ namespace SOLUM_UI
             {
                 _allRecords.Add(new SoloParentRecordViewModel(dialog.Result));
                 ToastNotification.Show("Record Added", dialog.Result.Name + " was added successfully.", ToastType.Success);
-                AuditLogService.Instance.LogCreate(dialog.Result.Name, GetCurrentUser());
+                AuditLogService.Instance.LogCreate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole);
                 ApplyFiltersAndPage();
             }
         }
@@ -448,7 +450,8 @@ namespace SOLUM_UI
                 int idx = _allRecords.FindIndex(r => r.Id == id);
                 if (idx >= 0) _allRecords[idx] = new SoloParentRecordViewModel(dialog.Result);
                 ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
-                AuditLogService.Instance.LogUpdate(dialog.Result.Name, GetCurrentUser());
+                AuditLogService.Instance.LogUpdate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole,
+                    BuildDiff(vm.RawModel, dialog.Result));
                 ApplyFiltersAndPage();
             }
         }
@@ -472,7 +475,7 @@ namespace SOLUM_UI
 
             _allRecords.RemoveAll(r => r.Id == id);
             ToastNotification.Show("Record Deleted", "The record was removed.", ToastType.Warning);
-            AuditLogService.Instance.LogDelete(recordName, GetCurrentUser());
+            AuditLogService.Instance.LogDelete(id, recordName, GetCurrentUser(), CurrentUserRole);
             ApplyFiltersAndPage();
         }
 
@@ -537,15 +540,17 @@ namespace SOLUM_UI
                 const double lastUpd    = 112;
                 const double validUntil = 110;
                 const double status     = 96;
-                const double actions    = 66;
-                const double scrollbar  = 18;
+                const double actions    = 76;
+
+                double available = RecordsList.ActualWidth - 2;
+                if (available <= 0) return;
 
                 double totalFixed = id + sex + civil + dob + lastUpd + validUntil + status + actions;
-                double flex = Math.Max(240, RecordsList.ActualWidth - totalFixed - scrollbar);
+                double flex = Math.Max(200, available - totalFixed);
 
                 gv.Columns[0].Width = id;
-                gv.Columns[1].Width = flex * 0.52;
-                gv.Columns[2].Width = flex * 0.48;
+                gv.Columns[1].Width = flex * 0.54;
+                gv.Columns[2].Width = flex * 0.46;
                 gv.Columns[3].Width = sex;
                 gv.Columns[4].Width = civil;
                 gv.Columns[5].Width = dob;
@@ -578,12 +583,40 @@ namespace SOLUM_UI
 
                 _allRecords.Add(new SoloParentRecordViewModel(dialog.Result));
                 ToastNotification.Show("Record Added", dialog.Result.Name + " was added successfully.", ToastType.Success);
-                AuditLogService.Instance.LogCreate(dialog.Result.Name, GetCurrentUser());
+                AuditLogService.Instance.LogCreate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole);
                 ApplyFiltersAndPage();
             }
         }
 
         private string GetCurrentUser() => !string.IsNullOrEmpty(CurrentUserName) ? CurrentUserName : "Admin";
+
+        /// <summary>Compares two records field-by-field and returns a comma-separated summary of changed fields.</summary>
+        private static string BuildDiff(SOLUM_UI.Models.SoloParentRecord before, SOLUM_UI.Models.SoloParentRecord after)
+        {
+            var changes = new System.Collections.Generic.List<string>();
+            void Check(string label, string a, string b)
+            {
+                if (!string.Equals(a ?? "", b ?? "", StringComparison.Ordinal))
+                    changes.Add(label + ": \"" + (a ?? "") + "\" → \"" + (b ?? "") + "\"");
+            }
+            Check("Last Name",    before.Surname,       after.Surname);
+            Check("First Name",   before.FirstName,     after.FirstName);
+            Check("Middle Name",  before.MiddleName,    after.MiddleName);
+            Check("Extension",    before.ExtensionName, after.ExtensionName);
+            Check("Sex",          before.Sex,           after.Sex);
+            Check("Civil Status", before.CivilStatus,   after.CivilStatus);
+            Check("Birthplace",   before.PlaceOfBirth,  after.PlaceOfBirth);
+            Check("Address",      before.Address,       after.Address);
+            Check("Barangay",     before.Barangay,      after.Barangay);
+            Check("Contact",      before.ContactNumber, after.ContactNumber);
+            Check("Status",       before.Status,        after.Status);
+            Check("Education",    before.EducationalAttainment, after.EducationalAttainment);
+            Check("Occupation",   before.Occupation,    after.Occupation);
+            Check("Religion",     before.Religion,      after.Religion);
+            if (before.DateOfBirth != after.DateOfBirth)
+                changes.Add("Date of Birth: \"" + before.DateOfBirth.ToString("yyyy-MM-dd") + "\" → \"" + after.DateOfBirth.ToString("yyyy-MM-dd") + "\"");
+            return string.Join("; ", changes);
+        }
 
         public SoloParentRecordViewModel FindRecord(string spId)
         {

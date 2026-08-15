@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using SOLUM_UI.Services;
 
 namespace SOLUM_UI
 {
@@ -88,6 +89,7 @@ namespace SOLUM_UI
 
             var mainWindow = new MainWindow();
             mainWindow.Show();
+            AuditLogService.Instance.LogLogin(MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
             ToastNotification.Show("Welcome", "Logged in as " + email + ".", ToastType.Success);
             this.Close();
         }

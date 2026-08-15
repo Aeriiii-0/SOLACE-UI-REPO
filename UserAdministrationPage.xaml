@@ -281,17 +281,17 @@
                         <ColumnDefinition Width="120"/>
                         <ColumnDefinition Width="80"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" BorderBrush="#E0CDD3" BorderThickness="0,0,1,0" Padding="16,0,0,0">
-                        <TextBlock Text="USER NAME" Style="{StaticResource TableHeaderText}"/>
+                    <Border Grid.Column="0" BorderBrush="#E0CDD3" BorderThickness="0,0,1,0">
+                        <TextBlock Text="USER NAME" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
                     </Border>
-                    <Border Grid.Column="1" BorderBrush="#E0CDD3" BorderThickness="0,0,1,0" Padding="16,0,0,0">
-                        <TextBlock Text="ROLE" Style="{StaticResource TableHeaderText}"/>
+                    <Border Grid.Column="1" BorderBrush="#E0CDD3" BorderThickness="0,0,1,0">
+                        <TextBlock Text="ROLE" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
                     </Border>
-                    <Border Grid.Column="2" BorderBrush="#E0CDD3" BorderThickness="0,0,1,0" Padding="16,0,0,0">
-                        <TextBlock Text="BARANGAY" Style="{StaticResource TableHeaderText}"/>
+                    <Border Grid.Column="2" BorderBrush="#E0CDD3" BorderThickness="0,0,1,0">
+                        <TextBlock Text="BARANGAY" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
                     </Border>
-                    <Border Grid.Column="3" BorderBrush="#E0CDD3" BorderThickness="0,0,1,0" Padding="16,0,0,0">
-                        <TextBlock Text="DATE ADDED" Style="{StaticResource TableHeaderText}"/>
+                    <Border Grid.Column="3" BorderBrush="#E0CDD3" BorderThickness="0,0,1,0">
+                        <TextBlock Text="DATE ADDED" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
                     </Border>
                     <Border Grid.Column="4">
                         <TextBlock Text="ACTIONS" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>

@@ -153,11 +153,13 @@
                             <Border x:Name="HeaderBg"
                                     Background="#FBF5F7"
                                     BorderBrush="#702943"
-                                    BorderThickness="0,0,1,2"
-                                    Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                  VerticalAlignment="Center"
-                                                  TextBlock.Foreground="#702943"/>
+                                    BorderThickness="0,0,0,2">
+                                <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment="Center"
+                                                      TextBlock.Foreground="#702943"/>
+                                </Border>
                             </Border>
                             <Thumb x:Name="PART_HeaderGripper"
                                    HorizontalAlignment="Right"
@@ -178,6 +180,9 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="HeaderBg" Property="Background" Value="#F0E4E8"/>
+                            </Trigger>
+                            <Trigger Property="Column" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

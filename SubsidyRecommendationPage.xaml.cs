@@ -188,22 +188,20 @@ namespace SOLUM_UI
         {
             if (RecommendationList.View is System.Windows.Controls.GridView gv && gv.Columns.Count >= 7)
             {
-                double available = RecommendationList.ActualWidth - 22;
+                double available = RecommendationList.ActualWidth - 2;
                 if (available <= 0) return;
 
                 const double spId       = 78;
-                const double name       = 150;
-                const double barangay   = 110;
                 const double priority   = 96;
                 const double status     = 104;
                 const double indicators = 190;
-                const double action     = 340;
+                const double action     = 300;
 
-                double spare = Math.Max(0, available - spId - name - barangay - priority - status - indicators - action);
+                double nameBarangay = Math.Max(200, available - spId - priority - status - indicators - action);
 
                 gv.Columns[0].Width = spId;
-                gv.Columns[1].Width = name + spare * 0.5;
-                gv.Columns[2].Width = barangay + spare * 0.5;
+                gv.Columns[1].Width = nameBarangay * 0.57;
+                gv.Columns[2].Width = nameBarangay * 0.43;
                 gv.Columns[3].Width = priority;
                 gv.Columns[4].Width = status;
                 gv.Columns[5].Width = indicators;

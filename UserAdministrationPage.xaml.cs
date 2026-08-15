@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using SOLUM_UI.Services;
 
 namespace SOLUM_UI
 {
@@ -131,6 +132,8 @@ namespace SOLUM_UI
             if (_editTarget == user) ClosePanel_Click(null, null);
             Search_TextChanged(null, null);
             ToastNotification.Show("User Deleted", user.FullName + " was removed.", ToastType.Warning);
+            AuditLogService.Instance.LogUserAdmin("deleted", user.FullName + " (" + user.Email + ")",
+                MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
         }
 
         private void ClosePanel_Click(object sender, RoutedEventArgs e)
@@ -195,6 +198,7 @@ namespace SOLUM_UI
 
             if (_editTarget != null)
             {
+                string oldName = _editTarget.FullName;
                 _editTarget.FirstName = firstName;
                 _editTarget.LastName  = lastName;
                 _editTarget.Email     = email;
@@ -203,6 +207,9 @@ namespace SOLUM_UI
 
                 Search_TextChanged(null, null);
                 ToastNotification.Show("User Updated", firstName + " " + lastName + " was updated.", ToastType.Info);
+                AuditLogService.Instance.LogUserAdmin("updated",
+                    firstName + " " + lastName + " (" + email + ")",
+                    MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
                 ClosePanel_Click(null, null);
             }
             else
@@ -220,6 +227,9 @@ namespace SOLUM_UI
 
                 Search_TextChanged(null, null);
                 ToastNotification.Show("User Created", firstName + " " + lastName + " was added.", ToastType.Success);
+                AuditLogService.Instance.LogUserAdmin("created",
+                    firstName + " " + lastName + " (" + email + ")",
+                    MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
                 ClosePanel_Click(null, null);
             }
         }

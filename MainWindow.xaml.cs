@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Navigation;
+using SOLUM_UI.Services;
 
 namespace SOLUM_UI
 {
@@ -213,6 +214,7 @@ namespace SOLUM_UI
 
             var login = new LoginPage();
             login.Show();
+            AuditLogService.Instance.LogLogout(CurrentUserName, CurrentUserRole);
             ToastNotification.Show("Logged Out", "You have been logged out.", ToastType.Info);
             this.Close();
         }

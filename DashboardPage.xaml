@@ -9,128 +9,122 @@
         <vm:DashboardViewModel/>
     </Page.DataContext>
 
-    <!-- Root grid: dashboard content + overlay stacked -->
     <Grid>
-
-        <!-- ── Dashboard content (blurred when overlay is open) ── -->
-        <ScrollViewer x:Name="DashboardScroll"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
-            <Grid Margin="24,16,24,24">
+        <Grid x:Name="DashboardScroll">
+            <Grid Margin="28,22,28,22">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="*" MinWidth="220" MaxWidth="320"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="*" MinWidth="300" MaxWidth="400"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- left col -->
-                <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <!-- Welcome header -->
-                    <TextBlock Text="Welcome, Admin!"
-                               FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
-                               Foreground="#702943" Margin="0,0,0,4"/>
-                    <TextBlock Text="Here's what's happening with your solo parent program today."
-                               FontFamily="Segoe UI" FontSize="12"
-                               Foreground="#9B3060" Margin="0,0,0,16"/>
+                    <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                        <TextBlock x:Name="TxtWelcome" Text="Welcome back!"
+                                   FontFamily="Segoe UI" FontSize="26" FontWeight="Bold"
+                                   Foreground="#702943"/>
+                        <TextBlock Text="Here's what's happening with your solo parent program today."
+                                   FontFamily="Segoe UI" FontSize="14"
+                                   Foreground="#A06080" Margin="0,5,0,0"/>
+                    </StackPanel>
 
-                    <!-- Stat cards row -->
-                    <Grid Margin="0,0,0,16">
+                    <Grid Grid.Row="1" Margin="0,0,0,18">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="14"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="14"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Registered Solo Parents -->
-                        <Border Grid.Column="0" Background="White" CornerRadius="12"
-                                Padding="16,14" Margin="0,0,8,0">
+                        <Border Grid.Column="0" Background="White" CornerRadius="14" Padding="22,18">
                             <Border.Effect>
-                                <DropShadowEffect Color="#E0C8D0" BlurRadius="12" ShadowDepth="2" Opacity="0.18" Direction="270"/>
+                                <DropShadowEffect Color="#D4A0B0" BlurRadius="16" ShadowDepth="2" Opacity="0.16" Direction="270"/>
                             </Border.Effect>
                             <StackPanel>
-                                <TextBlock Text="Registered Solo Parents"
-                                           FontFamily="Segoe UI" FontSize="11"
-                                           Foreground="#9B3060" Margin="0,0,0,6"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Border Width="10" Height="10" CornerRadius="5" Background="#702943" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="REGISTERED" FontFamily="Segoe UI" FontSize="11" FontWeight="Bold" Foreground="#9B3060"/>
+                                </StackPanel>
                                 <TextBlock Text="{Binding RegisteredSoloParents, StringFormat={}{0:N0}}"
-                                           FontFamily="Segoe UI" FontSize="32"
-                                           FontWeight="Bold" Foreground="#702943"/>
-                                <TextBlock Text="{Binding RegisteredDelta}"
-                                           FontFamily="Segoe UI" FontSize="10"
-                                           Foreground="#28A745" Margin="0,4,0,0"/>
+                                           FontFamily="Segoe UI" FontSize="44" FontWeight="Bold" Foreground="#702943"/>
+                                <TextBlock Text="Solo Parents" FontFamily="Segoe UI" FontSize="14" Foreground="#888888" Margin="0,3,0,10"/>
+                                <Border Background="#F0E8EC" CornerRadius="7" Padding="10,5" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding RegisteredDelta}" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                </Border>
                             </StackPanel>
                         </Border>
 
-                        <!-- Total Active Solo Parents -->
-                        <Border Grid.Column="1" Background="White" CornerRadius="12"
-                                Padding="16,14" Margin="4,0,4,0">
+                        <Border Grid.Column="2" Background="White" CornerRadius="14" Padding="22,18">
                             <Border.Effect>
-                                <DropShadowEffect Color="#E0C8D0" BlurRadius="12" ShadowDepth="2" Opacity="0.18" Direction="270"/>
+                                <DropShadowEffect Color="#D4A0B0" BlurRadius="16" ShadowDepth="2" Opacity="0.16" Direction="270"/>
                             </Border.Effect>
                             <StackPanel>
-                                <TextBlock Text="Total Active Solo Parents"
-                                           FontFamily="Segoe UI" FontSize="11"
-                                           Foreground="#9B3060" Margin="0,0,0,6"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Border Width="10" Height="10" CornerRadius="5" Background="#27AE60" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="ACTIVE" FontFamily="Segoe UI" FontSize="11" FontWeight="Bold" Foreground="#27AE60"/>
+                                </StackPanel>
                                 <TextBlock Text="{Binding ActiveSoloParents, StringFormat={}{0:N0}}"
-                                           FontFamily="Segoe UI" FontSize="32"
-                                           FontWeight="Bold" Foreground="#702943"/>
-                                <TextBlock Text="{Binding ActiveDelta}"
-                                           FontFamily="Segoe UI" FontSize="10"
-                                           Foreground="#28A745" Margin="0,4,0,0"/>
+                                           FontFamily="Segoe UI" FontSize="44" FontWeight="Bold" Foreground="#27AE60"/>
+                                <TextBlock Text="Valid Records" FontFamily="Segoe UI" FontSize="14" Foreground="#888888" Margin="0,3,0,10"/>
+                                <Border Background="#E8F5E9" CornerRadius="7" Padding="10,5" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding ActiveDelta}" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#27AE60"/>
+                                </Border>
                             </StackPanel>
                         </Border>
 
-                        <!-- Renewals due this month -->
-                        <Border Grid.Column="2" Background="White" CornerRadius="12"
-                                Padding="16,14" Margin="8,0,0,0">
+                        <Border Grid.Column="4" Background="White" CornerRadius="14" Padding="22,18">
                             <Border.Effect>
-                                <DropShadowEffect Color="#E0C8D0" BlurRadius="12" ShadowDepth="2" Opacity="0.18" Direction="270"/>
+                                <DropShadowEffect Color="#D4A0B0" BlurRadius="16" ShadowDepth="2" Opacity="0.16" Direction="270"/>
                             </Border.Effect>
                             <StackPanel>
-                                <TextBlock Text="Renewals due this month"
-                                           FontFamily="Segoe UI" FontSize="11"
-                                           Foreground="#9B3060" Margin="0,0,0,6"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Border Width="10" Height="10" CornerRadius="5" Background="#F57F17" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="RENEWALS" FontFamily="Segoe UI" FontSize="11" FontWeight="Bold" Foreground="#C0762A"/>
+                                </StackPanel>
                                 <TextBlock Text="{Binding RenewalsDueThisMonth, StringFormat={}{0:N0}}"
-                                           FontFamily="Segoe UI" FontSize="32"
-                                           FontWeight="Bold" Foreground="#702943"/>
-                                <TextBlock Text="{Binding RenewalsDelta}"
-                                           FontFamily="Segoe UI" FontSize="10"
-                                           Foreground="#28A745" Margin="0,4,0,0"/>
+                                           FontFamily="Segoe UI" FontSize="44" FontWeight="Bold" Foreground="#C0762A"/>
+                                <TextBlock Text="Due this month" FontFamily="Segoe UI" FontSize="14" Foreground="#888888" Margin="0,3,0,10"/>
+                                <Border Background="#FFF4E3" CornerRadius="7" Padding="10,5" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding RenewalsDelta}" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#C0762A"/>
+                                </Border>
                             </StackPanel>
                         </Border>
                     </Grid>
 
-                    <!-- Monthly registrations chart card -->
-                    <Border Background="White" CornerRadius="12"
-                            Padding="20,16" Margin="0,0,0,16">
+                    <Border Grid.Row="2" Background="White" CornerRadius="14" Padding="24,20" Margin="0,0,0,18">
                         <Border.Effect>
-                            <DropShadowEffect Color="#E0C8D0" BlurRadius="12" ShadowDepth="2" Opacity="0.18" Direction="270"/>
+                            <DropShadowEffect Color="#D4A0B0" BlurRadius="16" ShadowDepth="2" Opacity="0.16" Direction="270"/>
                         </Border.Effect>
-                        <StackPanel>
-                            <TextBlock Text="Monthly registrations"
-                                       FontFamily="Segoe UI" FontSize="15"
-                                       FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,2"/>
-                            <TextBlock Text="New solo parents registered — Jan–July 2026"
-                                       FontFamily="Segoe UI" FontSize="11"
-                                       Foreground="#A06080" Margin="0,0,0,16"/>
-                            <Grid Height="240">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Margin="0,0,0,18">
+                                <TextBlock Text="Monthly Registrations"
+                                           FontFamily="Segoe UI" FontSize="16" FontWeight="Bold" Foreground="#702943"/>
+                                <TextBlock Text="New solo parents registered — Jan to Jul 2026"
+                                           FontFamily="Segoe UI" FontSize="13" Foreground="#A06080" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <Grid Grid.Row="1">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="36"/>
+                                    <ColumnDefinition Width="40"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <!-- Y-axis labels -->
-                                <Grid Grid.Column="0" Margin="0,0,4,24">
-                                    <TextBlock Text="300" FontSize="9" Foreground="#A06080"
-                                               VerticalAlignment="Top" HorizontalAlignment="Right"/>
-                                    <TextBlock Text="200" FontSize="9" Foreground="#A06080"
-                                               VerticalAlignment="Center" HorizontalAlignment="Right"
-                                               Margin="0,-12,0,0"/>
-                                    <TextBlock Text="100" FontSize="9" Foreground="#A06080"
-                                               VerticalAlignment="Bottom" HorizontalAlignment="Right"
-                                               Margin="0,0,0,24"/>
-                                    <TextBlock Text="0" FontSize="9" Foreground="#A06080"
-                                               VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+                                <Grid Grid.Column="0" Margin="0,0,8,32">
+                                    <TextBlock Text="350" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+                                    <TextBlock Text="250" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,-10,0,0"/>
+                                    <TextBlock Text="150" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,0,32"/>
+                                    <TextBlock Text="0"   FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                                 </Grid>
-                                <!-- Bars -->
                                 <ItemsControl Grid.Column="1" ItemsSource="{Binding MonthlyBars}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -143,12 +137,12 @@
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="*"/>
                                                     <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="24"/>
+                                                    <RowDefinition Height="32"/>
                                                 </Grid.RowDefinitions>
                                                 <Border Grid.Row="1" Background="#D4A0B0"
-                                                        CornerRadius="4,4,0,0"
+                                                        CornerRadius="5,5,0,0"
                                                         Height="{Binding BarHeight}"
-                                                        Margin="4,0" VerticalAlignment="Bottom">
+                                                        Margin="8,0" VerticalAlignment="Bottom">
                                                     <Border.Style>
                                                         <Style TargetType="Border">
                                                             <Style.Triggers>
@@ -163,163 +157,140 @@
                                                     </Border.ToolTip>
                                                 </Border>
                                                 <TextBlock Grid.Row="2" Text="{Binding Month}"
-                                                           FontFamily="Segoe UI" FontSize="10"
+                                                           FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold"
                                                            Foreground="#702943"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </Grid>
-                        </StackPanel>
+                        </Grid>
                     </Border>
 
-                    <!-- ML / AI banner -->
-                    <Border Background="#702943" CornerRadius="12" Padding="16,14">
+                    <Border Grid.Row="3" Background="#702943" CornerRadius="14" Padding="20,16">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Width="36" Height="36"
-                                    Background="#9B3060" CornerRadius="18" Margin="0,0,12,0">
-                                <TextBlock Text="🤖" FontSize="18"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border Grid.Column="0" Width="44" Height="44" Background="#9B3060" CornerRadius="22" Margin="0,0,16,0">
+                                <TextBlock Text="🤖" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock Text="ML Model ran 14 new subsidy recommendations"
-                                           FontFamily="Segoe UI" FontSize="12"
-                                           FontWeight="SemiBold" Foreground="White"/>
+                                           FontFamily="Segoe UI" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
                                 <TextBlock Text="10 high-priority cases await staff approval · Last retrained 4 hours ago"
-                                           FontFamily="Segoe UI" FontSize="10"
-                                           Foreground="#E8C8D4" Margin="0,2,0,0"/>
+                                           FontFamily="Segoe UI" FontSize="12" Foreground="#E8C8D4" Margin="0,4,0,0"/>
                             </StackPanel>
-                            <Button Grid.Column="2" Content="Review ↗"
-                                    FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold"
-                                    Foreground="White" Background="Transparent"
-                                    BorderBrush="White" BorderThickness="1.5"
-                                    Padding="14,8" Cursor="Hand">
+                            <Button Grid.Column="2" Cursor="Hand">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
-                                        <Border x:Name="ReviewBg" Background="Transparent"
-                                                BorderBrush="White" BorderThickness="1.5"
-                                                CornerRadius="8" Padding="14,8">
+                                        <Border x:Name="Bg" Background="Transparent" BorderBrush="White"
+                                                BorderThickness="1.5" CornerRadius="9" Padding="18,10">
                                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="ReviewBg" Property="Background" Value="#9B3060"/>
+                                                <Setter TargetName="Bg" Property="Background" Value="#9B3060"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Button.Template>
+                                <TextBlock Text="Review ↗" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
                             </Button>
                         </Grid>
                     </Border>
+                </Grid>
 
-                </StackPanel>
-
-                <!-- right col -->
-                <Border Grid.Column="1" Background="White" CornerRadius="12"
-                        Padding="20,18" VerticalAlignment="Top">
+                <Border Grid.Column="2" Background="White" CornerRadius="14">
                     <Border.Effect>
-                        <DropShadowEffect Color="#E0C8D0" BlurRadius="12" ShadowDepth="2" Opacity="0.18" Direction="270"/>
+                        <DropShadowEffect Color="#D4A0B0" BlurRadius="16" ShadowDepth="2" Opacity="0.16" Direction="270"/>
                     </Border.Effect>
-                    <StackPanel>
-                        <TextBlock Text="Recent Activity"
-                                   FontFamily="Segoe UI" FontSize="15" FontWeight="Bold"
-                                   Foreground="#1A1A1A" Margin="0,0,0,4"/>
-                        <TextBlock Text="Audit Logs"
-                                   FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold"
-                                   Foreground="#702943" Margin="0,0,0,14"/>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                        <!-- Log entries list -->
-                        <ItemsControl ItemsSource="{Binding RecentLogs}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="0,0,0,14">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="28"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Width="24" Height="24"
-                                                CornerRadius="12" VerticalAlignment="Top" Margin="0,1,0,0">
-                                            <Border.Background>
-                                                <SolidColorBrush Color="{Binding DotColor}"/>
-                                            </Border.Background>
-                                            <TextBlock Text="{Binding DotLabel}" FontSize="10"
-                                                       Foreground="White"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"/>
+                        <Border Grid.Row="0" Padding="22,20,22,16" BorderBrush="#F0E4E8" BorderThickness="0,0,0,1">
+                            <StackPanel>
+                                <TextBlock Text="Recent Activity"
+                                           FontFamily="Segoe UI" FontSize="16" FontWeight="Bold" Foreground="#111111"/>
+                                <TextBlock Text="Audit Logs"
+                                           FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="#702943" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled" Padding="18,14,18,0">
+                            <ItemsControl ItemsSource="{Binding RecentLogs}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#FAFAFA" CornerRadius="10"
+                                                BorderBrush="#EEE4E8" BorderThickness="1"
+                                                Padding="14,12" Margin="0,0,0,10">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="38"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Width="34" Height="34"
+                                                        CornerRadius="17" VerticalAlignment="Top">
+                                                    <Border.Background>
+                                                        <SolidColorBrush Color="{Binding DotColor}"/>
+                                                    </Border.Background>
+                                                    <TextBlock Text="{Binding DotLabel}" FontSize="14" FontWeight="Bold"
+                                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                                    <TextBlock Text="{Binding Description}"
+                                                               FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold"
+                                                               Foreground="#111111" TextWrapping="Wrap"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                        <TextBlock Text="{Binding PerformedBy}" FontFamily="Segoe UI" FontSize="12" Foreground="#666666"/>
+                                                        <TextBlock Text=" · " FontFamily="Segoe UI" FontSize="12" Foreground="#CCCCCC"/>
+                                                        <TextBlock Text="{Binding TimeAgo}" FontFamily="Segoe UI" FontSize="12" Foreground="#AAAAAA"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Grid>
                                         </Border>
-                                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                            <TextBlock Text="{Binding Description}"
-                                                       FontFamily="Segoe UI" FontSize="11"
-                                                       FontWeight="SemiBold" Foreground="#1A1A1A"
-                                                       TextWrapping="Wrap"/>
-                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                                <TextBlock Text="by " FontFamily="Segoe UI" FontSize="10" Foreground="#888888"/>
-                                                <TextBlock Text="{Binding PerformedBy}" FontFamily="Segoe UI" FontSize="10" Foreground="#888888"/>
-                                                <TextBlock Text=" · " FontFamily="Segoe UI" FontSize="10" Foreground="#BBBBBB"/>
-                                                <TextBlock Text="{Binding TimeAgo}" FontFamily="Segoe UI" FontSize="10" Foreground="#BBBBBB"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
 
-                        <Rectangle Height="1" Fill="#F0E4E4" Margin="0,4,0,12"/>
-
-                        <!-- View all logs button -->
-                        <Button Content="View all logs"
-                                FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold"
-                                Foreground="White" Cursor="Hand"
-                                Click="ViewAllLogs_Click"
-                                HorizontalAlignment="Stretch">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="ViewAllBg" Background="#702943"
-                                            CornerRadius="8" Padding="0,10">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="ViewAllBg" Property="Background" Value="#9B3060"/>
-                                        </Trigger>
-                                        <Trigger Property="IsPressed" Value="True">
-                                            <Setter TargetName="ViewAllBg" Property="Background" Value="#5A1F35"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                    </StackPanel>
+                        <Border Grid.Row="2" Padding="18,14" BorderBrush="#F0E4E8" BorderThickness="0,1,0,0">
+                            <Button Click="ViewAllLogs_Click" Cursor="Hand" HorizontalAlignment="Stretch">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="#702943" CornerRadius="9" Padding="0,13">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="Background" Value="#9B3060"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Text="View all logs" FontFamily="Segoe UI" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                            </Button>
+                        </Border>
+                    </Grid>
                 </Border>
-
             </Grid>
-        </ScrollViewer>
-
-        <!-- ── Overlay: dim + blur backdrop ── -->
-        <Grid x:Name="OverlayRoot" Visibility="Collapsed">
-
-            <!-- Semi-transparent dim layer — clicking it closes the overlay -->
-            <Rectangle Fill="#80000000" Cursor="Arrow">
-                <Rectangle.InputBindings>
-                    <MouseBinding MouseAction="LeftClick" Command="{x:Null}"/>
-                </Rectangle.InputBindings>
-            </Rectangle>
-
-            <!-- The actual overlay panel, centered -->
-            <local:ViewAllLogsOverlay x:Name="LogsOverlay"
-                                      HorizontalAlignment="Center"
-                                      VerticalAlignment="Center"
-                                      Width="700"
-                                      MaxHeight="620"
-                                      CloseRequested="LogsOverlay_CloseRequested"/>
         </Grid>
 
+        <Grid x:Name="OverlayRoot" Visibility="Collapsed">
+            <Rectangle Fill="#80000000"/>
+            <local:ViewAllLogsOverlay x:Name="LogsOverlay"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      Margin="60,40,60,40"
+                                      CloseRequested="LogsOverlay_CloseRequested"/>
+        </Grid>
     </Grid>
 </Page>

@@ -9,6 +9,7 @@
         MinHeight="420" MinWidth="680"
         Height="450" Width="800"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         ResizeMode="CanResize"
         WindowStyle="None"
         AllowsTransparency="True"

@@ -35,9 +35,7 @@ namespace SOLUM_UI.ViewModels
         public List<string> ActionFilters { get; } = new List<string>
         {
             "All", "Created", "Updated", "Deleted", "Viewed", "Logged In", "Logged Out", "System"
-        };
-
-        private const int PageSize = 10;
+        };        private const int PageSize = 10;
         private int _totalFiltered = 0;
 
         private int _currentPage = 1;
