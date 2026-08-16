@@ -3,9 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Height="56">
     <UserControl.Resources>
-        <Style x:Key="TopBarIconButton" TargetType="Button">
-            <Setter Property="Width" Value="36"/>
-            <Setter Property="Height" Value="36"/>
+        <Style x:Key="TopBarIconBtn" TargetType="Button">
+            <Setter Property="Width" Value="38"/>
+            <Setter Property="Height" Value="38"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -13,12 +13,12 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Grid>
-                            <Ellipse x:Name="Bg" Width="36" Height="36" Fill="Transparent"/>
+                            <Ellipse x:Name="Bg" Width="38" Height="38" Fill="Transparent"/>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="Fill" Value="#F0E4E4"/>
+                                <Setter TargetName="Bg" Property="Fill" Value="#F0E4E8"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Bg" Property="Fill" Value="#D4A0B0"/>
@@ -28,45 +28,51 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="MenuItemStyle" TargetType="Border">
+            <Setter Property="Padding" Value="16,11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FDF5F7"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid VerticalAlignment="Center">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="320"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Column="0"
-                   x:Name="PageTitleText"
-                   FontFamily="Segoe UI"
-                   FontSize="20"
-                   FontWeight="Bold"
-                   Foreground="#702943"
-                   HorizontalAlignment="Right"
-                   VerticalAlignment="Center"
-                   Margin="0,0,20,0"/>
+        <TextBlock Grid.Column="0" x:Name="PageTitleText"
+                   FontFamily="Segoe UI" FontSize="20" FontWeight="Bold"
+                   Foreground="#702943" HorizontalAlignment="Right"
+                   VerticalAlignment="Center" Margin="0,0,24,0"/>
 
-        <StackPanel Grid.Column="1"
-                    Orientation="Horizontal"
-                    VerticalAlignment="Center"
-                    Margin="0,0,40,0">
+        <StackPanel Grid.Column="1" Orientation="Horizontal"
+                    VerticalAlignment="Center" Margin="0,0,11,0">
 
-            <Rectangle Width="2"
-                       Height="32"
-                       Fill="#D4A0B0"
-                       RadiusX="1" RadiusY="1"
-                       VerticalAlignment="Center"
-                       Margin="0,0,24,0"/>
+            <Rectangle Width="1.5" Height="30" Fill="#D4A0B0" RadiusX="1" RadiusY="1"
+                       VerticalAlignment="Center" Margin="0,0,20,0"/>
 
-            <Border x:Name="ProfilePill"
-                    Background="#F5ECEE"
-                    CornerRadius="20"
-                    Padding="10,6,14,6"
-                    BorderBrush="#E8D0D8"
-                    BorderThickness="1"
-                    Cursor="Hand"
-                    Margin="0,0,24,0"
-                    MouseLeftButtonDown="ProfilePill_Click">
+            <Button x:Name="BtnNotification" Style="{StaticResource TopBarIconBtn}"
+                    Margin="0,0,6,0" ToolTip="Notifications"
+                    Click="Notification_Click">
+                <Path Stretch="Uniform" Width="20" Height="20" Fill="#702943"
+                      Data="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21"/>
+            </Button>
+
+            <Button x:Name="BtnFaq" Style="{StaticResource TopBarIconBtn}"
+                    Margin="0,0,20,0" ToolTip="Help &amp; FAQ"
+                    Click="Faq_Click">
+                <Path Stretch="Uniform" Width="22" Height="22" Fill="#702943"
+                      Data="M11.5,2C6.81,2 3,5.81 3,10.5S6.81,19 11.5,19H12V22C14.86,20.28 19,17.5 19,10.5C19,5.81 15.19,2 11.5,2M12.5,16.5H10.5V14.5H12.5V16.5M12.5,13H10.5C10.5,9.75 13.5,10 13.5,8C13.5,6.9 12.6,6 11.5,6C10.4,6 9.5,6.9 9.5,8H7.5C7.5,5.79 9.29,4 11.5,4C13.71,4 15.5,5.79 15.5,8C15.5,10.5 12.5,10.75 12.5,13Z"/>
+            </Button>
+
+            <Border x:Name="ProfilePill" Background="#F5ECEE" CornerRadius="20"
+                    Padding="10,6,14,6" BorderBrush="#E8D0D8" BorderThickness="1"
+                    Cursor="Hand" MouseLeftButtonDown="ProfilePill_Click">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Style.Triggers>
@@ -77,48 +83,79 @@
                     </Style>
                 </Border.Style>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Width="28" Height="28"
-                            CornerRadius="14"
-                            Background="#702943"
-                            Margin="0,0,10,0">
-                        <TextBlock x:Name="UserInitial"
-                                   Text="U"
-                                   FontFamily="Segoe UI"
-                                   FontSize="13"
-                                   FontWeight="Bold"
+                    <Border Width="28" Height="28" CornerRadius="14"
+                            Background="#702943" Margin="0,0,10,0">
+                        <TextBlock x:Name="UserInitial" Text="U"
+                                   FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
                                    Foreground="White"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock x:Name="UserNameText"
-                                   Text="Sua, Renzo B."
-                                   FontFamily="Segoe UI"
-                                   FontSize="11"
-                                   FontWeight="Bold"
+                        <TextBlock x:Name="UserNameText" Text="Admin User"
+                                   FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
                                    Foreground="#702943"/>
-                        <TextBlock x:Name="UserRoleText"
-                                   Text="Admin"
-                                   FontFamily="Segoe UI"
-                                   FontWeight="Medium"
-                                   FontSize="9"
+                        <TextBlock x:Name="UserRoleText" Text="Admin"
+                                   FontFamily="Segoe UI" FontSize="9" FontWeight="Medium"
                                    Foreground="#A06080"/>
                     </StackPanel>
+                    <Path Margin="8,0,0,0" Data="M7,10L12,15L17,10H7Z"
+                          Fill="#A06080" Stretch="Uniform" Width="10" Height="10"
+                          VerticalAlignment="Center" IsHitTestVisible="False"/>
                 </StackPanel>
             </Border>
 
-            <Button Style="{StaticResource TopBarIconButton}"
-                    Margin="0,0,10,0">
-                <Path Stretch="Uniform" Width="20" Height="20"
-                      Fill="#702943"
-                      Data="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21"/>
-            </Button>
+            <Popup x:Name="ProfileMenu" PlacementTarget="{Binding ElementName=ProfilePill}"
+                   Placement="Bottom" StaysOpen="True" AllowsTransparency="True"
+                   PopupAnimation="Fade" HorizontalOffset="-60">
+                <Border Background="White" CornerRadius="12" BorderBrush="#E0D0D5"
+                        BorderThickness="1" Padding="0,6" MinWidth="200" Margin="0,4,0,0">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="4" Opacity="0.16"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <Border Padding="16,10,16,10" Margin="0,0,0,2"
+                                BorderBrush="#F0E8EC" BorderThickness="0,0,0,1">
+                            <StackPanel>
+                                <TextBlock x:Name="MenuUserName" Text="Admin User"
+                                           FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
+                                           Foreground="#1A1A1A"/>
+                                <TextBlock x:Name="MenuUserRole" Text="Administrator"
+                                           FontFamily="Segoe UI" FontSize="11" Foreground="#888888"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Border>
 
-            <Button Style="{StaticResource TopBarIconButton}">
-                <Path Stretch="Uniform" Width="22" Height="22"
-                      Fill="#702943"
-                      Data="M11.5,2C6.81,2 3,5.81 3,10.5S6.81,19 11.5,19H12V22C14.86,20.28 19,17.5 19,10.5C19,5.81 15.19,2 11.5,2M12.5,16.5H10.5V14.5H12.5V16.5M12.5,13H10.5C10.5,9.75 13.5,10 13.5,8C13.5,6.9 12.6,6 11.5,6C10.4,6 9.5,6.9 9.5,8H7.5C7.5,5.79 9.29,4 11.5,4C13.71,4 15.5,5.79 15.5,8C15.5,10.5 12.5,10.75 12.5,13Z"/>
-            </Button>
+                        <Border Style="{StaticResource MenuItemStyle}" MouseLeftButtonDown="Menu_ViewProfile">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"
+                                      Fill="#702943" Stretch="Uniform" Width="16" Height="16" Margin="0,0,10,0"/>
+                                <TextBlock Text="View Profile" FontFamily="Segoe UI"
+                                           FontSize="13" Foreground="#1A1A1A"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource MenuItemStyle}" MouseLeftButtonDown="Menu_ChangePassword">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.6 14.8,10V11.3C15.4,11.6 16,12.3 16,13.1V17.1C16,18 15.2,18.8 14.2,18.8H9.8C8.8,18.8 8,18 8,17.1V13.1C8,12.3 8.6,11.6 9.2,11.3V10C9.2,8.6 10.6,7 12,7M12,8.2C11.2,8.2 10.5,9 10.5,10V11H13.5V10C13.5,9 12.8,8.2 12,8.2Z"
+                                      Fill="#702943" Stretch="Uniform" Width="16" Height="16" Margin="0,0,10,0"/>
+                                <TextBlock Text="Change Password" FontFamily="Segoe UI"
+                                           FontSize="13" Foreground="#1A1A1A"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Margin="0,4,0,0" BorderBrush="#F0E8EC" BorderThickness="0,1,0,0">
+                            <Border Style="{StaticResource MenuItemStyle}" MouseLeftButtonDown="Menu_Logout">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="M17,7L15.59,8.41L18.17,11H8V13H18.17L15.59,15.58L17,17L22,12M4,5H12V3H4A2,2 0 0,0 2,5V19A2,2 0 0,0 4,21H12V19H4V5Z"
+                                          Fill="#DC3545" Stretch="Uniform" Width="16" Height="16" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Logout" FontFamily="Segoe UI"
+                                               FontSize="13" Foreground="#DC3545"/>
+                                </StackPanel>
+                            </Border>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Popup>
         </StackPanel>
     </Grid>
 </UserControl>

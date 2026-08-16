@@ -259,7 +259,9 @@
                                      Grid.Row="0"
                                      PageTitle="Dashboard"
                                      Margin="50,0,-50,0"
-                                     ProfileClicked="TopBarControl_ProfileClicked"/>
+                                     ProfileClicked="TopBarControl_ProfileClicked"
+                                     ChangePasswordRequested="TopBarControl_ChangePasswordRequested"
+                                     LogoutRequested="TopBarControl_LogoutRequested"/>
 
                     <Border Grid.Row="1"
                             Background="#FFFFFF"

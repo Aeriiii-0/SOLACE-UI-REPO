@@ -194,6 +194,20 @@ namespace SOLUM_UI
             NavigateTo("UserProfile");
         }
 
+        private void TopBarControl_ChangePasswordRequested(object sender, RoutedEventArgs e)
+        {
+            ActivateButton("UserProfile");
+            TopBarControl.PageTitle = "User Profile";
+            var page = new UserProfilePage();
+            page.ScrollToChangePassword();
+            NavigatePage(page);
+        }
+
+        private void TopBarControl_LogoutRequested(object sender, RoutedEventArgs e)
+        {
+            HandleLogout();
+        }
+
         private void HandleLogout()
         {
             LogoutOverlay.Visibility = Visibility.Visible;
