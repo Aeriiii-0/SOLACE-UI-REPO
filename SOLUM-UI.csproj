@@ -71,6 +71,8 @@
     <Compile Include="LoginPage.xaml.cs">
       <DependentUpon>LoginPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\OcrModels.cs" />
+    <Compile Include="Services\OcrService.cs" />
     <Compile Include="Models\AuditLog.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="Services\AuditLogService.cs" />
@@ -111,6 +113,9 @@
     <Compile Include="ToastNotification.xaml.cs">
       <DependentUpon>ToastNotification.xaml</DependentUpon>
     </Compile>
+    <Compile Include="OcrTemplateConfigWindow.xaml.cs">
+      <DependentUpon>OcrTemplateConfigWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="ConfirmDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -120,6 +125,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="OcrScanDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="OcrTemplateConfigWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -54,7 +54,9 @@ namespace SOLUM_UI
 
             if (_existing != null)
             {
-                FormSubtitle.Text = "Edit Record — " + _existing.Id;
+                FormSubtitle.Text = string.IsNullOrEmpty(_existing.Id) 
+                    ? "Add New Record (OCR Pre-Populated — Please Verify)" 
+                    : "Edit Record — " + _existing.Id;
                 PopulateFields(_existing);
             }
             else
@@ -212,6 +214,25 @@ namespace SOLUM_UI
 
             TxtNeeds.Text       = r.NeedsAndProblems  ?? string.Empty;
             TxtOtherIncome.Text = r.OtherIncomeSource ?? string.Empty;
+
+            if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
+            {
+                _familyRowData.Clear();
+                foreach (var fm in r.FamilyMembers)
+                {
+                    _familyRowData.Add(new FamilyMemberRow
+                    {
+                        MemberName          = fm.MemberName,
+                        Sex                 = fm.Sex,
+                        Age                 = fm.Age,
+                        Birthdate           = fm.Birthdate,
+                        CivilStatus         = fm.CivilStatus,
+                        Relationship        = fm.Relationship,
+                        EducationEmployment = fm.EducationEmployment,
+                        Income              = fm.Income
+                    });
+                }
+            }
 
             Circumstance_Changed(null, null);
             UpdateAge(r.DateOfBirth);

@@ -1,4 +1,4 @@
-﻿using SOLUM_UI.Models;
+using SOLUM_UI.Models;
 using SOLUM_UI.Services;
 using SOLUM_UI.ViewModels;
 using System;
@@ -406,15 +406,24 @@ namespace SOLUM_UI
                 return;
             }
 
+            SoloParentRecord prePopulated = null;
+
             if (methodDialog.Selected == EntryMethod.Scan)
             {
                 var ocr = new OcrScanDialog { Owner = Window.GetWindow(this) };
                 ocr.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
-                ocr.ShowDialog();
-                return;
+                
+                if (ocr.ShowDialog() != true || ocr.Result == null)
+                {
+                    return;
+                }
+
+                prePopulated = ocr.Result;
+                if (mainWindow != null)
+                    mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
             }
 
-            RecordDialog dialog = new RecordDialog { Owner = Window.GetWindow(this) };
+            RecordDialog dialog = new RecordDialog(prePopulated) { Owner = Window.GetWindow(this) };
             dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)

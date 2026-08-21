@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SOLUM_UI.Models
@@ -13,6 +13,31 @@ namespace SOLUM_UI.Models
         public string Relationship        { get; set; }
         public string EducationEmployment { get; set; }
         public string Income              { get; set; }
+
+        public double NameConf { get; set; } = 0.90;
+        public double SexConf  { get; set; } = 0.90;
+        public double AgeConf  { get; set; } = 0.90;
+        public double DobConf  { get; set; } = 0.90;
+        public double CivConf  { get; set; } = 0.90;
+        public double RelConf  { get; set; } = 0.90;
+        public double EduConf  { get; set; } = 0.90;
+        public double IncConf  { get; set; } = 0.90;
+
+        public string NameBg => GetConfBg(NameConf);
+        public string SexBg  => GetConfBg(SexConf);
+        public string AgeBg  => GetConfBg(AgeConf);
+        public string DobBg  => GetConfBg(DobConf);
+        public string CivBg  => GetConfBg(CivConf);
+        public string RelBg  => GetConfBg(RelConf);
+        public string EduBg  => GetConfBg(EduConf);
+        public string IncBg  => GetConfBg(IncConf);
+
+        private static string GetConfBg(double conf)
+        {
+            if (conf >= 0.80) return "#D5F5E3"; // Clear soft mint green (High confidence)
+            if (conf >= 0.50) return "#FCF3CF"; // Clear visible warm amber/yellow (Moderate confidence)
+            return "#FADBD8";                   // Clear visible coral red/pink (Low warning)
+        }
     }
 
     public class SoloParentRecord
