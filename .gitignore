@@ -33,3 +33,11 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 .DS_Store
+
+# Python / OCR Engine Exclusions
+OcrService/venv/
+OcrService/.venv/
+OcrService/__pycache__/
+OcrService/build/
+OcrService/dist/
+*.pyc
