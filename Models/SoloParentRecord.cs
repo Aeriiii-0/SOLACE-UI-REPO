@@ -72,6 +72,8 @@ namespace SOLUM_UI.Models
         public bool CircumstanceA5            { get; set; }
         public string CircumstanceA5Period    { get; set; }
         public bool CircumstanceA6            { get; set; }
+        public bool CircumstanceA6Nullity     { get; set; }
+        public bool CircumstanceA6Annulment   { get; set; }
         public bool CircumstanceA7            { get; set; }
         public bool CircumstanceB             { get; set; }
         public string CircumstanceBStayAbroad { get; set; }
@@ -112,7 +114,14 @@ namespace SOLUM_UI.Models
                 if (CircumstanceA3) parts.Add("A3. Detention of Spouse");
                 if (CircumstanceA4) { var s = "A4. Physical & Mental Incapacity of Spouse"; if (!string.IsNullOrWhiteSpace(CircumstanceA4Disability)) s += " (" + CircumstanceA4Disability + ")"; parts.Add(s); }
                 if (CircumstanceA5) { var s = "A5. Legal or de facto Separation"; if (!string.IsNullOrWhiteSpace(CircumstanceA5Period)) s += " (" + CircumstanceA5Period + ")"; parts.Add(s); }
-                if (CircumstanceA6) parts.Add("A6. Nullity / annulment of marriage");
+                if (CircumstanceA6)
+                {
+                    var sub = new System.Collections.Generic.List<string>();
+                    if (CircumstanceA6Nullity)   sub.Add("Nullity of marriage");
+                    if (CircumstanceA6Annulment) sub.Add("Annulment of marriage");
+                    var s = "A6. Declaration of" + (sub.Count > 0 ? ": " + string.Join(", ", sub) : "");
+                    parts.Add(s);
+                }
                 if (CircumstanceA7) parts.Add("A7. Abandonment of spouse for at least 6 months");
                 if (CircumstanceB)  { var s = "B. OFW-related"; if (!string.IsNullOrWhiteSpace(CircumstanceBStayAbroad)) s += " (" + CircumstanceBStayAbroad + ")"; parts.Add(s); }
                 if (CircumstanceC)  parts.Add("C. Unmarried Mother or Father");

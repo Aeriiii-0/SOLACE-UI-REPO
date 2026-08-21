@@ -145,6 +145,7 @@ namespace SOLUM_UI
             PnlA2.Visibility = ChkA2.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             PnlA4.Visibility = ChkA4.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             PnlA5.Visibility = ChkA5.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PnlA6.Visibility = ChkA6.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             PnlB.Visibility  = ChkB.IsChecked  == true ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -199,6 +200,8 @@ namespace SOLUM_UI
             ChkA5.IsChecked = r.CircumstanceA5;
             TxtA5Period.Text = r.CircumstanceA5Period ?? string.Empty;
             ChkA6.IsChecked = r.CircumstanceA6;
+            ChkA6Nullity.IsChecked   = r.CircumstanceA6Nullity;
+            ChkA6Annulment.IsChecked = r.CircumstanceA6Annulment;
             ChkA7.IsChecked = r.CircumstanceA7;
             ChkB.IsChecked  = r.CircumstanceB;
             TxtBStayAbroad.Text = r.CircumstanceBStayAbroad ?? string.Empty;
@@ -538,6 +541,8 @@ namespace SOLUM_UI
                 CircumstanceA5             = ChkA5.IsChecked == true,
                 CircumstanceA5Period       = TxtA5Period.Text.Trim(),
                 CircumstanceA6             = ChkA6.IsChecked == true,
+                CircumstanceA6Nullity      = ChkA6Nullity.IsChecked == true,
+                CircumstanceA6Annulment    = ChkA6Annulment.IsChecked == true,
                 CircumstanceA7             = ChkA7.IsChecked == true,
                 CircumstanceB              = ChkB.IsChecked == true,
                 CircumstanceBStayAbroad    = TxtBStayAbroad.Text.Trim(),
@@ -606,6 +611,11 @@ namespace SOLUM_UI
 
             sec = "Circumstances";
             Add(sec, "Circumstances of Being Solo Parent", r.CircumstancesDisplay, null);
+            if (r.CircumstanceA6)
+            {
+                Add(sec, "A6 — Nullity of marriage",   r.CircumstanceA6Nullity   ? "Yes" : "No", null);
+                Add(sec, "A6 — Annulment of marriage", r.CircumstanceA6Annulment ? "Yes" : "No", null);
+            }
 
             if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
             {

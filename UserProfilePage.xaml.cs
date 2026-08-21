@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -38,6 +39,12 @@ namespace SOLUM_UI
             TxtPwdRole.Text      = role;
 
             TxtSessionStart.Text = _sessionStart.ToString("MMM d, yyyy  h:mm tt");
+
+            var myLogs = Services.AuditLogService.Instance.GetForUser(name, role).ToList();
+            TxtMyActions.Text  = myLogs.Count.ToString();
+            TxtMyCreates.Text  = myLogs.Count(l => l.Action == Models.AuditAction.Create).ToString();
+            TxtMyUpdates.Text  = myLogs.Count(l => l.Action == Models.AuditAction.Update).ToString();
+            TxtMyViews.Text    = myLogs.Count(l => l.Action == Models.AuditAction.View).ToString();
         }
 
         /// <summary>Scrolls the page to the Change Password section.</summary>

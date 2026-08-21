@@ -307,6 +307,95 @@
                     </StackPanel>
                 </Border>
 
+                <Border Style="{StaticResource SectionCard}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Border Width="4" CornerRadius="2" Background="#702943" Margin="0,1,12,1"/>
+                            <TextBlock Text="MY ACTIVITY SUMMARY" Style="{StaticResource SectionTitle}" Margin="0"/>
+                        </StackPanel>
+
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Background="#FDF5F7" CornerRadius="10"
+                                    BorderBrush="#E0D0D5" BorderThickness="1"
+                                    Padding="16,14">
+                                <StackPanel>
+                                    <TextBlock x:Name="TxtMyActions" Text="0"
+                                               FontFamily="Segoe UI" FontSize="28" FontWeight="Bold"
+                                               Foreground="#702943"/>
+                                    <TextBlock Text="My Actions" Style="{StaticResource FieldLabel}" Margin="0,2,0,0"/>
+                                    <Border Background="#F0E8EC" CornerRadius="5" Padding="7,3"
+                                            Margin="0,8,0,0" HorizontalAlignment="Left">
+                                        <TextBlock Text="All time" FontFamily="Segoe UI"
+                                                   FontSize="9" Foreground="#702943" FontWeight="SemiBold"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Background="#F0FFF4" CornerRadius="10"
+                                    BorderBrush="#C6E8CE" BorderThickness="1"
+                                    Padding="16,14">
+                                <StackPanel>
+                                    <TextBlock x:Name="TxtMyCreates" Text="0"
+                                               FontFamily="Segoe UI" FontSize="28" FontWeight="Bold"
+                                               Foreground="#27AE60"/>
+                                    <TextBlock Text="Records Created" Style="{StaticResource FieldLabel}" Margin="0,2,0,0"/>
+                                    <Border Background="#E8F5E9" CornerRadius="5" Padding="7,3"
+                                            Margin="0,8,0,0" HorizontalAlignment="Left">
+                                        <TextBlock Text="By me" FontFamily="Segoe UI"
+                                                   FontSize="9" Foreground="#27AE60" FontWeight="SemiBold"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Background="#FFF8EE" CornerRadius="10"
+                                    BorderBrush="#F5D8A8" BorderThickness="1"
+                                    Padding="16,14">
+                                <StackPanel>
+                                    <TextBlock x:Name="TxtMyUpdates" Text="0"
+                                               FontFamily="Segoe UI" FontSize="28" FontWeight="Bold"
+                                               Foreground="#C0762A"/>
+                                    <TextBlock Text="Records Updated" Style="{StaticResource FieldLabel}" Margin="0,2,0,0"/>
+                                    <Border Background="#FFF4E3" CornerRadius="5" Padding="7,3"
+                                            Margin="0,8,0,0" HorizontalAlignment="Left">
+                                        <TextBlock Text="Edits made" FontFamily="Segoe UI"
+                                                   FontSize="9" Foreground="#C0762A" FontWeight="SemiBold"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Background="#FDF5F7" CornerRadius="10"
+                                    BorderBrush="#E0D0D5" BorderThickness="1"
+                                    Padding="16,14">
+                                <StackPanel>
+                                    <TextBlock x:Name="TxtMyViews" Text="0"
+                                               FontFamily="Segoe UI" FontSize="28" FontWeight="Bold"
+                                               Foreground="#888888"/>
+                                    <TextBlock Text="Records Viewed" Style="{StaticResource FieldLabel}" Margin="0,2,0,0"/>
+                                    <Border Background="#F2F2F2" CornerRadius="5" Padding="7,3"
+                                            Margin="0,8,0,0" HorizontalAlignment="Left">
+                                        <TextBlock Text="Read-only" FontFamily="Segoe UI"
+                                                   FontSize="9" Foreground="#888888" FontWeight="SemiBold"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
             </StackPanel>
         </Grid>
     </ScrollViewer>

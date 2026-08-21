@@ -51,7 +51,7 @@
                    VerticalAlignment="Center" Margin="0,0,24,0"/>
 
         <StackPanel Grid.Column="1" Orientation="Horizontal"
-                    VerticalAlignment="Center" Margin="0,0,11,0">
+                    VerticalAlignment="Center" Margin="0,0,61,0">
 
             <Rectangle Width="1.5" Height="30" Fill="#D4A0B0" RadiusX="1" RadiusY="1"
                        VerticalAlignment="Center" Margin="0,0,20,0"/>

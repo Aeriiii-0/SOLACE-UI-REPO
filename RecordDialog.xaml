@@ -549,6 +549,7 @@
                                                 <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
                                                           SelectionChanged="CmbCivilStatus_SelectionChanged">
                                                     <ComboBoxItem Content="Single"/>
+                                                    <ComboBoxItem Content="Married"/>
                                                     <ComboBoxItem Content="Widowed"/>
                                                     <ComboBoxItem Content="Separated"/>
                                                     <ComboBoxItem Content="Divorced"/>
@@ -794,13 +795,26 @@
                                                     <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}"/>
                                                 </StackPanel>
 
-                                                <CheckBox x:Name="ChkA6" Style="{StaticResource FormCheck}">
+                                                <CheckBox x:Name="ChkA6" Style="{StaticResource FormCheck}"
+                                                          Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <CheckBox.Content>
                                                         <TextBlock>
-                                                            <Run Text="A6. " FontWeight="Bold"/><Run Text="Declaration of nullity / annulment of marriage"/>
+                                                            <Run Text="A6. " FontWeight="Bold"/><Run Text="Declaration of:"/>
                                                         </TextBlock>
                                                     </CheckBox.Content>
                                                 </CheckBox>
+                                                <StackPanel x:Name="PnlA6" Visibility="Collapsed" Margin="22,4,0,6">
+                                                    <CheckBox x:Name="ChkA6Nullity" Style="{StaticResource FormCheck}">
+                                                        <CheckBox.Content>
+                                                            <TextBlock Text="Nullity of marriage"/>
+                                                        </CheckBox.Content>
+                                                    </CheckBox>
+                                                    <CheckBox x:Name="ChkA6Annulment" Style="{StaticResource FormCheck}" Margin="0,4,0,0">
+                                                        <CheckBox.Content>
+                                                            <TextBlock Text="Annulment of marriage"/>
+                                                        </CheckBox.Content>
+                                                    </CheckBox>
+                                                </StackPanel>
 
                                                 <CheckBox x:Name="ChkA7" Style="{StaticResource FormCheck}">
                                                     <CheckBox.Content>
