@@ -111,25 +111,53 @@ namespace SOLUM_UI
 
                 if (section == "Circumstances")
                 {
-                    var circumstanceField = sectionFields.Find(f => f.Label == "Circumstances of Being Solo Parent");
-                    if (circumstanceField != null && !string.IsNullOrWhiteSpace(circumstanceField.NewValue) && circumstanceField.NewValue != "—")
+                    if (sectionFields.Count == 1 && sectionFields[0].Label == "Circumstances" && sectionFields[0].NewValue == "None selected")
                     {
-                        var wrap = new WrapPanel { Margin = new Thickness(0, 0, 0, 8) };
-                        foreach (var line in circumstanceField.NewValue.Split('\n'))
+                        cardStack.Children.Add(new TextBlock
                         {
-                            if (string.IsNullOrWhiteSpace(line)) continue;
-                            wrap.Children.Add(new Border
-                            {
-                                Background = _chipBg, CornerRadius = new CornerRadius(8),
-                                Padding = new Thickness(12, 6, 12, 6), Margin = new Thickness(0, 0, 8, 8),
-                                Child = new TextBlock { Text = line.Trim(), FontSize = 13, Foreground = _chipTxt, FontFamily = new FontFamily("Segoe UI"), FontWeight = FontWeights.SemiBold }
-                            });
-                        }
-                        cardStack.Children.Add(wrap);
+                            Text = "None selected", FontSize = 14, Foreground = _label,
+                            FontFamily = new FontFamily("Segoe UI"), Margin = new Thickness(0, 0, 0, 10)
+                        });
                     }
                     else
                     {
-                        cardStack.Children.Add(new TextBlock { Text = "None selected", FontSize = 14, Foreground = _label, FontFamily = new FontFamily("Segoe UI"), Margin = new Thickness(0, 0, 0, 10) });
+                        foreach (var sf in sectionFields)
+                        {
+                            bool isDetail = sf.Label.StartsWith("   ");
+                            var row = new Border
+                            {
+                                Background      = isDetail ? Brushes.White : _chipBg,
+                                CornerRadius    = new CornerRadius(8),
+                                BorderBrush     = isDetail ? _border : _chipBg,
+                                BorderThickness = new Thickness(1),
+                                Padding         = new Thickness(isDetail ? 12 : 14, 7, 14, 7),
+                                Margin          = new Thickness(isDetail ? 16 : 0, 0, 0, 6)
+                            };
+                            var rowInner = new StackPanel { Orientation = Orientation.Horizontal };
+                            rowInner.Children.Add(new TextBlock
+                            {
+                                Text         = sf.Label.Trim() + ":",
+                                FontSize     = 12,
+                                FontWeight   = isDetail ? FontWeights.Normal : FontWeights.SemiBold,
+                                Foreground   = isDetail ? _label : _chipTxt,
+                                FontFamily   = new FontFamily("Segoe UI"),
+                                Margin       = new Thickness(0, 0, 8, 0),
+                                VerticalAlignment = VerticalAlignment.Center
+                            });
+                            rowInner.Children.Add(new TextBlock
+                            {
+                                Text         = string.IsNullOrWhiteSpace(sf.NewValue) ? "—" : sf.NewValue,
+                                FontSize     = 12,
+                                FontWeight   = FontWeights.SemiBold,
+                                Foreground   = sf.NewValue == "✓ Ticked" || sf.NewValue == "✓ Yes"
+                                                ? Clr(0x1E, 0x8B, 0x4E) : _value,
+                                FontFamily   = new FontFamily("Segoe UI"),
+                                VerticalAlignment = VerticalAlignment.Center,
+                                TextWrapping = TextWrapping.Wrap
+                            });
+                            row.Child = rowInner;
+                            cardStack.Children.Add(row);
+                        }
                     }
                 }
                 else if (section == "Family Composition")

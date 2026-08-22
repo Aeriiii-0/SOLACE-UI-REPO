@@ -530,7 +530,6 @@ namespace SOLUM_UI
                 Address       = TxtAddress.Text.Trim(),
                 ContactNumber = TxtContact.Text.Trim(),
                 Barangay      = TxtBarangay.Text.Trim(),
-                DateAdmitted  = DateTime.MinValue,
                 Status        = GetComboValue(CmbStatus),
                 LastUpdated   = DateTime.Now,
 
@@ -631,12 +630,60 @@ namespace SOLUM_UI
             Add(sec, "Contact No.",    r.EmergencyContactNumber, _existing?.EmergencyContactNumber);
 
             sec = "Circumstances";
-            Add(sec, "Circumstances of Being Solo Parent", r.CircumstancesDisplay, null);
+
+            if (r.CircumstanceA1)
+                Add(sec, "A1. Birth from rape", "✓ Ticked", null);
+
+            if (r.CircumstanceA2)
+            {
+                Add(sec, "A2. Death of Spouse", "✓ Ticked", null);
+                Add(sec, "   Cause of death",
+                    F(r.CircumstanceA2Cause), null);
+                Add(sec, "   Date of death",
+                    r.CircumstanceA2Date != DateTime.MinValue
+                        ? r.CircumstanceA2Date.ToString("MMMM d, yyyy") : "—", null);
+            }
+
+            if (r.CircumstanceA3)
+                Add(sec, "A3. Detention of Spouse", "✓ Ticked", null);
+
+            if (r.CircumstanceA4)
+            {
+                Add(sec, "A4. Incapacity of Spouse", "✓ Ticked", null);
+                Add(sec, "   Type of disability", F(r.CircumstanceA4Disability), null);
+            }
+
+            if (r.CircumstanceA5)
+            {
+                Add(sec, "A5. Legal/de facto Separation", "✓ Ticked", null);
+                Add(sec, "   Period of separation", F(r.CircumstanceA5Period), null);
+            }
+
             if (r.CircumstanceA6)
             {
-                Add(sec, "A6 — Nullity of marriage",   r.CircumstanceA6Nullity   ? "Yes" : "No", null);
-                Add(sec, "A6 — Annulment of marriage", r.CircumstanceA6Annulment ? "Yes" : "No", null);
+                Add(sec, "A6. Declaration of", "✓ Ticked", null);
+                Add(sec, "   Nullity of marriage",   r.CircumstanceA6Nullity   ? "✓ Yes" : "No", null);
+                Add(sec, "   Annulment of marriage", r.CircumstanceA6Annulment ? "✓ Yes" : "No", null);
             }
+
+            if (r.CircumstanceA7)
+                Add(sec, "A7. Abandonment of Spouse", "✓ Ticked", null);
+
+            if (r.CircumstanceB)
+            {
+                Add(sec, "B. OFW-related", "✓ Ticked", null);
+                Add(sec, "   Length of stay abroad", F(r.CircumstanceBStayAbroad), null);
+            }
+
+            if (r.CircumstanceC) Add(sec, "C. Unmarried Mother/Father",        "✓ Ticked", null);
+            if (r.CircumstanceD) Add(sec, "D. Legal Guardian/Adoptive/Foster", "✓ Ticked", null);
+            if (r.CircumstanceE) Add(sec, "E. Relative (4th civil degree)",    "✓ Ticked", null);
+            if (r.CircumstanceF) Add(sec, "F. Pregnant Woman",                 "✓ Ticked", null);
+
+            if (!r.CircumstanceA1 && !r.CircumstanceA2 && !r.CircumstanceA3 && !r.CircumstanceA4 &&
+                !r.CircumstanceA5 && !r.CircumstanceA6 && !r.CircumstanceA7 && !r.CircumstanceB  &&
+                !r.CircumstanceC  && !r.CircumstanceD  && !r.CircumstanceE  && !r.CircumstanceF)
+                Add(sec, "Circumstances", "None selected", null);
 
             if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
             {
