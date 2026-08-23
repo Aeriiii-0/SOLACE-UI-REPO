@@ -71,13 +71,24 @@ namespace SOLUM_UI.Controls
 
         private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (!ProfileMenu.IsOpen) return;
-            if (e.OriginalSource is System.Windows.DependencyObject source)
+            if (ProfileMenu.IsOpen)
             {
-                if (IsDescendant(ProfilePill, source) || IsDescendant((System.Windows.DependencyObject)ProfileMenu.Child, source))
-                    return;
+                if (e.OriginalSource is System.Windows.DependencyObject src)
+                {
+                    if (IsDescendant(ProfilePill, src) || IsDescendant((System.Windows.DependencyObject)ProfileMenu.Child, src))
+                        return;
+                }
+                ProfileMenu.IsOpen = false;
             }
-            ProfileMenu.IsOpen = false;
+            if (FaqPopup.IsOpen)
+            {
+                if (e.OriginalSource is System.Windows.DependencyObject src2)
+                {
+                    if (IsDescendant(BtnFaq, src2) || IsDescendant((System.Windows.DependencyObject)FaqPopup.Child, src2))
+                        return;
+                }
+                FaqPopup.IsOpen = false;
+            }
         }
 
         private static bool IsDescendant(System.Windows.DependencyObject parent, System.Windows.DependencyObject child)
@@ -131,7 +142,13 @@ namespace SOLUM_UI.Controls
 
         private void Faq_Click(object sender, RoutedEventArgs e)
         {
-            ToastNotification.Show("Help & FAQ", "Documentation coming soon.", ToastType.Info);
+            FaqPopup.IsOpen = !FaqPopup.IsOpen;
+            if (FaqPopup.IsOpen) ProfileMenu.IsOpen = false;
+        }
+
+        private void FaqClose_Click(object sender, RoutedEventArgs e)
+        {
+            FaqPopup.IsOpen = false;
         }
     }
 }

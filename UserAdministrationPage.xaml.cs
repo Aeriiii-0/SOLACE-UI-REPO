@@ -10,13 +10,13 @@ namespace SOLUM_UI
 {
     public class AppUser
     {
-        public string FirstName { get; set; }
-        public string LastName  { get; set; }
-        public string Email     { get; set; }
-        public string Role      { get; set; }
-        public string Barangay  { get; set; }
-        public string Password  { get; set; }
-        public string DateAdded { get; set; }
+        public string FirstName     { get; set; }
+        public string LastName      { get; set; }
+        public string Email         { get; set; }
+        public string Role          { get; set; }
+        public string ContactNumber { get; set; }
+        public string Password      { get; set; }
+        public string DateAdded     { get; set; }
 
         public string FullName => FirstName + " " + LastName;
 
@@ -43,16 +43,11 @@ namespace SOLUM_UI
     {
         private readonly List<AppUser> _allUsers = new List<AppUser>
         {
-            new AppUser { FirstName = "Admin",     LastName = "User",       Email = "admin@gmail.com",
-                          Role = "Administrator",  Barangay = "",           DateAdded = "Jan 1, 2024" },
-            new AppUser { FirstName = "Maria",     LastName = "Santos",     Email = "maria.santos@gmail.com",
-                          Role = "Basic User",     Barangay = "Biñan Poblacion", DateAdded = "Feb 12, 2024" },
-            new AppUser { FirstName = "Juan",      LastName = "Dela Cruz",  Email = "juan.delacruz@gmail.com",
-                          Role = "Basic User",     Barangay = "Malaban",    DateAdded = "Mar 3, 2024" },
-            new AppUser { FirstName = "Ana",       LastName = "Reyes",      Email = "ana.reyes@gmail.com",
-                          Role = "Basic User",     Barangay = "Canlalay",   DateAdded = "Mar 20, 2024" },
-            new AppUser { FirstName = "Rosa",      LastName = "Martinez",   Email = "rosa.martinez@gmail.com",
-                          Role = "Basic User",     Barangay = "Platero",    DateAdded = "Apr 5, 2024" },
+            new AppUser { FirstName="Admin",  LastName="User",      Email="admin@gmail.com",        Role="Administrator", ContactNumber="09170000001", DateAdded="Jan 1, 2024"  },
+            new AppUser { FirstName="Maria",  LastName="Santos",    Email="maria.santos@gmail.com", Role="Encoder",       ContactNumber="09171234567", DateAdded="Feb 12, 2024" },
+            new AppUser { FirstName="Juan",   LastName="Dela Cruz", Email="juan.delacruz@gmail.com",Role="Encoder",       ContactNumber="09281234567", DateAdded="Mar 3, 2024"  },
+            new AppUser { FirstName="Ana",    LastName="Reyes",     Email="ana.reyes@gmail.com",    Role="Encoder",       ContactNumber="09391234567", DateAdded="Mar 20, 2024" },
+            new AppUser { FirstName="Rosa",   LastName="Martinez",  Email="rosa.martinez@gmail.com",Role="Encoder",       ContactNumber="09611234567", DateAdded="Apr 5, 2024"  },
         };
 
         private List<AppUser> _filtered;
@@ -71,16 +66,15 @@ namespace SOLUM_UI
             TxtUserCount.Text = " " + _filtered.Count;
         }
 
-        // filter list as user types in search box
         private void Search_TextChanged(object sender, TextChangedEventArgs e)
         {
             string q = SearchBox.Text.ToLower().Trim();
             _filtered = string.IsNullOrEmpty(q)
                 ? new List<AppUser>(_allUsers)
                 : _allUsers.FindAll(u =>
-                    (u.FullName  ?? "").ToLower().Contains(q) ||
-                    (u.Email     ?? "").ToLower().Contains(q) ||
-                    (u.Barangay  ?? "").ToLower().Contains(q));
+                    (u.FullName       ?? "").ToLower().Contains(q) ||
+                    (u.Email          ?? "").ToLower().Contains(q) ||
+                    (u.ContactNumber  ?? "").ToLower().Contains(q));
             RefreshList();
         }
 
@@ -99,13 +93,12 @@ namespace SOLUM_UI
             if (user == null) return;
 
             _editTarget = user;
-
-            TxtFirstName.Text = user.FirstName;
-            TxtLastName.Text  = user.LastName;
-            TxtEmail.Text     = user.Email;
-            SetComboByContent(CmbBarangay, user.Barangay);
-            PwdPassword.Password = string.Empty;
-            PwdConfirm.Password  = string.Empty;
+            TxtFirstName.Text      = user.FirstName;
+            TxtLastName.Text       = user.LastName;
+            TxtEmail.Text          = user.Email;
+            TxtContactNumber.Text  = user.ContactNumber;
+            PwdPassword.Password   = string.Empty;
+            PwdConfirm.Password    = string.Empty;
 
             SetPanelMode(true);
             ClearErrors(null, null);
@@ -150,7 +143,7 @@ namespace SOLUM_UI
             string firstName = TxtFirstName.Text.Trim();
             string lastName  = TxtLastName.Text.Trim();
             string email     = TxtEmail.Text.Trim();
-            string barangay  = (CmbBarangay.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty;
+            string contact   = TxtContactNumber.Text.Trim();
             string password  = PwdPassword.Password;
             string confirm   = PwdConfirm.Password;
             bool ok = true;
@@ -171,8 +164,10 @@ namespace SOLUM_UI
                      && _allUsers.Exists(u => u.Email.ToLower() == email.ToLower()))
             { ErrEmail.Text = "Email already in use."; ErrEmail.Visibility = Visibility.Visible; ok = false; }
 
-            if (string.IsNullOrWhiteSpace(barangay))
-            { ErrBarangay.Visibility = Visibility.Visible; ok = false; }
+            if (string.IsNullOrWhiteSpace(contact))
+            { ErrContactNumber.Text = "Required."; ErrContactNumber.Visibility = Visibility.Visible; ok = false; }
+            else if (!Regex.IsMatch(contact, @"^\d{7,15}$"))
+            { ErrContactNumber.Text = "Enter a valid contact number."; ErrContactNumber.Visibility = Visibility.Visible; ok = false; }
 
             bool pwdProvided = !string.IsNullOrWhiteSpace(password) || !string.IsNullOrWhiteSpace(confirm);
             if (_editTarget == null || pwdProvided)
@@ -198,11 +193,10 @@ namespace SOLUM_UI
 
             if (_editTarget != null)
             {
-                string oldName = _editTarget.FullName;
-                _editTarget.FirstName = firstName;
-                _editTarget.LastName  = lastName;
-                _editTarget.Email     = email;
-                _editTarget.Barangay  = barangay;
+                _editTarget.FirstName     = firstName;
+                _editTarget.LastName      = lastName;
+                _editTarget.Email         = email;
+                _editTarget.ContactNumber = contact;
                 if (pwdProvided) _editTarget.Password = password;
 
                 Search_TextChanged(null, null);
@@ -216,13 +210,13 @@ namespace SOLUM_UI
             {
                 _allUsers.Add(new AppUser
                 {
-                    FirstName = firstName,
-                    LastName  = lastName,
-                    Email     = email,
-                    Role      = "Basic User",
-                    Barangay  = barangay,
-                    Password  = password,
-                    DateAdded = DateTime.Today.ToString("MMM d, yyyy")
+                    FirstName     = firstName,
+                    LastName      = lastName,
+                    Email         = email,
+                    Role          = "Encoder",
+                    ContactNumber = contact,
+                    Password      = password,
+                    DateAdded     = DateTime.Today.ToString("MMM d, yyyy")
                 });
 
                 Search_TextChanged(null, null);
@@ -246,7 +240,7 @@ namespace SOLUM_UI
             TxtFirstName.Text         = string.Empty;
             TxtLastName.Text          = string.Empty;
             TxtEmail.Text             = string.Empty;
-            CmbBarangay.SelectedIndex = -1;
+            TxtContactNumber.Text     = string.Empty;
             PwdPassword.Password      = string.Empty;
             PwdConfirm.Password       = string.Empty;
             FormErrorBanner.Visibility = Visibility.Collapsed;
@@ -255,20 +249,13 @@ namespace SOLUM_UI
 
         private void ClearErrors(object sender, object e)
         {
-            ErrFirstName.Visibility    = Visibility.Collapsed;
-            ErrLastName.Visibility     = Visibility.Collapsed;
-            ErrEmail.Visibility        = Visibility.Collapsed;
-            ErrBarangay.Visibility     = Visibility.Collapsed;
-            ErrPassword.Visibility     = Visibility.Collapsed;
-            ErrConfirm.Visibility      = Visibility.Collapsed;
-            FormErrorBanner.Visibility = Visibility.Collapsed;
-        }
-
-        private void SetComboByContent(ComboBox combo, string value)
-        {
-            foreach (ComboBoxItem item in combo.Items)
-                if (item.Content?.ToString() == value) { combo.SelectedItem = item; return; }
-            combo.SelectedIndex = -1;
+            ErrFirstName.Visibility      = Visibility.Collapsed;
+            ErrLastName.Visibility       = Visibility.Collapsed;
+            ErrEmail.Visibility          = Visibility.Collapsed;
+            ErrContactNumber.Visibility  = Visibility.Collapsed;
+            ErrPassword.Visibility       = Visibility.Collapsed;
+            ErrConfirm.Visibility        = Visibility.Collapsed;
+            FormErrorBanner.Visibility   = Visibility.Collapsed;
         }
     }
 }

@@ -224,5 +224,8 @@
     <Resource Include="Assets\Logo.png" />
     <Resource Include="Assets\SidebarLogo.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Templates\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
