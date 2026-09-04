@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
+using System.ComponentModel;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,174 +23,445 @@ namespace SOLUM_UI
         public SoloParentRecord Result { get; private set; }
         private OcrFormResponse _ocrResponse = new OcrFormResponse();
         private string _currentImagePath = string.Empty;
+        private int _currentStep = 1;
+        private bool _savedSuccessfully = false;
+        private bool _isPopulating = false;
 
-        // Observable Dependents Collection bound to DataGrid
-        private readonly ObservableCollection<FamilyMember> _dependents = new ObservableCollection<FamilyMember>();
+        // Observable Family / Dependents Collection bound to ItemsControl
+        private readonly ObservableCollection<FamilyMemberRow> _familyRowData = new ObservableCollection<FamilyMemberRow>();
 
-        // Zoom Level
+        // Template bounding boxes cache
+        private Dictionary<string, double[]> _fieldBBoxes = new Dictionary<string, double[]>(StringComparer.OrdinalIgnoreCase);
+
+        // Zoom factor and drag panning
         private double _zoomFactor = 1.0;
+        private Point _scrollMousePoint;
+        private double _hOffset = 0;
+        private double _vOffset = 0;
+        private bool _isDragging = false;
+
+        private static readonly SolidColorBrush ErrorBrush   = new SolidColorBrush(Color.FromRgb(0xE5, 0x39, 0x35));
+        private static readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(0xD0, 0xB8, 0xC0));
+        private static readonly Thickness DefaultThickness   = new Thickness(1);
+
+        private ScannerSettings _scannerSettings = ScannerSettings.Load();
 
         public OcrScanDialog()
         {
             InitializeComponent();
-            GridFamilyMembers.ItemsSource = _dependents;
-            InitializeCircumstancesList();
-            WireFieldEditEvents();
+
+            for (int i = 0; i < 5; i++)
+                _familyRowData.Add(new FamilyMemberRow());
+            FamilyRows.ItemsSource = _familyRowData;
+
+            _fieldBBoxes = OcrService.GetTemplateBoundingBoxes();
+            DpDateOfApplication.SelectedDate = DateTime.Today;
+
+            UpdateScannerStatusBadge();
             CheckServerHealth();
         }
 
-        private async void CheckServerHealth()
+        protected override void OnSourceInitialized(EventArgs e)
         {
-            TxtServerStatus.Text = "● Checking Engine...";
-            ServerStatusBadge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F39C12"));
+            base.OnSourceInitialized(e);
+            ApplySize();
+        }
 
-            bool online = await OcrService.IsServerOnlineAsync();
-            if (!online)
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e) => ApplySize();
+
+        private void ApplySize()
+        {
+            double screenW, screenH, screenLeft, screenTop;
+
+            if (Owner != null && Owner.WindowState == WindowState.Maximized)
             {
-                TxtServerStatus.Text = "● Warming Up Engine...";
-                ServerStatusBadge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F39C12"));
-                online = await OcrService.EnsureServerRunningAsync(25);
+                screenW    = SystemParameters.WorkArea.Width;
+                screenH    = SystemParameters.WorkArea.Height;
+                screenLeft = SystemParameters.WorkArea.Left;
+                screenTop  = SystemParameters.WorkArea.Top;
+            }
+            else if (Owner != null)
+            {
+                screenW    = Owner.ActualWidth;
+                screenH    = Owner.ActualHeight;
+                screenLeft = Owner.Left;
+                screenTop  = Owner.Top;
+            }
+            else
+            {
+                screenW    = SystemParameters.WorkArea.Width;
+                screenH    = SystemParameters.WorkArea.Height;
+                screenLeft = SystemParameters.WorkArea.Left;
+                screenTop  = SystemParameters.WorkArea.Top;
             }
 
-            ServerStatusBadge.Background = online ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#388E3C"))
-                                                  : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D32F2F"));
-            TxtServerStatus.Text = online ? "● OCR Engine Online" : "● OCR Engine Offline (Click to Retry)";
-        }
+            Width  = screenW;
+            Height = screenH;
+            Left   = screenLeft;
+            Top    = screenTop;
 
-        private void ServerStatusBadge_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            CheckServerHealth();
-        }
-
-        private void InitializeCircumstancesList()
-        {
-            var circumstances = new[]
+            if (DialogShell != null)
             {
-                new { Code = "A1", Label = "A1. Gives birth as a result of rape" },
-                new { Code = "A2", Label = "A2. Death of Spouse" },
-                new { Code = "A3", Label = "A3. Detention of Spouse" },
-                new { Code = "A4", Label = "A4. Physical & Mental Incapacity of Spouse" },
-                new { Code = "A5", Label = "A5. Legal or de facto Separation" },
-                new { Code = "A6", Label = "A6. Declaration of nullity / annulment of marriage" },
-                new { Code = "A7", Label = "A7. Abandonment of spouse for at least 6 months" },
-                new { Code = "B",  Label = "B. Spouse or family member of an OFW" },
-                new { Code = "C",  Label = "C. Unmarried Mother or Father" },
-                new { Code = "D",  Label = "D. Legal Guardian / Adoptive / Foster Parent" },
-                new { Code = "E",  Label = "E. Relative within 4th civil degree" },
-                new { Code = "F",  Label = "F. Pregnant Woman" }
-            };
-
-            CmbCircumstance.ItemsSource = circumstances;
-            CmbCircumstance.SelectedValuePath = "Code";
-            CmbCircumstance.DisplayMemberPath = "Label";
-        }
-
-        private readonly Dictionary<string, double[]> _fieldBBoxes = new Dictionary<string, double[]>(StringComparer.OrdinalIgnoreCase)
-        {
-            { "last_name", new[] { 0.090, 0.188, 0.160, 0.032 } },
-            { "first_name", new[] { 0.285, 0.188, 0.185, 0.032 } },
-            { "middle_name", new[] { 0.515, 0.188, 0.150, 0.032 } },
-            { "ext_name", new[] { 0.690, 0.188, 0.070, 0.032 } },
-            { "birthdate", new[] { 0.090, 0.222, 0.120, 0.028 } },
-            { "birthplace", new[] { 0.265, 0.222, 0.145, 0.028 } },
-            { "age", new[] { 0.435, 0.222, 0.060, 0.028 } },
-            { "sex", new[] { 0.885, 0.188, 0.080, 0.032 } },
-            { "civil_status", new[] { 0.810, 0.188, 0.050, 0.032 } },
-            { "educational_attainment", new[] { 0.585, 0.222, 0.140, 0.028 } },
-            { "religion", new[] { 0.075, 0.255, 0.138, 0.028 } },
-            { "philsys_number", new[] { 0.810, 0.222, 0.155, 0.028 } },
-            { "address", new[] { 0.175, 0.285, 0.240, 0.028 } },
-            { "barangay", new[] { 0.460, 0.285, 0.205, 0.028 } },
-            { "monthly_income", new[] { 0.520, 0.255, 0.075, 0.028 } },
-            { "occupation", new[] { 0.325, 0.255, 0.125, 0.028 } },
-            { "employment_status", new[] { 0.595, 0.255, 0.365, 0.028 } },
-            { "contact_number", new[] { 0.740, 0.285, 0.225, 0.028 } },
-            { "emergency_name", new[] { 0.170, 0.315, 0.160, 0.028 } },
-            { "emergency_relationship", new[] { 0.395, 0.315, 0.100, 0.028 } },
-            { "emergency_address", new[] { 0.535, 0.315, 0.215, 0.028 } },
-            { "emergency_number", new[] { 0.810, 0.315, 0.155, 0.028 } },
-            { "circumstances_section", new[] { 0.029, 0.345, 0.930, 0.142 } }
-        };
-
-        private void WireFieldEditEvents()
-        {
-            var fieldTextBoxes = new (TextBox box, Border badge, TextBlock txt, string key)[]
-            {
-                (TxtLastName, Badge_LastName, TxtConf_LastName, "last_name"),
-                (TxtFirstName, Badge_FirstName, TxtConf_FirstName, "first_name"),
-                (TxtMiddleName, Badge_MiddleName, TxtConf_MiddleName, "middle_name"),
-                (TxtBirthplace, Badge_Birthplace, TxtConf_Birthplace, "birthplace"),
-                (TxtPhilSysNumber, Badge_PhilSysNumber, TxtConf_PhilSysNumber, "philsys_number"),
-                (TxtAddress, Badge_Address, TxtConf_Address, "address"),
-                (TxtBarangay, Badge_Barangay, TxtConf_Barangay, "barangay"),
-                (TxtMonthlyIncome, Badge_MonthlyIncome, TxtConf_MonthlyIncome, "monthly_income"),
-                (TxtOccupation, Badge_Occupation, TxtConf_Occupation, "occupation"),
-                (TxtContactNumber, Badge_ContactNumber, TxtConf_ContactNumber, "contact_number"),
-                (TxtEmergencyName, Badge_EmergencyName, TxtConf_EmergencyName, "emergency_name"),
-                (TxtEmergencyAddress, Badge_EmergencyAddress, TxtConf_EmergencyAddress, "emergency_address"),
-                (TxtEmergencyNumber, Badge_EmergencyNumber, TxtConf_EmergencyNumber, "emergency_number"),
-            };
-
-            foreach (var item in fieldTextBoxes)
-            {
-                var capturedBadge = item.badge;
-                var capturedTxt = item.txt;
-                var capturedKey = item.key;
-
-                item.box.TextChanged += (s, e) =>
-                {
-                    if (capturedBadge.Visibility == Visibility.Visible && capturedTxt.Text != "Edited")
-                    {
-                        capturedBadge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EBF5FB"));
-                        capturedTxt.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2980B9"));
-                        capturedTxt.Text = "Edited";
-                        capturedBadge.ToolTip = "Field was modified by caseworker.";
-                    }
-                };
-
-                item.box.GotFocus += (s, e) => FocusOnField(capturedKey);
-                item.box.PreviewMouseDown += (s, e) => FocusOnField(capturedKey);
+                DialogShell.MaxHeight = Math.Min(screenH * 0.95, 760);
+                DialogShell.Height    = Math.Min(screenH * 0.90, 730);
+                DialogShell.Width     = Math.Min(screenW * 0.95, 1360);
+                DialogShell.MinWidth  = Math.Min(screenW * 0.90, 1050);
             }
-
-            CmbBirthMonth.GotFocus += (s, e) => FocusOnField("birthdate");
-            CmbBirthDay.GotFocus += (s, e) => FocusOnField("birthdate");
-            TxtBirthYear.GotFocus += (s, e) => FocusOnField("birthdate");
-
-            WireComboEditEvents(CmbExtension, Badge_Extension, TxtConf_Extension, "ext_name");
-            WireComboEditEvents(CmbSex, Badge_Sex, TxtConf_Sex, "sex");
-            WireComboEditEvents(CmbCivilStatus, Badge_CivilStatus, TxtConf_CivilStatus, "civil_status");
-            WireComboEditEvents(CmbEducationalAttainment, Badge_EducationalAttainment, TxtConf_EducationalAttainment, "educational_attainment");
-            WireComboEditEvents(CmbReligion, Badge_Religion, TxtConf_Religion, "religion");
-            WireComboEditEvents(CmbEmploymentStatus, Badge_EmploymentStatus, TxtConf_EmploymentStatus, "employment_status");
-            WireComboEditEvents(CmbEmergencyRelationship, Badge_EmergencyRelationship, TxtConf_EmergencyRelationship, "emergency_relationship");
-
-            CmbCircumstance.GotFocus += (s, e) => FocusOnField("circumstances_section");
-            TxtA2Cause.GotFocus += (s, e) => FocusOnField("circ_a2_cause");
-            TxtA2Date.GotFocus += (s, e) => FocusOnField("circ_a2_date");
-            TxtA4Disability.GotFocus += (s, e) => FocusOnField("circ_a4_disability");
-            TxtA5Period.GotFocus += (s, e) => FocusOnField("circ_a5_period");
-            TxtBStayAbroad.GotFocus += (s, e) => FocusOnField("circ_b_stay");
-            ChkA6Nullity.GotFocus += (s, e) => FocusOnField("circ_a6_nullity");
-            ChkA6Annulment.GotFocus += (s, e) => FocusOnField("circ_a6_annulment");
         }
 
-        private void WireComboEditEvents(ComboBox cmb, Border badge, TextBlock txt, string key)
+        private void Window_Closing(object sender, CancelEventArgs e)
         {
-            if (cmb == null) return;
-            cmb.SelectionChanged += (s, e) =>
+            if (_savedSuccessfully) return;
+            if (!HasAnyInput()) return;
+
+            var result = MessageBox.Show(
+                "You have unsaved information in this OCR session.\n\nDiscard and close?",
+                "Unsaved Changes",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question,
+                MessageBoxResult.No);
+
+            if (result == MessageBoxResult.No)
+                e.Cancel = true;
+        }
+
+        private bool HasAnyInput()
+        {
+            return !string.IsNullOrWhiteSpace(TxtLastName?.Text) ||
+                   !string.IsNullOrWhiteSpace(TxtFirstName?.Text) ||
+                   !string.IsNullOrWhiteSpace(_currentImagePath);
+        }
+
+        #region Server Health Check
+ 
+         private enum OcrEngineState
+         {
+             Loading,
+             Ready,
+             Failed
+         }
+
+         private void UpdateEngineStatus(OcrEngineState state, string message)
+         {
+             Color dotColor;
+             switch (state)
+             {
+                 case OcrEngineState.Ready:
+                     dotColor = (Color)ColorConverter.ConvertFromString("#10B981"); // Vibrant Green
+                     break;
+                 case OcrEngineState.Loading:
+                     dotColor = (Color)ColorConverter.ConvertFromString("#F59E0B"); // Orange
+                     break;
+                 case OcrEngineState.Failed:
+                 default:
+                     dotColor = (Color)ColorConverter.ConvertFromString("#EF4444"); // Red
+                     break;
+             }
+
+             ServerStatusBadge.Background = new SolidColorBrush(dotColor);
+             if (ServerStatusBadge.Effect is System.Windows.Media.Effects.DropShadowEffect glow)
+             {
+                 glow.Color = dotColor;
+             }
+
+             var tip = new ToolTip
+             {
+                 Content = message,
+                 FontSize = 11,
+                 FontWeight = FontWeights.SemiBold,
+                 Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E2E")),
+                 Foreground = Brushes.White,
+                 BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#333344")),
+                 BorderThickness = new Thickness(1),
+                 Padding = new Thickness(8, 5, 8, 5)
+             };
+             ServerStatusBadge.ToolTip = tip;
+         }
+
+         private async void CheckServerHealth()
+         {
+             UpdateEngineStatus(OcrEngineState.Loading, "OCR Engine: Checking Status...");
+
+             bool online = await OcrService.IsServerOnlineAsync();
+             if (!online)
+             {
+                 UpdateEngineStatus(OcrEngineState.Loading, "OCR Engine: Warming Up Engine...");
+                 online = await OcrService.EnsureServerRunningAsync(25);
+             }
+
+             if (online)
+             {
+                 UpdateEngineStatus(OcrEngineState.Ready, "OCR Engine: Ready (Online) - Click to re-check");
+             }
+             else
+             {
+                 UpdateEngineStatus(OcrEngineState.Failed, "OCR Engine: Not Ready / Offline (Click to retry)");
+             }
+         }
+
+         private void ServerStatusBadge_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+         {
+             CheckServerHealth();
+         }
+
+         #endregion
+
+        #region Step Navigation
+
+        private void Step1Header_Click(object sender, MouseButtonEventArgs e)
+        {
+            ValidationMessage.Visibility = Visibility.Collapsed;
+            GoToStep(1);
+        }
+
+        private void Step2Header_Click(object sender, MouseButtonEventArgs e)
+        {
+            ValidationMessage.Visibility = Visibility.Collapsed;
+            if (!ValidateStep1()) return;
+            GoToStep(2);
+        }
+
+        private void Next_Click(object sender, RoutedEventArgs e)
+        {
+            ValidationMessage.Visibility = Visibility.Collapsed;
+            if (!ValidateStep1()) return;
+            GoToStep(2);
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            ValidationMessage.Visibility = Visibility.Collapsed;
+            GoToStep(1);
+        }
+
+        private void GoToStep(int step)
+        {
+            _currentStep = step;
+            bool onStep1 = step == 1;
+
+            ScrollStep1.Visibility = onStep1 ? Visibility.Visible  : Visibility.Collapsed;
+            ScrollStep2.Visibility = onStep1 ? Visibility.Collapsed : Visibility.Visible;
+            BtnNext.Visibility     = onStep1 ? Visibility.Visible  : Visibility.Collapsed;
+            BtnSave.Visibility     = onStep1 ? Visibility.Collapsed : Visibility.Visible;
+            BtnBack.Visibility     = onStep1 ? Visibility.Collapsed : Visibility.Visible;
+
+            Step1Dot.Background = onStep1
+                ? new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43))
+                : new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
+
+            if (!onStep1)
             {
-                if (badge != null && badge.Visibility == Visibility.Visible && txt != null && txt.Text != "Edited")
+                Step2Dot.Background      = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
+                Step2DotLabel.Foreground = new SolidColorBrush(Colors.White);
+                Step2Title.Foreground    = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
+            }
+            else
+            {
+                Step2Dot.Background      = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
+                Step2DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
+                Step2Title.Foreground    = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
+            }
+        }
+
+        #endregion
+
+        #region Live Field-Sync Focus
+
+        private void Field_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement elem && elem.Tag is string tag && !string.IsNullOrEmpty(tag))
+            {
+                FocusOnField(ResolveDynamicTag(elem, tag));
+            }
+        }
+
+        private void Field_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement elem && elem.Tag is string tag && !string.IsNullOrEmpty(tag))
+            {
+                FocusOnField(ResolveDynamicTag(elem, tag));
+            }
+        }
+
+        private string ResolveDynamicTag(FrameworkElement elem, string tag)
+        {
+            if (tag.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase) && elem.DataContext is FamilyMemberRow row)
+            {
+                int rIndex = _familyRowData.IndexOf(row);
+                if (rIndex >= 0)
                 {
-                    badge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EBF5FB"));
-                    txt.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2980B9"));
-                    txt.Text = "Edited";
-                    badge.ToolTip = "Field was modified by caseworker.";
+                    var parts = tag.Split('_');
+                    string col = parts[parts.Length - 1];
+                    return $"fam_row{rIndex + 1}_{col}";
                 }
-            };
-            cmb.GotFocus += (s, e) => FocusOnField(key);
+            }
+            return tag;
         }
 
-        #region Document Upload & Auto-Extraction
+        private void DatePicker_CalendarOpened(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement elem && elem.Tag is string tag && !string.IsNullOrEmpty(tag))
+            {
+                FocusOnField(tag);
+            }
+        }
+
+        private void FocusOnField(string fieldKey)
+        {
+            if (string.IsNullOrEmpty(fieldKey)) return;
+
+            if (ImgDocument.Source == null || ImgDocument.ActualWidth <= 0 || ImgDocument.ActualHeight <= 0)
+                return;
+
+            // Normalize aliases to their canonical template keys
+            string key = fieldKey.Trim().ToLowerInvariant();
+            if (key == "dob") key = "birthdate";
+            else if (key == "date_of_application") key = "application_date";
+            else if (key == "needs_and_problems") key = "needs";
+            else if (key == "other_sources_of_income") key = "other_income";
+            else if (key == "employed") key = "is_employed";
+            else if (key == "self_employed") key = "is_self_employed";
+            else if (key == "not_employed") key = "is_not_employed";
+
+            double[] bbox = null;
+
+            // 1. Primary: Use the adjusted bbox returned by the OCR engine for this document
+            if (_ocrResponse?.Fields != null && _ocrResponse.Fields.TryGetValue(key, out var fieldRes) && fieldRes.Bbox != null && fieldRes.Bbox.Length == 4)
+            {
+                bbox = fieldRes.Bbox;
+            }
+            // 2. Secondary: Use the template bbox loaded from cswdo_template.json (strictly adheres to user adjustments)
+            else if (_fieldBBoxes.TryGetValue(key, out var defBbox) && defBbox != null && defBbox.Length == 4)
+            {
+                bbox = defBbox;
+            }
+            // 3. Fallback for individual checkboxes if only parent employment_status was configured
+            else if ((key == "is_employed" || key == "is_self_employed" || key == "is_not_employed") && _fieldBBoxes.TryGetValue("employment_status", out var empParent))
+            {
+                double px = empParent[0], py = empParent[1], pw = empParent[2], ph = empParent[3];
+                if (key == "is_employed") bbox = new[] { px + pw * 0.07, py + ph * 0.35, pw * 0.05, ph * 0.50 };
+                else if (key == "is_self_employed") bbox = new[] { px + pw * 0.33, py + ph * 0.35, pw * 0.05, ph * 0.50 };
+                else if (key == "is_not_employed") bbox = new[] { px + pw * 0.66, py + ph * 0.35, pw * 0.06, ph * 0.50 };
+            }
+
+            if (bbox == null || bbox.Length < 4) return;
+
+            double imgW = ImgDocument.ActualWidth;
+            double imgH = ImgDocument.ActualHeight;
+
+            HighlightCanvas.Children.Clear();
+            double boxX = bbox[0] * imgW;
+            double boxY = bbox[1] * imgH;
+            double boxW = bbox[2] * imgW;
+            double boxH = bbox[3] * imgH;
+
+            var rect = new System.Windows.Shapes.Rectangle
+            {
+                Width = Math.Max(24, boxW + 8),
+                Height = Math.Max(18, boxH + 6),
+                Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943")),
+                StrokeThickness = 3.0,
+                StrokeDashArray = new DoubleCollection { 4, 2 },
+                Fill = new SolidColorBrush(Color.FromArgb(40, 112, 41, 67)),
+                RadiusX = 4,
+                RadiusY = 4
+            };
+            Canvas.SetLeft(rect, Math.Max(0, boxX - 4));
+            Canvas.SetTop(rect, Math.Max(0, boxY - 3));
+            HighlightCanvas.Children.Add(rect);
+
+            _zoomFactor = 2.8;
+            ApplyZoom();
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                double targetCenterX = (boxX + boxW / 2.0) * _zoomFactor;
+                double targetCenterY = (boxY + boxH / 2.0) * _zoomFactor;
+
+                double scrollX = targetCenterX - (DocScrollViewer.ViewportWidth / 2.0);
+                double scrollY = targetCenterY - (DocScrollViewer.ViewportHeight / 2.0);
+
+                DocScrollViewer.ScrollToHorizontalOffset(Math.Max(0, scrollX));
+                DocScrollViewer.ScrollToVerticalOffset(Math.Max(0, scrollY));
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        #endregion
+
+        #region Document Upload & OCR Processing
+
+        private void ScannerSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new ScannerSettingsDialog(_scannerSettings) { Owner = this };
+            if (dlg.ShowDialog() == true)
+            {
+                _scannerSettings = dlg.Settings;
+                _scannerSettings.Save();
+                UpdateScannerStatusBadge();
+            }
+        }
+
+        private void UpdateScannerStatusBadge()
+        {
+            if (TxtScannerStatusBadge != null)
+            {
+                string dev = string.IsNullOrWhiteSpace(_scannerSettings.DeviceName) ? "Auto-detect" : _scannerSettings.DeviceName;
+                TxtScannerStatusBadge.Text = $"Status: {dev} ({_scannerSettings.Dpi} DPI - {_scannerSettings.ColorMode})";
+            }
+        }
+
+        private async void ScanHardware_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (BtnScanHardware != null) BtnScanHardware.IsEnabled = false;
+                if (BtnSelectImage != null) BtnSelectImage.IsEnabled = false;
+                if (BtnScannerSettings != null) BtnScannerSettings.IsEnabled = false;
+
+                OverlayProcessing.Visibility = Visibility.Visible;
+                OcrStageProgressBar.Value = 5;
+                TxtProcessingStep.Text = "Step 1 of 4: Scanner Hardware Acquisition";
+                TxtCurrentExtractingField.Text = "Connecting to scanner device...";
+                TxtLiveElapsedTime.Text = "0.0s";
+
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+                string scannedFile = await WiaScannerService.ScanDocumentAsync(
+                    _scannerSettings,
+                    status => Dispatcher.Invoke(() =>
+                    {
+                        TxtCurrentExtractingField.Text = status;
+                        TxtLiveElapsedTime.Text = $"{stopwatch.Elapsed.TotalSeconds:F1}s";
+                    })
+                );
+
+                stopwatch.Stop();
+
+                if (!string.IsNullOrEmpty(scannedFile) && File.Exists(scannedFile))
+                {
+                    await ProcessDocumentAsync(scannedFile);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                OverlayProcessing.Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                OverlayProcessing.Visibility = Visibility.Collapsed;
+                MessageBox.Show(
+                    $"Scanner Notice:\n\n{ex.Message}\n\nYou can also click 'Upload File' if you already have a scanned image.",
+                    "Scanner Communication Notice",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+            finally
+            {
+                if (BtnScanHardware != null) BtnScanHardware.IsEnabled = true;
+                if (BtnSelectImage != null) BtnSelectImage.IsEnabled = true;
+                if (BtnScannerSettings != null) BtnScannerSettings.IsEnabled = true;
+            }
+        }
 
         private async void SelectImage_Click(object sender, RoutedEventArgs e)
         {
@@ -210,6 +482,7 @@ namespace SOLUM_UI
             var configWin = new OcrTemplateConfigWindow(_currentImagePath) { Owner = this };
             if (configWin.ShowDialog() == true)
             {
+                _fieldBBoxes = OcrService.GetTemplateBoundingBoxes();
                 if (!string.IsNullOrEmpty(_currentImagePath) && File.Exists(_currentImagePath))
                 {
                     await ProcessDocumentAsync(_currentImagePath);
@@ -220,14 +493,15 @@ namespace SOLUM_UI
         private async Task ProcessDocumentAsync(string imagePath)
         {
             _currentImagePath = imagePath;
-            TxtImageStatus.Text = System.IO.Path.GetFileName(imagePath);
+
+            if (EmptyCanvasState != null)
+                EmptyCanvasState.Visibility = Visibility.Collapsed;
 
             OverlayProcessing.Visibility = Visibility.Visible;
             OcrStageProgressBar.Value = 15;
             TxtProcessingStep.Text = "Step 1 of 4: Preprocessing & Contrast Enhancement";
             TxtCurrentExtractingField.Text = "Deskewing and enhancing document contrast...";
 
-            // Load initial bitmap on UI thread
             var bitmap = new BitmapImage();
             bitmap.BeginInit();
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
@@ -237,11 +511,13 @@ namespace SOLUM_UI
             ImgDocument.Width = DocScrollViewer.ActualWidth > 50 ? DocScrollViewer.ActualWidth - 20 : 440;
             ZoomFit_Click(null, null);
 
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            TxtLiveElapsedTime.Text = "0.0s";
+
             try
             {
                 using (var cts = new CancellationTokenSource())
                 {
-                    // Simulated visual step ticker during async server extraction
                     var progressTask = Task.Run(async () =>
                     {
                         var steps = new[]
@@ -250,37 +526,45 @@ namespace SOLUM_UI
                             (45, "Step 2 of 4: Reading Form Template Bounding Boxes", "Extracting Demographics & Barangay..."),
                             (65, "Step 2 of 4: Reading Form Template Bounding Boxes", "Extracting Socioeconomic & Emergency Contact..."),
                             (80, "Step 3 of 4: Analyzing Encircled Circumstances", "Detecting pen marks in Section II..."),
-                            (90, "Step 3 of 4: Reading Family Dependents Table", "Extracting child records from Section V..."),
+                            (90, "Step 3 of 4: Reading Family Dependents Table", "Extracting child records from Section III..."),
                             (95, "Step 4 of 4: Finalizing Extraction", "Applying confidence scores and normalizations...")
                         };
 
-                        foreach (var step in steps)
+                        int stepIdx = 0;
+                        while (!cts.Token.IsCancellationRequested)
                         {
+                            await Task.Delay(100, cts.Token).ConfigureAwait(false);
                             if (cts.Token.IsCancellationRequested) break;
-                            await Task.Delay(350, cts.Token).ConfigureAwait(false);
-                            if (cts.Token.IsCancellationRequested) break;
+
+                            int idx = Math.Min(stepIdx / 4, steps.Length - 1);
+                            var curStep = steps[idx];
+                            stepIdx++;
 
                             await Dispatcher.InvokeAsync(() =>
                             {
-                                OcrStageProgressBar.Value = step.Item1;
-                                TxtProcessingStep.Text = step.Item2;
-                                TxtCurrentExtractingField.Text = step.Item3;
+                                OcrStageProgressBar.Value = curStep.Item1;
+                                TxtProcessingStep.Text = curStep.Item2;
+                                TxtCurrentExtractingField.Text = curStep.Item3;
+                                TxtLiveElapsedTime.Text = $"{stopwatch.Elapsed.TotalSeconds:F1}s";
                             });
                         }
                     }, cts.Token);
 
-                    // Execute actual OCR backend request
-                    _ocrResponse = await OcrService.ExtractFormAsync(imagePath);
+                    _ocrResponse = await OcrService.ExtractFormAsync(imagePath, "global");
                     cts.Cancel();
                 }
 
-                // Finalize UI
+                stopwatch.Stop();
+                if (_ocrResponse != null && _ocrResponse.ExecutionTimeSeconds <= 0)
+                {
+                    _ocrResponse.ExecutionTimeSeconds = Math.Round(stopwatch.Elapsed.TotalSeconds, 2);
+                }
+
                 OcrStageProgressBar.Value = 100;
                 TxtProcessingStep.Text = "Step 4 of 4: Complete!";
                 TxtCurrentExtractingField.Text = "Extracted all fields with confidence scores.";
                 await Task.Delay(200);
 
-                // If backend returned preprocessed/deskewed image, use it
                 if (!string.IsNullOrEmpty(_ocrResponse.PreviewImageBase64))
                 {
                     byte[] bytes = Convert.FromBase64String(_ocrResponse.PreviewImageBase64);
@@ -295,7 +579,6 @@ namespace SOLUM_UI
                     }
                 }
 
-                // Populate Fields, Circumstances, Confidence Badges, & Dependents DataGrid
                 PopulateHitlFields(_ocrResponse);
             }
             catch (Exception ex)
@@ -311,317 +594,199 @@ namespace SOLUM_UI
         private void PopulateHitlFields(OcrFormResponse resp)
         {
             if (resp == null) return;
-
-            // Overall Confidence Banner
-            int pct = (int)(resp.OverallConfidence * 100);
-            TxtOverallConfidence.Text = pct + "% " + resp.OverallRating;
-            BadgeOverallConfidence.Background = resp.OverallConfidence >= 0.80 
-                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"))
-                : (resp.OverallConfidence >= 0.50 
-                    ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1"))
-                    : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEBEE")));
-
-            // Section 1: Personal Info
-            TxtLastName.Text          = GetVal(resp, "last_name");
-            TxtFirstName.Text         = GetVal(resp, "first_name");
-            TxtMiddleName.Text        = GetVal(resp, "middle_name");
-            CmbExtension.Text         = OcrService.FuzzyMatchExtension(GetVal(resp, "ext_name"));
-            
-            string dobRaw = GetVal(resp, "birthdate");
-            if (OcrService.TryParseOcrDate(dobRaw, out DateTime parsedDob))
+            _isPopulating = true;
+            try
             {
-                SetBirthdateFields(parsedDob);
-                TxtWarn_Birthdate.Visibility = Visibility.Collapsed;
+                int pct = (int)(resp.OverallConfidence * 100);
+                TxtOverallConfBadge.Text = $"Overall AI Confidence: {pct}% ({resp.OverallRating})";
+
+                // Step 1: Identifying Information
+                string appDateRaw = GetVal(resp, "application_date");
+                if (OcrService.TryParseOcrDate(appDateRaw, out DateTime parsedAppDate))
+                {
+                    DpDateOfApplication.SelectedDate = parsedAppDate;
+                }
+
+                TxtLastName.Text     = OcrService.CleanPersonName(GetVal(resp, "last_name"));
+                TxtFirstName.Text    = OcrService.CleanPersonName(GetVal(resp, "first_name"));
+                TxtMiddleName.Text   = OcrService.CleanPersonName(GetVal(resp, "middle_name"));
+                TxtExtension.Text    = OcrService.FuzzyMatchExtension(GetVal(resp, "ext_name"));
+                TxtPlaceOfBirth.Text = GetVal(resp, "birthplace");
+
+                SetComboByContent(CmbCivilStatus, OcrService.FuzzyMatchCivilStatus(GetVal(resp, "civil_status")));
+                SetComboByContent(CmbSex,         OcrService.FuzzyMatchSex(GetVal(resp, "sex")));
+                SetComboByContent(CmbEducation,   OcrService.FuzzyMatchEducation(GetVal(resp, "educational_attainment")));
+
+                string dobRaw = GetVal(resp, "birthdate");
+                if (OcrService.TryParseOcrDate(dobRaw, out DateTime parsedDob))
+                {
+                    DpBirthdate.SelectedDate = parsedDob;
+                    UpdateAge(parsedDob);
+                }
+                else
+                {
+                    DpBirthdate.SelectedDate = null;
+                    UpdateAge(null);
+                }
+
+                TxtPhilSys.Text       = GetVal(resp, "philsys_number");
+                TxtReligion.Text      = OcrService.FuzzyMatchReligion(GetVal(resp, "religion"));
+                TxtOccupation.Text    = GetVal(resp, "occupation");
+                TxtMonthlyIncome.Text = OcrService.FuzzyMatchIncome(GetVal(resp, "monthly_income"));
+
+                string empRaw = GetVal(resp, "employment_status").ToLower();
+                ChkEmployed.IsChecked     = empRaw.Contains("employed") && !empRaw.Contains("not") && !empRaw.Contains("unemployed") && !empRaw.Contains("self");
+                ChkSelfEmployed.IsChecked = empRaw.Contains("self");
+                ChkNotEmployed.IsChecked  = empRaw.Contains("not") || empRaw.Contains("unemployed");
+
+                TxtAddress.Text   = GetVal(resp, "address");
+                TxtBarangay.Text  = OcrService.FuzzyMatchBarangay(GetVal(resp, "barangay"));
+                TxtContact.Text   = OcrService.FormatPhoneNumber(GetVal(resp, "contact_number"));
+
+                TxtEmergencyContact.Text = OcrService.CleanPersonName(GetVal(resp, "emergency_name"));
+                TxtRelationship.Text     = OcrService.FuzzyMatchRelationship(GetVal(resp, "emergency_relationship"));
+                TxtEmergencyAddress.Text = GetVal(resp, "emergency_address");
+                TxtEmergencyNumber.Text  = OcrService.FormatPhoneNumber(GetVal(resp, "emergency_number"));
+
+                // Confidence Badges
+                SetFieldConfidence("application_date", Badge_AppDate, TxtConf_AppDate, resp);
+                SetFieldConfidence("last_name", Badge_LastName, TxtConf_LastName, resp);
+                SetFieldConfidence("first_name", Badge_FirstName, TxtConf_FirstName, resp);
+                SetFieldConfidence("middle_name", Badge_MiddleName, TxtConf_MiddleName, resp);
+                SetFieldConfidence("ext_name", Badge_Extension, TxtConf_Extension, resp);
+                SetFieldConfidence("civil_status", Badge_CivilStatus, TxtConf_CivilStatus, resp);
+                SetFieldConfidence("sex", Badge_Sex, TxtConf_Sex, resp);
                 SetFieldConfidence("birthdate", Badge_Birthdate, TxtConf_Birthdate, resp);
-            }
-            else
-            {
-                SetBirthdateFields(null);
-                if (!string.IsNullOrWhiteSpace(dobRaw))
+                SetFieldConfidence("birthplace", Badge_Birthplace, TxtConf_Birthplace, resp);
+                SetFieldConfidence("educational_attainment", Badge_Education, TxtConf_Education, resp);
+                SetFieldConfidence("philsys_number", Badge_PhilSys, TxtConf_PhilSys, resp);
+                SetFieldConfidence("religion", Badge_Religion, TxtConf_Religion, resp);
+                SetFieldConfidence("occupation", Badge_Occupation, TxtConf_Occupation, resp);
+                SetFieldConfidence("monthly_income", Badge_MonthlyIncome, TxtConf_MonthlyIncome, resp);
+                SetFieldConfidence("employment_status", Badge_EmploymentStatus, TxtConf_EmploymentStatus, resp);
+                SetFieldConfidence("address", Badge_Address, TxtConf_Address, resp);
+                SetFieldConfidence("barangay", Badge_Barangay, TxtConf_Barangay, resp);
+                SetFieldConfidence("contact_number", Badge_Contact, TxtConf_Contact, resp);
+                SetFieldConfidence("emergency_name", Badge_EmergencyContact, TxtConf_EmergencyContact, resp);
+                SetFieldConfidence("emergency_relationship", Badge_Relationship, TxtConf_Relationship, resp);
+                SetFieldConfidence("emergency_number", Badge_EmergencyNumber, TxtConf_EmergencyNumber, resp);
+                SetFieldConfidence("emergency_address", Badge_EmergencyAddress, TxtConf_EmergencyAddress, resp);
+
+                // Step 2: Circumstances
+                if (resp.Circumstance != null && resp.Circumstance.Detected && !string.IsNullOrEmpty(resp.Circumstance.Code))
                 {
-                    TxtWarn_Birthdate.Visibility = Visibility.Visible;
-                    Badge_Birthdate.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEBEE"));
-                    TxtConf_Birthdate.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C0392B"));
-                    TxtConf_Birthdate.Text = "Review";
-                    Badge_Birthdate.ToolTip = $"Unrecognized OCR date text: '{dobRaw}'. Please select Month, Day, and Year manually.";
-                    Badge_Birthdate.Visibility = Visibility.Visible;
+                    if (BadgeCircumstanceDetected != null && TxtCircumstanceBadge != null)
+                    {
+                        BadgeCircumstanceDetected.Visibility = Visibility.Visible;
+                        int cConf = (int)(resp.Circumstance.Confidence * 100);
+                        TxtCircumstanceBadge.Text = $"● Detected: {resp.Circumstance.Code} ({cConf}%)";
+                    }
+
+                    string code = resp.Circumstance.Code.ToUpper();
+                    ChkA1.IsChecked = (code == "A1");
+                    ChkA2.IsChecked = (code == "A2");
+                    ChkA3.IsChecked = (code == "A3");
+                    ChkA4.IsChecked = (code == "A4");
+                    ChkA5.IsChecked = (code == "A5");
+                    ChkA6.IsChecked = (code == "A6");
+                    ChkA7.IsChecked = (code == "A7");
+                    ChkB.IsChecked  = (code == "B");
+                    ChkC.IsChecked  = (code == "C");
+                    ChkD.IsChecked  = (code == "D");
+                    ChkE.IsChecked  = (code == "E");
+                    ChkF.IsChecked  = (code == "F");
+
+                    if (ChkA2.IsChecked == true)
+                    {
+                        TxtA2Cause.Text = resp.Circumstance.SubfieldCause ?? string.Empty;
+                        if (OcrService.TryParseOcrDate(resp.Circumstance.SubfieldDate, out var dDate))
+                            DpA2Date.SelectedDate = dDate;
+                    }
+                    if (ChkA4.IsChecked == true)
+                    {
+                        TxtA4Disability.Text = resp.Circumstance.SubfieldDisability ?? string.Empty;
+                    }
+                    if (ChkA5.IsChecked == true)
+                    {
+                        TxtA5Period.Text = resp.Circumstance.SubfieldPeriod ?? string.Empty;
+                    }
+                    if (ChkB.IsChecked == true)
+                    {
+                        TxtBStayAbroad.Text = resp.Circumstance.SubfieldStayAbroad ?? string.Empty;
+                    }
                 }
                 else
                 {
-                    TxtWarn_Birthdate.Visibility = Visibility.Collapsed;
-                    Badge_Birthdate.Visibility = Visibility.Collapsed;
+                    if (BadgeCircumstanceDetected != null) BadgeCircumstanceDetected.Visibility = Visibility.Collapsed;
                 }
-            }
+                Circumstance_Changed(null, null);
 
-            TxtBirthplace.Text            = GetVal(resp, "birthplace");
-            CmbSex.Text                   = OcrService.FuzzyMatchSex(GetVal(resp, "sex"));
-            CmbCivilStatus.Text           = OcrService.FuzzyMatchCivilStatus(GetVal(resp, "civil_status"));
-            CmbEducationalAttainment.Text = OcrService.FuzzyMatchEducation(GetVal(resp, "educational_attainment"));
-            CmbReligion.Text              = OcrService.FuzzyMatchReligion(GetVal(resp, "religion"));
-            TxtPhilSysNumber.Text         = GetVal(resp, "philsys_number");
-
-            SetFieldConfidence("last_name", Badge_LastName, TxtConf_LastName, resp);
-            SetFieldConfidence("first_name", Badge_FirstName, TxtConf_FirstName, resp);
-            SetFieldConfidence("middle_name", Badge_MiddleName, TxtConf_MiddleName, resp);
-            SetFieldConfidence("ext_name", Badge_Extension, TxtConf_Extension, resp);
-            SetFieldConfidence("birthplace", Badge_Birthplace, TxtConf_Birthplace, resp);
-            SetFieldConfidence("sex", Badge_Sex, TxtConf_Sex, resp);
-            SetFieldConfidence("civil_status", Badge_CivilStatus, TxtConf_CivilStatus, resp);
-            SetFieldConfidence("educational_attainment", Badge_EducationalAttainment, TxtConf_EducationalAttainment, resp);
-            SetFieldConfidence("religion", Badge_Religion, TxtConf_Religion, resp);
-            SetFieldConfidence("philsys_number", Badge_PhilSysNumber, TxtConf_PhilSysNumber, resp);
-
-            // Section 2: Encircled Circumstance
-            if (resp.Circumstance != null && resp.Circumstance.Detected && !string.IsNullOrEmpty(resp.Circumstance.Code))
-            {
-                BadgeCircumstanceDetected.Visibility = Visibility.Visible;
-                int confPct = (int)(resp.Circumstance.Confidence * 100);
-                TxtCircumstanceBadge.Text = $"● Encircled: {resp.Circumstance.Code} ({confPct}%)";
-                CmbCircumstance.SelectedValue = resp.Circumstance.Code;
-                UpdateCircumstanceSubfield(resp.Circumstance.Code);
-
-                // Populate any detected sub-fields
-                if (!string.IsNullOrEmpty(resp.Circumstance.SubfieldCause)) TxtA2Cause.Text = resp.Circumstance.SubfieldCause;
-                if (!string.IsNullOrEmpty(resp.Circumstance.SubfieldDate)) TxtA2Date.Text = resp.Circumstance.SubfieldDate;
-                if (!string.IsNullOrEmpty(resp.Circumstance.SubfieldDisability)) TxtA4Disability.Text = resp.Circumstance.SubfieldDisability;
-                if (!string.IsNullOrEmpty(resp.Circumstance.SubfieldPeriod)) TxtA5Period.Text = resp.Circumstance.SubfieldPeriod;
-                if (!string.IsNullOrEmpty(resp.Circumstance.SubfieldStayAbroad)) TxtBStayAbroad.Text = resp.Circumstance.SubfieldStayAbroad;
-                ChkA6Nullity.IsChecked = resp.Circumstance.SubfieldNullity;
-                ChkA6Annulment.IsChecked = resp.Circumstance.SubfieldAnnulment;
-            }
-            else
-            {
-                BadgeCircumstanceDetected.Visibility = Visibility.Collapsed;
-                CmbCircumstance.SelectedIndex = -1;
-                HideAllCircumstancePanels();
-            }
-
-            // Section 3: Address & Socioeconomic
-            TxtAddress.Text           = GetVal(resp, "address");
-            TxtBarangay.Text          = OcrService.FuzzyMatchBarangay(GetVal(resp, "barangay"));
-            TxtMonthlyIncome.Text     = OcrService.FuzzyMatchIncome(GetVal(resp, "monthly_income"));
-            TxtOccupation.Text        = GetVal(resp, "occupation");
-            TxtContactNumber.Text     = GetVal(resp, "contact_number");
-
-            string empRaw = GetVal(resp, "employment_status").ToLower();
-            if (empRaw.Contains("self"))
-                CmbEmploymentStatus.SelectedIndex = 1;
-            else if (empRaw.Contains("not") || empRaw.Contains("unemployed"))
-                CmbEmploymentStatus.SelectedIndex = 2;
-            else if (empRaw.Contains("employed"))
-                CmbEmploymentStatus.SelectedIndex = 0;
-            else
-                CmbEmploymentStatus.SelectedIndex = -1;
-
-            SetFieldConfidence("address", Badge_Address, TxtConf_Address, resp);
-            SetFieldConfidence("barangay", Badge_Barangay, TxtConf_Barangay, resp);
-            SetFieldConfidence("monthly_income", Badge_MonthlyIncome, TxtConf_MonthlyIncome, resp);
-            SetFieldConfidence("occupation", Badge_Occupation, TxtConf_Occupation, resp);
-            SetFieldConfidence("employment_status", Badge_EmploymentStatus, TxtConf_EmploymentStatus, resp);
-            SetFieldConfidence("contact_number", Badge_ContactNumber, TxtConf_ContactNumber, resp);
-
-            // Section 4: Emergency Contact
-            TxtEmergencyName.Text            = GetVal(resp, "emergency_name");
-            CmbEmergencyRelationship.Text    = OcrService.FuzzyMatchRelationship(GetVal(resp, "emergency_relationship"));
-            TxtEmergencyNumber.Text          = GetVal(resp, "emergency_number");
-            TxtEmergencyAddress.Text         = GetVal(resp, "emergency_address");
-
-            SetFieldConfidence("emergency_name", Badge_EmergencyName, TxtConf_EmergencyName, resp);
-            SetFieldConfidence("emergency_relationship", Badge_EmergencyRelationship, TxtConf_EmergencyRelationship, resp);
-            SetFieldConfidence("emergency_number", Badge_EmergencyNumber, TxtConf_EmergencyNumber, resp);
-            SetFieldConfidence("emergency_address", Badge_EmergencyAddress, TxtConf_EmergencyAddress, resp);
-
-            ValidatePhoneNumbers();
-
-            // Section 5: Populate Dependents Grid
-            _dependents.Clear();
-            if (resp.FamilyMembers != null && resp.FamilyMembers.Count > 0)
-            {
-                foreach (var m in resp.FamilyMembers)
+                // Step 2: Family Composition Table
+                _familyRowData.Clear();
+                if (resp.FamilyMembers != null && resp.FamilyMembers.Count > 0)
                 {
-                    _dependents.Add(m);
+                    foreach (var m in resp.FamilyMembers)
+                    {
+                        if (string.IsNullOrWhiteSpace(m.MemberName) || OcrService.IsOcrNotApplicable(m.MemberName))
+                            continue;
+
+                        _familyRowData.Add(new FamilyMemberRow
+                        {
+                            MemberName          = m.MemberName,
+                            Sex                 = OcrService.IsOcrNotApplicable(m.Sex) ? string.Empty : m.Sex,
+                            Age                 = OcrService.IsOcrNotApplicable(m.Age) ? string.Empty : m.Age,
+                            Birthdate           = OcrService.IsOcrNotApplicable(m.Birthdate) ? string.Empty : m.Birthdate,
+                            CivilStatus         = OcrService.IsOcrNotApplicable(m.CivilStatus) ? string.Empty : OcrService.FuzzyMatchCivilStatus(m.CivilStatus),
+                            Relationship        = OcrService.IsOcrNotApplicable(m.Relationship) ? string.Empty : OcrService.FuzzyMatchRelationship(m.Relationship),
+                            EducationEmployment = OcrService.IsOcrNotApplicable(m.EducationEmployment) ? string.Empty : m.EducationEmployment,
+                            Income              = OcrService.IsOcrNotApplicable(m.Income) ? "0" : OcrService.FuzzyMatchIncome(m.Income)
+                        });
+                    }
                 }
-            }
-        }
 
-        private void SetBirthdateFields(DateTime? dt)
-        {
-            if (dt.HasValue)
-            {
-                CmbBirthMonth.SelectedIndex = dt.Value.Month; // 1 to 12
-                CmbBirthDay.SelectedIndex = dt.Value.Day;     // 1 to 31
-                TxtBirthYear.Text = dt.Value.Year.ToString();
-                TxtWarn_Birthdate.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                CmbBirthMonth.SelectedIndex = 0;
-                CmbBirthDay.SelectedIndex = 0;
-                TxtBirthYear.Text = string.Empty;
-            }
-        }
-
-        private DateTime? GetSelectedBirthdate()
-        {
-            if (CmbBirthMonth == null || CmbBirthDay == null || TxtBirthYear == null) return null;
-            int m = CmbBirthMonth.SelectedIndex;
-            int d = CmbBirthDay.SelectedIndex;
-            if (m >= 1 && m <= 12 && d >= 1 && d <= 31 && int.TryParse(TxtBirthYear.Text?.Trim(), out int y) && y >= 1900 && y <= DateTime.Today.Year)
-            {
-                try
+                while (_familyRowData.Count < 5)
                 {
-                    return new DateTime(y, m, d);
+                    _familyRowData.Add(new FamilyMemberRow());
                 }
-                catch { }
+
+                // Step 2: Section IV Needs & Problems & Section V Other Sources of Income
+                TxtNeeds.Text = GetVal(resp, "needs");
+                TxtOtherIncome.Text = GetVal(resp, "other_income");
+                SetFieldConfidence("needs", Badge_Needs, TxtConf_Needs, resp);
+                SetFieldConfidence("other_income", Badge_OtherIncome, TxtConf_OtherIncome, resp);
+
+                SetComboByContent(CmbStatus, "Valid");
             }
-            return null;
-        }
-
-        private void BirthdateField_Changed(object sender, RoutedEventArgs e)
-        {
-            if (Badge_Birthdate == null || TxtConf_Birthdate == null || TxtWarn_Birthdate == null) return;
-            var dt = GetSelectedBirthdate();
-            if (dt.HasValue)
+            finally
             {
-                TxtWarn_Birthdate.Visibility = Visibility.Collapsed;
-                Badge_Birthdate.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
-                TxtConf_Birthdate.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
-                TxtConf_Birthdate.Text = "Edited";
-                Badge_Birthdate.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                if (CmbBirthMonth.SelectedIndex > 0 || CmbBirthDay.SelectedIndex > 0 || !string.IsNullOrWhiteSpace(TxtBirthYear.Text))
-                {
-                    TxtWarn_Birthdate.Visibility = Visibility.Visible;
-                    Badge_Birthdate.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEBEE"));
-                    TxtConf_Birthdate.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C0392B"));
-                    TxtConf_Birthdate.Text = "Review";
-                    Badge_Birthdate.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    TxtWarn_Birthdate.Visibility = Visibility.Collapsed;
-                    Badge_Birthdate.Visibility = Visibility.Collapsed;
-                }
-            }
-        }
-
-        private void FamilyMemberCell_GotFocus(object sender, RoutedEventArgs e)
-        {
-            if (sender is FrameworkElement elem && elem.Tag is string colKey)
-            {
-                var row = FindVisualParent<DataGridRow>(elem);
-                if (row != null)
-                {
-                    int rowIndex = row.GetIndex() + 1; // 1 to 5
-                    string targetFieldKey = $"fam_row{rowIndex}_{colKey}";
-                    FocusOnField(targetFieldKey);
-                }
-            }
-        }
-
-        private void FamilyMemberCell_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            FamilyMemberCell_GotFocus(sender, e);
-        }
-
-        private static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
-        {
-            if (child == null) return null;
-            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
-            if (parentObject == null) return null;
-            if (parentObject is T parent) return parent;
-            return FindVisualParent<T>(parentObject);
-        }
-
-        private void CmbCircumstance_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            string code = CmbCircumstance.SelectedValue?.ToString() ?? string.Empty;
-            UpdateCircumstanceSubfield(code);
-        }
-
-        private void HideAllCircumstancePanels()
-        {
-            if (PnlA2 != null) PnlA2.Visibility = Visibility.Collapsed;
-            if (PnlA4 != null) PnlA4.Visibility = Visibility.Collapsed;
-            if (PnlA5 != null) PnlA5.Visibility = Visibility.Collapsed;
-            if (PnlA6 != null) PnlA6.Visibility = Visibility.Collapsed;
-            if (PnlB != null) PnlB.Visibility = Visibility.Collapsed;
-        }
-
-        private void UpdateCircumstanceSubfield(string code)
-        {
-            HideAllCircumstancePanels();
-
-            if (code == "A2" && PnlA2 != null)
-                PnlA2.Visibility = Visibility.Visible;
-            else if (code == "A4" && PnlA4 != null)
-                PnlA4.Visibility = Visibility.Visible;
-            else if (code == "A5" && PnlA5 != null)
-                PnlA5.Visibility = Visibility.Visible;
-            else if (code == "A6" && PnlA6 != null)
-                PnlA6.Visibility = Visibility.Visible;
-            else if (code == "B" && PnlB != null)
-                PnlB.Visibility = Visibility.Visible;
-        }
-
-        private void CmbEmploymentStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-        }
-
-        private void TxtContactNumber_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ValidatePhoneNumbers();
-        }
-
-        private void TxtEmergencyNumber_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ValidatePhoneNumbers();
-        }
-
-        private void ValidatePhoneNumbers()
-        {
-            if (TxtWarn_ContactNumber != null && TxtContactNumber != null)
-            {
-                string digits = Regex.Replace(TxtContactNumber.Text ?? "", @"\D", "");
-                bool valid = string.IsNullOrEmpty(TxtContactNumber.Text) || (digits.Length == 11 && digits.StartsWith("09"));
-                TxtWarn_ContactNumber.Visibility = valid ? Visibility.Collapsed : Visibility.Visible;
-            }
-
-            if (TxtWarn_EmergencyNumber != null && TxtEmergencyNumber != null)
-            {
-                string digits = Regex.Replace(TxtEmergencyNumber.Text ?? "", @"\D", "");
-                bool valid = string.IsNullOrEmpty(TxtEmergencyNumber.Text) || (digits.Length == 11 && digits.StartsWith("09"));
-                TxtWarn_EmergencyNumber.Visibility = valid ? Visibility.Collapsed : Visibility.Visible;
+                _isPopulating = false;
             }
         }
 
         private void SetFieldConfidence(string key, Border badge, TextBlock txtBadge, OcrFormResponse resp)
         {
-            if (resp.Fields != null && resp.Fields.TryGetValue(key, out var f) && f.Confidence > 0)
-            {
-                badge.Visibility = Visibility.Visible;
-                int pct = (int)(f.Confidence * 100);
-                txtBadge.Text = $"{pct}%";
+            if (badge == null || txtBadge == null) return;
 
-                if (f.Confidence >= 0.80)
+            if (resp?.Fields != null && resp.Fields.TryGetValue(key, out var f) && f != null && !string.IsNullOrWhiteSpace(f.Value))
+            {
+                int confPct = (int)(f.Confidence * 100);
+                txtBadge.Text = $"{confPct}%";
+                badge.Visibility = Visibility.Visible;
+
+                if (confPct >= 80)
                 {
                     badge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
                     txtBadge.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
-                    badge.ToolTip = $"High Confidence ({pct}%): OCR strongly matched the handwritten stroke.";
                 }
-                else if (f.Confidence >= 0.50)
+                else if (confPct >= 50)
                 {
                     badge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF4E5"));
                     txtBadge.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D35400"));
-                    badge.ToolTip = $"Moderate Confidence ({pct}%): Please verify handwritten characters.";
                 }
                 else
                 {
                     badge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FDEDEC"));
                     txtBadge.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C0392B"));
-                    badge.ToolTip = $"Low Confidence ({pct}%): OCR had difficulty reading this field. Please check carefully.";
                 }
             }
             else
@@ -630,36 +795,570 @@ namespace SOLUM_UI
             }
         }
 
+        private void MarkBadgeEdited(Border badge, TextBlock txt)
+        {
+            if (_isPopulating || badge == null || txt == null) return;
+            badge.Visibility = Visibility.Visible;
+            badge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EBF5FB"));
+            txt.Text = "Edited";
+            txt.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2980B9"));
+        }
+
         private string GetVal(OcrFormResponse resp, string key)
         {
             if (resp?.Fields != null && resp.Fields.TryGetValue(key, out var f))
-                return f.Value ?? string.Empty;
+            {
+                string val = f.Value ?? string.Empty;
+                if (OcrService.IsOcrNotApplicable(val))
+                    return string.Empty;
+                return val;
+            }
             return string.Empty;
         }
 
-        private void AddDependent_Click(object sender, RoutedEventArgs e)
+        private void SetComboByContent(ComboBox combo, string value)
         {
-            _dependents.Add(new FamilyMember
+            if (string.IsNullOrWhiteSpace(value) || combo == null) return;
+            string val = value.Trim();
+
+            // 1. Exact match
+            foreach (ComboBoxItem item in combo.Items)
             {
-                MemberName = "New Dependent",
-                Relationship = "Child",
-                Age = "",
-                Sex = "Female",
-                CivilStatus = "Single",
-                Birthdate = "",
-                EducationEmployment = "",
-                Income = "0"
-            });
+                string text = item.Content?.ToString();
+                if (string.Equals(text, val, StringComparison.OrdinalIgnoreCase))
+                {
+                    combo.SelectedItem = item;
+                    return;
+                }
+            }
+
+            // 2. Normalized prefix / contains match (e.g. "College Level" or "BS Nursing" matches "College")
+            string valNorm = System.Text.RegularExpressions.Regex.Replace(val.ToLowerInvariant(), @"[^a-z0-9]", "");
+            foreach (ComboBoxItem item in combo.Items)
+            {
+                string text = item.Content?.ToString() ?? "";
+                string textNorm = System.Text.RegularExpressions.Regex.Replace(text.ToLowerInvariant(), @"[^a-z0-9]", "");
+                if (string.IsNullOrEmpty(textNorm)) continue;
+
+                if (valNorm.StartsWith(textNorm) || textNorm.StartsWith(valNorm) ||
+                    valNorm.Contains(textNorm) || textNorm.Contains(valNorm))
+                {
+                    combo.SelectedItem = item;
+                    return;
+                }
+            }
+        }
+
+        private string GetComboValue(ComboBox combo)
+        {
+            ComboBoxItem sel = combo?.SelectedItem as ComboBoxItem;
+            return sel?.Content?.ToString() ?? string.Empty;
         }
 
         #endregion
 
-        #region Zoom, Focus on Field & Drag Panning Controls
+        #region Form Event Handlers & Dynamic Calculation
 
-        private Point _scrollMousePoint;
-        private double _hOffset = 0;
-        private double _vOffset = 0;
-        private bool _isDragging = false;
+        private void UpdateAge(DateTime? dob)
+        {
+            if (!dob.HasValue || dob.Value == DateTime.MinValue)
+            {
+                TxtAge.Text = string.Empty;
+                return;
+            }
+            DateTime today = DateTime.Today;
+            int age = today.Year - dob.Value.Year;
+            if (dob.Value.Date > today.AddYears(-age)) age--;
+            TxtAge.Text = age.ToString();
+        }
+
+        private void DpBirthdate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateAge(DpBirthdate.SelectedDate);
+            ClearDateError(DpBirthdate, ErrBirthdate);
+        }
+
+        private void NameOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !Regex.IsMatch(e.Text, @"^[a-zA-ZñÑ\s\.\-']+$");
+        }
+
+        private void FamilyBirthdate_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox tb && tb.DataContext is FamilyMemberRow row)
+            {
+                row.Birthdate = OcrService.NormalizeDateString(tb.Text, out _);
+            }
+        }
+
+        private bool _isFormattingPhone = false;
+
+        private void FormatPhoneBox(TextBox tb)
+        {
+            if (tb == null || _isFormattingPhone) return;
+            _isFormattingPhone = true;
+            try
+            {
+                string raw = tb.Text ?? "";
+                string digits = Regex.Replace(raw, @"\D", "");
+                if (digits.Length > 11) digits = digits.Substring(0, 11);
+
+                string formatted;
+                if (digits.Length == 11)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4, 3)}-{digits.Substring(7, 4)}";
+                else if (digits.Length > 7)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4, 3)}-{digits.Substring(7)}";
+                else if (digits.Length > 4)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4)}";
+                else
+                    formatted = digits;
+
+                if (raw != formatted)
+                {
+                    int caret = tb.SelectionStart;
+                    int diff = formatted.Length - raw.Length;
+                    tb.Text = formatted;
+                    tb.SelectionStart = Math.Max(0, Math.Min(formatted.Length, caret + diff));
+                }
+            }
+            finally
+            {
+                _isFormattingPhone = false;
+            }
+        }
+
+        private void Phone_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Back && sender is TextBox tb)
+            {
+                int sel = tb.SelectionStart;
+                if (sel > 0 && tb.SelectionLength == 0 && sel <= tb.Text.Length && tb.Text[sel - 1] == '-')
+                {
+                    int rem = sel - 2;
+                    if (rem >= 0)
+                    {
+                        tb.Text = tb.Text.Remove(rem, 2);
+                        tb.SelectionStart = rem;
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+
+        private void Phone_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !Regex.IsMatch(e.Text, @"^[\d\-]+$");
+        }
+
+        private void NumberOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !Regex.IsMatch(e.Text, @"^\d+$");
+        }
+
+        private void ApplicantType_Changed(object sender, RoutedEventArgs e)
+        {
+            CheckBox clicked = sender as CheckBox;
+            if (clicked == null) return;
+            if (clicked == ChkNewApplicant && ChkNewApplicant.IsChecked == true) ChkRenewal.IsChecked = false;
+            else if (clicked == ChkRenewal && ChkRenewal.IsChecked == true) ChkNewApplicant.IsChecked = false;
+        }
+
+        private void Circumstance_Changed(object sender, RoutedEventArgs e)
+        {
+            if (PnlA2 != null) PnlA2.Visibility = ChkA2.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            if (PnlA4 != null) PnlA4.Visibility = ChkA4.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            if (PnlA5 != null) PnlA5.Visibility = ChkA5.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            if (PnlB  != null) PnlB.Visibility  = ChkB.IsChecked  == true ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void AddFamilyRow_Click(object sender, RoutedEventArgs e)
+        {
+            _familyRowData.Add(new FamilyMemberRow());
+        }
+
+        private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ClearFieldError(TxtLastName, ErrLastName);
+            MarkBadgeEdited(Badge_LastName, TxtConf_LastName);
+        }
+
+        private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ClearFieldError(TxtFirstName, ErrFirstName);
+            MarkBadgeEdited(Badge_FirstName, TxtConf_FirstName);
+        }
+
+        private void TxtBarangay_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ClearFieldError(TxtBarangay, ErrBarangay);
+            MarkBadgeEdited(Badge_Barangay, TxtConf_Barangay);
+        }
+
+        private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ClearFieldError(TxtAddress, ErrAddress);
+            MarkBadgeEdited(Badge_Address, TxtConf_Address);
+        }
+
+        private void TxtContact_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FormatPhoneBox(TxtContact);
+            ClearFieldError(TxtContact, ErrContact);
+            MarkBadgeEdited(Badge_Contact, TxtConf_Contact);
+        }
+
+        private void TxtEmergencyNumber_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FormatPhoneBox(TxtEmergencyNumber);
+            MarkBadgeEdited(Badge_EmergencyNumber, TxtConf_EmergencyNumber);
+        }
+
+        private void TxtPlaceOfBirth_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ClearFieldError(TxtPlaceOfBirth, ErrPlaceOfBirth);
+            MarkBadgeEdited(Badge_Birthplace, TxtConf_Birthplace);
+        }
+
+        private void CmbSex_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ClearFieldError(CmbSex, ErrSex);
+            MarkBadgeEdited(Badge_Sex, TxtConf_Sex);
+        }
+
+        private void CmbCivilStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ClearFieldError(CmbCivilStatus, ErrCivilStatus);
+            MarkBadgeEdited(Badge_CivilStatus, TxtConf_CivilStatus);
+        }
+
+        private void CmbStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ClearFieldError(CmbStatus, ErrStatus);
+        }
+
+        private void MarkError(Control ctrl, TextBlock lbl, string msg)
+        {
+            if (ctrl != null)
+            {
+                ctrl.BorderBrush     = ErrorBrush;
+                ctrl.BorderThickness = new Thickness(1.5);
+            }
+            if (lbl != null)
+            {
+                lbl.Text       = msg;
+                lbl.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void MarkDateError(DatePicker dp, TextBlock lbl, string msg)
+        {
+            if (dp != null)
+            {
+                dp.BorderBrush     = ErrorBrush;
+                dp.BorderThickness = new Thickness(1.5);
+            }
+            if (lbl != null)
+            {
+                lbl.Text       = msg;
+                lbl.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void ClearFieldError(Control ctrl, TextBlock lbl)
+        {
+            if (ctrl != null)
+            {
+                ctrl.BorderBrush     = DefaultBrush;
+                ctrl.BorderThickness = DefaultThickness;
+            }
+            if (lbl != null)
+            {
+                lbl.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void ClearDateError(DatePicker dp, TextBlock lbl)
+        {
+            if (dp != null)
+            {
+                dp.BorderBrush     = DefaultBrush;
+                dp.BorderThickness = DefaultThickness;
+            }
+            if (lbl != null)
+            {
+                lbl.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        #endregion
+
+        #region Form Validation & Record Saving
+
+        private bool ValidateStep1()
+        {
+            bool ok = true;
+            var missing = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(TxtLastName.Text))
+            { MarkError(TxtLastName, ErrLastName, "Required."); missing.Add("Last Name"); ok = false; }
+
+            if (string.IsNullOrWhiteSpace(TxtFirstName.Text))
+            { MarkError(TxtFirstName, ErrFirstName, "Required."); missing.Add("First Name"); ok = false; }
+
+            if (string.IsNullOrWhiteSpace(TxtPlaceOfBirth.Text))
+            { MarkError(TxtPlaceOfBirth, ErrPlaceOfBirth, "Required."); missing.Add("Birthplace"); ok = false; }
+
+            if (CmbSex.SelectedItem == null)
+            { MarkError(CmbSex, ErrSex, "Required."); missing.Add("Sex"); ok = false; }
+
+            if (CmbCivilStatus.SelectedItem == null)
+            { MarkError(CmbCivilStatus, ErrCivilStatus, "Required."); missing.Add("Civil Status"); ok = false; }
+
+            if (!DpBirthdate.SelectedDate.HasValue)
+            { MarkDateError(DpBirthdate, ErrBirthdate, "Required."); missing.Add("Birthdate"); ok = false; }
+            else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today)
+            { MarkDateError(DpBirthdate, ErrBirthdate, "Cannot be in the future."); missing.Add("Birthdate (future date)"); ok = false; }
+            else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today.AddYears(-15))
+            { MarkDateError(DpBirthdate, ErrBirthdate, "Must be at least 15 years old."); missing.Add("Birthdate (must be 15+)"); ok = false; }
+
+            if (string.IsNullOrWhiteSpace(TxtAddress.Text))
+            { MarkError(TxtAddress, ErrAddress, "Required."); missing.Add("Address"); ok = false; }
+
+            string contactDigits = Regex.Replace(TxtContact.Text ?? "", @"\D", "");
+            if (string.IsNullOrWhiteSpace(contactDigits))
+            { MarkError(TxtContact, ErrContact, "Required."); missing.Add("Contact Number"); ok = false; }
+            else if (contactDigits.Length != 11)
+            { MarkError(TxtContact, ErrContact, "Must be 11 digits."); missing.Add("Contact Number (11 digits)"); ok = false; }
+
+            if (string.IsNullOrWhiteSpace(TxtBarangay.Text))
+            { MarkError(TxtBarangay, ErrBarangay, "Required."); missing.Add("Barangay"); ok = false; }
+
+            if (!ok)
+                SetValidationMessage(missing);
+
+            return ok;
+        }
+
+        private bool ValidateFields()
+        {
+            bool ok = ValidateStep1();
+            var missing = new List<string>();
+
+            if (CmbStatus.SelectedItem == null)
+            { MarkError(CmbStatus, ErrStatus, "Required."); missing.Add("Application Status"); ok = false; }
+
+            if (!ok && missing.Count > 0)
+                SetValidationMessage(missing);
+
+            return ok;
+        }
+
+        private void SetValidationMessage(List<string> missing)
+        {
+            if (missing.Count == 0) return;
+            var sb = new StringBuilder("Missing required fields: ");
+            sb.Append(string.Join(", ", missing));
+            sb.Append(".");
+            ValidationMessage.Text       = sb.ToString();
+            ValidationMessage.Visibility = Visibility.Visible;
+        }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            ValidationMessage.Visibility = Visibility.Collapsed;
+            if (!ValidateFields()) return;
+
+            var preview = BuildRecord();
+            var fields  = BuildConfirmFields(preview);
+
+            DialogShell.Visibility = Visibility.Hidden;
+
+            var confirm = new ConfirmDialog(
+                "Confirm Scanned Record",
+                "Review the verified document details below before committing to the database.",
+                "Confirm & Save",
+                fields,
+                screenW: Width, screenH: Height,
+                screenLeft: Left, screenTop: Top
+            ) { Owner = Owner ?? this };
+
+            confirm.ShowDialog();
+
+            if (!confirm.Confirmed)
+            {
+                DialogShell.Visibility = Visibility.Visible;
+                return;
+            }
+
+            try
+            {
+                Result = preview;
+                _savedSuccessfully = true;
+                DialogResult = true;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                DialogShell.Visibility = Visibility.Visible;
+                MessageBox.Show(
+                    "An error occurred while saving:\n\n" + ex.Message +
+                    "\n\nYour form data has been preserved.",
+                    "Save Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private SoloParentRecord BuildRecord()
+        {
+            string surname = TxtLastName.Text.Trim();
+            string first   = TxtFirstName.Text.Trim();
+            string middle  = TxtMiddleName.Text.Trim();
+
+            var members = new List<FamilyMember>();
+            foreach (var item in _familyRowData)
+            {
+                var row = item as FamilyMemberRow;
+                if (row != null && !string.IsNullOrWhiteSpace(row.MemberName) && !OcrService.IsOcrNotApplicable(row.MemberName))
+                {
+                    members.Add(new FamilyMember
+                    {
+                        MemberName          = row.MemberName,
+                        Sex                 = row.OfficialSex,
+                        Age                 = row.Age,
+                        Birthdate           = row.Birthdate,
+                        CivilStatus         = row.CivilStatus,
+                        Relationship        = row.Relationship,
+                        EducationEmployment = row.EducationEmployment,
+                        Income              = row.Income
+                    });
+                }
+            }
+
+            return new SoloParentRecord
+            {
+                Id            = "SP-" + DateTime.Now.ToString("yyMMddHHmm"),
+                Surname       = surname,
+                FirstName     = first,
+                MiddleName    = middle,
+                ExtensionName = TxtExtension.Text.Trim(),
+                Name          = surname + ", " + first + (string.IsNullOrEmpty(middle) ? "" : " " + middle),
+                DateOfBirth   = DpBirthdate.SelectedDate.Value,
+                PlaceOfBirth  = TxtPlaceOfBirth.Text.Trim(),
+                Sex           = GetComboValue(CmbSex),
+                CivilStatus   = GetComboValue(CmbCivilStatus),
+                Citizenship   = string.Empty,
+                BloodType     = string.Empty,
+                Height        = string.Empty,
+                Weight        = string.Empty,
+                Address       = TxtAddress.Text.Trim(),
+                ContactNumber = OcrService.FormatPhoneNumber(TxtContact.Text.Trim()),
+                Barangay      = TxtBarangay.Text.Trim(),
+                DateAdmitted  = DateTime.MinValue,
+                Status        = GetComboValue(CmbStatus),
+                LastUpdated   = DateTime.Now,
+
+                IsNewApplicant      = ChkNewApplicant.IsChecked == true,
+                IsRenewal           = ChkRenewal.IsChecked == true,
+                DateOfApplication   = DpDateOfApplication.SelectedDate ?? DateTime.Today,
+
+                EducationalAttainment = GetComboValue(CmbEducation),
+                PhilSysNumber         = TxtPhilSys.Text.Trim(),
+                Religion              = TxtReligion.Text.Trim(),
+                Occupation            = TxtOccupation.Text.Trim(),
+                MonthlyIncome         = TxtMonthlyIncome.Text.Trim(),
+                IsEmployed            = ChkEmployed.IsChecked == true,
+                IsSelfEmployed        = ChkSelfEmployed.IsChecked == true,
+                IsNotEmployed         = ChkNotEmployed.IsChecked == true,
+
+                EmergencyContactName   = TxtEmergencyContact.Text.Trim(),
+                EmergencyRelationship  = TxtRelationship.Text.Trim(),
+                EmergencyAddress       = TxtEmergencyAddress.Text.Trim(),
+                EmergencyContactNumber = OcrService.FormatPhoneNumber(TxtEmergencyNumber.Text.Trim()),
+
+                CircumstanceA1             = ChkA1.IsChecked == true,
+                CircumstanceA2             = ChkA2.IsChecked == true,
+                CircumstanceA2Cause        = TxtA2Cause.Text.Trim(),
+                CircumstanceA2Date         = DpA2Date.SelectedDate ?? DateTime.MinValue,
+                CircumstanceA3             = ChkA3.IsChecked == true,
+                CircumstanceA4             = ChkA4.IsChecked == true,
+                CircumstanceA4Disability   = TxtA4Disability.Text.Trim(),
+                CircumstanceA5             = ChkA5.IsChecked == true,
+                CircumstanceA5Period       = TxtA5Period.Text.Trim(),
+                CircumstanceA6             = ChkA6.IsChecked == true,
+                CircumstanceA7             = ChkA7.IsChecked == true,
+                CircumstanceB              = ChkB.IsChecked == true,
+                CircumstanceBStayAbroad    = TxtBStayAbroad.Text.Trim(),
+                CircumstanceC              = ChkC.IsChecked == true,
+                CircumstanceD              = ChkD.IsChecked == true,
+                CircumstanceE              = ChkE.IsChecked == true,
+                CircumstanceF              = ChkF.IsChecked == true,
+
+                FamilyMembers     = members,
+                Children          = members.Count,
+                NeedsAndProblems  = TxtNeeds.Text.Trim(),
+                OtherIncomeSource = TxtOtherIncome.Text.Trim(),
+            };
+        }
+
+        private List<ConfirmField> BuildConfirmFields(SoloParentRecord r)
+        {
+            string F(string v) => string.IsNullOrWhiteSpace(v) ? "—" : v;
+            var list = new List<ConfirmField>();
+
+            void Add(string section, string label, string newVal)
+            {
+                list.Add(new ConfirmField
+                {
+                    Section   = section,
+                    Label     = label,
+                    NewValue  = F(newVal),
+                    OldValue  = null,
+                    IsChanged = false
+                });
+            }
+
+            string sec = "Applicant Type";
+            string appType = r.IsNewApplicant ? "New Applicant" : r.IsRenewal ? "For Renewal" : "—";
+            Add(sec, "Application Type",    appType);
+            Add(sec, "Date of Application", r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("MMMM d, yyyy") : "—");
+
+            sec = "Personal Information";
+            Add(sec, "Full Name",              r.FullName);
+            Add(sec, "Date of Birth",          r.DateOfBirth.ToString("MMMM d, yyyy"));
+            Add(sec, "Age",                    TxtAge.Text);
+            Add(sec, "Place of Birth",         r.PlaceOfBirth);
+            Add(sec, "Sex",                    r.Sex);
+            Add(sec, "Civil Status",           r.CivilStatus);
+            Add(sec, "Educational Attainment", r.EducationalAttainment);
+            Add(sec, "PhilSys Number",         r.PhilSysNumber);
+            Add(sec, "Religion",               r.Religion);
+            Add(sec, "Occupation",             r.Occupation);
+            Add(sec, "Monthly Income",         r.MonthlyIncome);
+            Add(sec, "Employment Status",      r.EmploymentStatusDisplay);
+            Add(sec, "Address",                r.Address);
+            Add(sec, "Barangay",               r.Barangay);
+            Add(sec, "Contact Number",         r.ContactNumber);
+
+            sec = "Emergency Contact";
+            Add(sec, "Emergency Name",         r.EmergencyContactName);
+            Add(sec, "Relationship",           r.EmergencyRelationship);
+            Add(sec, "Emergency Address",      r.EmergencyAddress);
+            Add(sec, "Emergency Phone",        r.EmergencyContactNumber);
+
+            sec = "Circumstance";
+            Add(sec, "Solo Parent Category",   r.CircumstancesDisplay);
+
+            sec = "Family Composition";
+            Add(sec, "Dependents Count",       r.FamilyMembers != null ? r.FamilyMembers.Count.ToString() : "0");
+
+            sec = "Status";
+            Add(sec, "Application Status",     r.Status);
+
+            return list;
+        }
+
+        #endregion
+
+        #region Zoom, Viewport & Pan Controls
 
         private void DocScrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -692,85 +1391,6 @@ namespace SOLUM_UI
             }
         }
 
-        private void FocusOnField(string fieldKey)
-        {
-            if (ImgDocument.Source == null || ImgDocument.ActualWidth <= 0 || ImgDocument.ActualHeight <= 0)
-                return;
-
-            double[] bbox = null;
-            if (_ocrResponse?.Fields != null && _ocrResponse.Fields.TryGetValue(fieldKey, out var fieldRes) && fieldRes.Bbox != null && fieldRes.Bbox.Length == 4)
-            {
-                bbox = fieldRes.Bbox;
-            }
-            else if (_fieldBBoxes.TryGetValue(fieldKey, out var defBbox))
-            {
-                bbox = defBbox;
-            }
-            else if (fieldKey.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase))
-            {
-                // Dynamic fallback for family table cells: fam_row{r}_{col}
-                var parts = fieldKey.Split('_');
-                if (parts.Length >= 3 && int.TryParse(parts[1].Replace("row", ""), out int rNum))
-                {
-                    string col = parts[2].ToLowerInvariant();
-                    double rTop = 0.513 + (rNum - 1) * 0.030;
-                    double rH = 0.026;
-                    switch (col)
-                    {
-                        case "name": bbox = new[] { 0.025, rTop, 0.230, rH }; break;
-                        case "sex":  bbox = new[] { 0.255, rTop, 0.060, rH }; break;
-                        case "age":  bbox = new[] { 0.315, rTop, 0.055, rH }; break;
-                        case "dob":  bbox = new[] { 0.370, rTop, 0.135, rH }; break;
-                        case "civ":  bbox = new[] { 0.505, rTop, 0.095, rH }; break;
-                        case "rel":  bbox = new[] { 0.600, rTop, 0.120, rH }; break;
-                        case "edu":  bbox = new[] { 0.720, rTop, 0.140, rH }; break;
-                        case "inc":  bbox = new[] { 0.860, rTop, 0.105, rH }; break;
-                    }
-                }
-            }
-
-            if (bbox == null || bbox.Length < 4) return;
-
-            double imgW = ImgDocument.ActualWidth;
-            double imgH = ImgDocument.ActualHeight;
-
-            HighlightCanvas.Children.Clear();
-            double boxX = bbox[0] * imgW;
-            double boxY = bbox[1] * imgH;
-            double boxW = bbox[2] * imgW;
-            double boxH = bbox[3] * imgH;
-
-            var rect = new System.Windows.Shapes.Rectangle
-            {
-                Width = Math.Max(24, boxW + 8),
-                Height = Math.Max(18, boxH + 6),
-                Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943")),
-                StrokeThickness = 3.0,
-                StrokeDashArray = new DoubleCollection { 4, 2 },
-                Fill = new SolidColorBrush(Color.FromArgb(40, 112, 41, 67)),
-                RadiusX = 4,
-                RadiusY = 4
-            };
-            Canvas.SetLeft(rect, Math.Max(0, boxX - 4));
-            Canvas.SetTop(rect, Math.Max(0, boxY - 3));
-            HighlightCanvas.Children.Add(rect);
-
-            _zoomFactor = 3.5;
-            ApplyZoom();
-
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                double targetCenterX = (boxX + boxW / 2.0) * _zoomFactor;
-                double targetCenterY = (boxY + boxH / 2.0) * _zoomFactor;
-
-                double scrollX = targetCenterX - (DocScrollViewer.ViewportWidth / 2.0);
-                double scrollY = targetCenterY - (DocScrollViewer.ViewportHeight / 2.0);
-
-                DocScrollViewer.ScrollToHorizontalOffset(Math.Max(0, scrollX));
-                DocScrollViewer.ScrollToVerticalOffset(Math.Max(0, scrollY));
-            }), System.Windows.Threading.DispatcherPriority.Loaded);
-        }
-
         private void ZoomIn_Click(object sender, RoutedEventArgs e)
         {
             _zoomFactor = Math.Min(5.0, _zoomFactor + 0.3);
@@ -795,107 +1415,34 @@ namespace SOLUM_UI
             CanvasContainer.LayoutTransform = new ScaleTransform(_zoomFactor, _zoomFactor);
         }
 
-        #endregion
-
-        #region Pre-populate & Transfer to Registration Form
-
-        private void ConfirmPrepopulate_Click(object sender, RoutedEventArgs e)
+        private void ViewDetections_Click(object sender, RoutedEventArgs e)
         {
-            var r = new SoloParentRecord
+            try
             {
-                Surname                = TxtLastName.Text.Trim(),
-                FirstName              = TxtFirstName.Text.Trim(),
-                MiddleName             = TxtMiddleName.Text.Trim(),
-                ExtensionName          = CmbExtension.Text.Trim(),
-                PlaceOfBirth           = TxtBirthplace.Text.Trim(),
-                CivilStatus            = CmbCivilStatus.Text.Trim(),
-                Sex                    = CmbSex.Text.Trim(),
-                EducationalAttainment  = CmbEducationalAttainment.Text.Trim(),
-                Religion               = CmbReligion.Text.Trim(),
-                PhilSysNumber          = TxtPhilSysNumber.Text.Trim(),
-                Address                = TxtAddress.Text.Trim(),
-                Barangay               = OcrService.FuzzyMatchBarangay(TxtBarangay.Text.Trim()),
-                MonthlyIncome          = OcrService.FuzzyMatchIncome(TxtMonthlyIncome.Text.Trim()),
-                Occupation             = TxtOccupation.Text.Trim(),
-                ContactNumber          = TxtContactNumber.Text.Trim(),
-                EmergencyContactName   = TxtEmergencyName.Text.Trim(),
-                EmergencyRelationship  = CmbEmergencyRelationship.Text.Trim(),
-                EmergencyAddress       = TxtEmergencyAddress.Text.Trim(),
-                EmergencyContactNumber = TxtEmergencyNumber.Text.Trim(),
-                Status                 = "Valid",
-                DateOfApplication      = DateTime.Today,
-                LastUpdated            = DateTime.Today
-            };
+                string appDir = AppDomain.CurrentDomain.BaseDirectory;
+                string debugPath1 = System.IO.Path.Combine(appDir, "debug_detections.jpg");
+                string debugPath2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(appDir, @"..\..\OcrService\debug_detections.jpg"));
+                string debugPath3 = @"d:\Repos\SOLACE-UI-REPO\OcrService\debug_detections.jpg";
 
-            var bday = GetSelectedBirthdate();
-            if (bday.HasValue)
-            {
-                r.DateOfBirth = bday.Value;
+                string targetPath = null;
+                if (System.IO.File.Exists(debugPath1)) targetPath = debugPath1;
+                else if (System.IO.File.Exists(debugPath2)) targetPath = debugPath2;
+                else if (System.IO.File.Exists(debugPath3)) targetPath = debugPath3;
+
+                if (targetPath != null && System.IO.File.Exists(targetPath))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(targetPath) { UseShellExecute = true });
+                }
+                else
+                {
+                    MessageBox.Show("No debug detection overlay found yet. Please run an OCR scan first using the Global Spatial Engine!",
+                        "Debug Overlay", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
-
-            r.IsEmployed     = (CmbEmploymentStatus.SelectedIndex == 0);
-            r.IsSelfEmployed = (CmbEmploymentStatus.SelectedIndex == 1);
-            r.IsNotEmployed  = (CmbEmploymentStatus.SelectedIndex == 2);
-
-            // Transfer Circumstances from the verified ComboBox and sub-fields
-            string selectedCirc = CmbCircumstance.SelectedValue?.ToString() ?? string.Empty;
-
-            r.CircumstanceA1 = (selectedCirc == "A1");
-
-            r.CircumstanceA2 = (selectedCirc == "A2");
-            if (r.CircumstanceA2)
+            catch (Exception ex)
             {
-                r.CircumstanceA2Cause = TxtA2Cause.Text.Trim();
-                if (OcrService.TryParseOcrDate(TxtA2Date.Text.Trim(), out var dDate))
-                    r.CircumstanceA2Date = dDate;
+                MessageBox.Show($"Could not open debug detection image: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
-
-            r.CircumstanceA3 = (selectedCirc == "A3");
-
-            r.CircumstanceA4 = (selectedCirc == "A4");
-            if (r.CircumstanceA4)
-            {
-                r.CircumstanceA4Disability = TxtA4Disability.Text.Trim();
-            }
-
-            r.CircumstanceA5 = (selectedCirc == "A5");
-            if (r.CircumstanceA5)
-            {
-                r.CircumstanceA5Period = TxtA5Period.Text.Trim();
-            }
-
-            r.CircumstanceA6 = (selectedCirc == "A6");
-
-            r.CircumstanceA7 = (selectedCirc == "A7");
-
-            r.CircumstanceB  = (selectedCirc == "B");
-            if (r.CircumstanceB)
-            {
-                r.CircumstanceBStayAbroad = TxtBStayAbroad.Text.Trim();
-            }
-
-            r.CircumstanceC  = (selectedCirc == "C");
-            r.CircumstanceD  = (selectedCirc == "D");
-            r.CircumstanceE  = (selectedCirc == "E");
-            r.CircumstanceF  = (selectedCirc == "F");
-
-            // Transfer Dependents from the verified DataGrid (ensuring Income is numeric "0" if N/A)
-            var cleanedDependents = new List<FamilyMember>();
-            foreach (var m in _dependents)
-            {
-                m.Income = OcrService.FuzzyMatchIncome(m.Income);
-                m.CivilStatus = OcrService.FuzzyMatchCivilStatus(m.CivilStatus);
-                m.Relationship = OcrService.FuzzyMatchRelationship(m.Relationship);
-                cleanedDependents.Add(m);
-            }
-            r.FamilyMembers = cleanedDependents;
-            r.Children = cleanedDependents.Count;
-
-            r.Name = r.FullName;
-            Result = r;
-
-            DialogResult = true;
-            Close();
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)

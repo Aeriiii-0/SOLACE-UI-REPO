@@ -102,7 +102,8 @@
                             </Border>
 
                             <!-- Scrollable & Zoomable Viewport -->
-                            <ScrollViewer x:Name="CanvasScrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="#333333">
+                            <ScrollViewer x:Name="CanvasScrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="#333333"
+                                          PreviewMouseWheel="CanvasScrollViewer_PreviewMouseWheel">
                                 <Grid x:Name="CanvasContainer" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <!-- Scanned Document Image (Fills Container exactly matching Canvas coordinates) -->
                                     <Image x:Name="ImgDocument" Stretch="Fill"

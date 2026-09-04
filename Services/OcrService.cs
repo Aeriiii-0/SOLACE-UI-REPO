@@ -181,7 +181,7 @@ namespace SOLUM_UI.Services
             catch { }
         }
 
-        public static async Task<OcrFormResponse> ExtractFormAsync(string imagePath)
+        public static async Task<OcrFormResponse> ExtractFormAsync(string imagePath, string mode = "global")
         {
             var result = new OcrFormResponse();
             if (!File.Exists(imagePath))
@@ -208,7 +208,7 @@ namespace SOLUM_UI.Services
                 HttpResponseMessage response;
                 try
                 {
-                    response = await _http.PostAsync(ServerUrl + "/extract-form", form);
+                    response = await _http.PostAsync($"{ServerUrl}/extract-form?mode={Uri.EscapeDataString(mode)}", form);
                 }
                 catch (Exception ex)
                 {
@@ -329,6 +329,42 @@ namespace SOLUM_UI.Services
             return Path.Combine(ocrDir, "cswdo_template.json");
         }
 
+        public static Dictionary<string, double[]> GetTemplateBoundingBoxes()
+        {
+            var dict = new Dictionary<string, double[]>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                string path = GetLocalTemplatePath();
+                if (File.Exists(path))
+                {
+                    string json = File.ReadAllText(path);
+                    var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+                    var root = serializer.Deserialize<Dictionary<string, object>>(json);
+                    if (root != null && root.TryGetValue("fields", out var fieldsObj) && fieldsObj is Dictionary<string, object> fields)
+                    {
+                        foreach (var kvp in fields)
+                        {
+                            if (kvp.Value is Dictionary<string, object> fieldDict &&
+                                fieldDict.TryGetValue("bbox", out var bboxObj) &&
+                                bboxObj is System.Collections.IEnumerable list)
+                            {
+                                var nums = list.Cast<object>().Select(v => Convert.ToDouble(v, CultureInfo.InvariantCulture)).ToArray();
+                                if (nums.Length >= 4)
+                                {
+                                    dict[kvp.Key] = new[] { nums[0], nums[1], nums[2], nums[3] };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[OcrService] Error loading template bboxes: " + ex.Message);
+            }
+            return dict;
+        }
+
         #region Official Biñan Barangays & Fuzzy Matching
 
         public static readonly string[] BinanBarangays = new[]
@@ -373,11 +409,13 @@ namespace SOLUM_UI.Services
         /// </summary>
         public static string FuzzyMatchBarangay(string rawText)
         {
-            if (string.IsNullOrWhiteSpace(rawText)) return string.Empty;
+            if (string.IsNullOrWhiteSpace(rawText) || IsOcrNotApplicable(rawText)) return string.Empty;
 
             string cleaned = rawText.Trim();
+            if (IsOcrNotApplicable(cleaned)) return string.Empty;
+
             string norm = NormalizeBarangayText(cleaned);
-            if (string.IsNullOrEmpty(norm)) return cleaned;
+            if (string.IsNullOrEmpty(norm)) return string.Empty;
 
             // 1. Direct alias match
             if (BarangayAliases.TryGetValue(norm, out string directAlias))
@@ -453,7 +491,7 @@ namespace SOLUM_UI.Services
 
         public static string FuzzyMatchExtension(string raw)
         {
-            if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
+            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
             string norm = raw.Trim().ToLowerInvariant().Replace(".", "").Replace(" ", "");
             if (norm == "jr" || norm == "junior" || norm == "jnr" || norm == "jr.") return "Jr.";
             if (norm == "sr" || norm == "senior" || norm == "snr" || norm == "sr.") return "Sr.";
@@ -473,12 +511,12 @@ namespace SOLUM_UI.Services
 
         public static string FuzzyMatchSex(string raw)
         {
-            if (string.IsNullOrWhiteSpace(raw)) return "Female";
+            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
             string norm = raw.Trim().ToLowerInvariant();
             if (norm.StartsWith("f") || norm.Contains("fem") || norm.Contains("babae") || norm == "w") return "Female";
             if (norm.StartsWith("m") || norm.Contains("masc") || norm.Contains("lalaki") || norm == "man") return "Male";
             if (norm.Contains("other") || norm.Contains("lgbt") || norm.Contains("x")) return "Others";
-            return "Female";
+            return string.Empty;
         }
 
         public static readonly string[] StandardReligions = new[]
@@ -496,7 +534,7 @@ namespace SOLUM_UI.Services
 
         public static string FuzzyMatchReligion(string raw)
         {
-            if (string.IsNullOrWhiteSpace(raw)) return "Others";
+            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
             string norm = raw.Trim().ToLowerInvariant();
             string clean = Regex.Replace(norm, @"[^a-z0-9]", "");
 
@@ -523,7 +561,7 @@ namespace SOLUM_UI.Services
                     return rel;
             }
 
-            return "Others";
+            return IsOcrNotApplicable(raw) ? string.Empty : clean_text_capitalized(raw);
         }
 
         public static bool IsOcrNotApplicable(string raw)
@@ -531,9 +569,13 @@ namespace SOLUM_UI.Services
             if (string.IsNullOrWhiteSpace(raw)) return true;
             string norm = raw.Trim().ToUpperInvariant();
             string clean = Regex.Replace(norm, @"[^A-Z0-9]", "");
-            string[] naList = new[] { "N/A", "NA", "NLA", "N\\A", "N|A", "N1A", "NIA", "N-A", "N_A", "N A", "N.A.", "N.A", "NONE", "NONE.", "WALA", "-", "--", "—", "0", "0.00" };
+            string[] naList = new[] {
+                "N/A", "NA", "NLA", "N\\A", "N|A", "N1A", "NIA", "N-A", "N_A", "N A",
+                "N.A.", "N.A", "NONE", "NONE.", "WALA", "-", "--", "—", "0", "0.00",
+                "NULL", "NOT APPLICABLE", "NOT APPL", "NO", "N. A."
+            };
             if (naList.Contains(norm)) return true;
-            if (clean == "NA" || clean == "NLA" || clean == "NIA" || clean == "N1A" || clean == "NONE" || clean == "WALA") return true;
+            if (clean == "NA" || clean == "NLA" || clean == "NIA" || clean == "N1A" || clean == "NONE" || clean == "WALA" || clean == "NOTAPPLICABLE" || clean == "NOTAPPL" || clean == "NULL") return true;
             return false;
         }
 
@@ -563,7 +605,7 @@ namespace SOLUM_UI.Services
 
         public static string FuzzyMatchCivilStatus(string raw)
         {
-            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return "Single";
+            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
             string norm = raw.Trim().ToLowerInvariant();
             string clean = Regex.Replace(norm, @"[^a-z]", "");
 
@@ -605,7 +647,7 @@ namespace SOLUM_UI.Services
                     return st;
             }
 
-            return clean_text_capitalized(raw);
+            return IsOcrNotApplicable(raw) ? string.Empty : clean_text_capitalized(raw);
         }
 
         public static readonly string[] StandardRelationships = new[]
@@ -632,7 +674,7 @@ namespace SOLUM_UI.Services
 
         public static string FuzzyMatchRelationship(string raw)
         {
-            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return "Others";
+            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
             string norm = raw.Trim().ToLowerInvariant();
             string clean = Regex.Replace(norm, @"[^a-z]", "");
 
@@ -660,7 +702,7 @@ namespace SOLUM_UI.Services
                     return r;
             }
 
-            return clean_text_capitalized(raw);
+            return IsOcrNotApplicable(raw) ? string.Empty : clean_text_capitalized(raw);
         }
 
         public static readonly string[] StandardEducations = new[]
@@ -679,39 +721,61 @@ namespace SOLUM_UI.Services
 
         public static string FuzzyMatchEducation(string raw)
         {
-            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return "High School Graduate";
+            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
             string norm = raw.Trim().ToLowerInvariant();
             string clean = Regex.Replace(norm, @"[^a-z0-9]", "");
 
-            if (clean.Contains("elem") || clean.Contains("primary") || clean.Contains("mababa"))
+            // Post Graduate
+            if (clean.Contains("post") || clean.Contains("master") || clean.Contains("doctor") || 
+                clean.Contains("phd") || clean.Contains("ms") || clean.Contains("ma") || 
+                clean.Contains("mba") || clean.Contains("juris") || clean.Contains("law"))
             {
-                if (clean.Contains("grad") || clean.Contains("tapos")) return "Elementary Graduate";
-                return "Elementary Level";
+                return "Post Graduate";
             }
-            if (clean.Contains("high") || clean.Contains("hs") || clean.Contains("secondary") || clean.Contains("mataas") || clean.Contains("senior") || clean.Contains("junior"))
+
+            // College / Bachelor Degrees (e.g. BS Nursing, BSN, BS, BA, AB, College, University, Engineering, Education)
+            if (clean.Contains("col") || clean.Contains("univ") || clean.Contains("tertiary") ||
+                clean.Contains("bs") || clean.Contains("ba") || clean.Contains("bachelor") ||
+                clean.Contains("nurs") || clean.Contains("eng") || clean.Contains("educ") ||
+                clean.Contains("degree") || clean.Contains("undergrad") || clean.Contains("grad") ||
+                clean.Contains("crim") || clean.Contains("psych") || clean.Contains("account") ||
+                clean.Contains("tapos"))
             {
-                if (clean.Contains("grad") || clean.Contains("tapos") || clean.Contains("shs")) return "High School Graduate";
-                return "High School Level";
+                return "College";
             }
-            if (clean.Contains("voc") || clean.Contains("tech") || clean.Contains("tvet") || clean.Contains("tesda"))
-                return "Vocational / TVET";
-            if (clean.Contains("col") || clean.Contains("univ") || clean.Contains("tertiary") || clean.Contains("bs") || clean.Contains("ba"))
+
+            // Vocational / TVET / TESDA / Caregiver
+            if (clean.Contains("voc") || clean.Contains("tech") || clean.Contains("tvet") || 
+                clean.Contains("tesda") || clean.Contains("caregiver") || clean.Contains("nc2") || clean.Contains("diploma"))
             {
-                if (clean.Contains("grad") || clean.Contains("tapos") || clean.Contains("degree")) return "College Graduate";
-                return "College Level";
+                return "Vocational";
             }
-            if (clean.Contains("post") || clean.Contains("master") || clean.Contains("doctor") || clean.Contains("phd") || clean.Contains("ms") || clean.Contains("ma"))
-                return "Post-Graduate";
+
+            // High School
+            if (clean.Contains("high") || clean.Contains("hs") || clean.Contains("secondary") || 
+                clean.Contains("mataas") || clean.Contains("senior") || clean.Contains("junior") || clean.Contains("shs") || clean.Contains("jhs"))
+            {
+                return "High School";
+            }
+
+            // Elementary
+            if (clean.Contains("elem") || clean.Contains("primary") || clean.Contains("mababa") || clean.Contains("grade"))
+            {
+                return "Elementary";
+            }
+
             if (clean.Contains("none") || clean.Contains("wala") || clean.Contains("na"))
-                return "None";
+                return string.Empty;
 
-            foreach (var ed in StandardEducations)
+            // Fallback similarity check against standard 5
+            string[] standardOptions = { "College", "High School", "Elementary", "Vocational", "Post Graduate" };
+            foreach (var opt in standardOptions)
             {
-                if (ComputeSimilarity(clean, ed.ToLowerInvariant()) >= 0.60)
-                    return ed;
+                if (ComputeSimilarity(clean, opt.ToLowerInvariant()) >= 0.50)
+                    return opt;
             }
 
-            return clean_text_capitalized(raw);
+            return IsOcrNotApplicable(raw) ? string.Empty : clean_text_capitalized(raw);
         }
 
         private static string clean_text_capitalized(string raw)
@@ -874,6 +938,114 @@ namespace SOLUM_UI.Services
             return 0;
         }
 
+        public static string CleanPersonName(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
+            string t = raw.Trim();
+            // Strip any residual printed label prefixes like 'Middle ame', 'Middle name', 'First ame', 'Last ame', etc.
+            t = Regex.Replace(t, @"^\s*\(?\s*(m[i1lI]dd?[li1I]?e?\s+(a?m[eo]|name)|middle\b|last\s+(a?m[eo]|name)|last\b|first\s+(a?m[eo]|name)|first\b|gitnang\s+pangalan)\s*\)?\s*[:\-_.]*\s*", "", RegexOptions.IgnoreCase);
+            // Convert common OCR digit confusions in names (4 -> A, 0 -> O)
+            t = Regex.Replace(t, "4", "A");
+            t = Regex.Replace(t, "0", "O");
+            // Only allow letters, ñ, Ñ, spaces, hyphens, periods, and apostrophes
+            t = Regex.Replace(t, @"[^a-zA-ZñÑ\s\.\-']", "");
+            t = Regex.Replace(t, @"\s+", " ").Trim();
+            return t;
+        }
+
+        public static string CleanAgeString(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
+            string t = raw.Trim();
+            t = Regex.Replace(t, @"^(age|edad)\s*[:\-_.]*", "", RegexOptions.IgnoreCase).Trim();
+            var pureMatch = Regex.Match(t, @"\b\d{1,3}\b");
+            if (pureMatch.Success && int.TryParse(pureMatch.Value, out int pureAge) && pureAge >= 0 && pureAge <= 120)
+            {
+                return pureAge.ToString();
+            }
+
+            if (t.Length <= 3)
+            {
+                t = Regex.Replace(t, "[Gg]", "6");
+                t = Regex.Replace(t, "[Oo]", "0");
+                t = Regex.Replace(t, @"[Il|/]", "1");
+                t = Regex.Replace(t, "[Ss]", "5");
+                t = Regex.Replace(t, "[Bb]", "8");
+                var match = Regex.Match(t, @"\d+");
+                if (match.Success && int.TryParse(match.Value, out int age) && age >= 0 && age <= 120)
+                {
+                    return age.ToString();
+                }
+            }
+            return string.Empty;
+        }
+
+        public static string NormalizeDateString(string raw, out DateTime? parsedDate)
+        {
+            parsedDate = null;
+            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
+
+            string s = raw.Trim();
+            s = Regex.Replace(s, @"^(date\s*of\s*birth|birthdate|dob|kaarawan|bday)\s*[:\-_.]*", "", RegexOptions.IgnoreCase).Trim();
+
+            // 1. Try generic TryParseOcrDate
+            if (TryParseOcrDate(s, out DateTime dt))
+            {
+                parsedDate = dt;
+                return dt.ToString("yyyy-MM-dd");
+            }
+
+            // 2. Explicit MM/DD/YY or MM/DD/YYYY as specified on the CSWDO form
+            var m = Regex.Match(s, @"^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})$");
+            if (m.Success)
+            {
+                int p1 = int.Parse(m.Groups[1].Value);
+                int p2 = int.Parse(m.Groups[2].Value);
+                string yStr = m.Groups[3].Value;
+                int yr = yStr.Length == 4 
+                    ? int.Parse(yStr) 
+                    : (int.Parse(yStr) <= DateTime.Today.Year % 100 ? 2000 + int.Parse(yStr) : 1900 + int.Parse(yStr));
+
+                int month = p1;
+                int day = p2;
+                if (month > 12 && day <= 12)
+                {
+                    int tmp = month; month = day; day = tmp;
+                }
+
+                try
+                {
+                    if (month >= 1 && month <= 12 && day >= 1 && day <= DateTime.DaysInMonth(yr, month))
+                    {
+                        var d = new DateTime(yr, month, day);
+                        parsedDate = d;
+                        return d.ToString("yyyy-MM-dd");
+                    }
+                }
+                catch { }
+            }
+
+            return s;
+        }
+
+        public static string FormatPhoneNumber(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
+            string digits = Regex.Replace(raw, @"\D", "");
+            if (digits.StartsWith("63") && digits.Length == 12)
+                digits = "0" + digits.Substring(2);
+            else if (digits.StartsWith("9") && digits.Length == 10)
+                digits = "0" + digits;
+
+            if (digits.Length == 11)
+                return $"{digits.Substring(0, 4)}-{digits.Substring(4, 3)}-{digits.Substring(7, 4)}";
+            if (digits.Length > 7)
+                return $"{digits.Substring(0, 4)}-{digits.Substring(4, 3)}-{digits.Substring(7)}";
+            if (digits.Length > 4)
+                return $"{digits.Substring(0, 4)}-{digits.Substring(4)}";
+            return digits;
+        }
+
         public static SoloParentRecord ConvertToSoloParentRecord(OcrFormResponse ocr)
         {
             var r = new SoloParentRecord
@@ -892,11 +1064,11 @@ namespace SOLUM_UI.Services
                 MonthlyIncome         = GetFieldValue(ocr, "monthly_income"),
                 Address               = GetFieldValue(ocr, "address"),
                 Barangay              = FuzzyMatchBarangay(GetFieldValue(ocr, "barangay")),
-                ContactNumber         = GetFieldValue(ocr, "contact_number"),
+                ContactNumber         = FormatPhoneNumber(GetFieldValue(ocr, "contact_number")),
                 EmergencyContactName  = GetFieldValue(ocr, "emergency_name"),
                 EmergencyRelationship = GetFieldValue(ocr, "emergency_relationship"),
                 EmergencyAddress      = GetFieldValue(ocr, "emergency_address"),
-                EmergencyContactNumber= GetFieldValue(ocr, "emergency_number"),
+                EmergencyContactNumber= FormatPhoneNumber(GetFieldValue(ocr, "emergency_number")),
                 Status                = "Valid",
                 LastUpdated           = DateTime.Today
             };

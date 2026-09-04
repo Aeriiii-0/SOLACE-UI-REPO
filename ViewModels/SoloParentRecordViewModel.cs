@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 using SOLUM_UI.Models;
@@ -29,7 +29,7 @@ namespace SOLUM_UI.ViewModels
         public string Barangay => _model.Barangay;
         public string Sex => _model.Sex;
         public string CivilStatus => _model.CivilStatus;
-        public string ContactNumber => _model.ContactNumber;
+        public string ContactNumber => SOLUM_UI.Services.OcrService.FormatPhoneNumber(_model.ContactNumber);
         public string Address => _model.Address;
         public int Children => _model.Children;
         public string Status => _model.Status;

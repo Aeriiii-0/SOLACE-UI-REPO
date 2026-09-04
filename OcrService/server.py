@@ -5,6 +5,7 @@ os.environ["FLAGS_enable_pir_api"] = "0"
 os.environ["FLAGS_use_mkldnn"] = "0"
 os.environ["FLAGS_enable_pir_in_executor"] = "0"
 
+import time
 import json
 import cv2
 import uvicorn
@@ -19,7 +20,7 @@ except Exception:
     pass
 
 from preprocess import preprocess_pipeline, crop_roi, image_to_base64
-from parser import parse_form_with_ocr, clean_text, get_confidence_rating, load_template, recognize_crop, strip_form_label, match_barangay
+from parser import parse_form_with_ocr, clean_text, get_confidence_rating, load_template, recognize_crop, get_ov_recognizer
 
 app = FastAPI(title="Solace OCR Engine", version="2.0")
 
@@ -32,7 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize Ultra-Fast Lightweight CPU PaddleOCR (disabling heavy UVDoc 3D unwarping & orientation models)
+# Initialize Ultra-Fast Lightweight CPU PaddleOCR & Native OpenVINO Recognition Engine
 ocr = None
 ocr_init_error = None
 try:
@@ -45,10 +46,18 @@ try:
         lang="en"
     )
     print("[OCR Server SUCCESS] Lightweight PP-OCRv4 Mobile engine loaded and ready (< 1.5s CPU speed)!")
+
+    # Pre-warm native OpenVINO Static 2-Bucket Recognizer on startup (0 cold-start latency)
+    try:
+        _warmup_ov = get_ov_recognizer()
+        if _warmup_ov:
+            print("[OpenVINO Engine SUCCESS] Native OpenVINO models pre-compiled and ready in RAM!")
+    except Exception as _ov_err:
+        print(f"[OpenVINO Pre-Warm Note]: {_ov_err}")
 except Exception as e:
     import traceback
     ocr_init_error = str(e)
-    print(f"[OCR Server FATAL ERROR] PaddleOCR failed to load:")
+    print(f"[OCR Server FATAL ERROR] Engine initialization failed:")
     traceback.print_exc()
 
 @app.get("/")
@@ -80,19 +89,21 @@ async def save_template(template_data: dict):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/extract-form")
-def extract_form(file: UploadFile = File(...)):
+def extract_form(file: UploadFile = File(...), mode: str = "global"):
     """
     Full document ingestion pipeline:
-    Runs in Starlette threadpool (non-blocking for asyncio event loop).
+    mode='global': Single full-page detection + spatial bucketing (Default)
+    mode='crop': Legacy field-by-field crop loop (Fallback)
     """
     print(f"\n=======================================================")
-    print(f"[Server] >>> New Document Ingestion Request Received: {file.filename}")
+    print(f"[Server] >>> New Document Ingestion Request Received: {file.filename} (mode: {mode})")
     
     if ocr is None:
         error_msg = f"PaddleOCR engine is not loaded on server. Initialization failure: {ocr_init_error}"
         print(f"[Server ERROR] {error_msg}")
         raise HTTPException(status_code=500, detail=error_msg)
         
+    t_start = time.time()
     try:
         contents = file.file.read()
         print(f"[Server] 1. Read {len(contents)} bytes from upload.")
@@ -104,8 +115,10 @@ def extract_form(file: UploadFile = File(...)):
             
         print(f"[Server] 2. Preprocessed image. Shape: {enhanced_gray.shape} (H, W)")
         
-        result = parse_form_with_ocr(ocr, enhanced_gray)
-        print(f"[Server] 3. OCR Extraction finished. Status: {result.get('status')}, Rating: {result.get('overall_rating')}")
+        result = parse_form_with_ocr(ocr, enhanced_gray, mode=mode)
+        elapsed = round(time.time() - t_start, 2)
+        result["execution_time_seconds"] = elapsed
+        print(f"[Server] 3. OCR Extraction ({mode}) finished in {elapsed}s. Status: {result.get('status')}, Rating: {result.get('overall_rating')}")
         
         result["preview_image"] = image_to_base64(deskewed_color)
         print(f"[Server] 4. Returning JSON response to C# client.")
@@ -121,37 +134,6 @@ def extract_form(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/test-field")
-def test_field(file: UploadFile = File(...), field_name: str = Form("last_name")):
-    """
-    Test extraction for a single field with full debug transparency.
-    """
-    print(f"\n[Test Field] Testing single field: '{field_name}'")
-    contents = file.file.read()
-    _, enhanced_gray = preprocess_pipeline(contents)
-    template = load_template()
-    cfg = template.get("fields", {}).get(field_name, {})
-    bbox = cfg.get("bbox", [0.025, 0.180, 0.225, 0.040])
-    
-    crop = crop_roi(enhanced_gray, bbox)
-    raw_text, conf = recognize_crop(ocr, crop)
-    
-    cleaned = strip_form_label(field_name, raw_text) if "strip_form_label" in globals() else clean_text(raw_text)
-    if field_name == "barangay":
-        cleaned = match_barangay(cleaned)
-    
-    print(f"  -> Raw OCR Text: '{raw_text}'")
-    print(f"  -> Cleaned Value: '{cleaned}' (conf: {conf:.2f})\n")
-    
-    return {
-        "status": "success",
-        "field": field_name,
-        "bbox": bbox,
-        "raw_ocr": raw_text,
-        "value": cleaned,
-        "confidence": round(conf, 2),
-        "rating": get_confidence_rating(conf)
-    }
 
 @app.post("/extract-roi")
 def extract_roi(
@@ -165,6 +147,7 @@ def extract_roi(
     Real-time single-field re-extraction when a caseworker repositions a bounding box.
     """
     try:
+        t_start = time.time()
         contents = file.file.read()
         _, enhanced_gray = preprocess_pipeline(contents)
         
@@ -176,15 +159,17 @@ def extract_roi(
         
         raw_text, conf = recognize_crop(ocr, crop)
         cleaned = clean_text(raw_text)
+        elapsed = round(time.time() - t_start, 3)
         
-        print(f"[ROI Extract] Bbox [{x:.3f}, {y:.3f}, {w:.3f}, {h:.3f}] -> '{cleaned}' (conf: {conf:.2f})")
+        print(f"[ROI Extract] Bbox [{x:.3f}, {y:.3f}, {w:.3f}, {h:.3f}] -> '{cleaned}' (conf: {conf:.2f}, time: {elapsed}s)")
         
         return {
             "status": "success",
             "value": cleaned,
             "confidence": round(conf, 2),
             "rating": get_confidence_rating(conf),
-            "bbox": bbox
+            "bbox": bbox,
+            "execution_time_seconds": elapsed
         }
     except Exception as e:
         import traceback
