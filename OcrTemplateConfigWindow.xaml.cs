@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -98,46 +99,34 @@ namespace SOLUM_UI
         private void ParseTemplateJson(string json)
         {
             _fields.Clear();
-            int fieldsIdx = json.IndexOf("\"fields\"");
-            string fieldsBody = json;
-            if (fieldsIdx >= 0)
+            try
             {
-                int openBrace = json.IndexOf('{', fieldsIdx);
-                if (openBrace >= 0)
+                var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+                var root = serializer.Deserialize<Dictionary<string, object>>(json);
+                if (root != null && root.TryGetValue("fields", out var fieldsObj) && fieldsObj is Dictionary<string, object> fields)
                 {
-                    fieldsBody = json.Substring(openBrace + 1);
-                }
-            }
-
-            var fieldMatches = Regex.Matches(fieldsBody, @"\""([a-zA-Z0-9_]+)\""\s*:\s*\{([^}]+)\}", RegexOptions.Singleline);
-            foreach (Match m in fieldMatches)
-            {
-                string key = m.Groups[1].Value;
-                if (key == "fields" || key == "form_id" || key == "form_name" || key == "version") continue;
-
-                string body = m.Groups[2].Value;
-                string name = key;
-                string cat = "general";
-
-                var nameM = Regex.Match(body, @"\""name\""\s*:\s*\""([^\""]+)\""");
-                if (nameM.Success) name = nameM.Groups[1].Value;
-
-                var catM = Regex.Match(body, @"\""category\""\s*:\s*\""([^\""]+)\""");
-                if (catM.Success) cat = catM.Groups[1].Value;
-
-                var bboxM = Regex.Match(body, @"\""bbox\""\s*:\s*\[([\d\.\s,]+)\]");
-                if (bboxM.Success)
-                {
-                    var parts = bboxM.Groups[1].Value.Split(',');
-                    if (parts.Length >= 4 &&
-                        double.TryParse(parts[0].Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double x) &&
-                        double.TryParse(parts[1].Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double y) &&
-                        double.TryParse(parts[2].Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double w) &&
-                        double.TryParse(parts[3].Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double h))
+                    foreach (var kvp in fields)
                     {
-                        _fields.Add(new TemplateFieldItem { Key = key, Name = name, Category = cat, X = x, Y = y, W = w, H = h });
+                        string key = kvp.Key;
+                        if (kvp.Value is Dictionary<string, object> fieldDict)
+                        {
+                            string name = fieldDict.TryGetValue("name", out var nObj) ? nObj?.ToString() : key;
+                            string cat = fieldDict.TryGetValue("category", out var cObj) ? cObj?.ToString() : "general";
+                            if (fieldDict.TryGetValue("bbox", out var bboxObj) && bboxObj is System.Collections.IEnumerable list)
+                            {
+                                var nums = list.Cast<object>().Select(v => Convert.ToDouble(v, System.Globalization.CultureInfo.InvariantCulture)).ToArray();
+                                if (nums.Length >= 4)
+                                {
+                                    _fields.Add(new TemplateFieldItem { Key = key, Name = name, Category = cat, X = nums[0], Y = nums[1], W = nums[2], H = nums[3] });
+                                }
+                            }
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[OcrTemplateConfigWindow] ParseTemplateJson error: " + ex.Message);
             }
 
             if (_fields.Count == 0) LoadFactoryDefaults();
@@ -146,6 +135,7 @@ namespace SOLUM_UI
         private void LoadFactoryDefaults()
         {
             _fields.Clear();
+            _fields.Add(new TemplateFieldItem { Key = "application_date", Name = "Date of Application", Category = "Header", X = 0.760, Y = 0.108, W = 0.225, H = 0.018 });
             _fields.Add(new TemplateFieldItem { Key = "last_name", Name = "Last Name / Surname", Category = "Section I", X = 0.090, Y = 0.188, W = 0.160, H = 0.032 });
             _fields.Add(new TemplateFieldItem { Key = "first_name", Name = "First Name", Category = "Section I", X = 0.285, Y = 0.188, W = 0.185, H = 0.032 });
             _fields.Add(new TemplateFieldItem { Key = "middle_name", Name = "Middle Name", Category = "Section I", X = 0.515, Y = 0.188, W = 0.150, H = 0.032 });
@@ -160,10 +150,10 @@ namespace SOLUM_UI
             _fields.Add(new TemplateFieldItem { Key = "religion", Name = "Religion", Category = "Section I", X = 0.075, Y = 0.255, W = 0.138, H = 0.028 });
             _fields.Add(new TemplateFieldItem { Key = "occupation", Name = "Occupation / Source of Income", Category = "Section I", X = 0.325, Y = 0.255, W = 0.125, H = 0.028 });
             _fields.Add(new TemplateFieldItem { Key = "monthly_income", Name = "Monthly Income", Category = "Section I", X = 0.520, Y = 0.255, W = 0.075, H = 0.028 });
-            _fields.Add(new TemplateFieldItem { Key = "employment_status", Name = "Employment Status (Checkboxes)", Category = "Section I", X = 0.595, Y = 0.255, W = 0.365, H = 0.028 });
-            _fields.Add(new TemplateFieldItem { Key = "is_employed", Name = "Checkbox: Employed", Category = "Section I", X = 0.595, Y = 0.255, W = 0.115, H = 0.028 });
-            _fields.Add(new TemplateFieldItem { Key = "is_self_employed", Name = "Checkbox: Self-Employed", Category = "Section I", X = 0.710, Y = 0.255, W = 0.135, H = 0.028 });
-            _fields.Add(new TemplateFieldItem { Key = "is_not_employed", Name = "Checkbox: Not Employed", Category = "Section I", X = 0.845, Y = 0.255, W = 0.125, H = 0.028 });
+            _fields.Add(new TemplateFieldItem { Key = "employment_status", Name = "Employment Status (Checkboxes)", Category = "Section I", X = 0.593, Y = 0.236, W = 0.380, H = 0.035 });
+            _fields.Add(new TemplateFieldItem { Key = "is_employed", Name = "Checkbox: Employed", Category = "Section I", X = 0.620, Y = 0.252, W = 0.017, H = 0.012 });
+            _fields.Add(new TemplateFieldItem { Key = "is_self_employed", Name = "Checkbox: Self-Employed", Category = "Section I", X = 0.718, Y = 0.252, W = 0.017, H = 0.012 });
+            _fields.Add(new TemplateFieldItem { Key = "is_not_employed", Name = "Checkbox: Not Employed", Category = "Section I", X = 0.845, Y = 0.252, W = 0.019, H = 0.012 });
             _fields.Add(new TemplateFieldItem { Key = "address", Name = "Address (House/Street)", Category = "Section I", X = 0.175, Y = 0.285, W = 0.240, H = 0.028 });
             _fields.Add(new TemplateFieldItem { Key = "barangay", Name = "Barangay", Category = "Section I", X = 0.460, Y = 0.285, W = 0.205, H = 0.028 });
             _fields.Add(new TemplateFieldItem { Key = "contact_number", Name = "Contact Number", Category = "Section I", X = 0.740, Y = 0.285, W = 0.225, H = 0.028 });
@@ -242,6 +232,12 @@ namespace SOLUM_UI
             _fields.Add(new TemplateFieldItem { Key = "fam_row5_rel", Name = "Family Row 5: Relationship", Category = "Section III", X = 0.600, Y = 0.635, W = 0.120, H = 0.028 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row5_edu", Name = "Family Row 5: Education / Job", Category = "Section III", X = 0.720, Y = 0.635, W = 0.140, H = 0.028 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row5_inc", Name = "Family Row 5: Income", Category = "Section III", X = 0.860, Y = 0.635, W = 0.105, H = 0.028 });
+
+            // Section IV: Needs and Problems
+            _fields.Add(new TemplateFieldItem { Key = "needs", Name = "IV. Needs and Problems", Category = "Section IV", X = 0.025, Y = 0.555, W = 0.940, H = 0.030 });
+
+            // Section V: Other Sources of Income
+            _fields.Add(new TemplateFieldItem { Key = "other_income", Name = "V. Other Sources of Income", Category = "Section V", X = 0.025, Y = 0.602, W = 0.940, H = 0.025 });
         }
 
         private void LoadDocumentImage()
@@ -354,6 +350,21 @@ namespace SOLUM_UI
 
             if (cW <= 0 || cH <= 0) return;
 
+            // Compute zoom-invariant screen dimensions so handles & labels remain compact and consistent at any zoom level
+            double z = Math.Max(0.05, _currentZoom);
+            double strokeSelected = Math.Max(1.5, 2.5 / z);
+            double strokeUnselected = Math.Max(0.8, 1.2 / z);
+            double fontSize = Math.Max(8.0, 11.0 / z);
+            double labelPadH = Math.Max(3.0, 6.0 / z);
+            double labelPadV = Math.Max(1.0, 2.5 / z);
+            double labelCorner = Math.Max(2.0, 3.0 / z);
+            double labelOffset = Math.Max(14.0, 18.0 / z);
+            
+            // Compact 10px screen handle size
+            double hSize = 10.0 / z;
+            double halfH = hSize / 2.0;
+            double handleStroke = Math.Max(1.0, 1.5 / z);
+
             foreach (var f in _fields)
             {
                 bool isSelected = (_selectedField != null && _selectedField.Key == f.Key);
@@ -363,14 +374,14 @@ namespace SOLUM_UI
                 double width = f.W * cW;
                 double height = f.H * cH;
 
-                // Rectangle border
+                // Rectangle border for field
                 var rect = new Rectangle
                 {
-                    Width = Math.Max(10, width),
-                    Height = Math.Max(10, height),
-                    Stroke = isSelected ? new SolidColorBrush(Color.FromRgb(233, 30, 99)) : new SolidColorBrush(Color.FromArgb(180, 33, 150, 243)),
-                    StrokeThickness = isSelected ? 3 : 1.5,
-                    Fill = isSelected ? new SolidColorBrush(Color.FromArgb(40, 233, 30, 99)) : new SolidColorBrush(Color.FromArgb(20, 33, 150, 243)),
+                    Width = Math.Max(4 / z, width),
+                    Height = Math.Max(4 / z, height),
+                    Stroke = isSelected ? new SolidColorBrush(Color.FromRgb(233, 30, 99)) : new SolidColorBrush(Color.FromArgb(170, 33, 150, 243)),
+                    StrokeThickness = isSelected ? strokeSelected : strokeUnselected,
+                    Fill = isSelected ? new SolidColorBrush(Color.FromArgb(35, 233, 30, 99)) : new SolidColorBrush(Color.FromArgb(12, 33, 150, 243)),
                     Tag = new HandleTagInfo { Field = f, HandleType = ResizeHandleType.Move },
                     Cursor = Cursors.SizeAll
                 };
@@ -379,34 +390,31 @@ namespace SOLUM_UI
                 Canvas.SetTop(rect, top);
                 OverlayCanvas.Children.Add(rect);
 
-                // Field Label Tag
-                var labelBorder = new Border
-                {
-                    Background = isSelected ? new SolidColorBrush(Color.FromRgb(233, 30, 99)) : new SolidColorBrush(Color.FromRgb(33, 150, 243)),
-                    CornerRadius = new CornerRadius(3),
-                    Padding = new Thickness(4, 1, 4, 1),
-                    IsHitTestVisible = false
-                };
-
-                var lblText = new TextBlock
-                {
-                    Text = f.Name,
-                    FontSize = 10,
-                    FontWeight = FontWeights.SemiBold,
-                    Foreground = Brushes.White
-                };
-                labelBorder.Child = lblText;
-
-                Canvas.SetLeft(labelBorder, left);
-                Canvas.SetTop(labelBorder, Math.Max(0, top - 18));
-                OverlayCanvas.Children.Add(labelBorder);
-
-                // If selected, render 8 interactive corner and edge resize handles
+                // Show Field Name Title ONLY for the selected field to avoid blocking the view of other fields
                 if (isSelected)
                 {
-                    double hSize = 14;
-                    double halfH = hSize / 2.0;
+                    var labelBorder = new Border
+                    {
+                        Background = new SolidColorBrush(Color.FromRgb(233, 30, 99)),
+                        CornerRadius = new CornerRadius(labelCorner),
+                        Padding = new Thickness(labelPadH, labelPadV, labelPadH, labelPadV),
+                        IsHitTestVisible = false
+                    };
 
+                    var lblText = new TextBlock
+                    {
+                        Text = f.Name,
+                        FontSize = fontSize,
+                        FontWeight = FontWeights.SemiBold,
+                        Foreground = Brushes.White
+                    };
+                    labelBorder.Child = lblText;
+
+                    Canvas.SetLeft(labelBorder, left);
+                    Canvas.SetTop(labelBorder, Math.Max(0, top - labelOffset));
+                    OverlayCanvas.Children.Add(labelBorder);
+
+                    // Render 8 compact corner and edge resize handles
                     var handleList = new[]
                     {
                         new { Type = ResizeHandleType.TopLeft,     Cx = left,            Cy = top,             Cursor = Cursors.SizeNWSE },
@@ -427,7 +435,7 @@ namespace SOLUM_UI
                             Height = hSize,
                             Fill = Brushes.White,
                             Stroke = new SolidColorBrush(Color.FromRgb(233, 30, 99)),
-                            StrokeThickness = 2,
+                            StrokeThickness = handleStroke,
                             Cursor = h.Cursor,
                             Tag = new HandleTagInfo { Field = f, HandleType = h.Type }
                         };
@@ -612,7 +620,8 @@ namespace SOLUM_UI
                 if (roiResult != null && roiResult.Status == "success")
                 {
                     string extractedVal = string.IsNullOrEmpty(roiResult.Value) ? "(empty)" : roiResult.Value;
-                    TxtLiveOcrResult.Text = $"Extracted: \"{extractedVal}\" (Conf: {roiResult.Confidence:F2})";
+                    string timeInfo = roiResult.ExecutionTimeSeconds > 0 ? $" [{roiResult.ExecutionTimeSeconds:F2}s]" : "";
+                    TxtLiveOcrResult.Text = $"Extracted{timeInfo}: \"{extractedVal}\" (Conf: {roiResult.Confidence:F2})";
                 }
                 else
                 {
@@ -654,30 +663,45 @@ namespace SOLUM_UI
 
         private string BuildTemplateJson()
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("{");
-            sb.AppendLine("  \"form_id\": \"CSWDO-066-2\",");
-            sb.AppendLine("  \"form_name\": \"City of Biñan CSWDO Application Form for Solo Parent\",");
-            sb.AppendLine("  \"version\": \"2.2\",");
-            sb.AppendLine("  \"fields\": {");
-
-            for (int i = 0; i < _fields.Count; i++)
+            string localPath = SOLUM_UI.Services.OcrService.GetLocalTemplatePath();
+            Dictionary<string, object> root = null;
+            var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+            try
             {
-                var f = _fields[i];
-                string comma = (i < _fields.Count - 1) ? "," : "";
-                string type = (f.Key == "family_composition_table") ? "table" : (f.Key == "circumstances_section" ? "circumstance_group" : "text");
+                if (File.Exists(localPath))
+                {
+                    string existing = File.ReadAllText(localPath);
+                    root = serializer.Deserialize<Dictionary<string, object>>(existing);
+                }
+            }
+            catch { }
 
-                sb.AppendLine($"    \"{f.Key}\": {{");
-                sb.AppendLine($"      \"name\": \"{f.Name}\",");
-                sb.AppendLine($"      \"category\": \"{f.Category}\",");
-                sb.AppendLine($"      \"bbox\": [{f.X.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}, {f.Y.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}, {f.W.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}, {f.H.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}],");
-                sb.AppendLine($"      \"type\": \"{type}\"");
-                sb.AppendLine($"    }}{comma}");
+            if (root == null)
+            {
+                root = new Dictionary<string, object>
+                {
+                    { "form_id", "CSWDO-066-2" },
+                    { "form_name", "City of Biñan CSWDO Application Form for Solo Parent" },
+                    { "version", "2.2" }
+                };
             }
 
-            sb.AppendLine("  }");
-            sb.AppendLine("}");
-            return sb.ToString();
+            var fieldsDict = new Dictionary<string, object>();
+            foreach (var f in _fields)
+            {
+                string type = (f.Key == "family_composition_table") ? "table" : (f.Key == "circumstances_section" ? "circumstance_group" : "text");
+                var fieldData = new Dictionary<string, object>
+                {
+                    { "name", f.Name },
+                    { "category", f.Category },
+                    { "bbox", new double[] { Math.Round(f.X, 3), Math.Round(f.Y, 3), Math.Round(f.W, 3), Math.Round(f.H, 3) } },
+                    { "type", type }
+                };
+                fieldsDict[f.Key] = fieldData;
+            }
+            root["fields"] = fieldsDict;
+
+            return serializer.Serialize(root);
         }
 
         private void ResetToDefault_Click(object sender, RoutedEventArgs e)
@@ -729,9 +753,21 @@ namespace SOLUM_UI
             }
         }
 
+        private void CanvasScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Delta > 0)
+                _currentZoom = Math.Min(4.0, _currentZoom + 0.12);
+            else
+                _currentZoom = Math.Max(0.1, _currentZoom - 0.12);
+
+            ApplyZoom();
+            e.Handled = true;
+        }
+
         private void ApplyZoom()
         {
             CanvasContainer.LayoutTransform = new ScaleTransform(_currentZoom, _currentZoom);
+            RedrawAllCanvasBoxes();
         }
 
         #region Global Nudge and Scale (All Boxes)

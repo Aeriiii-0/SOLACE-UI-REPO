@@ -79,7 +79,7 @@ namespace SOLUM_UI
                 if (r.DateOfBirth.Date > DateTime.Today.AddYears(-age)) age--;
             }
             TxtSexAge.Text    = (r.Sex ?? "—") + (age > 0 ? "  ·  " + age + " years old" : string.Empty);
-            TxtContact.Text   = string.IsNullOrWhiteSpace(r.ContactNumber) ? string.Empty : r.ContactNumber;
+            TxtContact.Text   = string.IsNullOrWhiteSpace(r.ContactNumber) ? string.Empty : SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber);
             TxtStatusBadge.Text = string.IsNullOrWhiteSpace(r.Status) ? string.Empty : r.Status;
             TxtSpId.Text      = r.Id ?? string.Empty;
 
@@ -126,7 +126,7 @@ namespace SOLUM_UI
             {
                 ("Address",     r.Address),
                 ("Barangay",    r.Barangay),
-                ("Contact No.", r.ContactNumber),
+                ("Contact No.", SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber)),
             });
 
             AddCard("Emergency Contact", new[]
@@ -134,7 +134,7 @@ namespace SOLUM_UI
                 ("Contact Person", r.EmergencyContactName),
                 ("Relationship",   r.EmergencyRelationship),
                 ("Address",        r.EmergencyAddress),
-                ("Contact No.",    r.EmergencyContactNumber),
+                ("Contact No.",    SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.EmergencyContactNumber)),
             });
 
             AddCircumstancesCard(r.CircumstancesDisplay);

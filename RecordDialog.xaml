@@ -1,4 +1,4 @@
-﻿<Window x:Class="SOLUM_UI.RecordDialog"
+<Window x:Class="SOLUM_UI.RecordDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Solo Parent Application Form"
@@ -663,7 +663,9 @@
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="Applicant's Contact Number *" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtContact" Style="{StaticResource FormBox}"
-                                                         PreviewTextInput="NumberOnly_PreviewTextInput"
+                                                         MaxLength="13"
+                                                         PreviewTextInput="Phone_PreviewTextInput"
+                                                         PreviewKeyDown="Phone_PreviewKeyDown"
                                                          TextChanged="TxtContact_TextChanged"/>
                                                 <TextBlock x:Name="ErrContact" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
@@ -693,7 +695,10 @@
                                             <StackPanel Grid.Column="3">
                                                 <TextBlock Text="Contact Number" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtEmergencyNumber" Style="{StaticResource FormBox}"
-                                                         PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                                         MaxLength="13"
+                                                         PreviewTextInput="Phone_PreviewTextInput"
+                                                         PreviewKeyDown="Phone_PreviewKeyDown"
+                                                         TextChanged="TxtEmergencyNumber_TextChanged"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -900,7 +905,7 @@
                                                        Foreground="#555555" Margin="0,0,6,0"/>
                                             <TextBlock Grid.Column="2" Text="Age" FontSize="11" FontWeight="Bold"
                                                        Foreground="#555555" Margin="0,0,6,0"/>
-                                            <TextBlock Grid.Column="3" Text="Birthdate mm/dd/yy" FontSize="11" FontWeight="Bold"
+                                            <TextBlock Grid.Column="3" Text="Birthdate (mm/dd/yyyy)" FontSize="11" FontWeight="Bold"
                                                        Foreground="#555555" Margin="0,0,6,0"/>
                                             <TextBlock Grid.Column="4" Text="Civil Status" FontSize="11" FontWeight="Bold"
                                                        Foreground="#555555" Margin="0,0,6,0"/>
@@ -929,21 +934,28 @@
                                                                  BorderBrush="#D0D0D0" BorderThickness="1"
                                                                  Background="White" Padding="6,0"
                                                                  VerticalContentAlignment="Center" Margin="0,0,4,0"
+                                                                 PreviewTextInput="NameOnly_PreviewTextInput"
+                                                                 LostFocus="FamilyMemberName_LostFocus"
                                                                  Text="{Binding MemberName, UpdateSourceTrigger=PropertyChanged}"/>
                                                         <TextBox Grid.Column="1" Height="36" FontSize="12"
                                                                  BorderBrush="#D0D0D0" BorderThickness="1"
                                                                  Background="White" Padding="4,0"
-                                                                 VerticalContentAlignment="Center" Margin="0,0,4,0"
+                                                                 VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,4,0"
+                                                                 MaxLength="6"
+                                                                 PreviewTextInput="NameOnly_PreviewTextInput"
                                                                  Text="{Binding Sex, UpdateSourceTrigger=PropertyChanged}"/>
                                                         <TextBox Grid.Column="2" Height="36" FontSize="12"
                                                                  BorderBrush="#D0D0D0" BorderThickness="1"
-                                                                 Background="White" Padding="4,0"
-                                                                 VerticalContentAlignment="Center" Margin="0,0,4,0"
-                                                                 Text="{Binding Age, UpdateSourceTrigger=PropertyChanged}"/>
+                                                                 Background="#F5F5F5" Padding="4,0"
+                                                                 VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,4,0"
+                                                                 IsReadOnly="True" Focusable="False" Cursor="Arrow"
+                                                                 ToolTip="Age is automatically calculated from Birthdate"
+                                                                 Text="{Binding Age, Mode=OneWay}"/>
                                                         <TextBox Grid.Column="3" Height="36" FontSize="12"
                                                                  BorderBrush="#D0D0D0" BorderThickness="1"
                                                                  Background="White" Padding="6,0"
                                                                  VerticalContentAlignment="Center" Margin="0,0,4,0"
+                                                                 LostFocus="FamilyBirthdate_LostFocus"
                                                                  Text="{Binding Birthdate, UpdateSourceTrigger=PropertyChanged}"/>
                                                         <TextBox Grid.Column="4" Height="36" FontSize="12"
                                                                  BorderBrush="#D0D0D0" BorderThickness="1"

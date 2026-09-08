@@ -14,17 +14,95 @@ namespace SOLUM_UI
 {
     public class FamilyMemberRow : INotifyPropertyChanged
     {
-        private string _memberName; private string _sex; private string _age;
-        private string _birthdate;  private string _civilStatus; private string _relationship;
-        private string _educationEmployment; private string _income;
+        private string _memberName;
+        private string _sex;
+        private string _age;
+        private string _birthdate;
+        private string _civilStatus;
+        private string _relationship;
+        private string _educationEmployment;
+        private string _income;
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void N(string p) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(p));
 
-        public string MemberName          { get => _memberName;          set { _memberName = value;          N(nameof(MemberName)); } }
-        public string Sex                 { get => _sex;                 set { _sex = value;                 N(nameof(Sex)); } }
-        public string Age                 { get => _age;                 set { _age = value;                 N(nameof(Age)); } }
-        public string Birthdate           { get => _birthdate;           set { _birthdate = value;           N(nameof(Birthdate)); } }
+        public string MemberName
+        {
+            get => _memberName;
+            set
+            {
+                _memberName = value;
+                N(nameof(MemberName));
+            }
+        }
+
+        public string Sex
+        {
+            get => _sex;
+            set
+            {
+                string s = value?.Trim() ?? string.Empty;
+                if (s.Equals("Female", StringComparison.OrdinalIgnoreCase) || s.Equals("F", StringComparison.OrdinalIgnoreCase))
+                    _sex = "F";
+                else if (s.Equals("Male", StringComparison.OrdinalIgnoreCase) || s.Equals("M", StringComparison.OrdinalIgnoreCase))
+                    _sex = "M";
+                else if (s.Length > 0)
+                    _sex = s.Substring(0, 1).ToUpperInvariant();
+                else
+                    _sex = string.Empty;
+                N(nameof(Sex));
+            }
+        }
+
+        public string OfficialSex
+        {
+            get
+            {
+                if (string.Equals(_sex, "F", StringComparison.OrdinalIgnoreCase)) return "Female";
+                if (string.Equals(_sex, "M", StringComparison.OrdinalIgnoreCase)) return "Male";
+                return _sex ?? string.Empty;
+            }
+        }
+
+        public string Age
+        {
+            get => _age;
+            set
+            {
+                _age = SOLUM_UI.Services.OcrService.CleanAgeString(value);
+                N(nameof(Age));
+            }
+        }
+
+        public string Birthdate
+        {
+            get => _birthdate;
+            set
+            {
+                _birthdate = value;
+                N(nameof(Birthdate));
+
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    string norm = SOLUM_UI.Services.OcrService.NormalizeDateString(value, out DateTime? dt);
+                    if (dt.HasValue && dt.Value != DateTime.MinValue)
+                    {
+                        int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(dt.Value);
+                        if (calcAge >= 0 && calcAge <= 120)
+                        {
+                            _age = calcAge.ToString();
+                            N(nameof(Age));
+                        }
+                    }
+                }
+                else
+                {
+                    _age = string.Empty;
+                    N(nameof(Age));
+                }
+            }
+        }
+
         public string CivilStatus         { get => _civilStatus;         set { _civilStatus = value;         N(nameof(CivilStatus)); } }
         public string Relationship        { get => _relationship;        set { _relationship = value;        N(nameof(Relationship)); } }
         public string EducationEmployment { get => _educationEmployment; set { _educationEmployment = value; N(nameof(EducationEmployment)); } }
@@ -164,7 +242,7 @@ namespace SOLUM_UI
             TxtExtension.Text    = r.ExtensionName ?? string.Empty;
             TxtPlaceOfBirth.Text = r.PlaceOfBirth  ?? string.Empty;
             TxtAddress.Text      = r.Address       ?? string.Empty;
-            TxtContact.Text      = r.ContactNumber ?? string.Empty;
+            TxtContact.Text      = SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber ?? string.Empty);
             TxtBarangay.Text     = r.Barangay      ?? string.Empty;
 
             if (r.DateOfBirth != DateTime.MinValue) DpBirthdate.SelectedDate = r.DateOfBirth;
@@ -190,7 +268,7 @@ namespace SOLUM_UI
             TxtEmergencyContact.Text = r.EmergencyContactName   ?? string.Empty;
             TxtRelationship.Text     = r.EmergencyRelationship  ?? string.Empty;
             TxtEmergencyAddress.Text = r.EmergencyAddress       ?? string.Empty;
-            TxtEmergencyNumber.Text  = r.EmergencyContactNumber ?? string.Empty;
+            TxtEmergencyNumber.Text  = SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.EmergencyContactNumber ?? string.Empty);
 
             ChkA1.IsChecked = r.CircumstanceA1;
             ChkA2.IsChecked = r.CircumstanceA2;
@@ -220,12 +298,23 @@ namespace SOLUM_UI
                 _familyRowData.Clear();
                 foreach (var fm in r.FamilyMembers)
                 {
+                    string normDob = SOLUM_UI.Services.OcrService.NormalizeDateString(fm.Birthdate, out DateTime? dt);
+                    string ageVal = fm.Age;
+                    if (dt.HasValue && dt.Value != DateTime.MinValue)
+                    {
+                        int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(dt.Value);
+                        if (calcAge >= 0 && calcAge <= 120)
+                        {
+                            ageVal = calcAge.ToString();
+                        }
+                    }
+
                     _familyRowData.Add(new FamilyMemberRow
                     {
                         MemberName          = fm.MemberName,
                         Sex                 = fm.Sex,
-                        Age                 = fm.Age,
-                        Birthdate           = fm.Birthdate,
+                        Age                 = ageVal,
+                        Birthdate           = string.IsNullOrWhiteSpace(normDob) ? fm.Birthdate : normDob,
                         CivilStatus         = fm.CivilStatus,
                         Relationship        = fm.Relationship,
                         EducationEmployment = fm.EducationEmployment,
@@ -240,9 +329,30 @@ namespace SOLUM_UI
 
         private void SetComboByContent(ComboBox combo, string value)
         {
-            if (string.IsNullOrEmpty(value)) return;
+            if (string.IsNullOrWhiteSpace(value) || combo == null) return;
+            string val = value.Trim();
             foreach (ComboBoxItem item in combo.Items)
-                if (item.Content?.ToString() == value) { combo.SelectedItem = item; return; }
+            {
+                if (string.Equals(item.Content?.ToString(), val, StringComparison.OrdinalIgnoreCase))
+                {
+                    combo.SelectedItem = item;
+                    return;
+                }
+            }
+
+            string valNorm = System.Text.RegularExpressions.Regex.Replace(val.ToLowerInvariant(), @"[^a-z0-9]", "");
+            foreach (ComboBoxItem item in combo.Items)
+            {
+                string text = item.Content?.ToString() ?? "";
+                string textNorm = System.Text.RegularExpressions.Regex.Replace(text.ToLowerInvariant(), @"[^a-z0-9]", "");
+                if (string.IsNullOrEmpty(textNorm)) continue;
+                if (valNorm.StartsWith(textNorm) || textNorm.StartsWith(valNorm) ||
+                    valNorm.Contains(textNorm) || textNorm.Contains(valNorm))
+                {
+                    combo.SelectedItem = item;
+                    return;
+                }
+            }
         }
 
         private string GetComboValue(ComboBox combo)
@@ -272,7 +382,105 @@ namespace SOLUM_UI
 
         private void NameOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !Regex.IsMatch(e.Text, @"^[a-zA-Z\s\.\-]+$");
+            e.Handled = !Regex.IsMatch(e.Text, @"^[a-zA-ZñÑ\s\.\-']+$");
+        }
+
+        private void FamilyBirthdate_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox tb && tb.DataContext is FamilyMemberRow row)
+            {
+                if (string.IsNullOrWhiteSpace(tb.Text))
+                {
+                    row.Birthdate = string.Empty;
+                    row.Age = string.Empty;
+                    return;
+                }
+
+                string norm = SOLUM_UI.Services.OcrService.NormalizeDateString(tb.Text, out DateTime? dt);
+                if (!string.IsNullOrEmpty(norm))
+                {
+                    row.Birthdate = norm;
+                }
+                if (dt.HasValue && dt.Value != DateTime.MinValue)
+                {
+                    int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(dt.Value);
+                    if (calcAge >= 0 && calcAge <= 120)
+                    {
+                        row.Age = calcAge.ToString();
+                    }
+                }
+                else
+                {
+                    row.Age = string.Empty;
+                }
+            }
+        }
+
+        private void FamilyMemberName_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox tb && tb.DataContext is FamilyMemberRow row)
+            {
+                row.MemberName = SOLUM_UI.Services.OcrService.CleanPersonName(tb.Text);
+            }
+        }
+
+        private bool _isFormattingPhone = false;
+
+        private void FormatPhoneBox(TextBox tb)
+        {
+            if (tb == null || _isFormattingPhone) return;
+            _isFormattingPhone = true;
+            try
+            {
+                string raw = tb.Text ?? "";
+                string digits = Regex.Replace(raw, @"\D", "");
+                if (digits.Length > 11) digits = digits.Substring(0, 11);
+
+                string formatted;
+                if (digits.Length == 11)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4, 3)}-{digits.Substring(7, 4)}";
+                else if (digits.Length > 7)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4, 3)}-{digits.Substring(7)}";
+                else if (digits.Length > 4)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4)}";
+                else
+                    formatted = digits;
+
+                if (raw != formatted)
+                {
+                    int caret = tb.SelectionStart;
+                    int diff = formatted.Length - raw.Length;
+                    tb.Text = formatted;
+                    tb.SelectionStart = Math.Max(0, Math.Min(formatted.Length, caret + diff));
+                }
+            }
+            finally
+            {
+                _isFormattingPhone = false;
+            }
+        }
+
+        private void Phone_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Back && sender is TextBox tb)
+            {
+                int sel = tb.SelectionStart;
+                if (sel > 0 && tb.SelectionLength == 0 && sel <= tb.Text.Length && tb.Text[sel - 1] == '-')
+                {
+                    int rem = sel - 2;
+                    if (rem >= 0)
+                    {
+                        tb.Text = tb.Text.Remove(rem, 2);
+                        tb.SelectionStart = rem;
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+
+        private void Phone_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !Regex.IsMatch(e.Text, @"^[\d\-]+$");
         }
 
         private void NumberOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -292,7 +500,16 @@ namespace SOLUM_UI
         private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)      => ClearFieldError(TxtFirstName,    ErrFirstName);
         private void TxtBarangay_TextChanged(object sender, TextChangedEventArgs e)       => ClearFieldError(TxtBarangay,     ErrBarangay);
         private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)        => ClearFieldError(TxtAddress,      ErrAddress);
-        private void TxtContact_TextChanged(object sender, TextChangedEventArgs e)        => ClearFieldError(TxtContact,      ErrContact);
+        private void TxtContact_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FormatPhoneBox(TxtContact);
+            ClearFieldError(TxtContact, ErrContact);
+        }
+
+        private void TxtEmergencyNumber_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FormatPhoneBox(TxtEmergencyNumber);
+        }
         private void TxtPlaceOfBirth_TextChanged(object sender, TextChangedEventArgs e)   => ClearFieldError(TxtPlaceOfBirth, ErrPlaceOfBirth);
         private void CmbSex_SelectionChanged(object sender, SelectionChangedEventArgs e)         => ClearFieldError(CmbSex,         ErrSex);
         private void CmbCivilStatus_SelectionChanged(object sender, SelectionChangedEventArgs e) => ClearFieldError(CmbCivilStatus, ErrCivilStatus);
@@ -300,32 +517,56 @@ namespace SOLUM_UI
 
         private void MarkError(Control ctrl, TextBlock lbl, string msg)
         {
-            ctrl.BorderBrush     = ErrorBrush;
-            ctrl.BorderThickness = new Thickness(1.5);
-            lbl.Text             = msg;
-            lbl.Visibility       = Visibility.Visible;
+            if (ctrl != null)
+            {
+                ctrl.BorderBrush     = ErrorBrush;
+                ctrl.BorderThickness = new Thickness(1.5);
+            }
+            if (lbl != null)
+            {
+                lbl.Text       = msg;
+                lbl.Visibility = Visibility.Visible;
+            }
         }
 
         private void MarkDateError(DatePicker dp, TextBlock lbl, string msg)
         {
-            dp.BorderBrush     = ErrorBrush;
-            dp.BorderThickness = new Thickness(1.5);
-            lbl.Text           = msg;
-            lbl.Visibility     = Visibility.Visible;
+            if (dp != null)
+            {
+                dp.BorderBrush     = ErrorBrush;
+                dp.BorderThickness = new Thickness(1.5);
+            }
+            if (lbl != null)
+            {
+                lbl.Text       = msg;
+                lbl.Visibility = Visibility.Visible;
+            }
         }
 
         private void ClearFieldError(Control ctrl, TextBlock lbl)
         {
-            ctrl.BorderBrush     = DefaultBrush;
-            ctrl.BorderThickness = DefaultThickness;
-            lbl.Visibility       = Visibility.Collapsed;
+            if (ctrl != null)
+            {
+                ctrl.BorderBrush     = DefaultBrush;
+                ctrl.BorderThickness = DefaultThickness;
+            }
+            if (lbl != null)
+            {
+                lbl.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void ClearDateError(DatePicker dp, TextBlock lbl)
         {
-            dp.BorderBrush     = DefaultBrush;
-            dp.BorderThickness = DefaultThickness;
-            lbl.Visibility     = Visibility.Collapsed;
+            if (dp != null)
+            {
+                dp.BorderBrush     = DefaultBrush;
+                dp.BorderThickness = DefaultThickness;
+            }
+            if (lbl != null)
+            {
+                lbl.Visibility = Visibility.Collapsed;
+            }
         }
 
         private bool ValidateStep1()
@@ -358,9 +599,10 @@ namespace SOLUM_UI
             if (string.IsNullOrWhiteSpace(TxtAddress.Text))
             { MarkError(TxtAddress, ErrAddress, "Required."); missing.Add("Address"); ok = false; }
 
-            if (string.IsNullOrWhiteSpace(TxtContact.Text))
+            string contactDigits = Regex.Replace(TxtContact.Text ?? "", @"\D", "");
+            if (string.IsNullOrWhiteSpace(contactDigits))
             { MarkError(TxtContact, ErrContact, "Required."); missing.Add("Contact Number"); ok = false; }
-            else if (TxtContact.Text.Trim().Length != 11)
+            else if (contactDigits.Length != 11)
             { MarkError(TxtContact, ErrContact, "Must be 11 digits."); missing.Add("Contact Number (11 digits)"); ok = false; }
 
             if (string.IsNullOrWhiteSpace(TxtBarangay.Text))
@@ -498,17 +740,30 @@ namespace SOLUM_UI
             {
                 var row = item as FamilyMemberRow;
                 if (row != null && !string.IsNullOrWhiteSpace(row.MemberName))
+                {
+                    string normDob = SOLUM_UI.Services.OcrService.NormalizeDateString(row.Birthdate, out DateTime? dt);
+                    string ageVal = row.Age;
+                    if (dt.HasValue && dt.Value != DateTime.MinValue)
+                    {
+                        int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(dt.Value);
+                        if (calcAge >= 0 && calcAge <= 120)
+                        {
+                            ageVal = calcAge.ToString();
+                        }
+                    }
+
                     members.Add(new FamilyMember
                     {
-                        MemberName          = row.MemberName,
-                        Sex                 = row.Sex,
-                        Age                 = row.Age,
-                        Birthdate           = row.Birthdate,
+                        MemberName          = SOLUM_UI.Services.OcrService.CleanPersonName(row.MemberName),
+                        Sex                 = row.OfficialSex,
+                        Age                 = ageVal,
+                        Birthdate           = string.IsNullOrWhiteSpace(normDob) ? row.Birthdate : normDob,
                         CivilStatus         = row.CivilStatus,
                         Relationship        = row.Relationship,
                         EducationEmployment = row.EducationEmployment,
                         Income              = row.Income
                     });
+                }
             }
 
             return new SoloParentRecord
@@ -528,10 +783,10 @@ namespace SOLUM_UI
                 Height        = string.Empty,
                 Weight        = string.Empty,
                 Address       = TxtAddress.Text.Trim(),
-                ContactNumber = TxtContact.Text.Trim(),
+                ContactNumber = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtContact.Text.Trim()),
                 Barangay      = TxtBarangay.Text.Trim(),
                 Status        = GetComboValue(CmbStatus),
-                LastUpdated   = DateTime.Now,
+                LastUpdated   = DateTime.Today,
 
                 IsNewApplicant      = ChkNewApplicant.IsChecked == true,
                 IsRenewal           = ChkRenewal.IsChecked == true,
@@ -549,7 +804,7 @@ namespace SOLUM_UI
                 EmergencyContactName   = TxtEmergencyContact.Text.Trim(),
                 EmergencyRelationship  = TxtRelationship.Text.Trim(),
                 EmergencyAddress       = TxtEmergencyAddress.Text.Trim(),
-                EmergencyContactNumber = TxtEmergencyNumber.Text.Trim(),
+                EmergencyContactNumber = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtEmergencyNumber.Text.Trim()),
 
                 CircumstanceA1             = ChkA1.IsChecked == true,
                 CircumstanceA2             = ChkA2.IsChecked == true,

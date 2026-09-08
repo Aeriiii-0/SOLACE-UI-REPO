@@ -53,8 +53,8 @@ def enhance_contrast(image: np.ndarray) -> np.ndarray:
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     enhanced = clahe.apply(gray)
     
-    # Slight bilateral filter to reduce paper grain noise while preserving sharp pen strokes
-    denoised = cv2.bilateralFilter(enhanced, d=5, sigmaColor=50, sigmaSpace=50)
+    # Gentle filter that removes paper grain without blurring out fine 1-2px pen strokes
+    denoised = cv2.bilateralFilter(enhanced, d=3, sigmaColor=15, sigmaSpace=15)
     return denoised
 
 def crop_roi(image: np.ndarray, bbox: list) -> np.ndarray:
@@ -89,59 +89,26 @@ def resize_for_ocr(image: np.ndarray, max_dim: int = 1200) -> np.ndarray:
         return cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
     return image
 
-def auto_crop_paper_boundaries(image: np.ndarray) -> np.ndarray:
-    """
-    Detects paper borders in flatbed scans that include dark/black scanner glass edges,
-    and crops cleanly to the document paper rectangle so field ratios match.
-    """
-    try:
-        h, w = image.shape[:2]
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
-        
-        # Check if outer edges have dark scanner glass margins (< 70 mean intensity)
-        border_thickness = max(5, int(min(h, w) * 0.02))
-        top_edge = np.mean(gray[:border_thickness, :])
-        bottom_edge = np.mean(gray[-border_thickness:, :])
-        left_edge = np.mean(gray[:, :border_thickness])
-        right_edge = np.mean(gray[:, -border_thickness:])
-        
-        if top_edge < 70 or bottom_edge < 70 or left_edge < 70 or right_edge < 70:
-            _, thresh = cv2.threshold(gray, 75, 255, cv2.THRESH_BINARY)
-            contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            if contours:
-                largest = max(contours, key=cv2.contourArea)
-                x, y, cw, ch = cv2.boundingRect(largest)
-                # Only crop if paper area covers at least 60% of image
-                if (cw * ch) > (w * h * 0.60):
-                    return image[y:y+ch, x:x+cw]
-    except Exception:
-        pass
-    return image
-
 def preprocess_pipeline(image_bytes: bytes):
     """
-    Decodes raw image bytes, crops scanner borders, resizes large scans to optimal resolution,
-    applies deskewing, and enhances contrast.
-    Returns: (color_deskewed_image, enhanced_grayscale_image)
+    Decodes raw image bytes, resizes large scans to optimal resolution (~1200px),
+    and enhances contrast for OCR reading.
+    Preserves exact aspect ratio and normalized bounding box geometry.
+    Returns: (color_optimized_image, enhanced_grayscale_image)
     """
     nparr = np.frombuffer(image_bytes, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     if image is None:
         return None, None
         
-    # 1. Auto-crop dark scanner borders if present
-    cropped_paper = auto_crop_paper_boundaries(image)
+    # Resize large scans proportionally to max 1200px (normalized [x,y,w,h] remains identical)
+    optimized = resize_for_ocr(image, max_dim=1200)
+    
+    # Contrast enhancement for OCR reading
+    enhanced = enhance_contrast(optimized)
+    
+    return optimized, enhanced
 
-    # 2. Resize large scans to ~1200px for rapid CPU processing
-    optimized = resize_for_ocr(cropped_paper, max_dim=1200)
-    
-    # 3. Deskew
-    deskewed = deskew(optimized)
-    
-    # 4. Contrast enhance for OCR reading
-    enhanced = enhance_contrast(deskewed)
-    
-    return deskewed, enhanced
 
 def image_to_base64(image: np.ndarray, format: str = ".jpg") -> str:
     """

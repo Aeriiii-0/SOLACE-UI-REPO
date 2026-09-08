@@ -33,6 +33,7 @@ namespace SOLUM_UI.Models
         public string FormId { get; set; } = "CSWDO-066-2";
         public double OverallConfidence { get; set; }
         public string OverallRating { get; set; } = "Low";
+        public double ExecutionTimeSeconds { get; set; }
         public string PreviewImageBase64 { get; set; } = string.Empty;
         public Dictionary<string, OcrFieldResult> Fields { get; set; } = new Dictionary<string, OcrFieldResult>(StringComparer.OrdinalIgnoreCase);
         public OcrCircumstanceResult Circumstance { get; set; } = new OcrCircumstanceResult();
@@ -45,6 +46,7 @@ namespace SOLUM_UI.Models
         public string Value { get; set; } = string.Empty;
         public double Confidence { get; set; }
         public string Rating { get; set; } = "Low";
+        public double ExecutionTimeSeconds { get; set; }
         public double[] Bbox { get; set; } = new double[4];
     }
 }
