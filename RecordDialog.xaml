@@ -891,7 +891,7 @@
                                                        Foreground="#555555" Margin="0,0,6,0"/>
                                             <TextBlock Grid.Column="2" Text="Age" FontSize="11" FontWeight="Bold"
                                                        Foreground="#555555" Margin="0,0,6,0"/>
-                                            <TextBlock Grid.Column="3" Text="Birthdate mm/dd/yy" FontSize="11" FontWeight="Bold"
+                                            <TextBlock Grid.Column="3" Text="Birthdate (mm/dd/yyyy)" FontSize="11" FontWeight="Bold"
                                                        Foreground="#555555" Margin="0,0,6,0"/>
                                             <TextBlock Grid.Column="4" Text="Civil Status" FontSize="11" FontWeight="Bold"
                                                        Foreground="#555555" Margin="0,0,6,0"/>
@@ -921,6 +921,7 @@
                                                                  Background="White" Padding="6,0"
                                                                  VerticalContentAlignment="Center" Margin="0,0,4,0"
                                                                  PreviewTextInput="NameOnly_PreviewTextInput"
+                                                                 LostFocus="FamilyMemberName_LostFocus"
                                                                  Text="{Binding MemberName, UpdateSourceTrigger=PropertyChanged}"/>
                                                         <TextBox Grid.Column="1" Height="36" FontSize="12"
                                                                  BorderBrush="#D0D0D0" BorderThickness="1"
@@ -931,11 +932,11 @@
                                                                  Text="{Binding Sex, UpdateSourceTrigger=PropertyChanged}"/>
                                                         <TextBox Grid.Column="2" Height="36" FontSize="12"
                                                                  BorderBrush="#D0D0D0" BorderThickness="1"
-                                                                 Background="White" Padding="4,0"
+                                                                 Background="#F5F5F5" Padding="4,0"
                                                                  VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,4,0"
-                                                                 MaxLength="3"
-                                                                 PreviewTextInput="NumberOnly_PreviewTextInput"
-                                                                 Text="{Binding Age, UpdateSourceTrigger=PropertyChanged}"/>
+                                                                 IsReadOnly="True" Focusable="False" Cursor="Arrow"
+                                                                 ToolTip="Age is automatically calculated from Birthdate"
+                                                                 Text="{Binding Age, Mode=OneWay}"/>
                                                         <TextBox Grid.Column="3" Height="36" FontSize="12"
                                                                  BorderBrush="#D0D0D0" BorderThickness="1"
                                                                  Background="White" Padding="6,0"

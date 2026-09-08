@@ -406,24 +406,22 @@ namespace SOLUM_UI
                 return;
             }
 
-            SoloParentRecord prePopulated = null;
-
             if (methodDialog.Selected == EntryMethod.Scan)
             {
                 var ocr = new OcrScanDialog { Owner = Window.GetWindow(this) };
                 ocr.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
                 
-                if (ocr.ShowDialog() != true || ocr.Result == null)
+                if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
-                    return;
+                    _allRecords.Add(new SoloParentRecordViewModel(ocr.Result));
+                    ToastNotification.Show("Record Added", ocr.Result.Name + " was added successfully.", ToastType.Success);
+                    AuditLogService.Instance.LogCreate(ocr.Result.Id, ocr.Result.Name, GetCurrentUser(), CurrentUserRole);
+                    ApplyFiltersAndPage();
                 }
-
-                prePopulated = ocr.Result;
-                if (mainWindow != null)
-                    mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
+                return;
             }
 
-            RecordDialog dialog = new RecordDialog(prePopulated) { Owner = Window.GetWindow(this) };
+            RecordDialog dialog = new RecordDialog() { Owner = Window.GetWindow(this) };
             dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)

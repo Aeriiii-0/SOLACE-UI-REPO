@@ -53,8 +53,8 @@ def enhance_contrast(image: np.ndarray) -> np.ndarray:
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     enhanced = clahe.apply(gray)
     
-    # Slight bilateral filter to reduce paper grain noise while preserving sharp pen strokes
-    denoised = cv2.bilateralFilter(enhanced, d=5, sigmaColor=50, sigmaSpace=50)
+    # Gentle filter that removes paper grain without blurring out fine 1-2px pen strokes
+    denoised = cv2.bilateralFilter(enhanced, d=3, sigmaColor=15, sigmaSpace=15)
     return denoised
 
 def crop_roi(image: np.ndarray, bbox: list) -> np.ndarray:

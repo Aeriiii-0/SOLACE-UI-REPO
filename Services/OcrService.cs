@@ -836,6 +836,7 @@ namespace SOLUM_UI.Services
 
             string s = raw.Trim();
             s = Regex.Replace(s, @"^(date\s*of\s*birth|birthdate|dob|kaarawan|bday)\s*[:\-_.]*", "", RegexOptions.IgnoreCase).Trim();
+            s = Regex.Replace(s, @"^\s*\(?\s*m+[/.]?d+[/.]?y+\s*\)?\s*", "", RegexOptions.IgnoreCase).Trim();
 
             if (DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
                 return true;
@@ -855,6 +856,38 @@ namespace SOLUM_UI.Services
                     return true;
                 }
                 catch { }
+            }
+
+            // Check missing one slash: e.g. 1/252020 or 01/252020
+            var mOneSlash1 = Regex.Match(s, @"^(\d{1,2})[/\-.](\d{1,2})(\d{4})$");
+            if (mOneSlash1.Success)
+            {
+                int p1 = int.Parse(mOneSlash1.Groups[1].Value);
+                int p2 = int.Parse(mOneSlash1.Groups[2].Value);
+                int yr = int.Parse(mOneSlash1.Groups[3].Value);
+                int m = p1, d = p2;
+                if (m > 12 && d <= 12) { int tmp = m; m = d; d = tmp; }
+                if (m >= 1 && m <= 12 && d >= 1 && d <= DateTime.DaysInMonth(yr, m))
+                {
+                    result = new DateTime(yr, m, d);
+                    return true;
+                }
+            }
+
+            // Check missing first slash: e.g. 0125/2020
+            var mOneSlash2 = Regex.Match(s, @"^(\d{1,2})(\d{2})[/\-.](\d{4})$");
+            if (mOneSlash2.Success)
+            {
+                int p1 = int.Parse(mOneSlash2.Groups[1].Value);
+                int p2 = int.Parse(mOneSlash2.Groups[2].Value);
+                int yr = int.Parse(mOneSlash2.Groups[3].Value);
+                int m = p1, d = p2;
+                if (m > 12 && d <= 12) { int tmp = m; m = d; d = tmp; }
+                if (m >= 1 && m <= 12 && d >= 1 && d <= DateTime.DaysInMonth(yr, m))
+                {
+                    result = new DateTime(yr, m, d);
+                    return true;
+                }
             }
 
             // Check written month: e.g. June 19 2004 or Jum192004 or 19 June 2004
@@ -914,6 +947,29 @@ namespace SOLUM_UI.Services
                 if (y2 >= 1920 && y2 <= 2030 && m2 >= 1 && m2 <= 12 && d2 >= 1 && d2 <= 31)
                 {
                     try { result = new DateTime(y2, m2, d2); return true; } catch { }
+                }
+            }
+
+            if (digitsOnly.Length == 7)
+            {
+                int m = int.Parse(digitsOnly.Substring(0, 1));
+                int d = int.Parse(digitsOnly.Substring(1, 2));
+                int yr = int.Parse(digitsOnly.Substring(3, 4));
+                if (yr >= 1920 && yr <= 2030 && m >= 1 && m <= 12 && d >= 1 && d <= DateTime.DaysInMonth(yr, m))
+                {
+                    try { result = new DateTime(yr, m, d); return true; } catch { }
+                }
+            }
+
+            if (digitsOnly.Length == 6)
+            {
+                int m = int.Parse(digitsOnly.Substring(0, 2));
+                int d = int.Parse(digitsOnly.Substring(2, 2));
+                int y2 = int.Parse(digitsOnly.Substring(4, 2));
+                int yr = y2 < 40 ? 2000 + y2 : 1900 + y2;
+                if (m >= 1 && m <= 12 && d >= 1 && d <= DateTime.DaysInMonth(yr, m))
+                {
+                    try { result = new DateTime(yr, m, d); return true; } catch { }
                 }
             }
 
@@ -987,12 +1043,13 @@ namespace SOLUM_UI.Services
 
             string s = raw.Trim();
             s = Regex.Replace(s, @"^(date\s*of\s*birth|birthdate|dob|kaarawan|bday)\s*[:\-_.]*", "", RegexOptions.IgnoreCase).Trim();
+            s = Regex.Replace(s, @"^\s*\(?\s*m+[/.]?d+[/.]?y+\s*\)?\s*", "", RegexOptions.IgnoreCase).Trim();
 
             // 1. Try generic TryParseOcrDate
             if (TryParseOcrDate(s, out DateTime dt))
             {
                 parsedDate = dt;
-                return dt.ToString("yyyy-MM-dd");
+                return dt.ToString("MM/dd/yyyy");
             }
 
             // 2. Explicit MM/DD/YY or MM/DD/YYYY as specified on the CSWDO form
@@ -1019,13 +1076,20 @@ namespace SOLUM_UI.Services
                     {
                         var d = new DateTime(yr, month, day);
                         parsedDate = d;
-                        return d.ToString("yyyy-MM-dd");
+                        return d.ToString("MM/dd/yyyy");
                     }
                 }
                 catch { }
             }
 
             return s;
+        }
+
+        public static int CalculateAge(DateTime birthDate)
+        {
+            int age = DateTime.Today.Year - birthDate.Year;
+            if (birthDate.Date > DateTime.Today.AddYears(-age)) age--;
+            return age;
         }
 
         public static string FormatPhoneNumber(string raw)

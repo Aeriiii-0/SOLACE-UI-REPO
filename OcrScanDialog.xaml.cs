@@ -730,12 +730,28 @@ namespace SOLUM_UI
                         if (string.IsNullOrWhiteSpace(m.MemberName) || OcrService.IsOcrNotApplicable(m.MemberName))
                             continue;
 
+                        DateTime? dt = null;
+                        string normDob = OcrService.IsOcrNotApplicable(m.Birthdate) ? string.Empty : OcrService.NormalizeDateString(m.Birthdate, out dt);
+                        string ageVal = string.Empty;
+                        if (dt.HasValue && dt.Value != DateTime.MinValue)
+                        {
+                            int calcAge = OcrService.CalculateAge(dt.Value);
+                            if (calcAge >= 0 && calcAge <= 120)
+                            {
+                                ageVal = calcAge.ToString();
+                            }
+                        }
+                        if (string.IsNullOrWhiteSpace(ageVal))
+                        {
+                            ageVal = OcrService.IsOcrNotApplicable(m.Age) ? string.Empty : m.Age;
+                        }
+
                         _familyRowData.Add(new FamilyMemberRow
                         {
-                            MemberName          = m.MemberName,
+                            MemberName          = OcrService.CleanPersonName(m.MemberName),
                             Sex                 = OcrService.IsOcrNotApplicable(m.Sex) ? string.Empty : m.Sex,
-                            Age                 = OcrService.IsOcrNotApplicable(m.Age) ? string.Empty : m.Age,
-                            Birthdate           = OcrService.IsOcrNotApplicable(m.Birthdate) ? string.Empty : m.Birthdate,
+                            Age                 = ageVal,
+                            Birthdate           = normDob,
                             CivilStatus         = OcrService.IsOcrNotApplicable(m.CivilStatus) ? string.Empty : OcrService.FuzzyMatchCivilStatus(m.CivilStatus),
                             Relationship        = OcrService.IsOcrNotApplicable(m.Relationship) ? string.Empty : OcrService.FuzzyMatchRelationship(m.Relationship),
                             EducationEmployment = OcrService.IsOcrNotApplicable(m.EducationEmployment) ? string.Empty : m.EducationEmployment,
@@ -887,7 +903,38 @@ namespace SOLUM_UI
         {
             if (sender is TextBox tb && tb.DataContext is FamilyMemberRow row)
             {
-                row.Birthdate = OcrService.NormalizeDateString(tb.Text, out _);
+                if (string.IsNullOrWhiteSpace(tb.Text))
+                {
+                    row.Birthdate = string.Empty;
+                    row.Age = string.Empty;
+                    return;
+                }
+
+                string norm = OcrService.NormalizeDateString(tb.Text, out DateTime? dt);
+                if (!string.IsNullOrEmpty(norm))
+                {
+                    row.Birthdate = norm;
+                }
+                if (dt.HasValue && dt.Value != DateTime.MinValue)
+                {
+                    int calcAge = OcrService.CalculateAge(dt.Value);
+                    if (calcAge >= 0 && calcAge <= 120)
+                    {
+                        row.Age = calcAge.ToString();
+                    }
+                }
+                else
+                {
+                    row.Age = string.Empty;
+                }
+            }
+        }
+
+        private void FamilyMemberName_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox tb && tb.DataContext is FamilyMemberRow row)
+            {
+                row.MemberName = OcrService.CleanPersonName(tb.Text);
             }
         }
 
@@ -1219,12 +1266,23 @@ namespace SOLUM_UI
                 var row = item as FamilyMemberRow;
                 if (row != null && !string.IsNullOrWhiteSpace(row.MemberName) && !OcrService.IsOcrNotApplicable(row.MemberName))
                 {
+                    string normDob = OcrService.NormalizeDateString(row.Birthdate, out DateTime? dt);
+                    string ageVal = row.Age;
+                    if (dt.HasValue && dt.Value != DateTime.MinValue)
+                    {
+                        int calcAge = OcrService.CalculateAge(dt.Value);
+                        if (calcAge >= 0 && calcAge <= 120)
+                        {
+                            ageVal = calcAge.ToString();
+                        }
+                    }
+
                     members.Add(new FamilyMember
                     {
-                        MemberName          = row.MemberName,
+                        MemberName          = OcrService.CleanPersonName(row.MemberName),
                         Sex                 = row.OfficialSex,
-                        Age                 = row.Age,
-                        Birthdate           = row.Birthdate,
+                        Age                 = ageVal,
+                        Birthdate           = string.IsNullOrWhiteSpace(normDob) ? row.Birthdate : normDob,
                         CivilStatus         = row.CivilStatus,
                         Relationship        = row.Relationship,
                         EducationEmployment = row.EducationEmployment,

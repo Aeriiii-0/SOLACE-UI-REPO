@@ -115,7 +115,7 @@ def extract_form(file: UploadFile = File(...), mode: str = "global"):
             
         print(f"[Server] 2. Preprocessed image. Shape: {enhanced_gray.shape} (H, W)")
         
-        result = parse_form_with_ocr(ocr, enhanced_gray, mode=mode)
+        result = parse_form_with_ocr(ocr, deskewed_color, mode=mode)
         elapsed = round(time.time() - t_start, 2)
         result["execution_time_seconds"] = elapsed
         print(f"[Server] 3. OCR Extraction ({mode}) finished in {elapsed}s. Status: {result.get('status')}, Rating: {result.get('overall_rating')}")

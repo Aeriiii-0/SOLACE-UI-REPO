@@ -31,7 +31,7 @@ namespace SOLUM_UI
             get => _memberName;
             set
             {
-                _memberName = SOLUM_UI.Services.OcrService.CleanPersonName(value);
+                _memberName = value;
                 N(nameof(MemberName));
             }
         }
@@ -79,19 +79,26 @@ namespace SOLUM_UI
             get => _birthdate;
             set
             {
-                string norm = SOLUM_UI.Services.OcrService.NormalizeDateString(value, out DateTime? dt);
-                _birthdate = norm;
+                _birthdate = value;
                 N(nameof(Birthdate));
 
-                if (dt.HasValue && dt.Value != DateTime.MinValue)
+                if (!string.IsNullOrWhiteSpace(value))
                 {
-                    int calcAge = DateTime.Today.Year - dt.Value.Year;
-                    if (dt.Value.Date > DateTime.Today.AddYears(-calcAge)) calcAge--;
-                    if (calcAge >= 0 && calcAge <= 120)
+                    string norm = SOLUM_UI.Services.OcrService.NormalizeDateString(value, out DateTime? dt);
+                    if (dt.HasValue && dt.Value != DateTime.MinValue)
                     {
-                        _age = calcAge.ToString();
-                        N(nameof(Age));
+                        int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(dt.Value);
+                        if (calcAge >= 0 && calcAge <= 120)
+                        {
+                            _age = calcAge.ToString();
+                            N(nameof(Age));
+                        }
                     }
+                }
+                else
+                {
+                    _age = string.Empty;
+                    N(nameof(Age));
                 }
             }
         }
@@ -288,12 +295,23 @@ namespace SOLUM_UI
                 _familyRowData.Clear();
                 foreach (var fm in r.FamilyMembers)
                 {
+                    string normDob = SOLUM_UI.Services.OcrService.NormalizeDateString(fm.Birthdate, out DateTime? dt);
+                    string ageVal = fm.Age;
+                    if (dt.HasValue && dt.Value != DateTime.MinValue)
+                    {
+                        int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(dt.Value);
+                        if (calcAge >= 0 && calcAge <= 120)
+                        {
+                            ageVal = calcAge.ToString();
+                        }
+                    }
+
                     _familyRowData.Add(new FamilyMemberRow
                     {
                         MemberName          = fm.MemberName,
                         Sex                 = fm.Sex,
-                        Age                 = fm.Age,
-                        Birthdate           = fm.Birthdate,
+                        Age                 = ageVal,
+                        Birthdate           = string.IsNullOrWhiteSpace(normDob) ? fm.Birthdate : normDob,
                         CivilStatus         = fm.CivilStatus,
                         Relationship        = fm.Relationship,
                         EducationEmployment = fm.EducationEmployment,
@@ -368,7 +386,38 @@ namespace SOLUM_UI
         {
             if (sender is TextBox tb && tb.DataContext is FamilyMemberRow row)
             {
-                row.Birthdate = SOLUM_UI.Services.OcrService.NormalizeDateString(tb.Text, out _);
+                if (string.IsNullOrWhiteSpace(tb.Text))
+                {
+                    row.Birthdate = string.Empty;
+                    row.Age = string.Empty;
+                    return;
+                }
+
+                string norm = SOLUM_UI.Services.OcrService.NormalizeDateString(tb.Text, out DateTime? dt);
+                if (!string.IsNullOrEmpty(norm))
+                {
+                    row.Birthdate = norm;
+                }
+                if (dt.HasValue && dt.Value != DateTime.MinValue)
+                {
+                    int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(dt.Value);
+                    if (calcAge >= 0 && calcAge <= 120)
+                    {
+                        row.Age = calcAge.ToString();
+                    }
+                }
+                else
+                {
+                    row.Age = string.Empty;
+                }
+            }
+        }
+
+        private void FamilyMemberName_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox tb && tb.DataContext is FamilyMemberRow row)
+            {
+                row.MemberName = SOLUM_UI.Services.OcrService.CleanPersonName(tb.Text);
             }
         }
 
@@ -688,17 +737,30 @@ namespace SOLUM_UI
             {
                 var row = item as FamilyMemberRow;
                 if (row != null && !string.IsNullOrWhiteSpace(row.MemberName))
+                {
+                    string normDob = SOLUM_UI.Services.OcrService.NormalizeDateString(row.Birthdate, out DateTime? dt);
+                    string ageVal = row.Age;
+                    if (dt.HasValue && dt.Value != DateTime.MinValue)
+                    {
+                        int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(dt.Value);
+                        if (calcAge >= 0 && calcAge <= 120)
+                        {
+                            ageVal = calcAge.ToString();
+                        }
+                    }
+
                     members.Add(new FamilyMember
                     {
-                        MemberName          = row.MemberName,
+                        MemberName          = SOLUM_UI.Services.OcrService.CleanPersonName(row.MemberName),
                         Sex                 = row.OfficialSex,
-                        Age                 = row.Age,
-                        Birthdate           = row.Birthdate,
+                        Age                 = ageVal,
+                        Birthdate           = string.IsNullOrWhiteSpace(normDob) ? row.Birthdate : normDob,
                         CivilStatus         = row.CivilStatus,
                         Relationship        = row.Relationship,
                         EducationEmployment = row.EducationEmployment,
                         Income              = row.Income
                     });
+                }
             }
 
             return new SoloParentRecord

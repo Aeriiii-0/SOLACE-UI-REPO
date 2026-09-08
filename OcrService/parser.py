@@ -174,6 +174,9 @@ def clean_civil_status(raw_text: str) -> str:
     if not raw_text or is_ocr_na(raw_text):
         return ""
     t = raw_text.strip().lower()
+    if globals().get("ENABLE_ROBUST_LABEL_FILTER", True):
+        t = re.sub(r'^(civil\s*s?tatus|status|kasarian)\s*[:\-_.]*', '', t, flags=re.IGNORECASE).strip()
+        t = re.sub(r'civil\s*s?tatus', '', t, flags=re.IGNORECASE).strip()
     t_clean = re.sub(r'[^a-z]', '', t)
     
     # 1. Single letter or exact abbreviations
@@ -309,8 +312,15 @@ def clean_person_name(raw_name: str) -> str:
     if not raw_name or is_ocr_na(raw_name):
         return ""
     t = raw_name.strip()
-    # Strip any residual printed label prefixes like 'Middle ame', 'Middle name', etc.
-    t = re.sub(r'^\s*\(?\s*(m[i1lI]dd?[li1I]?e?\s+(a?m[eo]|name)|middle\b|last\s+(a?m[eo]|name)|last\b|first\s+(a?m[eo]|name)|first\b|gitnang\s+pangalan)\s*\)?\s*[:\-_.]*\s*', '', t, flags=re.IGNORECASE)
+    if globals().get("ENABLE_ROBUST_LABEL_FILTER", True):
+        # 1. Strip leading Roman numerals or list numbering: 'i. ', 'I. ', '1. ', 'II. '
+        t = re.sub(r'^\s*\(?\s*([iIvVxX]+|[0-9]+)\s*[\.\)]\s*', '', t)
+        # 2. Strip residual label fragments anywhere in the name string
+        t = re.sub(r'(person\s*t?\s*o?\s*be\s*contact(ed|ea)?|in\s*(c?ase)?\s*of\s*(emergency|cmergency|e?mergen[a-z]*)|emergency\s*(contact|person|name|a?m[eo])?)', '', t, flags=re.IGNORECASE)
+        t = re.sub(r'^\s*\(?\s*(name\s*)?(last\s*(name|a?m[eo])?|surname|first\s*(name|a?m[eo])?|m[i1lI]dd?[li1I]?e?\s*(name|a?m[eo])?|middle|gitnang\s*pangalan)\b\s*\)?\s*[:\-_.]*\s*', '', t, flags=re.IGNORECASE)
+    else:
+        # Legacy fallback
+        t = re.sub(r'^\s*\(?\s*(m[i1lI]dd?[li1I]?e?\s+(a?m[eo]|name)|middle\b|last\s+(a?m[eo]|name)|last\b|first\s+(a?m[eo]|name)|first\b|gitnang\s+pangalan)\s*\)?\s*[:\-_.]*\s*', '', t, flags=re.IGNORECASE)
     t = re.sub(r'4', 'A', t)
     t = re.sub(r'0', 'O', t)
     t = re.sub(r'[^a-zA-ZñÑ\s\.\-\']', '', t)
@@ -359,6 +369,7 @@ def clean_date(raw_text: str) -> str:
     
     # Strip common label prefixes
     raw = re.sub(r'^(date\s*of\s*(this\s*)?application|application\s*date|petsa(\s*ng\s*aplikasyon)?|date\s*of\s*birth|birthdate|dob|kaarawan|bday|date)\s*[:\-_.]*', '', raw, flags=re.IGNORECASE).strip()
+    raw = re.sub(r'^\s*\(?\s*m+[/.]?d+[/.]?y+\s*\)?\s*', '', raw, flags=re.IGNORECASE).strip()
     if not raw or is_ocr_na(raw):
         return ""
 
@@ -375,6 +386,23 @@ def clean_date(raw_text: str) -> str:
                 return f"{yr}-{int(p2):02d}-{int(p1):02d}"
             elif int(p1) <= 12 and int(p2) <= 31:
                 return f"{yr}-{int(p1):02d}-{int(p2):02d}"
+
+    # 1b. Missing one separator: e.g. '1/252020', '01/252020', '0125/2020'
+    m_missing1 = re.search(r'(\d{1,2})[/\-.](\d{1,2})(\d{4})', raw)
+    if m_missing1:
+        p1, p2, yr = m_missing1.groups()
+        if int(p1) > 12 and int(p2) <= 12:
+            p1, p2 = p2, p1
+        if 1 <= int(p1) <= 12 and 1 <= int(p2) <= 31 and 1920 <= int(yr) <= 2030:
+            return f"{yr}-{int(p1):02d}-{int(p2):02d}"
+
+    m_missing2 = re.search(r'(\d{1,2})(\d{2})[/\-.](\d{4})', raw)
+    if m_missing2:
+        p1, p2, yr = m_missing2.groups()
+        if int(p1) > 12 and int(p2) <= 12:
+            p1, p2 = p2, p1
+        if 1 <= int(p1) <= 12 and 1 <= int(p2) <= 31 and 1920 <= int(yr) <= 2030:
+            return f"{yr}-{int(p1):02d}-{int(p2):02d}"
 
     # 2. Text month + day + year (e.g. 'June 19, 2004', 'Jun 19 2004', 'Jum192004', 'June192004')
     clean = re.sub(r'[^a-zA-Z0-9\s]', ' ', raw)
@@ -407,6 +435,11 @@ def clean_date(raw_text: str) -> str:
         if 1 <= int(m_s) <= 12 and 1 <= int(d_s) <= 31 and 1920 <= int(y_s) <= 2030:
             return f"{y_s}-{int(m_s):02d}-{int(d_s):02d}"
             
+    if len(digits_only) == 7:
+        m_s, d_s, y_s = digits_only[:1], digits_only[1:3], digits_only[3:]
+        if 1 <= int(m_s) <= 9 and 1 <= int(d_s) <= 31 and 1920 <= int(y_s) <= 2030:
+            return f"{y_s}-{int(m_s):02d}-{int(d_s):02d}"
+
     if len(digits_only) == 6:
         m_s, d_s, y_s = digits_only[:2], digits_only[2:4], digits_only[4:]
         if 1 <= int(m_s) <= 12 and 1 <= int(d_s) <= 31:
@@ -646,6 +679,38 @@ def get_confidence_rating(score: float) -> str:
         return "Moderate"
     return "Low"
 
+# ==============================================================================
+# FEATURE FLAG: Robust Form Label Filtering
+# Set to False to instantly revert to legacy regex matching.
+# ==============================================================================
+ENABLE_ROBUST_LABEL_FILTER = True
+
+GLOBAL_PRINTED_LABEL_PATTERNS = [
+    re.compile(r"person\s*t?\s*o?\s*be\s*contact(ed|ea)?", re.IGNORECASE),
+    re.compile(r"in\s*(c?ase)?\s*of\s*(emergency|cmergency|e?mergen[a-z]*)", re.IGNORECASE),
+    re.compile(r"emergency\s*(contact|person|name|address|number|relationship)?", re.IGNORECASE),
+    re.compile(r"civil\s*(s?tatus)?", re.IGNORECASE),
+    re.compile(r"date\s*of\s*(this\s*)?(application|birth)?", re.IGNORECASE),
+    re.compile(r"place\s*of\s*birth", re.IGNORECASE),
+    re.compile(r"educational\s*(attainment)?", re.IGNORECASE),
+    re.compile(r"source\s*o[rf]\s*income", re.IGNORECASE),
+    re.compile(r"monthly\s*income", re.IGNORECASE),
+    re.compile(r"employment\s*status", re.IGNORECASE),
+    re.compile(r"philsys\s*(card)?\s*(no|number)?", re.IGNORECASE),
+    re.compile(r"applicant'?s?\s*contact\s*(number|no)?", re.IGNORECASE),
+    re.compile(r"^\s*\(?\s*([iIvVxX]+|[0-9]+)\s*[\.\)]\s*$", re.IGNORECASE),
+]
+
+def is_printed_label_word(word: str) -> bool:
+    """Checks if a detected word token is a known printed form label that should never be data."""
+    if not globals().get("ENABLE_ROBUST_LABEL_FILTER", True) or not word:
+        return False
+    w = word.strip()
+    for pat in GLOBAL_PRINTED_LABEL_PATTERNS:
+        if pat.search(w):
+            return True
+    return False
+
 # Known printed labels to strip from extracted field values
 FORM_LABEL_PREFIXES = {
     "application_date": [
@@ -658,17 +723,18 @@ FORM_LABEL_PREFIXES = {
         r"^\s*(v\.?\s*)?(other\s*sources?\s*of\s*income|iba\s*pang\s*pinagkukunang?\s*yaman|pinagkakakitaan)\s*[:\-_.]*"
     ],
     "last_name": [
-        r"^\s*([0-9]+\.?)?\s*\(?\s*(name\s*)?(last\s*name|last\s*a?m[eo]|surname|apelyido|last\b)\s*\)?\s*[:\-_.]*",
+        r"^\s*([iIvVxX]+|[0-9]+)\s*[\.\)]\s*",
+        r"^\s*([0-9]+\.?)?\s*\(?\s*(name\s*)?(last\s*(name|a?m[eo])?|surname|apelyido|last\b)\s*\)?\s*[:\-_.]*",
         r"^\s*\(?\s*(name|ame|surname)\b\s*\)?\s*[:\-_.]*"
     ],
     "first_name": [
-        r"^\s*([0-9]+\.?)?\s*\(?\s*(first\s*name|first\s*a?m[eo]|pangalan|first\b)\s*\)?\s*[:\-_.]*",
+        r"^\s*([0-9]+\.?)?\s*\(?\s*(first\s*(name|a?m[eo])?|pangalan|first\b)\s*\)?\s*[:\-_.]*",
         r"^\s*\(?\s*(first\b|pangalan)\s*\)?\s*[:\-_.]*",
         r"^\s*\(?\s*(name|ame)\b\s*\)?\s*[:\-_.]*"
     ],
     "middle_name": [
-        r"^\s*([0-9]+\.?)?\s*\(?\s*m[i1lI]dd?[li1I]?e?\s*(a?m[eo]|name|gitnang\s*pangalan)?\s*\)?\s*[:\-_.]*",
-        r"^\s*\(?\s*(middle\s*name|middle\s*a?m[eo]|middle\b|gitnang\s*pangalan)\s*\)?\s*[:\-_.]*",
+        r"^\s*([0-9]+\.?)?\s*\(?\s*m[i1lI]dd?[li1I]?e?\s*(name|a?m[eo]|gitnang\s*pangalan)?\s*\)?\s*[:\-_.]*",
+        r"^\s*\(?\s*(middle\s*(name|a?m[eo])?|middle\b|gitnang\s*pangalan)\s*\)?\s*[:\-_.]*",
         r"^\s*\(?\s*(m\.?i\.?|gitnang\s*pangalan)\s*\)?\s*[:\-_.]*",
         r"^\s*\(?\s*(name|ame)\b\s*\)?\s*[:\-_.]*"
     ],
@@ -677,7 +743,7 @@ FORM_LABEL_PREFIXES = {
         r"^\s*\(?\s*ext\.?\s*\)?\s*[:\-_.]*"
     ],
     "civil_status": [
-        r"^\s*([0-9]+\.?)?\s*civil\s*status\s*[:\-_.]*"
+        r"^\s*([0-9]+\.?)?\s*(civil\s*s?tatus|status|kasarian)\s*[:\-_.]*"
     ],
     "sex": [
         r"^\s*([0-9]+\.?)?\s*(sex|gender|kasarian)\s*[:\-_.]*"
@@ -723,8 +789,8 @@ FORM_LABEL_PREFIXES = {
         r"^\s*([0-9]+\.?)?\s*(applicant'?s?\s*)?(contact|cellphone|mobile|tel)?\s*(number|no\.?)\s*[:\-_.]*"
     ],
     "emergency_name": [
-        r"^.*?(person\s*to\s*(be|oe)\s*contact(ed|ea)|in\s*case\s*of\s*(emergency|cmergency)|emergency\s*contact).*?:\s*",
-        r"^\s*([0-9]+\.?)?\s*\(?\s*(person\s*to\s*be\s*contacted|emergency\s*(contact|person|name|a?m[eo])?)\s*\)?\s*[:\-_.]*",
+        r"^.*?(person\s*t?\s*o?\s*be\s*contact(ed|ea)?|in\s*(c?ase)?\s*of\s*(emergency|cmergency|e?mergen[a-z]*)|emergency\s*(contact|person|name|a?m[eo])?).*?([:\-_.]|\b)\s*",
+        r"^\s*([0-9]+\.?)?\s*\(?\s*(person\s*t?\s*o?\s*be\s*contacted|emergency\s*(contact|person|name|a?m[eo])?)\s*\)?\s*[:\-_.]*",
         r"^\s*\(?\s*(name|ame)\s*\)?\s*[:\-_.]*"
     ],
     "emergency_relationship": [
@@ -980,6 +1046,9 @@ def assign_detections_to_field(field_key: str, cfg: dict, all_detections: list) 
         if not word:
             continue
 
+        if globals().get("ENABLE_ROBUST_LABEL_FILTER", True) and is_printed_label_word(word):
+            continue
+
         is_label = False
         for pat in label_patterns:
             try:
@@ -1026,18 +1095,20 @@ def clean_field_value(f_key: str, f_type: str, raw_text: str, conf: float, enhan
             return "0", conf
         return "", 0.0
 
-    if f_key in ["last_name", "first_name", "middle_name", "emergency_name"]:
+    if f_key in ["last_name", "first_name", "middle_name", "emergency_name"] or f_key.endswith("_name"):
         cleaned = clean_person_name(cleaned)
     elif f_key == "barangay":
         cleaned = match_barangay(cleaned)
     elif f_key == "religion":
         cleaned = clean_religion(cleaned)
-    elif f_key == "civil_status":
+    elif f_key == "civil_status" or f_key.endswith("_civ"):
         cleaned = clean_civil_status(cleaned)
-    elif f_key == "emergency_relationship":
+    elif f_key == "emergency_relationship" or f_key.endswith("_rel"):
         cleaned = clean_relationship(cleaned)
-    elif f_key == "sex":
+    elif f_key == "sex" or f_key.endswith("_sex"):
         cleaned = clean_sex(cleaned)
+    elif f_key.endswith("_age"):
+        cleaned = clean_family_age(cleaned)
     elif f_key == "ext_name":
         cleaned = clean_extension(cleaned)
     elif f_key in ["contact_number", "emergency_number"]:
@@ -1046,7 +1117,7 @@ def clean_field_value(f_key: str, f_type: str, raw_text: str, conf: float, enhan
         cleaned = clean_income(cleaned)
     elif f_key == "employment_status":
         cleaned, conf = detect_employment_status(enhanced_image, ocr_engine, fields_config)
-    elif f_type == "date" or f_key in ["birthdate", "application_date"]:
+    elif f_type == "date" or f_key in ["birthdate", "application_date"] or f_key.endswith("_dob"):
         date_parsed = clean_date(cleaned)
         if date_parsed:
             cleaned = date_parsed
@@ -1141,7 +1212,8 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
         clean_m_dob = "" if is_ocr_na(raw_dob) else (clean_date(raw_dob) or raw_dob)
         if is_ocr_na(clean_m_dob): clean_m_dob = ""
 
-        # If Birthdate is valid YYYY-MM-DD, compute Age automatically if missing or misread
+        # If Birthdate is valid, compute Age automatically if missing or misread
+        # and format clean_m_dob as MM/DD/YYYY
         if clean_m_dob and len(clean_m_dob) == 10 and clean_m_dob[4] == '-' and clean_m_dob[7] == '-':
             try:
                 from datetime import datetime, date
@@ -1150,8 +1222,26 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
                 calc_age = today.year - dt.year - ((today.month, today.day) < (dt.month, dt.day))
                 if 0 <= calc_age <= 120:
                     clean_m_age = str(calc_age)
+                clean_m_dob = f"{dt.month:02d}/{dt.day:02d}/{dt.year}"
             except Exception:
                 pass
+        elif clean_m_dob:
+            m_slash = re.match(r'^(\d{1,2})[/\-](\d{1,2})[/\-](\d{2,4})$', clean_m_dob)
+            if m_slash:
+                p1, p2, p3 = m_slash.groups()
+                yr = int(p3) if len(p3) == 4 else (2000 + int(p3) if int(p3) < 40 else 1900 + int(p3))
+                m_val, d_val = int(p1), int(p2)
+                if m_val > 12 and d_val <= 12: m_val, d_val = d_val, m_val
+                if 1 <= m_val <= 12 and 1 <= d_val <= 31:
+                    try:
+                        from datetime import date
+                        today = date.today()
+                        calc_age = today.year - yr - ((today.month, today.day) < (m_val, d_val))
+                        if 0 <= calc_age <= 120:
+                            clean_m_age = str(calc_age)
+                        clean_m_dob = f"{m_val:02d}/{d_val:02d}/{yr}"
+                    except Exception:
+                        pass
 
         # 5. Civil Status
         raw_civ, civ_conf = get_cell_text("civ", 4)
