@@ -247,7 +247,7 @@
                                     <Setter.Value>
                                         <ControlTemplate TargetType="TextBox">
                                             <Grid>
-                                                <TextBlock Text="Search by name, email or barangay..." Foreground="#C0A8B0" FontSize="13"
+                                                <TextBlock Text="Search by name or email..." Foreground="#C0A8B0" FontSize="13"
                                                            VerticalAlignment="Center" IsHitTestVisible="False">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
@@ -288,7 +288,7 @@
                         <TextBlock Text="ROLE" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
                     </Border>
                     <Border Grid.Column="2" BorderBrush="#E0CDD3" BorderThickness="0,0,1,0">
-                        <TextBlock Text="BARANGAY" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="CONTACT" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
                     </Border>
                     <Border Grid.Column="3" BorderBrush="#E0CDD3" BorderThickness="0,0,1,0">
                         <TextBlock Text="DATE ADDED" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
@@ -360,7 +360,7 @@
                                                Foreground="{Binding RoleTextColor}"/>
                                 </Border>
 
-                                <TextBlock Grid.Column="2" Text="{Binding Barangay}" FontSize="12"
+                                <TextBlock Grid.Column="2" Text="{Binding ContactNumber}" FontSize="12"
                                            Foreground="#555555" VerticalAlignment="Center"
                                            TextTrimming="CharacterEllipsis" Margin="16,0,0,0"/>
 
@@ -484,26 +484,13 @@
 
                         <StackPanel Margin="0,0,0,14">
                             <TextBlock Text="Position" Style="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="TxtPosition" Text="Basic User" Style="{StaticResource FormBoxReadOnly}"/>
+                            <TextBox x:Name="TxtPosition" Text="Encoder" Style="{StaticResource FormBoxReadOnly}"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,14">
-                            <TextBlock Text="Assigned Barangay *" Style="{StaticResource FieldLabel}"/>
-                            <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}" SelectionChanged="ClearErrors">
-                                <ComboBoxItem Content="Biñan Poblacion"/>
-                                <ComboBoxItem Content="Canlalay"/>
-                                <ComboBoxItem Content="Casile"/>
-                                <ComboBoxItem Content="De La Paz"/>
-                                <ComboBoxItem Content="Langkiwa"/>
-                                <ComboBoxItem Content="Loma"/>
-                                <ComboBoxItem Content="Malaban"/>
-                                <ComboBoxItem Content="Malamig"/>
-                                <ComboBoxItem Content="Platero"/>
-                                <ComboBoxItem Content="San Antonio"/>
-                                <ComboBoxItem Content="San Jose"/>
-                                <ComboBoxItem Content="Tubigan"/>
-                            </ComboBox>
-                            <TextBlock x:Name="ErrBarangay" Text="Required." Style="{StaticResource ErrorText}"/>
+                            <TextBlock Text="Contact Number *" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="TxtContactNumber" Style="{StaticResource FormBox}" TextChanged="ClearErrors"/>
+                            <TextBlock x:Name="ErrContactNumber" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
 
                         <StackPanel x:Name="PnlPassword" Margin="0,0,0,14">

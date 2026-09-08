@@ -192,7 +192,7 @@ namespace SOLUM_UI
             double gap    = totalGap / (n + 1);
             double chartH = canvasH - 2;
 
-            var gridBrush = new SolidColorBrush(Color.FromRgb(0xF0,0xE8,0xEC));
+            var gridBrush = new SolidColorBrush(Color.FromRgb(0xE8, 0xD8, 0xDE));
             for (int step = 1; step <= 4; step++)
             {
                 double y = chartH * (1 - step / 4.0);

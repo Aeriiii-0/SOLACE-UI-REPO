@@ -4,12 +4,14 @@
       Title="Subsidy Recommendation"
       Background="#FFFFFF">
     <Page.Resources>
+
         <Style x:Key="PriorityBadge" TargetType="Border">
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Padding" Value="10,3"/>
-            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
+
         <Style x:Key="ColHeader" TargetType="GridViewColumnHeader">
             <Setter Property="Background" Value="#FBF5F7"/>
             <Setter Property="Foreground" Value="#702943"/>
@@ -22,8 +24,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="GridViewColumnHeader">
                         <Border x:Name="HeaderBg" Background="#FBF5F7"
-                                BorderBrush="#702943"
-                                BorderThickness="0,0,0,1">
+                                BorderBrush="#702943" BorderThickness="0,0,0,1">
                             <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"
                                     Padding="{TemplateBinding Padding}">
                                 <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -43,6 +44,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
         <Style x:Key="SubRow" TargetType="ListViewItem">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
@@ -71,13 +73,38 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="SelRow" TargetType="ListViewItem">
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#E0D0D5"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border x:Name="Bg" Background="{Binding RowBg}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <GridViewRowPresenter VerticalAlignment="Center" Margin="0,9"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Opacity" Value="0.82"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="Cell" TargetType="TextBlock">
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="#111111"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="TextTrimming" Value="None"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
             <Setter Property="Margin" Value="10,0"/>
         </Style>
+
         <Style x:Key="ApproveBtn" TargetType="Button">
             <Setter Property="Height" Value="28"/>
             <Setter Property="Padding" Value="12,0"/>
@@ -102,6 +129,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
         <Style x:Key="RejectBtn" TargetType="Button">
             <Setter Property="Height" Value="28"/>
             <Setter Property="Padding" Value="12,0"/>
@@ -126,6 +154,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
         <Style x:Key="FilterComboStyle" TargetType="ComboBox">
             <Setter Property="Height" Value="44"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -141,34 +170,26 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid>
-                            <Border x:Name="CmbBg" Background="White" BorderBrush="#D0B8C0"
-                                    BorderThickness="1.5" CornerRadius="8">
+                            <Border x:Name="CmbBg" Background="White" BorderBrush="#D0B8C0" BorderThickness="1.5" CornerRadius="8">
                                 <Grid Margin="12,0,36,0">
                                     <ContentPresenter x:Name="ContentSite"
                                                       Content="{TemplateBinding SelectionBoxItem}"
                                                       ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                                       VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                    <TextBlock x:Name="Placeholder" Text="Select..."
-                                               Foreground="#BBBBBB" FontSize="13"
-                                               VerticalAlignment="Center" IsHitTestVisible="False"
-                                               Visibility="Collapsed"/>
+                                    <TextBlock x:Name="Placeholder" Text="Select..." Foreground="#BBBBBB" FontSize="13"
+                                               VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed"/>
                                 </Grid>
                             </Border>
                             <ToggleButton HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                           Background="Transparent" BorderThickness="0"
-                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay,
-                                              RelativeSource={RelativeSource TemplatedParent}}"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                           Focusable="False" Opacity="0"/>
-                            <Path HorizontalAlignment="Right" VerticalAlignment="Center"
-                                  Margin="0,0,12,0" Data="M7,10L12,15L17,10H7Z"
-                                  Fill="#702943" Stretch="Uniform" Width="12" Height="12"
-                                  IsHitTestVisible="False"/>
-                            <Popup x:Name="Popup" Placement="Bottom"
-                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                            <Path HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0"
+                                  Data="M7,10L12,15L17,10H7Z" Fill="#702943" Stretch="Uniform" Width="12" Height="12" IsHitTestVisible="False"/>
+                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
                                    AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                                <Border Background="White" CornerRadius="10" BorderBrush="#D0B8C0"
-                                        BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}"
-                                        MaxHeight="200" Margin="0,2,0,0">
+                                <Border Background="White" CornerRadius="10" BorderBrush="#D0B8C0" BorderThickness="1"
+                                        MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200" Margin="0,2,0,0">
                                     <Border.Effect>
                                         <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.14"/>
                                     </Border.Effect>
@@ -201,8 +222,7 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ComboBoxItem">
-                                <Border x:Name="ItemBg" Background="Transparent"
-                                        Padding="{TemplateBinding Padding}" CornerRadius="6" Margin="4,2">
+                                <Border x:Name="ItemBg" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="6" Margin="4,2">
                                     <ContentPresenter/>
                                 </Border>
                                 <ControlTemplate.Triggers>
@@ -221,10 +241,43 @@
                 </Style>
             </Style.Resources>
         </Style>
+
+        <Style x:Key="TabBtn" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#A06080"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="TabBg" Background="Transparent" BorderBrush="Transparent" BorderThickness="0,0,0,3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBg" Property="Background" Value="#FDF5F7"/>
+                            </Trigger>
+                            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Active">
+                                <Setter TargetName="TabBg" Property="BorderBrush" Value="#702943"/>
+                                <Setter Property="Foreground" Value="#702943"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -237,30 +290,34 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Subsidy Recommendation" FontFamily="Segoe UI" FontSize="20"
-                           FontWeight="Bold" Foreground="#702943"/>
-                <TextBlock Text="ML model recommendations awaiting staff review."
-                           FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,4,0,0"/>
+                <TextBlock Text="Subsidy Recommendation" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
+                <TextBlock Text="ML model recommendations awaiting staff review." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,4,0,0"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                 <Border Background="#FFF0F5" CornerRadius="8" Padding="14,8" Margin="0,0,10,0">
                     <StackPanel Orientation="Horizontal">
                         <Ellipse Width="8" Height="8" Fill="#702943" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="TxtPendingCount" Text="10 pending"
-                                   FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
+                        <TextBlock x:Name="TxtPendingCount" Text="10 pending" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
                     </StackPanel>
                 </Border>
                 <Border Background="#E8F5E9" CornerRadius="8" Padding="14,8">
                     <StackPanel Orientation="Horizontal">
                         <Ellipse Width="8" Height="8" Fill="#27AE60" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="TxtApprovedCount" Text="0 approved"
-                                   FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#27AE60"/>
+                        <TextBlock x:Name="TxtApprovedCount" Text="0 approved" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#27AE60"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="24,0,24,8">
+        <Border Grid.Row="1" BorderBrush="#E8D8DE" BorderThickness="0,0,0,1" Margin="24,0,24,0">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="TabBtnRecommendations" Style="{StaticResource TabBtn}" Tag="Active" Content="Recommendations" Click="TabRecommendations_Click"/>
+                <Button x:Name="TabBtnSelection" Style="{StaticResource TabBtn}" Tag="Inactive" Content="Approved Selection" Click="TabSelection_Click"/>
+                <Button x:Name="TabBtnFinal" Style="{StaticResource TabBtn}" Tag="Inactive" Content="Final Grantees" Click="TabFinal_Click"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2" Margin="24,8,24,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -268,10 +325,8 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="22"
-                    BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="0,0,8,0">
-                <Button x:Name="FilterDropBtn" Background="Transparent" BorderThickness="0"
-                        Cursor="Hand" Height="44" Padding="14,0" Click="FilterDrop_Click">
+            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="22" BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="0,0,8,0">
+                <Button x:Name="FilterDropBtn" Background="Transparent" BorderThickness="0" Cursor="Hand" Height="44" Padding="14,0" Click="FilterDrop_Click">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border Background="Transparent" CornerRadius="22" Padding="{TemplateBinding Padding}">
@@ -280,42 +335,27 @@
                         </ControlTemplate>
                     </Button.Template>
                     <StackPanel Orientation="Horizontal">
-                        <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z"
-                              Fill="#702943" Stretch="Uniform" Width="13" Height="13"
-                              VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <TextBlock x:Name="FilterLabel" Text="Filter"
-                                   FontSize="13" FontWeight="SemiBold"
-                                   Foreground="#702943" VerticalAlignment="Center"/>
+                        <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="#702943" Stretch="Uniform" Width="13" Height="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="FilterLabel" Text="Filter" FontSize="13" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </Border>
 
-            <Popup x:Name="FilterPopup"
-                   PlacementTarget="{Binding ElementName=FilterDropBtn}"
-                   Placement="Bottom" StaysOpen="False"
-                   AllowsTransparency="True" PopupAnimation="Fade">
-                <Border Background="White" CornerRadius="14"
-                        BorderBrush="#E0D0D5" BorderThickness="1" Padding="20,18,20,18"
-                        MinWidth="280">
+            <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterDropBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                <Border Background="White" CornerRadius="14" BorderBrush="#E0D0D5" BorderThickness="1" Padding="20,18,20,18" MinWidth="280">
                     <Border.Effect>
                         <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="4" Opacity="0.18"/>
                     </Border.Effect>
                     <StackPanel>
-                        <TextBlock Text="Priority" FontFamily="Segoe UI" FontSize="13"
-                                   FontWeight="SemiBold" Foreground="#1A1A1A" Margin="0,0,0,8"/>
-                        <ComboBox x:Name="CmbFilterPriority"
-                                  Style="{StaticResource FilterComboStyle}"
-                                  Margin="0,0,0,16">
+                        <TextBlock Text="Priority" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="#1A1A1A" Margin="0,0,0,8"/>
+                        <ComboBox x:Name="CmbFilterPriority" Style="{StaticResource FilterComboStyle}" Margin="0,0,0,16">
                             <ComboBoxItem Content="All" IsSelected="True"/>
                             <ComboBoxItem Content="High"/>
                             <ComboBoxItem Content="Medium"/>
                             <ComboBoxItem Content="Low"/>
                         </ComboBox>
-                        <TextBlock Text="Status" FontFamily="Segoe UI" FontSize="13"
-                                   FontWeight="SemiBold" Foreground="#1A1A1A" Margin="0,0,0,8"/>
-                        <ComboBox x:Name="CmbFilterStatus"
-                                  Style="{StaticResource FilterComboStyle}"
-                                  Margin="0,0,0,16">
+                        <TextBlock Text="Status" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="#1A1A1A" Margin="0,0,0,8"/>
+                        <ComboBox x:Name="CmbFilterStatus" Style="{StaticResource FilterComboStyle}" Margin="0,0,0,16">
                             <ComboBoxItem Content="All" IsSelected="True"/>
                             <ComboBoxItem Content="Pending"/>
                             <ComboBoxItem Content="Approved"/>
@@ -340,8 +380,7 @@
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Button.Template>
-                                <TextBlock Text="Reset" FontFamily="Segoe UI" FontSize="13"
-                                           FontWeight="SemiBold" Foreground="#555555"/>
+                                <TextBlock Text="Reset" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="#555555"/>
                             </Button>
                             <Button Grid.Column="2" Height="42" Cursor="Hand" Click="FilterApply_Click">
                                 <Button.Template>
@@ -356,18 +395,15 @@
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Button.Template>
-                                <TextBlock Text="Apply Now" FontFamily="Segoe UI" FontSize="13"
-                                           FontWeight="SemiBold" Foreground="White"/>
+                                <TextBlock Text="Apply Now" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
                             </Button>
                         </Grid>
                     </StackPanel>
                 </Border>
             </Popup>
 
-            <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="22"
-                    BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="0,0,10,0">
-                <Button x:Name="SortDropBtn" Background="Transparent" BorderThickness="0"
-                        Cursor="Hand" Width="44" Height="44" Click="SortDrop_Click" ToolTip="Sort">
+            <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="22" BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="0,0,10,0">
+                <Button x:Name="SortDropBtn" Background="Transparent" BorderThickness="0" Cursor="Hand" Width="44" Height="44" Click="SortDrop_Click" ToolTip="Sort">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border Background="Transparent" CornerRadius="22">
@@ -375,67 +411,30 @@
                             </Border>
                         </ControlTemplate>
                     </Button.Template>
-                    <Path Data="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z"
-                          Fill="#702943" Stretch="Uniform" Width="18" Height="18"/>
+                    <Path Data="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z" Fill="#702943" Stretch="Uniform" Width="18" Height="18"/>
                 </Button>
             </Border>
 
-            <Popup x:Name="SortPopup"
-                   PlacementTarget="{Binding ElementName=SortDropBtn}"
-                   Placement="Bottom" StaysOpen="False"
-                   AllowsTransparency="True" PopupAnimation="Fade">
-                <Border Background="White" CornerRadius="12"
-                        BorderBrush="#E0D0D5" BorderThickness="1" Padding="4">
+            <Popup x:Name="SortPopup" PlacementTarget="{Binding ElementName=SortDropBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                <Border Background="White" CornerRadius="12" BorderBrush="#E0D0D5" BorderThickness="1" Padding="4">
                     <Border.Effect>
                         <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.18"/>
                     </Border.Effect>
                     <StackPanel MinWidth="180">
                         <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="By Barangay">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
+                            <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FDF3F5"/></Trigger></Style.Triggers></Style></Border.Style>
                             <TextBlock Text="By Barangay" FontSize="13" Foreground="#333333" Padding="12,9"/>
                         </Border>
                         <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Priority: High First">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
+                            <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FDF3F5"/></Trigger></Style.Triggers></Style></Border.Style>
                             <TextBlock Text="Priority: High First" FontSize="13" Foreground="#333333" Padding="12,9"/>
                         </Border>
                         <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Priority: Low First">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
+                            <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FDF3F5"/></Trigger></Style.Triggers></Style></Border.Style>
                             <TextBlock Text="Priority: Low First" FontSize="13" Foreground="#333333" Padding="12,9"/>
                         </Border>
                         <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Name A-Z">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
+                            <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FDF3F5"/></Trigger></Style.Triggers></Style></Border.Style>
                             <TextBlock Text="Name A → Z" FontSize="13" Foreground="#333333" Padding="12,9"/>
                         </Border>
                     </StackPanel>
@@ -461,166 +460,497 @@
                     </ControlTemplate>
                 </Button.Template>
                 <StackPanel Orientation="Horizontal">
-                    <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"
-                          Fill="White" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0"/>
+                    <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" Fill="White" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0"/>
                     <TextBlock Text="Export All" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
                 </StackPanel>
             </Button>
         </Grid>
 
-        <Border Grid.Row="2" Margin="24,0,24,0" CornerRadius="0"
-                BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True" Background="White">
-            <ListView x:Name="RecommendationList"
-                      BorderThickness="0" Background="Transparent"
-                      ItemContainerStyle="{StaticResource SubRow}"
-                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      Loaded="RecommendationList_Loaded"
-                      SizeChanged="RecommendationList_SizeChanged"
-                      Margin="0,4,0,0">
-                <ListView.View>
-                    <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
-                        <GridViewColumn x:Name="ColSpId" Header="SP ID" Width="80">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
-                                        <TextBlock Text="{Binding SpId}" Style="{StaticResource Cell}"
-                                                   FontSize="12" FontWeight="SemiBold" Foreground="#702943"
-                                                   HorizontalAlignment="Center"/>
-                                    </Border>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn x:Name="ColName" Header="NAME" Width="200">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
-                                        <TextBlock Text="{Binding Name}" Style="{StaticResource Cell}" FontWeight="Medium"/>
-                                    </Border>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="120">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
-                                        <TextBlock Text="{Binding Barangay}" Style="{StaticResource Cell}"/>
-                                    </Border>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn x:Name="ColPriority" Header="PRIORITY" Width="100">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
-                                        <Border Style="{StaticResource PriorityBadge}" Background="{Binding PriorityColor}" HorizontalAlignment="Center">
-                                            <TextBlock Text="{Binding Priority}" FontSize="11"
-                                                       FontWeight="SemiBold" Foreground="{Binding PriorityTextColor}"/>
-                                        </Border>
-                                    </Border>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="110">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
-                                        <Border Style="{StaticResource PriorityBadge}" Background="{Binding StatusColor}" HorizontalAlignment="Center">
-                                            <TextBlock Text="{Binding Status}" FontSize="11"
-                                                       FontWeight="SemiBold" Foreground="{Binding StatusTextColor}"/>
-                                        </Border>
-                                    </Border>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn x:Name="ColIndicators" Header="INDICATORS" Width="220">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
-                                        <Border Background="#F5F0F3" CornerRadius="6" Padding="10,4" Margin="8,0" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                            <TextBlock Text="placeholder muna mamsh" FontSize="10"
-                                                       Foreground="#A06080" FontStyle="Italic" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </Border>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn x:Name="ColAction" Header="ACTION" Width="310">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
-                                        <Button Style="{StaticResource ApproveBtn}" Tag="{Binding SpId}"
-                                                Click="Approve_Click" Margin="0,0,5,0" Content="Approve"/>
-                                        <Button Style="{StaticResource RejectBtn}" Tag="{Binding SpId}"
-                                                Click="Reject_Click" Content="Reject" Margin="0,0,8,0"/>
-                                        <Button Height="28" Padding="8,0" Cursor="Hand"
-                                                Tag="{Binding SpId}" Click="ExportRow_Click" Margin="0,0,8,0">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="Transparent" CornerRadius="6"
-                                                            BorderBrush="#D0B8C0" BorderThickness="1"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Opacity" Value="0.75"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"
-                                                  Fill="#702943" Stretch="Uniform" Width="12" Height="12"/>
-                                        </Button>
-                                        <Button Height="28" Padding="16,0" Cursor="Hand"
-                                                Tag="{Binding SpId}" Click="ViewRecord_Click">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border x:Name="Bg" Background="#702943" CornerRadius="6"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="Bg" Property="Opacity" Value="0.85"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="View Record" FontSize="11" FontWeight="SemiBold" Foreground="White"/>
-                                        </Button>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
-        </Border>
+        <Grid Grid.Row="3" Margin="24,0,24,0">
 
-        <Border Grid.Row="3" Margin="24,8,24,16" Background="#702943" CornerRadius="12" Padding="14,12">
+            <Border x:Name="PanelRecommendations" BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True" Background="White" Visibility="Visible">
+                <ListView x:Name="RecommendationList"
+                          BorderThickness="0" Background="Transparent"
+                          ItemContainerStyle="{StaticResource SubRow}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          Loaded="RecommendationList_Loaded"
+                          SizeChanged="RecommendationList_SizeChanged"
+                          Margin="0,4,0,0">
+                    <ListView.View>
+                        <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
+                            <GridViewColumn x:Name="ColSpId" Header="SP ID" Width="78">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                            <TextBlock Text="{Binding SpId}" FontSize="12" FontWeight="SemiBold" Foreground="#702943" HorizontalAlignment="Center" Margin="6,0"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn x:Name="ColName" Header="NAME" Width="200">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                            <TextBlock Text="{Binding Name}" Style="{StaticResource Cell}" FontWeight="Medium"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="120">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                            <TextBlock Text="{Binding Barangay}" Style="{StaticResource Cell}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn x:Name="ColScore" Header="SCORE" Width="96">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="8,0">
+                                            <TextBlock Text="{Binding ScoreLabel}" FontSize="12" FontWeight="SemiBold"
+                                                       Foreground="{Binding ScoreBarColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn x:Name="ColPriority" Header="PRIORITY" Width="90">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                            <Border Style="{StaticResource PriorityBadge}" Background="{Binding PriorityColor}">
+                                                <TextBlock Text="{Binding Priority}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding PriorityTextColor}"/>
+                                            </Border>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="96">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                            <Border Style="{StaticResource PriorityBadge}" Background="{Binding StatusColor}">
+                                                <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding StatusTextColor}"/>
+                                            </Border>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn x:Name="ColIndicators" Header="INDICATORS" Width="160">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                            <Border Background="#F5F0F3" CornerRadius="6" Padding="10,4" Margin="8,0" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                <TextBlock Text="placeholder muna mamsh" FontSize="10" Foreground="#A06080" FontStyle="Italic" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn x:Name="ColAction" Header="ACTION" Width="290">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                                            <Button Style="{StaticResource ApproveBtn}" Tag="{Binding SpId}" Click="Approve_Click" Margin="0,0,5,0" Content="Approve"/>
+                                            <Button Style="{StaticResource RejectBtn}" Tag="{Binding SpId}" Click="Reject_Click" Content="Reject" Margin="0,0,8,0"/>
+                                            <Button Height="28" Padding="8,0" Cursor="Hand" Tag="{Binding SpId}" Click="ExportRow_Click" Margin="0,0,8,0">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="Transparent" CornerRadius="6" BorderBrush="#D0B8C0" BorderThickness="1" Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True"><Setter Property="Opacity" Value="0.75"/></Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                                <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" Fill="#702943" Stretch="Uniform" Width="12" Height="12"/>
+                                            </Button>
+                                            <Button Height="28" Padding="16,0" Cursor="Hand" Tag="{Binding SpId}" Click="ViewRecord_Click">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border x:Name="Bg" Background="#702943" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.85"/></Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                                <TextBlock Text="View Record" FontSize="11" FontWeight="SemiBold" Foreground="White"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Border>
+
+            <Grid x:Name="PanelSelection" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Background="#FBF5F7" CornerRadius="12" BorderBrush="#D4A0B0" BorderThickness="1" Padding="16,12" Margin="0,0,0,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                            <TextBlock Text="Budget Allocation" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="#702943"/>
+                            <TextBlock Text="₱1,000 per grantee" FontFamily="Segoe UI" FontSize="11" Foreground="#A06080" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <Border Grid.Column="2" Background="White" CornerRadius="8" BorderBrush="#D0B8C0" BorderThickness="1.5" Margin="0,0,8,0">
+                            <Grid Width="160">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="₱" FontFamily="Segoe UI" FontSize="13" Foreground="#702943" FontWeight="SemiBold" VerticalAlignment="Center" Margin="10,0,4,0"/>
+                                <TextBox x:Name="TxtBudgetAmount" Grid.Column="1" Text="10000"
+                                         FontFamily="Segoe UI" FontSize="13" BorderThickness="0" Background="Transparent"
+                                         VerticalContentAlignment="Center" Height="38" Padding="4,0" Foreground="#1A1A1A"
+                                         TextChanged="BudgetInput_TextChanged"/>
+                            </Grid>
+                        </Border>
+                        <Border Grid.Column="3" Background="#F0F8FF" CornerRadius="8" BorderBrush="#D0B8C0" BorderThickness="1" Padding="12,0" Margin="0,0,14,0" Height="38">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="=" FontFamily="Segoe UI" FontSize="12" Foreground="#888888" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock x:Name="TxtGranteeCount" Text="10 grantees" FontFamily="Segoe UI" FontSize="12" Foreground="#702943" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Button Grid.Column="4" Height="38" Padding="18,0" Cursor="Hand" Click="ApplyBudget_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#702943" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.88"/></Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="Apply" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="1" BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True" Background="White">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
+                            <Border Background="#EAF6F0" Padding="16,8">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="8" Height="8" Fill="#27AE60" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Within Budget" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#27AE60" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtSelectionSummary" Text="" FontFamily="Segoe UI" FontSize="11" Foreground="#555555" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <ListView x:Name="SelectionList"
+                                      BorderThickness="0" Background="Transparent"
+                                      ItemContainerStyle="{StaticResource SelRow}"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                      Loaded="SelectionList_Loaded"
+                                      SizeChanged="SelectionList_SizeChanged">
+                                <ListView.View>
+                                    <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
+                                        <GridViewColumn Header="#" Width="48">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="4,0">
+                                                        <Border Background="{Binding RankBg}" CornerRadius="12" Width="28" Height="28" HorizontalAlignment="Center">
+                                                            <TextBlock Text="{Binding Rank}" FontSize="11" FontWeight="Bold" Foreground="{Binding RankFg}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="SP ID" Width="78">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                                        <TextBlock Text="{Binding SpId}" FontSize="12" FontWeight="SemiBold" Foreground="#702943" HorizontalAlignment="Center" Margin="6,0"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="NAME" Width="200">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                                        <TextBlock Text="{Binding Name}" Style="{StaticResource Cell}" FontWeight="Medium"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="BARANGAY" Width="120">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                                        <TextBlock Text="{Binding Barangay}" Style="{StaticResource Cell}"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="SCORE" Width="80">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="8,0">
+                                                        <TextBlock Text="{Binding ScoreLabel}" FontSize="12" FontWeight="SemiBold"
+                                                                   Foreground="{Binding ScoreBarColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="PRIORITY" Width="90">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                                        <Border Style="{StaticResource PriorityBadge}" Background="{Binding PriorityColor}">
+                                                            <TextBlock Text="{Binding Priority}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding PriorityTextColor}"/>
+                                                        </Border>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="ALLOWANCE" Width="150">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                                        <TextBlock Text="{Binding SubsidyType}" Style="{StaticResource Cell}" FontSize="12"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="STATUS" Width="96">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border Padding="6,0">
+                                                        <Border CornerRadius="10" Padding="10,3" Background="{Binding RankBg}" HorizontalAlignment="Center">
+                                                            <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{Binding RankFg}">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Text" Value="Approved"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsWaitlisted}" Value="True">
+                                                                                <Setter Property="Text" Value="Waitlisted"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                            <Border x:Name="WaitlistDivider" Visibility="Collapsed">
+                                <Grid>
+                                    <Rectangle Height="2" Fill="#F57F17" Opacity="0.5" Margin="0,8"/>
+                                    <Border Background="White" CornerRadius="10" Padding="14,5" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,4">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#F57F17" BlurRadius="6" ShadowDepth="0" Opacity="0.2"/>
+                                        </Border.Effect>
+                                        <Border Background="#FFF8E1" CornerRadius="8" Padding="10,4">
+                                            <TextBlock Text="⏳  Waitlisted below — exceeds budget" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#F57F17"/>
+                                        </Border>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+
+            <Grid x:Name="PanelFinal" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Background="#F0FFF4" CornerRadius="12" BorderBrush="#27AE60" BorderThickness="1" Padding="16,12" Margin="0,0,0,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Width="38" Height="38" Background="#27AE60" CornerRadius="19" Margin="0,0,12,0">
+                            <TextBlock Text="✓" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Final Grantee Confirmation" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="#1A6637"/>
+                            <TextBlock x:Name="TxtFinalSummary" Text="0 of 0 confirmed as grantees" FontFamily="Segoe UI" FontSize="11" Foreground="#388E3C" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <Border Grid.Column="2" Background="#27AE60" CornerRadius="8" Padding="12,6" VerticalAlignment="Center">
+                            <TextBlock Text="Final Stage" FontFamily="Segoe UI" FontSize="10" FontWeight="SemiBold" Foreground="White"/>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="1" BorderBrush="#27AE60" BorderThickness="1.5" ClipToBounds="True" Background="White">
+                    <ListView x:Name="FinalList"
+                              BorderThickness="0" Background="Transparent"
+                              ItemContainerStyle="{StaticResource SelRow}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              Loaded="FinalList_Loaded"
+                              SizeChanged="FinalList_SizeChanged"
+                              Margin="0,4,0,0">
+                        <ListView.View>
+                            <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
+                                <GridViewColumn Header="#" Width="48">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="4,0">
+                                                <Border Background="{Binding RankBg}" CornerRadius="12" Width="28" Height="28" HorizontalAlignment="Center">
+                                                    <TextBlock Text="{Binding Rank}" FontSize="11" FontWeight="Bold" Foreground="{Binding RankFg}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="SP ID" Width="78">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                                <TextBlock Text="{Binding SpId}" FontSize="12" FontWeight="SemiBold" Foreground="#702943" HorizontalAlignment="Center" Margin="6,0"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="NAME" Width="200">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                                <TextBlock Text="{Binding Name}" Style="{StaticResource Cell}" FontWeight="Medium"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="BARANGAY" Width="120">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                                <TextBlock Text="{Binding Barangay}" Style="{StaticResource Cell}"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="SCORE" Width="80">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="8,0">
+                                                <TextBlock Text="{Binding ScoreLabel}" FontSize="12" FontWeight="SemiBold"
+                                                           Foreground="{Binding ScoreBarColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="PRIORITY" Width="90">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                                <Border Style="{StaticResource PriorityBadge}" Background="{Binding PriorityColor}">
+                                                    <TextBlock Text="{Binding Priority}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding PriorityTextColor}"/>
+                                                </Border>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="ALLOWANCE" Width="140">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                                <TextBlock Text="{Binding SubsidyType}" Style="{StaticResource Cell}" FontSize="12"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="FINAL STATUS" Width="120">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="6,0">
+                                                <Border CornerRadius="10" Padding="10,4" Background="{Binding FinalBadgeColor}" HorizontalAlignment="Center">
+                                                    <TextBlock Text="{Binding FinalBadgeText}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding FinalBadgeTextColor}"/>
+                                                </Border>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="ACTION" Width="168">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                                                <Button Height="28" Padding="14,0" Cursor="Hand" Tag="{Binding SpId}" Click="ConfirmGrantee_Click" Margin="0,0,6,0">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border x:Name="Bg" Background="#27AE60" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.85"/></Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="Confirm" FontSize="11" FontWeight="SemiBold" Foreground="White"/>
+                                                </Button>
+                                                <Button Height="28" Padding="10,0" Cursor="Hand" Tag="{Binding SpId}" Click="RevokeGrantee_Click">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border x:Name="Bg" Background="Transparent" CornerRadius="6" BorderBrush="#BBBBBB" BorderThickness="1" Padding="{TemplateBinding Padding}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.75"/></Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="Revoke" FontSize="11" FontWeight="SemiBold" Foreground="#888888"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Border>
+            </Grid>
+
+        </Grid>
+
+        <Border Grid.Row="4" Margin="24,8,24,16" Background="#702943" CornerRadius="12" Padding="14,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Width="34" Height="34" Background="#9B3060"
-                        CornerRadius="17" Margin="0,0,12,0">
+                <Border Grid.Column="0" Width="34" Height="34" Background="#9B3060" CornerRadius="17" Margin="0,0,12,0">
                     <TextBlock Text="🤖" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="ML Model ran 14 new subsidy recommendations"
-                               FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
-                    <TextBlock Text="10 high-priority cases await staff approval · Last retrained 4 hours ago"
-                               FontFamily="Segoe UI" FontSize="10" Foreground="#E8C8D4" Margin="0,2,0,0"/>
+                    <TextBlock Text="ML Model ran 14 new subsidy recommendations" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="10 high-priority cases await staff approval · Last retrained 4 hours ago" FontFamily="Segoe UI" FontSize="10" Foreground="#E8C8D4" Margin="0,2,0,0"/>
                 </StackPanel>
-                <Border Grid.Column="2" Background="#9B3060" CornerRadius="8"
-                        Padding="12,6" VerticalAlignment="Center">
-                    <TextBlock Text="Model v2.4" FontFamily="Segoe UI" FontSize="10"
-                               FontWeight="SemiBold" Foreground="White"/>
+                <Border Grid.Column="2" Background="#9B3060" CornerRadius="8" Padding="12,6" VerticalAlignment="Center">
+                    <TextBlock Text="Model v2.4" FontFamily="Segoe UI" FontSize="10" FontWeight="SemiBold" Foreground="White"/>
                 </Border>
             </Grid>
         </Border>
+
     </Grid>
 </Page>

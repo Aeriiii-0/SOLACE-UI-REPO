@@ -225,6 +225,7 @@ namespace SOLUM_UI
             PnlA2.Visibility = ChkA2.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             PnlA4.Visibility = ChkA4.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             PnlA5.Visibility = ChkA5.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            PnlA6.Visibility = ChkA6.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             PnlB.Visibility  = ChkB.IsChecked  == true ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -279,6 +280,8 @@ namespace SOLUM_UI
             ChkA5.IsChecked = r.CircumstanceA5;
             TxtA5Period.Text = r.CircumstanceA5Period ?? string.Empty;
             ChkA6.IsChecked = r.CircumstanceA6;
+            ChkA6Nullity.IsChecked   = r.CircumstanceA6Nullity;
+            ChkA6Annulment.IsChecked = r.CircumstanceA6Annulment;
             ChkA7.IsChecked = r.CircumstanceA7;
             ChkB.IsChecked  = r.CircumstanceB;
             TxtBStayAbroad.Text = r.CircumstanceBStayAbroad ?? string.Empty;
@@ -782,7 +785,6 @@ namespace SOLUM_UI
                 Address       = TxtAddress.Text.Trim(),
                 ContactNumber = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtContact.Text.Trim()),
                 Barangay      = TxtBarangay.Text.Trim(),
-                DateAdmitted  = _existing?.DateAdmitted ?? DateTime.Today,
                 Status        = GetComboValue(CmbStatus),
                 LastUpdated   = DateTime.Today,
 
@@ -814,6 +816,8 @@ namespace SOLUM_UI
                 CircumstanceA5             = ChkA5.IsChecked == true,
                 CircumstanceA5Period       = TxtA5Period.Text.Trim(),
                 CircumstanceA6             = ChkA6.IsChecked == true,
+                CircumstanceA6Nullity      = ChkA6Nullity.IsChecked == true,
+                CircumstanceA6Annulment    = ChkA6Annulment.IsChecked == true,
                 CircumstanceA7             = ChkA7.IsChecked == true,
                 CircumstanceB              = ChkB.IsChecked == true,
                 CircumstanceBStayAbroad    = TxtBStayAbroad.Text.Trim(),
@@ -881,7 +885,60 @@ namespace SOLUM_UI
             Add(sec, "Contact No.",    r.EmergencyContactNumber, _existing?.EmergencyContactNumber);
 
             sec = "Circumstances";
-            Add(sec, "Circumstances of Being Solo Parent", r.CircumstancesDisplay, null);
+
+            if (r.CircumstanceA1)
+                Add(sec, "A1. Birth from rape", "✓ Ticked", null);
+
+            if (r.CircumstanceA2)
+            {
+                Add(sec, "A2. Death of Spouse", "✓ Ticked", null);
+                Add(sec, "   Cause of death",
+                    F(r.CircumstanceA2Cause), null);
+                Add(sec, "   Date of death",
+                    r.CircumstanceA2Date != DateTime.MinValue
+                        ? r.CircumstanceA2Date.ToString("MMMM d, yyyy") : "—", null);
+            }
+
+            if (r.CircumstanceA3)
+                Add(sec, "A3. Detention of Spouse", "✓ Ticked", null);
+
+            if (r.CircumstanceA4)
+            {
+                Add(sec, "A4. Incapacity of Spouse", "✓ Ticked", null);
+                Add(sec, "   Type of disability", F(r.CircumstanceA4Disability), null);
+            }
+
+            if (r.CircumstanceA5)
+            {
+                Add(sec, "A5. Legal/de facto Separation", "✓ Ticked", null);
+                Add(sec, "   Period of separation", F(r.CircumstanceA5Period), null);
+            }
+
+            if (r.CircumstanceA6)
+            {
+                Add(sec, "A6. Declaration of", "✓ Ticked", null);
+                Add(sec, "   Nullity of marriage",   r.CircumstanceA6Nullity   ? "✓ Yes" : "No", null);
+                Add(sec, "   Annulment of marriage", r.CircumstanceA6Annulment ? "✓ Yes" : "No", null);
+            }
+
+            if (r.CircumstanceA7)
+                Add(sec, "A7. Abandonment of Spouse", "✓ Ticked", null);
+
+            if (r.CircumstanceB)
+            {
+                Add(sec, "B. OFW-related", "✓ Ticked", null);
+                Add(sec, "   Length of stay abroad", F(r.CircumstanceBStayAbroad), null);
+            }
+
+            if (r.CircumstanceC) Add(sec, "C. Unmarried Mother/Father",        "✓ Ticked", null);
+            if (r.CircumstanceD) Add(sec, "D. Legal Guardian/Adoptive/Foster", "✓ Ticked", null);
+            if (r.CircumstanceE) Add(sec, "E. Relative (4th civil degree)",    "✓ Ticked", null);
+            if (r.CircumstanceF) Add(sec, "F. Pregnant Woman",                 "✓ Ticked", null);
+
+            if (!r.CircumstanceA1 && !r.CircumstanceA2 && !r.CircumstanceA3 && !r.CircumstanceA4 &&
+                !r.CircumstanceA5 && !r.CircumstanceA6 && !r.CircumstanceA7 && !r.CircumstanceB  &&
+                !r.CircumstanceC  && !r.CircumstanceD  && !r.CircumstanceE  && !r.CircumstanceF)
+                Add(sec, "Circumstances", "None selected", null);
 
             if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
             {

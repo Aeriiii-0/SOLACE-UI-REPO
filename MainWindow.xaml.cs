@@ -45,8 +45,6 @@ namespace SOLUM_UI
                 _navButtons["UserAdministration"].Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
             if (_navButtons.ContainsKey("SubsidyRecommendation"))
                 _navButtons["SubsidyRecommendation"].Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
-            if (_navButtons.ContainsKey("Analytics"))
-                _navButtons["Analytics"].Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void MainFrame_Navigated(object sender, NavigationEventArgs e)

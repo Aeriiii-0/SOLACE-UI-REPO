@@ -520,11 +520,6 @@ namespace SOLUM_UI
             lines.AppendLine("Address," + rec.Address);
             lines.AppendLine("Barangay," + rec.Barangay);
             lines.AppendLine("Contact Number," + rec.ContactNumber);
-            lines.AppendLine("Source of Referral," + rec.SourceOfReferral);
-            lines.AppendLine("Date Admitted," + rec.DateAdmittedFormatted);
-            lines.AppendLine("Case No.," + rec.CaseNo);
-            lines.AppendLine("Offense Committed," + rec.OffenseCommitted);
-            lines.AppendLine("Nature of Referral," + rec.NatureOfReferral);
             lines.AppendLine("Children," + rec.Children);
             lines.AppendLine("Status," + rec.Status);
             lines.AppendLine("Last Updated," + rec.LastUpdatedFormatted);
