@@ -1310,7 +1310,6 @@ namespace SOLUM_UI
                 Address       = TxtAddress.Text.Trim(),
                 ContactNumber = OcrService.FormatPhoneNumber(TxtContact.Text.Trim()),
                 Barangay      = TxtBarangay.Text.Trim(),
-                DateAdmitted  = DateTime.MinValue,
                 Status        = GetComboValue(CmbStatus),
                 LastUpdated   = DateTime.Now,
 
