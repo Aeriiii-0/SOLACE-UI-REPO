@@ -35,6 +35,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System.Drawing" />
+    <Reference Include="EPPlus, Version=4.5.3.3, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\EPPlus.4.5.3.3\lib\net40\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.20.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\DocumentFormat.OpenXml.2.20.0\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -56,6 +63,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ExportOptionsDialog.xaml.cs">
+      <DependentUpon>ExportOptionsDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ConfirmDialog.xaml.cs">
       <DependentUpon>ConfirmDialog.xaml</DependentUpon>
     </Compile>
@@ -74,6 +84,7 @@
     </Compile>
     <Compile Include="Models\OcrModels.cs" />
     <Compile Include="Models\ScannerSettings.cs" />
+    <Compile Include="Services\AnalyticsExportService.cs" />
     <Compile Include="Services\OcrService.cs" />
     <Compile Include="Services\WiaScannerService.cs" />
     <Compile Include="ScannerSettingsDialog.xaml.cs">
@@ -122,6 +133,10 @@
     <Compile Include="OcrTemplateConfigWindow.xaml.cs">
       <DependentUpon>OcrTemplateConfigWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="ExportOptionsDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="ConfirmDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

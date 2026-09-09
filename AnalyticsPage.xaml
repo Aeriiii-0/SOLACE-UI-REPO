@@ -5,6 +5,7 @@
       Background="#FFFFFF">
 
     <Page.Resources>
+
         <Style x:Key="AnalyticsCombo" TargetType="ComboBox">
             <Setter Property="Height" Value="44"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -20,8 +21,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid>
-                            <Border x:Name="CmbBg" Background="White" BorderBrush="#D0B8C0"
-                                    BorderThickness="1.5" CornerRadius="8">
+                            <Border x:Name="CmbBg" Background="White" BorderBrush="#D0B8C0" BorderThickness="1.5" CornerRadius="8">
                                 <Grid Margin="12,0,36,0">
                                     <ContentPresenter x:Name="ContentSite"
                                                       Content="{TemplateBinding SelectionBoxItem}"
@@ -31,19 +31,14 @@
                             </Border>
                             <ToggleButton HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                           Background="Transparent" BorderThickness="0"
-                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay,
-                                              RelativeSource={RelativeSource TemplatedParent}}"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                           Focusable="False" Opacity="0"/>
-                            <Path HorizontalAlignment="Right" VerticalAlignment="Center"
-                                  Margin="0,0,12,0" Data="M7,10L12,15L17,10H7Z"
-                                  Fill="#702943" Stretch="Uniform" Width="12" Height="12"
-                                  IsHitTestVisible="False"/>
-                            <Popup x:Name="Popup" Placement="Bottom"
-                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                            <Path HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0"
+                                  Data="M7,10L12,15L17,10H7Z" Fill="#702943" Stretch="Uniform" Width="12" Height="12" IsHitTestVisible="False"/>
+                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
                                    AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                                <Border Background="White" CornerRadius="10" BorderBrush="#D0B8C0"
-                                        BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}"
-                                        MaxHeight="200" Margin="0,2,0,0">
+                                <Border Background="White" CornerRadius="10" BorderBrush="#D0B8C0" BorderThickness="1"
+                                        MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200" Margin="0,2,0,0">
                                     <Border.Effect>
                                         <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.14"/>
                                     </Border.Effect>
@@ -73,8 +68,7 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ComboBoxItem">
-                                <Border x:Name="ItemBg" Background="Transparent"
-                                        Padding="{TemplateBinding Padding}" CornerRadius="6" Margin="4,2">
+                                <Border x:Name="ItemBg" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="6" Margin="4,2">
                                     <ContentPresenter/>
                                 </Border>
                                 <ControlTemplate.Triggers>
@@ -96,38 +90,55 @@
 
         <Style x:Key="Card" TargetType="Border">
             <Setter Property="Background" Value="White"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="BorderBrush" Value="#E0D0D5"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="BorderBrush" Value="#EDE0E5"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="20,16"/>
+            <Setter Property="Padding" Value="20,18"/>
         </Style>
-        <Style x:Key="StatLbl" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Foreground" Value="#999999"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="Margin" Value="0,3,0,0"/>
+
+        <Style x:Key="CardShadow" TargetType="Border" BasedOn="{StaticResource Card}">
+            <Style.Resources>
+                <Style TargetType="Border"/>
+            </Style.Resources>
         </Style>
-        <Style x:Key="SecLabel" TargetType="TextBlock">
+
+        <Style x:Key="SectionLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="10"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Foreground" Value="#702943"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
+
+        <Style x:Key="StatNum" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="28"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#1A1A1A"/>
+        </Style>
+
+        <Style x:Key="StatSub" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#AAAAAA"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+        </Style>
+
         <Style x:Key="BarLbl" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="9"/>
             <Setter Property="Foreground" Value="#888888"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="VerticalAlignment" Value="Bottom"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
+
         <Style x:Key="RecentItem" TargetType="Border">
             <Setter Property="Background" Value="White"/>
             <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="BorderBrush" Value="#E8D8DE"/>
+            <Setter Property="BorderBrush" Value="#EDE0E5"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="14,12"/>
-            <Setter Property="Margin" Value="0,0,10,10"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
@@ -136,6 +147,31 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <DataTemplate x:Key="StatRowTemplate">
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="44"/>
+                </Grid.ColumnDefinitions>
+                <Ellipse Grid.Column="0" Width="8" Height="8"
+                         Fill="{Binding BarColor}" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="{Binding Label}"
+                           FontFamily="Segoe UI" FontSize="12" Foreground="#444444"
+                           VerticalAlignment="Center" Margin="10,0,8,0"
+                           TextTrimming="CharacterEllipsis"/>
+                <TextBlock Grid.Column="2" Text="{Binding Pct}"
+                           FontFamily="Segoe UI" FontSize="11" Foreground="#BBBBBB"
+                           VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="3" Text="{Binding Count}"
+                           FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
+                           Foreground="#1A1A1A" VerticalAlignment="Center"
+                           HorizontalAlignment="Right"/>
+            </Grid>
+        </DataTemplate>
+
     </Page.Resources>
 
     <Grid>
@@ -144,42 +180,35 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="White" BorderBrush="#D0B8C0"
-                BorderThickness="0,0,0,1.5" Padding="24,14,24,12">
+        <Border Grid.Row="0" Background="White" BorderBrush="#EDE0E5"
+                BorderThickness="0,0,0,1" Padding="24,12,24,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#F0E8EC" CornerRadius="8" BorderBrush="#D0B8C0"
-                            BorderThickness="1" Padding="12,6" VerticalAlignment="Center">
+                    <Border Background="#F5EEF1" CornerRadius="8" Padding="12,5" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="7" Height="7" Fill="#702943" Margin="0,0,7,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="TxtLastRefresh" Text=""
-                                       FontSize="11" Foreground="#702943"
-                                       FontFamily="Segoe UI" FontWeight="SemiBold"/>
+                            <Ellipse Width="6" Height="6" Fill="#702943" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtLastRefresh" Text="" FontSize="11"
+                                       Foreground="#702943" FontFamily="Segoe UI" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Border>
                     <Border x:Name="ActiveFilterBadge" Background="#702943" CornerRadius="8"
-                            Padding="12,6" Margin="10,0,0,0" VerticalAlignment="Center"
-                            Visibility="Collapsed">
+                            Padding="12,5" Margin="8,0,0,0" VerticalAlignment="Center" Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="White"
-                                  Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
-                            <TextBlock x:Name="TxtActiveFilter" Text=""
-                                       FontSize="11" Foreground="White"
-                                       FontFamily="Segoe UI" FontWeight="SemiBold"/>
+                                  Stretch="Uniform" Width="9" Height="9" Margin="0,0,6,0"/>
+                            <TextBlock x:Name="TxtActiveFilter" Text="" FontSize="11"
+                                       Foreground="White" FontFamily="Segoe UI" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
-
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#FFFFFF" CornerRadius="22"
-                            BorderBrush="#D0B8C0" BorderThickness="1.5">
+                    <Border Background="White" CornerRadius="22" BorderBrush="#D8C8CE" BorderThickness="1.5" Margin="0,0,8,0">
                         <Button x:Name="FilterDropBtn" Background="Transparent" BorderThickness="0"
-                                Cursor="Hand" Height="40" Padding="16,0" Click="FilterDrop_Click">
+                                Cursor="Hand" Height="38" Padding="16,0" Click="FilterDrop_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="Transparent" CornerRadius="22" Padding="{TemplateBinding Padding}">
@@ -188,21 +217,37 @@
                                 </ControlTemplate>
                             </Button.Template>
                             <StackPanel Orientation="Horizontal">
-                                <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z"
-                                      Fill="#702943" Stretch="Uniform" Width="13" Height="13"
-                                      VerticalAlignment="Center" Margin="0,0,7,0"/>
-                                <TextBlock Text="Filter" FontSize="13" FontWeight="SemiBold"
+                                <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="#702943"
+                                      Stretch="Uniform" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,7,0"/>
+                                <TextBlock Text="Filter" FontSize="12" FontWeight="SemiBold"
                                            Foreground="#702943" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                     </Border>
-
+                    <Button Height="38" Padding="16,0" Cursor="Hand" Click="ExportXlsx_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" Background="#702943" CornerRadius="22" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" Fill="White"
+                                  Stretch="Uniform" Width="12" Height="12" Margin="0,0,6,0"/>
+                            <TextBlock Text="Export xlsx" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="White" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                     <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterDropBtn}"
-                           Placement="Bottom" StaysOpen="False"
-                           AllowsTransparency="True" PopupAnimation="Fade">
-                        <Border Background="White" CornerRadius="16"
-                                BorderBrush="#E8D4DA" BorderThickness="1.5" Padding="20,18,20,18"
-                                MinWidth="260" Margin="0,4,0,0">
+                           Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                        <Border Background="White" CornerRadius="16" BorderBrush="#E8D4DA"
+                                BorderThickness="1.5" Padding="20,18" MinWidth="260" Margin="0,4,0,0">
                             <Border.Effect>
                                 <DropShadowEffect Color="#702943" BlurRadius="20" ShadowDepth="4" Opacity="0.12"/>
                             </Border.Effect>
@@ -218,7 +263,7 @@
                                 <TextBlock Text="Month" FontFamily="Segoe UI" FontSize="13"
                                            FontWeight="SemiBold" Foreground="#1A1A1A" Margin="0,0,0,8"/>
                                 <ComboBox x:Name="CmbFilterMonth" Style="{StaticResource AnalyticsCombo}" Margin="0,0,0,16"/>
-                                <Grid Margin="0,4,0,0">
+                                <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="8"/>
@@ -227,8 +272,7 @@
                                     <Button Grid.Column="0" Height="40" Cursor="Hand" Click="FilterReset_Click">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
-                                                <Border x:Name="Bg" Background="#F5ECEE" CornerRadius="10"
-                                                        BorderBrush="#D0B8C0" BorderThickness="1">
+                                                <Border x:Name="Bg" Background="#F5ECEE" CornerRadius="10" BorderBrush="#D0B8C0" BorderThickness="1">
                                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                 </Border>
                                                 <ControlTemplate.Triggers>
@@ -266,161 +310,135 @@
         </Border>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled" Background="#FAFAFA">
-            <StackPanel Margin="22,18,22,22">
+                      HorizontalScrollBarVisibility="Disabled" Background="#F7F3F5">
+            <StackPanel Margin="20,16,20,20">
 
-                <Grid Margin="0,0,0,14">
+                <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Style="{StaticResource Card}"
-                            BorderBrush="#C4788E" BorderThickness="0,3,0,0">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#D4A0B0" BlurRadius="10" ShadowDepth="2" Opacity="0.14" Direction="270"/>
-                        </Border.Effect>
+                    <Border Grid.Column="0" Style="{StaticResource Card}" BorderBrush="#D4A0B0" BorderThickness="0,0,0,3">
+                        <Border.Effect><DropShadowEffect Color="#D4A0B0" BlurRadius="8" ShadowDepth="1" Opacity="0.10" Direction="270"/></Border.Effect>
                         <StackPanel>
-                            <TextBlock Text="TOTAL RECORDS" FontFamily="Segoe UI" FontSize="10"
-                                       FontWeight="Bold" Foreground="#9B3060" Margin="0,0,0,8"/>
-                            <TextBlock x:Name="TxtTotalRecords" Text="0"
-                                       FontFamily="Segoe UI" FontSize="32" FontWeight="Bold" Foreground="#702943"/>
-                            <TextBlock Text="Solo Parents" Style="{StaticResource StatLbl}"/>
-                            <Border Background="#F0E8EC" CornerRadius="6" Padding="8,4" Margin="0,10,0,0" HorizontalAlignment="Left">
-                                <TextBlock x:Name="TxtPeriodLabel" Text="All time"
-                                           FontSize="10" Foreground="#702943" FontFamily="Segoe UI" FontWeight="SemiBold"/>
+                            <TextBlock Text="TOTAL" FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
+                                       Foreground="#AAAAAA" Margin="0,0,0,6"/>
+                            <TextBlock x:Name="TxtTotalRecords" Style="{StaticResource StatNum}" Text="0"/>
+                            <TextBlock Text="Solo Parents" Style="{StaticResource StatSub}"/>
+                            <Border Background="#F5EEF1" CornerRadius="5" Padding="7,3" Margin="0,8,0,0" HorizontalAlignment="Left">
+                                <TextBlock x:Name="TxtPeriodLabel" Text="All time" FontSize="10"
+                                           Foreground="#702943" FontFamily="Segoe UI" FontWeight="SemiBold"/>
                             </Border>
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="2" Style="{StaticResource Card}"
-                            BorderBrush="#27AE60" BorderThickness="0,3,0,0">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#A8D5B0" BlurRadius="10" ShadowDepth="2" Opacity="0.14" Direction="270"/>
-                        </Border.Effect>
+                    <Border Grid.Column="2" Style="{StaticResource Card}" BorderBrush="#27AE60" BorderThickness="0,0,0,3">
+                        <Border.Effect><DropShadowEffect Color="#A8D5B0" BlurRadius="8" ShadowDepth="1" Opacity="0.10" Direction="270"/></Border.Effect>
                         <StackPanel>
-                            <TextBlock Text="VALID RECORDS" FontFamily="Segoe UI" FontSize="10"
-                                       FontWeight="Bold" Foreground="#1E8B4E" Margin="0,0,0,8"/>
-                            <TextBlock x:Name="TxtActiveRecords" Text="0"
-                                       FontFamily="Segoe UI" FontSize="32" FontWeight="Bold" Foreground="#27AE60"/>
-                            <TextBlock Text="Active Status" Style="{StaticResource StatLbl}"/>
-                            <Border Background="#E8F5E9" CornerRadius="6" Padding="8,4" Margin="0,10,0,0" HorizontalAlignment="Left">
-                                <TextBlock x:Name="TxtActiveRate" Text="0%"
-                                           FontSize="10" Foreground="#27AE60" FontFamily="Segoe UI" FontWeight="SemiBold"/>
+                            <TextBlock Text="VALID" FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
+                                       Foreground="#AAAAAA" Margin="0,0,0,6"/>
+                            <TextBlock x:Name="TxtValidRecords" Style="{StaticResource StatNum}" Text="0" Foreground="#27AE60"/>
+                            <TextBlock Text="Active Records" Style="{StaticResource StatSub}"/>
+                            <Border Background="#EAF7EE" CornerRadius="5" Padding="7,3" Margin="0,8,0,0" HorizontalAlignment="Left">
+                                <TextBlock x:Name="TxtValidRate" Text="0%" FontSize="10"
+                                           Foreground="#27AE60" FontFamily="Segoe UI" FontWeight="SemiBold"/>
                             </Border>
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="4" Style="{StaticResource Card}"
-                            BorderBrush="#AAAAAA" BorderThickness="0,3,0,0">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#CCCCCC" BlurRadius="10" ShadowDepth="2" Opacity="0.12" Direction="270"/>
-                        </Border.Effect>
+                    <Border Grid.Column="4" Style="{StaticResource Card}" BorderBrush="#CCCCCC" BorderThickness="0,0,0,3">
+                        <Border.Effect><DropShadowEffect Color="#CCCCCC" BlurRadius="8" ShadowDepth="1" Opacity="0.08" Direction="270"/></Border.Effect>
                         <StackPanel>
-                            <TextBlock Text="INACTIVE" FontFamily="Segoe UI" FontSize="10"
-                                       FontWeight="Bold" Foreground="#777777" Margin="0,0,0,8"/>
-                            <TextBlock x:Name="TxtInactiveRecords" Text="0"
-                                       FontFamily="Segoe UI" FontSize="32" FontWeight="Bold" Foreground="#888888"/>
-                            <TextBlock Text="Inactive Status" Style="{StaticResource StatLbl}"/>
-                            <Border Background="#F2F2F2" CornerRadius="6" Padding="8,4" Margin="0,10,0,0" HorizontalAlignment="Left">
-                                <TextBlock x:Name="TxtInactiveRate" Text="0%"
-                                           FontSize="10" Foreground="#888888" FontFamily="Segoe UI" FontWeight="SemiBold"/>
+                            <TextBlock Text="INACTIVE" FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
+                                       Foreground="#AAAAAA" Margin="0,0,0,6"/>
+                            <TextBlock x:Name="TxtInactiveRecords" Style="{StaticResource StatNum}" Text="0" Foreground="#AAAAAA"/>
+                            <TextBlock Text="Inactive Records" Style="{StaticResource StatSub}"/>
+                            <Border Background="#F2F2F2" CornerRadius="5" Padding="7,3" Margin="0,8,0,0" HorizontalAlignment="Left">
+                                <TextBlock x:Name="TxtInactiveRate" Text="0%" FontSize="10"
+                                           Foreground="#888888" FontFamily="Segoe UI" FontWeight="SemiBold"/>
                             </Border>
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="6" Style="{StaticResource Card}"
-                            BorderBrush="#F57F17" BorderThickness="0,3,0,0">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#F5C870" BlurRadius="10" ShadowDepth="2" Opacity="0.14" Direction="270"/>
-                        </Border.Effect>
+                    <Border Grid.Column="6" Style="{StaticResource Card}" BorderBrush="#F5A623" BorderThickness="0,0,0,3">
+                        <Border.Effect><DropShadowEffect Color="#F5C870" BlurRadius="8" ShadowDepth="1" Opacity="0.10" Direction="270"/></Border.Effect>
                         <StackPanel>
-                            <TextBlock Text="DEPENDANTS" FontFamily="Segoe UI" FontSize="10"
-                                       FontWeight="Bold" Foreground="#C0762A" Margin="0,0,0,8"/>
-                            <TextBlock x:Name="TxtTotalChildren" Text="0"
-                                       FontFamily="Segoe UI" FontSize="32" FontWeight="Bold" Foreground="#C0762A"/>
-                            <TextBlock Text="Total Dependants" Style="{StaticResource StatLbl}"/>
-                            <Border Background="#FFF4E3" CornerRadius="6" Padding="8,4" Margin="0,10,0,0" HorizontalAlignment="Left">
-                                <TextBlock x:Name="TxtAvgChildren" Text="0 avg."
-                                           FontSize="10" Foreground="#C0762A" FontFamily="Segoe UI" FontWeight="SemiBold"/>
+                            <TextBlock Text="DEPENDANTS" FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
+                                       Foreground="#AAAAAA" Margin="0,0,0,6"/>
+                            <TextBlock x:Name="TxtTotalChildren" Style="{StaticResource StatNum}" Text="0" Foreground="#C0762A"/>
+                            <TextBlock Text="Total Dependants" Style="{StaticResource StatSub}"/>
+                            <Border Background="#FFF4E3" CornerRadius="5" Padding="7,3" Margin="0,8,0,0" HorizontalAlignment="Left">
+                                <TextBlock x:Name="TxtAvgChildren" Text="0.0 avg." FontSize="10"
+                                           Foreground="#C0762A" FontFamily="Segoe UI" FontWeight="SemiBold"/>
                             </Border>
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="8" Style="{StaticResource Card}"
-                            BorderBrush="#9B3060" BorderThickness="0,3,0,0">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#D4A0B0" BlurRadius="10" ShadowDepth="2" Opacity="0.14" Direction="270"/>
-                        </Border.Effect>
+                    <Border Grid.Column="8" Style="{StaticResource Card}" BorderBrush="#702943" BorderThickness="0,0,0,3">
+                        <Border.Effect><DropShadowEffect Color="#D4A0B0" BlurRadius="8" ShadowDepth="1" Opacity="0.10" Direction="270"/></Border.Effect>
                         <StackPanel>
-                            <TextBlock Text="FEMALE" FontFamily="Segoe UI" FontSize="10"
-                                       FontWeight="Bold" Foreground="#9B3060" Margin="0,0,0,8"/>
-                            <TextBlock x:Name="TxtFemaleCount" Text="0"
-                                       FontFamily="Segoe UI" FontSize="32" FontWeight="Bold" Foreground="#702943"/>
-                            <TextBlock Text="Female Registrants" Style="{StaticResource StatLbl}"/>
-                            <Border Background="#F0E8EC" CornerRadius="6" Padding="8,4" Margin="0,10,0,0" HorizontalAlignment="Left">
-                                <TextBlock x:Name="TxtMaleCount" Text="0 male"
-                                           FontSize="10" Foreground="#9B3060" FontFamily="Segoe UI" FontWeight="SemiBold"/>
+                            <TextBlock Text="NEW SPIC" FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
+                                       Foreground="#AAAAAA" Margin="0,0,0,6"/>
+                            <TextBlock x:Name="TxtNewSpic" Style="{StaticResource StatNum}" Text="0" Foreground="#702943"/>
+                            <TextBlock Text="Newly Issued" Style="{StaticResource StatSub}"/>
+                            <Border Background="#F5EEF1" CornerRadius="5" Padding="7,3" Margin="0,8,0,0" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="TxtRenewedSpic" Text="0" FontSize="10"
+                                               Foreground="#9B3060" FontFamily="Segoe UI" FontWeight="SemiBold"/>
+                                    <TextBlock Text=" renewed" FontSize="10" Foreground="#9B3060" FontFamily="Segoe UI"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="10" Style="{StaticResource Card}" BorderBrush="#9B3060" BorderThickness="0,0,0,3">
+                        <Border.Effect><DropShadowEffect Color="#D4A0B0" BlurRadius="8" ShadowDepth="1" Opacity="0.10" Direction="270"/></Border.Effect>
+                        <StackPanel>
+                            <TextBlock Text="SEX" FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
+                                       Foreground="#AAAAAA" Margin="0,0,0,6"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock x:Name="TxtFemaleCircle" Style="{StaticResource StatNum}" Text="0" Foreground="#702943"/>
+                                <TextBlock Text=" F" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
+                                           Foreground="#D4A0B0" VerticalAlignment="Bottom" Margin="2,0,0,3"/>
+                            </StackPanel>
+                            <TextBlock Text="Female registrants" Style="{StaticResource StatSub}"/>
+                            <Border Background="#F5EEF1" CornerRadius="5" Padding="7,3" Margin="0,8,0,0" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="TxtMaleCircle" Text="0" FontSize="10"
+                                               Foreground="#9B3060" FontFamily="Segoe UI" FontWeight="SemiBold"/>
+                                    <TextBlock Text=" male" FontSize="10" Foreground="#9B3060" FontFamily="Segoe UI"/>
+                                </StackPanel>
                             </Border>
                         </StackPanel>
                     </Border>
                 </Grid>
 
-                <Border Style="{StaticResource Card}" Margin="0,0,0,14"
-                        Background="#FDF5F7" BorderBrush="#D0B8C0">
-                    <Border.Effect>
-                        <DropShadowEffect Color="#D4A0B0" BlurRadius="8" ShadowDepth="1" Opacity="0.10" Direction="270"/>
-                    </Border.Effect>
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <Border Width="4" CornerRadius="2" Background="#702943" Margin="0,1,10,1"/>
-                            <TextBlock Text="AI SUMMARY" Style="{StaticResource SecLabel}"/>
-                            <Border Background="#702943" CornerRadius="4" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="BETA" FontFamily="Segoe UI" FontSize="8"
-                                           FontWeight="Bold" Foreground="White"/>
-                            </Border>
-                        </StackPanel>
-                        <Border Background="White" CornerRadius="8" BorderBrush="#D0B8C0"
-                                BorderThickness="1" Padding="18,14" MinHeight="70">
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock Text="placeholder ng summary hehe" FontSize="13"
-                                           FontStyle="Italic" Foreground="#C0A0AA"
-                                           FontFamily="Segoe UI" HorizontalAlignment="Center"/>
-                                <TextBlock Text="AI-generated insights will appear here once integrated."
-                                           FontSize="10" Foreground="#D0B8C0" FontFamily="Segoe UI"
-                                           HorizontalAlignment="Center" Margin="0,5,0,0"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </Border>
-
-                <Grid Margin="0,0,0,14">
+                <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="3*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="8"/>
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0" Style="{StaticResource Card}">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#D4A0B0" BlurRadius="8" ShadowDepth="1" Opacity="0.10" Direction="270"/>
-                        </Border.Effect>
+                        <Border.Effect><DropShadowEffect Color="#C8B0B8" BlurRadius="8" ShadowDepth="1" Opacity="0.08" Direction="270"/></Border.Effect>
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                <Border Width="4" CornerRadius="2" Background="#702943" Margin="0,1,10,1"/>
-                                <TextBlock Text="RECORDS BY BARANGAY" Style="{StaticResource SecLabel}"/>
+                                <Border Width="3" CornerRadius="2" Background="#702943" Margin="0,1,10,1"/>
+                                <TextBlock Text="RECORDS BY BARANGAY" Style="{StaticResource SectionLabel}"/>
                             </StackPanel>
-                            <Border Background="#FDF5F7" CornerRadius="8" Padding="8,4" Margin="0,0,0,0">
-                                <Canvas x:Name="BarangayCanvas" Height="160" Margin="0,8,0,24"/>
+                            <Border Background="#FAF5F7" CornerRadius="10" Padding="8,6">
+                                <Canvas x:Name="BarangayCanvas" Height="150" Margin="0,6,0,20"/>
                             </Border>
                             <ItemsControl x:Name="BarangayLabels">
                                 <ItemsControl.ItemsPanel>
@@ -439,119 +457,110 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="2" Style="{StaticResource Card}">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#D4A0B0" BlurRadius="8" ShadowDepth="1" Opacity="0.10" Direction="270"/>
-                        </Border.Effect>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                <Border Width="4" CornerRadius="2" Background="#702943" Margin="0,1,10,1"/>
-                                <TextBlock Text="CIVIL STATUS" Style="{StaticResource SecLabel}"/>
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="8"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Style="{StaticResource Card}">
+                            <Border.Effect><DropShadowEffect Color="#C8B0B8" BlurRadius="8" ShadowDepth="1" Opacity="0.08" Direction="270"/></Border.Effect>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    <Border Width="3" CornerRadius="2" Background="#702943" Margin="0,1,10,1"/>
+                                    <TextBlock Text="AGE GROUP" Style="{StaticResource SectionLabel}"/>
+                                </StackPanel>
+                                <ItemsControl x:Name="AgeChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
                             </StackPanel>
-                            <ItemsControl x:Name="CivilStatusChart">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Margin="0,0,0,8" Padding="8,6" CornerRadius="6"
-                                                Background="#FAFAFA" BorderBrush="#EEE4E8" BorderThickness="1">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="78"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="24"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="{Binding Label}"
-                                                           FontSize="12" Foreground="#333333"
-                                                           FontFamily="Segoe UI" VerticalAlignment="Center"
-                                                           TextTrimming="CharacterEllipsis"/>
-                                                <Border Grid.Column="1" Height="12" CornerRadius="3"
-                                                        Background="#F0E8EC" VerticalAlignment="Center">
-                                                    <Border Height="12" CornerRadius="3"
-                                                            Background="{Binding BarColor}"
-                                                            HorizontalAlignment="Left"
-                                                            Width="{Binding BarWidth}"/>
-                                                </Border>
-                                                <TextBlock Grid.Column="2" Text="{Binding Count}"
-                                                           FontSize="11" FontWeight="Bold"
-                                                           Foreground="#702943" FontFamily="Segoe UI"
-                                                           VerticalAlignment="Center" Margin="5,0,0,0"/>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                        </Border>
+
+                        <Border Grid.Row="2" Style="{StaticResource Card}">
+                            <Border.Effect><DropShadowEffect Color="#C8B0B8" BlurRadius="8" ShadowDepth="1" Opacity="0.08" Direction="270"/></Border.Effect>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    <Border Width="3" CornerRadius="2" Background="#9B3060" Margin="0,1,10,1"/>
+                                    <TextBlock Text="CIVIL STATUS" Style="{StaticResource SectionLabel}"/>
+                                </StackPanel>
+                                <ItemsControl x:Name="CivilStatusChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource Card}">
+                        <Border.Effect><DropShadowEffect Color="#C8B0B8" BlurRadius="8" ShadowDepth="1" Opacity="0.08" Direction="270"/></Border.Effect>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="3" CornerRadius="2" Background="#C4788E" Margin="0,1,10,1"/>
+                                <TextBlock Text="EMPLOYMENT" Style="{StaticResource SectionLabel}"/>
+                            </StackPanel>
+                            <ItemsControl x:Name="EmploymentChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource Card}">
+                        <Border.Effect><DropShadowEffect Color="#C8B0B8" BlurRadius="8" ShadowDepth="1" Opacity="0.08" Direction="270"/></Border.Effect>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="3" CornerRadius="2" Background="#702943" Margin="0,1,10,1"/>
+                                <TextBlock Text="MONTHLY INCOME" Style="{StaticResource SectionLabel}"/>
+                            </StackPanel>
+                            <ItemsControl x:Name="IncomeChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
                         </StackPanel>
                     </Border>
 
                     <Border Grid.Column="4" Style="{StaticResource Card}">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#D4A0B0" BlurRadius="8" ShadowDepth="1" Opacity="0.10" Direction="270"/>
-                        </Border.Effect>
+                        <Border.Effect><DropShadowEffect Color="#C8B0B8" BlurRadius="8" ShadowDepth="1" Opacity="0.08" Direction="270"/></Border.Effect>
                         <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                <Border Width="4" CornerRadius="2" Background="#702943" Margin="0,1,10,1"/>
-                                <TextBlock Text="SEX DISTRIBUTION" Style="{StaticResource SecLabel}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="3" CornerRadius="2" Background="#F5A623" Margin="0,1,10,1"/>
+                                <TextBlock Text="DEPENDANTS AGE" Style="{StaticResource SectionLabel}"/>
                             </StackPanel>
-                            <Grid Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                    <Border Width="90" Height="90" CornerRadius="45"
-                                            Background="#FDF0F3"
-                                            BorderBrush="#D0B8C0" BorderThickness="2"
-                                            HorizontalAlignment="Center" Margin="0,0,0,10">
-                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                            <TextBlock x:Name="TxtFemaleCircle" Text="0"
-                                                       FontSize="26" FontWeight="Bold"
-                                                       Foreground="#702943" FontFamily="Segoe UI"
-                                                       HorizontalAlignment="Center"/>
-                                            <TextBlock Text="F" FontSize="10" FontWeight="Bold"
-                                                       Foreground="#9B3060" FontFamily="Segoe UI"
-                                                       HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Border>
-                                    <TextBlock x:Name="TxtFemaleRate" Text="0%"
-                                               FontSize="15" FontWeight="Bold" Foreground="#702943"
-                                               FontFamily="Segoe UI" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Female" FontSize="11" Foreground="#888888"
-                                               FontFamily="Segoe UI" HorizontalAlignment="Center" Margin="0,2,0,0"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                    <Border Width="90" Height="90" CornerRadius="45"
-                                            Background="#EEF2FF"
-                                            BorderBrush="#B0BEF5" BorderThickness="2"
-                                            HorizontalAlignment="Center" Margin="0,0,0,10">
-                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                            <TextBlock x:Name="TxtMaleCircle" Text="0"
-                                                       FontSize="26" FontWeight="Bold"
-                                                       Foreground="#3B5BDB" FontFamily="Segoe UI"
-                                                       HorizontalAlignment="Center"/>
-                                            <TextBlock Text="M" FontSize="10" FontWeight="Bold"
-                                                       Foreground="#7088E0" FontFamily="Segoe UI"
-                                                       HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Border>
-                                    <TextBlock x:Name="TxtMaleRate" Text="0%"
-                                               FontSize="15" FontWeight="Bold" Foreground="#3B5BDB"
-                                               FontFamily="Segoe UI" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Male" FontSize="11" Foreground="#888888"
-                                               FontFamily="Segoe UI" HorizontalAlignment="Center" Margin="0,2,0,0"/>
-                                </StackPanel>
-                            </Grid>
+                            <ItemsControl x:Name="DependantsAgeChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
                         </StackPanel>
                     </Border>
                 </Grid>
 
-                <Border Style="{StaticResource Card}">
-                    <Border.Effect>
-                        <DropShadowEffect Color="#D4A0B0" BlurRadius="8" ShadowDepth="1" Opacity="0.10" Direction="270"/>
-                    </Border.Effect>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <Border.Effect><DropShadowEffect Color="#C8B0B8" BlurRadius="8" ShadowDepth="1" Opacity="0.08" Direction="270"/></Border.Effect>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                            <Border Width="4" CornerRadius="2" Background="#702943" Margin="0,1,10,1"/>
-                            <TextBlock Text="RECENTLY UPDATED RECORDS" Style="{StaticResource SecLabel}"/>
-                            <Border Background="#F0E8EC" CornerRadius="4" Padding="7,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <Border Width="3" CornerRadius="2" Background="#702943" Margin="0,1,10,1"/>
+                            <TextBlock Text="SOLO PARENT CATEGORY" Style="{StaticResource SectionLabel}"/>
+                            <Border Background="#F5EEF1" CornerRadius="5" Padding="7,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="12 circumstances" FontFamily="Segoe UI" FontSize="9"
+                                           FontWeight="SemiBold" Foreground="#702943"/>
+                            </Border>
+                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <ItemsControl x:Name="CategoryChartLeft" Grid.Column="0" ItemTemplate="{StaticResource StatRowTemplate}"/>
+                            <ItemsControl x:Name="CategoryChartRight" Grid.Column="2" ItemTemplate="{StaticResource StatRowTemplate}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}">
+                    <Border.Effect><DropShadowEffect Color="#C8B0B8" BlurRadius="8" ShadowDepth="1" Opacity="0.08" Direction="270"/></Border.Effect>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                            <Border Width="3" CornerRadius="2" Background="#702943" Margin="0,1,10,1"/>
+                            <TextBlock Text="RECENTLY UPDATED" Style="{StaticResource SectionLabel}"/>
+                            <Border Background="#F5EEF1" CornerRadius="5" Padding="7,2" Margin="10,0,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="click to view" FontFamily="Segoe UI" FontSize="9"
                                            FontWeight="SemiBold" Foreground="#702943"/>
                             </Border>
@@ -567,9 +576,6 @@
                                     <Border Style="{StaticResource RecentItem}"
                                             MouseLeftButtonDown="RecentRecord_Click"
                                             Tag="{Binding SpId}">
-                                        <Border.Effect>
-                                            <DropShadowEffect Color="#D4A0B0" BlurRadius="6" ShadowDepth="1" Opacity="0.08" Direction="270"/>
-                                        </Border.Effect>
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto"/>
@@ -577,25 +583,21 @@
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
-                                            <Border Grid.Row="0" CornerRadius="5"
-                                                    Background="{Binding StatusBg}"
-                                                    Padding="7,3" HorizontalAlignment="Left" Margin="0,0,0,8">
-                                                <TextBlock Text="{Binding Status}" FontSize="9"
-                                                           FontWeight="Bold"
-                                                           Foreground="{Binding StatusFg}"
-                                                           FontFamily="Segoe UI"/>
+                                            <Border Grid.Row="0" CornerRadius="5" Background="{Binding StatusBg}"
+                                                    Padding="6,2" HorizontalAlignment="Left" Margin="0,0,0,7">
+                                                <TextBlock Text="{Binding Status}" FontSize="9" FontWeight="Bold"
+                                                           Foreground="{Binding StatusFg}" FontFamily="Segoe UI"/>
                                             </Border>
                                             <TextBlock Grid.Row="1" Text="{Binding Name}" FontSize="12"
                                                        FontWeight="SemiBold" Foreground="#111111"
-                                                       FontFamily="Segoe UI"
-                                                       TextTrimming="CharacterEllipsis" Margin="0,0,0,3"/>
+                                                       FontFamily="Segoe UI" TextTrimming="CharacterEllipsis" Margin="0,0,0,3"/>
                                             <TextBlock Grid.Row="2" Text="{Binding Barangay}" FontSize="10"
-                                                       Foreground="#888888" FontFamily="Segoe UI" Margin="0,0,0,4"/>
+                                                       Foreground="#AAAAAA" FontFamily="Segoe UI" Margin="0,0,0,4"/>
                                             <StackPanel Grid.Row="3" Orientation="Horizontal">
                                                 <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z"
-                                                      Fill="#D0B8C0" Stretch="Uniform" Width="10" Height="10" Margin="0,0,4,0"/>
+                                                      Fill="#DDDDDD" Stretch="Uniform" Width="9" Height="9" Margin="0,0,4,0"/>
                                                 <TextBlock Text="{Binding DateLabel}" FontSize="9"
-                                                           Foreground="#BBBBBB" FontFamily="Segoe UI"/>
+                                                           Foreground="#CCCCCC" FontFamily="Segoe UI"/>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
