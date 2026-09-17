@@ -574,6 +574,34 @@ namespace SOLUM_UI
             if (mainWindow != null)
                 mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
 
+            var methodDialog = new EntryMethodDialog { Owner = Window.GetWindow(this) };
+            bool? picked = methodDialog.ShowDialog();
+
+            if (picked != true || methodDialog.Selected == EntryMethod.None)
+            {
+                if (mainWindow != null) mainWindow.MainContent.Effect = null;
+                return;
+            }
+
+            if (methodDialog.Selected == EntryMethod.Scan)
+            {
+                var ocr = new OcrScanDialog { Owner = Window.GetWindow(this) };
+                ocr.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
+                
+                if (ocr.ShowDialog() == true && ocr.Result != null)
+                {
+                    ocr.Result.CreatedBy = CurrentUserName;
+                    ocr.Result.Barangay  = string.IsNullOrEmpty(ocr.Result.Barangay)
+                        ? CurrentUserBarangay : ocr.Result.Barangay;
+
+                    _allRecords.Add(new SoloParentRecordViewModel(ocr.Result));
+                    ToastNotification.Show("Record Added", ocr.Result.Name + " was added successfully.", ToastType.Success);
+                    AuditLogService.Instance.LogCreate(ocr.Result.Id, ocr.Result.Name, GetCurrentUser(), CurrentUserRole);
+                    ApplyFiltersAndPage();
+                }
+                return;
+            }
+
             RecordDialog dialog = new RecordDialog { Owner = Window.GetWindow(this) };
             dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
