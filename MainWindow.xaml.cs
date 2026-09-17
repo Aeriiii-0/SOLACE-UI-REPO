@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using SOLUM_UI.Services;
+using SOLUM_UI.Services.Api;
 
 namespace SOLUM_UI
 {
@@ -23,6 +24,7 @@ namespace SOLUM_UI
         public static string CurrentUserBarangay { get; set; } = string.Empty;
 
         private Dictionary<string, Button> _navButtons = new Dictionary<string, Button>();
+        private Dictionary<string, Page> _pageCache = new Dictionary<string, Page>(); // NEW — one instance per page tag
 
         public MainWindow()
         {
@@ -34,8 +36,19 @@ namespace SOLUM_UI
                 TopBarControl.SetUser(CurrentUserName, CurrentUserRole);
                 ApplyRoleNavVisibility();
                 ActivateButton("Dashboard");
-                NavigatePage(new DashboardPage());
+                NavigatePage(GetOrCreatePage("Dashboard", () => new DashboardPage())); // CHANGED
             };
+        }
+
+        // NEW — returns the cached page instance for this tag, creating it once on first use
+        private Page GetOrCreatePage(string tag, Func<Page> factory)
+        {
+            if (!_pageCache.TryGetValue(tag, out var page))
+            {
+                page = factory();
+                _pageCache[tag] = page;
+            }
+            return page;
         }
 
         private void ApplyRoleNavVisibility()
@@ -55,13 +68,12 @@ namespace SOLUM_UI
                 MainFrame.RemoveBackEntry();
         }
 
+        // CHANGED — simplified now that caching handles "don't rebuild the same page" for us.
+        // This just avoids re-navigating the Frame to the exact same instance it's already showing.
         private void NavigatePage(Page page)
         {
-            if (MainFrame.Content is Page current)
-            {
-                if (current.GetType() == page.GetType() && !(page is SoloParentRecordsPage))
-                    return;
-            }
+            if (MainFrame.Content == page)
+                return;
             MainFrame.Navigate(page);
         }
 
@@ -158,25 +170,25 @@ namespace SOLUM_UI
             switch (tag)
             {
                 case "Dashboard":
-                    NavigatePage(new DashboardPage());
+                    NavigatePage(GetOrCreatePage("Dashboard", () => new DashboardPage())); // CHANGED
                     break;
                 case "SoloParentRecords":
-                    SoloParentRecordsPage.CurrentUserName     = CurrentUserName;
-                    SoloParentRecordsPage.CurrentUserRole     = CurrentUserRole;
+                    SoloParentRecordsPage.CurrentUserName = CurrentUserName;
+                    SoloParentRecordsPage.CurrentUserRole = CurrentUserRole;
                     SoloParentRecordsPage.CurrentUserBarangay = CurrentUserBarangay;
-                    NavigatePage(new SoloParentRecordsPage());
+                    NavigatePage(GetOrCreatePage("SoloParentRecords", () => new SoloParentRecordsPage())); // CHANGED
                     break;
                 case "UserAdministration":
-                    NavigatePage(new UserAdministrationPage());
+                    NavigatePage(GetOrCreatePage("UserAdministration", () => new UserAdministrationPage())); // CHANGED
                     break;
                 case "Analytics":
-                    NavigatePage(new AnalyticsPage());
+                    NavigatePage(GetOrCreatePage("Analytics", () => new AnalyticsPage())); // CHANGED
                     break;
                 case "SubsidyRecommendation":
-                    NavigatePage(new SubsidyRecommendationPage());
+                    NavigatePage(GetOrCreatePage("SubsidyRecommendation", () => new SubsidyRecommendationPage())); // CHANGED
                     break;
                 case "UserProfile":
-                    NavigatePage(new UserProfilePage());
+                    NavigatePage(GetOrCreatePage("UserProfile", () => new UserProfilePage())); // CHANGED
                     break;
                 case "Settings":
                     break;
@@ -196,7 +208,7 @@ namespace SOLUM_UI
         {
             ActivateButton("UserProfile");
             TopBarControl.PageTitle = "User Profile";
-            var page = new UserProfilePage();
+            var page = (UserProfilePage)GetOrCreatePage("UserProfile", () => new UserProfilePage()); // CHANGED
             page.ScrollToChangePassword();
             NavigatePage(page);
         }
@@ -222,7 +234,11 @@ namespace SOLUM_UI
             LogoutOverlay.Visibility = Visibility.Collapsed;
             LogoutLoadingOverlay.Visibility = Visibility.Visible;
 
-            await System.Threading.Tasks.Task.Delay(1200);
+            try
+            {
+                await AuthApiService.Instance.LogoutAsync();
+            }
+            catch { }
 
             var login = new LoginPage();
             login.Show();
@@ -234,11 +250,11 @@ namespace SOLUM_UI
         public void NavigateToRecord(string spId)
         {
             ActivateButton("SoloParentRecords");
-            SoloParentRecordsPage.CurrentUserName     = CurrentUserName;
-            SoloParentRecordsPage.CurrentUserRole     = CurrentUserRole;
+            SoloParentRecordsPage.CurrentUserName = CurrentUserName;
+            SoloParentRecordsPage.CurrentUserRole = CurrentUserRole;
             SoloParentRecordsPage.CurrentUserBarangay = CurrentUserBarangay;
             TopBarControl.PageTitle = "Solo Parent Records";
-            var page = new SoloParentRecordsPage();
+            var page = (SoloParentRecordsPage)GetOrCreatePage("SoloParentRecords", () => new SoloParentRecordsPage()); // CHANGED
             page.HighlightRecord(spId);
             NavigatePage(page);
         }

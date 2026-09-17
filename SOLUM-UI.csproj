@@ -59,12 +59,19 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\Api\UserDtos.cs" />
+    <Compile Include="Services\Api\UserApiService.cs" />
     <Compile Include="Views\AnalyticsPage.xaml.cs">
       <DependentUpon>AnalyticsPage.xaml</DependentUpon>
     </Compile>
@@ -128,6 +135,12 @@
     <Compile Include="Models\ScannerSettings.cs" />
     <Compile Include="Models\SoloParentRecord.cs" />
     <Compile Include="Models\SpouseInfo.cs" />
+    <Compile Include="Models\Api\BaseResponse.cs" />
+    <Compile Include="Models\Api\AuthDtos.cs" />
+    <Compile Include="Models\Api\SoloParentDtos.cs" />
+    <Compile Include="Services\Api\ApiClient.cs" />
+    <Compile Include="Services\Api\AuthApiService.cs" />
+    <Compile Include="Services\Api\SoloParentApiService.cs" />
     <Compile Include="Services\AnalyticsExportService.cs" />
     <Compile Include="Services\AuditLogService.cs" />
     <Compile Include="Services\OcrService.cs" />

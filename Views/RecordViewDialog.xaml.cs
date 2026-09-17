@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using SOLUM_UI.Models;
+using SOLUM_UI.Services.Api;
 
 namespace SOLUM_UI
 {
@@ -10,6 +11,7 @@ namespace SOLUM_UI
     {
         private readonly SoloParentRecord _record;
         public bool OpenedEdit { get; private set; }
+        public bool Renewed { get; private set; }
 
         private static readonly SolidColorBrush _label   = Clr(0x88, 0x88, 0x88);
         private static readonly SolidColorBrush _value   = Clr(0x11, 0x11, 0x11);
@@ -345,6 +347,41 @@ namespace SOLUM_UI
                 FontFamily   = new FontFamily("Segoe UI")
             });
             return sp;
+        }
+
+        private async void Renew_Click(object sender, RoutedEventArgs e)
+        {
+            if (_record == null || string.IsNullOrWhiteSpace(_record.Id)) return;
+
+            if (Guid.TryParse(_record.Id, out var id))
+            {
+                BtnRenew.IsEnabled = false;
+                try
+                {
+                    var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(id);
+                    if (resp.Succeeded)
+                    {
+                        Renewed = true;
+                        ToastNotification.Show("Record Renewed", "Record validity extended for 1 year.", ToastType.Success);
+                        Close();
+                    }
+                    else
+                    {
+                        string err = resp.Errors != null && resp.Errors.Count > 0
+                            ? string.Join("\n", resp.Errors)
+                            : "Failed to renew record.";
+                        MessageBox.Show(err, "Renew Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+                finally
+                {
+                    BtnRenew.IsEnabled = true;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Cannot renew record without a valid backend ID.", "Renew", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
         private void Edit_Click(object sender, RoutedEventArgs e)

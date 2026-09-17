@@ -1,8 +1,11 @@
-﻿using System.Threading.Tasks;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using SOLUM_UI.Services;
+using SOLUM_UI.Services.Api;
 
 namespace SOLUM_UI
 {
@@ -36,16 +39,20 @@ namespace SOLUM_UI
                 : Visibility.Collapsed;
         }
 
+        private bool _isLoggingIn = false;   // NEW
+
         private void BtnLogin_Click(object sender, RoutedEventArgs e) => AttemptLogin();
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter && !_isLoggingIn)   // CHANGED — was unguarded
                 AttemptLogin();
         }
 
         private async void AttemptLogin()
         {
+            if (_isLoggingIn) return;   // NEW — guards any other re-entry path too
+
             string email = TxtEmail.Text.Trim();
             string password = _isPasswordVisible
                 ? TxtPasswordVisible.Text
@@ -57,41 +64,47 @@ namespace SOLUM_UI
                 return;
             }
 
-            if (!email.EndsWith("@gmail.com", System.StringComparison.OrdinalIgnoreCase))
-            {
-                ShowError("Invalid email or password. Please check your credentials and try again.");
-                return;
-            }
-
             if (string.IsNullOrWhiteSpace(password))
             {
                 ShowError("Please enter your password.");
                 return;
             }
 
+            _isLoggingIn = true;               // NEW
             BtnLogin.IsEnabled = false;
             LoadingOverlay.Visibility = Visibility.Visible;
 
-            await Task.Delay(1500);
-
-            MainWindow.CurrentUserName = email;
-
-            if (email.StartsWith("admin", System.StringComparison.OrdinalIgnoreCase))
+            try
             {
-                MainWindow.CurrentUserRole     = "Administrator";
-                MainWindow.CurrentUserBarangay = string.Empty;
-            }
-            else
-            {
-                MainWindow.CurrentUserRole     = "BasicUser";
-                MainWindow.CurrentUserBarangay = "De La Paz";
-            }
+                var loginResponse = await AuthApiService.Instance.LoginAsync(email, password);
 
-            var mainWindow = new MainWindow();
-            mainWindow.Show();
-            AuditLogService.Instance.LogLogin(MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
-            ToastNotification.Show("Welcome", "Logged in as " + email + ".", ToastType.Success);
-            this.Close();
+                if (!loginResponse.Succeeded || loginResponse.Data == null || string.IsNullOrWhiteSpace(loginResponse.Data.Token))
+                {
+                    string err = loginResponse.Errors != null && loginResponse.Errors.Count > 0
+                        ? string.Join("\n", loginResponse.Errors)
+                        : "Invalid email or password. Please check your credentials and try again.";
+                    ShowError(err);
+                    return;
+                }
+
+                MainWindow.CurrentUserName = !string.IsNullOrWhiteSpace(loginResponse.Data.Email)
+                    ? loginResponse.Data.Email
+                    : email;
+
+                MainWindow.CurrentUserRole = AuthApiService.Instance.IsAdmin ? "Administrator" : "Encoder";
+
+                var mainWindow = new MainWindow();
+                mainWindow.Show();
+                AuditLogService.Instance.LogLogin(MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
+                ToastNotification.Show("Welcome", "Logged in as " + MainWindow.CurrentUserName + ".", ToastType.Success);
+                this.Close();
+            }
+            finally
+            {
+                _isLoggingIn = false;          // NEW
+                BtnLogin.IsEnabled = true;
+                LoadingOverlay.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void ShowError(string message)
