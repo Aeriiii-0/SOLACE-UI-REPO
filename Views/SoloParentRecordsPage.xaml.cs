@@ -1,8 +1,12 @@
 using SOLUM_UI.Models;
+using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
+using SOLUM_UI.Services.Api;
 using SOLUM_UI.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -19,26 +23,29 @@ namespace SOLUM_UI
         private List<SoloParentRecordViewModel> _allRecords;
         private List<SoloParentRecordViewModel> _filteredRecords;
 
-        private string _statusFilter  = "All";
-        private string _sexFilter     = "All";
+        private string _statusFilter   = "All";
+        private string _sexFilter      = "All";
         private string _barangayFilter = "All";
-        private string _sortOption    = "Name A-Z";
+        private string _sortOption     = "Name A-Z";
 
-        private const int PageSize   = 10;
-        private int _currentPage     = 1;
+        private const int PageSize = 10;
+        private int _currentPage   = 1;
+        private int _totalPages    = 1;
+        private bool _isLoading    = false;
 
-        private bool IsAdmin      => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase);
-        private bool IsBasicUser  => string.Equals(CurrentUserRole, "BasicUser",     StringComparison.OrdinalIgnoreCase);
-        private bool IsEncoder    => string.Equals(CurrentUserRole, "Encoder",       StringComparison.OrdinalIgnoreCase);
+        private bool IsAdmin     => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
+                                    string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase);
+        private bool IsBasicUser => string.Equals(CurrentUserRole, "BasicUser", StringComparison.OrdinalIgnoreCase);
+        private bool IsEncoder   => string.Equals(CurrentUserRole, "Encoder", StringComparison.OrdinalIgnoreCase);
 
         public SoloParentRecordsPage()
         {
             InitializeComponent();
-            LoadRecords();
             Loaded += (s, e) =>
             {
                 ApplyRoleView();
                 ResizeNameColumn();
+                _ = LoadRecordsAsync();
             };
             SizeChanged += Page_SizeChanged;
         }
@@ -47,204 +54,185 @@ namespace SOLUM_UI
         {
             if (IsBasicUser)
             {
-                AdminToolbar.Visibility      = Visibility.Collapsed;
-                BasicUserToolbar.Visibility  = Visibility.Visible;
+                AdminToolbar.Visibility       = Visibility.Collapsed;
+                BasicUserToolbar.Visibility   = Visibility.Visible;
                 EncoderSearchPanel.Visibility = Visibility.Collapsed;
-                PagingRow.Visibility         = Visibility.Visible;
-                _barangayFilter              = CurrentUserBarangay;
+                PagingRow.Visibility          = Visibility.Visible;
+                _barangayFilter               = CurrentUserBarangay;
 
                 if (ColSex         != null) ColSex.Width         = 0;
                 if (ColCivilStatus != null) ColCivilStatus.Width = 0;
                 if (ColChildren    != null) ColChildren.Width    = 0;
                 if (ColLastUpdated != null) ColLastUpdated.Width = 0;
                 if (ColBarangay    != null) ColBarangay.Width    = 0;
-                if (ColActions     != null) ColActions.Width     = 80;
+                if (ColActions     != null) ColActions.Width     = 104;
             }
             else if (IsEncoder)
             {
-                AdminToolbar.Visibility      = Visibility.Collapsed;
-                BasicUserToolbar.Visibility  = Visibility.Collapsed;
+                AdminToolbar.Visibility       = Visibility.Collapsed;
+                BasicUserToolbar.Visibility   = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Visible;
-                PagingRow.Visibility         = Visibility.Collapsed;
+                PagingRow.Visibility          = Visibility.Visible;
+                if (ColActions != null) ColActions.Width = 104;
             }
             else
             {
-                AdminToolbar.Visibility      = Visibility.Visible;
-                BasicUserToolbar.Visibility  = Visibility.Collapsed;
+                AdminToolbar.Visibility       = Visibility.Visible;
+                BasicUserToolbar.Visibility   = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Collapsed;
-                PagingRow.Visibility         = Visibility.Visible;
+                PagingRow.Visibility          = Visibility.Visible;
+                if (ColActions != null) ColActions.Width = 104;
             }
         }
 
-        private void LoadRecords()
+        private async Task LoadRecordsAsync()
         {
-            List<SoloParentRecord> raw = new List<SoloParentRecord>
+            if (_isLoading) return;
+            _isLoading = true;
+
+            try
             {
-                new SoloParentRecord { Id = "SP-001", Surname = "Santos", FirstName = "Maria", MiddleName = "Lim",
-                    Name = "Santos, Maria Lim", DateOfBirth = new DateTime(1990, 3, 12), PlaceOfBirth = "Biñan",
-                    Sex = "Female", CivilStatus = "Single",
-                    Address = "123 Rizal St.", Barangay = "Biñan Poblacion",
-                    ContactNumber = "09171234567", Children = 2, Status = "Valid",
-                    LastUpdated = new DateTime(2025, 3, 15) },
-                new SoloParentRecord { Id = "SP-002", Surname = "Dela Cruz", FirstName = "Juan", MiddleName = "Reyes",
-                    ExtensionName = "Jr.", Name = "Dela Cruz, Juan Reyes Jr.", DateOfBirth = new DateTime(1985, 7, 22),
-                    PlaceOfBirth = "Biñan", Sex = "Male", CivilStatus = "Widowed",
-                    Address = "456 Mabini Ave.", Barangay = "Malaban",
-                    ContactNumber = "09281234567", Children = 3, Status = "Valid",
-                    LastUpdated = new DateTime(2025, 3, 12) },
-                new SoloParentRecord { Id = "SP-003", Surname = "Reyes", FirstName = "Ana", MiddleName = "Mendoza",
-                    Name = "Reyes, Ana Mendoza", DateOfBirth = new DateTime(1993, 1, 5), PlaceOfBirth = "Biñan",
-                    Sex = "Female", CivilStatus = "Separated",
-                    Address = "789 Luna St.", Barangay = "Canlalay",
-                    ContactNumber = "09391234567", Children = 1, Status = "Inactive",
-                    LastUpdated = new DateTime(2025, 3, 14) },
-                new SoloParentRecord { Id = "SP-004", Surname = "Garcia", FirstName = "Pedro", MiddleName = "Torres",
-                    ExtensionName = "III", Name = "Garcia, Pedro Torres III", DateOfBirth = new DateTime(1988, 9, 30),
-                    PlaceOfBirth = "Biñan", Sex = "Male", CivilStatus = "Single",
-                    Address = "321 Bonifacio Rd.", Barangay = "San Antonio",
-                    ContactNumber = "09501234567", Children = 2, Status = "Valid",
-                    LastUpdated = new DateTime(2025, 3, 9) },
-                new SoloParentRecord { Id = "SP-005", Surname = "Martinez", FirstName = "Rosa", MiddleName = "Cruz",
-                    Name = "Martinez, Rosa Cruz", DateOfBirth = new DateTime(1979, 5, 18), PlaceOfBirth = "Biñan",
-                    Sex = "Female", CivilStatus = "Widowed",
-                    Address = "654 Aguinaldo Blvd.", Barangay = "Platero",
-                    ContactNumber = "09611234567", Children = 4, Status = "Inactive",
-                    LastUpdated = new DateTime(2025, 3, 28) },
-                new SoloParentRecord { Id = "SP-006", Surname = "Lim", FirstName = "Cynthia", MiddleName = "Tan",
-                    Name = "Lim, Cynthia Tan", DateOfBirth = new DateTime(1991, 8, 14), PlaceOfBirth = "Biñan",
-                    Sex = "Female", CivilStatus = "Separated",
-                    Address = "11 Taft Ave.", Barangay = "Loma",
-                    ContactNumber = "09711234567", Children = 2, Status = "Valid",
-                    LastUpdated = new DateTime(2025, 4, 1) },
-                new SoloParentRecord { Id = "SP-007", Surname = "Bautista", FirstName = "Carlos", MiddleName = "Ocampo",
-                    Name = "Bautista, Carlos Ocampo", DateOfBirth = new DateTime(1983, 11, 22), PlaceOfBirth = "Biñan",
-                    Sex = "Male", CivilStatus = "Widowed",
-                    Address = "22 Burgos St.", Barangay = "Tubigan",
-                    ContactNumber = "09821234567", Children = 3, Status = "Valid",
-                    LastUpdated = new DateTime(2025, 4, 5) },
-                new SoloParentRecord { Id = "SP-008", Surname = "Mendoza", FirstName = "Elena", MiddleName = "Flores",
-                    Name = "Mendoza, Elena Flores", DateOfBirth = new DateTime(1995, 4, 7), PlaceOfBirth = "Biñan",
-                    Sex = "Female", CivilStatus = "Single",
-                    Address = "33 MacArthur Hwy.", Barangay = "De La Paz",
-                    ContactNumber = "09931234567", Children = 1, Status = "Inactive",
-                    LastUpdated = new DateTime(2025, 4, 10) },
-                new SoloParentRecord { Id = "SP-009", Surname = "Torres", FirstName = "Benjamin", MiddleName = "Ramos",
-                    Name = "Torres, Benjamin Ramos", DateOfBirth = new DateTime(1980, 6, 30), PlaceOfBirth = "Biñan",
-                    Sex = "Male", CivilStatus = "Separated",
-                    Address = "44 Shaw Blvd.", Barangay = "Casile",
-                    ContactNumber = "09041234567", Children = 2, Status = "Inactive",
-                    LastUpdated = new DateTime(2025, 4, 12) },
-                new SoloParentRecord { Id = "SP-010", Surname = "Navarro", FirstName = "Josephine", MiddleName = "Aquino",
-                    Name = "Navarro, Josephine Aquino", DateOfBirth = new DateTime(1987, 2, 18), PlaceOfBirth = "Biñan",
-                    Sex = "Female", CivilStatus = "Widowed",
-                    Address = "55 San Jose Rd.", Barangay = "San Jose",
-                    ContactNumber = "09151234567", Children = 3, Status = "Valid",
-                    LastUpdated = new DateTime(2025, 4, 15) },
-                new SoloParentRecord { Id = "SP-011", Surname = "Hernandez", FirstName = "Roberto", MiddleName = "Diaz",
-                    Name = "Hernandez, Roberto Diaz", DateOfBirth = new DateTime(1978, 9, 5), PlaceOfBirth = "Biñan",
-                    Sex = "Male", CivilStatus = "Annulled",
-                    Address = "66 Langkiwa Ave.", Barangay = "Langkiwa",
-                    ContactNumber = "09261234567", Children = 4, Status = "Valid",
-                    LastUpdated = new DateTime(2025, 4, 18) },
-                new SoloParentRecord { Id = "SP-012", Surname = "Castillo", FirstName = "Patricia", MiddleName = "Villanueva",
-                    Name = "Castillo, Patricia Villanueva", DateOfBirth = new DateTime(1996, 12, 25), PlaceOfBirth = "Biñan",
-                    Sex = "Female", CivilStatus = "Single",
-                    Address = "77 Malamig St.", Barangay = "Malamig",
-                    ContactNumber = "09371234567", Children = 1, Status = "Inactive",
-                    LastUpdated = new DateTime(2025, 4, 20) },
-            };
+                string effectiveBarangay = IsBasicUser ? CurrentUserBarangay : _barangayFilter;
+                string idQuery = SearchId?.Text?.Trim() ?? string.Empty;
+                string nameQuery = SearchName?.Text?.Trim() ?? string.Empty;
+                string barangayQuery = SearchBarangay?.Text?.Trim() ?? string.Empty;
 
-            _allRecords = new List<SoloParentRecordViewModel>();
-            foreach (SoloParentRecord r in raw)
-                _allRecords.Add(new SoloParentRecordViewModel(r));
+                if (IsBasicUser)
+                {
+                    nameQuery = BasicSearchName?.Text?.Trim() ?? string.Empty;
+                    barangayQuery = string.Empty;
+                }
 
-            ApplyFiltersAndPage();
+                Guid? searchGuid = null;
+                if (Guid.TryParse(idQuery, out var parsedGuid))
+                {
+                    searchGuid = parsedGuid;
+                }
+
+                bool? isActive = null;
+                if (!IsBasicUser && _statusFilter != "All")
+                {
+                    isActive = string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase);
+                }
+
+                string sex = (!IsBasicUser && _sexFilter != "All") ? _sexFilter : null;
+
+                string barangay = null;
+                if (!string.IsNullOrWhiteSpace(barangayQuery))
+                {
+                    barangay = barangayQuery;
+                }
+                else if (!string.IsNullOrEmpty(effectiveBarangay) && effectiveBarangay != "All")
+                {
+                    barangay = effectiveBarangay;
+                }
+
+                string sortBy = "LastName";
+                string sortOrder = "asc";
+
+                switch (_sortOption)
+                {
+                    case "Name A-Z": sortBy = "LastName"; sortOrder = "asc"; break;
+                    case "Name Z-A": sortBy = "LastName"; sortOrder = "desc"; break;
+                    case "Newest": sortBy = "datecreated"; sortOrder = "desc"; break;
+                    case "Oldest": sortBy = "datecreated"; sortOrder = "asc"; break;
+                    case "Barangay": sortBy = "barangay"; sortOrder = "asc"; break;
+                }
+
+                var req = new GetSoloParentRequest
+                {
+                    Id = searchGuid,
+                    Fullname = !string.IsNullOrWhiteSpace(nameQuery) ? nameQuery : null,
+                    Barangay = barangay,
+                    Sex = sex,
+                    IsActive = isActive,
+                    SortBy = sortBy,
+                    SortOrder = sortOrder,
+                    Page = _currentPage,
+                    PageSize = PageSize
+                };
+
+                var resp = await SoloParentApiService.Instance.GetSoloParentsAsync(req);
+
+                if (!resp.Succeeded || resp.Data == null)
+                {
+                    string err = resp.Errors != null && resp.Errors.Count > 0
+                        ? resp.Errors[0]
+                        : "Unable to load records from backend.";
+                    ToastNotification.Show("API Notice", err, ToastType.Warning);
+
+                    _allRecords = new List<SoloParentRecordViewModel>();
+                    _filteredRecords = new List<SoloParentRecordViewModel>();
+                    RecordsList.ItemsSource = null;
+                    if (NoResultsPanel != null) NoResultsPanel.Visibility = Visibility.Visible;
+                    UpdatePagingUI();
+                    return;
+                }
+
+                var paged = resp.Data;
+                _totalPages = Math.Max(1, paged.TotalPages);
+
+                // For the current page of summaries, retrieve full details in parallel
+                var detailTasks = paged.Items.Select(item => SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id)).ToList();
+                var detailResponses = await Task.WhenAll(detailTasks);
+
+                _allRecords = new List<SoloParentRecordViewModel>();
+                for (int i = 0; i < paged.Items.Count; i++)
+                {
+                    var summary = paged.Items[i];
+                    var detailResp = detailResponses[i];
+
+                    SoloParentRecord rec;
+                    if (detailResp.Succeeded && detailResp.Data != null)
+                    {
+                        rec = SoloParentApiService.Instance.MapToRecord(detailResp.Data);
+                    }
+                    else
+                    {
+                        rec = new SoloParentRecord
+                        {
+                            Id = summary.Id.ToString(),
+                            Barangay = summary.Barangay,
+                            Sex = summary.Sex,
+                            Status = summary.IsActive ? "Valid" : "Inactive",
+                            LastUpdated = summary.DateCreated,
+                            Name = "Solo Parent " + summary.Id.ToString().Substring(0, 8)
+                        };
+                    }
+
+                    var vm = new SoloParentRecordViewModel(rec);
+                    vm.SetAlternate(i % 2 != 0);
+                    _allRecords.Add(vm);
+                }
+
+                _filteredRecords = new List<SoloParentRecordViewModel>(_allRecords);
+                RecordsList.ItemsSource = null;
+                RecordsList.ItemsSource = _filteredRecords;
+
+                if (NoResultsPanel != null)
+                    NoResultsPanel.Visibility = _filteredRecords.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+                UpdatePagingUI();
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show("Error", ex.Message, ToastType.Error);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
         }
 
         private void ApplyFiltersAndPage()
         {
-            if (_allRecords == null) return;
-
-            string effectiveBarangay = IsBasicUser ? CurrentUserBarangay : _barangayFilter;
-
-            string idQuery       = SearchId?.Text?.Trim()        ?? string.Empty;
-            string nameQuery     = SearchName?.Text?.ToLower().Trim()     ?? string.Empty;
-            string barangayQuery = SearchBarangay?.Text?.ToLower().Trim() ?? string.Empty;
-
-            if (IsBasicUser)
-            {
-                idQuery       = BasicSearchName?.Text?.ToLower().Trim() ?? string.Empty;
-                nameQuery     = BasicSearchName?.Text?.ToLower().Trim() ?? string.Empty;
-                barangayQuery = string.Empty;
-            }
-
-            _filteredRecords = new List<SoloParentRecordViewModel>();
-
-            foreach (SoloParentRecordViewModel r in _allRecords)
-            {
-                if (_statusFilter != "All" && !IsBasicUser && (r.Status ?? string.Empty) != _statusFilter) continue;
-                if (_sexFilter    != "All" && !IsBasicUser && (r.Sex    ?? string.Empty) != _sexFilter)    continue;
-
-                if (!string.IsNullOrEmpty(effectiveBarangay) && effectiveBarangay != "All")
-                {
-                    if (!string.Equals(r.Barangay ?? string.Empty, effectiveBarangay, StringComparison.OrdinalIgnoreCase))
-                        continue;
-                }
-
-                if (IsBasicUser)
-                {
-                    if (!string.IsNullOrEmpty(nameQuery) && !(r.Name ?? "").ToLower().Contains(nameQuery)) continue;
-                }
-                else if (!string.IsNullOrEmpty(idQuery))
-                {
-                    if (!(r.Id ?? "").ToLower().Contains(idQuery.ToLower())) continue;
-                }
-                else
-                {
-                    bool nameMatch     = string.IsNullOrEmpty(nameQuery)     || (r.Name     ?? "").ToLower().Contains(nameQuery);
-                    bool barangayMatch = string.IsNullOrEmpty(barangayQuery) || (r.Barangay ?? "").ToLower().Contains(barangayQuery);
-                    if (!nameMatch || !barangayMatch) continue;
-                }
-
-                _filteredRecords.Add(r);
-            }
-
-            switch (_sortOption)
-            {
-                case "Name A-Z": _filteredRecords.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase)); break;
-                case "Name Z-A": _filteredRecords.Sort((a, b) => string.Compare(b.Name, a.Name, StringComparison.OrdinalIgnoreCase)); break;
-                case "Newest": _filteredRecords.Sort((a, b) => string.Compare(b.LastUpdatedFormatted, a.LastUpdatedFormatted, StringComparison.OrdinalIgnoreCase)); break;
-                case "Oldest": _filteredRecords.Sort((a, b) => string.Compare(a.LastUpdatedFormatted, b.LastUpdatedFormatted, StringComparison.OrdinalIgnoreCase)); break;
-                case "Barangay": _filteredRecords.Sort((a, b) => string.Compare(a.Barangay, b.Barangay, StringComparison.OrdinalIgnoreCase)); break;
-            }
-
             _currentPage = 1;
-            RenderPage();
+            _ = LoadRecordsAsync();
         }
 
         private void ApplyFilters() => ApplyFiltersAndPage();
 
-        private int TotalPages => Math.Max(1, (int)Math.Ceiling(_filteredRecords.Count / (double)PageSize));
-
-        private void RenderPage()
-        {
-            if (_filteredRecords == null) return;
-
-            int start = (_currentPage - 1) * PageSize;
-            List<SoloParentRecordViewModel> page = _filteredRecords.GetRange(
-                start, Math.Min(PageSize, _filteredRecords.Count - start));
-
-            for (int i = 0; i < page.Count; i++)
-                page[i].SetAlternate(i % 2 != 0);
-
-            RecordsList.ItemsSource = null;
-            RecordsList.ItemsSource = page;
-
-            if (NoResultsPanel != null)
-                NoResultsPanel.Visibility = _filteredRecords.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-
-            UpdatePagingUI();
-        }
+        private int TotalPages => _totalPages;
 
         private void UpdatePagingUI()
         {
@@ -263,7 +251,7 @@ namespace SOLUM_UI
             if (_currentPage < TotalPages)
             {
                 _currentPage++;
-                RenderPage();
+                _ = LoadRecordsAsync();
             }
         }
 
@@ -272,7 +260,7 @@ namespace SOLUM_UI
             if (_currentPage > 1)
             {
                 _currentPage--;
-                RenderPage();
+                _ = LoadRecordsAsync();
             }
         }
 
@@ -360,38 +348,40 @@ namespace SOLUM_UI
             OpenViewDialog(vm);
         }
 
-        private void OpenViewDialog(SoloParentRecordViewModel vm)
+        private async void OpenViewDialog(SoloParentRecordViewModel vm)
         {
             MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
             if (mainWindow != null)
                 mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
 
-            var view = new RecordViewDialog(vm.RawModel) { Owner = Window.GetWindow(this) };
+            SoloParentRecord recordToView = vm.RawModel;
+
+            if (Guid.TryParse(vm.Id, out var id))
+            {
+                var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(id);
+                if (detailResp.Succeeded && detailResp.Data != null)
+                {
+                    recordToView = SoloParentApiService.Instance.MapToRecord(detailResp.Data);
+                }
+            }
+
+            var view = new RecordViewDialog(recordToView) { Owner = Window.GetWindow(this) };
             view.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
             view.ShowDialog();
 
+            if (view.Renewed)
+            {
+                await LoadRecordsAsync();
+                return;
+            }
+
             if (view.OpenedEdit)
             {
-                if (mainWindow != null)
-                    mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
-
-                RecordDialog dialog = new RecordDialog(vm.RawModel) { Owner = Window.GetWindow(this) };
-                dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
-
-                if (dialog.ShowDialog() == true && dialog.Result != null)
-                {
-                    int idx = _allRecords.FindIndex(r => r.Id == vm.Id);
-                    if (idx >= 0) _allRecords[idx] = new SoloParentRecordViewModel(dialog.Result);
-                    ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
-                    AuditLogService.Instance.LogUpdate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole,
-                        BuildDiff(vm.RawModel, dialog.Result));
-                    AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
-                    ApplyFiltersAndPage();
-                }
+                await EditRecordAsync(recordToView);
             }
         }
 
-        private void AddNewRecord_Click(object sender, RoutedEventArgs e)
+        private async void AddNewRecord_Click(object sender, RoutedEventArgs e)
         {
             MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
             if (mainWindow != null)
@@ -413,10 +403,7 @@ namespace SOLUM_UI
                 
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
-                    _allRecords.Add(new SoloParentRecordViewModel(ocr.Result));
-                    ToastNotification.Show("Record Added", ocr.Result.Name + " was added successfully.", ToastType.Success);
-                    AuditLogService.Instance.LogCreate(ocr.Result.Id, ocr.Result.Name, GetCurrentUser(), CurrentUserRole);
-                    ApplyFiltersAndPage();
+                    await SaveNewRecordAsync(ocr.Result);
                 }
                 return;
             }
@@ -426,17 +413,37 @@ namespace SOLUM_UI
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                _allRecords.Add(new SoloParentRecordViewModel(dialog.Result));
-                ToastNotification.Show("Record Added", dialog.Result.Name + " was added successfully.", ToastType.Success);
-                AuditLogService.Instance.LogCreate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole);
-                ApplyFiltersAndPage();
+                await SaveNewRecordAsync(dialog.Result);
             }
         }
 
-        private void Edit_Click(object sender, RoutedEventArgs e)
+        private async Task SaveNewRecordAsync(SoloParentRecord record)
+        {
+            record.CreatedBy = CurrentUserName;
+            record.Barangay  = string.IsNullOrEmpty(record.Barangay) ? CurrentUserBarangay : record.Barangay;
+
+            var createReq = SoloParentApiService.Instance.MapToCreateRequest(record);
+            var createResp = await SoloParentApiService.Instance.CreateSoloParentAsync(createReq);
+
+            if (!createResp.Succeeded)
+            {
+                string err = createResp.Errors != null && createResp.Errors.Count > 0
+                    ? string.Join("\n", createResp.Errors)
+                    : "Failed to create record on the server.";
+                MessageBox.Show(err, "Creation Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            record.Id = createResp.Data.ToString();
+            ToastNotification.Show("Record Added", record.Name + " was added successfully.", ToastType.Success);
+            AuditLogService.Instance.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
+            await LoadRecordsAsync();
+        }
+
+        private async void Edit_Click(object sender, RoutedEventArgs e)
         {
             string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
-            SoloParentRecordViewModel vm = _allRecords.Find(r => r.Id == id);
+            SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
             if (vm == null) return;
 
             if (IsBasicUser && !string.Equals(vm.RawModel.CreatedBy ?? string.Empty, CurrentUserName, StringComparison.OrdinalIgnoreCase))
@@ -445,25 +452,81 @@ namespace SOLUM_UI
                 return;
             }
 
+            await EditRecordAsync(vm.RawModel);
+        }
+
+        private async Task EditRecordAsync(SoloParentRecord rawRecord)
+        {
             MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
             if (mainWindow != null)
                 mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
 
-            RecordDialog dialog = new RecordDialog(vm.RawModel) { Owner = Window.GetWindow(this) };
+            SoloParentDto existingDto = null;
+            if (Guid.TryParse(rawRecord.Id, out var id))
+            {
+                var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(id);
+                if (fetch.Succeeded && fetch.Data != null)
+                {
+                    existingDto = fetch.Data;
+                    rawRecord = SoloParentApiService.Instance.MapToRecord(existingDto);
+                }
+            }
+
+            RecordDialog dialog = new RecordDialog(rawRecord) { Owner = Window.GetWindow(this) };
             dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                int idx = _allRecords.FindIndex(r => r.Id == id);
-                if (idx >= 0) _allRecords[idx] = new SoloParentRecordViewModel(dialog.Result);
+                if (Guid.TryParse(rawRecord.Id, out var guid))
+                {
+                    var updateReq = SoloParentApiService.Instance.MapToUpdateRequest(guid, dialog.Result, existingDto);
+                    var updateResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(guid, updateReq);
+                    if (!updateResp.Succeeded)
+                    {
+                        string err = updateResp.Errors != null && updateResp.Errors.Count > 0
+                            ? string.Join("\n", updateResp.Errors)
+                            : "Failed to update record on the server.";
+                        MessageBox.Show(err, "Update Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+
                 ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
                 AuditLogService.Instance.LogUpdate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole,
-                    BuildDiff(vm.RawModel, dialog.Result));
-                ApplyFiltersAndPage();
+                    BuildDiff(rawRecord, dialog.Result));
+                await LoadRecordsAsync();
             }
         }
 
-        private void Delete_Click(object sender, RoutedEventArgs e)
+        private async void Renew_Click(object sender, RoutedEventArgs e)
+        {
+            string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
+            if (!Guid.TryParse(id, out var guid))
+            {
+                MessageBox.Show("Cannot renew record without a valid backend ID.", "Renew", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
+            string recordName = vm != null ? vm.Name : id;
+
+            var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid);
+            if (resp.Succeeded)
+            {
+                ToastNotification.Show("Record Renewed", recordName + " validity extended for 1 year.", ToastType.Success);
+                AuditLogService.Instance.LogUpdate(id, recordName, GetCurrentUser(), CurrentUserRole, "Validity extended for 1 year");
+                await LoadRecordsAsync();
+            }
+            else
+            {
+                string err = resp.Errors != null && resp.Errors.Count > 0
+                    ? string.Join("\n", resp.Errors)
+                    : "Failed to renew record.";
+                MessageBox.Show(err, "Renew Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private async void Delete_Click(object sender, RoutedEventArgs e)
         {
             if (IsBasicUser)
             {
@@ -472,24 +535,36 @@ namespace SOLUM_UI
             }
 
             string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
-            SoloParentRecordViewModel vm = _allRecords.Find(r => r.Id == id);
+            SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
             string recordName = vm != null ? vm.Name : id;
 
             MessageBoxResult confirm = MessageBox.Show(
-                "Delete record " + id + "?", "Confirm Delete",
+                "Delete record " + recordName + "?", "Confirm Delete",
                 MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (confirm != MessageBoxResult.Yes) return;
 
-            _allRecords.RemoveAll(r => r.Id == id);
+            if (Guid.TryParse(id, out var guid))
+            {
+                var deleteResp = await SoloParentApiService.Instance.DeleteSoloParentAsync(guid);
+                if (!deleteResp.Succeeded)
+                {
+                    string err = deleteResp.Errors != null && deleteResp.Errors.Count > 0
+                        ? string.Join("\n", deleteResp.Errors)
+                        : "Failed to delete record from server.";
+                    MessageBox.Show(err, "Delete Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+            }
+
             ToastNotification.Show("Record Deleted", "The record was removed.", ToastType.Warning);
             AuditLogService.Instance.LogDelete(id, recordName, GetCurrentUser(), CurrentUserRole);
-            ApplyFiltersAndPage();
+            await LoadRecordsAsync();
         }
 
         private void ExportRecord_Click(object sender, RoutedEventArgs e)
         {
             string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
-            SoloParentRecordViewModel vm = _allRecords.Find(r => r.Id == id);
+            SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
             if (vm == null) return;
 
             var dlg = new Microsoft.Win32.SaveFileDialog
@@ -542,7 +617,7 @@ namespace SOLUM_UI
                 const double lastUpd    = 112;
                 const double validUntil = 110;
                 const double status     = 96;
-                const double actions    = 76;
+                const double actions    = 104;
 
                 double available = RecordsList.ActualWidth - 2;
                 if (available <= 0) return;
@@ -568,7 +643,7 @@ namespace SOLUM_UI
             ApplyFiltersAndPage();
         }
 
-        private void BasicUserAddRecord_Click(object sender, RoutedEventArgs e)
+        private async void BasicUserAddRecord_Click(object sender, RoutedEventArgs e)
         {
             MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
             if (mainWindow != null)
@@ -590,14 +665,7 @@ namespace SOLUM_UI
                 
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
-                    ocr.Result.CreatedBy = CurrentUserName;
-                    ocr.Result.Barangay  = string.IsNullOrEmpty(ocr.Result.Barangay)
-                        ? CurrentUserBarangay : ocr.Result.Barangay;
-
-                    _allRecords.Add(new SoloParentRecordViewModel(ocr.Result));
-                    ToastNotification.Show("Record Added", ocr.Result.Name + " was added successfully.", ToastType.Success);
-                    AuditLogService.Instance.LogCreate(ocr.Result.Id, ocr.Result.Name, GetCurrentUser(), CurrentUserRole);
-                    ApplyFiltersAndPage();
+                    await SaveNewRecordAsync(ocr.Result);
                 }
                 return;
             }
@@ -607,14 +675,7 @@ namespace SOLUM_UI
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                dialog.Result.CreatedBy = CurrentUserName;
-                dialog.Result.Barangay  = string.IsNullOrEmpty(dialog.Result.Barangay)
-                    ? CurrentUserBarangay : dialog.Result.Barangay;
-
-                _allRecords.Add(new SoloParentRecordViewModel(dialog.Result));
-                ToastNotification.Show("Record Added", dialog.Result.Name + " was added successfully.", ToastType.Success);
-                AuditLogService.Instance.LogCreate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole);
-                ApplyFiltersAndPage();
+                await SaveNewRecordAsync(dialog.Result);
             }
         }
 

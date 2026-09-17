@@ -98,12 +98,33 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="8"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="TxtSpId" Grid.Column="0"
                                        FontSize="12" Foreground="#A06080"
                                        FontFamily="Segoe UI" VerticalAlignment="Center"
                                        FontWeight="SemiBold"/>
-                            <Button x:Name="BtnEdit" Grid.Column="1" Height="38" Padding="22,0"
+                            <Button x:Name="BtnRenew" Grid.Column="1" Height="38" Padding="20,0"
+                                    Cursor="Hand" Click="Renew_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="#E6F9EE" CornerRadius="8"
+                                                BorderBrush="#A3E4D7" BorderThickness="1"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="Background" Value="#D4EFDF"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Text="Renew Record" FontSize="13" FontWeight="SemiBold"
+                                           Foreground="#27AE60" FontFamily="Segoe UI"/>
+                            </Button>
+                            <Button x:Name="BtnEdit" Grid.Column="3" Height="38" Padding="22,0"
                                     Cursor="Hand" Click="Edit_Click">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
@@ -122,7 +143,7 @@
                                 <TextBlock Text="Edit Record" FontSize="13" FontWeight="SemiBold"
                                            Foreground="#702943" FontFamily="Segoe UI"/>
                             </Button>
-                            <Button Grid.Column="3" Height="38" Padding="22,0"
+                            <Button Grid.Column="5" Height="38" Padding="22,0"
                                     Cursor="Hand" Click="Close_Click">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">

@@ -185,7 +185,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="24"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0" Margin="24,20,24,0">
@@ -370,9 +370,9 @@
                                 <StackPanel Grid.Column="4" Orientation="Horizontal"
                                             HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Button Width="28" Height="28" BorderThickness="0"
-                                            Background="Transparent" Cursor="Hand"
-                                            Tag="{Binding Email}" Click="EditUser_Click" Margin="0,0,2,0"
-                                            ToolTip="Edit">
+                                        Background="Transparent" Cursor="Hand"
+                                        Tag="{Binding Id}" Click="EditUser_Click" Margin="0,0,2,0"
+                                        ToolTip="Edit">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
                                                 <Border x:Name="Bg" Background="Transparent" CornerRadius="6" Padding="5">
@@ -389,9 +389,9 @@
                                               Fill="#702943" Stretch="Uniform" Width="13" Height="13"/>
                                     </Button>
                                     <Button Width="28" Height="28" BorderThickness="0"
-                                            Background="Transparent" Cursor="Hand"
-                                            Tag="{Binding Email}" Click="DeleteUser_Click"
-                                            ToolTip="Delete">
+                                        Background="Transparent" Cursor="Hand"
+                                        Tag="{Binding Id}" Click="DeleteUser_Click"
+                                        ToolTip="Delete">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
                                                 <Border x:Name="Bg" Background="Transparent" CornerRadius="6" Padding="5">
@@ -413,6 +413,54 @@
                     </ListView.ItemTemplate>
                 </ListView>
             </Border>
+
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center"
+            Margin="24,10,24,14">
+                <Button x:Name="BtnPrevPage" Content="Previous" Width="90" Height="32"
+            Cursor="Hand" Click="BtnPrevPage_Click" Margin="0,0,12,0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bg" Background="White" CornerRadius="8"
+                        BorderBrush="#D0D0D0" BorderThickness="1">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Bg" Property="Background" Value="#FAFAFA"/>
+                                    <Setter Property="Foreground" Value="#CCCCCC"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <TextBlock x:Name="TxtPageInfo" Text="Page 1 of 1" FontSize="12"
+               Foreground="#555555" VerticalAlignment="Center" Margin="0,0,12,0"/>
+
+                <Button x:Name="BtnNextPage" Content="Next" Width="90" Height="32"
+            Cursor="Hand" Click="BtnNextPage_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bg" Background="White" CornerRadius="8"
+                        BorderBrush="#D0D0D0" BorderThickness="1">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Bg" Property="Background" Value="#FAFAFA"/>
+                                    <Setter Property="Foreground" Value="#CCCCCC"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <Border x:Name="AddUserPanel" Grid.Column="1" Background="White" BorderBrush="#E2E8F0"
