@@ -721,7 +721,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColName" Header="NAME" Width="160">
+                            <GridViewColumn x:Name="ColName" Header="NAME" Width="200">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -731,7 +731,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="120">
+                            <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="145">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -741,7 +741,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColSex" Header="SEX" Width="90">
+                            <GridViewColumn x:Name="ColSex" Header="SEX" Width="70">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -771,7 +771,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColLastUpdated" Header="LAST UPDATED" Width="112">
+                            <GridViewColumn x:Name="ColLastUpdated" Header="LAST UPDATED" Width="120">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -791,7 +791,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="96">
+                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="90">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -808,7 +808,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="104">
+                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="140">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal"
