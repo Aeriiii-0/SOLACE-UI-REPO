@@ -731,7 +731,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="100">
+                            <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="90">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -808,7 +808,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="220">
+                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="230">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal"
