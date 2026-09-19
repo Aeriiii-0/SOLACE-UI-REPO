@@ -65,7 +65,7 @@ namespace SOLUM_UI
                 if (ColChildren    != null) ColChildren.Width    = 0;
                 if (ColLastUpdated != null) ColLastUpdated.Width = 0;
                 if (ColBarangay    != null) ColBarangay.Width    = 0;
-                if (ColActions     != null) ColActions.Width     = 104;
+                if (ColActions     != null) ColActions.Width     = 245;
             }
             else if (IsEncoder)
             {
@@ -73,7 +73,7 @@ namespace SOLUM_UI
                 BasicUserToolbar.Visibility   = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Visible;
                 PagingRow.Visibility          = Visibility.Visible;
-                if (ColActions != null) ColActions.Width = 104;
+                if (ColActions != null) ColActions.Width = 245;
             }
             else
             {
@@ -81,7 +81,7 @@ namespace SOLUM_UI
                 BasicUserToolbar.Visibility   = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Collapsed;
                 PagingRow.Visibility          = Visibility.Visible;
-                if (ColActions != null) ColActions.Width = 104;
+                if (ColActions != null) ColActions.Width = 245;
             }
         }
 
