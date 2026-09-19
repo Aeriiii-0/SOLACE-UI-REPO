@@ -118,6 +118,10 @@ namespace SOLUM_UI.Models
         public string NeedsAndProblems  { get; set; }
         public string OtherIncomeSource { get; set; }
 
+        public bool   IsPantawidBeneficiary { get; set; }
+        public bool   IsIndigenousPerson    { get; set; }
+        public bool   IsLGBTQ               { get; set; }
+
         // helper
         public string LastUpdatedFormatted => LastUpdated != DateTime.MinValue ? LastUpdated.ToString("yyyy-MM-dd") : "—";
         public string DateOfBirthFormatted => DateOfBirth != DateTime.MinValue ? DateOfBirth.ToString("yyyy-MM-dd") : "—";

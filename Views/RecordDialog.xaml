@@ -1059,6 +1059,20 @@
                                     </StackPanel>
                                 </Border>
 
+                                <Border Style="{StaticResource CardSection}">
+                                    <StackPanel>
+                                        <Border Style="{StaticResource CardSectionHeader}">
+                                            <TextBlock Text="VII. ADDITIONAL CLASSIFICATIONS" Style="{StaticResource SectionLabel}"/>
+                                        </Border>
+                                        <CheckBox x:Name="ChkPantawid" Content="Pantawid Beneficiary"
+                                                  FontSize="13" Foreground="#333333" Margin="0,8,0,10"/>
+                                        <CheckBox x:Name="ChkIndigenous" Content="Indigenous Person"
+                                                  FontSize="13" Foreground="#333333" Margin="0,0,0,10"/>
+                                        <CheckBox x:Name="ChkLGBTQ" Content="LGBTQ+"
+                                                  FontSize="13" Foreground="#333333" Margin="0,0,0,8"/>
+                                    </StackPanel>
+                                </Border>
+
                             </StackPanel>
                         </ScrollViewer>
 
