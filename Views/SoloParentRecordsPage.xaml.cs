@@ -65,7 +65,7 @@ namespace SOLUM_UI
                 if (ColChildren    != null) ColChildren.Width    = 0;
                 if (ColLastUpdated != null) ColLastUpdated.Width = 0;
                 if (ColBarangay    != null) ColBarangay.Width    = 0;
-                if (ColActions     != null) ColActions.Width     = 245;
+                if (ColActions     != null) ColActions.Width     = 300;
             }
             else if (IsEncoder)
             {
@@ -73,7 +73,6 @@ namespace SOLUM_UI
                 BasicUserToolbar.Visibility   = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Visible;
                 PagingRow.Visibility          = Visibility.Visible;
-                if (ColActions != null) ColActions.Width = 245;
             }
             else
             {
@@ -81,7 +80,6 @@ namespace SOLUM_UI
                 BasicUserToolbar.Visibility   = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Collapsed;
                 PagingRow.Visibility          = Visibility.Visible;
-                if (ColActions != null) ColActions.Width = 245;
             }
         }
 
@@ -569,39 +567,24 @@ namespace SOLUM_UI
 
             var dlg = new Microsoft.Win32.SaveFileDialog
             {
-                FileName = vm.Id + "_" + (vm.Surname ?? "record"),
-                DefaultExt = ".csv",
-                Filter = "CSV file (*.csv)|*.csv"
+                FileName = (vm.Id ?? "record") + "_" + (vm.Surname ?? "export"),
+                DefaultExt = ".pdf",
+                Filter = "PDF file (*.pdf)|*.pdf"
             };
 
             if (dlg.ShowDialog() != true) return;
 
-            var rec = vm.RawModel;
-            var lines = new System.Text.StringBuilder();
-            lines.AppendLine("Field,Value");
-            lines.AppendLine("ID," + rec.Id);
-            lines.AppendLine("Surname," + rec.Surname);
-            lines.AppendLine("First Name," + rec.FirstName);
-            lines.AppendLine("Middle Name," + rec.MiddleName);
-            lines.AppendLine("Extension," + rec.ExtensionName);
-            lines.AppendLine("Date of Birth," + rec.DateOfBirthFormatted);
-            lines.AppendLine("Place of Birth," + rec.PlaceOfBirth);
-            lines.AppendLine("Sex," + rec.Sex);
-            lines.AppendLine("Civil Status," + rec.CivilStatus);
-            lines.AppendLine("Citizenship," + rec.Citizenship);
-            lines.AppendLine("Blood Type," + rec.BloodType);
-            lines.AppendLine("Height," + rec.Height);
-            lines.AppendLine("Weight," + rec.Weight);
-            lines.AppendLine("Address," + rec.Address);
-            lines.AppendLine("Barangay," + rec.Barangay);
-            lines.AppendLine("Contact Number," + rec.ContactNumber);
-            lines.AppendLine("Children," + rec.Children);
-            lines.AppendLine("Status," + rec.Status);
-            lines.AppendLine("Last Updated," + rec.LastUpdatedFormatted);
-
-            System.IO.File.WriteAllText(dlg.FileName, lines.ToString());
-            MessageBox.Show("Record exported to:\n" + dlg.FileName, "Export Complete",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                SOLUM_UI.Services.SoloParentExportService.ExportToPdf(dlg.FileName, vm.RawModel);
+                MessageBox.Show("Record exported to:\n" + dlg.FileName, "Export Complete",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Export failed:\n" + ex.Message, "Export Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Page_SizeChanged(object sender, SizeChangedEventArgs e) => ResizeNameColumn();
@@ -610,14 +593,14 @@ namespace SOLUM_UI
         {
             if (RecordsList.View is GridView gv && gv.Columns.Count >= 10)
             {
-                const double id         = 72;
+                const double id         = 152;
                 const double sex        = 90;
                 const double civil      = 120;
                 const double dob        = 110;
                 const double lastUpd    = 112;
                 const double validUntil = 110;
                 const double status     = 96;
-                const double actions    = 104;
+                const double actions    = 149;
 
                 double available = RecordsList.ActualWidth - 2;
                 if (available <= 0) return;
@@ -626,8 +609,8 @@ namespace SOLUM_UI
                 double flex = Math.Max(200, available - totalFixed);
 
                 gv.Columns[0].Width = id;
-                gv.Columns[1].Width = flex * 0.54;
-                gv.Columns[2].Width = flex * 0.46;
+                gv.Columns[1].Width = Math.Max(60, flex * 0.54 + 20);
+                gv.Columns[2].Width = Math.Max(40, flex * 0.46 - 20);
                 gv.Columns[3].Width = sex;
                 gv.Columns[4].Width = civil;
                 gv.Columns[5].Width = dob;
