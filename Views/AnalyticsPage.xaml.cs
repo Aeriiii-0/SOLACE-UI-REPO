@@ -1,242 +1,281 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using SOLUM_UI.Models;
+using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
+using SOLUM_UI.Services.Api;
 
 namespace SOLUM_UI
 {
     public partial class AnalyticsPage : Page
     {
-        private int? _filterYear  = null;
-        private int? _filterMonth = null;
-        private string _currentPeriod = "All time";
+        private int _filterYear;
+        private int _filterMonth;
+        private string _filterBarangay = "ALL";
+        private string _currentPeriod = "";
+        private MonthlyAnalyticsDto _current;
 
-        private readonly List<SoloParentRecord> _records = new List<SoloParentRecord>
+        private readonly Dictionary<(int year, int month, string barangay), MonthlyAnalyticsDto> _cache = new Dictionary<(int, int, string), MonthlyAnalyticsDto>();
+
+
+        private static readonly (string key, string label)[] AgeBracketOrder =
         {
-            new SoloParentRecord { Id="SP-001", Name="Santos, Maria Lim",             Sex="Female", CivilStatus="Single",    Barangay="Biñan Poblacion", Children=2, Status="Valid",    IsEmployed=true,  MonthlyIncome="below minimum wage", DateOfBirth=new DateTime(1990,3,15), CircumstanceA7=true,  IsNewApplicant=true,  LastUpdated=new DateTime(2025,3,15) },
-            new SoloParentRecord { Id="SP-002", Name="Dela Cruz, Juan Reyes Jr.",     Sex="Male",   CivilStatus="Widowed",   Barangay="Malaban",         Children=3, Status="Valid",    IsSelfEmployed=true, MonthlyIncome="below minimum wage", DateOfBirth=new DateTime(1985,1,10), CircumstanceA2=true,  IsNewApplicant=true,  LastUpdated=new DateTime(2025,3,12) },
-            new SoloParentRecord { Id="SP-003", Name="Reyes, Ana Mendoza",            Sex="Female", CivilStatus="Separated", Barangay="Canlalay",        Children=1, Status="Inactive", IsSelfEmployed=true, MonthlyIncome="below minimum wage", DateOfBirth=new DateTime(1993,6,20), CircumstanceA7=true,  IsRenewal=true,       LastUpdated=new DateTime(2025,3,14) },
-            new SoloParentRecord { Id="SP-004", Name="Garcia, Pedro Torres III",      Sex="Male",   CivilStatus="Single",    Barangay="San Antonio",     Children=2, Status="Valid",    IsEmployed=true,  MonthlyIncome="Minimum wage +1 to Php 20833", DateOfBirth=new DateTime(1988,9,5),  CircumstanceC=true,   IsRenewal=true,       LastUpdated=new DateTime(2025,3,9)  },
-            new SoloParentRecord { Id="SP-005", Name="Martinez, Rosa Cruz",           Sex="Female", CivilStatus="Widowed",   Barangay="Platero",         Children=4, Status="Inactive", IsNotEmployed=true, MonthlyIncome="below minimum wage", DateOfBirth=new DateTime(1978,11,2), CircumstanceA2=true,  IsNewApplicant=true,  LastUpdated=new DateTime(2025,3,28) },
-            new SoloParentRecord { Id="SP-006", Name="Lim, Cynthia Tan",              Sex="Female", CivilStatus="Separated", Barangay="Loma",            Children=2, Status="Valid",    IsEmployed=true,  MonthlyIncome="Minimum wage +1 to Php 20833", DateOfBirth=new DateTime(1995,4,14), CircumstanceA7=true,  IsRenewal=true,       LastUpdated=new DateTime(2025,4,1)  },
-            new SoloParentRecord { Id="SP-007", Name="Bautista, Carlos Ocampo",       Sex="Male",   CivilStatus="Widowed",   Barangay="Tubigan",         Children=3, Status="Valid",    IsSelfEmployed=true, MonthlyIncome="below minimum wage", DateOfBirth=new DateTime(1982,7,22), CircumstanceA2=true,  IsRenewal=true,       LastUpdated=new DateTime(2025,4,5)  },
-            new SoloParentRecord { Id="SP-008", Name="Mendoza, Elena Flores",         Sex="Female", CivilStatus="Single",    Barangay="De La Paz",       Children=1, Status="Inactive", IsNotEmployed=true, MonthlyIncome="below minimum wage", DateOfBirth=new DateTime(2005,8,18), CircumstanceC=true,   IsNewApplicant=true,  LastUpdated=new DateTime(2025,4,10) },
-            new SoloParentRecord { Id="SP-009", Name="Torres, Benjamin Ramos",        Sex="Male",   CivilStatus="Separated", Barangay="Casile",          Children=2, Status="Inactive", IsEmployed=true,  MonthlyIncome="Php 20834 and above",  DateOfBirth=new DateTime(1991,12,3), CircumstanceA5=true,  IsRenewal=true,       LastUpdated=new DateTime(2025,4,12) },
-            new SoloParentRecord { Id="SP-010", Name="Navarro, Josephine Aquino",     Sex="Female", CivilStatus="Widowed",   Barangay="San Jose",        Children=3, Status="Valid",    IsEmployed=true,  MonthlyIncome="below minimum wage", DateOfBirth=new DateTime(1987,5,7),  CircumstanceA2=true,  IsRenewal=true,       LastUpdated=new DateTime(2025,4,15) },
-            new SoloParentRecord { Id="SP-011", Name="Hernandez, Roberto Diaz",       Sex="Male",   CivilStatus="Annulled",  Barangay="Langkiwa",        Children=4, Status="Valid",    IsEmployed=true,  MonthlyIncome="Php 20834 and above",  DateOfBirth=new DateTime(1980,2,28), CircumstanceA6=true,  IsRenewal=true,       LastUpdated=new DateTime(2025,4,18) },
-            new SoloParentRecord { Id="SP-012", Name="Castillo, Patricia Villanueva", Sex="Female", CivilStatus="Single",    Barangay="Malamig",         Children=1, Status="Inactive", IsSelfEmployed=true, MonthlyIncome="below minimum wage", DateOfBirth=new DateTime(1997,10,11),CircumstanceC=true,   IsNewApplicant=true,  LastUpdated=new DateTime(2025,4,20) },
+            ("19_AND_BELOW", "19 & below"),
+            ("20_39",        "20 – 39"),
+            ("40_59",        "40 – 59"),
+            ("60_AND_ABOVE", "60 and above"),
+        };
+
+        private static readonly (string key, string label)[] IncomeBracketOrder =
+        {
+            ("BELOW_MINIMUM_WAGE",          "Below Min. Wage"),
+            ("MINIMUM_WAGE_PLUS1_TO_20833", "Min.+1 – ₱20,833"),
+            ("20834_AND_ABOVE",             "₱20,834 and above"),
+        };
+
+        private static readonly (string key, string label)[] DependentsAgeBracketOrder =
+        {
+            ("6_AND_BELOW",  "6 & below"),
+            ("7_22",         "7 – 22"),
+            ("22_AND_ABOVE", "22 and above"),
+        };
+
+        private static readonly (string key, string label)[] EmploymentStatusOrder =
+        {
+            ("employed",      "Employed"),
+            ("self_employed", "Self-Employed"),
+            ("not_employed",  "Not Employed"),
+        };
+
+        private static readonly (string key, string label)[] CivilStatusOrder =
+        {
+            ("Single",    "Single"),
+            ("Married",   "Married"),
+            ("Widowed",   "Widowed"),
+            ("Separated", "Sep./Annul."),
+            ("Annulled",  "Sep./Annul."),
+        };
+
+        private static readonly (string key, string label)[] CategoryOrder =
+        {
+            ("A1", "a1. Consequence of rape"),
+            ("A2", "a2. Widow/widower"),
+            ("A3", "a3. Spouse of PDL"),
+            ("A4", "a4. Spouse of PWD"),
+            ("A5", "a5. Separated/de facto"),
+            ("A6", "a6. Annulled"),
+            ("A7", "a7. Abandoned"),
+            ("B",  "b. Spouse/Relative of OFW"),
+            ("C",  "c. Unmarried person"),
+            ("D",  "d. Guardian/Adoptive/Foster"),
+            ("E",  "e. Relative"),
+            ("F",  "f. Pregnant woman"),
         };
 
         public AnalyticsPage()
         {
             InitializeComponent();
-            Loaded += (s, e) =>
+            Loaded += async (s, e) =>
             {
+                _filterYear = DateTime.Today.Year;
+                _filterMonth = DateTime.Today.Month;
                 PopulateFilterDropdowns();
-                BuildAnalytics();
-                BarangayCanvas.SizeChanged += (ss, ee) => DrawBarangayChart(GetFiltered());
+                await LoadAndBuildAnalyticsAsync();
+
+              
             };
         }
 
+        private async Task<BaseResponse<MonthlyAnalyticsDto>> GetMonthlyAnalyticsCachedAsync(int year, int month, string barangay)
+        {
+            var key = (year, month, barangay ?? "ALL");
+
+            if (_cache.TryGetValue(key, out var cached))
+            {
+                return new BaseResponse<MonthlyAnalyticsDto> { Succeeded = true, Data = cached };
+            }
+
+            var response = await AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(year, month, barangay);
+
+            if (response.Succeeded && response.Data != null)
+            {
+                _cache[key] = response.Data;
+            }
+
+            return response;
+        }
+
+        private static readonly string[] Barangays =
+            {
+                "Biñan", "Bungahan", "Canlalay", "Casile", "De La Paz", "Ganado",
+                "Langkiwa", "Loma", "Malaban", "Malamig", "Mamplasan", "Platero",
+                "Poblacion", "San Antonio", "San Francisco", "San Jose", "San Vicente",
+                "Santo Domingo", "Santo Niño", "Santo Tomas", "Soro-Soro", "Timbao",
+                "Tubigan", "Zapote"
+            };
+
         private void PopulateFilterDropdowns()
         {
-            var years = _records.Select(r => r.LastUpdated.Year).Distinct().OrderByDescending(y => y).ToList();
             CmbFilterYear.Items.Clear();
-            CmbFilterYear.Items.Add(new ComboBoxItem { Content = "All Years", Tag = null });
-            foreach (var y in years)
+            int thisYear = DateTime.Today.Year;
+            for (int y = thisYear; y >= thisYear - 4; y--)
                 CmbFilterYear.Items.Add(new ComboBoxItem { Content = y.ToString(), Tag = y });
-            CmbFilterYear.SelectedIndex = 0;
+            CmbFilterYear.SelectedItem = CmbFilterYear.Items
+                .Cast<ComboBoxItem>().FirstOrDefault(i => (int)i.Tag == _filterYear);
 
             CmbFilterMonth.Items.Clear();
-            CmbFilterMonth.Items.Add(new ComboBoxItem { Content = "All Months", Tag = null });
             for (int m = 1; m <= 12; m++)
                 CmbFilterMonth.Items.Add(new ComboBoxItem { Content = new DateTime(2000, m, 1).ToString("MMMM"), Tag = m });
-            CmbFilterMonth.SelectedIndex = 0;
+            CmbFilterMonth.SelectedItem = CmbFilterMonth.Items
+                .Cast<ComboBoxItem>().FirstOrDefault(i => (int)i.Tag == _filterMonth);
+
+            CmbFilterBarangay.Items.Clear();
+            CmbFilterBarangay.Items.Add(new ComboBoxItem { Content = "All Barangays", Tag = "ALL" });
+            foreach (var b in Barangays)
+                CmbFilterBarangay.Items.Add(new ComboBoxItem { Content = b, Tag = b });
+            CmbFilterBarangay.SelectedItem = CmbFilterBarangay.Items
+                .Cast<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == _filterBarangay);
         }
 
         private void FilterDrop_Click(object sender, RoutedEventArgs e) => FilterPopup.IsOpen = true;
 
-        private void FilterApply_Click(object sender, RoutedEventArgs e)
+        private async void FilterApply_Click(object sender, RoutedEventArgs e)
         {
-            _filterYear  = (CmbFilterYear.SelectedItem  as ComboBoxItem)?.Tag as int?;
-            _filterMonth = (CmbFilterMonth.SelectedItem as ComboBoxItem)?.Tag as int?;
+            _filterYear = (int)((CmbFilterYear.SelectedItem as ComboBoxItem)?.Tag ?? DateTime.Today.Year);
+            _filterMonth = (int)((CmbFilterMonth.SelectedItem as ComboBoxItem)?.Tag ?? DateTime.Today.Month);
+            _filterBarangay = (string)((CmbFilterBarangay.SelectedItem as ComboBoxItem)?.Tag ?? "ALL"); // NEW
             FilterPopup.IsOpen = false;
             UpdateFilterBadge();
-            BuildAnalytics();
+            await LoadAndBuildAnalyticsAsync();
         }
 
-        private void FilterReset_Click(object sender, RoutedEventArgs e)
+        private async void FilterReset_Click(object sender, RoutedEventArgs e)
         {
-            CmbFilterYear.SelectedIndex  = 0;
-            CmbFilterMonth.SelectedIndex = 0;
-            _filterYear  = null;
-            _filterMonth = null;
+            _filterYear = DateTime.Today.Year;
+            _filterMonth = DateTime.Today.Month;
+            _filterBarangay = "ALL";
+            PopulateFilterDropdowns();
             FilterPopup.IsOpen = false;
             UpdateFilterBadge();
-            BuildAnalytics();
+            await LoadAndBuildAnalyticsAsync();
         }
 
         private void UpdateFilterBadge()
         {
-            if (_filterYear == null && _filterMonth == null)
-            {
-                ActiveFilterBadge.Visibility = Visibility.Collapsed;
-                return;
-            }
-            var parts = new List<string>();
-            if (_filterYear  != null) parts.Add(_filterYear.ToString());
-            if (_filterMonth != null) parts.Add(new DateTime(2000, _filterMonth.Value, 1).ToString("MMMM"));
-            TxtActiveFilter.Text         = string.Join(" · ", parts);
+            string period = new DateTime(2000, _filterMonth, 1).ToString("MMMM") + " " + _filterYear;
+            if (_filterBarangay != "ALL") period += " · " + _filterBarangay;
+            TxtActiveFilter.Text = period;
             ActiveFilterBadge.Visibility = Visibility.Visible;
         }
 
-        private List<SoloParentRecord> GetFiltered()
+
+        private async Task LoadAndBuildAnalyticsAsync()
         {
-            return _records.Where(r =>
-                (_filterYear  == null || r.LastUpdated.Year  == _filterYear.Value) &&
-                (_filterMonth == null || r.LastUpdated.Month == _filterMonth.Value)
-            ).ToList();
+            var response = await GetMonthlyAnalyticsCachedAsync(_filterYear, _filterMonth, _filterBarangay); 
+
+            if (!response.Succeeded || response.Data == null)
+            {
+                string err = response.Errors != null && response.Errors.Count > 0
+                    ? string.Join("\n", response.Errors)
+                    : "Unable to load analytics for this period.";
+                ToastNotification.Show("Load Failed", err, ToastType.Warning);
+                return;
+            }
+
+            _current = response.Data;
+            BuildAnalytics(_current);
         }
 
-        private int age(SoloParentRecord r) =>
-            r.DateOfBirth != DateTime.MinValue
-                ? (int)((DateTime.Today - r.DateOfBirth).TotalDays / 365.25)
-                : 0;
-
-        private void BuildAnalytics()
+        private void BuildAnalytics(MonthlyAnalyticsDto d)
         {
-            var d = GetFiltered();
-            int total = d.Count;
+            string period = new DateTime(2000, d.Month, 1).ToString("MMMM") + " " + d.Year;
+            TxtTotalRecords.Text = d.TotalSoloParents.ToString();
+            TxtPeriodLabel.Text = period;
+            _currentPeriod = period;
+            TxtLastRefresh.Text = "Updated " + DateTime.Now.ToString("MMM d, h:mm tt");
 
-            string period = _filterYear == null && _filterMonth == null ? "All time"
-                : _filterYear != null && _filterMonth != null
-                    ? new DateTime(2000, _filterMonth.Value, 1).ToString("MMMM") + " " + _filterYear
-                : _filterYear != null ? _filterYear.ToString()
-                : new DateTime(2000, _filterMonth.Value, 1).ToString("MMMM");
-
-            TxtTotalRecords.Text = total.ToString();
-            TxtPeriodLabel.Text  = period;
-            _currentPeriod       = period;
-            TxtLastRefresh.Text  = "Updated " + DateTime.Now.ToString("MMM d, h:mm tt");
-
-            int valid    = d.Count(r => r.Status == "Valid");
-            int inactive = d.Count(r => r.Status == "Inactive");
-            TxtValidRecords.Text   = valid.ToString();
-            TxtValidRate.Text      = total > 0 ? Math.Round(valid    * 100.0 / total, 0) + "% of total" : "—";
-            TxtInactiveRecords.Text = inactive.ToString();
-            TxtInactiveRate.Text    = total > 0 ? Math.Round(inactive * 100.0 / total, 0) + "% of total" : "—";
-
-            int newApplicants = d.Count(r => r.IsNewApplicant);
-            int renewals      = d.Count(r => r.IsRenewal);
-            TxtNewSpic.Text     = newApplicants.ToString();
-            TxtRenewedSpic.Text = renewals.ToString();
-
-            // for showing gender analytics
-            int female = d.Count(r => r.Sex == "Female");
-            int male   = d.Count(r => r.Sex == "Male");
+            int female = d.Sex.TryGetValue("Female", out var f) ? f : 0;
+            int male = d.Sex.TryGetValue("Male", out var m) ? m : 0;
             TxtFemaleCircle.Text = female.ToString();
-            TxtMaleCircle.Text   = male.ToString();
+            TxtMaleCircle.Text = male.ToString();
 
-            int totKids = d.Sum(r => r.Children);
+            int totKids = d.DependentsAgeBrackets.Values.Sum();
             TxtTotalChildren.Text = totKids.ToString();
-            TxtAvgChildren.Text   = total > 0 ? Math.Round((double)totKids / total, 1).ToString("0.0") + " avg." : "—";
+            TxtAvgChildren.Text = d.TotalSoloParents > 0
+                ? Math.Round((double)totKids / d.TotalSoloParents, 1).ToString("0.0") + " avg."
+                : "—";
 
-            bindHorizBars(AgeChart, new[]
-            {
-                ("19 & below",   d.Count(r => age(r) <= 19)),
-                ("20 – 39",      d.Count(r => age(r) >= 20 && age(r) <= 39)),
-                ("40 – 59",      d.Count(r => age(r) >= 40 && age(r) <= 59)),
-                ("60 and above", d.Count(r => age(r) >= 60)),
-            }, "#702943");
+            bindBucketedBars(AgeChart, d.AgeBrackets, AgeBracketOrder, "#702943");
+            bindBucketedBars(CivilStatusChart, d.CivilStatus, CivilStatusOrder, "#9B3060");
+            bindBucketedBars(EmploymentChart, d.EmploymentStatus, EmploymentStatusOrder, "#C4788E");
+            bindBucketedBars(IncomeChart, d.MonthlyIncomeBrackets, IncomeBracketOrder, "#702943");
+            bindBucketedBars(DependantsAgeChart, d.DependentsAgeBrackets, DependentsAgeBracketOrder, "#F57F17");
 
-            bindHorizBars(CivilStatusChart, new[]
-            {
-                ("Single",      d.Count(r => r.CivilStatus == "Single")),
-                ("Married",     d.Count(r => r.CivilStatus == "Married")),
-                ("Widowed",     d.Count(r => r.CivilStatus == "Widowed")),
-                ("Sep./Annul.", d.Count(r => r.CivilStatus == "Separated" || r.CivilStatus == "Annulled")),
-            }, "#9B3060");
+            var catRows = BuildBucketedRows(d.Categories, CategoryOrder, "#702943");
+            int half = (catRows.Count + 1) / 2;
+            CategoryChartLeft.ItemsSource = catRows.Take(half).ToList();
+            CategoryChartRight.ItemsSource = catRows.Skip(half).ToList();
 
-            bindHorizBars(EmploymentChart, new[]
-            {
-                ("Employed",     d.Count(r => r.IsEmployed)),
-                ("Self-Employed",d.Count(r => r.IsSelfEmployed)),
-                ("Not Employed", d.Count(r => r.IsNotEmployed)),
-            }, "#C4788E");
-
-            bindHorizBars(IncomeChart, new[]
-            {
-                ("Below Min. Wage",    d.Count(r => r.MonthlyIncome == "below minimum wage")),
-                ("Min.+1 – ₱20,833",  d.Count(r => r.MonthlyIncome == "Minimum wage +1 to Php 20833")),
-                ("₱20,834 and above", d.Count(r => r.MonthlyIncome == "Php 20834 and above")),
-            }, "#702943");
-
-            bindHorizBars(DependantsAgeChart, new[]
-            {
-                ("6 & below",      d.Sum(r => r.FamilyMembers.Count(m => { int a = 0; int.TryParse(m.Age, out a); return a <= 6; }))),
-                ("7 – 22",         d.Sum(r => r.FamilyMembers.Count(m => { int a = 0; int.TryParse(m.Age, out a); return a >= 7 && a <= 22; }))),
-                ("22 and above",   d.Sum(r => r.FamilyMembers.Count(m => { int a = 0; int.TryParse(m.Age, out a); return a > 22; }))),
-            }, "#F57F17");
-
-            var catRows = new[]
-            {
-                ("a1. Consequence of rape",               d.Count(r => r.CircumstanceA1)),
-                ("a2. Widow/widower",                     d.Count(r => r.CircumstanceA2)),
-                ("a3. Spouse of PDL",                     d.Count(r => r.CircumstanceA3)),
-                ("a4. Spouse of PWD",                     d.Count(r => r.CircumstanceA4)),
-                ("a5. Separated/de facto",                d.Count(r => r.CircumstanceA5)),
-                ("a6. Annulled",                          d.Count(r => r.CircumstanceA6)),
-                ("a7. Abandoned",                         d.Count(r => r.CircumstanceA7)),
-                ("b. Spouse/Relative of OFW",             d.Count(r => r.CircumstanceB)),
-                ("c. Unmarried person",                   d.Count(r => r.CircumstanceC)),
-                ("d. Guardian/Adoptive/Foster",           d.Count(r => r.CircumstanceD)),
-                ("e. Relative",                           d.Count(r => r.CircumstanceE)),
-                ("f. Pregnant woman",                     d.Count(r => r.CircumstanceF)),
-            };
-            int catTotal = catRows.Sum(x => x.Item2);
-            var color702 = (Color)ColorConverter.ConvertFromString("#702943");
-            var catBrush = new SolidColorBrush(color702);
-            CategoryChartLeft.ItemsSource  = catRows.Take(6).Select(r => new ChartRow { Label = r.Item1, Count = r.Item2, Pct = catTotal > 0 ? Math.Round(r.Item2 * 100.0 / catTotal, 0).ToString("0") + "%" : "—", BarColor = catBrush }).ToList();
-            CategoryChartRight.ItemsSource = catRows.Skip(6).Select(r => new ChartRow { Label = r.Item1, Count = r.Item2, Pct = catTotal > 0 ? Math.Round(r.Item2 * 100.0 / catTotal, 0).ToString("0") + "%" : "—", BarColor = catBrush }).ToList();
-
-            DrawBarangayChart(d);
-
-            var recent = d.OrderByDescending(r => r.LastUpdated).Take(12).ToList();
-            RecentList.ItemsSource = recent.Select(r => new RecentRow
-            {
-                SpId      = r.Id,
-                Name      = r.Name,
-                Barangay  = r.Barangay,
-                DateLabel = r.LastUpdated.ToString("MMM d, yyyy"),
-                Status    = r.Status,
-                StatusBg  = r.Status == "Valid"
-                    ? new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9))
-                    : new SolidColorBrush(Color.FromRgb(0xF2, 0xF2, 0xF2)),
-                StatusFg  = r.Status == "Valid"
-                    ? new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60))
-                    : new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99))
-            }).ToList();
+            // Barangay breakdown chart and recent-records list are left empty —
+            // see the commented-out methods below for the original logic and
+            // what each would need to work again.
+            BarangayCanvas.Children.Clear();
+            BarangayLabels.ItemsSource = null;
+            RecentList.ItemsSource = null;
         }
 
-        private void bindHorizBars(ItemsControl chart, (string label, int count)[] rows, string hexColor)
+        private List<ChartRow> BuildBucketedRows(Dictionary<string, int> data, (string key, string label)[] knownOrder, string hexColor)
         {
-            int total = rows.Sum(r => r.count);
             var color = (Color)ColorConverter.ConvertFromString(hexColor);
-            chart.ItemsSource = rows.Select(r => new ChartRow
+            var brush = new SolidColorBrush(color);
+            int total = data.Values.Sum();
+            var used = new HashSet<string>(knownOrder.Select(k => k.key), StringComparer.OrdinalIgnoreCase);
+
+            var rows = knownOrder.Select(k =>
             {
-                Label    = r.label,
-                Count    = r.count,
-                Pct      = total > 0 ? Math.Round(r.count * 100.0 / total, 0).ToString("0") + "%" : "—",
-                BarColor = new SolidColorBrush(color)
+                int count = data.TryGetValue(k.key, out var c) ? c : 0;
+                return new ChartRow
+                {
+                    Label = k.label,
+                    Count = count,
+                    Pct = total > 0 ? Math.Round(count * 100.0 / total, 0).ToString("0") + "%" : "—",
+                    BarColor = brush
+                };
             }).ToList();
+
+            foreach (var kvp in data)
+            {
+                if (used.Contains(kvp.Key)) continue;
+                rows.Add(new ChartRow
+                {
+                    Label = kvp.Key + " (unmapped)",
+                    Count = kvp.Value,
+                    Pct = total > 0 ? Math.Round(kvp.Value * 100.0 / total, 0).ToString("0") + "%" : "—",
+                    BarColor = brush
+                });
+            }
+
+            return rows;
         }
+
+        private void bindBucketedBars(ItemsControl chart, Dictionary<string, int> data, (string key, string label)[] knownOrder, string hexColor)
+        {
+            chart.ItemsSource = BuildBucketedRows(data, knownOrder, hexColor);
+        }
+
+        /* OLD: per-barangay breakdown chart. Needs a data source that returns counts
+           PER barangay for the period — the current endpoint only returns totals for
+           ONE barangay (or "ALL") at a time, so this can't be fed directly anymore.
+           Either: (a) call GetMonthlyAnalyticsAsync once per known barangay and
+           assemble the bars from d.TotalSoloParents of each response, or (b) get a
+           dedicated "grouped by barangay" endpoint from the backend.
 
         private void DrawBarangayChart(List<SoloParentRecord> data)
         {
@@ -303,37 +342,73 @@ namespace SOLUM_UI
 
             BarangayLabels.ItemsSource = groups.Select(g => new ChartRow { Label = g.Key }).ToList();
         }
+        */
 
-        private void ExportXlsx_Click(object sender, RoutedEventArgs e)
+        
+        private void RecentRecord_Click(object sender, MouseButtonEventArgs e)
+        {
+            ToastNotification.Show("Unavailable", "Recent records aren't available yet.", ToastType.Info);
+        }
+
+        private async void BtnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            _cache.Remove((_filterYear, _filterMonth, _filterBarangay ?? "ALL"));
+            await LoadAndBuildAnalyticsAsync();
+        }
+
+        
+        private async void ExportXlsx_Click(object sender, RoutedEventArgs e)
         {
             var saveDlg = new Microsoft.Win32.SaveFileDialog
             {
-                FileName   = "SoloParents_Summary_" + DateTime.Now.ToString("yyyyMMdd"),
+                FileName = "SoloParents_Quarterly_" + DateTime.Now.ToString("yyyyMMdd"),
                 DefaultExt = ".xlsx",
-                Filter     = "Excel Workbook (*.xlsx)|*.xlsx"
+                Filter = "Excel Workbook (*.xlsx)|*.xlsx"
             };
             if (saveDlg.ShowDialog() != true) return;
+
+            // Derive the quarter from the currently selected month
+            int q = (_filterMonth - 1) / 3 + 1;
+            int startMonth = (q - 1) * 3 + 1;
+            var months = new[] { startMonth, startMonth + 1, startMonth + 2 };
+
+            var results = new List<MonthlyAnalyticsDto>();
+            foreach (var mo in months)
+            {
+                var resp = await GetMonthlyAnalyticsCachedAsync(_filterYear, mo, _filterBarangay);
+                if (!resp.Succeeded || resp.Data == null)
+                {
+                    string err = resp.Errors != null && resp.Errors.Count > 0
+                        ? string.Join("\n", resp.Errors)
+                        : $"Unable to load data for {new DateTime(2000, mo, 1):MMMM} {_filterYear}.";
+                    ToastNotification.Show("Export Failed", err, ToastType.Warning);
+                    return;
+                }
+                results.Add(resp.Data);
+            }
+
+            string periodLabel = new DateTime(2000, months[2], 1).ToString("MMMM").ToUpper() + " " + _filterYear;
 
             var mw = Window.GetWindow(this) as MainWindow;
             if (mw != null) mw.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
 
-            double w = mw?.Width  ?? 1280;
-            double h = mw?.Height ?? 800;
-            double l = mw?.Left   ?? 0;
-            double t = mw?.Top    ?? 0;
-
-            var optsDlg = new ExportOptionsDialog(
-                System.IO.Path.GetFileName(saveDlg.FileName), w, h, l, t)
+            double w = mw?.Width ?? 1280, h = mw?.Height ?? 800, l = mw?.Left ?? 0, t = mw?.Top ?? 0;
+            var optsDlg = new ExportOptionsDialog(System.IO.Path.GetFileName(saveDlg.FileName), w, h, l, t)
             { Owner = mw ?? Window.GetWindow(this) };
             optsDlg.ShowDialog();
 
             if (mw != null) mw.MainContent.Effect = null;
-
             if (!optsDlg.Confirmed) return;
 
             try
             {
-                AnalyticsExportService.Export(saveDlg.FileName, GetFiltered(), _currentPeriod, optsDlg.Password);
+                AnalyticsExportService.ExportQuarterlySummary(
+                    saveDlg.FileName,
+                    results[0], results[1], results[2],
+                    periodLabel,
+                    MainWindow.CurrentUserName,   // NEW — real logged-in user, not a hardcoded name
+                    password: optsDlg.Password);
+
                 ToastNotification.Show("Exported", "Saved to " + System.IO.Path.GetFileName(saveDlg.FileName), ToastType.Success);
                 if (optsDlg.OpenAfter)
                     System.Diagnostics.Process.Start(saveDlg.FileName);
@@ -344,46 +419,14 @@ namespace SOLUM_UI
             }
         }
 
-        private void RecentRecord_Click(object sender, MouseButtonEventArgs e)
-        {
-            string spId = (sender as FrameworkElement)?.Tag?.ToString();
-            if (string.IsNullOrEmpty(spId)) return;
-            var record = _records.FirstOrDefault(r => r.Id == spId);
-            if (record == null) return;
-
-            MainWindow mw = Window.GetWindow(this) as MainWindow;
-            if (mw != null) mw.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
-
-            var view = new RecordViewDialog(record) { Owner = Window.GetWindow(this) };
-            view.Closed += (s, args) => { if (mw != null) mw.MainContent.Effect = null; };
-            view.ShowDialog();
-
-            if (view.OpenedEdit)
-            {
-                if (mw != null) mw.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
-                var dlg = new RecordDialog(record) { Owner = Window.GetWindow(this) };
-                dlg.Closed += (s, args) => { if (mw != null) mw.MainContent.Effect = null; };
-                dlg.ShowDialog();
-            }
-        }
-
         private class ChartRow
         {
-            public string          Label    { get; set; }
-            public int             Count    { get; set; }
-            public string          Pct      { get; set; }
+            public string Label { get; set; }
+            public int Count { get; set; }
+            public string Pct { get; set; }
             public SolidColorBrush BarColor { get; set; }
         }
 
-        private class RecentRow
-        {
-            public string          SpId      { get; set; }
-            public string          Name      { get; set; }
-            public string          Barangay  { get; set; }
-            public string          DateLabel { get; set; }
-            public string          Status    { get; set; }
-            public SolidColorBrush StatusBg  { get; set; }
-            public SolidColorBrush StatusFg  { get; set; }
-        }
+        
     }
 }

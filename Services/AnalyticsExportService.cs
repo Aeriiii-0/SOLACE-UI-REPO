@@ -1,10 +1,11 @@
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using SOLUM_UI.Models;
+using SOLUM_UI.Models.Api;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using OfficeOpenXml;
-using OfficeOpenXml.Style;
-using SOLUM_UI.Models;
 
 namespace SOLUM_UI.Services
 {
@@ -200,12 +201,15 @@ namespace SOLUM_UI.Services
             row++;
         }
 
-        private static void dataRow(ExcelWorksheet ws, ref int row, string label, int count)
+        private static void dataRow(ExcelWorksheet ws, ref int row, string label, int? count)
         {
             ws.Cells[row, 2].Value = label;
             ws.Cells[row, 2].Style.Font.Size = 10;
             ws.Cells[row, 2].Style.Indent = 1;
-            ws.Cells[row, 3].Value = count;
+            if (count.HasValue)
+            {
+                ws.Cells[row, 3].Value = count.Value;
+            }
             ws.Cells[row, 3].Style.Font.Bold = true;
             ws.Cells[row, 3].Style.Font.Size = 10;
             ws.Cells[row, 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
@@ -283,6 +287,211 @@ namespace SOLUM_UI.Services
                               .ToDictionary(g => g.Key, g => g.Count()),
             };
         }
+
+        // NEW — quarterly LGU summary, built from 3 months of MonthlyAnalyticsDto instead of
+        // raw records. Matches your sample file's section list and labels, but NOT its exact
+        // merged-cell layout (the sample merges the section label vertically down column A
+        // across all its rows; this reuses the existing sectionHeader/dataRow helper style
+        // already used elsewhere in this file — same data, slightly different visual layout).
+        public static void ExportQuarterlySummary(
+            string filePath,
+            MonthlyAnalyticsDto m1, MonthlyAnalyticsDto m2, MonthlyAnalyticsDto m3,
+            string periodLabel,          // e.g. "SEPTEMBER 2025" — last month of the quarter, matching sample's "As of ..." line
+            string submittedByName,      // NEW — no hardcoded name; caller must supply, e.g. from logged-in user
+            string cityProvince = "BINAN, LAGUNA",
+            string region = "IV-A",
+            string password = null)
+        {
+            using (var pkg = new ExcelPackage())
+            {
+                buildQuarterlySummarySheet(pkg, m1, m2, m3, periodLabel, submittedByName, cityProvince, region);
+
+                if (!string.IsNullOrEmpty(password))
+                    pkg.SaveAs(new System.IO.FileInfo(filePath), password);
+                else
+                    pkg.SaveAs(new System.IO.FileInfo(filePath));
+            }
+        }
+
+        // Known bucket keys, matching the guesses used in AnalyticsPage's bracket tables.
+        // If those turn out wrong against real data (see the "(unmapped)" warning discussed
+        // earlier), fix them here too — these are intentionally duplicated, not shared,
+        // so the export's column labels stay exact even if the on-screen chart labels evolve.
+        private static readonly (string key, string label)[] QAgeBrackets =
+        {
+    ("19_AND_BELOW", "19 years old and below"),
+    ("20_39",        "20-39 years old"),
+    ("40_59",        "40-59 years old"),
+    ("60_AND_ABOVE", "60 and above"),
+};
+
+        private static readonly (string key, string label)[] QIncomeBrackets =
+        {
+    ("BELOW_MINIMUM_WAGE",          "below minimum wage"),
+    ("MINIMUM_WAGE_PLUS1_TO_20833", "Minimum wage +1 to Php 20833"),
+    ("20834_AND_ABOVE",             "Php 20834 and above"),
+};
+
+        private static readonly (string key, string label)[] QDependentsBrackets =
+        {
+    ("6_AND_BELOW",  "6 years old and below"),
+    ("7_22",         "7 -22 years old"),
+    ("22_AND_ABOVE", "22 years old and above"),
+};
+
+        private static readonly (string key, string label)[] QEmployment =
+        {
+    ("employed",      "Employed (public & private)"),
+    ("self_employed", "Self employed"),
+    ("not_employed",  "Not employed"),
+};
+
+        private static readonly (string key, string label)[] QCivilStatus =
+        {
+    ("Single",  "Single"),
+    ("Married", "Married"),
+    ("Widowed", "Widowed"),
+};
+        // NOTE: sample file combines Separated + Annulled into one row ("Legally Separated /
+        // Annulled"). Handled separately below since it needs two source keys summed together.
+
+        private static readonly (string key, string label)[] QCategories =
+        {
+    ("A1", "a1. Consequence of rape"),
+    ("A2", "a2. Widow/widower"),
+    ("A3", "a3. Spouse of PDL"),
+    ("A4", "a4. Spouse of PWD"),
+    ("A5", "a5. Separated or de facto separated"),
+    ("A6", "a6. Annulled"),
+    ("A7", "a7. Abandoned"),
+    ("B",  "b. Spouse/Relative of OFW"),
+    ("C",  "c. Unmarried person"),
+    ("D",  "d. Legal Guardian, Adoptive or Foster Parent"),
+    ("E",  "e. Relative"),
+    ("F",  "f. Pregnant woman"),
+};
+
+        // Sums one bucket key across the 3 monthly snapshots. Missing keys count as 0.
+        private static int sumBucket(Dictionary<string, int> a, Dictionary<string, int> b, Dictionary<string, int> c, string key)
+        {
+            int v = 0;
+            if (a != null && a.TryGetValue(key, out var av)) v += av;
+            if (b != null && b.TryGetValue(key, out var bv)) v += bv;
+            if (c != null && c.TryGetValue(key, out var cv)) v += cv;
+            return v;
+        }
+
+        private static void buildQuarterlySummarySheet(
+            ExcelPackage pkg,
+            MonthlyAnalyticsDto m1, MonthlyAnalyticsDto m2, MonthlyAnalyticsDto m3,
+            string periodLabel, string submittedByName, string cityProvince, string region)
+        {
+            var ws = pkg.Workbook.Worksheets.Add("LGU Summary");
+
+            var accent = Color.FromArgb(0x70, 0x29, 0x43);
+            var light = Color.FromArgb(0xF0, 0xE8, 0xEC);
+            var grey = Color.FromArgb(0x77, 0x77, 0x77);
+
+            int row = 1;
+
+            ws.Cells[row, 1].Value = "LGU SUMMARY OF SOLO PARENTS";
+            headerStyle(ws.Cells[row, 1, row, 3], accent, Color.White, 13);
+            ws.Row(row).Height = 22;
+            row++;
+
+            ws.Cells[row, 1].Value = "As of " + periodLabel;
+            labelStyle(ws.Cells[row, 1], grey);
+            row += 2;
+
+            infoRow(ws, ref row, "City / Municipality / Province", cityProvince);
+            infoRow(ws, ref row, "Region", region);
+            row++;
+
+            int total = m1.TotalSoloParents + m2.TotalSoloParents + m3.TotalSoloParents;
+            infoRow(ws, ref row, "Number of Solo Parents served", total.ToString());
+            row++;
+
+            sectionHeader(ws, ref row, "Age", accent, light);
+            foreach (var (key, label) in QAgeBrackets)
+                dataRow(ws, ref row, label, sumBucket(m1.AgeBrackets, m2.AgeBrackets, m3.AgeBrackets, key));
+            row++;
+
+            sectionHeader(ws, ref row, "Sex", accent, light);
+            dataRow(ws, ref row, "Male", sumBucket(m1.Sex, m2.Sex, m3.Sex, "Male"));
+            dataRow(ws, ref row, "Female", sumBucket(m1.Sex, m2.Sex, m3.Sex, "Female"));
+            row++;
+
+            sectionHeader(ws, ref row, "Civil Status", accent, light);
+            foreach (var (key, label) in QCivilStatus)
+                dataRow(ws, ref row, label, sumBucket(m1.CivilStatus, m2.CivilStatus, m3.CivilStatus, key));
+            int sepAnnulled = sumBucket(m1.CivilStatus, m2.CivilStatus, m3.CivilStatus, "Separated")
+                             + sumBucket(m1.CivilStatus, m2.CivilStatus, m3.CivilStatus, "Annulled");
+            dataRow(ws, ref row, "Legally Separated / Annulled", sepAnnulled);
+            row++;
+
+            sectionHeader(ws, ref row, "Employment Status", accent, light);
+            foreach (var (key, label) in QEmployment)
+                dataRow(ws, ref row, label, sumBucket(m1.EmploymentStatus, m2.EmploymentStatus, m3.EmploymentStatus, key));
+            row++;
+
+            sectionHeader(ws, ref row, "Monthly Income", accent, light);
+            foreach (var (key, label) in QIncomeBrackets)
+                dataRow(ws, ref row, label, sumBucket(m1.MonthlyIncomeBrackets, m2.MonthlyIncomeBrackets, m3.MonthlyIncomeBrackets, key));
+            row++;
+
+            sectionHeader(ws, ref row, "No. of Children / Dependent", accent, light);
+            foreach (var (key, label) in QDependentsBrackets)
+                dataRow(ws, ref row, label, sumBucket(m1.DependentsAgeBrackets, m2.DependentsAgeBrackets, m3.DependentsAgeBrackets, key));
+            row++;
+
+            sectionHeader(ws, ref row, "Category", accent, light);
+            foreach (var (key, label) in QCategories)
+                dataRow(ws, ref row, label, sumBucket(m1.Categories, m2.Categories, m3.Categories, key));
+            row++;
+
+            // BLANK — not present in MonthlyAnalyticsDto. Left empty (not 0) so this can't be
+            // mistaken for a confirmed zero when the report is reviewed/submitted.
+            sectionHeader(ws, ref row, "Solo Parent Identification Card", accent, light);
+            dataRow(ws, ref row, "Newly issued SPIC", null);
+            dataRow(ws, ref row, "Renewed SPIC", null);
+            dataRow(ws, ref row, "Terminated SPIC", null);
+            row++;
+
+            sectionHeader(ws, ref row, "Pantawid Beneficiary", accent, light);
+            dataRow(ws, ref row, "Yes", null);
+            dataRow(ws, ref row, "No", null);
+            row++;
+
+            sectionHeader(ws, ref row, "Indigenous Person", accent, light);
+            dataRow(ws, ref row, "Yes", null);
+            dataRow(ws, ref row, "No", null);
+            row++;
+
+            sectionHeader(ws, ref row, "LGBTQ+", accent, light);
+            dataRow(ws, ref row, "Yes", null);
+            dataRow(ws, ref row, "No", null);
+            row += 2;
+
+            ws.Cells[row, 1].Value = "Submitted by:";
+            labelStyle(ws.Cells[row, 1], grey);
+            row += 2;
+
+            ws.Cells[row, 1].Value = submittedByName ?? "";
+            ws.Cells[row, 1].Style.Font.Bold = true;
+            ws.Cells[row, 1].Style.Font.Size = 10;
+            row++;
+
+            ws.Cells[row, 1].Value = "Name of Solo Parent Focal Person:";
+            labelStyle(ws.Cells[row, 1], grey);
+            row++;
+
+            ws.Cells[row, 1].Value = "Date of Submission: " + DateTime.Today.ToString("MMMM d, yyyy");
+            labelStyle(ws.Cells[row, 1], grey);
+
+            ws.Column(1).Width = 36;
+            ws.Column(2).Width = 48;
+            ws.Column(3).Width = 14;
+        }
     }
 
     public class AnalyticsSummaryDto
@@ -318,4 +527,6 @@ namespace SOLUM_UI.Services
         public int CatB, CatC, CatD, CatE, CatF;
         public Dictionary<string, int> ByBarangay { get; set; }
     }
+
+
 }
