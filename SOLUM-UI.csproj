@@ -74,7 +74,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\Api\MonthlyAnalyticsDto.cs" />
     <Compile Include="Models\Api\UserDtos.cs" />
+    <Compile Include="Services\Api\AnalyticsApiService.cs" />
     <Compile Include="Services\Api\UserApiService.cs" />
     <Compile Include="Views\AnalyticsPage.xaml.cs">
       <DependentUpon>AnalyticsPage.xaml</DependentUpon>
