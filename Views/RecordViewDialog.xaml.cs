@@ -151,6 +151,13 @@ namespace SOLUM_UI
                     ("Other Sources of Income", string.IsNullOrWhiteSpace(r.OtherIncomeSource) ? "—" : r.OtherIncomeSource),
                 });
 
+            AddCard("Additional Classifications", new[]
+            {
+                ("Pantawid Beneficiary", r.IsPantawidBeneficiary ? "Yes" : "No"),
+                ("Indigenous Person",    r.IsIndigenousPerson ? "Yes" : "No"),
+                ("LGBTQ+",               r.IsLGBTQ ? "Yes" : "No"),
+            });
+
             AddCard("Record Info", new[]
             {
                 ("Last Updated", r.LastUpdated != DateTime.MinValue ? r.LastUpdated.ToString("MMMM d, yyyy") : "—"),

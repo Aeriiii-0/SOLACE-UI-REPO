@@ -293,6 +293,10 @@ namespace SOLUM_UI
             TxtNeeds.Text       = r.NeedsAndProblems  ?? string.Empty;
             TxtOtherIncome.Text = r.OtherIncomeSource ?? string.Empty;
 
+            ChkPantawid.IsChecked   = r.IsPantawidBeneficiary;
+            ChkIndigenous.IsChecked = r.IsIndigenousPerson;
+            ChkLGBTQ.IsChecked      = r.IsLGBTQ;
+
             if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
             {
                 _familyRowData.Clear();
@@ -829,6 +833,10 @@ namespace SOLUM_UI
                 FamilyMembers   = members,
                 NeedsAndProblems  = TxtNeeds.Text.Trim(),
                 OtherIncomeSource = TxtOtherIncome.Text.Trim(),
+                IsPantawidBeneficiary = ChkPantawid.IsChecked == true,
+                IsIndigenousPerson    = ChkIndigenous.IsChecked == true,
+                IsLGBTQ               = ChkLGBTQ.IsChecked == true,
+                Children          = members.Count
             };
         }
 
@@ -958,6 +966,11 @@ namespace SOLUM_UI
             sec = "Needs & Income";
             Add(sec, "Needs and Problems",      r.NeedsAndProblems,  _existing?.NeedsAndProblems);
             Add(sec, "Other Sources of Income", r.OtherIncomeSource, _existing?.OtherIncomeSource);
+
+            sec = "Additional Classifications";
+            Add(sec, "Pantawid Beneficiary", r.IsPantawidBeneficiary ? "✓ Yes" : "No", _existing != null ? (_existing.IsPantawidBeneficiary ? "✓ Yes" : "No") : null);
+            Add(sec, "Indigenous Person",    r.IsIndigenousPerson ? "✓ Yes" : "No",    _existing != null ? (_existing.IsIndigenousPerson ? "✓ Yes" : "No") : null);
+            Add(sec, "LGBTQ+",               r.IsLGBTQ ? "✓ Yes" : "No",               _existing != null ? (_existing.IsLGBTQ ? "✓ Yes" : "No") : null);
 
             sec = "Application Status";
             Add(sec, "Status", r.Status, _existing?.Status);

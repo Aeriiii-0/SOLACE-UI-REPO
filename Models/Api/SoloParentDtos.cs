@@ -48,6 +48,9 @@ namespace SOLUM_UI.Models.Api
         public string EducationalAttainment { get; set; } = string.Empty;
         public string PhilsysCardNumber { get; set; }
         public string Religion { get; set; } = string.Empty;
+        public bool IsPantawidBeneficiary { get; set; }
+        public bool IsIndigenousPerson { get; set; }
+        public bool IsLGBTQ { get; set; }
 
         public void SetFullNameHash(string hash)
         {

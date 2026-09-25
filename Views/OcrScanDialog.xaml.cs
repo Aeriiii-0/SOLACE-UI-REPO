@@ -1407,6 +1407,11 @@ namespace SOLUM_UI
             sec = "Family Composition";
             Add(sec, "Dependents Count",       r.FamilyMembers != null ? r.FamilyMembers.Count.ToString() : "0");
 
+            sec = "Additional Classifications";
+            Add(sec, "Pantawid Beneficiary", r.IsPantawidBeneficiary ? "✓ Yes" : "No");
+            Add(sec, "Indigenous Person",    r.IsIndigenousPerson ? "✓ Yes" : "No");
+            Add(sec, "LGBTQ+",               r.IsLGBTQ ? "✓ Yes" : "No");
+
             sec = "Status";
             Add(sec, "Application Status",     r.Status);
 

@@ -116,8 +116,8 @@
         </Style>
 
         <Style x:Key="ActionBtn" TargetType="Button">
-            <Setter Property="Width" Value="28"/>
-            <Setter Property="Height" Value="28"/>
+            <Setter Property="Width" Value="26"/>
+            <Setter Property="Height" Value="26"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -711,7 +711,7 @@
                     <ListView.View>
                         <GridView ColumnHeaderContainerStyle="{StaticResource GvHeader}">
 
-                            <GridViewColumn Header="ID" Width="72">
+                            <GridViewColumn Header="ID" Width="145">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -721,7 +721,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColName" Header="NAME" Width="160">
+                            <GridViewColumn x:Name="ColName" Header="NAME" Width="130">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -731,7 +731,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="120">
+                            <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="20">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -741,7 +741,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColSex" Header="SEX" Width="90">
+                            <GridViewColumn x:Name="ColSex" Header="SEX" Width="50">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -751,7 +751,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColCivilStatus" Header="CIVIL STATUS" Width="120">
+                            <GridViewColumn x:Name="ColCivilStatus" Header="CIVIL STATUS" Width="100">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -761,7 +761,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="DATE OF BIRTH" Width="110">
+                            <GridViewColumn Header="DATE OF BIRTH" Width="88">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -771,7 +771,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColLastUpdated" Header="LAST UPDATED" Width="112">
+                            <GridViewColumn x:Name="ColLastUpdated" Header="LAST UPDATED" Width="100">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -781,7 +781,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColChildren" Header="VALID UNTIL" Width="110">
+                            <GridViewColumn x:Name="ColChildren" Header="VALID UNTIL" Width="88">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -791,7 +791,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="96">
+                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="80">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
@@ -808,42 +808,43 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="104">
+                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="225">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal"
                                                     HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center">
+                                                    VerticalAlignment="Center"
+                                                    Margin="4,0">
                                             <Button Style="{StaticResource ActionBtn}"
                                                     Tag="{Binding Id}"
                                                     Click="Edit_Click"
-                                                    Margin="0,0,3,0"
+                                                    Margin="0,0,2,0"
                                                     ToolTip="Edit">
                                                 <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"
-                                                      Fill="#702943" Stretch="Uniform" Width="12" Height="12"/>
+                                                      Fill="#702943" Stretch="Uniform" Width="11" Height="11"/>
                                             </Button>
                                             <Button Style="{StaticResource ActionBtn}"
                                                     Tag="{Binding Id}"
                                                     Click="Renew_Click"
-                                                    Margin="0,0,3,0"
+                                                    Margin="0,0,2,0"
                                                     ToolTip="Renew Validity">
                                                 <Path Data="M12,4V1L8,5L12,9V6C15.31,6 18,8.69 18,12C18,13.04 17.73,14.01 17.27,14.86L18.74,16.33C19.54,15.08 20,13.6 20,12C20,7.58 16.42,4 12,4M12,18C8.69,18 6,15.31 6,12C6,10.96 6.27,9.99 6.73,9.14L5.26,7.67C4.46,8.92 4,10.4 4,12C4,16.42 7.58,20 12,20V23L16,19L12,15V18Z"
-                                                      Fill="#27AE60" Stretch="Uniform" Width="12" Height="12"/>
+                                                      Fill="#27AE60" Stretch="Uniform" Width="11" Height="11"/>
                                             </Button>
                                             <Button Style="{StaticResource ActionBtn}"
                                                     Tag="{Binding Id}"
                                                     Click="Delete_Click"
-                                                    Margin="0,0,3,0"
+                                                    Margin="0,0,2,0"
                                                     ToolTip="Delete">
                                                 <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
-                                                      Fill="#E74C3C" Stretch="Uniform" Width="12" Height="12"/>
+                                                      Fill="#E74C3C" Stretch="Uniform" Width="11" Height="11"/>
                                             </Button>
                                             <Button Style="{StaticResource ActionBtn}"
                                                     Tag="{Binding Id}"
                                                     Click="ExportRecord_Click"
                                                     ToolTip="Export">
                                                 <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"
-                                                      Fill="#2196F3" Stretch="Uniform" Width="12" Height="12"/>
+                                                      Fill="#2196F3" Stretch="Uniform" Width="11" Height="11"/>
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>
@@ -873,25 +874,28 @@
             </Grid>
         </Border>
 
-        <!-- Encoder-only search panel (Row 1, hidden for Admin) -->
         <Border x:Name="BasicUserToolbar" Grid.Row="0" Visibility="Collapsed" Margin="20,16,20,12">
-            <Grid>
+            <Grid Height="44">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Background="White" CornerRadius="22"
-                        BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="0,0,10,0">
+                <Border Grid.Column="0"
+                        Background="#FFFFFF" CornerRadius="22"
+                        BorderBrush="#E0D0D5" BorderThickness="1.5"
+                        Margin="0,0,8,0">
                     <Border.Effect>
                         <DropShadowEffect Color="#C0A0AA" BlurRadius="15" ShadowDepth="3" Opacity="0.08"/>
                     </Border.Effect>
-                    <Grid Height="44">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="SEARCH" FontSize="10" FontWeight="Bold"
+                        <TextBlock Grid.Column="0" Text="NAME" FontSize="10" FontWeight="Bold"
                                    Foreground="#702943" VerticalAlignment="Center" Margin="14,0,8,0"/>
                         <TextBox x:Name="BasicSearchName" Grid.Column="1"
                                  BorderThickness="0" Background="Transparent"
@@ -925,10 +929,28 @@
                                 </Style>
                             </TextBox.Style>
                         </TextBox>
+                        <Button Grid.Column="2"
+                                Width="34" Height="34" Margin="2,0,5,0"
+                                Cursor="Hand" Click="SearchBtn_Click" ToolTip="Search">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="#702943" CornerRadius="17">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="0.85"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"
+                                  Fill="White" Stretch="Uniform" Width="14" Height="14"/>
+                        </Button>
                     </Grid>
                 </Border>
 
-                <Button Grid.Column="1" Height="44" Padding="20,0" Cursor="Hand"
+                <Button Grid.Column="2" Height="44" Padding="18,0" Cursor="Hand"
                         Click="BasicUserAddRecord_Click">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
@@ -945,9 +967,7 @@
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Button.Template>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="+ Add New Record" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
-                    </StackPanel>
+                    <TextBlock Text="+ Add New Record" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
                 </Button>
             </Grid>
         </Border>
@@ -955,233 +975,291 @@
         <Border x:Name="EncoderSearchPanel" Grid.Row="1"
                 Visibility="Collapsed"
                 Margin="20,0,20,12"
-                Background="White" CornerRadius="12"
-                BorderBrush="#E0D0D5" BorderThickness="1" Padding="20,16">
+                Background="White" CornerRadius="14"
+                BorderBrush="#E0D0D5" BorderThickness="1.5">
             <Border.Effect>
-                <DropShadowEffect Color="#C0A0AA" BlurRadius="10" ShadowDepth="2" Opacity="0.08"/>
+                <DropShadowEffect Color="#C0A0AA" BlurRadius="14" ShadowDepth="3" Opacity="0.07"/>
             </Border.Effect>
-            <StackPanel>
-                <TextBlock Text="SEARCH SOLO PARENT RECORD"
-                           FontSize="10" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,14"/>
-                <Grid Margin="0,0,0,10">
+            <StackPanel Margin="20,16,20,16">
+
+                <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                        <TextBlock Text="Solo Parent ID" FontSize="11" Foreground="#777777" Margin="0,0,0,4"/>
-                        <TextBox x:Name="EncSearchId" Height="40" Padding="12,0"
-                                 FontSize="13" Foreground="#111111" Background="White"
-                                 BorderBrush="#E0D0D5" BorderThickness="1"
-                                 VerticalContentAlignment="Center"
-                                 TextChanged="EncoderFields_TextChanged"
-                                 KeyDown="SearchBox_KeyDown">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="White" BorderBrush="#D0B8C0" BorderThickness="1" CornerRadius="8">
-                                                    <Grid>
-                                                        <TextBlock Text="e.g. SP-001" Foreground="#C0A8B0" FontSize="13"
-                                                                   VerticalAlignment="Center" Margin="12,0" IsHitTestVisible="False">
-                                                            <TextBlock.Style>
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                        </TextBlock>
-                                                        <ScrollViewer x:Name="PART_ContentHost" Margin="12,0" VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="SOLO PARENT ID" FontSize="10" FontWeight="Bold"
+                                   Foreground="#702943" Margin="2,0,0,5"/>
+                        <Border Background="White" CornerRadius="10"
+                                BorderBrush="#D4A0B0" BorderThickness="1.5">
+                            <Grid Height="40">
+                                <TextBox x:Name="EncSearchId"
+                                         BorderThickness="0" Background="Transparent"
+                                         FontSize="13" Foreground="#111111" VerticalAlignment="Center"
+                                         Margin="12,0"
+                                         TextChanged="EncoderFields_TextChanged"
+                                         KeyDown="SearchBox_KeyDown">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="TextBox">
+                                                        <Grid>
+                                                            <TextBlock Text="e.g. SP-001" Foreground="#C0A8B0" FontSize="13"
+                                                                       VerticalAlignment="Center" IsHitTestVisible="False">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+                            </Grid>
+                        </Border>
                     </StackPanel>
-                    <StackPanel Grid.Column="1">
-                        <TextBlock Text="First Name" FontSize="11" Foreground="#777777" Margin="0,0,0,4"/>
-                        <TextBox x:Name="EncSearchFirstName" Height="40" Padding="12,0"
-                                 FontSize="13" Foreground="#111111" Background="White"
-                                 BorderBrush="#E0D0D5" BorderThickness="1"
-                                 VerticalContentAlignment="Center"
-                                 TextChanged="EncoderFields_TextChanged"
-                                 KeyDown="SearchBox_KeyDown">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="White" BorderBrush="#D0B8C0" BorderThickness="1" CornerRadius="8">
-                                                    <Grid>
-                                                        <TextBlock Text="Enter first name" Foreground="#C0A8B0" FontSize="13"
-                                                                   VerticalAlignment="Center" Margin="12,0" IsHitTestVisible="False">
-                                                            <TextBlock.Style>
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                        </TextBlock>
-                                                        <ScrollViewer x:Name="PART_ContentHost" Margin="12,0" VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
-                    </StackPanel>
-                </Grid>
-                <Grid Margin="0,0,0,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                        <TextBlock Text="Last Name" FontSize="11" Foreground="#777777" Margin="0,0,0,4"/>
-                        <TextBox x:Name="EncSearchLastName" Height="40" Padding="12,0"
-                                 FontSize="13" Foreground="#111111" Background="White"
-                                 BorderBrush="#E0D0D5" BorderThickness="1"
-                                 VerticalContentAlignment="Center"
-                                 TextChanged="EncoderFields_TextChanged"
-                                 KeyDown="SearchBox_KeyDown">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="White" BorderBrush="#D0B8C0" BorderThickness="1" CornerRadius="8">
-                                                    <Grid>
-                                                        <TextBlock Text="Enter last name" Foreground="#C0A8B0" FontSize="13"
-                                                                   VerticalAlignment="Center" Margin="12,0" IsHitTestVisible="False">
-                                                            <TextBlock.Style>
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                        </TextBlock>
-                                                        <ScrollViewer x:Name="PART_ContentHost" Margin="12,0" VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Margin="0,0,10,0">
-                        <TextBlock Text="Barangay" FontSize="11" Foreground="#777777" Margin="0,0,0,4"/>
-                        <TextBox x:Name="EncSearchBarangay" Height="40" Padding="12,0"
-                                 FontSize="13" Foreground="#111111" Background="White"
-                                 BorderBrush="#E0D0D5" BorderThickness="1"
-                                 VerticalContentAlignment="Center"
-                                 TextChanged="EncoderFields_TextChanged"
-                                 KeyDown="SearchBox_KeyDown">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="White" BorderBrush="#D0B8C0" BorderThickness="1" CornerRadius="8">
-                                                    <Grid>
-                                                        <TextBlock Text="Enter barangay" Foreground="#C0A8B0" FontSize="13"
-                                                                   VerticalAlignment="Center" Margin="12,0" IsHitTestVisible="False">
-                                                            <TextBlock.Style>
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                        </TextBlock>
-                                                        <ScrollViewer x:Name="PART_ContentHost" Margin="12,0" VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
-                    </StackPanel>
+
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Birthday" FontSize="11" Foreground="#777777" Margin="0,0,0,4"/>
-                        <TextBox x:Name="EncSearchBirthday" Height="40" Padding="12,0"
-                                 FontSize="13" Foreground="#111111" Background="White"
-                                 BorderBrush="#E0D0D5" BorderThickness="1"
-                                 VerticalContentAlignment="Center"
-                                 TextChanged="EncoderFields_TextChanged"
-                                 KeyDown="SearchBox_KeyDown">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="White" BorderBrush="#D0B8C0" BorderThickness="1" CornerRadius="8">
-                                                    <Grid>
-                                                        <TextBlock Text="yyyy-mm-dd" Foreground="#C0A8B0" FontSize="13"
-                                                                   VerticalAlignment="Center" Margin="12,0" IsHitTestVisible="False">
-                                                            <TextBlock.Style>
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                        </TextBlock>
-                                                        <ScrollViewer x:Name="PART_ContentHost" Margin="12,0" VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
+                        <TextBlock Text="FIRST NAME" FontSize="10" FontWeight="Bold"
+                                   Foreground="#702943" Margin="2,0,0,5"/>
+                        <Border Background="White" CornerRadius="10"
+                                BorderBrush="#D4A0B0" BorderThickness="1.5">
+                            <Grid Height="40">
+                                <TextBox x:Name="EncSearchFirstName"
+                                         BorderThickness="0" Background="Transparent"
+                                         FontSize="13" Foreground="#111111" VerticalAlignment="Center"
+                                         Margin="12,0"
+                                         TextChanged="EncoderFields_TextChanged"
+                                         KeyDown="SearchBox_KeyDown">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="TextBox">
+                                                        <Grid>
+                                                            <TextBlock Text="Enter first name" Foreground="#C0A8B0" FontSize="13"
+                                                                       VerticalAlignment="Center" IsHitTestVisible="False">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+                            </Grid>
+                        </Border>
                     </StackPanel>
                 </Grid>
-                <Button Height="42" Padding="28,0" HorizontalAlignment="Left" Cursor="Hand"
-                        Click="EncoderSearchBtn_Click">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="#702943" CornerRadius="21" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Opacity" Value="0.88"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                    <TextBlock Text="Search" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
-                </Button>
+
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="LAST NAME" FontSize="10" FontWeight="Bold"
+                                   Foreground="#702943" Margin="2,0,0,5"/>
+                        <Border Background="White" CornerRadius="10"
+                                BorderBrush="#D4A0B0" BorderThickness="1.5">
+                            <Grid Height="40">
+                                <TextBox x:Name="EncSearchLastName"
+                                         BorderThickness="0" Background="Transparent"
+                                         FontSize="13" Foreground="#111111" VerticalAlignment="Center"
+                                         Margin="12,0"
+                                         TextChanged="EncoderFields_TextChanged"
+                                         KeyDown="SearchBox_KeyDown">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="TextBox">
+                                                        <Grid>
+                                                            <TextBlock Text="Enter last name" Foreground="#C0A8B0" FontSize="13"
+                                                                       VerticalAlignment="Center" IsHitTestVisible="False">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="BARANGAY" FontSize="10" FontWeight="Bold"
+                                   Foreground="#702943" Margin="2,0,0,5"/>
+                        <Border Background="White" CornerRadius="10"
+                                BorderBrush="#D4A0B0" BorderThickness="1.5">
+                            <Grid Height="40">
+                                <TextBox x:Name="EncSearchBarangay"
+                                         BorderThickness="0" Background="Transparent"
+                                         FontSize="13" Foreground="#111111" VerticalAlignment="Center"
+                                         Margin="12,0"
+                                         TextChanged="EncoderFields_TextChanged"
+                                         KeyDown="SearchBox_KeyDown">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="TextBox">
+                                                        <Grid>
+                                                            <TextBlock Text="Enter barangay" Foreground="#C0A8B0" FontSize="13"
+                                                                       VerticalAlignment="Center" IsHitTestVisible="False">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="BIRTHDAY" FontSize="10" FontWeight="Bold"
+                                   Foreground="#702943" Margin="2,0,0,5"/>
+                        <Border Background="White" CornerRadius="10"
+                                BorderBrush="#D4A0B0" BorderThickness="1.5">
+                            <Grid Height="40">
+                                <TextBox x:Name="EncSearchBirthday"
+                                         BorderThickness="0" Background="Transparent"
+                                         FontSize="13" Foreground="#111111" VerticalAlignment="Center"
+                                         Margin="12,0"
+                                         TextChanged="EncoderFields_TextChanged"
+                                         KeyDown="SearchBox_KeyDown">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="TextBox">
+                                                        <Grid>
+                                                            <TextBlock Text="yyyy-mm-dd" Foreground="#C0A8B0" FontSize="13"
+                                                                       VerticalAlignment="Center" IsHitTestVisible="False">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="EncoderAddBtn" Height="42" Padding="20,0" Margin="0,0,8,0"
+                            Cursor="Hand" Click="AddNewRecord_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" Background="White" CornerRadius="21"
+                                        BorderBrush="#D4A0B0" BorderThickness="1.5"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="#F5ECEE"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <TextBlock Text="+ Add New Record" FontSize="13" FontWeight="SemiBold" Foreground="#702943"/>
+                    </Button>
+                    <Button Height="42" Padding="26,0" Cursor="Hand"
+                            Click="EncoderSearchBtn_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="#702943" CornerRadius="21"
+                                        Padding="{TemplateBinding Padding}">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="2" Opacity="0.22"/>
+                                    </Border.Effect>
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.88"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"
+                                  Fill="White" Stretch="Uniform" Width="13" Height="13" Margin="0,0,7,0"/>
+                            <TextBlock Text="Search" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
             </StackPanel>
         </Border>
 

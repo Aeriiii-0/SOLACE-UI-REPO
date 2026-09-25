@@ -204,7 +204,8 @@ namespace SOLUM_UI
             int female = d.Sex.TryGetValue("Female", out var f) ? f : 0;
             int male = d.Sex.TryGetValue("Male", out var m) ? m : 0;
             TxtFemaleCircle.Text = female.ToString();
-            TxtMaleCircle.Text = male.ToString();
+            TxtMaleCircle.Text   = male.ToString();
+            DrawGenderDonut(female, male);
 
             int totKids = d.DependentsAgeBrackets.Values.Sum();
             TxtTotalChildren.Text = totKids.ToString();
@@ -252,22 +253,91 @@ namespace SOLUM_UI
 
             foreach (var kvp in data)
             {
-                if (used.Contains(kvp.Key)) continue;
-                rows.Add(new ChartRow
-                {
-                    Label = kvp.Key + " (unmapped)",
-                    Count = kvp.Value,
-                    Pct = total > 0 ? Math.Round(kvp.Value * 100.0 / total, 0).ToString("0") + "%" : "—",
-                    BarColor = brush
-                });
-            }
+                ("a1. Consequence of rape",               d.Count(r => r.CircumstanceA1)),
+                ("a2. Widow/widower",                     d.Count(r => r.CircumstanceA2)),
+                ("a3. Spouse of PDL",                     d.Count(r => r.CircumstanceA3)),
+                ("a4. Spouse of PWD",                     d.Count(r => r.CircumstanceA4)),
+                ("a5. Separated/de facto",                d.Count(r => r.CircumstanceA5)),
+                ("a6. Annulled",                          d.Count(r => r.CircumstanceA6)),
+                ("a7. Abandoned",                         d.Count(r => r.CircumstanceA7)),
+                ("b. Spouse/Relative of OFW",             d.Count(r => r.CircumstanceB)),
+                ("c. Unmarried person",                   d.Count(r => r.CircumstanceC)),
+                ("d. Guardian/Adoptive/Foster",           d.Count(r => r.CircumstanceD)),
+                ("e. Relative",                           d.Count(r => r.CircumstanceE)),
+                ("f. Pregnant woman",                     d.Count(r => r.CircumstanceF)),
+            };
+            int catTotal = catRows.Sum(x => x.Item2);
+            int catMax   = catRows.Length > 0 ? catRows.Max(x => x.Item2) : 1;
+            CategoryChartLeft.ItemsSource  = catRows.Take(6).Select(r => new ChartRow
+            {
+                Label      = r.Item1,
+                Count      = r.Item2,
+                Pct        = catTotal > 0 ? Math.Round(r.Item2 * 100.0 / catTotal, 0).ToString("0") + "%" : "—",
+                BarColor   = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43)),
+                BarWidthPx = catMax > 0 ? Math.Max(4, r.Item2 * 180.0 / catMax) : 0,
+                GradStart  = "#702943",
+                GradEnd    = "#A8415E",
+            }).ToList();
+            CategoryChartRight.ItemsSource = catRows.Skip(6).Select(r => new ChartRow
+            {
+                Label      = r.Item1,
+                Count      = r.Item2,
+                Pct        = catTotal > 0 ? Math.Round(r.Item2 * 100.0 / catTotal, 0).ToString("0") + "%" : "—",
+                BarColor   = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43)),
+                BarWidthPx = catMax > 0 ? Math.Max(4, r.Item2 * 180.0 / catMax) : 0,
+                GradStart  = "#702943",
+                GradEnd    = "#A8415E",
+            }).ToList();
 
-            return rows;
+            DrawBarangayChart(d);
+
+            var recent = d.OrderByDescending(r => r.LastUpdated).Take(12).ToList();
+            RecentList.ItemsSource = recent.Select(r =>
+            {
+                string initials = "";
+                var parts = (r.Name ?? "").Split(new char[]{' ', ','}, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 1) initials += parts[0][0];
+                if (parts.Length >= 2) initials += parts[1][0];
+                return new RecentRow
+                {
+                    SpId      = r.Id,
+                    Name      = r.Name,
+                    Barangay  = r.Barangay,
+                    DateLabel = r.LastUpdated.ToString("MMM d, yyyy"),
+                    Status    = r.Status,
+                    Initials  = initials.ToUpperInvariant(),
+                    StatusBg  = r.Status == "Valid"
+                        ? new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9))
+                        : new SolidColorBrush(Color.FromRgb(0xF2, 0xF2, 0xF2)),
+                    StatusFg  = r.Status == "Valid"
+                        ? new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60))
+                        : new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99))
+                };
+            }).ToList();
         }
 
         private void bindBucketedBars(ItemsControl chart, Dictionary<string, int> data, (string key, string label)[] knownOrder, string hexColor)
         {
-            chart.ItemsSource = BuildBucketedRows(data, knownOrder, hexColor);
+            int    total    = rows.Sum(r => r.count);
+            int    maxCount = rows.Length > 0 ? rows.Max(r => r.count) : 1;
+            var    c        = (Color)ColorConverter.ConvertFromString(hexColor);
+            string gradEnd  = hexColor;
+            // lighter tint for gradient end
+            var lighter = Color.FromRgb(
+                (byte)Math.Min(255, c.R + 60),
+                (byte)Math.Min(255, c.G + 40),
+                (byte)Math.Min(255, c.B + 50));
+
+            chart.ItemsSource = rows.Select(r => new ChartRow
+            {
+                Label      = r.label,
+                Count      = r.count,
+                Pct        = total > 0 ? Math.Round(r.count * 100.0 / total, 0).ToString("0") + "%" : "—",
+                BarColor   = new SolidColorBrush(c),
+                BarWidthPx = maxCount > 0 ? Math.Max(4, r.count * 180.0 / maxCount) : 0,
+                GradStart  = hexColor,
+                GradEnd    = "#" + lighter.R.ToString("X2") + lighter.G.ToString("X2") + lighter.B.ToString("X2"),
+            }).ToList();
         }
 
         /* OLD: per-barangay breakdown chart. Needs a data source that returns counts
@@ -287,19 +357,19 @@ namespace SOLUM_UI
                              .Take(10).ToList();
             if (!groups.Any()) return;
 
-            double canvasH = BarangayCanvas.ActualHeight > 0 ? BarangayCanvas.ActualHeight : 160;
-            double canvasW = BarangayCanvas.ActualWidth  > 0 ? BarangayCanvas.ActualWidth  : 400;
+            double canvasH  = BarangayCanvas.ActualHeight > 0 ? BarangayCanvas.ActualHeight : 160;
+            double canvasW  = BarangayCanvas.ActualWidth  > 0 ? BarangayCanvas.ActualWidth  : 400;
             int    maxCount = groups.Max(g => g.Count());
             int    n        = groups.Count;
-            double totalBarW = canvasW * 0.65;
-            double barW     = Math.Floor(totalBarW / n);
+            double barW     = Math.Floor((canvasW * 0.72) / n);
             double gap      = (canvasW - barW * n) / (n + 1);
-            double chartH   = canvasH - 2;
+            double chartH   = canvasH - 4;
 
+            // grid lines
             var gridBrush = new SolidColorBrush(Color.FromRgb(0xE8, 0xD8, 0xDE));
             for (int step = 1; step <= 4; step++)
             {
-                double gy = chartH * (1 - step / 4.0);
+                double gy = chartH * (1.0 - step / 4.0);
                 BarangayCanvas.Children.Add(new Line
                 {
                     X1 = 0, X2 = canvasW, Y1 = gy, Y2 = gy,
@@ -308,35 +378,66 @@ namespace SOLUM_UI
                 });
             }
 
-            var fill = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
-            var hov  = new SolidColorBrush(Color.FromRgb(0x9B, 0x30, 0x60));
+            // color palette cycling through the brand palette
+            Color[] palette =
+            {
+                Color.FromRgb(0x70, 0x29, 0x43),
+                Color.FromRgb(0x9B, 0x30, 0x60),
+                Color.FromRgb(0xC4, 0x78, 0x8E),
+                Color.FromRgb(0xA8, 0x41, 0x5E),
+                Color.FromRgb(0x80, 0x35, 0x50),
+                Color.FromRgb(0xB5, 0x5A, 0x78),
+                Color.FromRgb(0xD4, 0xA0, 0xB0),
+                Color.FromRgb(0x87, 0x2D, 0x4A),
+                Color.FromRgb(0x70, 0x29, 0x43),
+                Color.FromRgb(0x9B, 0x30, 0x60),
+            };
 
             for (int i = 0; i < n; i++)
             {
-                double barH = Math.Max(4, groups[i].Count() * chartH / maxCount);
-                double x    = gap + i * (barW + gap);
-                double y    = chartH - barH;
+                double barH   = Math.Max(6, groups[i].Count() * chartH / maxCount);
+                double x      = gap + i * (barW + gap);
+                double y      = chartH - barH;
+                var    fillC  = palette[i % palette.Length];
+                var    lightC = Color.FromRgb(
+                    (byte)Math.Min(255, fillC.R + 55),
+                    (byte)Math.Min(255, fillC.G + 35),
+                    (byte)Math.Min(255, fillC.B + 45));
+
                 var rect = new Rectangle
                 {
-                    Width = barW, Height = barH, Fill = fill,
-                    RadiusX = 4, RadiusY = 4,
-                    Tag     = groups[i].Key, Cursor = Cursors.Hand,
-                    ToolTip = groups[i].Key + "  ·  " + groups[i].Count() + " record(s)"
+                    Width   = barW,
+                    Height  = barH,
+                    RadiusX = 5,
+                    RadiusY = 5,
+                    Tag     = groups[i].Key,
+                    Cursor  = Cursors.Hand,
+                    ToolTip = groups[i].Key + "  ·  " + groups[i].Count() + " record(s)",
+                    Fill    = new LinearGradientBrush(
+                        fillC, lightC,
+                        new Point(0, 1), new Point(0, 0))
                 };
                 Canvas.SetLeft(rect, x);
                 Canvas.SetTop(rect, y);
-                rect.MouseEnter += (s, e) => ((Rectangle)s).Fill = hov;
-                rect.MouseLeave += (s, e) => ((Rectangle)s).Fill = fill;
+
+                var captureFill  = new SolidColorBrush(fillC);
+                var captureHover = new SolidColorBrush(lightC);
+                rect.MouseEnter += (s, e) => ((Rectangle)s).Fill = captureHover;
+                rect.MouseLeave += (s, e) => ((Rectangle)s).Fill = new LinearGradientBrush(
+                    fillC, lightC, new Point(0, 1), new Point(0, 0));
                 BarangayCanvas.Children.Add(rect);
 
+                // count label above bar
                 var lbl = new TextBlock
                 {
-                    Text = groups[i].Count().ToString(),
-                    FontSize = 9, FontWeight = FontWeights.SemiBold,
-                    Foreground = fill, FontFamily = new FontFamily("Segoe UI")
+                    Text       = groups[i].Count().ToString(),
+                    FontSize   = 9,
+                    FontWeight = FontWeights.Bold,
+                    Foreground = new SolidColorBrush(fillC),
+                    FontFamily = new FontFamily("Segoe UI")
                 };
-                Canvas.SetLeft(lbl, x + barW / 2 - 4);
-                Canvas.SetTop(lbl, Math.Max(0, y - 14));
+                Canvas.SetLeft(lbl, x + barW / 2 - 5);
+                Canvas.SetTop(lbl, Math.Max(0, y - 16));
                 BarangayCanvas.Children.Add(lbl);
             }
 
@@ -350,14 +451,85 @@ namespace SOLUM_UI
             ToastNotification.Show("Unavailable", "Recent records aren't available yet.", ToastType.Info);
         }
 
-        private async void BtnRefresh_Click(object sender, RoutedEventArgs e)
+        private void DrawGenderDonut(int female, int male)
         {
-            _cache.Remove((_filterYear, _filterMonth, _filterBarangay ?? "ALL"));
-            await LoadAndBuildAnalyticsAsync();
+            GenderDonut.Children.Clear();
+            double cx = 40, cy = 40, r = 34, innerR = 22;
+            int total = female + male;
+            if (total == 0) return;
+
+            double femalePct = female / (double)total;
+            double sweep     = femalePct * 360.0;
+            if (sweep < 1)  sweep = 1;
+            if (sweep > 359) sweep = 359;
+
+            // helper: point on circle
+            System.Func<double, double, System.Windows.Point> pt = (angle, rad2) =>
+            {
+                double radians = (angle - 90) * Math.PI / 180.0;
+                return new System.Windows.Point(cx + rad2 * Math.Cos(radians), cy + rad2 * Math.Sin(radians));
+            };
+
+            // female arc (brand primary)
+            var femArc = BuildArcDonut(cx, cy, r, innerR, 0, sweep,
+                Color.FromRgb(0x70, 0x29, 0x43), Color.FromRgb(0xA8, 0x41, 0x5E));
+            GenderDonut.Children.Add(femArc);
+
+            // male arc
+            var maleArc = BuildArcDonut(cx, cy, r, innerR, sweep, 360.0 - sweep,
+                Color.FromRgb(0xD4, 0xA0, 0xB0), Color.FromRgb(0xE8, 0xC8, 0xD4));
+            GenderDonut.Children.Add(maleArc);
+
+            // center label
+            var centerLbl = new TextBlock
+            {
+                Text              = total.ToString(),
+                FontFamily        = new FontFamily("Segoe UI"),
+                FontSize          = 13,
+                FontWeight        = FontWeights.Bold,
+                Foreground        = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43)),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment   = VerticalAlignment.Center,
+            };
+            Canvas.SetLeft(centerLbl, cx - 12);
+            Canvas.SetTop(centerLbl,  cy - 9);
+            GenderDonut.Children.Add(centerLbl);
         }
 
-        
-        private async void ExportXlsx_Click(object sender, RoutedEventArgs e)
+        private static UIElement BuildArcDonut(double cx, double cy, double r, double innerR,
+            double startDeg, double sweepDeg, Color c1, Color c2)
+        {
+            if (sweepDeg <= 0) return new Path();
+
+            bool isLarge = sweepDeg > 180;
+
+            double r1 = (startDeg - 90) * Math.PI / 180.0;
+            double r2 = (startDeg + sweepDeg - 90) * Math.PI / 180.0;
+
+            var outerStart = new System.Windows.Point(cx + r * Math.Cos(r1), cy + r * Math.Sin(r1));
+            var outerEnd   = new System.Windows.Point(cx + r * Math.Cos(r2), cy + r * Math.Sin(r2));
+            var innerEnd   = new System.Windows.Point(cx + innerR * Math.Cos(r2), cy + innerR * Math.Sin(r2));
+            var innerStart = new System.Windows.Point(cx + innerR * Math.Cos(r1), cy + innerR * Math.Sin(r1));
+
+            var figure = new PathFigure { StartPoint = outerStart, IsClosed = true };
+            figure.Segments.Add(new ArcSegment(outerEnd, new System.Windows.Size(r, r), 0, isLarge,
+                SweepDirection.Clockwise, true));
+            figure.Segments.Add(new LineSegment(innerEnd, true));
+            figure.Segments.Add(new ArcSegment(innerStart, new System.Windows.Size(innerR, innerR), 0, isLarge,
+                SweepDirection.Counterclockwise, true));
+
+            var geo = new PathGeometry();
+            geo.Figures.Add(figure);
+
+            return new Path
+            {
+                Data = geo,
+                Fill = new LinearGradientBrush(c1, c2,
+                    new System.Windows.Point(0, 0), new System.Windows.Point(1, 1))
+            };
+        }
+
+        private void ExportXlsx_Click(object sender, RoutedEventArgs e)
         {
             var saveDlg = new Microsoft.Win32.SaveFileDialog
             {
@@ -421,12 +593,26 @@ namespace SOLUM_UI
 
         private class ChartRow
         {
-            public string Label { get; set; }
-            public int Count { get; set; }
-            public string Pct { get; set; }
-            public SolidColorBrush BarColor { get; set; }
+            public string          Label      { get; set; }
+            public int             Count      { get; set; }
+            public string          Pct        { get; set; }
+            public SolidColorBrush BarColor   { get; set; }
+            public double          BarWidthPx { get; set; }
+            public string          GradStart  { get; set; }
+            public string          GradEnd    { get; set; }
         }
 
-        
+        private class RecentRow
+        {
+            public string          SpId      { get; set; }
+            public string          Name      { get; set; }
+            public string          Barangay  { get; set; }
+            public string          DateLabel { get; set; }
+            public string          Status    { get; set; }
+            public string          Initials  { get; set; }
+            public SolidColorBrush StatusBg  { get; set; }
+            public SolidColorBrush StatusFg  { get; set; }
+        }
     }
 }
+

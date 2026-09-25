@@ -64,6 +64,10 @@
       <HintPath>packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="PdfSharp, Version=1.50.5147.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <HintPath>packages\PDFsharp.1.50.5147\lib\net20\PdfSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -144,6 +148,7 @@
     <Compile Include="Services\Api\AuthApiService.cs" />
     <Compile Include="Services\Api\SoloParentApiService.cs" />
     <Compile Include="Services\AnalyticsExportService.cs" />
+    <Compile Include="Services\SoloParentExportService.cs" />
     <Compile Include="Services\AuditLogService.cs" />
     <Compile Include="Services\OcrService.cs" />
     <Compile Include="Services\WiaScannerService.cs" />
@@ -269,6 +274,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Templates\" />
+    <Content Include="Templates\SOLO-PARENTS-APPLICATION-FORM-TEMPLATE.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
