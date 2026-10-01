@@ -32,6 +32,11 @@ x86/
 **/packages/*
 !**/packages/build/
 
+# NuGet Packages
+[Pp]ackages/*
+![Pp]ackages/build/
+
+
 # OS files
 Thumbs.db
 ehthumbs.db
