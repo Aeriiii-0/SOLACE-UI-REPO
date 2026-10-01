@@ -568,7 +568,7 @@
                                                 </Button.Template>
                                                 <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" Fill="#702943" Stretch="Uniform" Width="12" Height="12"/>
                                             </Button>
-                                            <Button Height="28" Padding="16,0" Cursor="Hand" Tag="{Binding SpId}" Click="ViewRecord_Click">
+                                            <Button Height="28" Padding="14.5,0" Cursor="Hand" Tag="{Binding SpId}" Click="ViewRecord_Click">
                                                 <Button.Template>
                                                     <ControlTemplate TargetType="Button">
                                                         <Border x:Name="Bg" Background="#702943" CornerRadius="6" Padding="{TemplateBinding Padding}">
