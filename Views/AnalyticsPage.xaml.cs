@@ -24,7 +24,6 @@ namespace SOLUM_UI
 
         private readonly Dictionary<(int year, int month, string barangay), MonthlyAnalyticsDto> _cache = new Dictionary<(int, int, string), MonthlyAnalyticsDto>();
 
-
         private static readonly (string key, string label)[] AgeBracketOrder =
         {
             ("19_AND_BELOW", "19 & below"),
@@ -33,18 +32,20 @@ namespace SOLUM_UI
             ("60_AND_ABOVE", "60 and above"),
         };
 
+        // CHANGED: API returns MIN_WAGE_PLUS1_TO_20833
         private static readonly (string key, string label)[] IncomeBracketOrder =
         {
-            ("BELOW_MINIMUM_WAGE",          "Below Min. Wage"),
-            ("MINIMUM_WAGE_PLUS1_TO_20833", "Min.+1 – ₱20,833"),
-            ("20834_AND_ABOVE",             "₱20,834 and above"),
+            ("BELOW_MINIMUM_WAGE",      "Below Min. Wage"),     // verify against backend
+            ("MIN_WAGE_PLUS1_TO_20833", "Min.+1 – ₱20,833"),
+            ("20834_AND_ABOVE",         "₱20,834 and above"),   // verify against backend
         };
 
+        // CHANGED: API returns 7_TO_22
         private static readonly (string key, string label)[] DependentsAgeBracketOrder =
         {
-            ("6_AND_BELOW",  "6 & below"),
-            ("7_22",         "7 – 22"),
-            ("22_AND_ABOVE", "22 and above"),
+            ("6_AND_BELOW",  "6 & below"),      // verify against backend
+            ("7_TO_22",      "7 – 22"),
+            ("22_AND_ABOVE", "22 and above"),   // verify against backend
         };
 
         private static readonly (string key, string label)[] EmploymentStatusOrder =
@@ -54,13 +55,13 @@ namespace SOLUM_UI
             ("not_employed",  "Not Employed"),
         };
 
+        // CHANGED: Separated + Annulled are merged into SEP_ANNUL in BuildAnalytics
         private static readonly (string key, string label)[] CivilStatusOrder =
         {
             ("Single",    "Single"),
             ("Married",   "Married"),
             ("Widowed",   "Widowed"),
-            ("Separated", "Sep./Annul."),
-            ("Annulled",  "Sep./Annul."),
+            ("SEP_ANNUL", "Sep./Annul."),
         };
 
         private static readonly (string key, string label)[] CategoryOrder =
@@ -79,6 +80,34 @@ namespace SOLUM_UI
             ("F",  "f. Pregnant woman"),
         };
 
+        // NEW: sector breakdowns
+        private static readonly (string key, string label)[] LgbtOrder =
+        {
+            ("LGBT",     "LGBT"),
+            ("Non-LGBT", "Non-LGBT"),
+        };
+
+        private static readonly (string key, string label)[] PantawidOrder =
+        {
+            ("Beneficiary",     "Pantawid Beneficiary"),
+            ("Non-Beneficiary", "Non-Beneficiary"),
+        };
+
+        private static readonly (string key, string label)[] IndigenousOrder =
+        {
+            ("Indigenous",     "Indigenous"),
+            ("Non-Indigenous", "Non-Indigenous"),
+        };
+
+        private static readonly string[] Barangays =
+        {
+            "Biñan", "Bungahan", "Canlalay", "Casile", "De La Paz", "Ganado",
+            "Langkiwa", "Loma", "Malaban", "Malamig", "Mamplasan", "Platero",
+            "Poblacion", "San Antonio", "San Francisco", "San Jose", "San Vicente",
+            "Santo Domingo", "Santo Niño", "Santo Tomas", "Soro-Soro", "Timbao",
+            "Tubigan", "Zapote"
+        };
+
         public AnalyticsPage()
         {
             InitializeComponent();
@@ -88,8 +117,6 @@ namespace SOLUM_UI
                 _filterMonth = DateTime.Today.Month;
                 PopulateFilterDropdowns();
                 await LoadAndBuildAnalyticsAsync();
-
-              
             };
         }
 
@@ -111,15 +138,6 @@ namespace SOLUM_UI
 
             return response;
         }
-
-        private static readonly string[] Barangays =
-            {
-                "Biñan", "Bungahan", "Canlalay", "Casile", "De La Paz", "Ganado",
-                "Langkiwa", "Loma", "Malaban", "Malamig", "Mamplasan", "Platero",
-                "Poblacion", "San Antonio", "San Francisco", "San Jose", "San Vicente",
-                "Santo Domingo", "Santo Niño", "Santo Tomas", "Soro-Soro", "Timbao",
-                "Tubigan", "Zapote"
-            };
 
         private void PopulateFilterDropdowns()
         {
@@ -150,7 +168,7 @@ namespace SOLUM_UI
         {
             _filterYear = (int)((CmbFilterYear.SelectedItem as ComboBoxItem)?.Tag ?? DateTime.Today.Year);
             _filterMonth = (int)((CmbFilterMonth.SelectedItem as ComboBoxItem)?.Tag ?? DateTime.Today.Month);
-            _filterBarangay = (string)((CmbFilterBarangay.SelectedItem as ComboBoxItem)?.Tag ?? "ALL"); // NEW
+            _filterBarangay = (string)((CmbFilterBarangay.SelectedItem as ComboBoxItem)?.Tag ?? "ALL");
             FilterPopup.IsOpen = false;
             UpdateFilterBadge();
             await LoadAndBuildAnalyticsAsync();
@@ -175,10 +193,9 @@ namespace SOLUM_UI
             ActiveFilterBadge.Visibility = Visibility.Visible;
         }
 
-
         private async Task LoadAndBuildAnalyticsAsync()
         {
-            var response = await GetMonthlyAnalyticsCachedAsync(_filterYear, _filterMonth, _filterBarangay); 
+            var response = await GetMonthlyAnalyticsCachedAsync(_filterYear, _filterMonth, _filterBarangay);
 
             if (!response.Succeeded || response.Data == null)
             {
@@ -204,7 +221,7 @@ namespace SOLUM_UI
             int female = d.Sex.TryGetValue("Female", out var f) ? f : 0;
             int male = d.Sex.TryGetValue("Male", out var m) ? m : 0;
             TxtFemaleCircle.Text = female.ToString();
-            TxtMaleCircle.Text   = male.ToString();
+            TxtMaleCircle.Text = male.ToString();
             DrawGenderDonut(female, male);
 
             int totKids = d.DependentsAgeBrackets.Values.Sum();
@@ -213,11 +230,24 @@ namespace SOLUM_UI
                 ? Math.Round((double)totKids / d.TotalSoloParents, 1).ToString("0.0") + " avg."
                 : "—";
 
+            // CHANGED: merge Separated + Annulled into one bucket
+            var civil = new Dictionary<string, int>(d.CivilStatus);
+            int sepAnnul = (civil.TryGetValue("Separated", out var sep) ? sep : 0)
+                         + (civil.TryGetValue("Annulled", out var ann) ? ann : 0);
+            civil.Remove("Separated");
+            civil.Remove("Annulled");
+            civil["SEP_ANNUL"] = sepAnnul;
+
             bindBucketedBars(AgeChart, d.AgeBrackets, AgeBracketOrder, "#702943");
-            bindBucketedBars(CivilStatusChart, d.CivilStatus, CivilStatusOrder, "#9B3060");
+            bindBucketedBars(CivilStatusChart, civil, CivilStatusOrder, "#9B3060");
             bindBucketedBars(EmploymentChart, d.EmploymentStatus, EmploymentStatusOrder, "#C4788E");
             bindBucketedBars(IncomeChart, d.MonthlyIncomeBrackets, IncomeBracketOrder, "#702943");
             bindBucketedBars(DependantsAgeChart, d.DependentsAgeBrackets, DependentsAgeBracketOrder, "#F57F17");
+
+            // NEW: sector charts (need LgbtChart, PantawidChart, IndigenousChart in the XAML)
+            bindBucketedBars(LgbtChart, d.Lgbt, LgbtOrder, "#702943");
+            bindBucketedBars(PantawidChart, d.PantawidBeneficiary, PantawidOrder, "#9B3060");
+            bindBucketedBars(IndigenousChart, d.Indigenous, IndigenousOrder, "#C4788E");
 
             var catRows = BuildBucketedRows(d.Categories, CategoryOrder, "#702943");
             int half = (catRows.Count + 1) / 2;
@@ -225,8 +255,8 @@ namespace SOLUM_UI
             CategoryChartRight.ItemsSource = catRows.Skip(half).ToList();
 
             // Barangay breakdown chart and recent-records list are left empty —
-            // see the commented-out methods below for the original logic and
-            // what each would need to work again.
+            // see the commented-out DrawBarangayChart method below for the original
+            // logic and what data source it would need to work again.
             BarangayCanvas.Children.Clear();
             BarangayLabels.ItemsSource = null;
             RecentList.ItemsSource = null;
@@ -237,7 +267,6 @@ namespace SOLUM_UI
             var color = (Color)ColorConverter.ConvertFromString(hexColor);
             var brush = new SolidColorBrush(color);
             int total = data.Values.Sum();
-            var used = new HashSet<string>(knownOrder.Select(k => k.key), StringComparer.OrdinalIgnoreCase);
 
             var rows = knownOrder.Select(k =>
             {
@@ -251,78 +280,21 @@ namespace SOLUM_UI
                 };
             }).ToList();
 
-            foreach (var kvp in data)
-            {
-                ("a1. Consequence of rape",               d.Count(r => r.CircumstanceA1)),
-                ("a2. Widow/widower",                     d.Count(r => r.CircumstanceA2)),
-                ("a3. Spouse of PDL",                     d.Count(r => r.CircumstanceA3)),
-                ("a4. Spouse of PWD",                     d.Count(r => r.CircumstanceA4)),
-                ("a5. Separated/de facto",                d.Count(r => r.CircumstanceA5)),
-                ("a6. Annulled",                          d.Count(r => r.CircumstanceA6)),
-                ("a7. Abandoned",                         d.Count(r => r.CircumstanceA7)),
-                ("b. Spouse/Relative of OFW",             d.Count(r => r.CircumstanceB)),
-                ("c. Unmarried person",                   d.Count(r => r.CircumstanceC)),
-                ("d. Guardian/Adoptive/Foster",           d.Count(r => r.CircumstanceD)),
-                ("e. Relative",                           d.Count(r => r.CircumstanceE)),
-                ("f. Pregnant woman",                     d.Count(r => r.CircumstanceF)),
-            };
-            int catTotal = catRows.Sum(x => x.Item2);
-            int catMax   = catRows.Length > 0 ? catRows.Max(x => x.Item2) : 1;
-            CategoryChartLeft.ItemsSource  = catRows.Take(6).Select(r => new ChartRow
-            {
-                Label      = r.Item1,
-                Count      = r.Item2,
-                Pct        = catTotal > 0 ? Math.Round(r.Item2 * 100.0 / catTotal, 0).ToString("0") + "%" : "—",
-                BarColor   = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43)),
-                BarWidthPx = catMax > 0 ? Math.Max(4, r.Item2 * 180.0 / catMax) : 0,
-                GradStart  = "#702943",
-                GradEnd    = "#A8415E",
-            }).ToList();
-            CategoryChartRight.ItemsSource = catRows.Skip(6).Select(r => new ChartRow
-            {
-                Label      = r.Item1,
-                Count      = r.Item2,
-                Pct        = catTotal > 0 ? Math.Round(r.Item2 * 100.0 / catTotal, 0).ToString("0") + "%" : "—",
-                BarColor   = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43)),
-                BarWidthPx = catMax > 0 ? Math.Max(4, r.Item2 * 180.0 / catMax) : 0,
-                GradStart  = "#702943",
-                GradEnd    = "#A8415E",
-            }).ToList();
-
-            DrawBarangayChart(d);
-
-            var recent = d.OrderByDescending(r => r.LastUpdated).Take(12).ToList();
-            RecentList.ItemsSource = recent.Select(r =>
-            {
-                string initials = "";
-                var parts = (r.Name ?? "").Split(new char[]{' ', ','}, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length >= 1) initials += parts[0][0];
-                if (parts.Length >= 2) initials += parts[1][0];
-                return new RecentRow
-                {
-                    SpId      = r.Id,
-                    Name      = r.Name,
-                    Barangay  = r.Barangay,
-                    DateLabel = r.LastUpdated.ToString("MMM d, yyyy"),
-                    Status    = r.Status,
-                    Initials  = initials.ToUpperInvariant(),
-                    StatusBg  = r.Status == "Valid"
-                        ? new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9))
-                        : new SolidColorBrush(Color.FromRgb(0xF2, 0xF2, 0xF2)),
-                    StatusFg  = r.Status == "Valid"
-                        ? new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60))
-                        : new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99))
-                };
-            }).ToList();
+            return rows;
         }
 
         private void bindBucketedBars(ItemsControl chart, Dictionary<string, int> data, (string key, string label)[] knownOrder, string hexColor)
         {
-            int    total    = rows.Sum(r => r.count);
-            int    maxCount = rows.Length > 0 ? rows.Max(r => r.count) : 1;
-            var    c        = (Color)ColorConverter.ConvertFromString(hexColor);
-            string gradEnd  = hexColor;
-            // lighter tint for gradient end
+            var rows = knownOrder.Select(k => new
+            {
+                label = k.label,
+                count = data != null && data.TryGetValue(k.key, out var i) ? i : 0
+            }).ToArray();
+
+            int total = rows.Sum(r => r.count);
+            int maxCount = rows.Length > 0 ? rows.Max(r => r.count) : 1;
+            var c = (Color)ColorConverter.ConvertFromString(hexColor);
+
             var lighter = Color.FromRgb(
                 (byte)Math.Min(255, c.R + 60),
                 (byte)Math.Min(255, c.G + 40),
@@ -330,13 +302,13 @@ namespace SOLUM_UI
 
             chart.ItemsSource = rows.Select(r => new ChartRow
             {
-                Label      = r.label,
-                Count      = r.count,
-                Pct        = total > 0 ? Math.Round(r.count * 100.0 / total, 0).ToString("0") + "%" : "—",
-                BarColor   = new SolidColorBrush(c),
+                Label = r.label,
+                Count = r.count,
+                Pct = total > 0 ? Math.Round(r.count * 100.0 / total, 0).ToString("0") + "%" : "—",
+                BarColor = new SolidColorBrush(c),
                 BarWidthPx = maxCount > 0 ? Math.Max(4, r.count * 180.0 / maxCount) : 0,
-                GradStart  = hexColor,
-                GradEnd    = "#" + lighter.R.ToString("X2") + lighter.G.ToString("X2") + lighter.B.ToString("X2"),
+                GradStart = hexColor,
+                GradEnd = "#" + lighter.R.ToString("X2") + lighter.G.ToString("X2") + lighter.B.ToString("X2"),
             }).ToList();
         }
 
@@ -365,7 +337,6 @@ namespace SOLUM_UI
             double gap      = (canvasW - barW * n) / (n + 1);
             double chartH   = canvasH - 4;
 
-            // grid lines
             var gridBrush = new SolidColorBrush(Color.FromRgb(0xE8, 0xD8, 0xDE));
             for (int step = 1; step <= 4; step++)
             {
@@ -378,7 +349,6 @@ namespace SOLUM_UI
                 });
             }
 
-            // color palette cycling through the brand palette
             Color[] palette =
             {
                 Color.FromRgb(0x70, 0x29, 0x43),
@@ -427,7 +397,6 @@ namespace SOLUM_UI
                     fillC, lightC, new Point(0, 1), new Point(0, 0));
                 BarangayCanvas.Children.Add(rect);
 
-                // count label above bar
                 var lbl = new TextBlock
                 {
                     Text       = groups[i].Count().ToString(),
@@ -445,7 +414,6 @@ namespace SOLUM_UI
         }
         */
 
-        
         private void RecentRecord_Click(object sender, MouseButtonEventArgs e)
         {
             ToastNotification.Show("Unavailable", "Recent records aren't available yet.", ToastType.Info);
@@ -459,40 +427,30 @@ namespace SOLUM_UI
             if (total == 0) return;
 
             double femalePct = female / (double)total;
-            double sweep     = femalePct * 360.0;
-            if (sweep < 1)  sweep = 1;
+            double sweep = femalePct * 360.0;
+            if (sweep < 1) sweep = 1;
             if (sweep > 359) sweep = 359;
 
-            // helper: point on circle
-            System.Func<double, double, System.Windows.Point> pt = (angle, rad2) =>
-            {
-                double radians = (angle - 90) * Math.PI / 180.0;
-                return new System.Windows.Point(cx + rad2 * Math.Cos(radians), cy + rad2 * Math.Sin(radians));
-            };
-
-            // female arc (brand primary)
             var femArc = BuildArcDonut(cx, cy, r, innerR, 0, sweep,
                 Color.FromRgb(0x70, 0x29, 0x43), Color.FromRgb(0xA8, 0x41, 0x5E));
             GenderDonut.Children.Add(femArc);
 
-            // male arc
             var maleArc = BuildArcDonut(cx, cy, r, innerR, sweep, 360.0 - sweep,
                 Color.FromRgb(0xD4, 0xA0, 0xB0), Color.FromRgb(0xE8, 0xC8, 0xD4));
             GenderDonut.Children.Add(maleArc);
 
-            // center label
             var centerLbl = new TextBlock
             {
-                Text              = total.ToString(),
-                FontFamily        = new FontFamily("Segoe UI"),
-                FontSize          = 13,
-                FontWeight        = FontWeights.Bold,
-                Foreground        = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43)),
+                Text = total.ToString(),
+                FontFamily = new FontFamily("Segoe UI"),
+                FontSize = 13,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43)),
                 HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment   = VerticalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
             };
             Canvas.SetLeft(centerLbl, cx - 12);
-            Canvas.SetTop(centerLbl,  cy - 9);
+            Canvas.SetTop(centerLbl, cy - 9);
             GenderDonut.Children.Add(centerLbl);
         }
 
@@ -507,8 +465,8 @@ namespace SOLUM_UI
             double r2 = (startDeg + sweepDeg - 90) * Math.PI / 180.0;
 
             var outerStart = new System.Windows.Point(cx + r * Math.Cos(r1), cy + r * Math.Sin(r1));
-            var outerEnd   = new System.Windows.Point(cx + r * Math.Cos(r2), cy + r * Math.Sin(r2));
-            var innerEnd   = new System.Windows.Point(cx + innerR * Math.Cos(r2), cy + innerR * Math.Sin(r2));
+            var outerEnd = new System.Windows.Point(cx + r * Math.Cos(r2), cy + r * Math.Sin(r2));
+            var innerEnd = new System.Windows.Point(cx + innerR * Math.Cos(r2), cy + innerR * Math.Sin(r2));
             var innerStart = new System.Windows.Point(cx + innerR * Math.Cos(r1), cy + innerR * Math.Sin(r1));
 
             var figure = new PathFigure { StartPoint = outerStart, IsClosed = true };
@@ -529,7 +487,7 @@ namespace SOLUM_UI
             };
         }
 
-        private void ExportXlsx_Click(object sender, RoutedEventArgs e)
+        private async void ExportXlsx_Click(object sender, RoutedEventArgs e)
         {
             var saveDlg = new Microsoft.Win32.SaveFileDialog
             {
@@ -578,7 +536,7 @@ namespace SOLUM_UI
                     saveDlg.FileName,
                     results[0], results[1], results[2],
                     periodLabel,
-                    MainWindow.CurrentUserName,   // NEW — real logged-in user, not a hardcoded name
+                    MainWindow.CurrentUserName,
                     password: optsDlg.Password);
 
                 ToastNotification.Show("Exported", "Saved to " + System.IO.Path.GetFileName(saveDlg.FileName), ToastType.Success);
@@ -591,28 +549,33 @@ namespace SOLUM_UI
             }
         }
 
+        private async void BtnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            _cache.Remove((_filterYear, _filterMonth, _filterBarangay ?? "ALL"));
+            await LoadAndBuildAnalyticsAsync();
+        }
+
         private class ChartRow
         {
-            public string          Label      { get; set; }
-            public int             Count      { get; set; }
-            public string          Pct        { get; set; }
-            public SolidColorBrush BarColor   { get; set; }
-            public double          BarWidthPx { get; set; }
-            public string          GradStart  { get; set; }
-            public string          GradEnd    { get; set; }
+            public string Label { get; set; }
+            public int Count { get; set; }
+            public string Pct { get; set; }
+            public SolidColorBrush BarColor { get; set; }
+            public double BarWidthPx { get; set; }
+            public string GradStart { get; set; }
+            public string GradEnd { get; set; }
         }
 
         private class RecentRow
         {
-            public string          SpId      { get; set; }
-            public string          Name      { get; set; }
-            public string          Barangay  { get; set; }
-            public string          DateLabel { get; set; }
-            public string          Status    { get; set; }
-            public string          Initials  { get; set; }
-            public SolidColorBrush StatusBg  { get; set; }
-            public SolidColorBrush StatusFg  { get; set; }
+            public string SpId { get; set; }
+            public string Name { get; set; }
+            public string Barangay { get; set; }
+            public string DateLabel { get; set; }
+            public string Status { get; set; }
+            public string Initials { get; set; }
+            public SolidColorBrush StatusBg { get; set; }
+            public SolidColorBrush StatusFg { get; set; }
         }
     }
 }
-

@@ -1409,8 +1409,8 @@ namespace SOLUM_UI
 
             sec = "Additional Classifications";
             Add(sec, "Pantawid Beneficiary", r.IsPantawidBeneficiary ? "✓ Yes" : "No");
-            Add(sec, "Indigenous Person",    r.IsIndigenousPerson ? "✓ Yes" : "No");
-            Add(sec, "LGBTQ+",               r.IsLGBTQ ? "✓ Yes" : "No");
+            Add(sec, "Indigenous Person",    r.IsIndigenous ? "✓ Yes" : "No");
+            Add(sec, "LGBTQ+",               r.IsLGBT ? "✓ Yes" : "No");
 
             sec = "Status";
             Add(sec, "Application Status",     r.Status);

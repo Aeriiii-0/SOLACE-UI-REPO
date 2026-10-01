@@ -115,7 +115,11 @@ namespace SOLUM_UI.Services.Api
                 ContactDetails = MapContactInfo(r),
                 AddressDetails = MapAddressInfo(r),
                 EmergencyContact = MapEmergencyContact(r),
-                ProblemPresented = MapProblemPresented(r)
+                ProblemPresented = MapProblemPresented(r),
+
+                IsIndigenous = r.IsIndigenous,
+                IsLGBT = r.IsLGBT,
+                IsPantawidBeneficiary = r.IsPantawidBeneficiary 
             };
 
             var existingMap = existingEntity?.FamilyMembers?.ToDictionary(f => f.Name?.Trim() ?? string.Empty, f => f)
@@ -205,9 +209,6 @@ namespace SOLUM_UI.Services.Api
                 EducationalAttainment = dto.PersonalInfo?.EducationalAttainment ?? string.Empty,
                 PhilSysNumber = dto.PersonalInfo?.PhilsysCardNumber ?? string.Empty,
                 Religion = dto.PersonalInfo?.Religion ?? string.Empty,
-                IsPantawidBeneficiary = dto.PersonalInfo?.IsPantawidBeneficiary ?? false,
-                IsIndigenousPerson = dto.PersonalInfo?.IsIndigenousPerson ?? false,
-                IsLGBTQ = dto.PersonalInfo?.IsLGBTQ ?? false,
 
                 Occupation = dto.Employment?.Occupation ?? string.Empty,
                 MonthlyIncome = dto.Employment?.MonthlyIncome > 0 ? dto.Employment.MonthlyIncome.ToString("N2") : string.Empty,
@@ -231,6 +232,11 @@ namespace SOLUM_UI.Services.Api
                 CircumstanceA6Nullity = dto.ProblemPresented?.isNullity == true,
                 CircumstanceA6Annulment = dto.ProblemPresented?.isAnnulmentOfMarraige == true,
                 CircumstanceBStayAbroad = dto.ProblemPresented?.LengthOfAbroad.HasValue == true ? dto.ProblemPresented.LengthOfAbroad.Value.ToString() : string.Empty,
+
+
+                IsPantawidBeneficiary = dto.IsPantawidBeneficiary,
+                IsIndigenous = dto.IsIndigenous,
+                IsLGBT = dto.IsLGBT,
             };
 
             record.Name = $"{record.Surname}, {record.FirstName} {record.MiddleName}".Trim();
@@ -295,10 +301,7 @@ namespace SOLUM_UI.Services.Api
                 Age = age,
                 EducationalAttainment = !string.IsNullOrWhiteSpace(r.EducationalAttainment) ? r.EducationalAttainment.Trim() : "High School Graduate",
                 PhilsysCardNumber = r.PhilSysNumber?.Trim(),
-                Religion = !string.IsNullOrWhiteSpace(r.Religion) ? r.Religion.Trim() : "Roman Catholic",
-                IsPantawidBeneficiary = r.IsPantawidBeneficiary,
-                IsIndigenousPerson = r.IsIndigenousPerson,
-                IsLGBTQ = r.IsLGBTQ
+                Religion = !string.IsNullOrWhiteSpace(r.Religion) ? r.Religion.Trim() : "Roman Catholic"
             };
         }
 

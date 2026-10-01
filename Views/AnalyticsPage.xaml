@@ -488,7 +488,7 @@
                     <Border Grid.Column="10" Style="{StaticResource Card}">
                         <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.10" Direction="270"/></Border.Effect>
                         <StackPanel Margin="20,18,20,18">
-                            <TextBlock Text="GENDER SPLIT" FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
+                            <TextBlock Text="SEX SPLIT" FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
                                        Foreground="#8B5A6E" Margin="0,0,0,10"/>
                             <!-- donut arc canvas -->
                             <Canvas x:Name="GenderDonut" Width="80" Height="80"
@@ -519,7 +519,9 @@
 
                     <!-- barangay chart -->
                     <Border Grid.Column="0" Style="{StaticResource Card}">
-                        <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/></Border.Effect>
+                        <Border.Effect>
+                            <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
+                        </Border.Effect>
                         <StackPanel Margin="20,18,20,18">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                                 <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
@@ -567,7 +569,9 @@
                         </Grid.RowDefinitions>
 
                         <Border Grid.Row="0" Style="{StaticResource Card}">
-                            <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/></Border.Effect>
+                            <Border.Effect>
+                                <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
+                            </Border.Effect>
                             <StackPanel Margin="20,18,20,18">
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                     <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
@@ -585,7 +589,9 @@
                         </Border>
 
                         <Border Grid.Row="2" Style="{StaticResource Card}">
-                            <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/></Border.Effect>
+                            <Border.Effect>
+                                <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
+                            </Border.Effect>
                             <StackPanel Margin="20,18,20,18">
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                     <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
@@ -603,6 +609,7 @@
                         </Border>
                     </Grid>
                 </Grid>
+
 
                 <!-- employment / income / dependants row -->
                 <Grid Margin="0,0,0,14">
@@ -649,6 +656,8 @@
                             <ItemsControl x:Name="IncomeChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
                         </StackPanel>
                     </Border>
+                    
+                    
 
                     <Border Grid.Column="4" Style="{StaticResource Card}">
                         <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/></Border.Effect>
@@ -665,6 +674,80 @@
                                 <TextBlock Text="DEPENDANTS AGE" Style="{StaticResource SectionLabel}"/>
                             </StackPanel>
                             <ItemsControl x:Name="DependantsAgeChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- sectors row: LGBT / Pantawid / Indigenous -->
+                <Grid Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- LGBT -->
+                    <Border Grid.Column="0" Style="{StaticResource Card}">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
+                        </Border.Effect>
+                        <StackPanel Margin="20,18,20,18">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#702943" Offset="0"/>
+                                            <GradientStop Color="#C4788E" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <TextBlock Text="LGBT" Style="{StaticResource SectionLabel}"/>
+                            </StackPanel>
+                            <ItemsControl x:Name="LgbtChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Pantawid Beneficiary -->
+                    <Border Grid.Column="2" Style="{StaticResource Card}">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
+                        </Border.Effect>
+                        <StackPanel Margin="20,18,20,18">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#9B3060" Offset="0"/>
+                                            <GradientStop Color="#C4788E" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <TextBlock Text="PANTAWID BENEFICIARY" Style="{StaticResource SectionLabel}"/>
+                            </StackPanel>
+                            <ItemsControl x:Name="PantawidChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Indigenous -->
+                    <Border Grid.Column="4" Style="{StaticResource Card}">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
+                        </Border.Effect>
+                        <StackPanel Margin="20,18,20,18">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#C4788E" Offset="0"/>
+                                            <GradientStop Color="#D4A0B0" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <TextBlock Text="INDIGENOUS PERSON" Style="{StaticResource SectionLabel}"/>
+                            </StackPanel>
+                            <ItemsControl x:Name="IndigenousChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
                         </StackPanel>
                     </Border>
                 </Grid>

@@ -23,9 +23,9 @@ namespace SOLUM_UI.Services
 
                 var page     = doc.Pages[0];
                 var gfx      = XGraphics.FromPdfPage(page);
-                var font     = new XFont("Arial", 8,  XFontStyle.Regular);
-                var fontName = new XFont("Arial", 13, XFontStyle.Regular); // names — prominent
-                var fontSm   = new XFont("Arial", 7,  XFontStyle.Regular);
+                var font     = new XFont("Arial", 8,  XFontStyleEx.Regular);
+                var fontName = new XFont("Arial", 13, XFontStyleEx.Regular); // names — prominent
+                var fontSm   = new XFont("Arial", 7, XFontStyleEx.Regular);
                 var brush    = XBrushes.Black;
 
                 int calcAge = r.DateOfBirth != DateTime.MinValue

@@ -118,9 +118,9 @@ namespace SOLUM_UI.Models
         public string NeedsAndProblems  { get; set; }
         public string OtherIncomeSource { get; set; }
 
-        public bool   IsPantawidBeneficiary { get; set; }
-        public bool   IsIndigenousPerson    { get; set; }
-        public bool   IsLGBTQ               { get; set; }
+        public bool IsLGBT { get; set; }
+        public bool IsPantawidBeneficiary { get; set; }
+        public bool IsIndigenous { get; set; }
 
         // helper
         public string LastUpdatedFormatted => LastUpdated != DateTime.MinValue ? LastUpdated.ToString("yyyy-MM-dd") : "—";

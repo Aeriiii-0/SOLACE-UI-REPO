@@ -154,8 +154,8 @@ namespace SOLUM_UI
             AddCard("Additional Classifications", new[]
             {
                 ("Pantawid Beneficiary", r.IsPantawidBeneficiary ? "Yes" : "No"),
-                ("Indigenous Person",    r.IsIndigenousPerson ? "Yes" : "No"),
-                ("LGBTQ+",               r.IsLGBTQ ? "Yes" : "No"),
+                ("Indigenous Person",    r.IsIndigenous ? "Yes" : "No"),
+                ("LGBTQ+",               r.IsLGBT ? "Yes" : "No"),
             });
 
             AddCard("Record Info", new[]

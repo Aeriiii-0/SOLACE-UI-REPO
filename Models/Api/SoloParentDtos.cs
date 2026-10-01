@@ -48,9 +48,6 @@ namespace SOLUM_UI.Models.Api
         public string EducationalAttainment { get; set; } = string.Empty;
         public string PhilsysCardNumber { get; set; }
         public string Religion { get; set; } = string.Empty;
-        public bool IsPantawidBeneficiary { get; set; }
-        public bool IsIndigenousPerson { get; set; }
-        public bool IsLGBTQ { get; set; }
 
         public void SetFullNameHash(string hash)
         {
@@ -148,6 +145,10 @@ namespace SOLUM_UI.Models.Api
         AddressInfo AddressDetails { get; set; }
         EmergencyContactInfo EmergencyContact { get; set; }
         ProblemPresentedDetails ProblemPresented { get; set; }
+
+         bool IsLGBT { get; set; }
+         bool IsPantawidBeneficiary { get; set; }
+         bool IsIndigenous { get; set; }
     }
 
     public class CreateSoloParentRequest : ISoloParentRequest
@@ -159,6 +160,10 @@ namespace SOLUM_UI.Models.Api
         public EmergencyContactInfo EmergencyContact { get; set; } = new EmergencyContactInfo();
         public ProblemPresentedDetails ProblemPresented { get; set; } = new ProblemPresentedDetails();
         public List<CreateFamilyMemberRequest> FamilyMembers { get; set; } = new List<CreateFamilyMemberRequest>();
+
+        public bool IsLGBT { get; set; }
+        public bool IsPantawidBeneficiary { get; set; }
+        public bool IsIndigenous { get; set; }
     }
 
     public class UpdateSoloParentRequest : ISoloParentRequest
@@ -173,6 +178,10 @@ namespace SOLUM_UI.Models.Api
         public List<UpdateFamilyMemberRequest> ExistingFamilyMembers { get; set; } = new List<UpdateFamilyMemberRequest>();
         public List<CreateFamilyMemberRequest> NewFamilyMembers { get; set; } = new List<CreateFamilyMemberRequest>();
         public List<Guid> RemovedFamilyMemberIds { get; set; } = new List<Guid>();
+
+        public bool IsLGBT { get; set; }
+        public bool IsPantawidBeneficiary { get; set; }
+        public bool IsIndigenous { get; set; }
     }
 
     public class GetSoloParentRequest
@@ -206,6 +215,11 @@ namespace SOLUM_UI.Models.Api
         public AddressInfo AddressDetails { get; set; } = new AddressInfo();
         public EmergencyContactInfo EmergencyContact { get; set; } = new EmergencyContactInfo();
         public ProblemPresentedDetails ProblemPresented { get; set; } = new ProblemPresentedDetails();
+
+        public bool IsLGBT { get; set; }
+        public bool IsPantawidBeneficiary { get; set; }
+        public bool IsIndigenous { get; set; }
+
         public DateTime DateCreated { get; set; }
         public bool IsActive { get; set; }
     }
@@ -226,5 +240,11 @@ namespace SOLUM_UI.Models.Api
         public bool IsDeleted { get; set; }
         public List<FamilyMemberDto> FamilyMembers { get; set; } = new List<FamilyMemberDto>();
         public List<RecordTermDto> RecordTerms { get; set; } = new List<RecordTermDto>();
+
+        public bool IsLGBT { get; set; }
+        public bool IsPantawidBeneficiary { get; set; }
+        public bool IsIndigenous { get; set; }
+
+
     }
 }

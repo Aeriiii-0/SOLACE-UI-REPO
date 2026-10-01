@@ -294,8 +294,8 @@ namespace SOLUM_UI
             TxtOtherIncome.Text = r.OtherIncomeSource ?? string.Empty;
 
             ChkPantawid.IsChecked   = r.IsPantawidBeneficiary;
-            ChkIndigenous.IsChecked = r.IsIndigenousPerson;
-            ChkLGBTQ.IsChecked      = r.IsLGBTQ;
+            ChkIndigenous.IsChecked = r.IsIndigenous;
+            ChkLGBTQ.IsChecked      = r.IsLGBT;
 
             if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
             {
@@ -834,8 +834,8 @@ namespace SOLUM_UI
                 NeedsAndProblems  = TxtNeeds.Text.Trim(),
                 OtherIncomeSource = TxtOtherIncome.Text.Trim(),
                 IsPantawidBeneficiary = ChkPantawid.IsChecked == true,
-                IsIndigenousPerson    = ChkIndigenous.IsChecked == true,
-                IsLGBTQ               = ChkLGBTQ.IsChecked == true,
+                IsIndigenous    = ChkIndigenous.IsChecked == true,
+                IsLGBT               = ChkLGBTQ.IsChecked == true,
                 Children          = members.Count
             };
         }
@@ -969,8 +969,8 @@ namespace SOLUM_UI
 
             sec = "Additional Classifications";
             Add(sec, "Pantawid Beneficiary", r.IsPantawidBeneficiary ? "✓ Yes" : "No", _existing != null ? (_existing.IsPantawidBeneficiary ? "✓ Yes" : "No") : null);
-            Add(sec, "Indigenous Person",    r.IsIndigenousPerson ? "✓ Yes" : "No",    _existing != null ? (_existing.IsIndigenousPerson ? "✓ Yes" : "No") : null);
-            Add(sec, "LGBTQ+",               r.IsLGBTQ ? "✓ Yes" : "No",               _existing != null ? (_existing.IsLGBTQ ? "✓ Yes" : "No") : null);
+            Add(sec, "Indigenous Person",    r.IsIndigenous ? "✓ Yes" : "No",    _existing != null ? (_existing.IsIndigenous ? "✓ Yes" : "No") : null);
+            Add(sec, "LGBTQ+",               r.IsLGBT ? "✓ Yes" : "No",               _existing != null ? (_existing.IsLGBT ? "✓ Yes" : "No") : null);
 
             sec = "Application Status";
             Add(sec, "Status", r.Status, _existing?.Status);
