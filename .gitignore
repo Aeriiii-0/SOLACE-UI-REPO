@@ -28,6 +28,10 @@ x86/
 *.db-shm
 *.db-wal
 
+# Legacy NuGet packages folder
+**/packages/*
+!**/packages/build/
+
 # OS files
 Thumbs.db
 ehthumbs.db
