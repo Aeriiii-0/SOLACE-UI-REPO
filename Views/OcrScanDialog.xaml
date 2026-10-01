@@ -20,17 +20,17 @@
             <Setter Property="Margin" Value="0,0,0,0"/>
         </Style>
         <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="#222222"/>
-            <Setter Property="Margin" Value="0,0,0,3"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
         <Style x:Key="FormBox" TargetType="TextBox">
-            <Setter Property="Height" Value="34"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="#111111"/>
-            <Setter Property="BorderBrush" Value="#D0D0D0"/>
+            <Setter Property="BorderBrush" Value="#D0B8C0"/>
             <Setter Property="BorderThickness" Value="1.2"/>
             <Setter Property="Background" Value="White"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -40,14 +40,14 @@
                         <Border x:Name="Bg" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6">
+                                CornerRadius="8">
                             <ScrollViewer x:Name="PART_ContentHost"
                                           Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="BorderBrush" Value="#BDBDBD"/>
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#C0A0AA"/>
                             </Trigger>
                             <Trigger Property="IsFocused" Value="True">
                                 <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
@@ -59,28 +59,28 @@
             </Setter>
         </Style>
         <Style x:Key="FormCombo" TargetType="ComboBox">
-            <Setter Property="Height" Value="34"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="#111111"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D0D0D0"/>
+            <Setter Property="BorderBrush" Value="#D0B8C0"/>
             <Setter Property="BorderThickness" Value="1.2"/>
-            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Padding" Value="12,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid>
-                            <Border x:Name="ComboBg" Background="White" BorderBrush="#D0D0D0"
-                                    BorderThickness="1.2" CornerRadius="6">
-                                <Grid Margin="10,0,28,0">
+                            <Border x:Name="ComboBg" Background="White" BorderBrush="#D0B8C0"
+                                    BorderThickness="1.2" CornerRadius="8">
+                                <Grid Margin="12,0,30,0">
                                     <ContentPresenter x:Name="ContentSite"
                                                       Content="{TemplateBinding SelectionBoxItem}"
                                                       ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                                       VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                     <TextBlock x:Name="Placeholder" Text="Select..."
-                                               Foreground="#BBBBBB" FontSize="12"
+                                               Foreground="#BBBBBB" FontSize="13"
                                                VerticalAlignment="Center" IsHitTestVisible="False"
                                                Visibility="Collapsed"/>
                                 </Grid>
@@ -97,11 +97,11 @@
                             <Popup x:Name="Popup" Placement="Bottom"
                                    IsOpen="{TemplateBinding IsDropDownOpen}"
                                    AllowsTransparency="True" Focusable="False" PopupAnimation="None">
-                                <Border Background="White" CornerRadius="8" BorderBrush="#E0E0E0"
+                                <Border Background="White" CornerRadius="8" BorderBrush="#E0D0D5"
                                         BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}"
                                         MaxHeight="200" Margin="0,4,0,0">
                                     <Border.Effect>
-                                        <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="3" Opacity="0.12"/>
+                                        <DropShadowEffect Color="#702943" BlurRadius="12" ShadowDepth="3" Opacity="0.10"/>
                                     </Border.Effect>
                                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
@@ -111,7 +111,7 @@
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#BDBDBD"/>
+                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#C0A0AA"/>
                             </Trigger>
                             <Trigger Property="IsFocused" Value="True">
                                 <Setter TargetName="ComboBg" Property="BorderBrush" Value="#702943"/>
@@ -123,24 +123,24 @@
         </Style>
 
         <Style x:Key="FormDate" TargetType="DatePicker">
-            <Setter Property="Height" Value="34"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="#111111"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D0D0D0"/>
+            <Setter Property="BorderBrush" Value="#D0B8C0"/>
             <Setter Property="BorderThickness" Value="1.2"/>
             <Setter Property="Focusable" Value="True"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="DatePicker">
-                        <Border x:Name="DateBg" Background="White" BorderBrush="#D0D0D0"
-                                BorderThickness="1.2" CornerRadius="6">
+                        <Border x:Name="DateBg" Background="White" BorderBrush="#D0B8C0"
+                                BorderThickness="1.2" CornerRadius="8">
                             <Grid Margin="10,0,10,0">
                                 <DatePickerTextBox x:Name="PART_TextBox"
                                                    HorizontalContentAlignment="Left"
                                                    VerticalContentAlignment="Center"
-                                                   FontSize="12" Foreground="#111111"
+                                                   FontSize="13" Foreground="#111111"
                                                    BorderThickness="0" Background="Transparent"
                                                    FocusVisualStyle="{x:Null}"
                                                    SelectionBrush="#702943"
@@ -189,7 +189,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="DateBg" Property="BorderBrush" Value="#BDBDBD"/>
+                                <Setter TargetName="DateBg" Property="BorderBrush" Value="#C0A0AA"/>
                             </Trigger>
                             <Trigger Property="IsKeyboardFocusWithin" Value="True">
                                 <Setter TargetName="DateBg" Property="BorderBrush" Value="#702943"/>
@@ -202,7 +202,7 @@
         </Style>
 
         <Style x:Key="FormCheck" TargetType="CheckBox">
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="#222222"/>
             <Setter Property="Margin" Value="0,4,14,4"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -214,7 +214,7 @@
             <Setter Property="Visibility" Value="Collapsed"/>
         </Style>
         <Style x:Key="SaveBtn" TargetType="Button">
-            <Setter Property="Height" Value="36"/>
+            <Setter Property="Height" Value="38"/>
             <Setter Property="Padding" Value="22,0"/>
             <Setter Property="Background" Value="#702943"/>
             <Setter Property="Foreground" Value="White"/>
@@ -239,7 +239,7 @@
             </Setter>
         </Style>
         <Style x:Key="CancelBtn" TargetType="Button">
-            <Setter Property="Height" Value="36"/>
+            <Setter Property="Height" Value="38"/>
             <Setter Property="Padding" Value="20,0"/>
             <Setter Property="Background" Value="White"/>
             <Setter Property="Foreground" Value="#555555"/>
@@ -269,31 +269,31 @@
         <Style x:Key="CardSection" TargetType="Border">
             <Setter Property="Background" Value="White"/>
             <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderBrush" Value="#EDE0E5"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="14,10"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
         <Style x:Key="CardSectionHeader" TargetType="Border">
             <Setter Property="BorderBrush" Value="#702943"/>
             <Setter Property="BorderThickness" Value="3,0,0,0"/>
-            <Setter Property="Padding" Value="8,0"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
 
         <Style x:Key="FormBoxSm" TargetType="TextBox" BasedOn="{StaticResource FormBox}">
-            <Setter Property="Height" Value="28"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="10,0"/>
         </Style>
 
         <Style x:Key="FormDateSm" TargetType="DatePicker" BasedOn="{StaticResource FormDate}">
-            <Setter Property="Height" Value="28"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="FontSize" Value="12"/>
         </Style>
 
         <Style x:Key="FieldLabelSm" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="#444444"/>
             <Setter Property="Margin" Value="0,0,0,2"/>
@@ -311,7 +311,7 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <!-- Top Header -->
-                        <RowDefinition Height="56"/>
+                        <RowDefinition Height="60"/>
                         <!-- Main Body: Split Viewport (Left) vs 1:1 Record Form (Right) -->
                         <RowDefinition Height="*"/>
                         <!-- Footer Navigation -->
@@ -360,17 +360,17 @@
                     </Border>
 
                     <!-- MAIN WORKSPACE -->
-                    <Grid Grid.Row="1" Margin="14,10">
+                    <Grid Grid.Row="1" Margin="16,12">
                         <Grid.ColumnDefinitions>
                             <!-- Left: Document Viewport (~44% width) -->
-                            <ColumnDefinition Width="470"/>
+                            <ColumnDefinition Width="520"/>
                             <ColumnDefinition Width="12"/>
                             <!-- Right: 1:1 Partitioned Record Verification (~56% width) -->
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
                         <!-- LEFT: INTERACTIVE LIVE DOCUMENT VIEWPORT -->
-                        <Border Grid.Column="0" Background="#F9F6F7" BorderBrush="#E5D8DC" BorderThickness="1" CornerRadius="10" Padding="10">
+                        <Border Grid.Column="0" Background="#F8F4F6" BorderBrush="#DDD0D5" BorderThickness="1" CornerRadius="10" Padding="10">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -509,7 +509,7 @@
                         </Border>
 
                         <!-- RIGHT: 1:1 RECORD DIALOG FORM WITH STEP 1 & STEP 2 PARTITIONING -->
-                        <Border Grid.Column="2" Background="White" BorderBrush="#E5D8DC" BorderThickness="1" CornerRadius="10" Padding="0" ClipToBounds="True">
+                        <Border Grid.Column="2" Background="White" BorderBrush="#DDD0D5" BorderThickness="1" CornerRadius="10" Padding="0" ClipToBounds="True">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <!-- Step Wizard Indicator -->
@@ -519,7 +519,7 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- STEP INDICATOR HEADER -->
-                                <Border Grid.Row="0" Background="#FAFAFA" BorderBrush="#EEEEEE"
+                                <Border Grid.Row="0" Background="#FDFAFB" BorderBrush="#EDE0E5"
                                         BorderThickness="0,0,0,1" Padding="20,10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -566,7 +566,7 @@
                                     <ScrollViewer x:Name="ScrollStep1" VerticalScrollBarVisibility="Auto"
                                                   HorizontalScrollBarVisibility="Disabled"
                                                   Background="#F4F6F9" Visibility="Visible">
-                                        <StackPanel Margin="18,10,18,14">
+                                        <StackPanel Margin="20,12,20,16">
 
                                             <!-- CARD: APPLICANT TYPE -->
                                             <Border Style="{StaticResource CardSection}">
@@ -1065,7 +1065,7 @@
                                     <ScrollViewer x:Name="ScrollStep2" VerticalScrollBarVisibility="Auto"
                                                   HorizontalScrollBarVisibility="Disabled"
                                                   Background="#F4F6F9" Visibility="Collapsed">
-                                        <StackPanel Margin="18,10,18,14">
+                                        <StackPanel Margin="20,12,20,16">
 
                                             <!-- CARD: II. PROBLEM PRESENTED / CIRCUMSTANCE -->
                                             <Border Style="{StaticResource CardSection}">
@@ -1240,94 +1240,96 @@
                                                 <StackPanel>
                                                     <Border Style="{StaticResource CardSectionHeader}">
                                                         <TextBlock Text="III. FAMILY COMPOSITION (Include household dependents)"
-                                                                   Style="{StaticResource SectionLabel}"/>
+                                                                   Style="{StaticResource SectionLabel}"
+                                                                   FontSize="13"
+                                                                   FontWeight="Bold"/>
                                                     </Border>
                                                     <!-- Table header -->
                                                     <Grid Margin="0,0,0,4">
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="2*"/>
-                                                            <ColumnDefinition Width="45"/>
-                                                            <ColumnDefinition Width="45"/>
-                                                            <ColumnDefinition Width="95"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="1.5*"/>
-                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="220"/>
+                                                            <ColumnDefinition Width="65"/>
+                                                            <ColumnDefinition Width="65"/>
+                                                            <ColumnDefinition Width="200"/>
+                                                            <ColumnDefinition Width="140"/>
+                                                            <ColumnDefinition Width="160"/>
+                                                            <ColumnDefinition Width="230"/>
+                                                            <ColumnDefinition Width="100"/>
                                                         </Grid.ColumnDefinitions>
-                                                        <TextBlock Grid.Column="0" Text="Name" FontSize="10" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0"/>
-                                                        <TextBlock Grid.Column="1" Text="Sex" FontSize="10" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0"/>
-                                                        <TextBlock Grid.Column="2" Text="Age" FontSize="10" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0"/>
-                                                        <TextBlock Grid.Column="3" Text="Birthdate (mm/dd/yyyy)" FontSize="10" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0"/>
-                                                        <TextBlock Grid.Column="4" Text="Civil Stat" FontSize="10" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0"/>
-                                                        <TextBlock Grid.Column="5" Text="Relation" FontSize="10" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0"/>
-                                                        <TextBlock Grid.Column="6" Text="Educ / Job" FontSize="10" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0"/>
-                                                        <TextBlock Grid.Column="7" Text="Income" FontSize="10" FontWeight="Bold" Foreground="#555555"/>
+                                                        <TextBlock Grid.Column="0" Text="Name" FontSize="11" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0" HorizontalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="1" Text="Sex" FontSize="11" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0" HorizontalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="2" Text="Age" FontSize="11" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0" HorizontalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="3" Text="Birthdate (mm/dd/yyyy)" FontSize="11" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0" HorizontalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="4" Text="Civil Stat" FontSize="11" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0" HorizontalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="5" Text="Relation" FontSize="11" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0" HorizontalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="6" Text="Educ / Job" FontSize="11" FontWeight="Bold" Foreground="#555555" Margin="0,0,4,0" HorizontalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="7" Text="Income" FontSize="11" FontWeight="Bold" Foreground="#555555" HorizontalAlignment="Center"/>
                                                     </Grid>
                                                     <ItemsControl x:Name="FamilyRows">
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
                                                                 <Grid Margin="0,0,0,3">
                                                                     <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="2*"/>
-                                                                        <ColumnDefinition Width="45"/>
-                                                                        <ColumnDefinition Width="45"/>
-                                                                        <ColumnDefinition Width="95"/>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                        <ColumnDefinition Width="1.5*"/>
-                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="220"/>
+                                                                        <ColumnDefinition Width="65"/>
+                                                                        <ColumnDefinition Width="65"/>
+                                                                        <ColumnDefinition Width="200"/>
+                                                                        <ColumnDefinition Width="140"/>
+                                                                        <ColumnDefinition Width="160"/>
+                                                                        <ColumnDefinition Width="230"/>
+                                                                        <ColumnDefinition Width="100"/>
                                                                     </Grid.ColumnDefinitions>
-                                                                    <TextBox Grid.Column="0" Height="28" FontSize="11"
-                                                                             BorderBrush="#D0D0D0" BorderThickness="1"
+                                                                    <TextBox Grid.Column="0" Height="32" FontSize="12"
+                                                                 BorderBrush="#D0B8C0" BorderThickness="1"
                                                                              Background="White" Padding="4,0"
                                                                              VerticalContentAlignment="Center" Margin="0,0,3,0"
                                                                              Tag="fam_row1_name" GotFocus="Field_GotFocus"
                                                                              PreviewTextInput="NameOnly_PreviewTextInput"
                                                                              LostFocus="FamilyMemberName_LostFocus"
                                                                              Text="{Binding MemberName, UpdateSourceTrigger=PropertyChanged}"/>
-                                                                    <TextBox Grid.Column="1" Height="28" FontSize="11"
-                                                                             BorderBrush="#D0D0D0" BorderThickness="1"
+                                                                    <TextBox Grid.Column="1" Height="32" FontSize="12"
+                                                                 BorderBrush="#D0B8C0" BorderThickness="1"
                                                                              Background="White" Padding="2,0"
                                                                              VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,3,0"
                                                                              Tag="fam_row1_sex" GotFocus="Field_GotFocus"
                                                                              MaxLength="6"
                                                                              PreviewTextInput="NameOnly_PreviewTextInput"
                                                                              Text="{Binding Sex, UpdateSourceTrigger=PropertyChanged}"/>
-                                                                    <TextBox Grid.Column="2" Height="28" FontSize="11"
-                                                                             BorderBrush="#D0D0D0" BorderThickness="1"
+                                                                    <TextBox Grid.Column="2" Height="32" FontSize="12"
+                                                                 BorderBrush="#D0B8C0" BorderThickness="1"
                                                                              Background="#F5F5F5" Padding="2,0"
                                                                              VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,3,0"
                                                                              Tag="fam_row1_age" GotFocus="Field_GotFocus"
                                                                              IsReadOnly="True" Focusable="False" Cursor="Arrow"
                                                                              ToolTip="Age is automatically calculated from Birthdate"
                                                                              Text="{Binding Age, Mode=OneWay}"/>
-                                                                    <TextBox Grid.Column="3" Height="28" FontSize="11"
-                                                                             BorderBrush="#D0D0D0" BorderThickness="1"
+                                                                    <TextBox Grid.Column="3" Height="32" FontSize="12"
+                                                                 BorderBrush="#D0B8C0" BorderThickness="1"
                                                                              Background="White" Padding="4,0"
                                                                              VerticalContentAlignment="Center" Margin="0,0,3,0"
                                                                              Tag="fam_row1_dob" GotFocus="Field_GotFocus"
                                                                              LostFocus="FamilyBirthdate_LostFocus"
                                                                              Text="{Binding Birthdate, UpdateSourceTrigger=PropertyChanged}"/>
-                                                                    <TextBox Grid.Column="4" Height="28" FontSize="11"
-                                                                             BorderBrush="#D0D0D0" BorderThickness="1"
+                                                                    <TextBox Grid.Column="4" Height="32" FontSize="12"
+                                                                 BorderBrush="#D0B8C0" BorderThickness="1"
                                                                              Background="White" Padding="4,0"
                                                                              VerticalContentAlignment="Center" Margin="0,0,3,0"
                                                                              Tag="fam_row1_civ" GotFocus="Field_GotFocus"
                                                                              Text="{Binding CivilStatus, UpdateSourceTrigger=PropertyChanged}"/>
-                                                                    <TextBox Grid.Column="5" Height="28" FontSize="11"
-                                                                             BorderBrush="#D0D0D0" BorderThickness="1"
+                                                                    <TextBox Grid.Column="5" Height="32" FontSize="12"
+                                                                 BorderBrush="#D0B8C0" BorderThickness="1"
                                                                              Background="White" Padding="4,0"
                                                                              VerticalContentAlignment="Center" Margin="0,0,3,0"
                                                                              Tag="fam_row1_rel" GotFocus="Field_GotFocus"
                                                                              Text="{Binding Relationship, UpdateSourceTrigger=PropertyChanged}"/>
-                                                                    <TextBox Grid.Column="6" Height="28" FontSize="11"
-                                                                             BorderBrush="#D0D0D0" BorderThickness="1"
+                                                                    <TextBox Grid.Column="6" Height="32" FontSize="12"
+                                                                 BorderBrush="#D0B8C0" BorderThickness="1"
                                                                              Background="White" Padding="4,0"
                                                                              VerticalContentAlignment="Center" Margin="0,0,3,0"
                                                                              Tag="fam_row1_edu" GotFocus="Field_GotFocus"
                                                                              Text="{Binding EducationEmployment, UpdateSourceTrigger=PropertyChanged}"/>
-                                                                    <TextBox Grid.Column="7" Height="28" FontSize="11"
-                                                                             BorderBrush="#D0D0D0" BorderThickness="1"
+                                                                    <TextBox Grid.Column="7" Height="32" FontSize="12"
+                                                                 BorderBrush="#D0B8C0" BorderThickness="1"
                                                                              Background="White" Padding="4,0"
                                                                              VerticalContentAlignment="Center"
                                                                              Tag="fam_row1_inc" GotFocus="Field_GotFocus"
@@ -1444,7 +1446,7 @@
                     </Grid>
 
                     <!-- FOOTER ACTIONS -->
-                    <Border Grid.Row="2" Background="White" BorderBrush="#EEEEEE"
+                    <Border Grid.Row="2" Background="White" BorderBrush="#EDE0E5"
                             BorderThickness="0,1,0,0" Padding="20,10">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -1517,3 +1519,4 @@
         </Border>
     </Border>
 </Window>
+

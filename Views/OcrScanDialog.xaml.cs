@@ -102,10 +102,10 @@ namespace SOLUM_UI
 
             if (DialogShell != null)
             {
-                DialogShell.MaxHeight = Math.Min(screenH * 0.95, 760);
-                DialogShell.Height    = Math.Min(screenH * 0.90, 730);
-                DialogShell.Width     = Math.Min(screenW * 0.95, 1360);
-                DialogShell.MinWidth  = Math.Min(screenW * 0.90, 1050);
+                DialogShell.MaxHeight = Math.Min(screenH * 0.96, 920);
+                DialogShell.Height    = Math.Min(screenH * 0.93, 890);
+                DialogShell.Width     = Math.Min(screenW * 0.96, 1480);
+                DialogShell.MinWidth  = Math.Min(screenW * 0.92, 1140);
             }
         }
 
