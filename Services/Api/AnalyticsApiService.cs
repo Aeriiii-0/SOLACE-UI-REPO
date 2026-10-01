@@ -26,5 +26,11 @@ namespace SOLUM_UI.Services.Api
 
             return await ApiClient.Instance.GetAsync<MonthlyAnalyticsDto>(url);
         }
+
+        public async Task<BaseResponse<DashboardAnalyticsDto>> GetDashboardAnalyticsAsync()
+        {
+            string url = "api/analytics/dashboard";
+            return await ApiClient.Instance.GetAsync<DashboardAnalyticsDto>(url);
+        }
     }
 }

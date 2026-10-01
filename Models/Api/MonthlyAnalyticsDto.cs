@@ -21,3 +21,15 @@ public class MonthlyAnalyticsDto
     public Dictionary<string, int> PantawidBeneficiary { get; set; } = new Dictionary<string, int>(); 
     public Dictionary<string, int> Indigenous { get; set; } = new Dictionary<string, int>();    
 }
+
+public class DashboardAnalyticsDto
+{
+    public int TotalRegistered { get; set; }
+    public int RegisteredThisMonth { get; set; }
+
+    public int ActiveRecords { get; set; }
+    public int ActiveChangeFromLastMonth { get; set; }  
+
+    public int RenewalsDueThisMonth { get; set; }
+    public int RenewalsCompletedToday { get; set; }
+}

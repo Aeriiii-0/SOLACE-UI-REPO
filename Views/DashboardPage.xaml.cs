@@ -9,6 +9,15 @@ using SOLUM_UI.ViewModels;namespace SOLUM_UI
         public DashboardPage()
         {
             InitializeComponent();
+
+            if (!(DataContext is DashboardViewModel))
+                DataContext = new DashboardViewModel();
+
+            Loaded += async (s, e) =>
+            {
+                if (DataContext is DashboardViewModel vm)
+                    await vm.LoadAsync();
+            };
         }
 
         private void ViewAllLogs_Click(object sender, RoutedEventArgs e)
