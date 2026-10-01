@@ -1,8 +1,10 @@
+using SOLUM_UI.Models.Api;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using SOLUM_UI.Models.Api;
 
 namespace SOLUM_UI.Services.Api
 {
@@ -124,6 +126,34 @@ namespace SOLUM_UI.Services.Api
                 Errors = resp.Errors,
                 Data = resp.Succeeded ? "Password Changed Successfully." : null
             };
+        }
+
+        public static Guid? ExtractUserIdFromToken(string rawToken)
+        {
+            if (string.IsNullOrWhiteSpace(rawToken))
+                return null;
+
+            string token = rawToken.Trim().Trim('"', '\'');   // strip stray quotes
+            if (token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                token = token.Substring(7).Trim();
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                if (!handler.CanReadToken(token))
+                    return null;
+
+                var value = handler.ReadJwtToken(token).Claims
+                    .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier
+                                  || c.Type == "nameid"
+                                  || c.Type == "sub")?.Value;
+
+                return Guid.TryParse(value, out var id) ? id : (Guid?)null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

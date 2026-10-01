@@ -19,10 +19,12 @@ namespace SOLUM_UI
         /// <summary>Populate all read-only fields from current session.</summary>
         private void PopulateProfile()
         {
-            string name     = MainWindow.CurrentUserName;
+            string name     = MainWindow.FullName;
             string role     = MainWindow.CurrentUserRole;
             string barangay = MainWindow.CurrentUserBarangay;
-            string email    = name.Contains("@") ? name : name.ToLower().Replace(" ", ".") + "@solace.gov.ph";
+            string firstName = MainWindow.FirstName;
+            string lastName = MainWindow.LastName;
+            string email    = MainWindow.CurrentUserEmail;
 
             TxtDisplayName.Text  = name;
             TxtDisplayRole.Text  = role;
@@ -34,8 +36,8 @@ namespace SOLUM_UI
             TxtInitial.Text      = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "U";
 
             string[] parts = name.Split(' ');
-            TxtPwdFirstName.Text = parts.Length > 0 ? parts[0] : name;
-            TxtPwdLastName.Text  = parts.Length > 1 ? parts[parts.Length - 1] : "";
+            TxtPwdFirstName.Text = firstName;
+            TxtPwdLastName.Text  = lastName;
             TxtPwdRole.Text      = role;
 
             TxtSessionStart.Text = _sessionStart.ToString("MMM d, yyyy  h:mm tt");

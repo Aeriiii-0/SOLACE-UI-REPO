@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
 
@@ -91,9 +92,14 @@ namespace SOLUM_UI
                     ? loginResponse.Data.Email
                     : email;
 
+                Guid id = AuthApiService.ExtractUserIdFromToken(loginResponse.Data.Token) ?? Guid.Empty;
                 MainWindow.CurrentUserRole = AuthApiService.Instance.IsAdmin ? "Administrator" : "Encoder";
 
-                var mainWindow = new MainWindow();
+                var userDTO = await UserApiService.Instance.GetApplicationUsersAsync(
+                        new GetApplicationUserRequest { Id = id, Page = 1, PageSize = 1 }
+                    );
+
+                var mainWindow = new MainWindow(userDTO.Data.Items.ElementAt(0));
                 mainWindow.Show();
                 AuditLogService.Instance.LogLogin(MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
                 ToastNotification.Show("Welcome", "Logged in as " + MainWindow.CurrentUserName + ".", ToastType.Success);

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Navigation;
+using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
 
@@ -23,10 +24,30 @@ namespace SOLUM_UI
         public static string CurrentUserRole { get; set; } = "Administrator";
         public static string CurrentUserBarangay { get; set; } = string.Empty;
 
+        public static string CurrentUserEmail { get; set; } = string.Empty;
+
+        public static string FirstName { get; set; } = string.Empty;
+
+        public static string LastName { get; set; } = string.Empty;
+
+        public static string FullName => $"{FirstName} {LastName}".Trim();
+
+        public static void SetCurrentUser(ApplicationUserDTO user)
+        {
+            if (user != null)
+            {
+                CurrentUserName = user.Email;
+                FirstName = user.FirstName;
+                LastName = user.LastName;
+                CurrentUserBarangay = string.Empty; // Assuming barangay is set elsewhere
+                CurrentUserEmail = user.Email;
+            }
+        }
+
         private Dictionary<string, Button> _navButtons = new Dictionary<string, Button>();
         private Dictionary<string, Page> _pageCache = new Dictionary<string, Page>(); // NEW — one instance per page tag
 
-        public MainWindow()
+        public MainWindow(ApplicationUserDTO user)
         {
             InitializeComponent();
             RegisterNavButtons();
@@ -38,6 +59,7 @@ namespace SOLUM_UI
                 ActivateButton("Dashboard");
                 NavigatePage(GetOrCreatePage("Dashboard", () => new DashboardPage())); // CHANGED
             };
+            SetCurrentUser(user);
         }
 
         // NEW — returns the cached page instance for this tag, creating it once on first use
