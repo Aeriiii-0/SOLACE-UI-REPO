@@ -1,0 +1,243 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.FinalGranteesArchiveGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1050">
+    <UserControl.Resources>
+        <Style x:Key="PriorityBadge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="10,3"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="Cell" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#1A1A1A"/>
+        </Style>
+
+        <Style x:Key="ColHeader" TargetType="GridViewColumnHeader">
+            <Setter Property="Background" Value="#FBF5F7"/>
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewColumnHeader">
+                        <Border x:Name="HeaderBg" Background="#FBF5F7" BorderBrush="#702943" BorderThickness="0,0,0,1">
+                            <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="Center" TextBlock.Foreground="#702943"/>
+                            </Border>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SelRow" TargetType="ListViewItem">
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#E0D0D5"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border x:Name="Bg" Background="{Binding RowBg}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <GridViewRowPresenter VerticalAlignment="Center" Margin="0,9"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Top Header & Fiscal Year Bar -->
+        <Border Grid.Row="0" Background="#F0FFF4" CornerRadius="12" BorderBrush="#27AE60" BorderThickness="1" Padding="16,12" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Width="38" Height="38" Background="#27AE60" CornerRadius="19" Margin="0,0,12,0">
+                    <TextBlock Text="✓" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Final Grantee Confirmation &amp; Historical Archive" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="#1A6637"/>
+                    <TextBlock Text="{Binding FinalSummaryText}" FontFamily="Segoe UI" FontSize="11" Foreground="#388E3C" Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <!-- Fiscal Year Dropdown -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                    <TextBlock Text="Fiscal Year:" FontSize="11" FontWeight="SemiBold" Foreground="#1A6637" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <ComboBox SelectedIndex="{Binding SelectedFiscalYearIndex, Mode=TwoWay}" Width="150" Height="34">
+                        <ComboBoxItem Content="2026 (Active)"/>
+                        <ComboBoxItem Content="2025 (Archived)"/>
+                        <ComboBoxItem Content="2024 (Archived)"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <Button Grid.Column="3" Height="34" Padding="14,0" Cursor="Hand" Command="{Binding ExportFinalLedgerCommand}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="#27AE60" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True"><Setter Property="Opacity" Value="0.88"/></Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock Text="📥 Export Final Ledger" FontSize="11" FontWeight="SemiBold" Foreground="White"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Main Ledger Table -->
+        <Border Grid.Row="1" BorderBrush="#27AE60" BorderThickness="1.5" ClipToBounds="True" Background="White">
+            <ListView ItemsSource="{Binding FinalGranteesList}"
+                      BorderThickness="0" Background="Transparent"
+                      ItemContainerStyle="{StaticResource SelRow}"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      Margin="0,4,0,0">
+                <ListView.View>
+                    <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
+                        <GridViewColumn Header="#" Width="48">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="4,0">
+                                        <Border Background="{Binding RankBg}" CornerRadius="12" Width="28" Height="28" HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding Rank}" FontSize="11" FontWeight="Bold" Foreground="{Binding RankFg}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="SP ID" Width="85">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <TextBlock Text="{Binding SpId}" FontSize="12" FontWeight="SemiBold" Foreground="#702943" HorizontalAlignment="Center" Margin="6,0"/>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="NAME" Width="200">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <TextBlock Text="{Binding Name}" Style="{StaticResource Cell}" FontWeight="Medium"/>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="BARANGAY" Width="120">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <TextBlock Text="{Binding Barangay}" Style="{StaticResource Cell}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="SCORE" Width="80">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="8,0">
+                                        <TextBlock Text="{Binding ScoreLabel}" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{Binding ScoreBarColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="PRIORITY" Width="90">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <Border Style="{StaticResource PriorityBadge}" Background="{Binding PriorityColor}">
+                                            <TextBlock Text="{Binding Priority}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding PriorityTextColor}"/>
+                                        </Border>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="ALLOWANCE" Width="140">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <TextBlock Text="{Binding SubsidyType}" Style="{StaticResource Cell}" FontSize="12"/>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="FINAL STATUS" Width="130">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="6,0">
+                                        <Border CornerRadius="10" Padding="10,4" Background="{Binding FinalBadgeColor}" HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding FinalBadgeText}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding FinalBadgeTextColor}"/>
+                                        </Border>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="ACTION" Width="168">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                                        <Button Height="28" Padding="14,0" Cursor="Hand" Margin="0,0,6,0"
+                                                Command="{Binding DataContext.ConfirmGranteeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="#27AE60" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.85"/></Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                            <TextBlock Text="Confirm" FontSize="11" FontWeight="SemiBold" Foreground="White"/>
+                                        </Button>
+                                        <Button Height="28" Padding="10,0" Cursor="Hand"
+                                                Command="{Binding DataContext.RevokeGranteeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="6" BorderBrush="#BBBBBB" BorderThickness="1" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.75"/></Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                            <TextBlock Text="Revoke" FontSize="11" FontWeight="SemiBold" Foreground="#888888"/>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Border>
+    </Grid>
+</UserControl>

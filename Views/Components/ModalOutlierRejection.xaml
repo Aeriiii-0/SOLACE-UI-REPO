@@ -1,0 +1,189 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.ModalOutlierRejection"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <Style x:Key="ModalFormCombo" TargetType="ComboBox">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#111111"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#C0A0AA"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid HorizontalAlignment="Stretch">
+                            <Border x:Name="ComboBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                                <Grid Margin="12,0,28,0">
+                                    <ContentPresenter x:Name="ContentSite" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                </Grid>
+                            </Border>
+                            <ToggleButton HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" BorderThickness="0" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Focusable="False" Opacity="0"/>
+                            <Path HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" Data="M7,10L12,15L17,10H7Z" Fill="#702943" Stretch="Uniform" Width="11" Height="11" IsHitTestVisible="False"/>
+                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                                <Border Background="White" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="220" Margin="0,3,0,0">
+                                    <Border.Effect><DropShadowEffect Color="#702943" BlurRadius="12" ShadowDepth="3" Opacity="0.12"/></Border.Effect>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto"><ItemsPresenter/></ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ComboBorder" Property="BorderBrush" Value="#702943"/></Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True"><Setter TargetName="ComboBorder" Property="BorderBrush" Value="#702943"/><Setter TargetName="ComboBorder" Property="BorderThickness" Value="1.5"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Resources>
+                <Style TargetType="ComboBoxItem">
+                    <Setter Property="Padding" Value="12,8"/>
+                    <Setter Property="FontSize" Value="12.5"/>
+                    <Setter Property="Foreground" Value="#222222"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ComboBoxItem">
+                                <Border x:Name="ItemBg" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="6" Margin="4,2"><ContentPresenter/></Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ItemBg" Property="Background" Value="#FDF0F3"/></Trigger>
+                                    <Trigger Property="IsSelected" Value="True"><Setter TargetName="ItemBg" Property="Background" Value="#F0E4E8"/><Setter Property="Foreground" Value="#702943"/><Setter Property="FontWeight" Value="SemiBold"/></Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Style.Resources>
+        </Style>
+
+        <Style x:Key="ModalFormBox" TargetType="TextBox">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Foreground" Value="#111111"/>
+            <Setter Property="BorderBrush" Value="#C0A0AA"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="BorderBrush" Value="#A08090"/></Trigger>
+                            <Trigger Property="IsFocused" Value="True"><Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/><Setter TargetName="Bg" Property="BorderThickness" Value="1.5"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModalCancelBtn" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#D0C0C8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#F8F8F8"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModalConfirmBtn" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Background" Value="#702943"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.88"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#7F000000" Visibility="{Binding IsOutlierModalOpen, Converter={StaticResource BoolToVis}}">
+        <Border Background="White" CornerRadius="12" BorderBrush="#E0D0D5" BorderThickness="1"
+                Width="480" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="28">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="6" Opacity="0.25"/>
+            </Border.Effect>
+            <StackPanel>
+                <!-- Header (Clean, No Emojis) -->
+                <Grid Margin="0,0,0,14">
+                    <TextBlock Text="Disqualify Candidate" FontSize="16" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
+                    <Button HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Cursor="Hand" Command="{Binding CloseOutlierModalCommand}">
+                        <TextBlock Text="✕" FontSize="16" Foreground="#888888" FontWeight="Bold"/>
+                    </Button>
+                </Grid>
+
+                <TextBlock Text="{Binding OutlierTargetNameAndId}" FontSize="12.5" FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,16"/>
+
+                <!-- Reason Dropdown Styled after FormCombo -->
+                <TextBlock Text="Disqualification Reason *" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222" Margin="0,0,0,6"/>
+                <ComboBox SelectedValue="{Binding OutlierRejectionReason, Mode=TwoWay}"
+                          SelectedValuePath="Content"
+                          Style="{StaticResource ModalFormCombo}"
+                          Margin="0,0,0,16">
+                    <ComboBoxItem Content="Ineligible Income / Undisclosed Assets" IsSelected="True"/>
+                    <ComboBoxItem Content="Duplicate / Existing Government Grantee"/>
+                    <ComboBoxItem Content="Child Over Age / No Qualified Minor Dependents"/>
+                    <ComboBoxItem Content="Falsified Circumstance or Documentation"/>
+                    <ComboBoxItem Content="Voluntary Withdrawal by Applicant"/>
+                    <ComboBoxItem Content="Other Statutory Disqualification"/>
+                </ComboBox>
+
+                <!-- Audit Notes & Justification -->
+                <TextBlock Text="Audit Notes &amp; Justification" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222" Margin="0,0,0,6"/>
+                <TextBox Height="72" TextWrapping="Wrap" AcceptsReturn="True"
+                         Style="{StaticResource ModalFormBox}"
+                         Text="{Binding OutlierNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,0,0,16"/>
+
+                <!-- Auto-promote checkbox -->
+                <CheckBox IsChecked="{Binding OutlierAutoPromote, Mode=TwoWay}"
+                          Content="Auto-promote highest-ranked waitlist candidate to maintain budget quota"
+                          FontSize="12" Foreground="#333333" Margin="0,0,0,22"/>
+
+                <!-- Modal Actions Styled after Form CancelBtn and SaveBtn -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Cancel" Style="{StaticResource ModalCancelBtn}" Command="{Binding CloseOutlierModalCommand}"/>
+                    <Button Grid.Column="2" Content="Confirm Rejection" Style="{StaticResource ModalConfirmBtn}" Command="{Binding ConfirmOutlierRejectionCommand}"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

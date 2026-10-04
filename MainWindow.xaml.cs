@@ -7,6 +7,7 @@ using System.Windows.Navigation;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
+using SOLUM_UI.Views.Pages;
 
 namespace SOLUM_UI
 {
