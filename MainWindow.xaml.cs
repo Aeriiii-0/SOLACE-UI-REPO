@@ -21,6 +21,7 @@ namespace SOLUM_UI
         public static bool GetIsNavActive(DependencyObject obj) => (bool)obj.GetValue(IsNavActiveProperty);
 
         public static string CurrentUserName { get; set; } = "Admin User";
+        public static string CurrentUserId { get; set; } = string.Empty;
         public static string CurrentUserRole { get; set; } = "Administrator";
         public static string CurrentUserBarangay { get; set; } = string.Empty;
 
@@ -36,11 +37,16 @@ namespace SOLUM_UI
         {
             if (user != null)
             {
+                CurrentUserId = user.Id != Guid.Empty ? user.Id.ToString() : (AuthApiService.Instance.CurrentUserId ?? string.Empty);
                 CurrentUserName = user.Email;
                 FirstName = user.FirstName;
                 LastName = user.LastName;
                 CurrentUserBarangay = string.Empty; // Assuming barangay is set elsewhere
                 CurrentUserEmail = user.Email;
+            }
+            else
+            {
+                CurrentUserId = AuthApiService.Instance.CurrentUserId ?? string.Empty;
             }
         }
 

@@ -19,10 +19,13 @@ namespace SOLUM_UI.Services.Api
         public string RefreshToken { get; private set; } = string.Empty;
         public List<string> CurrentRoles { get; private set; } = new List<string>();
 
+        public string CurrentUserId => ExtractUserIdFromToken(Token)?.ToString() ?? string.Empty;
+
         public bool IsAuthenticated => !string.IsNullOrWhiteSpace(Token);
         public bool IsAdmin => CurrentRoles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
                                                     r.Equals("Administrator", StringComparison.OrdinalIgnoreCase));
-        public bool IsEncoder => CurrentRoles.Any(r => r.Equals("Encoder", StringComparison.OrdinalIgnoreCase));
+        public bool IsEncoder => CurrentRoles.Any(r => r.Equals("Encoder", StringComparison.OrdinalIgnoreCase)) ||
+                                 !IsAdmin;
 
         private AuthApiService() { }
 

@@ -42,8 +42,8 @@ namespace SOLUM_UI.Services.Api
             _jsonSettings = new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                NullValueHandling = NullValueHandling.Ignore,
-                DateFormatString = "yyyy-MM-ddTHH:mm:ss"
+                NullValueHandling = NullValueHandling.Ignore
+                // No DateFormatString — let Newtonsoft handle ISO 8601 / DateTimeOffset natively
             };
         }
 
