@@ -51,7 +51,7 @@ namespace SOLUM_UI
             InitializeComponent();
 
             for (int i = 0; i < 5; i++)
-                _familyRowData.Add(new FamilyMemberRow());
+                _familyRowData.Add(MakeFamilyRow());
             FamilyRows.ItemsSource = _familyRowData;
 
             _fieldBBoxes = OcrService.GetTemplateBoundingBoxes();
@@ -635,9 +635,13 @@ namespace SOLUM_UI
                 TxtMonthlyIncome.Text = OcrService.FuzzyMatchIncome(GetVal(resp, "monthly_income"));
 
                 string empRaw = GetVal(resp, "employment_status").ToLower();
-                ChkEmployed.IsChecked     = empRaw.Contains("employed") && !empRaw.Contains("not") && !empRaw.Contains("unemployed") && !empRaw.Contains("self");
-                ChkSelfEmployed.IsChecked = empRaw.Contains("self");
-                ChkNotEmployed.IsChecked  = empRaw.Contains("not") || empRaw.Contains("unemployed");
+                ChkEmployed.IsChecked     = false;
+                ChkSelfEmployed.IsChecked = false;
+                ChkNotEmployed.IsChecked  = false;
+                
+                if (empRaw.Contains("self")) ChkSelfEmployed.IsChecked = true;
+                else if (empRaw.Contains("not") || empRaw.Contains("unemployed")) ChkNotEmployed.IsChecked = true;
+                else if (empRaw.Contains("employed")) ChkEmployed.IsChecked = true;
 
                 TxtAddress.Text   = GetVal(resp, "address");
                 TxtBarangay.Text  = OcrService.FuzzyMatchBarangay(GetVal(resp, "barangay"));
@@ -683,18 +687,31 @@ namespace SOLUM_UI
                     }
 
                     string code = resp.Circumstance.Code.ToUpper();
-                    ChkA1.IsChecked = (code == "A1");
-                    ChkA2.IsChecked = (code == "A2");
-                    ChkA3.IsChecked = (code == "A3");
-                    ChkA4.IsChecked = (code == "A4");
-                    ChkA5.IsChecked = (code == "A5");
-                    ChkA6.IsChecked = (code == "A6");
-                    ChkA7.IsChecked = (code == "A7");
-                    ChkB.IsChecked  = (code == "B");
-                    ChkC.IsChecked  = (code == "C");
-                    ChkD.IsChecked  = (code == "D");
-                    ChkE.IsChecked  = (code == "E");
-                    ChkF.IsChecked  = (code == "F");
+                    ChkA1.IsChecked = false;
+                    ChkA2.IsChecked = false;
+                    ChkA3.IsChecked = false;
+                    ChkA4.IsChecked = false;
+                    ChkA5.IsChecked = false;
+                    ChkA6.IsChecked = false;
+                    ChkA7.IsChecked = false;
+                    ChkB.IsChecked = false;
+                    ChkC.IsChecked = false;
+                    ChkD.IsChecked = false;
+                    ChkE.IsChecked = false;
+                    ChkF.IsChecked = false;
+                    
+                    if (code == "A1") ChkA1.IsChecked = true;
+                    else if (code == "A2") ChkA2.IsChecked = true;
+                    else if (code == "A3") ChkA3.IsChecked = true;
+                    else if (code == "A4") ChkA4.IsChecked = true;
+                    else if (code == "A5") ChkA5.IsChecked = true;
+                    else if (code == "A6") ChkA6.IsChecked = true;
+                    else if (code == "A7") ChkA7.IsChecked = true;
+                    else if (code == "B") ChkB.IsChecked = true;
+                    else if (code == "C") ChkC.IsChecked = true;
+                    else if (code == "D") ChkD.IsChecked = true;
+                    else if (code == "E") ChkE.IsChecked = true;
+                    else if (code == "F") ChkF.IsChecked = true;
 
                     if (ChkA2.IsChecked == true)
                     {
@@ -709,6 +726,13 @@ namespace SOLUM_UI
                     if (ChkA5.IsChecked == true)
                     {
                         TxtA5Period.Text = resp.Circumstance.SubfieldPeriod ?? string.Empty;
+                    }
+                    if (ChkA6.IsChecked == true && CmbA6Declaration != null)
+                    {
+                        string subcode = resp.Circumstance.SubfieldCause?.ToLower() ?? string.Empty;
+                        if (subcode.Contains("nullity")) SetComboByContent(CmbA6Declaration, "Nullity of marriage");
+                        else if (subcode.Contains("annul")) SetComboByContent(CmbA6Declaration, "Annulment of marriage");
+                        else CmbA6Declaration.SelectedIndex = 0;
                     }
                     if (ChkB.IsChecked == true)
                     {
@@ -746,23 +770,24 @@ namespace SOLUM_UI
                             ageVal = OcrService.IsOcrNotApplicable(m.Age) ? string.Empty : m.Age;
                         }
 
-                        _familyRowData.Add(new FamilyMemberRow
-                        {
-                            MemberName          = OcrService.CleanPersonName(m.MemberName),
-                            Sex                 = OcrService.IsOcrNotApplicable(m.Sex) ? string.Empty : m.Sex,
-                            Age                 = ageVal,
-                            Birthdate           = normDob,
-                            CivilStatus         = OcrService.IsOcrNotApplicable(m.CivilStatus) ? string.Empty : OcrService.FuzzyMatchCivilStatus(m.CivilStatus),
-                            Relationship        = OcrService.IsOcrNotApplicable(m.Relationship) ? string.Empty : OcrService.FuzzyMatchRelationship(m.Relationship),
-                            EducationEmployment = OcrService.IsOcrNotApplicable(m.EducationEmployment) ? string.Empty : m.EducationEmployment,
-                            Income              = OcrService.IsOcrNotApplicable(m.Income) ? "0" : OcrService.FuzzyMatchIncome(m.Income)
-                        });
+                        var ocrRow = MakeFamilyRow();
+                        ocrRow.MemberName          = OcrService.CleanPersonName(m.MemberName);
+                        ocrRow.Sex                 = OcrService.IsOcrNotApplicable(m.Sex) ? string.Empty : m.Sex;
+                        ocrRow.CivilStatus         = OcrService.IsOcrNotApplicable(m.CivilStatus) ? string.Empty : OcrService.FuzzyMatchCivilStatus(m.CivilStatus);
+                        ocrRow.Relationship        = OcrService.IsOcrNotApplicable(m.Relationship) ? string.Empty : OcrService.FuzzyMatchRelationship(m.Relationship);
+                        ocrRow.EducationEmployment = OcrService.IsOcrNotApplicable(m.EducationEmployment) ? string.Empty : m.EducationEmployment;
+                        ocrRow.Income              = OcrService.IsOcrNotApplicable(m.Income) ? "0" : OcrService.FuzzyMatchIncome(m.Income);
+                        if (dt.HasValue && dt.Value != DateTime.MinValue)
+                            ocrRow.BirthdateDate = dt.Value;
+                        else if (!string.IsNullOrWhiteSpace(normDob))
+                            ocrRow.Birthdate = normDob;
+                        _familyRowData.Add(ocrRow);
                     }
                 }
 
                 while (_familyRowData.Count < 5)
                 {
-                    _familyRowData.Add(new FamilyMemberRow());
+                    _familyRowData.Add(MakeFamilyRow());
                 }
 
                 // Step 2: Section IV Needs & Problems & Section V Other Sources of Income
@@ -1015,13 +1040,22 @@ namespace SOLUM_UI
             if (PnlA2 != null) PnlA2.Visibility = ChkA2.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             if (PnlA4 != null) PnlA4.Visibility = ChkA4.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             if (PnlA5 != null) PnlA5.Visibility = ChkA5.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            if (PnlA6 != null) PnlA6.Visibility = ChkA6.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             if (PnlB  != null) PnlB.Visibility  = ChkB.IsChecked  == true ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void AddFamilyRow_Click(object sender, RoutedEventArgs e)
         {
-            _familyRowData.Add(new FamilyMemberRow());
+            _familyRowData.Add(MakeFamilyRow());
         }
+
+        private FamilyMemberRow MakeFamilyRow()
+        {
+            var row = new FamilyMemberRow();
+            row.DeleteCommand = new RelayCommand(() => _familyRowData.Remove(row));
+            return row;
+        }
+        
 
         private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -1322,32 +1356,34 @@ namespace SOLUM_UI
                 Religion              = TxtReligion.Text.Trim(),
                 Occupation            = TxtOccupation.Text.Trim(),
                 MonthlyIncome         = TxtMonthlyIncome.Text.Trim(),
-                IsEmployed            = ChkEmployed.IsChecked == true,
-                IsSelfEmployed        = ChkSelfEmployed.IsChecked == true,
-                IsNotEmployed         = ChkNotEmployed.IsChecked == true,
+                IsEmployed            = ChkEmployed.IsChecked == true && ChkEmployed.IsEnabled,
+                IsSelfEmployed        = ChkSelfEmployed.IsChecked == true && ChkSelfEmployed.IsEnabled,
+                IsNotEmployed         = ChkNotEmployed.IsChecked == true && ChkNotEmployed.IsEnabled,
 
                 EmergencyContactName   = TxtEmergencyContact.Text.Trim(),
                 EmergencyRelationship  = TxtRelationship.Text.Trim(),
                 EmergencyAddress       = TxtEmergencyAddress.Text.Trim(),
                 EmergencyContactNumber = OcrService.FormatPhoneNumber(TxtEmergencyNumber.Text.Trim()),
 
-                CircumstanceA1             = ChkA1.IsChecked == true,
-                CircumstanceA2             = ChkA2.IsChecked == true,
-                CircumstanceA2Cause        = TxtA2Cause.Text.Trim(),
-                CircumstanceA2Date         = DpA2Date.SelectedDate ?? DateTime.MinValue,
-                CircumstanceA3             = ChkA3.IsChecked == true,
-                CircumstanceA4             = ChkA4.IsChecked == true,
-                CircumstanceA4Disability   = TxtA4Disability.Text.Trim(),
-                CircumstanceA5             = ChkA5.IsChecked == true,
-                CircumstanceA5Period       = TxtA5Period.Text.Trim(),
-                CircumstanceA6             = ChkA6.IsChecked == true,
-                CircumstanceA7             = ChkA7.IsChecked == true,
-                CircumstanceB              = ChkB.IsChecked == true,
-                CircumstanceBStayAbroad    = TxtBStayAbroad.Text.Trim(),
-                CircumstanceC              = ChkC.IsChecked == true,
-                CircumstanceD              = ChkD.IsChecked == true,
-                CircumstanceE              = ChkE.IsChecked == true,
-                CircumstanceF              = ChkF.IsChecked == true,
+                CircumstanceA1             = ChkA1.IsChecked == true && ChkA1.IsEnabled,
+                CircumstanceA2             = ChkA2.IsChecked == true && ChkA2.IsEnabled,
+                CircumstanceA2Cause        = ChkA2.IsChecked == true ? TxtA2Cause.Text.Trim() : string.Empty,
+                CircumstanceA2Date         = ChkA2.IsChecked == true ? (DpA2Date.SelectedDate ?? DateTime.MinValue) : DateTime.MinValue,
+                CircumstanceA3             = ChkA3.IsChecked == true && ChkA3.IsEnabled,
+                CircumstanceA4             = ChkA4.IsChecked == true && ChkA4.IsEnabled,
+                CircumstanceA4Disability   = ChkA4.IsChecked == true ? TxtA4Disability.Text.Trim() : string.Empty,
+                CircumstanceA5             = ChkA5.IsChecked == true && ChkA5.IsEnabled,
+                CircumstanceA5Period       = ChkA5.IsChecked == true ? TxtA5Period.Text.Trim() : string.Empty,
+                CircumstanceA6             = ChkA6.IsChecked == true && ChkA6.IsEnabled,
+                CircumstanceA6Nullity      = ChkA6.IsChecked == true && GetComboValue(CmbA6Declaration) == "Nullity of marriage",
+                CircumstanceA6Annulment    = ChkA6.IsChecked == true && GetComboValue(CmbA6Declaration) == "Annulment of marriage",
+                CircumstanceA7             = ChkA7.IsChecked == true && ChkA7.IsEnabled,
+                CircumstanceB              = ChkB.IsChecked == true && ChkB.IsEnabled,
+                CircumstanceBStayAbroad    = ChkB.IsChecked == true ? TxtBStayAbroad.Text.Trim() : string.Empty,
+                CircumstanceC              = ChkC.IsChecked == true && ChkC.IsEnabled,
+                CircumstanceD              = ChkD.IsChecked == true && ChkD.IsEnabled,
+                CircumstanceE              = ChkE.IsChecked == true && ChkE.IsEnabled,
+                CircumstanceF              = ChkF.IsChecked == true && ChkF.IsEnabled,
 
                 FamilyMembers     = members,
                 Children          = members.Count,

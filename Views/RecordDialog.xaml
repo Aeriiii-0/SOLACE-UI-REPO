@@ -29,8 +29,8 @@
             <Setter Property="Padding" Value="14,0"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Foreground" Value="#111111"/>
-            <Setter Property="BorderBrush" Value="#D0D0D0"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="BorderBrush" Value="#C0A0AA"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
             <Setter Property="Background" Value="White"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Template">
@@ -39,14 +39,14 @@
                         <Border x:Name="Bg" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
+                                CornerRadius="6">
                             <ScrollViewer x:Name="PART_ContentHost"
                                           Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="BorderBrush" Value="#BDBDBD"/>
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#A08090"/>
                             </Trigger>
                             <Trigger Property="IsFocused" Value="True">
                                 <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
@@ -61,19 +61,19 @@
             <Setter Property="Height" Value="44"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Foreground" Value="#111111"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D0D0D0"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
-                        <Grid>
-                            <Border x:Name="ComboBg" Background="White" BorderBrush="#D0D0D0"
-                                    BorderThickness="1.5" CornerRadius="8">
-                                <Grid Margin="14,0,36,0">
+                        <Grid HorizontalAlignment="Stretch">
+                            <Border x:Name="ComboBg" Background="Transparent" BorderThickness="0">
+                                <Grid Margin="10,0,28,0">
                                     <ContentPresenter x:Name="ContentSite"
                                                       Content="{TemplateBinding SelectionBoxItem}"
                                                       ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
@@ -90,7 +90,7 @@
                                               RelativeSource={RelativeSource TemplatedParent}}"
                                           Focusable="False" Opacity="0"/>
                             <Path HorizontalAlignment="Right" VerticalAlignment="Center"
-                                  Margin="0,0,12,0" Data="M7,10L12,15L17,10H7Z"
+                                  Margin="0,0,10,0" Data="M7,10L12,15L17,10H7Z"
                                   Fill="#702943" Stretch="Uniform" Width="12" Height="12"
                                   IsHitTestVisible="False"/>
                             <Popup x:Name="Popup" Placement="Bottom"
@@ -109,12 +109,6 @@
                             </Popup>
                         </Grid>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#BDBDBD"/>
-                            </Trigger>
-                            <Trigger Property="IsDropDownOpen" Value="True">
-                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#702943"/>
-                            </Trigger>
                             <Trigger Property="SelectedIndex" Value="-1">
                                 <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
                             </Trigger>
@@ -154,134 +148,121 @@
             <Setter Property="Height" Value="44"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Foreground" Value="#111111"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D0D0D0"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="DatePicker">
-                        <Border x:Name="DateBg" Background="White" BorderBrush="#D0D0D0"
-                                BorderThickness="1.5" CornerRadius="8">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="40"/>
-                                </Grid.ColumnDefinitions>
-                                <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0"
-                                                   Foreground="#111111" Background="Transparent"
-                                                   BorderThickness="0" Padding="14,0"
-                                                   VerticalAlignment="Center" FontSize="14"/>
-                                <Button x:Name="PART_Button" Grid.Column="1"
-                                        Background="Transparent" BorderThickness="0"
-                                        Cursor="Hand" Focusable="False">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="CalBg" Background="Transparent" CornerRadius="0,8,8,0">
-                                                <Path Data="M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z"
-                                                      Fill="#AAAAAA" Stretch="Uniform" Width="16" Height="16"
-                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="CalBg" Property="Background" Value="#F5F5F5"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                                <Popup x:Name="PART_Popup" AllowsTransparency="True"
-                                       PlacementTarget="{Binding ElementName=DateBg}"
-                                       Placement="Bottom" StaysOpen="False">
-                                    <Border Background="White" CornerRadius="12" BorderBrush="#E0E0E0"
-                                            BorderThickness="1" Padding="8,6" Margin="0,2,0,0">
-                                        <Border.Effect>
-                                            <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="3" Opacity="0.08"/>
-                                        </Border.Effect>
-                                        <Calendar x:Name="PART_Calendar" Background="White"
-                                                  BorderThickness="0" Foreground="#222222"
-                                                  FontSize="13">
-                                            <Calendar.Resources>
-                                                <Style TargetType="CalendarDayButton">
-                                                    <Setter Property="Width" Value="30"/>
-                                                    <Setter Property="Height" Value="30"/>
-                                                    <Setter Property="FontSize" Value="12"/>
-                                                    <Setter Property="Foreground" Value="#222222"/>
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="CalendarDayButton">
-                                                                <Border x:Name="Bg" Background="Transparent" CornerRadius="15">
-                                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-                                                                    <Trigger Property="IsSelected" Value="True">
-                                                                        <Setter TargetName="Bg" Property="Background" Value="#702943"/>
-                                                                        <Setter Property="Foreground" Value="White"/>
-                                                                    </Trigger>
-                                                                    <Trigger Property="IsToday" Value="True">
-                                                                        <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
-                                                                        <Setter TargetName="Bg" Property="BorderThickness" Value="1.5"/>
-                                                                    </Trigger>
-                                                                    <MultiTrigger>
-                                                                        <MultiTrigger.Conditions>
-                                                                            <Condition Property="IsMouseOver" Value="True"/>
-                                                                            <Condition Property="IsSelected" Value="False"/>
-                                                                        </MultiTrigger.Conditions>
-                                                                        <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
-                                                                    </MultiTrigger>
-                                                                    <Trigger Property="IsInactive" Value="True">
-                                                                        <Setter Property="Foreground" Value="#CCCCCC"/>
-                                                                    </Trigger>
-                                                                    <Trigger Property="IsBlackedOut" Value="True">
-                                                                        <Setter Property="Foreground" Value="#DDDDDD"/>
-                                                                        <Setter Property="IsEnabled" Value="False"/>
-                                                                    </Trigger>
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                                <Style TargetType="CalendarButton">
-                                                    <Setter Property="FontSize" Value="12"/>
-                                                    <Setter Property="Foreground" Value="#222222"/>
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="CalendarButton">
-                                                                <Border x:Name="Bg" Background="Transparent" CornerRadius="6" Margin="2">
-                                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-                                                                    <Trigger Property="HasSelectedDays" Value="True">
-                                                                        <Setter TargetName="Bg" Property="Background" Value="#702943"/>
-                                                                        <Setter Property="Foreground" Value="White"/>
-                                                                    </Trigger>
-                                                                    <MultiTrigger>
-                                                                        <MultiTrigger.Conditions>
-                                                                            <Condition Property="IsMouseOver" Value="True"/>
-                                                                            <Condition Property="HasSelectedDays" Value="False"/>
-                                                                        </MultiTrigger.Conditions>
-                                                                        <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
-                                                                    </MultiTrigger>
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </Calendar.Resources>
-                                        </Calendar>
-                                    </Border>
-                                </Popup>
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="DateBg" Property="BorderBrush" Value="#BDBDBD"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
+                        <Grid HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="36"/>
+                            </Grid.ColumnDefinitions>
+                            <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0"
+                                               Foreground="#111111" Background="Transparent"
+                                               BorderThickness="0" Padding="10,0"
+                                               VerticalAlignment="Center" FontSize="14"/>
+                            <Button x:Name="PART_Button" Grid.Column="1"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    Width="20" Height="20"
+                                    Background="Transparent" BorderThickness="0"
+                                    Cursor="Hand" Focusable="False">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Path Data="M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z"
+                                              Fill="#702943" Stretch="Uniform" Width="16" Height="16"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <Popup x:Name="PART_Popup" Grid.Column="0" AllowsTransparency="True"
+                                   Placement="Bottom" StaysOpen="False">
+                                <Border Background="White" CornerRadius="12" BorderBrush="#E0E0E0"
+                                        BorderThickness="1" Padding="8,6" Margin="0,2,0,0">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="3" Opacity="0.08"/>
+                                    </Border.Effect>
+                                    <Calendar x:Name="PART_Calendar" Background="White"
+                                              BorderThickness="0" Foreground="#222222"
+                                              FontSize="13">
+                                        <Calendar.Resources>
+                                            <Style TargetType="CalendarDayButton">
+                                                <Setter Property="Width" Value="30"/>
+                                                <Setter Property="Height" Value="30"/>
+                                                <Setter Property="FontSize" Value="12"/>
+                                                <Setter Property="Foreground" Value="#222222"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="CalendarDayButton">
+                                                            <Border x:Name="Bg" Background="Transparent" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsSelected" Value="True">
+                                                                    <Setter TargetName="Bg" Property="Background" Value="#702943"/>
+                                                                    <Setter Property="Foreground" Value="White"/>
+                                                                </Trigger>
+                                                                <Trigger Property="IsToday" Value="True">
+                                                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                                                    <Setter TargetName="Bg" Property="BorderThickness" Value="1.5"/>
+                                                                </Trigger>
+                                                                <MultiTrigger>
+                                                                    <MultiTrigger.Conditions>
+                                                                        <Condition Property="IsMouseOver" Value="True"/>
+                                                                        <Condition Property="IsSelected" Value="False"/>
+                                                                    </MultiTrigger.Conditions>
+                                                                    <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
+                                                                </MultiTrigger>
+                                                                <Trigger Property="IsInactive" Value="True">
+                                                                    <Setter Property="Foreground" Value="#CCCCCC"/>
+                                                                </Trigger>
+                                                                <Trigger Property="IsBlackedOut" Value="True">
+                                                                    <Setter Property="Foreground" Value="#DDDDDD"/>
+                                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                            <Style TargetType="CalendarButton">
+                                                <Setter Property="FontSize" Value="12"/>
+                                                <Setter Property="Foreground" Value="#222222"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="CalendarButton">
+                                                            <Border x:Name="Bg" Background="Transparent" CornerRadius="6" Margin="2">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="HasSelectedDays" Value="True">
+                                                                    <Setter TargetName="Bg" Property="Background" Value="#702943"/>
+                                                                    <Setter Property="Foreground" Value="White"/>
+                                                                </Trigger>
+                                                                <MultiTrigger>
+                                                                    <MultiTrigger.Conditions>
+                                                                        <Condition Property="IsMouseOver" Value="True"/>
+                                                                        <Condition Property="HasSelectedDays" Value="False"/>
+                                                                    </MultiTrigger.Conditions>
+                                                                    <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
+                                                                </MultiTrigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </Calendar.Resources>
+                                    </Calendar>
+                                </Border>
+                            </Popup>
+                        </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="FormCheck" TargetType="CheckBox">
+        <Style x:Key="FormCheck" TargetType="ToggleButton">
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="#222222"/>
             <Setter Property="Margin" Value="0,5,20,5"/>
@@ -498,7 +479,9 @@
                                                         HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <TextBlock Text="Date of This Application:" FontSize="13" FontWeight="SemiBold"
                                                            Foreground="#222222" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                                <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDate}" Width="220" Height="36"/>
+                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Width="220">
+                                                    <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDate}" Height="36"/>
+                                                </Border>
                                             </StackPanel>
                                         </Grid>
                                     </StackPanel>
@@ -546,24 +529,28 @@
                                             </StackPanel>
                                             <StackPanel Grid.Column="4" Margin="0,0,10,0">
                                                 <TextBlock Text="Civil Status *" Style="{StaticResource FieldLabel}"/>
-                                                <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
-                                                          SelectionChanged="CmbCivilStatus_SelectionChanged">
-                                                    <ComboBoxItem Content="Single"/>
-                                                    <ComboBoxItem Content="Married"/>
-                                                    <ComboBoxItem Content="Widowed"/>
-                                                    <ComboBoxItem Content="Separated"/>
-                                                    <ComboBoxItem Content="Divorced"/>
-                                                    <ComboBoxItem Content="Annulled"/>
-                                                </ComboBox>
+                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                    <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
+                                                              SelectionChanged="CmbCivilStatus_SelectionChanged">
+                                                        <ComboBoxItem Content="Single"/>
+                                                        <ComboBoxItem Content="Married"/>
+                                                        <ComboBoxItem Content="Widowed"/>
+                                                        <ComboBoxItem Content="Separated"/>
+                                                        <ComboBoxItem Content="Divorced"/>
+                                                        <ComboBoxItem Content="Annulled"/>
+                                                    </ComboBox>
+                                                </Border>
                                                 <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="5">
                                                 <TextBlock Text="Sex *" Style="{StaticResource FieldLabel}"/>
-                                                <ComboBox x:Name="CmbSex" Style="{StaticResource FormCombo}"
-                                                          SelectionChanged="CmbSex_SelectionChanged">
-                                                    <ComboBoxItem Content="Male"/>
-                                                    <ComboBoxItem Content="Female"/>
-                                                </ComboBox>
+                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                    <ComboBox x:Name="CmbSex" Style="{StaticResource FormCombo}"
+                                                              SelectionChanged="CmbSex_SelectionChanged">
+                                                        <ComboBoxItem Content="Male"/>
+                                                        <ComboBoxItem Content="Female"/>
+                                                    </ComboBox>
+                                                </Border>
                                                 <TextBlock x:Name="ErrSex" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                         </Grid>
@@ -579,8 +566,10 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0" Margin="0,0,10,0">
                                                 <TextBlock Text="Birthdate *" Style="{StaticResource FieldLabel}"/>
-                                                <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
-                                                            SelectedDateChanged="DpBirthdate_SelectedDateChanged"/>
+                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                    <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
+                                                                SelectedDateChanged="DpBirthdate_SelectedDateChanged"/>
+                                                </Border>
                                                 <TextBlock x:Name="ErrBirthdate" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Margin="0,0,10,0">
@@ -596,13 +585,15 @@
                                             </StackPanel>
                                             <StackPanel Grid.Column="3" Margin="0,0,10,0">
                                                 <TextBlock Text="Educational Attainment" Style="{StaticResource FieldLabel}"/>
-                                                <ComboBox x:Name="CmbEducation" Style="{StaticResource FormCombo}">
-                                                    <ComboBoxItem Content="Elementary"/>
-                                                    <ComboBoxItem Content="High School"/>
-                                                    <ComboBoxItem Content="Vocational"/>
-                                                    <ComboBoxItem Content="College"/>
-                                                    <ComboBoxItem Content="Post Graduate"/>
-                                                </ComboBox>
+                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                    <ComboBox x:Name="CmbEducation" Style="{StaticResource FormCombo}">
+                                                        <ComboBoxItem Content="Elementary"/>
+                                                        <ComboBoxItem Content="High School"/>
+                                                        <ComboBoxItem Content="Vocational"/>
+                                                        <ComboBoxItem Content="College"/>
+                                                        <ComboBoxItem Content="Post Graduate"/>
+                                                    </ComboBox>
+                                                </Border>
                                             </StackPanel>
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="PhilSys Card Number" Style="{StaticResource FieldLabel}"/>
@@ -634,9 +625,9 @@
                                             <StackPanel Grid.Column="3">
                                                 <TextBlock Text="Employment Status" Style="{StaticResource FieldLabel}"/>
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Height="44">
-                                                    <CheckBox x:Name="ChkEmployed"     Content="Employed"      Style="{StaticResource FormCheck}"/>
-                                                    <CheckBox x:Name="ChkSelfEmployed" Content="Self-Employed" Style="{StaticResource FormCheck}"/>
-                                                    <CheckBox x:Name="ChkNotEmployed"  Content="Not Employed"  Style="{StaticResource FormCheck}"/>
+                                                    <RadioButton x:Name="ChkEmployed"     Content="Employed"      Style="{StaticResource FormCheck}" GroupName="Employment"/>
+                                                    <RadioButton x:Name="ChkSelfEmployed" Content="Self-Employed" Style="{StaticResource FormCheck}" GroupName="Employment"/>
+                                                    <RadioButton x:Name="ChkNotEmployed"  Content="Not Employed"  Style="{StaticResource FormCheck}" GroupName="Employment"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </Grid>
@@ -733,21 +724,21 @@
 
                                             <!-- col 1: A1–A4 -->
                                             <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                                                <CheckBox x:Name="ChkA1" Style="{StaticResource FormCheck}"
+                                                <RadioButton x:Name="ChkA1" Style="{StaticResource FormCheck}" GroupName="Circumstance"
                                                           Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A1. " FontWeight="Bold"/>
                                                         <Run Text="Gives birth as a result of rape"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
 
-                                                <CheckBox x:Name="ChkA2" Style="{StaticResource FormCheck}"
+                                                <RadioButton x:Name="ChkA2" Style="{StaticResource FormCheck}" GroupName="Circumstance"
                                                           Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A2. " FontWeight="Bold"/>
                                                         <Run Text="Death of Spouse"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
                                                 <StackPanel x:Name="PnlA2" Visibility="Collapsed" Margin="22,2,0,6">
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
@@ -766,20 +757,20 @@
                                                     </Grid>
                                                 </StackPanel>
 
-                                                <CheckBox x:Name="ChkA3" Style="{StaticResource FormCheck}">
+                                                <RadioButton x:Name="ChkA3" Style="{StaticResource FormCheck}" GroupName="Circumstance">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A3. " FontWeight="Bold"/>
                                                         <Run Text="Detention of Spouse"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
 
-                                                <CheckBox x:Name="ChkA4" Style="{StaticResource FormCheck}"
+                                                <RadioButton x:Name="ChkA4" Style="{StaticResource FormCheck}" GroupName="Circumstance"
                                                           Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A4. " FontWeight="Bold"/>
                                                         <Run Text="Physical &amp; Mental Incapacity of Spouse"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
                                                 <StackPanel x:Name="PnlA4" Visibility="Collapsed" Margin="22,2,0,6">
                                                     <TextBlock Text="Type of disability" Style="{StaticResource FieldLabelSm}"/>
                                                     <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBoxSm}"/>
@@ -788,48 +779,48 @@
 
                                             <!-- col 2: A5–B -->
                                             <StackPanel Grid.Column="1" Margin="0,0,12,0">
-                                                <CheckBox x:Name="ChkA5" Style="{StaticResource FormCheck}"
+                                                <RadioButton x:Name="ChkA5" Style="{StaticResource FormCheck}" GroupName="Circumstance"
                                                           Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A5. " FontWeight="Bold"/>
                                                         <Run Text="Legal or de facto Separation"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
                                                 <StackPanel x:Name="PnlA5" Visibility="Collapsed" Margin="22,2,0,6">
                                                     <TextBlock Text="Period of separation" Style="{StaticResource FieldLabelSm}"/>
                                                     <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}"/>
                                                 </StackPanel>
 
-                                                <CheckBox x:Name="ChkA6" Style="{StaticResource FormCheck}"
+                                                <RadioButton x:Name="ChkA6" Style="{StaticResource FormCheck}" GroupName="Circumstance"
                                                           Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A6. " FontWeight="Bold"/>
                                                         <Run Text="Declaration of:"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
                                                 <StackPanel x:Name="PnlA6" Visibility="Collapsed" Margin="22,2,0,6">
-                                                    <CheckBox x:Name="ChkA6Nullity" Style="{StaticResource FormCheck}" Margin="0,2,0,2">
-                                                        <TextBlock Text="Nullity of marriage"/>
-                                                    </CheckBox>
-                                                    <CheckBox x:Name="ChkA6Annulment" Style="{StaticResource FormCheck}" Margin="0,2,0,2">
-                                                        <TextBlock Text="Annulment of marriage"/>
-                                                    </CheckBox>
+                                                    <TextBlock Text="Type of Declaration" Style="{StaticResource FieldLabelSm}"/>
+                                                    <ComboBox x:Name="CmbA6Declaration" Style="{StaticResource FormCombo}" Height="36">
+                                                        <ComboBoxItem Content=""/>
+                                                        <ComboBoxItem Content="Nullity of marriage"/>
+                                                        <ComboBoxItem Content="Annulment of marriage"/>
+                                                    </ComboBox>
                                                 </StackPanel>
 
-                                                <CheckBox x:Name="ChkA7" Style="{StaticResource FormCheck}">
+                                                <RadioButton x:Name="ChkA7" Style="{StaticResource FormCheck}" GroupName="Circumstance">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A7. " FontWeight="Bold"/>
                                                         <Run Text="Abandonment of spouse for at least 6 months"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
 
-                                                <CheckBox x:Name="ChkB" Style="{StaticResource FormCheck}"
+                                                <RadioButton x:Name="ChkB" Style="{StaticResource FormCheck}" GroupName="Circumstance"
                                                           Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="B. " FontWeight="Bold"/>
                                                         <Run Text="Spouse or any family member of an OFW"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
                                                 <StackPanel x:Name="PnlB" Visibility="Collapsed" Margin="22,2,0,6">
                                                     <TextBlock Text="Length of Stay Abroad" Style="{StaticResource FieldLabelSm}"/>
                                                     <TextBox x:Name="TxtBStayAbroad" Style="{StaticResource FormBoxSm}"/>
@@ -838,33 +829,33 @@
 
                                             <!-- col 3: C–F -->
                                             <StackPanel Grid.Column="2">
-                                                <CheckBox x:Name="ChkC" Style="{StaticResource FormCheck}">
+                                                <RadioButton x:Name="ChkC" Style="{StaticResource FormCheck}" GroupName="Circumstance">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="C. " FontWeight="Bold"/>
                                                         <Run Text="Unmarried Mother or Father"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
 
-                                                <CheckBox x:Name="ChkD" Style="{StaticResource FormCheck}">
+                                                <RadioButton x:Name="ChkD" Style="{StaticResource FormCheck}" GroupName="Circumstance">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="D. " FontWeight="Bold"/>
                                                         <Run Text="Legal Guardian / Adoptive / Foster Parent"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
 
-                                                <CheckBox x:Name="ChkE" Style="{StaticResource FormCheck}">
+                                                <RadioButton x:Name="ChkE" Style="{StaticResource FormCheck}" GroupName="Circumstance">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="E. " FontWeight="Bold"/>
                                                         <Run Text="Relative within the fourth (4th) civil degree of consanguinity or affinity"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
 
-                                                <CheckBox x:Name="ChkF" Style="{StaticResource FormCheck}">
+                                                <RadioButton x:Name="ChkF" Style="{StaticResource FormCheck}" GroupName="Circumstance">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="F. " FontWeight="Bold"/>
                                                         <Run Text="Pregnant Woman"/>
                                                     </TextBlock>
-                                                </CheckBox>
+                                                </RadioButton>
                                             </StackPanel>
                                         </Grid>
                                     </StackPanel>
@@ -884,24 +875,26 @@
                                             <!-- table header -->
                                             <Grid Margin="0,0,0,4">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="220" SharedSizeGroup="C0"/>
-                                                    <ColumnDefinition Width="65"   SharedSizeGroup="C1"/>
-                                                    <ColumnDefinition Width="65"   SharedSizeGroup="C2"/>
-                                                    <ColumnDefinition Width="200"  SharedSizeGroup="C3"/>
-                                                    <ColumnDefinition Width="140" SharedSizeGroup="C4"/>
-                                                    <ColumnDefinition Width="160" SharedSizeGroup="C5"/>
-                                                    <ColumnDefinition Width="230" SharedSizeGroup="C6"/>
-                                                    <ColumnDefinition Width="100"   SharedSizeGroup="C7"/>
+                                                    <ColumnDefinition Width="270" SharedSizeGroup="C0"/>
+                                                    <ColumnDefinition Width="95"  SharedSizeGroup="C1"/>
+                                                    <ColumnDefinition Width="50"   SharedSizeGroup="C2"/>
+                                                    <ColumnDefinition Width="155"  SharedSizeGroup="C3"/>
+                                                    <ColumnDefinition Width="105"  SharedSizeGroup="C4"/>
+                                                    <ColumnDefinition Width="135"  SharedSizeGroup="C5"/>
+                                                    <ColumnDefinition Width="205"  SharedSizeGroup="C6"/>
+                                                    <ColumnDefinition Width="145"   SharedSizeGroup="C7"/>
+                                                    <ColumnDefinition Width="36"   SharedSizeGroup="C8"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Border Grid.ColumnSpan="8" Background="#F8F0F3" CornerRadius="6" Margin="0,0,0,2" Padding="4,8"/>
-                                                <TextBlock Grid.Column="0" Text="Name"                     FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="8,8,6,8" HorizontalAlignment="Center"/>
-                                                <TextBlock Grid.Column="1" Text="Sex"                      FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="4,8,6,8" HorizontalAlignment="Center"/>
-                                                <TextBlock Grid.Column="2" Text="Age"                      FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="4,8,6,8" HorizontalAlignment="Center"/>
-                                                <TextBlock Grid.Column="3" Text="Birthdate (mm/dd/yy)"    FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="4,8,6,8" HorizontalAlignment="Center"/>
-                                                <TextBlock Grid.Column="4" Text="Civil Status"             FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="4,8,6,8" HorizontalAlignment="Center"/>
-                                                <TextBlock Grid.Column="5" Text="Relationship"             FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="4,8,6,8" HorizontalAlignment="Center"/>
-                                                <TextBlock Grid.Column="6" Text="Educ. Level / Employment" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="4,8,6,8" HorizontalAlignment="Center"/>
-                                                <TextBlock Grid.Column="7" Text="Income"                   FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="4,8,8,8" HorizontalAlignment="Center"/>
+                                                <Border Grid.ColumnSpan="9" Background="#F8F0F3" CornerRadius="6" Margin="0,0,0,2" Padding="4,8"/>
+                                                <TextBlock Grid.Column="0" Text="Name" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="Sex" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Text="Age" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="3" Text="Birthdate" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="4" Text="Civil Status" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="5" Text="Relationship" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="6" Text="Emp. / Highest Educ. Attainment" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="7" Text="Income" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="8" Text="" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8"/>
                                             </Grid>
 
                                             <!-- data rows -->
@@ -910,61 +903,111 @@
                                                     <DataTemplate>
                                                         <Grid Margin="0,0,0,4">
                                                             <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="220" SharedSizeGroup="C0"/>
-                                                                <ColumnDefinition Width="65"   SharedSizeGroup="C1"/>
-                                                                <ColumnDefinition Width="65"   SharedSizeGroup="C2"/>
-                                                                <ColumnDefinition Width="200"  SharedSizeGroup="C3"/>
-                                                                <ColumnDefinition Width="140" SharedSizeGroup="C4"/>
-                                                                <ColumnDefinition Width="160" SharedSizeGroup="C5"/>
-                                                                <ColumnDefinition Width="230" SharedSizeGroup="C6"/>
-                                                                <ColumnDefinition Width="100"   SharedSizeGroup="C7"/>
+                                                                <ColumnDefinition Width="270" SharedSizeGroup="C0"/>
+                                                                <ColumnDefinition Width="95"  SharedSizeGroup="C1"/>
+                                                                <ColumnDefinition Width="50"   SharedSizeGroup="C2"/>
+                                                                <ColumnDefinition Width="155"  SharedSizeGroup="C3"/>
+                                                                <ColumnDefinition Width="105"  SharedSizeGroup="C4"/>
+                                                                <ColumnDefinition Width="135"  SharedSizeGroup="C5"/>
+                                                                <ColumnDefinition Width="205"  SharedSizeGroup="C6"/>
+                                                                <ColumnDefinition Width="145"   SharedSizeGroup="C7"/>
+                                                                <ColumnDefinition Width="36"   SharedSizeGroup="C8"/>
                                                             </Grid.ColumnDefinitions>
-                                                            <TextBox Grid.Column="0" Height="38" FontSize="13"
-                                                                     BorderBrush="#D0D0D0" BorderThickness="1"
-                                                                     Background="White" Padding="10,0"
-                                                                     VerticalContentAlignment="Center" Margin="0,0,4,0"
-                                                                     PreviewTextInput="NameOnly_PreviewTextInput"
-                                                                     LostFocus="FamilyMemberName_LostFocus"
-                                                                     Text="{Binding MemberName, UpdateSourceTrigger=PropertyChanged}"/>
-                                                            <TextBox Grid.Column="1" Height="38" FontSize="13"
-                                                                     BorderBrush="#D0D0D0" BorderThickness="1"
-                                                                     Background="White" Padding="4,0"
-                                                                     VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,4,0"
-                                                                     MaxLength="6"
-                                                                     Text="{Binding Sex, UpdateSourceTrigger=PropertyChanged}"/>
-                                                            <TextBox Grid.Column="2" Height="38" FontSize="13"
-                                                                     BorderBrush="#D0D0D0" BorderThickness="1"
-                                                                     Background="#F5F5F5" Padding="4,0"
-                                                                     VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,4,0"
-                                                                     IsReadOnly="True" Focusable="False" Cursor="Arrow"
-                                                                     ToolTip="Auto-calculated from Birthdate"
-                                                                     Text="{Binding Age, Mode=OneWay}"/>
-                                                            <TextBox Grid.Column="3" Height="38" FontSize="13"
-                                                                     BorderBrush="#D0D0D0" BorderThickness="1"
-                                                                     Background="White" Padding="10,0"
-                                                                     VerticalContentAlignment="Center" Margin="0,0,4,0"
-                                                                     LostFocus="FamilyBirthdate_LostFocus"
-                                                                     Text="{Binding Birthdate, UpdateSourceTrigger=PropertyChanged}"/>
-                                                            <TextBox Grid.Column="4" Height="38" FontSize="13"
-                                                                     BorderBrush="#D0D0D0" BorderThickness="1"
-                                                                     Background="White" Padding="8,0"
-                                                                     VerticalContentAlignment="Center" Margin="0,0,4,0"
-                                                                     Text="{Binding CivilStatus, UpdateSourceTrigger=PropertyChanged}"/>
-                                                            <TextBox Grid.Column="5" Height="38" FontSize="13"
-                                                                     BorderBrush="#D0D0D0" BorderThickness="1"
-                                                                     Background="White" Padding="8,0"
-                                                                     VerticalContentAlignment="Center" Margin="0,0,4,0"
-                                                                     Text="{Binding Relationship, UpdateSourceTrigger=PropertyChanged}"/>
-                                                            <TextBox Grid.Column="6" Height="38" FontSize="13"
-                                                                     BorderBrush="#D0D0D0" BorderThickness="1"
-                                                                     Background="White" Padding="10,0"
-                                                                     VerticalContentAlignment="Center" Margin="0,0,4,0"
-                                                                     Text="{Binding EducationEmployment, UpdateSourceTrigger=PropertyChanged}"/>
-                                                            <TextBox Grid.Column="7" Height="38" FontSize="13"
-                                                                     BorderBrush="#D0D0D0" BorderThickness="1"
-                                                                     Background="White" Padding="8,0"
-                                                                     VerticalContentAlignment="Center"
-                                                                     Text="{Binding Income, UpdateSourceTrigger=PropertyChanged}"/>
+                                                            <Border Grid.Column="0" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
+                                                                <TextBox Height="38" FontSize="13"
+                                                                         BorderThickness="0"
+                                                                         Background="Transparent" Padding="10,0"
+                                                                         VerticalContentAlignment="Center"
+                                                                         PreviewTextInput="NameOnly_PreviewTextInput"
+                                                                         LostFocus="FamilyMemberName_LostFocus"
+                                                                         Text="{Binding MemberName, UpdateSourceTrigger=PropertyChanged}"/>
+                                                            </Border>
+                                                            <Border Grid.Column="1" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
+                                                                <ComboBox Height="38"
+                                                                          Style="{StaticResource FormCombo}"
+                                                                          BorderThickness="0" Background="Transparent"
+                                                                          SelectedValue="{Binding Sex, UpdateSourceTrigger=PropertyChanged}">
+                                                                    <ComboBoxItem Content=""/>
+                                                                    <ComboBoxItem Content="Female"/>
+                                                                    <ComboBoxItem Content="Male"/>
+                                                                </ComboBox>
+                                                            </Border>
+                                                            <Border Grid.Column="2" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="#F5F5F5" Margin="0,0,5,0">
+                                                                <TextBox Height="38" FontSize="13"
+                                                                         BorderThickness="0"
+                                                                         Background="Transparent" Padding="4,0"
+                                                                         VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                                                                         IsReadOnly="True" Focusable="False" Cursor="Arrow"
+                                                                         ToolTip="Auto-calculated from Birthdate"
+                                                                         Text="{Binding Age, Mode=OneWay}"/>
+                                                            </Border>
+                                                            <Border Grid.Column="3" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
+                                                                <DatePicker Height="38"
+                                                                            Style="{StaticResource FormDate}"
+                                                                            BorderThickness="0" Background="Transparent"
+                                                                            SelectedDate="{Binding BirthdateDate, UpdateSourceTrigger=PropertyChanged}"/>
+                                                            </Border>
+                                                            <Border Grid.Column="4" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
+                                                                <ComboBox Height="38"
+                                                                          Style="{StaticResource FormCombo}"
+                                                                          BorderThickness="0" Background="Transparent"
+                                                                          SelectedValue="{Binding CivilStatus, UpdateSourceTrigger=PropertyChanged}">
+                                                                    <ComboBoxItem Content=""/>
+                                                                    <ComboBoxItem Content="Single"/>
+                                                                    <ComboBoxItem Content="Married"/>
+                                                                    <ComboBoxItem Content="Widowed"/>
+                                                                    <ComboBoxItem Content="Separated"/>
+                                                                    <ComboBoxItem Content="Annulled"/>
+                                                                </ComboBox>
+                                                            </Border>
+                                                            <Border Grid.Column="5" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
+                                                                <ComboBox Height="38"
+                                                                          Style="{StaticResource FormCombo}"
+                                                                          BorderThickness="0" Background="Transparent"
+                                                                          SelectedValue="{Binding Relationship, UpdateSourceTrigger=PropertyChanged}">
+                                                                    <ComboBoxItem Content=""/>
+                                                                    <ComboBoxItem Content="Child"/>
+                                                                    <ComboBoxItem Content="Spouse"/>
+                                                                    <ComboBoxItem Content="Parent"/>
+                                                                    <ComboBoxItem Content="Sibling"/>
+                                                                    <ComboBoxItem Content="Grandchild"/>
+                                                                    <ComboBoxItem Content="Grandparent"/>
+                                                                    <ComboBoxItem Content="Relative"/>
+                                                                    <ComboBoxItem Content="Ward"/>
+                                                                    <ComboBoxItem Content="Other"/>
+                                                                </ComboBox>
+                                                            </Border>
+                                                            <Border Grid.Column="6" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
+                                                                <TextBox Height="38" FontSize="13"
+                                                                         BorderThickness="0"
+                                                                         Background="Transparent" Padding="10,0"
+                                                                         VerticalContentAlignment="Center"
+                                                                         Text="{Binding EducationEmployment, UpdateSourceTrigger=PropertyChanged}"/>
+                                                            </Border>
+                                                            <Border Grid.Column="7" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
+                                                                <TextBox Height="38" FontSize="13"
+                                                                         BorderThickness="0"
+                                                                         Background="Transparent" Padding="10,0"
+                                                                         VerticalContentAlignment="Center"
+                                                                         Text="{Binding Income, UpdateSourceTrigger=PropertyChanged}"/>
+                                                            </Border>
+                                                            <Button Grid.Column="8" Height="38" Width="32" Cursor="Hand"
+                                                                    ToolTip="Remove row" Command="{Binding DeleteCommand}">
+                                                                <Button.Template>
+                                                                    <ControlTemplate TargetType="Button">
+                                                                        <Border x:Name="Bg" Background="Transparent" CornerRadius="6">
+                                                                            <Path Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z"
+                                                                                  Fill="#C0392B" Stretch="Uniform" Width="13" Height="13"
+                                                                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                        </Border>
+                                                                        <ControlTemplate.Triggers>
+                                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter TargetName="Bg" Property="Background" Value="#FDEDEC"/>
+                                                                            </Trigger>
+                                                                        </ControlTemplate.Triggers>
+                                                                    </ControlTemplate>
+                                                                </Button.Template>
+                                                            </Button>
                                                         </Grid>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
@@ -974,7 +1017,7 @@
 
                                         <Button Content="+ Add Row" Click="AddFamilyRow_Click"
                                                 Margin="0,8,0,0" HorizontalAlignment="Left"
-                                                Height="34" Padding="16,0"
+                                                Height="38" Padding="16,0"
                                                 Background="White" Foreground="#702943"
                                                 FontSize="12" FontWeight="SemiBold"
                                                 BorderBrush="#702943" BorderThickness="1"

@@ -131,11 +131,10 @@ namespace SOLUM_UI.Models
         {
             get
             {
-                var parts = new List<string>();
-                if (IsEmployed)     parts.Add("Employed");
-                if (IsSelfEmployed) parts.Add("Self-Employed");
-                if (IsNotEmployed)  parts.Add("Not Employed");
-                return parts.Count > 0 ? string.Join(", ", parts) : "—";
+                if (IsEmployed)     return "Employed";
+                if (IsSelfEmployed) return "Self-Employed";
+                if (IsNotEmployed)  return "Not Employed";
+                return "—";
             }
         }
 

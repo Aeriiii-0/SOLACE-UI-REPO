@@ -14,6 +14,11 @@ namespace SOLUM_UI
             _canExecute = canExecute;
         }
 
+        public RelayCommand(Action execute, Func<bool> canExecute = null)
+            : this(_ => execute(), canExecute == null ? (Func<object, bool>)null : _ => canExecute())
+        {
+        }
+
         public bool CanExecute(object parameter)
             => _canExecute == null || _canExecute(parameter);
 

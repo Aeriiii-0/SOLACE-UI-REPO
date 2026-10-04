@@ -11,7 +11,7 @@
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="40" ShadowDepth="0" Opacity="0.20"/>
             </Border.Effect>
-            <Border x:Name="DialogShell" Background="#F7F5F6" CornerRadius="14"
+            <Border x:Name="DialogShell" Background="White" CornerRadius="14"
                     ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -52,11 +52,11 @@
 
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled"
-                                  Background="#F7F5F6">
+                                  Background="White">
                         <StackPanel Margin="22,18,22,18">
 
                             <Border Background="White" CornerRadius="10"
-                                    BorderBrush="#D0B8C0" BorderThickness="1"
+                                    BorderBrush="#702943" BorderThickness="1"
                                     Padding="18,14" Margin="0,0,0,14">
                                 <Grid>
                                     <Grid.ColumnDefinitions>

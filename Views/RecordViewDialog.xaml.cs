@@ -15,13 +15,13 @@ namespace SOLUM_UI
 
         private static readonly SolidColorBrush _label   = Clr(0x88, 0x88, 0x88);
         private static readonly SolidColorBrush _value   = Clr(0x11, 0x11, 0x11);
-        private static readonly SolidColorBrush _cardBdr = Clr(0xD0, 0xB8, 0xC0);
+        private static readonly SolidColorBrush _cardBdr = Clr(0x70, 0x29, 0x43);
         private static readonly SolidColorBrush _divider = Clr(0xE8, 0xD8, 0xDE);
         private static readonly SolidColorBrush _head    = Clr(0x70, 0x29, 0x43);
         private static readonly SolidColorBrush _chipBg  = Clr(0xF5, 0xEC, 0xEF);
         private static readonly SolidColorBrush _chipTxt = Clr(0x70, 0x29, 0x43);
         private static readonly SolidColorBrush _rowAlt  = Clr(0xFD, 0xF5, 0xF7);
-        private static readonly SolidColorBrush _secBg   = Clr(0xFD, 0xF5, 0xF7);
+        private static readonly SolidColorBrush _secBg   = Clr(0xFF, 0xFF, 0xFF);
 
         private static SolidColorBrush Clr(byte r, byte g, byte b) =>
             new SolidColorBrush(Color.FromRgb(r, g, b));
@@ -314,26 +314,19 @@ namespace SOLUM_UI
         {
             var container = new Border
             {
-                Background      = _secBg,
-                CornerRadius    = new CornerRadius(6),
-                Padding         = new Thickness(10, 5, 10, 5),
-                Margin          = new Thickness(-4, 0, -4, 0),
+                Background      = Brushes.White,
+                CornerRadius    = new CornerRadius(0),
+                Padding         = new Thickness(0, 0, 0, 6),
+                Margin          = new Thickness(0, 0, 0, 0),
                 BorderBrush     = _divider,
                 BorderThickness = new Thickness(0, 0, 0, 1)
             };
-            var row = new StackPanel { Orientation = Orientation.Horizontal };
-            row.Children.Add(new Border
+            container.Child = new TextBlock
             {
-                Width = 3, CornerRadius = new CornerRadius(2),
-                Background = _head, Margin = new Thickness(0, 1, 10, 1)
-            });
-            row.Children.Add(new TextBlock
-            {
-                Text = title.ToUpper(), FontSize = 10, FontWeight = FontWeights.Bold,
+                Text = title.ToUpper(), FontSize = 12, FontWeight = FontWeights.Bold,
                 Foreground = _head, FontFamily = new FontFamily("Segoe UI"),
                 VerticalAlignment = VerticalAlignment.Center
-            });
-            container.Child = row;
+            };
             return container;
         }
 

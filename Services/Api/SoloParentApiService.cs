@@ -88,7 +88,10 @@ namespace SOLUM_UI.Services.Api
                 ContactDetails = MapContactInfo(r),
                 AddressDetails = MapAddressInfo(r),
                 EmergencyContact = MapEmergencyContact(r),
-                ProblemPresented = MapProblemPresented(r)
+                ProblemPresented = MapProblemPresented(r),
+                IsLGBT = r.IsLGBT,
+                IsPantawidBeneficiary = r.IsPantawidBeneficiary,
+                IsIndigenous = r.IsIndigenous
             };
 
             if (r.FamilyMembers != null)
@@ -227,13 +230,12 @@ namespace SOLUM_UI.Services.Api
 
                 NeedsAndProblems = dto.ProblemPresented?.Name ?? string.Empty,
                 CircumstanceA2Cause = dto.ProblemPresented?.CauseOfDeath ?? string.Empty,
+                CircumstanceA2Date = DateTime.TryParse(dto.ProblemPresented?.date, out var a2d) ? a2d : DateTime.MinValue,
                 CircumstanceA4Disability = dto.ProblemPresented?.TypeOfDisability ?? string.Empty,
                 CircumstanceA5Period = dto.ProblemPresented?.PeriodOfSeparation ?? string.Empty,
                 CircumstanceA6Nullity = dto.ProblemPresented?.isNullity == true,
                 CircumstanceA6Annulment = dto.ProblemPresented?.isAnnulmentOfMarraige == true,
                 CircumstanceBStayAbroad = dto.ProblemPresented?.LengthOfAbroad.HasValue == true ? dto.ProblemPresented.LengthOfAbroad.Value.ToString() : string.Empty,
-
-
                 IsPantawidBeneficiary = dto.IsPantawidBeneficiary,
                 IsIndigenous = dto.IsIndigenous,
                 IsLGBT = dto.IsLGBT,
@@ -379,7 +381,7 @@ namespace SOLUM_UI.Services.Api
             if (r.CircumstanceE)  { codes.Add("E");  title = "Relative within 4th civil degree"; }
             if (r.CircumstanceF)  { codes.Add("F");  title = "Pregnant Woman"; }
 
-            string code = codes.Count > 0 ? string.Join(",", codes) : "A1";
+            string code = codes.Count > 0 ? string.Join(",", codes) : string.Empty;
             if (!string.IsNullOrWhiteSpace(r.NeedsAndProblems))
             {
                 title = r.NeedsAndProblems;
@@ -397,8 +399,8 @@ namespace SOLUM_UI.Services.Api
                 TypeOfDisability = !string.IsNullOrWhiteSpace(r.CircumstanceA4Disability) ? r.CircumstanceA4Disability.Trim() : null,
                 PeriodOfSeparation = !string.IsNullOrWhiteSpace(r.CircumstanceA5Period) ? r.CircumstanceA5Period.Trim() : null,
                 LengthOfAbroad = lengthAbroad,
-                isNullity = r.CircumstanceA6Nullity ? true : (bool?)null,
-                isAnnulmentOfMarraige = r.CircumstanceA6Annulment ? true : (bool?)null
+                isNullity = r.CircumstanceA6 ? r.CircumstanceA6Nullity : (bool?)null,
+                isAnnulmentOfMarraige = r.CircumstanceA6 ? r.CircumstanceA6Annulment : (bool?)null
             };
         }
 

@@ -189,6 +189,9 @@
     <Compile Include="Views\EntryMethodDialog.xaml.cs">
       <DependentUpon>EntryMethodDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PreCheckDialog.xaml.cs">
+      <DependentUpon>PreCheckDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ExportOptionsDialog.xaml.cs">
       <DependentUpon>ExportOptionsDialog.xaml</DependentUpon>
     </Compile>
@@ -267,6 +270,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\EntryMethodDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PreCheckDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

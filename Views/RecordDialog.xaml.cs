@@ -18,6 +18,7 @@ namespace SOLUM_UI
         private string _sex;
         private string _age;
         private string _birthdate;
+        private DateTime? _birthdateDate;
         private string _civilStatus;
         private string _relationship;
         private string _educationEmployment;
@@ -29,11 +30,7 @@ namespace SOLUM_UI
         public string MemberName
         {
             get => _memberName;
-            set
-            {
-                _memberName = value;
-                N(nameof(MemberName));
-            }
+            set { _memberName = value; N(nameof(MemberName)); }
         }
 
         public string Sex
@@ -43,35 +40,21 @@ namespace SOLUM_UI
             {
                 string s = value?.Trim() ?? string.Empty;
                 if (s.Equals("Female", StringComparison.OrdinalIgnoreCase) || s.Equals("F", StringComparison.OrdinalIgnoreCase))
-                    _sex = "F";
+                    _sex = "Female";
                 else if (s.Equals("Male", StringComparison.OrdinalIgnoreCase) || s.Equals("M", StringComparison.OrdinalIgnoreCase))
-                    _sex = "M";
-                else if (s.Length > 0)
-                    _sex = s.Substring(0, 1).ToUpperInvariant();
+                    _sex = "Male";
                 else
-                    _sex = string.Empty;
+                    _sex = s;
                 N(nameof(Sex));
             }
         }
 
-        public string OfficialSex
-        {
-            get
-            {
-                if (string.Equals(_sex, "F", StringComparison.OrdinalIgnoreCase)) return "Female";
-                if (string.Equals(_sex, "M", StringComparison.OrdinalIgnoreCase)) return "Male";
-                return _sex ?? string.Empty;
-            }
-        }
+        public string OfficialSex => _sex ?? string.Empty;
 
         public string Age
         {
             get => _age;
-            set
-            {
-                _age = SOLUM_UI.Services.OcrService.CleanAgeString(value);
-                N(nameof(Age));
-            }
+            set { _age = SOLUM_UI.Services.OcrService.CleanAgeString(value); N(nameof(Age)); }
         }
 
         public string Birthdate
@@ -81,22 +64,45 @@ namespace SOLUM_UI
             {
                 _birthdate = value;
                 N(nameof(Birthdate));
-
                 if (!string.IsNullOrWhiteSpace(value))
                 {
                     string norm = SOLUM_UI.Services.OcrService.NormalizeDateString(value, out DateTime? dt);
                     if (dt.HasValue && dt.Value != DateTime.MinValue)
                     {
+                        _birthdateDate = dt.Value;
+                        N(nameof(BirthdateDate));
                         int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(dt.Value);
-                        if (calcAge >= 0 && calcAge <= 120)
-                        {
-                            _age = calcAge.ToString();
-                            N(nameof(Age));
-                        }
+                        if (calcAge >= 0 && calcAge <= 120) { _age = calcAge.ToString(); N(nameof(Age)); }
                     }
                 }
                 else
                 {
+                    _birthdateDate = null;
+                    N(nameof(BirthdateDate));
+                    _age = string.Empty;
+                    N(nameof(Age));
+                }
+            }
+        }
+
+        public DateTime? BirthdateDate
+        {
+            get => _birthdateDate;
+            set
+            {
+                _birthdateDate = value;
+                N(nameof(BirthdateDate));
+                if (value.HasValue && value.Value != DateTime.MinValue)
+                {
+                    _birthdate = value.Value.ToString("yyyy-MM-dd");
+                    N(nameof(Birthdate));
+                    int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(value.Value);
+                    if (calcAge >= 0 && calcAge <= 120) { _age = calcAge.ToString(); N(nameof(Age)); }
+                }
+                else
+                {
+                    _birthdate = string.Empty;
+                    N(nameof(Birthdate));
                     _age = string.Empty;
                     N(nameof(Age));
                 }
@@ -106,7 +112,20 @@ namespace SOLUM_UI
         public string CivilStatus         { get => _civilStatus;         set { _civilStatus = value;         N(nameof(CivilStatus)); } }
         public string Relationship        { get => _relationship;        set { _relationship = value;        N(nameof(Relationship)); } }
         public string EducationEmployment { get => _educationEmployment; set { _educationEmployment = value; N(nameof(EducationEmployment)); } }
-        public string Income              { get => _income;              set { _income = value;              N(nameof(Income)); } }
+
+        public string Income
+        {
+            get => _income;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value)) { _income = string.Empty; N(nameof(Income)); return; }
+                string clean = System.Text.RegularExpressions.Regex.Replace(value, @"[^\d\.]", "");
+                _income = clean;
+                N(nameof(Income));
+            }
+        }
+
+        public System.Windows.Input.ICommand DeleteCommand { get; set; }
     }
 
     public partial class RecordDialog : Window
@@ -127,7 +146,7 @@ namespace SOLUM_UI
             _existing = existing;
 
             for (int i = 0; i < 5; i++)
-                _familyRowData.Add(new FamilyMemberRow());
+                _familyRowData.Add(MakeFamilyRow());
             FamilyRows.ItemsSource = _familyRowData;
 
             if (_existing != null)
@@ -141,6 +160,30 @@ namespace SOLUM_UI
             {
                 FormSubtitle.Text = "Add New Record";
                 DpDateOfApplication.SelectedDate = DateTime.Today;
+            }
+        }
+
+        /// <summary>
+        /// Opens the form for a new record, pre-seeded with the primary identity fields
+        /// gathered by the PreCheckDialog.
+        /// </summary>
+        public RecordDialog(PreCheckResult preCheck) : this(existing: null)
+        {
+            if (preCheck != null)
+                ApplyPreCheck(preCheck);
+        }
+
+        private void ApplyPreCheck(PreCheckResult p)
+        {
+            if (p == null) return;
+            TxtLastName.Text   = p.LastName   ?? string.Empty;
+            TxtFirstName.Text  = p.FirstName  ?? string.Empty;
+            TxtMiddleName.Text = p.MiddleName ?? string.Empty;
+            TxtPhilSys.Text    = p.PhilSys    ?? string.Empty;
+            if (p.Birthdate.HasValue)
+            {
+                DpBirthdate.SelectedDate = p.Birthdate;
+                UpdateAge(p.Birthdate);
             }
         }
 
@@ -231,8 +274,16 @@ namespace SOLUM_UI
 
         private void AddFamilyRow_Click(object sender, RoutedEventArgs e)
         {
-            _familyRowData.Add(new FamilyMemberRow());
+            _familyRowData.Add(MakeFamilyRow());
         }
+
+        private FamilyMemberRow MakeFamilyRow()
+        {
+            var row = new FamilyMemberRow();
+            row.DeleteCommand = new RelayCommand(() => _familyRowData.Remove(row));
+            return row;
+        }
+        
 
         private void PopulateFields(SoloParentRecord r)
         {
@@ -261,34 +312,52 @@ namespace SOLUM_UI
             TxtOccupation.Text     = r.Occupation       ?? string.Empty;
             TxtMonthlyIncome.Text  = r.MonthlyIncome    ?? string.Empty;
 
-            ChkEmployed.IsChecked    = r.IsEmployed;
-            ChkSelfEmployed.IsChecked = r.IsSelfEmployed;
-            ChkNotEmployed.IsChecked  = r.IsNotEmployed;
+            ChkEmployed.IsChecked    = false;
+            ChkSelfEmployed.IsChecked = false;
+            ChkNotEmployed.IsChecked  = false;
+            
+            if (r.IsEmployed) ChkEmployed.IsChecked = true;
+            else if (r.IsSelfEmployed) ChkSelfEmployed.IsChecked = true;
+            else if (r.IsNotEmployed) ChkNotEmployed.IsChecked = true;
 
             TxtEmergencyContact.Text = r.EmergencyContactName   ?? string.Empty;
             TxtRelationship.Text     = r.EmergencyRelationship  ?? string.Empty;
             TxtEmergencyAddress.Text = r.EmergencyAddress       ?? string.Empty;
             TxtEmergencyNumber.Text  = SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.EmergencyContactNumber ?? string.Empty);
 
-            ChkA1.IsChecked = r.CircumstanceA1;
-            ChkA2.IsChecked = r.CircumstanceA2;
+            ChkA1.IsChecked = false;
+            ChkA2.IsChecked = false;
+            ChkA3.IsChecked = false;
+            ChkA4.IsChecked = false;
+            ChkA5.IsChecked = false;
+            ChkA6.IsChecked = false;
+            ChkA7.IsChecked = false;
+            ChkB.IsChecked = false;
+            ChkC.IsChecked = false;
+            ChkD.IsChecked = false;
+            ChkE.IsChecked = false;
+            ChkF.IsChecked = false;
+
+            if (r.CircumstanceA1) ChkA1.IsChecked = true;
+            else if (r.CircumstanceA2) ChkA2.IsChecked = true;
+            else if (r.CircumstanceA3) ChkA3.IsChecked = true;
+            else if (r.CircumstanceA4) ChkA4.IsChecked = true;
+            else if (r.CircumstanceA5) ChkA5.IsChecked = true;
+            else if (r.CircumstanceA6) ChkA6.IsChecked = true;
+            else if (r.CircumstanceA7) ChkA7.IsChecked = true;
+            else if (r.CircumstanceB) ChkB.IsChecked = true;
+            else if (r.CircumstanceC) ChkC.IsChecked = true;
+            else if (r.CircumstanceD) ChkD.IsChecked = true;
+            else if (r.CircumstanceE) ChkE.IsChecked = true;
+            else if (r.CircumstanceF) ChkF.IsChecked = true;
+
             TxtA2Cause.Text = r.CircumstanceA2Cause ?? string.Empty;
             if (r.CircumstanceA2Date != DateTime.MinValue) DpA2Date.SelectedDate = r.CircumstanceA2Date;
-            ChkA3.IsChecked = r.CircumstanceA3;
-            ChkA4.IsChecked = r.CircumstanceA4;
             TxtA4Disability.Text = r.CircumstanceA4Disability ?? string.Empty;
-            ChkA5.IsChecked = r.CircumstanceA5;
             TxtA5Period.Text = r.CircumstanceA5Period ?? string.Empty;
-            ChkA6.IsChecked = r.CircumstanceA6;
-            ChkA6Nullity.IsChecked   = r.CircumstanceA6Nullity;
-            ChkA6Annulment.IsChecked = r.CircumstanceA6Annulment;
-            ChkA7.IsChecked = r.CircumstanceA7;
-            ChkB.IsChecked  = r.CircumstanceB;
-            TxtBStayAbroad.Text = r.CircumstanceBStayAbroad ?? string.Empty;
-            ChkC.IsChecked = r.CircumstanceC;
-            ChkD.IsChecked = r.CircumstanceD;
-            ChkE.IsChecked = r.CircumstanceE;
-            ChkF.IsChecked = r.CircumstanceF;
+            if (r.CircumstanceA6Nullity)        SetComboByContent(CmbA6Declaration, "Nullity of marriage");
+            else if (r.CircumstanceA6Annulment) SetComboByContent(CmbA6Declaration, "Annulment of marriage");
+            else                                CmbA6Declaration.SelectedIndex = 0;
 
             TxtNeeds.Text       = r.NeedsAndProblems  ?? string.Empty;
             TxtOtherIncome.Text = r.OtherIncomeSource ?? string.Empty;
@@ -313,17 +382,16 @@ namespace SOLUM_UI
                         }
                     }
 
-                    _familyRowData.Add(new FamilyMemberRow
-                    {
-                        MemberName          = fm.MemberName,
-                        Sex                 = fm.Sex,
-                        Age                 = ageVal,
-                        Birthdate           = string.IsNullOrWhiteSpace(normDob) ? fm.Birthdate : normDob,
-                        CivilStatus         = fm.CivilStatus,
-                        Relationship        = fm.Relationship,
-                        EducationEmployment = fm.EducationEmployment,
-                        Income              = fm.Income
-                    });
+                    var row = MakeFamilyRow();
+                    row.MemberName          = fm.MemberName;
+                    row.Sex                 = fm.Sex;
+                    row.Age                 = ageVal;
+                    row.Birthdate           = string.IsNullOrWhiteSpace(normDob) ? fm.Birthdate : normDob;
+                    row.CivilStatus         = fm.CivilStatus;
+                    row.Relationship        = fm.Relationship;
+                    row.EducationEmployment = fm.EducationEmployment;
+                    row.Income              = fm.Income;
+                    _familyRowData.Add(row);
                 }
             }
 
@@ -801,34 +869,34 @@ namespace SOLUM_UI
                 Religion              = TxtReligion.Text.Trim(),
                 Occupation            = TxtOccupation.Text.Trim(),
                 MonthlyIncome         = TxtMonthlyIncome.Text.Trim(),
-                IsEmployed            = ChkEmployed.IsChecked == true,
-                IsSelfEmployed        = ChkSelfEmployed.IsChecked == true,
-                IsNotEmployed         = ChkNotEmployed.IsChecked == true,
+                IsEmployed            = ChkEmployed.IsChecked == true && ChkEmployed.IsEnabled,
+                IsSelfEmployed        = ChkSelfEmployed.IsChecked == true && ChkSelfEmployed.IsEnabled,
+                IsNotEmployed         = ChkNotEmployed.IsChecked == true && ChkNotEmployed.IsEnabled,
 
                 EmergencyContactName   = TxtEmergencyContact.Text.Trim(),
                 EmergencyRelationship  = TxtRelationship.Text.Trim(),
                 EmergencyAddress       = TxtEmergencyAddress.Text.Trim(),
                 EmergencyContactNumber = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtEmergencyNumber.Text.Trim()),
 
-                CircumstanceA1             = ChkA1.IsChecked == true,
-                CircumstanceA2             = ChkA2.IsChecked == true,
-                CircumstanceA2Cause        = TxtA2Cause.Text.Trim(),
-                CircumstanceA2Date         = DpA2Date.SelectedDate ?? DateTime.MinValue,
-                CircumstanceA3             = ChkA3.IsChecked == true,
-                CircumstanceA4             = ChkA4.IsChecked == true,
-                CircumstanceA4Disability   = TxtA4Disability.Text.Trim(),
-                CircumstanceA5             = ChkA5.IsChecked == true,
-                CircumstanceA5Period       = TxtA5Period.Text.Trim(),
-                CircumstanceA6             = ChkA6.IsChecked == true,
-                CircumstanceA6Nullity      = ChkA6Nullity.IsChecked == true,
-                CircumstanceA6Annulment    = ChkA6Annulment.IsChecked == true,
-                CircumstanceA7             = ChkA7.IsChecked == true,
-                CircumstanceB              = ChkB.IsChecked == true,
-                CircumstanceBStayAbroad    = TxtBStayAbroad.Text.Trim(),
-                CircumstanceC              = ChkC.IsChecked == true,
-                CircumstanceD              = ChkD.IsChecked == true,
-                CircumstanceE              = ChkE.IsChecked == true,
-                CircumstanceF              = ChkF.IsChecked == true,
+                CircumstanceA1             = ChkA1.IsChecked == true && ChkA1.IsEnabled,
+                CircumstanceA2             = ChkA2.IsChecked == true && ChkA2.IsEnabled,
+                CircumstanceA2Cause        = ChkA2.IsChecked == true ? TxtA2Cause.Text.Trim() : string.Empty,
+                CircumstanceA2Date         = ChkA2.IsChecked == true ? (DpA2Date.SelectedDate ?? DateTime.MinValue) : DateTime.MinValue,
+                CircumstanceA3             = ChkA3.IsChecked == true && ChkA3.IsEnabled,
+                CircumstanceA4             = ChkA4.IsChecked == true && ChkA4.IsEnabled,
+                CircumstanceA4Disability   = ChkA4.IsChecked == true ? TxtA4Disability.Text.Trim() : string.Empty,
+                CircumstanceA5             = ChkA5.IsChecked == true && ChkA5.IsEnabled,
+                CircumstanceA5Period       = ChkA5.IsChecked == true ? TxtA5Period.Text.Trim() : string.Empty,
+                CircumstanceA6             = ChkA6.IsChecked == true && ChkA6.IsEnabled,
+                CircumstanceA6Nullity      = ChkA6.IsChecked == true && GetComboValue(CmbA6Declaration) == "Nullity of marriage",
+                CircumstanceA6Annulment    = ChkA6.IsChecked == true && GetComboValue(CmbA6Declaration) == "Annulment of marriage",
+                CircumstanceA7             = ChkA7.IsChecked == true && ChkA7.IsEnabled,
+                CircumstanceB              = ChkB.IsChecked == true && ChkB.IsEnabled,
+                CircumstanceBStayAbroad    = ChkB.IsChecked == true ? TxtBStayAbroad.Text.Trim() : string.Empty,
+                CircumstanceC              = ChkC.IsChecked == true && ChkC.IsEnabled,
+                CircumstanceD              = ChkD.IsChecked == true && ChkD.IsEnabled,
+                CircumstanceE              = ChkE.IsChecked == true && ChkE.IsEnabled,
+                CircumstanceF              = ChkF.IsChecked == true && ChkF.IsEnabled,
 
                 FamilyMembers   = members,
                 NeedsAndProblems  = TxtNeeds.Text.Trim(),
@@ -895,11 +963,11 @@ namespace SOLUM_UI
             sec = "Circumstances";
 
             if (r.CircumstanceA1)
-                Add(sec, "A1. Birth from rape", "✓ Ticked", null);
+                Add(sec, "Problem Presented", "A1. Gives birth as a result of rape", null);
 
             if (r.CircumstanceA2)
             {
-                Add(sec, "A2. Death of Spouse", "✓ Ticked", null);
+                Add(sec, "Problem Presented", "A2. Death of Spouse", null);
                 Add(sec, "   Cause of death",
                     F(r.CircumstanceA2Cause), null);
                 Add(sec, "   Date of death",
@@ -908,45 +976,46 @@ namespace SOLUM_UI
             }
 
             if (r.CircumstanceA3)
-                Add(sec, "A3. Detention of Spouse", "✓ Ticked", null);
+                Add(sec, "Problem Presented", "A3. Detention of Spouse", null);
 
             if (r.CircumstanceA4)
             {
-                Add(sec, "A4. Incapacity of Spouse", "✓ Ticked", null);
+                Add(sec, "Problem Presented", "A4. Physical & Mental Incapacity of Spouse", null);
                 Add(sec, "   Type of disability", F(r.CircumstanceA4Disability), null);
             }
 
             if (r.CircumstanceA5)
             {
-                Add(sec, "A5. Legal/de facto Separation", "✓ Ticked", null);
+                Add(sec, "Problem Presented", "A5. Legal or de facto Separation", null);
                 Add(sec, "   Period of separation", F(r.CircumstanceA5Period), null);
             }
 
             if (r.CircumstanceA6)
             {
-                Add(sec, "A6. Declaration of", "✓ Ticked", null);
-                Add(sec, "   Nullity of marriage",   r.CircumstanceA6Nullity   ? "✓ Yes" : "No", null);
-                Add(sec, "   Annulment of marriage", r.CircumstanceA6Annulment ? "✓ Yes" : "No", null);
+                string a6sub = r.CircumstanceA6Nullity ? "Nullity of marriage"
+                             : r.CircumstanceA6Annulment ? "Annulment of marriage"
+                             : "—";
+                Add(sec, "Problem Presented", "A6. Declaration of: " + a6sub, null);
             }
 
             if (r.CircumstanceA7)
-                Add(sec, "A7. Abandonment of Spouse", "✓ Ticked", null);
+                Add(sec, "Problem Presented", "A7. Abandonment of spouse for at least 6 months", null);
 
             if (r.CircumstanceB)
             {
-                Add(sec, "B. OFW-related", "✓ Ticked", null);
+                Add(sec, "Problem Presented", "B. Spouse or any family member of an OFW", null);
                 Add(sec, "   Length of stay abroad", F(r.CircumstanceBStayAbroad), null);
             }
 
-            if (r.CircumstanceC) Add(sec, "C. Unmarried Mother/Father",        "✓ Ticked", null);
-            if (r.CircumstanceD) Add(sec, "D. Legal Guardian/Adoptive/Foster", "✓ Ticked", null);
-            if (r.CircumstanceE) Add(sec, "E. Relative (4th civil degree)",    "✓ Ticked", null);
-            if (r.CircumstanceF) Add(sec, "F. Pregnant Woman",                 "✓ Ticked", null);
+            if (r.CircumstanceC) Add(sec, "Problem Presented", "C. Unmarried Mother or Father", null);
+            if (r.CircumstanceD) Add(sec, "Problem Presented", "D. Legal Guardian / Adoptive / Foster Parent", null);
+            if (r.CircumstanceE) Add(sec, "Problem Presented", "E. Relative within the 4th civil degree", null);
+            if (r.CircumstanceF) Add(sec, "Problem Presented", "F. Pregnant Woman", null);
 
             if (!r.CircumstanceA1 && !r.CircumstanceA2 && !r.CircumstanceA3 && !r.CircumstanceA4 &&
                 !r.CircumstanceA5 && !r.CircumstanceA6 && !r.CircumstanceA7 && !r.CircumstanceB  &&
                 !r.CircumstanceC  && !r.CircumstanceD  && !r.CircumstanceE  && !r.CircumstanceF)
-                Add(sec, "Circumstances", "None selected", null);
+                Add(sec, "Problem Presented", "None selected", null);
 
             if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
             {
