@@ -27,6 +27,9 @@ namespace SOLUM_UI.Services.Api
             if (!string.IsNullOrWhiteSpace(request.Fullname))
                 queryParams.Add($"fullname={Uri.EscapeDataString(request.Fullname.Trim())}");
 
+            if (!string.IsNullOrWhiteSpace(request.PhilsysId))
+                queryParams.Add($"philsys_id={Uri.EscapeDataString(request.PhilsysId.Trim())}");
+
             if (!string.IsNullOrWhiteSpace(request.Sex) && !request.Sex.Equals("All", StringComparison.OrdinalIgnoreCase))
                 queryParams.Add($"sex={Uri.EscapeDataString(request.Sex.Trim())}");
 
@@ -35,6 +38,9 @@ namespace SOLUM_UI.Services.Api
 
             if (request.IsActive.HasValue)
                 queryParams.Add($"isActive={request.IsActive.Value.ToString().ToLowerInvariant()}");
+
+            if (!string.IsNullOrWhiteSpace(request.Status) && !request.Status.Equals("All", StringComparison.OrdinalIgnoreCase))
+                queryParams.Add($"status={Uri.EscapeDataString(request.Status.Trim())}");
 
             if (!string.IsNullOrWhiteSpace(request.SortBy))
                 queryParams.Add($"sortBy={Uri.EscapeDataString(request.SortBy)}");
@@ -45,8 +51,15 @@ namespace SOLUM_UI.Services.Api
             queryParams.Add($"page={request.Page}");
             queryParams.Add($"pageSize={request.PageSize}");
 
-            string url = "api/soloparent?" + string.Join("&", queryParams);
-            return await ApiClient.Instance.GetAsync<PagedResult<SoloParentSummaryDto>>(url);
+            string queryString = string.Join("&", queryParams);
+            string url = "api/soloparents?" + queryString;
+            var response = await ApiClient.Instance.GetAsync<PagedResult<SoloParentSummaryDto>>(url);
+            if (!response.Succeeded && response.Errors != null && response.Errors.Any(e => e.Contains("404")))
+            {
+                url = "api/soloparent?" + queryString;
+                response = await ApiClient.Instance.GetAsync<PagedResult<SoloParentSummaryDto>>(url);
+            }
+            return response;
         }
 
         public async Task<BaseResponse<SoloParentDto>> GetSoloParentByIdAsync(Guid id)
@@ -178,8 +191,8 @@ namespace SOLUM_UI.Services.Api
         {
             if (dto == null) return null;
 
-            bool isActive = false;
-            DateTime validUntil = DateTime.MinValue;
+            bool isActive = dto.IsActive;
+            DateTime validUntil = dto.CurrentTermExpiresAt ?? DateTime.MinValue;
 
             if (dto.RecordTerms != null && dto.RecordTerms.Count > 0)
             {
@@ -188,9 +201,19 @@ namespace SOLUM_UI.Services.Api
                     if (DateTime.TryParse(rt.ExpiresAt, out var exp))
                     {
                         if (exp > validUntil) validUntil = exp;
-                        if (exp >= DateTime.Today) isActive = true;
+                        if (exp >= DateTime.Today && !dto.IsDeleted) isActive = true;
                     }
                 }
+            }
+
+            string computedStatus = "Inactive";
+            if (!string.IsNullOrWhiteSpace(dto.Status))
+            {
+                computedStatus = dto.Status.Equals("Active", StringComparison.OrdinalIgnoreCase) ? "Valid" : dto.Status;
+            }
+            else
+            {
+                computedStatus = isActive ? "Valid" : "Inactive";
             }
 
             var record = new SoloParentRecord
@@ -198,8 +221,10 @@ namespace SOLUM_UI.Services.Api
                 Id = dto.Id.ToString(),
                 CreatedBy = "Admin",
                 LastUpdated = dto.DateCreated,
-                Status = isActive ? "Valid" : "Inactive",
+                Status = computedStatus,
                 DateOfApplication = dto.DateCreated,
+                CurrentTermExpiresAt = dto.CurrentTermExpiresAt ?? (validUntil != DateTime.MinValue ? (DateTime?)validUntil : null),
+                RecordTerms = dto.RecordTerms ?? new List<RecordTermDto>(),
 
                 Surname = dto.PersonalInfo?.LastName ?? string.Empty,
                 FirstName = dto.PersonalInfo?.FirstName ?? string.Empty,

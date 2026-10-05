@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -90,16 +92,43 @@ namespace SOLUM_UI
                 StatusBadge.Background = Clr(0xF0, 0xF0, 0xF0);
                 TxtStatusBadge.Foreground = Clr(0x88, 0x88, 0x88);
             }
+            else if (r.Status == "Terminated")
+            {
+                StatusBadge.Background = Clr(0xFD, 0xE8, 0xE8);
+                TxtStatusBadge.Foreground = Clr(0xE0, 0x24, 0x24);
+            }
+            else
+            {
+                StatusBadge.Background = Clr(0xE6, 0xF9, 0xEE);
+                TxtStatusBadge.Foreground = Clr(0x27, 0xAE, 0x60);
+            }
 
             CardPanel.Children.Clear();
 
             string appType = r.IsNewApplicant ? "New Applicant" : r.IsRenewal ? "For Renewal" : "—";
+            string expiryStr = r.CurrentTermExpiresAt.HasValue
+                ? r.CurrentTermExpiresAt.Value.ToString("MMMM d, yyyy")
+                : (r.LastUpdated != DateTime.MinValue ? r.LastUpdated.AddYears(1).ToString("MMMM d, yyyy") : "—");
 
-            AddCard("Application", new[]
+            var appItems = new List<(string, string)>
             {
-                ("Type",               appType),
+                ("Type", appType),
                 ("Date of Application", r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("MMMM d, yyyy") : "—"),
-            });
+                ("Term Expiration", expiryStr)
+            };
+
+            if (r.RecordTerms != null && r.RecordTerms.Count > 0)
+            {
+                var latestTerm = r.RecordTerms.Last();
+                if (!string.IsNullOrWhiteSpace(latestTerm.Type))
+                    appItems.Add(("Latest Term Type", latestTerm.Type));
+                if (!string.IsNullOrWhiteSpace(latestTerm.StartsAt))
+                    appItems.Add(("Term Starts", latestTerm.StartsAt));
+                if (!string.IsNullOrWhiteSpace(latestTerm.ExpiresAt))
+                    appItems.Add(("Term Ends", latestTerm.ExpiresAt));
+            }
+
+            AddCard("Application & Validity", appItems.ToArray());
 
             AddCard("Identity", new[]
             {

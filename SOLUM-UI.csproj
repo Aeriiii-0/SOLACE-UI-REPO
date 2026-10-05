@@ -246,6 +246,7 @@
     <Compile Include="Models\Api\BaseResponse.cs" />
     <Compile Include="Models\Api\AuthDtos.cs" />
     <Compile Include="Models\Api\AuditLogDtos.cs" />
+    <Compile Include="Models\Api\BarangayBreakdownDtos.cs" />
     <Compile Include="Models\Api\SoloParentDtos.cs" />
     <Compile Include="Services\Api\ApiClient.cs" />
     <Compile Include="Services\Api\AuthApiService.cs" />

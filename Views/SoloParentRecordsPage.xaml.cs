@@ -94,23 +94,66 @@ namespace SOLUM_UI
                 string idQuery = SearchId?.Text?.Trim() ?? string.Empty;
                 string nameQuery = SearchName?.Text?.Trim() ?? string.Empty;
                 string barangayQuery = SearchBarangay?.Text?.Trim() ?? string.Empty;
+                string filterPhilSys = TxtFilterPhilSys?.Text?.Trim() ?? string.Empty;
 
                 if (IsBasicUser)
                 {
                     nameQuery = BasicSearchName?.Text?.Trim() ?? string.Empty;
                     barangayQuery = string.Empty;
+                    if (System.Text.RegularExpressions.Regex.IsMatch(nameQuery, @"^[\d\s\-]+$") && nameQuery.Length >= 4)
+                    {
+                        filterPhilSys = nameQuery;
+                        nameQuery = string.Empty;
+                    }
+                }
+                else if (IsEncoder)
+                {
+                    idQuery = EncSearchId?.Text?.Trim() ?? string.Empty;
+                    string fn = EncSearchFirstName?.Text?.Trim() ?? string.Empty;
+                    string ln = EncSearchLastName?.Text?.Trim() ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(ln) || !string.IsNullOrWhiteSpace(fn))
+                    {
+                        nameQuery = $"{ln} {fn}".Trim();
+                    }
+                    barangayQuery = EncSearchBarangay?.Text?.Trim() ?? string.Empty;
                 }
 
                 Guid? searchGuid = null;
-                if (Guid.TryParse(idQuery, out var parsedGuid))
+                string philsysId = !string.IsNullOrWhiteSpace(filterPhilSys) ? filterPhilSys : null;
+
+                if (!string.IsNullOrWhiteSpace(idQuery))
                 {
-                    searchGuid = parsedGuid;
+                    if (Guid.TryParse(idQuery, out var parsedGuid))
+                    {
+                        searchGuid = parsedGuid;
+                    }
+                    else
+                    {
+                        // Support searching by PhilSys ID in the ID search box
+                        philsysId = idQuery;
+                    }
                 }
 
                 bool? isActive = null;
+                string statusParam = null;
                 if (!IsBasicUser && _statusFilter != "All")
                 {
-                    isActive = string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase);
+                    if (string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(_statusFilter, "Active", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isActive = true;
+                        statusParam = "Active";
+                    }
+                    else if (string.Equals(_statusFilter, "Inactive", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isActive = false;
+                        statusParam = "Inactive";
+                    }
+                    else if (string.Equals(_statusFilter, "Terminated", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isActive = false;
+                        statusParam = "Terminated";
+                    }
                 }
 
                 string sex = (!IsBasicUser && _sexFilter != "All") ? _sexFilter : null;
@@ -141,9 +184,11 @@ namespace SOLUM_UI
                 {
                     Id = searchGuid,
                     Fullname = !string.IsNullOrWhiteSpace(nameQuery) ? nameQuery : null,
+                    PhilsysId = !string.IsNullOrWhiteSpace(philsysId) ? philsysId : null,
                     Barangay = barangay,
                     Sex = sex,
                     IsActive = isActive,
+                    Status = statusParam,
                     SortBy = sortBy,
                     SortOrder = sortOrder,
                     Page = _currentPage,
@@ -187,12 +232,16 @@ namespace SOLUM_UI
                     }
                     else
                     {
+                        string fallbackStatus = !string.IsNullOrWhiteSpace(summary.Status)
+                            ? (summary.Status.Equals("Active", StringComparison.OrdinalIgnoreCase) ? "Valid" : summary.Status)
+                            : (summary.IsActive ? "Valid" : "Inactive");
+
                         rec = new SoloParentRecord
                         {
                             Id = summary.Id.ToString(),
                             Barangay = summary.Barangay,
                             Sex = summary.Sex,
-                            Status = summary.IsActive ? "Valid" : "Inactive",
+                            Status = fallbackStatus,
                             LastUpdated = summary.DateCreated,
                             Name = "Solo Parent " + summary.Id.ToString().Substring(0, 8)
                         };
@@ -288,10 +337,16 @@ namespace SOLUM_UI
 
         private void ClearSearch_Click(object sender, RoutedEventArgs e)
         {
-            SearchId.Text = string.Empty;
-            SearchName.Text = string.Empty;
-            SearchBarangay.Text = string.Empty;
-            ClearSearchBtn.Visibility = Visibility.Collapsed;
+            if (SearchId != null) SearchId.Text = string.Empty;
+            if (SearchName != null) SearchName.Text = string.Empty;
+            if (SearchBarangay != null) SearchBarangay.Text = string.Empty;
+            if (TxtFilterPhilSys != null) TxtFilterPhilSys.Text = string.Empty;
+            if (BasicSearchName != null) BasicSearchName.Text = string.Empty;
+            if (EncSearchId != null) EncSearchId.Text = string.Empty;
+            if (EncSearchFirstName != null) EncSearchFirstName.Text = string.Empty;
+            if (EncSearchLastName != null) EncSearchLastName.Text = string.Empty;
+            if (EncSearchBarangay != null) EncSearchBarangay.Text = string.Empty;
+            if (ClearSearchBtn != null) ClearSearchBtn.Visibility = Visibility.Collapsed;
             ApplyFiltersAndPage();
         }
 
@@ -317,6 +372,7 @@ namespace SOLUM_UI
             if (CmbFilterSex      != null) CmbFilterSex.SelectedIndex      = 0;
             if (CmbFilterBarangay != null) CmbFilterBarangay.SelectedIndex = 0;
             if (CmbFilterStatus   != null) CmbFilterStatus.SelectedIndex   = 0;
+            if (TxtFilterPhilSys  != null) TxtFilterPhilSys.Text            = string.Empty;
             _sexFilter      = "All";
             _barangayFilter = "All";
             _statusFilter   = "All";

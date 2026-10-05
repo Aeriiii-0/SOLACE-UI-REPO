@@ -168,15 +168,31 @@ namespace SOLUM_UI
                 string firstName = TxtFirstName.Text.Trim();
                 string lastName  = TxtLastName.Text.Trim();
                 string fullName  = lastName + " " + firstName;
+                string philsys   = TxtPhilSys.Text.Trim();
 
-                var request = new GetSoloParentRequest
+                BaseResponse<PagedResult<SoloParentSummaryDto>> response = null;
+
+                if (!string.IsNullOrWhiteSpace(philsys))
                 {
-                    Fullname = fullName,
-                    Page     = 1,
-                    PageSize = 5
-                };
+                    var philsysReq = new GetSoloParentRequest
+                    {
+                        PhilsysId = philsys,
+                        Page      = 1,
+                        PageSize  = 5
+                    };
+                    response = await SoloParentApiService.Instance.GetSoloParentsAsync(philsysReq);
+                }
 
-                var response = await SoloParentApiService.Instance.GetSoloParentsAsync(request);
+                if (response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
+                {
+                    var request = new GetSoloParentRequest
+                    {
+                        Fullname = fullName,
+                        Page     = 1,
+                        PageSize = 5
+                    };
+                    response = await SoloParentApiService.Instance.GetSoloParentsAsync(request);
+                }
 
                 if (response.Succeeded && response.Data?.Items != null && response.Data.Items.Count > 0)
                 {

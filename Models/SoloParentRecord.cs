@@ -50,6 +50,8 @@ namespace SOLUM_UI.Models
         public bool     IsNewApplicant    { get; set; }
         public bool     IsRenewal         { get; set; }
         public DateTime DateOfApplication { get; set; }
+        public DateTime? CurrentTermExpiresAt { get; set; }
+        public List<SOLUM_UI.Models.Api.RecordTermDto> RecordTerms { get; set; } = new List<SOLUM_UI.Models.Api.RecordTermDto>();
 
         // name
         public string Name          { get; set; }

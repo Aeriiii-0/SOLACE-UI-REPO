@@ -129,8 +129,10 @@ namespace SOLUM_UI.Models.Api
     {
         public Guid Id { get; set; }
         public Guid SoloParentId { get; set; }
+        public string Type { get; set; } // "New" or "Renewal"
         public string StartsAt { get; set; }
         public string ExpiresAt { get; set; }
+        public DateTime? DateCreated { get; set; }
     }
 
     // ========================
@@ -188,9 +190,11 @@ namespace SOLUM_UI.Models.Api
     {
         public Guid? Id { get; set; }
         public string Fullname { get; set; }
+        public string PhilsysId { get; set; }
         public string Sex { get; set; }
         public string Barangay { get; set; }
         public bool? IsActive { get; set; }
+        public string Status { get; set; } // "Active", "Inactive", "Terminated"
         public string SortBy { get; set; } = "LastName";
         public string SortOrder { get; set; } = "asc";
         public int Page { get; set; } = 1;
@@ -203,6 +207,7 @@ namespace SOLUM_UI.Models.Api
         public string Barangay { get; set; } = string.Empty;
         public string Sex { get; set; } = string.Empty;
         public bool IsActive { get; set; }
+        public string Status { get; set; } // "Active", "Inactive", or "Terminated"
         public DateTime DateCreated { get; set; }
     }
 
@@ -222,12 +227,13 @@ namespace SOLUM_UI.Models.Api
 
         public DateTime DateCreated { get; set; }
         public bool IsActive { get; set; }
+        public string Status { get; set; }
     }
 
     /// <summary>
-    /// Matches the SoloParent aggregate entity returned by GET /api/soloparent/{id}
+    /// Matches SoloParentDetailDto returned by GET /api/soloparent/{id}
     /// </summary>
-    public class SoloParentDto
+    public class SoloParentDetailDto
     {
         public Guid Id { get; set; }
         public PersonalInfo PersonalInfo { get; set; } = new PersonalInfo();
@@ -238,13 +244,19 @@ namespace SOLUM_UI.Models.Api
         public ProblemPresentedDetails ProblemPresented { get; set; } = new ProblemPresentedDetails();
         public DateTime DateCreated { get; set; }
         public bool IsDeleted { get; set; }
+        public bool IsActive { get; set; }
+        public string Status { get; set; } // "Active", "Inactive", or "Terminated"
+        public DateTime? CurrentTermExpiresAt { get; set; }
         public List<FamilyMemberDto> FamilyMembers { get; set; } = new List<FamilyMemberDto>();
         public List<RecordTermDto> RecordTerms { get; set; } = new List<RecordTermDto>();
 
         public bool IsLGBT { get; set; }
         public bool IsPantawidBeneficiary { get; set; }
         public bool IsIndigenous { get; set; }
+    }
 
-
+    // Kept as alias for compatibility
+    public class SoloParentDto : SoloParentDetailDto
+    {
     }
 }
