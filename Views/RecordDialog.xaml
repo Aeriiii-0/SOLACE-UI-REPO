@@ -926,6 +926,7 @@
                                                                 <ComboBox Height="38"
                                                                           Style="{StaticResource FormCombo}"
                                                                           BorderThickness="0" Background="Transparent"
+                                                                          SelectedValuePath="Content"
                                                                           SelectedValue="{Binding Sex, UpdateSourceTrigger=PropertyChanged}">
                                                                     <ComboBoxItem Content=""/>
                                                                     <ComboBoxItem Content="Female"/>
@@ -951,6 +952,7 @@
                                                                 <ComboBox Height="38"
                                                                           Style="{StaticResource FormCombo}"
                                                                           BorderThickness="0" Background="Transparent"
+                                                                          SelectedValuePath="Content"
                                                                           SelectedValue="{Binding CivilStatus, UpdateSourceTrigger=PropertyChanged}">
                                                                     <ComboBoxItem Content=""/>
                                                                     <ComboBoxItem Content="Single"/>
@@ -964,6 +966,7 @@
                                                                 <ComboBox Height="38"
                                                                           Style="{StaticResource FormCombo}"
                                                                           BorderThickness="0" Background="Transparent"
+                                                                          SelectedValuePath="Content"
                                                                           SelectedValue="{Binding Relationship, UpdateSourceTrigger=PropertyChanged}">
                                                                     <ComboBoxItem Content=""/>
                                                                     <ComboBoxItem Content="Child"/>

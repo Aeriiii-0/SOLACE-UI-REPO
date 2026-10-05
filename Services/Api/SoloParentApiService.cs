@@ -138,10 +138,11 @@ namespace SOLUM_UI.Services.Api
                 IsPantawidBeneficiary = r.IsPantawidBeneficiary 
             };
 
-            var existingMap = existingEntity?.FamilyMembers?.ToDictionary(f => f.Name?.Trim() ?? string.Empty, f => f)
-                              ?? new Dictionary<string, FamilyMemberDto>(StringComparer.OrdinalIgnoreCase);
+            var existingIds = existingEntity?.FamilyMembers != null
+                ? new HashSet<Guid>(existingEntity.FamilyMembers.Select(f => f.Id))
+                : new HashSet<Guid>();
 
-            var currentNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var processedExistingIds = new HashSet<Guid>();
 
             if (r.FamilyMembers != null)
             {
@@ -149,13 +150,14 @@ namespace SOLUM_UI.Services.Api
                 {
                     string mName = fm.MemberName?.Trim() ?? string.Empty;
                     if (string.IsNullOrWhiteSpace(mName)) continue;
-                    currentNames.Add(mName);
 
-                    if (existingMap.TryGetValue(mName, out var existingFm))
+                    // 1. Existing family member (has database GUID)
+                    if (fm.Id.HasValue && !fm.IsNew && existingIds.Contains(fm.Id.Value))
                     {
+                        processedExistingIds.Add(fm.Id.Value);
                         req.ExistingFamilyMembers.Add(new UpdateFamilyMemberRequest
                         {
-                            Id = existingFm.Id,
+                            Id = fm.Id.Value,
                             Name = fm.MemberName,
                             Sex = NormalizeSex(fm.Sex),
                             Age = ParseAge(fm.Age, fm.Birthdate),
@@ -166,6 +168,25 @@ namespace SOLUM_UI.Services.Api
                             Income = ParseDecimal(fm.Income)
                         });
                     }
+                    // 2. Fallback: If Id was missing but matches an unclaimed existing member by Name
+                    else if (!fm.Id.HasValue && !fm.IsNew && existingEntity?.FamilyMembers != null &&
+                             existingEntity.FamilyMembers.FirstOrDefault(f => !processedExistingIds.Contains(f.Id) && string.Equals(f.Name?.Trim(), mName, StringComparison.OrdinalIgnoreCase)) is FamilyMemberDto matched)
+                    {
+                        processedExistingIds.Add(matched.Id);
+                        req.ExistingFamilyMembers.Add(new UpdateFamilyMemberRequest
+                        {
+                            Id = matched.Id,
+                            Name = fm.MemberName,
+                            Sex = NormalizeSex(fm.Sex),
+                            Age = ParseAge(fm.Age, fm.Birthdate),
+                            Birthdate = ParseDate(fm.Birthdate, DateTime.UtcNow.AddYears(-10)),
+                            CivilStatus = string.IsNullOrWhiteSpace(fm.CivilStatus) ? "Single" : fm.CivilStatus,
+                            Relationship = string.IsNullOrWhiteSpace(fm.Relationship) ? "Child" : fm.Relationship,
+                            EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "Student" : fm.EducationEmployment,
+                            Income = ParseDecimal(fm.Income)
+                        });
+                    }
+                    // 3. New family member (omits ID per API contract)
                     else
                     {
                         req.NewFamilyMembers.Add(MapCreateFamilyMember(fm));
@@ -173,14 +194,25 @@ namespace SOLUM_UI.Services.Api
                 }
             }
 
-            if (existingEntity?.FamilyMembers != null)
+            // 4. Collect removed IDs:
+            // First, from explicit removals tracked during UI deletion
+            if (r.RemovedFamilyMemberIds != null)
             {
-                foreach (var fm in existingEntity.FamilyMembers)
+                foreach (var removedId in r.RemovedFamilyMemberIds)
                 {
-                    if (!currentNames.Contains(fm.Name?.Trim() ?? string.Empty))
+                    if (existingIds.Contains(removedId) && !req.RemovedFamilyMemberIds.Contains(removedId))
                     {
-                        req.RemovedFamilyMemberIds.Add(fm.Id);
+                        req.RemovedFamilyMemberIds.Add(removedId);
                     }
+                }
+            }
+
+            // Second, reconcile: any existing member not present in processedExistingIds
+            foreach (var existingId in existingIds)
+            {
+                if (!processedExistingIds.Contains(existingId) && !req.RemovedFamilyMemberIds.Contains(existingId))
+                {
+                    req.RemovedFamilyMemberIds.Add(existingId);
                 }
             }
 
@@ -287,6 +319,8 @@ namespace SOLUM_UI.Services.Api
             {
                 record.FamilyMembers = dto.FamilyMembers.Select(fm => new FamilyMember
                 {
+                    Id = fm.Id,
+                    IsNew = false,
                     MemberName = fm.Name,
                     Sex = fm.Sex,
                     Age = fm.Age.ToString(),

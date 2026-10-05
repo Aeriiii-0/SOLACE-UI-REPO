@@ -6,6 +6,8 @@ namespace SOLUM_UI.Models
     // Family composition row — also carries OCR confidence scores for the review grid
     public class FamilyMember
     {
+        public Guid? Id                   { get; set; }
+        public bool IsNew                 { get; set; } = true;
         public string MemberName          { get; set; }
         public string Sex                 { get; set; }
         public string Age                 { get; set; }
@@ -94,6 +96,7 @@ namespace SOLUM_UI.Models
         //  children 
         public int                Children      { get; set; }
         public List<FamilyMember> FamilyMembers { get; set; } = new List<FamilyMember>();
+        public List<Guid> RemovedFamilyMemberIds { get; set; } = new List<Guid>();
 
         //  circumstances 
         public bool   CircumstanceA1           { get; set; }
