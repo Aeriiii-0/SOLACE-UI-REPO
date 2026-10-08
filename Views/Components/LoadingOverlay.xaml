@@ -1,0 +1,68 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.LoadingOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Self"
+             Visibility="Collapsed"
+             IsHitTestVisible="False">
+
+    <Grid Panel.ZIndex="9999">
+        <Rectangle Fill="#88000000" RadiusX="0" RadiusY="0"/>
+        <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="White" CornerRadius="14"
+                Padding="36,28" MinWidth="200">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="0" Opacity="0.18"/>
+            </Border.Effect>
+            <StackPanel HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True"
+                             Height="4" Width="140"
+                             Foreground="#702943"
+                             Background="#F0E4E8"
+                             BorderThickness="0"
+                             Margin="0,0,0,16">
+                    <ProgressBar.Template>
+                        <ControlTemplate TargetType="ProgressBar">
+                            <Border x:Name="Track" Background="#F0E4E8" CornerRadius="2" Height="4">
+                                <Border x:Name="Indicator" HorizontalAlignment="Left"
+                                        Background="#702943" CornerRadius="2" Height="4">
+                                    <Border.RenderTransform>
+                                        <TranslateTransform x:Name="SlideTransform"/>
+                                    </Border.RenderTransform>
+                                </Border>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsIndeterminate" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard RepeatBehavior="Forever">
+                                                <DoubleAnimationUsingKeyFrames
+                                                    Storyboard.TargetName="Indicator"
+                                                    Storyboard.TargetProperty="Width"
+                                                    Duration="0:0:1.4">
+                                                    <LinearDoubleKeyFrame Value="20"  KeyTime="0:0:0"/>
+                                                    <LinearDoubleKeyFrame Value="80"  KeyTime="0:0:0.4"/>
+                                                    <LinearDoubleKeyFrame Value="20"  KeyTime="0:0:1.4"/>
+                                                </DoubleAnimationUsingKeyFrames>
+                                                <DoubleAnimationUsingKeyFrames
+                                                    Storyboard.TargetName="SlideTransform"
+                                                    Storyboard.TargetProperty="X"
+                                                    Duration="0:0:1.4">
+                                                    <LinearDoubleKeyFrame Value="-20" KeyTime="0:0:0"/>
+                                                    <LinearDoubleKeyFrame Value="60"  KeyTime="0:0:0.7"/>
+                                                    <LinearDoubleKeyFrame Value="140" KeyTime="0:0:1.4"/>
+                                                </DoubleAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ProgressBar.Template>
+                </ProgressBar>
+                <TextBlock Text="Loading…" FontSize="13" FontWeight="SemiBold"
+                           Foreground="#702943" HorizontalAlignment="Center"
+                           FontFamily="Segoe UI"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

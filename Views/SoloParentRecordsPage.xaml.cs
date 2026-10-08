@@ -48,6 +48,9 @@ namespace SOLUM_UI
                 _ = LoadRecordsAsync();
             };
             SizeChanged += Page_SizeChanged;
+            // Also recompute when the ListView itself changes size
+            RecordsList.SizeChanged += (s, e) => ResizeNameColumn();
+            RecordsList.Loaded      += (s, e) => ResizeNameColumn();
         }
 
         private void ApplyRoleView()
@@ -87,6 +90,8 @@ namespace SOLUM_UI
         {
             if (_isLoading) return;
             _isLoading = true;
+            if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = false;
+            if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
 
             try
             {
@@ -94,66 +99,23 @@ namespace SOLUM_UI
                 string idQuery = SearchId?.Text?.Trim() ?? string.Empty;
                 string nameQuery = SearchName?.Text?.Trim() ?? string.Empty;
                 string barangayQuery = SearchBarangay?.Text?.Trim() ?? string.Empty;
-                string filterPhilSys = TxtFilterPhilSys?.Text?.Trim() ?? string.Empty;
 
                 if (IsBasicUser)
                 {
                     nameQuery = BasicSearchName?.Text?.Trim() ?? string.Empty;
                     barangayQuery = string.Empty;
-                    if (System.Text.RegularExpressions.Regex.IsMatch(nameQuery, @"^[\d\s\-]+$") && nameQuery.Length >= 4)
-                    {
-                        filterPhilSys = nameQuery;
-                        nameQuery = string.Empty;
-                    }
-                }
-                else if (IsEncoder)
-                {
-                    idQuery = EncSearchId?.Text?.Trim() ?? string.Empty;
-                    string fn = EncSearchFirstName?.Text?.Trim() ?? string.Empty;
-                    string ln = EncSearchLastName?.Text?.Trim() ?? string.Empty;
-                    if (!string.IsNullOrWhiteSpace(ln) || !string.IsNullOrWhiteSpace(fn))
-                    {
-                        nameQuery = $"{ln} {fn}".Trim();
-                    }
-                    barangayQuery = EncSearchBarangay?.Text?.Trim() ?? string.Empty;
                 }
 
                 Guid? searchGuid = null;
-                string philsysId = !string.IsNullOrWhiteSpace(filterPhilSys) ? filterPhilSys : null;
-
-                if (!string.IsNullOrWhiteSpace(idQuery))
+                if (Guid.TryParse(idQuery, out var parsedGuid))
                 {
-                    if (Guid.TryParse(idQuery, out var parsedGuid))
-                    {
-                        searchGuid = parsedGuid;
-                    }
-                    else
-                    {
-                        // Support searching by PhilSys ID in the ID search box
-                        philsysId = idQuery;
-                    }
+                    searchGuid = parsedGuid;
                 }
 
                 bool? isActive = null;
-                string statusParam = null;
                 if (!IsBasicUser && _statusFilter != "All")
                 {
-                    if (string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(_statusFilter, "Active", StringComparison.OrdinalIgnoreCase))
-                    {
-                        isActive = true;
-                        statusParam = "Active";
-                    }
-                    else if (string.Equals(_statusFilter, "Inactive", StringComparison.OrdinalIgnoreCase))
-                    {
-                        isActive = false;
-                        statusParam = "Inactive";
-                    }
-                    else if (string.Equals(_statusFilter, "Terminated", StringComparison.OrdinalIgnoreCase))
-                    {
-                        isActive = false;
-                        statusParam = "Terminated";
-                    }
+                    isActive = string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase);
                 }
 
                 string sex = (!IsBasicUser && _sexFilter != "All") ? _sexFilter : null;
@@ -184,17 +146,17 @@ namespace SOLUM_UI
                 {
                     Id = searchGuid,
                     Fullname = !string.IsNullOrWhiteSpace(nameQuery) ? nameQuery : null,
-                    PhilsysId = !string.IsNullOrWhiteSpace(philsysId) ? philsysId : null,
                     Barangay = barangay,
                     Sex = sex,
                     IsActive = isActive,
-                    Status = statusParam,
                     SortBy = sortBy,
                     SortOrder = sortOrder,
                     Page = _currentPage,
                     PageSize = PageSize
                 };
 
+                // Fetch the list page, then retrieve full details in parallel (the list
+                // endpoint does not return complete PersonalInfo — detail endpoint does).
                 var resp = await SoloParentApiService.Instance.GetSoloParentsAsync(req);
 
                 if (!resp.Succeeded || resp.Data == null)
@@ -215,14 +177,16 @@ namespace SOLUM_UI
                 var paged = resp.Data;
                 _totalPages = Math.Max(1, paged.TotalPages);
 
-                // For the current page of summaries, retrieve full details in parallel
-                var detailTasks = paged.Items.Select(item => SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id)).ToList();
+                // Fetch every record's full detail in parallel
+                var detailTasks = paged.Items
+                    .Select(item => SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id))
+                    .ToList();
                 var detailResponses = await Task.WhenAll(detailTasks);
 
                 _allRecords = new List<SoloParentRecordViewModel>();
                 for (int i = 0; i < paged.Items.Count; i++)
                 {
-                    var summary = paged.Items[i];
+                    var summary    = paged.Items[i];
                     var detailResp = detailResponses[i];
 
                     SoloParentRecord rec;
@@ -232,19 +196,16 @@ namespace SOLUM_UI
                     }
                     else
                     {
-                        string fallbackStatus = !string.IsNullOrWhiteSpace(summary.Status)
-                            ? (summary.Status.Equals("Active", StringComparison.OrdinalIgnoreCase) ? "Valid" : summary.Status)
-                            : (summary.IsActive ? "Valid" : "Inactive");
-
+                        // Detail call failed — build a minimal record from summary fields
                         rec = new SoloParentRecord
                         {
-                            Id = summary.Id.ToString(),
-                            Barangay = summary.Barangay,
-                            Sex = summary.Sex,
-                            Status = fallbackStatus,
+                            Id          = summary.Id.ToString(),
+                            Barangay    = summary.Barangay,
+                            Sex         = summary.Sex,
+                            Status      = summary.IsActive ? "Valid" : "Inactive",
                             LastUpdated = summary.DateCreated,
-                            Name = "Solo Parent " + summary.Id.ToString().Substring(0, 8)
                         };
+                        rec.Name = rec.Surname = rec.FirstName = rec.MiddleName = string.Empty;
                     }
 
                     var vm = new SoloParentRecordViewModel(rec);
@@ -268,7 +229,14 @@ namespace SOLUM_UI
             finally
             {
                 _isLoading = false;
+                if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = true;
+                if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
             }
+        }
+
+        private async void BtnRefreshRecords_Click(object sender, RoutedEventArgs e)
+        {
+            await LoadRecordsAsync();
         }
 
         private void ApplyFiltersAndPage()
@@ -337,16 +305,10 @@ namespace SOLUM_UI
 
         private void ClearSearch_Click(object sender, RoutedEventArgs e)
         {
-            if (SearchId != null) SearchId.Text = string.Empty;
-            if (SearchName != null) SearchName.Text = string.Empty;
-            if (SearchBarangay != null) SearchBarangay.Text = string.Empty;
-            if (TxtFilterPhilSys != null) TxtFilterPhilSys.Text = string.Empty;
-            if (BasicSearchName != null) BasicSearchName.Text = string.Empty;
-            if (EncSearchId != null) EncSearchId.Text = string.Empty;
-            if (EncSearchFirstName != null) EncSearchFirstName.Text = string.Empty;
-            if (EncSearchLastName != null) EncSearchLastName.Text = string.Empty;
-            if (EncSearchBarangay != null) EncSearchBarangay.Text = string.Empty;
-            if (ClearSearchBtn != null) ClearSearchBtn.Visibility = Visibility.Collapsed;
+            SearchId.Text = string.Empty;
+            SearchName.Text = string.Empty;
+            SearchBarangay.Text = string.Empty;
+            ClearSearchBtn.Visibility = Visibility.Collapsed;
             ApplyFiltersAndPage();
         }
 
@@ -372,7 +334,6 @@ namespace SOLUM_UI
             if (CmbFilterSex      != null) CmbFilterSex.SelectedIndex      = 0;
             if (CmbFilterBarangay != null) CmbFilterBarangay.SelectedIndex = 0;
             if (CmbFilterStatus   != null) CmbFilterStatus.SelectedIndex   = 0;
-            if (TxtFilterPhilSys  != null) TxtFilterPhilSys.Text            = string.Empty;
             _sexFilter      = "All";
             _barangayFilter = "All";
             _statusFilter   = "All";
@@ -429,9 +390,21 @@ namespace SOLUM_UI
                 return;
             }
 
+            if (view.OpenedRenew)
+            {
+                await RenewRecordAsync(recordToView, view.RenewalResult);
+                return;
+            }
+
             if (view.OpenedEdit)
             {
                 await EditRecordAsync(recordToView);
+                return;
+            }
+
+            if (view.OpenedDelete)
+            {
+                await DeleteRecordAsync(recordToView.Id, recordToView.Name);
             }
         }
 
@@ -529,6 +502,43 @@ namespace SOLUM_UI
             await EditRecordAsync(vm.RawModel);
         }
 
+        private async Task RenewRecordAsync(SoloParentRecord original, SoloParentRecord updated)
+        {
+            if (!Guid.TryParse(original.Id, out var guid))
+            {
+                MessageBox.Show("Cannot renew: invalid record ID.", "Renew", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 1. Extend the validity window on the server
+            var renewResp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid);
+            if (!renewResp.Succeeded)
+            {
+                string err = renewResp.Errors != null && renewResp.Errors.Count > 0
+                    ? string.Join("\n", renewResp.Errors) : "Failed to renew record.";
+                MessageBox.Show(err, "Renew Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 2. Persist the edited mutable fields (civil status, income, employment)
+            var updateReq  = SoloParentApiService.Instance.MapToUpdateRequest(guid, updated);
+            var updateResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(guid, updateReq);
+            if (!updateResp.Succeeded)
+            {
+                string err = updateResp.Errors != null && updateResp.Errors.Count > 0
+                    ? string.Join("\n", updateResp.Errors) : "Failed to save updated fields.";
+                MessageBox.Show(err, "Update Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            string newExpiry = DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
+            ToastNotification.Show("Record Renewed",
+                $"{original.Name} — valid until {newExpiry}.", ToastType.Success);
+            AuditLogService.Instance.LogUpdate(original.Id, original.Name,
+                GetCurrentUser(), CurrentUserRole, $"Record renewed. Valid until {newExpiry}.");
+            await LoadRecordsAsync();
+        }
+
         private async Task EditRecordAsync(SoloParentRecord rawRecord)
         {
             MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
@@ -611,23 +621,31 @@ namespace SOLUM_UI
             string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
             SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
             string recordName = vm != null ? vm.Name : id;
+            await DeleteRecordAsync(id, recordName);
+        }
 
-            MessageBoxResult confirm = MessageBox.Show(
-                "Delete record " + recordName + "?", "Confirm Delete",
-                MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (confirm != MessageBoxResult.Yes) return;
-
-            if (Guid.TryParse(id, out var guid))
+        private async Task DeleteRecordAsync(string id, string recordName)
+        {
+            if (IsBasicUser)
             {
-                var deleteResp = await SoloParentApiService.Instance.DeleteSoloParentAsync(guid);
-                if (!deleteResp.Succeeded)
-                {
-                    string err = deleteResp.Errors != null && deleteResp.Errors.Count > 0
-                        ? string.Join("\n", deleteResp.Errors)
-                        : "Failed to delete record from server.";
-                    MessageBox.Show(err, "Delete Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                ToastNotification.Show("Access Denied", "Basic users cannot delete records.", ToastType.Warning);
+                return;
+            }
+
+            if (!Guid.TryParse(id, out var guid))
+            {
+                ToastNotification.Show("Invalid ID", "Cannot delete record without a valid ID.", ToastType.Warning);
+                return;
+            }
+
+            var deleteResp = await SoloParentApiService.Instance.DeleteSoloParentAsync(guid);
+            if (!deleteResp.Succeeded)
+            {
+                string err = deleteResp.Errors != null && deleteResp.Errors.Count > 0
+                    ? string.Join("\n", deleteResp.Errors)
+                    : "Failed to delete record from server.";
+                MessageBox.Show(err, "Delete Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
             ToastNotification.Show("Record Deleted", "The record was removed.", ToastType.Warning);
@@ -667,33 +685,33 @@ namespace SOLUM_UI
 
         private void ResizeNameColumn()
         {
-            if (RecordsList.View is GridView gv && gv.Columns.Count >= 10)
+            if (RecordsList.View is GridView gv && gv.Columns.Count >= 9)
             {
-                const double id         = 152;
-                const double sex        = 90;
-                const double civil      = 120;
-                const double dob        = 110;
-                const double lastUpd    = 112;
-                const double validUntil = 110;
-                const double status     = 96;
-                const double actions    = 149;
+                // Fixed columns (px)
+                const double sex        =  80;
+                const double civil      = 110;
+                const double dob        = 108;
+                const double lastUpd    = 108;
+                const double validUntil = 108;
+                const double status     =  90;
+                const double actions    = 145;
 
                 double available = RecordsList.ActualWidth - 2;
                 if (available <= 0) return;
 
-                double totalFixed = id + sex + civil + dob + lastUpd + validUntil + status + actions;
-                double flex = Math.Max(200, available - totalFixed);
+                double totalFixed = sex + civil + dob + lastUpd + validUntil + status + actions;
+                double flex = Math.Max(220, available - totalFixed);
 
-                gv.Columns[0].Width = id;
-                gv.Columns[1].Width = Math.Max(60, flex * 0.54 + 20);
-                gv.Columns[2].Width = Math.Max(40, flex * 0.46 - 20);
-                gv.Columns[3].Width = sex;
-                gv.Columns[4].Width = civil;
-                gv.Columns[5].Width = dob;
-                gv.Columns[6].Width = lastUpd;
-                gv.Columns[7].Width = validUntil;
-                gv.Columns[8].Width = status;
-                gv.Columns[9].Width = actions;
+                // Col 0 = NAME  (wider), Col 1 = BARANGAY  (narrower)
+                gv.Columns[0].Width = Math.Max(140, flex * 0.58);
+                gv.Columns[1].Width = Math.Max(80,  flex * 0.42);
+                gv.Columns[2].Width = sex;
+                gv.Columns[3].Width = civil;
+                gv.Columns[4].Width = dob;
+                gv.Columns[5].Width = lastUpd;
+                gv.Columns[6].Width = validUntil;
+                gv.Columns[7].Width = status;
+                gv.Columns[8].Width = actions;
             }
         }
 

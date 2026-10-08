@@ -260,20 +260,35 @@ namespace SOLUM_UI
 
         private void LoadRecommendations()
         {
-            _allItems = new List<SubsidyItem>
+            if (SubsidyLoadingOverlay != null) SubsidyLoadingOverlay.IsLoading = true;
+            if (BtnRefreshSubsidy   != null) BtnRefreshSubsidy.IsEnabled = false;
+            try
             {
-                new SubsidyItem { SpId="SP-001", Name="Santos, Maria Lim",         Barangay="San Roque",  SubsidyType="Allowance", Priority="High",   IncomeLevel="Low",  Dependants=2, CivilStatus="Single",    Score=92 },
-                new SubsidyItem { SpId="SP-002", Name="Dela Cruz, Juan Reyes Jr.", Barangay="Poblacion",  SubsidyType="Allowance", Priority="High",   IncomeLevel="Low",  Dependants=3, CivilStatus="Widowed",   Score=88 },
-                new SubsidyItem { SpId="SP-003", Name="Reyes, Ana Mendoza",        Barangay="Maligaya",   SubsidyType="Allowance", Priority="Medium", IncomeLevel="Mid",  Dependants=1, CivilStatus="Separated", Score=61 },
-                new SubsidyItem { SpId="SP-004", Name="Garcia, Pedro Torres III",  Barangay="San Isidro", SubsidyType="Allowance", Priority="Medium", IncomeLevel="Mid",  Dependants=2, CivilStatus="Single",    Score=67 },
-                new SubsidyItem { SpId="SP-005", Name="Martinez, Rosa Cruz",       Barangay="San Roque",  SubsidyType="Allowance", Priority="High",   IncomeLevel="Low",  Dependants=4, CivilStatus="Widowed",   Score=95 },
-                new SubsidyItem { SpId="SP-006", Name="Lim, Cynthia Tan",          Barangay="San Roque",  SubsidyType="Allowance", Priority="Medium", IncomeLevel="Mid",  Dependants=2, CivilStatus="Separated", Score=58 },
-                new SubsidyItem { SpId="SP-007", Name="Bautista, Carlos Ocampo",   Barangay="Poblacion",  SubsidyType="Allowance", Priority="High",   IncomeLevel="Low",  Dependants=3, CivilStatus="Widowed",   Score=84 },
-                new SubsidyItem { SpId="SP-008", Name="Mendoza, Elena Flores",     Barangay="Maligaya",   SubsidyType="Allowance", Priority="Low",    IncomeLevel="High", Dependants=1, CivilStatus="Single",    Score=41 },
-                new SubsidyItem { SpId="SP-009", Name="Torres, Benjamin Ramos",    Barangay="San Isidro", SubsidyType="Allowance", Priority="Low",    IncomeLevel="High", Dependants=2, CivilStatus="Separated", Score=37 },
-                new SubsidyItem { SpId="SP-010", Name="Navarro, Josephine Aquino", Barangay="San Roque",  SubsidyType="Allowance", Priority="Medium", IncomeLevel="Low",  Dependants=3, CivilStatus="Widowed",   Score=74 },
-            };
-            ApplyFilterAndSort();
+                _allItems = new List<SubsidyItem>
+                {
+                    new SubsidyItem { SpId="SP-001", Name="Santos, Maria Lim",         Barangay="San Roque",  SubsidyType="Allowance", Priority="High",   IncomeLevel="Low",  Dependants=2, CivilStatus="Single",    Score=92 },
+                    new SubsidyItem { SpId="SP-002", Name="Dela Cruz, Juan Reyes Jr.", Barangay="Poblacion",  SubsidyType="Allowance", Priority="High",   IncomeLevel="Low",  Dependants=3, CivilStatus="Widowed",   Score=88 },
+                    new SubsidyItem { SpId="SP-003", Name="Reyes, Ana Mendoza",        Barangay="Maligaya",   SubsidyType="Allowance", Priority="Medium", IncomeLevel="Mid",  Dependants=1, CivilStatus="Separated", Score=61 },
+                    new SubsidyItem { SpId="SP-004", Name="Garcia, Pedro Torres III",  Barangay="San Isidro", SubsidyType="Allowance", Priority="Medium", IncomeLevel="Mid",  Dependants=2, CivilStatus="Single",    Score=67 },
+                    new SubsidyItem { SpId="SP-005", Name="Martinez, Rosa Cruz",       Barangay="San Roque",  SubsidyType="Allowance", Priority="High",   IncomeLevel="Low",  Dependants=4, CivilStatus="Widowed",   Score=95 },
+                    new SubsidyItem { SpId="SP-006", Name="Lim, Cynthia Tan",          Barangay="San Roque",  SubsidyType="Allowance", Priority="Medium", IncomeLevel="Mid",  Dependants=2, CivilStatus="Separated", Score=58 },
+                    new SubsidyItem { SpId="SP-007", Name="Bautista, Carlos Ocampo",   Barangay="Poblacion",  SubsidyType="Allowance", Priority="High",   IncomeLevel="Low",  Dependants=3, CivilStatus="Widowed",   Score=84 },
+                    new SubsidyItem { SpId="SP-008", Name="Mendoza, Elena Flores",     Barangay="Maligaya",   SubsidyType="Allowance", Priority="Low",    IncomeLevel="High", Dependants=1, CivilStatus="Single",    Score=41 },
+                    new SubsidyItem { SpId="SP-009", Name="Torres, Benjamin Ramos",    Barangay="San Isidro", SubsidyType="Allowance", Priority="Low",    IncomeLevel="High", Dependants=2, CivilStatus="Separated", Score=37 },
+                    new SubsidyItem { SpId="SP-010", Name="Navarro, Josephine Aquino", Barangay="San Roque",  SubsidyType="Allowance", Priority="Medium", IncomeLevel="Low",  Dependants=3, CivilStatus="Widowed",   Score=74 },
+                };
+                ApplyFilterAndSort();
+            }
+            finally
+            {
+                if (SubsidyLoadingOverlay != null) SubsidyLoadingOverlay.IsLoading = false;
+                if (BtnRefreshSubsidy    != null) BtnRefreshSubsidy.IsEnabled = true;
+            }
+        }
+
+        private void BtnRefreshSubsidy_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            LoadRecommendations();
         }
 
         private void ApplyFilterAndSort()

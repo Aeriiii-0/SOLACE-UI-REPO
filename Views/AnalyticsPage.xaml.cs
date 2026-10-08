@@ -16,16 +16,11 @@ namespace SOLUM_UI
 {
     public partial class AnalyticsPage : Page
     {
-        private string _filterType = "Monthly"; // "Yearly", "Quarterly", "Monthly", "Custom"
         private int _filterYear;
         private int _filterMonth;
-        private int _filterQuarter = 1;
-        private DateTime? _startDate = null;
-        private DateTime? _endDate = null;
         private string _filterBarangay = "ALL";
         private string _currentPeriod = "";
         private MonthlyAnalyticsDto _current;
-        private BarangayAnalyticsResponseDto _currentBreakdown;
 
         private readonly Dictionary<(int year, int month, string barangay), MonthlyAnalyticsDto> _cache = new Dictionary<(int, int, string), MonthlyAnalyticsDto>();
 
@@ -146,114 +141,34 @@ namespace SOLUM_UI
 
         private void PopulateFilterDropdowns()
         {
-            // Populate Filter Type dropdown
-            CmbFilterType.Items.Clear();
-            CmbFilterType.Items.Add(new ComboBoxItem { Content = "Per Month", Tag = "Monthly" });
-            CmbFilterType.Items.Add(new ComboBoxItem { Content = "Quarterly", Tag = "Quarterly" });
-            CmbFilterType.Items.Add(new ComboBoxItem { Content = "Yearly", Tag = "Yearly" });
-            CmbFilterType.Items.Add(new ComboBoxItem { Content = "Custom Range", Tag = "Custom" });
-            CmbFilterType.SelectedItem = CmbFilterType.Items
-                .Cast<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == _filterType) 
-                ?? CmbFilterType.Items[0];
-
-            // Populate Year dropdown
             CmbFilterYear.Items.Clear();
             int thisYear = DateTime.Today.Year;
             for (int y = thisYear; y >= thisYear - 4; y--)
                 CmbFilterYear.Items.Add(new ComboBoxItem { Content = y.ToString(), Tag = y });
             CmbFilterYear.SelectedItem = CmbFilterYear.Items
-                .Cast<ComboBoxItem>().FirstOrDefault(i => (int)i.Tag == _filterYear)
-                ?? CmbFilterYear.Items[0];
+                .Cast<ComboBoxItem>().FirstOrDefault(i => (int)i.Tag == _filterYear);
 
-            // Populate Month dropdown
             CmbFilterMonth.Items.Clear();
             for (int m = 1; m <= 12; m++)
                 CmbFilterMonth.Items.Add(new ComboBoxItem { Content = new DateTime(2000, m, 1).ToString("MMMM"), Tag = m });
             CmbFilterMonth.SelectedItem = CmbFilterMonth.Items
-                .Cast<ComboBoxItem>().FirstOrDefault(i => (int)i.Tag == _filterMonth)
-                ?? CmbFilterMonth.Items[0];
+                .Cast<ComboBoxItem>().FirstOrDefault(i => (int)i.Tag == _filterMonth);
 
-            // Populate Quarter dropdown
-            CmbFilterQuarter.Items.Clear();
-            CmbFilterQuarter.Items.Add(new ComboBoxItem { Content = "Q1 (Jan – Mar)", Tag = 1 });
-            CmbFilterQuarter.Items.Add(new ComboBoxItem { Content = "Q2 (Apr – Jun)", Tag = 2 });
-            CmbFilterQuarter.Items.Add(new ComboBoxItem { Content = "Q3 (Jul – Sep)", Tag = 3 });
-            CmbFilterQuarter.Items.Add(new ComboBoxItem { Content = "Q4 (Oct – Dec)", Tag = 4 });
-            CmbFilterQuarter.SelectedItem = CmbFilterQuarter.Items
-                .Cast<ComboBoxItem>().FirstOrDefault(i => (int)i.Tag == _filterQuarter) 
-                ?? CmbFilterQuarter.Items[0];
-
-            // Custom Range default dates
-            if (DpFilterStartDate != null)
-                DpFilterStartDate.SelectedDate = _startDate ?? new DateTime(thisYear, 1, 1);
-            if (DpFilterEndDate != null)
-                DpFilterEndDate.SelectedDate = _endDate ?? DateTime.Today;
-
-            // Populate Barangay dropdown
             CmbFilterBarangay.Items.Clear();
             CmbFilterBarangay.Items.Add(new ComboBoxItem { Content = "All Barangays", Tag = "ALL" });
             foreach (var b in Barangays)
                 CmbFilterBarangay.Items.Add(new ComboBoxItem { Content = b, Tag = b });
             CmbFilterBarangay.SelectedItem = CmbFilterBarangay.Items
                 .Cast<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == _filterBarangay);
-
-            ApplyFilterVisibility(_filterType);
-        }
-
-        private void CmbFilterType_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (CmbFilterType?.SelectedItem is ComboBoxItem item && item.Tag is string selectedType)
-            {
-                ApplyFilterVisibility(selectedType);
-            }
-        }
-
-        private void ApplyFilterVisibility(string filterType)
-        {
-            if (PnlFilterYear == null || PnlFilterQuarter == null || PnlFilterMonth == null || PnlFilterCustomRange == null)
-                return;
-
-            switch (filterType)
-            {
-                case "Yearly":
-                    PnlFilterYear.Visibility = Visibility.Visible;
-                    PnlFilterQuarter.Visibility = Visibility.Collapsed;
-                    PnlFilterMonth.Visibility = Visibility.Collapsed;
-                    PnlFilterCustomRange.Visibility = Visibility.Collapsed;
-                    break;
-                case "Quarterly":
-                    PnlFilterYear.Visibility = Visibility.Visible;
-                    PnlFilterQuarter.Visibility = Visibility.Visible;
-                    PnlFilterMonth.Visibility = Visibility.Collapsed;
-                    PnlFilterCustomRange.Visibility = Visibility.Collapsed;
-                    break;
-                case "Monthly":
-                    PnlFilterYear.Visibility = Visibility.Visible;
-                    PnlFilterQuarter.Visibility = Visibility.Collapsed;
-                    PnlFilterMonth.Visibility = Visibility.Visible;
-                    PnlFilterCustomRange.Visibility = Visibility.Collapsed;
-                    break;
-                case "Custom":
-                    PnlFilterYear.Visibility = Visibility.Collapsed;
-                    PnlFilterQuarter.Visibility = Visibility.Collapsed;
-                    PnlFilterMonth.Visibility = Visibility.Collapsed;
-                    PnlFilterCustomRange.Visibility = Visibility.Visible;
-                    break;
-            }
         }
 
         private void FilterDrop_Click(object sender, RoutedEventArgs e) => FilterPopup.IsOpen = true;
 
         private async void FilterApply_Click(object sender, RoutedEventArgs e)
         {
-            _filterType = (string)((CmbFilterType.SelectedItem as ComboBoxItem)?.Tag ?? "Monthly");
             _filterYear = (int)((CmbFilterYear.SelectedItem as ComboBoxItem)?.Tag ?? DateTime.Today.Year);
             _filterMonth = (int)((CmbFilterMonth.SelectedItem as ComboBoxItem)?.Tag ?? DateTime.Today.Month);
-            _filterQuarter = (int)((CmbFilterQuarter.SelectedItem as ComboBoxItem)?.Tag ?? 1);
-            _startDate = DpFilterStartDate?.SelectedDate;
-            _endDate = DpFilterEndDate?.SelectedDate;
             _filterBarangay = (string)((CmbFilterBarangay.SelectedItem as ComboBoxItem)?.Tag ?? "ALL");
-
             FilterPopup.IsOpen = false;
             UpdateFilterBadge();
             await LoadAndBuildAnalyticsAsync();
@@ -261,12 +176,8 @@ namespace SOLUM_UI
 
         private async void FilterReset_Click(object sender, RoutedEventArgs e)
         {
-            _filterType = "Monthly";
             _filterYear = DateTime.Today.Year;
             _filterMonth = DateTime.Today.Month;
-            _filterQuarter = (_filterMonth - 1) / 3 + 1;
-            _startDate = null;
-            _endDate = null;
             _filterBarangay = "ALL";
             PopulateFilterDropdowns();
             FilterPopup.IsOpen = false;
@@ -276,25 +187,7 @@ namespace SOLUM_UI
 
         private void UpdateFilterBadge()
         {
-            string period = "";
-            switch (_filterType)
-            {
-                case "Yearly":
-                    period = $"Year {_filterYear}";
-                    break;
-                case "Quarterly":
-                    period = $"Q{_filterQuarter} {_filterYear}";
-                    break;
-                case "Monthly":
-                    period = new DateTime(2000, _filterMonth, 1).ToString("MMMM") + " " + _filterYear;
-                    break;
-                case "Custom":
-                    string startStr = _startDate?.ToString("MMM d, yyyy") ?? "Start";
-                    string endStr = _endDate?.ToString("MMM d, yyyy") ?? "End";
-                    period = $"{startStr} – {endStr}";
-                    break;
-            }
-
+            string period = new DateTime(2000, _filterMonth, 1).ToString("MMMM") + " " + _filterYear;
             if (_filterBarangay != "ALL") period += " · " + _filterBarangay;
             TxtActiveFilter.Text = period;
             ActiveFilterBadge.Visibility = Visibility.Visible;
@@ -302,136 +195,49 @@ namespace SOLUM_UI
 
         private async Task LoadAndBuildAnalyticsAsync()
         {
-            // Monthly analytics call (for demographic breakdowns)
-            int queryMonth = _filterType == "Quarterly" ? ((_filterQuarter - 1) * 3 + 1) : _filterMonth;
-            var monthlyTask = GetMonthlyAnalyticsCachedAsync(_filterYear, queryMonth, _filterBarangay);
-
-            // Barangay breakdown call using revised API parameters
-            Task<BaseResponse<BarangayAnalyticsResponseDto>> breakdownTask;
-            if (_filterType == "Quarterly")
+            if (AnalyticsLoadingOverlay != null) AnalyticsLoadingOverlay.IsLoading = true;
+            if (BtnRefresh != null) BtnRefresh.IsEnabled = false;
+            try
             {
-                breakdownTask = AnalyticsApiService.Instance.GetBarangayBreakdownAsync(
-                    quarter: _filterQuarter,
-                    year: _filterYear,
-                    barangay: _filterBarangay,
-                    type: "Quarterly");
-            }
-            else if (_filterType == "Yearly")
-            {
-                breakdownTask = AnalyticsApiService.Instance.GetBarangayBreakdownAsync(
-                    year: _filterYear,
-                    barangay: _filterBarangay,
-                    type: "Yearly");
-            }
-            else if (_filterType == "Custom")
-            {
-                breakdownTask = AnalyticsApiService.Instance.GetBarangayBreakdownAsync(
-                    barangay: _filterBarangay,
-                    type: "Custom",
-                    startDate: _startDate,
-                    endDate: _endDate);
-            }
-            else
-            {
-                breakdownTask = AnalyticsApiService.Instance.GetBarangayBreakdownAsync(
-                    quarter: (_filterMonth - 1) / 3 + 1,
-                    year: _filterYear,
-                    barangay: _filterBarangay,
-                    type: "Monthly");
-            }
+                var response = await GetMonthlyAnalyticsCachedAsync(_filterYear, _filterMonth, _filterBarangay);
 
-            await Task.WhenAll(monthlyTask, breakdownTask);
+                if (!response.Succeeded || response.Data == null)
+                {
+                    string err = response.Errors != null && response.Errors.Count > 0
+                        ? string.Join("\n", response.Errors)
+                        : "Unable to load analytics for this period.";
+                    ToastNotification.Show("Load Failed", err, ToastType.Warning);
+                    return;
+                }
 
-            var response = monthlyTask.Result;
-            var breakdownResponse = breakdownTask.Result;
-
-            if (!response.Succeeded || response.Data == null)
-            {
-                string err = response.Errors != null && response.Errors.Count > 0
-                    ? string.Join("\n", response.Errors)
-                    : "Unable to load analytics for this period.";
-                ToastNotification.Show("Load Failed", err, ToastType.Warning);
-                return;
+                _current = response.Data;
+                BuildAnalytics(_current);
             }
-
-            _current = response.Data;
-            _currentBreakdown = breakdownResponse?.Succeeded == true ? breakdownResponse.Data : null;
-            BuildAnalytics(_current, _currentBreakdown);
+            finally
+            {
+                if (AnalyticsLoadingOverlay != null) AnalyticsLoadingOverlay.IsLoading = false;
+                if (BtnRefresh != null) BtnRefresh.IsEnabled = true;
+            }
         }
 
-        private void BuildAnalytics(MonthlyAnalyticsDto d, BarangayAnalyticsResponseDto breakdown = null)
+        private void BuildAnalytics(MonthlyAnalyticsDto d)
         {
-            string period = "";
-            if (breakdown != null && !string.IsNullOrWhiteSpace(breakdown.PeriodLabel))
-            {
-                period = breakdown.PeriodLabel;
-            }
-            else
-            {
-                switch (_filterType)
-                {
-                    case "Yearly":
-                        period = $"Year {_filterYear}";
-                        break;
-                    case "Quarterly":
-                        period = $"Q{_filterQuarter} {_filterYear}";
-                        break;
-                    case "Custom":
-                        period = $"{_startDate:MMM d, yyyy} – {_endDate:MMM d, yyyy}";
-                        break;
-                    default:
-                        period = new DateTime(2000, d.Month, 1).ToString("MMMM") + " " + d.Year;
-                        break;
-                }
-            }
-
-            int totalSP = (breakdown != null && breakdown.GrandTotalSoloParents > 0)
-                ? breakdown.GrandTotalSoloParents
-                : d.TotalSoloParents;
-            TxtTotalRecords.Text = totalSP.ToString();
-
-            // Active / Inactive counts from Breakdown or MonthlyAnalyticsDto
-            int activeCount = (breakdown != null && breakdown.TotalActive > 0)
-                ? breakdown.TotalActive
-                : (d.ActiveSoloParents > 0 ? d.ActiveSoloParents : 0);
-
-            int inactiveCount = (breakdown != null && breakdown.TotalInactive > 0)
-                ? breakdown.TotalInactive
-                : (d.InactiveSoloParents > 0 ? d.InactiveSoloParents : (totalSP - activeCount));
-            if (inactiveCount < 0) inactiveCount = 0;
-
-            TxtValidRecords.Text = activeCount.ToString();
-            TxtValidRate.Text = totalSP > 0 ? Math.Round(activeCount * 100.0 / totalSP, 0).ToString("0") + "%" : "0%";
-
-            TxtInactiveRecords.Text = inactiveCount.ToString();
-            TxtInactiveRate.Text = totalSP > 0 ? Math.Round(inactiveCount * 100.0 / totalSP, 0).ToString("0") + "%" : "0%";
-
-            // New registrations & Renewals from Breakdown or MonthlyAnalyticsDto
-            int newRegCount = (breakdown != null && breakdown.TotalNewRegistrations > 0)
-                ? breakdown.TotalNewRegistrations
-                : d.NewRegistrations;
-
-            int renewalsCount = (breakdown != null && breakdown.TotalRenewals > 0)
-                ? breakdown.TotalRenewals
-                : d.Renewals;
-
-            TxtNewSpic.Text = newRegCount.ToString();
-            TxtRenewedSpic.Text = renewalsCount.ToString();
-
+            string period = new DateTime(2000, d.Month, 1).ToString("MMMM") + " " + d.Year;
+            TxtTotalRecords.Text = d.TotalSoloParents.ToString();
             TxtPeriodLabel.Text = period;
             _currentPeriod = period;
             TxtLastRefresh.Text = "Updated " + DateTime.Now.ToString("MMM d, h:mm tt");
 
-            int female = d.Sex != null && d.Sex.TryGetValue("Female", out var f) ? f : 0;
-            int male = d.Sex != null && d.Sex.TryGetValue("Male", out var m) ? m : 0;
+            int female = d.Sex.TryGetValue("Female", out var f) ? f : 0;
+            int male = d.Sex.TryGetValue("Male", out var m) ? m : 0;
             TxtFemaleCircle.Text = female.ToString();
             TxtMaleCircle.Text = male.ToString();
             DrawGenderDonut(female, male);
 
-            int totKids = d.DependentsAgeBrackets != null ? d.DependentsAgeBrackets.Values.Sum() : 0;
+            int totKids = d.DependentsAgeBrackets.Values.Sum();
             TxtTotalChildren.Text = totKids.ToString();
-            TxtAvgChildren.Text = totalSP > 0
-                ? Math.Round((double)totKids / totalSP, 1).ToString("0.0") + " avg."
+            TxtAvgChildren.Text = d.TotalSoloParents > 0
+                ? Math.Round((double)totKids / d.TotalSoloParents, 1).ToString("0.0") + " avg."
                 : "—";
 
             // CHANGED: merge Separated + Annulled into one bucket
@@ -458,15 +264,11 @@ namespace SOLUM_UI
             CategoryChartLeft.ItemsSource = catRows.Take(half).ToList();
             CategoryChartRight.ItemsSource = catRows.Skip(half).ToList();
 
-            if (breakdown != null && breakdown.Barangays != null && breakdown.Barangays.Any())
-            {
-                DrawBarangayChart(breakdown.Barangays);
-            }
-            else
-            {
-                BarangayCanvas.Children.Clear();
-                BarangayLabels.ItemsSource = null;
-            }
+            // Barangay breakdown chart and recent-records list are left empty —
+            // see the commented-out DrawBarangayChart method below for the original
+            // logic and what data source it would need to work again.
+            BarangayCanvas.Children.Clear();
+            BarangayLabels.ItemsSource = null;
             RecentList.ItemsSource = null;
         }
 
@@ -520,23 +322,30 @@ namespace SOLUM_UI
             }).ToList();
         }
 
-        private void DrawBarangayChart(List<BarangayBreakdownItemDto> items)
+        /* OLD: per-barangay breakdown chart. Needs a data source that returns counts
+           PER barangay for the period — the current endpoint only returns totals for
+           ONE barangay (or "ALL") at a time, so this can't be fed directly anymore.
+           Either: (a) call GetMonthlyAnalyticsAsync once per known barangay and
+           assemble the bars from d.TotalSoloParents of each response, or (b) get a
+           dedicated "grouped by barangay" endpoint from the backend.
+
+        private void DrawBarangayChart(List<SoloParentRecord> data)
         {
             BarangayCanvas.Children.Clear();
             BarangayLabels.ItemsSource = null;
 
-            if (items == null || !items.Any()) return;
+            var groups = data.GroupBy(r => r.Barangay ?? "Unknown")
+                             .OrderByDescending(g => g.Count())
+                             .Take(10).ToList();
+            if (!groups.Any()) return;
 
-            var topItems = items.OrderByDescending(b => b.TotalSoloParents).Take(10).ToList();
-            if (!topItems.Any()) return;
-
-            double canvasH = BarangayCanvas.ActualHeight > 0 ? BarangayCanvas.ActualHeight : 160;
-            double canvasW = BarangayCanvas.ActualWidth > 0 ? BarangayCanvas.ActualWidth : 400;
-            int maxCount = Math.Max(1, topItems.Max(g => g.TotalSoloParents));
-            int n = topItems.Count;
-            double barW = Math.Max(12, Math.Floor((canvasW * 0.72) / n));
-            double gap = Math.Max(6, (canvasW - barW * n) / (n + 1));
-            double chartH = canvasH - 4;
+            double canvasH  = BarangayCanvas.ActualHeight > 0 ? BarangayCanvas.ActualHeight : 160;
+            double canvasW  = BarangayCanvas.ActualWidth  > 0 ? BarangayCanvas.ActualWidth  : 400;
+            int    maxCount = groups.Max(g => g.Count());
+            int    n        = groups.Count;
+            double barW     = Math.Floor((canvasW * 0.72) / n);
+            double gap      = (canvasW - barW * n) / (n + 1);
+            double chartH   = canvasH - 4;
 
             var gridBrush = new SolidColorBrush(Color.FromRgb(0xE8, 0xD8, 0xDE));
             for (int step = 1; step <= 4; step++)
@@ -566,36 +375,32 @@ namespace SOLUM_UI
 
             for (int i = 0; i < n; i++)
             {
-                var item = topItems[i];
-                double barH = Math.Max(6, item.TotalSoloParents * chartH / maxCount);
-                double x = gap + i * (barW + gap);
-                double y = chartH - barH;
-                var fillC = palette[i % palette.Length];
-                var lightC = Color.FromRgb(
+                double barH   = Math.Max(6, groups[i].Count() * chartH / maxCount);
+                double x      = gap + i * (barW + gap);
+                double y      = chartH - barH;
+                var    fillC  = palette[i % palette.Length];
+                var    lightC = Color.FromRgb(
                     (byte)Math.Min(255, fillC.R + 55),
                     (byte)Math.Min(255, fillC.G + 35),
                     (byte)Math.Min(255, fillC.B + 45));
 
-                string tooltipText = $"{item.BarangayName}  ·  {item.TotalSoloParents} record(s) ({item.PercentageShare:F1}%)\n" +
-                                     $"Active: {item.ActiveCount}  |  Inactive: {item.InactiveCount}\n" +
-                                     $"New: {item.NewRegistrationsCount}  |  Renewals: {item.RenewalsCount}";
-
                 var rect = new Rectangle
                 {
-                    Width = barW,
-                    Height = barH,
+                    Width   = barW,
+                    Height  = barH,
                     RadiusX = 5,
                     RadiusY = 5,
-                    Tag = item.BarangayName,
-                    Cursor = Cursors.Hand,
-                    ToolTip = tooltipText,
-                    Fill = new LinearGradientBrush(
+                    Tag     = groups[i].Key,
+                    Cursor  = Cursors.Hand,
+                    ToolTip = groups[i].Key + "  ·  " + groups[i].Count() + " record(s)",
+                    Fill    = new LinearGradientBrush(
                         fillC, lightC,
                         new Point(0, 1), new Point(0, 0))
                 };
                 Canvas.SetLeft(rect, x);
                 Canvas.SetTop(rect, y);
 
+                var captureFill  = new SolidColorBrush(fillC);
                 var captureHover = new SolidColorBrush(lightC);
                 rect.MouseEnter += (s, e) => ((Rectangle)s).Fill = captureHover;
                 rect.MouseLeave += (s, e) => ((Rectangle)s).Fill = new LinearGradientBrush(
@@ -604,8 +409,8 @@ namespace SOLUM_UI
 
                 var lbl = new TextBlock
                 {
-                    Text = item.TotalSoloParents.ToString(),
-                    FontSize = 9,
+                    Text       = groups[i].Count().ToString(),
+                    FontSize   = 9,
                     FontWeight = FontWeights.Bold,
                     Foreground = new SolidColorBrush(fillC),
                     FontFamily = new FontFamily("Segoe UI")
@@ -615,8 +420,9 @@ namespace SOLUM_UI
                 BarangayCanvas.Children.Add(lbl);
             }
 
-            BarangayLabels.ItemsSource = topItems.Select(g => new ChartRow { Label = g.BarangayName }).ToList();
+            BarangayLabels.ItemsSource = groups.Select(g => new ChartRow { Label = g.Key }).ToList();
         }
+        */
 
         private void RecentRecord_Click(object sender, MouseButtonEventArgs e)
         {

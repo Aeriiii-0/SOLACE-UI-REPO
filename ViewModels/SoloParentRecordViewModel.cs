@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 using SOLUM_UI.Models;
@@ -36,11 +36,15 @@ namespace SOLUM_UI.ViewModels
         public string LastUpdatedFormatted => _model.LastUpdatedFormatted;
         public string DateOfBirthFormatted => _model.DateOfBirthFormatted;
         public string ValidUntilFormatted  =>
-            _model.CurrentTermExpiresAt.HasValue
-                ? _model.CurrentTermExpiresAt.Value.ToString("yyyy-MM-dd")
-                : (_model.LastUpdated != System.DateTime.MinValue
-                    ? _model.LastUpdated.AddYears(1).ToString("yyyy-MM-dd")
-                    : "—");
+            _model.LastUpdated != System.DateTime.MinValue
+                ? _model.LastUpdated.AddYears(1).ToString("yyyy-MM-dd")
+                : "—";
+
+        /// <summary>True when the record's 1-year validity window has passed.</summary>
+        public bool IsExpired =>
+            _model.LastUpdated != System.DateTime.MinValue &&
+            _model.LastUpdated.AddYears(1).Date < System.DateTime.Today;
+
         public SoloParentRecord RawModel => _model;
 
         public bool IsSelected
@@ -78,10 +82,8 @@ namespace SOLUM_UI.ViewModels
             {
                 switch (_model.Status)
                 {
-                    case "Valid":
-                    case "Active": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
+                    case "Valid": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
                     case "Inactive": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F5F5F5"));
-                    case "Terminated": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FDE8E8"));
                     default: return new SolidColorBrush(Colors.Transparent);
                 }
             } 
@@ -93,10 +95,8 @@ namespace SOLUM_UI.ViewModels
             {
                 switch (_model.Status)
                 {
-                    case "Valid":
-                    case "Active": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
+                    case "Valid": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
                     case "Inactive": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#999999"));
-                    case "Terminated": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E02424"));
                     default: return new SolidColorBrush(Colors.Black);
                 }
             }

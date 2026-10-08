@@ -175,8 +175,12 @@
     </ApplicationDefinition>
     <Compile Include="Models\Api\MonthlyAnalyticsDto.cs" />
     <Compile Include="Models\Api\UserDtos.cs" />
+    <Compile Include="Models\Api\BarangayBreakdownDtos.cs" />
     <Compile Include="Services\Api\AnalyticsApiService.cs" />
     <Compile Include="Services\Api\UserApiService.cs" />
+    <Compile Include="Views\Components\LoadingOverlay.xaml.cs">
+      <DependentUpon>LoadingOverlay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\AnalyticsPage.xaml.cs">
       <DependentUpon>AnalyticsPage.xaml</DependentUpon>
     </Compile>
@@ -209,6 +213,9 @@
     </Compile>
     <Compile Include="Views\RecordViewDialog.xaml.cs">
       <DependentUpon>RecordViewDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\RenewDialog.xaml.cs">
+      <DependentUpon>RenewDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\RelayCommand.cs" />
     <Compile Include="Views\ScannerSettingsDialog.xaml.cs">
@@ -246,7 +253,6 @@
     <Compile Include="Models\Api\BaseResponse.cs" />
     <Compile Include="Models\Api\AuthDtos.cs" />
     <Compile Include="Models\Api\AuditLogDtos.cs" />
-    <Compile Include="Models\Api\BarangayBreakdownDtos.cs" />
     <Compile Include="Models\Api\SoloParentDtos.cs" />
     <Compile Include="Services\Api\ApiClient.cs" />
     <Compile Include="Services\Api\AuthApiService.cs" />
@@ -260,6 +266,11 @@
     <Compile Include="ViewModels\AuditLogViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />
     <Compile Include="ViewModels\SoloParentRecordViewModel.cs" />
+    <Compile Include="ViewModels\RecordViewDialogViewModel.cs" />
+    <Page Include="Views\Components\LoadingOverlay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AnalyticsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -301,6 +312,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\RecordViewDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\RenewDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

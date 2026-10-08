@@ -19,6 +19,38 @@ namespace SOLUM_UI.Services.Api
 
         public async Task<BaseResponse<PagedResult<SoloParentSummaryDto>>> GetSoloParentsAsync(GetSoloParentRequest request)
         {
+            var queryParams = BuildQueryParams(request);
+            string queryString = string.Join("&", queryParams);
+            string url = "api/soloparents?" + queryString;
+            var response = await ApiClient.Instance.GetAsync<PagedResult<SoloParentSummaryDto>>(url);
+            if (!response.Succeeded && response.Errors != null && response.Errors.Any(e => e.Contains("404")))
+            {
+                url = "api/soloparent?" + queryString;
+                response = await ApiClient.Instance.GetAsync<PagedResult<SoloParentSummaryDto>>(url);
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Same endpoint as GetSoloParentsAsync but deserialises into the richer
+        /// SoloParentListItemDto so callers get full PersonalInfo without N+1 detail calls.
+        /// </summary>
+        public async Task<BaseResponse<PagedResult<SoloParentListItemDto>>> GetSoloParentsFullAsync(GetSoloParentRequest request)
+        {
+            var queryParams = BuildQueryParams(request);
+            string queryString = string.Join("&", queryParams);
+            string url = "api/soloparents?" + queryString;
+            var response = await ApiClient.Instance.GetAsync<PagedResult<SoloParentListItemDto>>(url);
+            if (!response.Succeeded && response.Errors != null && response.Errors.Any(e => e.Contains("404")))
+            {
+                url = "api/soloparent?" + queryString;
+                response = await ApiClient.Instance.GetAsync<PagedResult<SoloParentListItemDto>>(url);
+            }
+            return response;
+        }
+
+        private List<string> BuildQueryParams(GetSoloParentRequest request)
+        {
             var queryParams = new List<string>();
 
             if (request.Id.HasValue)
@@ -51,15 +83,7 @@ namespace SOLUM_UI.Services.Api
             queryParams.Add($"page={request.Page}");
             queryParams.Add($"pageSize={request.PageSize}");
 
-            string queryString = string.Join("&", queryParams);
-            string url = "api/soloparents?" + queryString;
-            var response = await ApiClient.Instance.GetAsync<PagedResult<SoloParentSummaryDto>>(url);
-            if (!response.Succeeded && response.Errors != null && response.Errors.Any(e => e.Contains("404")))
-            {
-                url = "api/soloparent?" + queryString;
-                response = await ApiClient.Instance.GetAsync<PagedResult<SoloParentSummaryDto>>(url);
-            }
-            return response;
+            return queryParams;
         }
 
         public async Task<BaseResponse<SoloParentDto>> GetSoloParentByIdAsync(Guid id)
@@ -138,8 +162,18 @@ namespace SOLUM_UI.Services.Api
                 IsPantawidBeneficiary = r.IsPantawidBeneficiary 
             };
 
-            var existingMap = existingEntity?.FamilyMembers?.ToDictionary(f => f.Name?.Trim() ?? string.Empty, f => f)
-                              ?? new Dictionary<string, FamilyMemberDto>(StringComparer.OrdinalIgnoreCase);
+            // Build a name→dto map from existing family members.
+            // Use a loop instead of ToDictionary so duplicate names don't crash.
+            var existingMap = new Dictionary<string, FamilyMemberDto>(StringComparer.OrdinalIgnoreCase);
+            if (existingEntity?.FamilyMembers != null)
+            {
+                foreach (var f in existingEntity.FamilyMembers)
+                {
+                    string key = f.Name?.Trim() ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(key) && !existingMap.ContainsKey(key))
+                        existingMap[key] = f;
+                }
+            }
 
             var currentNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -299,6 +333,68 @@ namespace SOLUM_UI.Services.Api
 
                 record.Children = record.FamilyMembers.Count;
             }
+
+            return record;
+        }
+
+        /// <summary>
+        /// Maps a list-page item (SoloParentListItemDto) to a SoloParentRecord.
+        /// Resolves name from root-level fields OR nested PersonalInfo,
+        /// whichever is populated.
+        /// </summary>
+        public SoloParentRecord MapToRecord(SoloParentListItemDto dto)
+        {
+            if (dto == null) return null;
+
+            // Resolve first/last name: prefer root-level flat fields, fall back to PersonalInfo
+            string firstName = !string.IsNullOrWhiteSpace(dto.PersonalInfo?.FirstName)
+                ? dto.PersonalInfo.FirstName
+                : dto.FirstName ?? string.Empty;
+
+            string lastName = !string.IsNullOrWhiteSpace(dto.PersonalInfo?.LastName)
+                ? dto.PersonalInfo.LastName
+                : dto.LastName ?? string.Empty;
+
+            string middleName = !string.IsNullOrWhiteSpace(dto.PersonalInfo?.MiddleName)
+                ? dto.PersonalInfo.MiddleName
+                : dto.MiddleName ?? string.Empty;
+
+            // Adapt to SoloParentDto and delegate to the full mapper
+            var adapted = new SoloParentDto
+            {
+                Id                    = dto.Id,
+                PersonalInfo          = new PersonalInfo
+                {
+                    FirstName              = firstName,
+                    LastName               = lastName,
+                    MiddleName             = middleName,
+                    ExtensionName          = dto.PersonalInfo?.ExtensionName,
+                    CivilStatus            = dto.PersonalInfo?.CivilStatus ?? string.Empty,
+                    Sex                    = dto.PersonalInfo?.Sex ?? string.Empty,
+                    Birthdate              = dto.PersonalInfo?.Birthdate ?? DateTime.MinValue,
+                    Birthplace             = dto.PersonalInfo?.Birthplace ?? string.Empty,
+                    EducationalAttainment  = dto.PersonalInfo?.EducationalAttainment ?? string.Empty,
+                    PhilsysCardNumber      = dto.PersonalInfo?.PhilsysCardNumber ?? string.Empty,
+                    Religion               = dto.PersonalInfo?.Religion ?? string.Empty,
+                },
+                Employment            = dto.Employment,
+                ContactDetails        = dto.ContactDetails,
+                AddressDetails        = dto.AddressDetails,
+                EmergencyContact      = dto.EmergencyContact,
+                ProblemPresented      = dto.ProblemPresented,
+                IsLGBT                = dto.IsLGBT,
+                IsPantawidBeneficiary = dto.IsPantawidBeneficiary,
+                IsIndigenous          = dto.IsIndigenous,
+                DateCreated           = dto.DateCreated,
+                IsActive              = dto.IsActive,
+                Status                = dto.Status,
+            };
+
+            var record = MapToRecord(adapted);
+
+            // If the name is still blank (API returns a flat fullName), use it directly
+            if (string.IsNullOrWhiteSpace(record.Surname) && !string.IsNullOrWhiteSpace(dto.FullName))
+                record.Name = dto.FullName;
 
             return record;
         }

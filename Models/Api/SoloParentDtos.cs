@@ -214,6 +214,11 @@ namespace SOLUM_UI.Models.Api
     public class SoloParentListItemDto
     {
         public Guid Id { get; set; }
+        // Root-level name fields — some API versions return them flat
+        public string FullName  { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName  { get; set; } = string.Empty;
+        public string MiddleName { get; set; } = string.Empty;
         public PersonalInfo PersonalInfo { get; set; } = new PersonalInfo();
         public EmploymentInfo Employment { get; set; } = new EmploymentInfo();
         public ContactInfo ContactDetails { get; set; } = new ContactInfo();

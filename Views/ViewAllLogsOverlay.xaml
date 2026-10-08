@@ -519,8 +519,10 @@
                                                     <Border.Background>
                                                         <SolidColorBrush Color="{Binding DotColor}"/>
                                                     </Border.Background>
-                                                    <TextBlock Text="{Binding DotLabel}" FontSize="14" FontWeight="Bold"
-                                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <Viewbox Width="17" Height="17"
+                                                             HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <Path Data="{Binding DotIcon}" Fill="White" Stretch="Uniform"/>
+                                                    </Viewbox>
                                                 </Border>
 
                                                 <!-- Description + meta -->

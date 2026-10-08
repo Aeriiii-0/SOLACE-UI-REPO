@@ -57,11 +57,15 @@ namespace SOLUM_UI
 
         private async Task LoadUsersAsync()
         {
+            if (UsersLoadingOverlay  != null) UsersLoadingOverlay.IsLoading  = true;
+            if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = false;
+            try
+            {
             var request = new GetApplicationUserRequest
             {
                 Role = "Encoder",
                 SearchTerm = SearchBox?.Text?.Trim(),
-                Page = _currentPage,        // CHANGED — was hardcoded to 1
+                Page = _currentPage,
                 PageSize = PageSize,
                 IsActive = true
             };
@@ -88,12 +92,9 @@ namespace SOLUM_UI
                     Role = "Encoder"
                 }).ToList();
 
-                // Assumes PagedResult<T>.TotalCount — adjust if your actual property name differs
                 int totalCount = response.Data.TotalCount;
                 _totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
 
-                // Guard: if we're sitting on a page beyond the new total (e.g. after a delete
-                // shrinks the count), step back and reload instead of showing an empty page.
                 if (_currentPage > _totalPages)
                 {
                     _currentPage = _totalPages;
@@ -104,7 +105,19 @@ namespace SOLUM_UI
 
             _filtered = new List<AppUser>(_allUsers);
             RefreshList();
-            UpdatePagingControls(); // NEW
+            UpdatePagingControls();
+            }
+            finally
+            {
+                if (UsersLoadingOverlay  != null) UsersLoadingOverlay.IsLoading  = false;
+                if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = true;
+            }
+        }
+
+        private async void BtnRefreshUsers_Click(object sender, RoutedEventArgs e)
+        {
+            _currentPage = 1;
+            await LoadUsersAsync();
         }
 
         private void UpdatePagingControls()

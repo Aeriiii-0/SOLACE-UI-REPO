@@ -17,7 +17,6 @@ namespace SOLUM_UI.ViewModels
         public int Value { get; set; }
         public int MaxValue { get; set; }
 
-        /// <summary>Pixel height relative to max, capped at 200px.</summary>
         public double BarHeight => MaxValue > 0 ? (Value / (double)MaxValue) * 200.0 : 0;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -25,42 +24,9 @@ namespace SOLUM_UI.ViewModels
 
     public class DashboardViewModel : INotifyPropertyChanged
     {
-        private string _chartSubtitle = "New solo parents registered";
-        public string ChartSubtitle
-        {
-            get => _chartSubtitle;
-            private set { _chartSubtitle = value; OnPropertyChanged(); }
-        }
+        private static readonly int[] _monthlyValues = { 330, 295, 245, 325, 295, 235, 330 };
+        private static readonly string[] _monthLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul" };
 
-        private int _yAxisMax = 100;
-        public int YAxisMax
-        {
-            get => _yAxisMax;
-            private set { _yAxisMax = value; OnPropertyChanged(); }
-        }
-
-        private int _yAxisMidHigh = 75;
-        public int YAxisMidHigh
-        {
-            get => _yAxisMidHigh;
-            private set { _yAxisMidHigh = value; OnPropertyChanged(); }
-        }
-
-        private int _yAxisMidLow = 50;
-        public int YAxisMidLow
-        {
-            get => _yAxisMidLow;
-            private set { _yAxisMidLow = value; OnPropertyChanged(); }
-        }
-
-        private int _yAxisMin = 0;
-        public int YAxisMin
-        {
-            get => _yAxisMin;
-            private set { _yAxisMin = value; OnPropertyChanged(); }
-        }
-
-        // --- stats from API (same property names as before, so existing XAML bindings keep working) ---
         private int _registeredSoloParents;
         public int RegisteredSoloParents
         {
@@ -75,25 +41,11 @@ namespace SOLUM_UI.ViewModels
             private set { _activeSoloParents = value; OnPropertyChanged(); }
         }
 
-        private int _inactiveSoloParents;
-        public int InactiveSoloParents
-        {
-            get => _inactiveSoloParents;
-            private set { _inactiveSoloParents = value; OnPropertyChanged(); }
-        }
-
         private int _renewalsDueThisMonth;
         public int RenewalsDueThisMonth
         {
             get => _renewalsDueThisMonth;
             private set { _renewalsDueThisMonth = value; OnPropertyChanged(); }
-        }
-
-        private int _renewalsThisMonth;
-        public int RenewalsThisMonth
-        {
-            get => _renewalsThisMonth;
-            private set { _renewalsThisMonth = value; OnPropertyChanged(); }
         }
 
         private string _registeredDelta = "";
@@ -117,7 +69,6 @@ namespace SOLUM_UI.ViewModels
             private set { _renewalsDelta = value; OnPropertyChanged(); }
         }
 
-        // For red/green styling of the Active delta (can be negative)
         private bool _isActiveChangeNegative;
         public bool IsActiveChangeNegative
         {
@@ -129,7 +80,12 @@ namespace SOLUM_UI.ViewModels
         public bool IsLoading
         {
             get => _isLoading;
-            private set { _isLoading = value; OnPropertyChanged(); }
+            private set
+            {
+                _isLoading = value;
+                OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         private string _errorMessage;
@@ -142,23 +98,7 @@ namespace SOLUM_UI.ViewModels
 
         public ObservableCollection<MonthBar> MonthlyBars { get; } = new ObservableCollection<MonthBar>();
         public ObservableCollection<AuditLog> RecentLogs  { get; } = new ObservableCollection<AuditLog>();
-        public ObservableCollection<BarangayBreakdownItemDto> TopBarangays { get; } = new ObservableCollection<BarangayBreakdownItemDto>();
 
-        private string _quarterPeriodLabel = "";
-        public string QuarterPeriodLabel
-        {
-            get => _quarterPeriodLabel;
-            private set { _quarterPeriodLabel = value; OnPropertyChanged(); }
-        }
-
-        private int _quarterGrandTotal;
-        public int QuarterGrandTotal
-        {
-            get => _quarterGrandTotal;
-            private set { _quarterGrandTotal = value; OnPropertyChanged(); }
-        }
-
-        // ── Log detail panel ──────────────────────────────────────────────────
         private AuditLog _selectedLog;
         public AuditLog SelectedLog
         {
@@ -167,23 +107,26 @@ namespace SOLUM_UI.ViewModels
         }
         public bool IsLogDetailVisible => _selectedLog != null;
 
-        public ICommand SelectLogCommand    { get; }
+        public ICommand SelectLogCommand     { get; }
         public ICommand CloseLogDetailCommand { get; }
+        public ICommand RefreshCommand        { get; }
 
         public DashboardViewModel()
         {
-            LoadChart();
-
-            SelectLogCommand     = new RelayCommand(param => SelectedLog = param as AuditLog);
+            SelectLogCommand      = new RelayCommand(param => SelectedLog = param as AuditLog);
             CloseLogDetailCommand = new RelayCommand(_ => SelectedLog = null);
+            RefreshCommand        = new RelayCommand(
+                async _ => await LoadAsync(),
+                _         => !IsLoading);
+
+            LoadChart();
         }
 
-        /// <summary>Fetches dashboard stats, quarterly breakdown, and recent audit logs from the API.</summary>
         public async Task LoadAsync()
         {
             if (IsLoading) return;
 
-            IsLoading = true;
+            IsLoading    = true;
             ErrorMessage = null;
 
             try
@@ -191,16 +134,11 @@ namespace SOLUM_UI.ViewModels
                 var (isEncoder, currentUserId) = GetEncoderContext();
                 string effectiveUserId = isEncoder && !string.IsNullOrWhiteSpace(currentUserId) ? currentUserId : null;
 
-                int currentQuarter = (DateTime.Today.Month - 1) / 3 + 1;
+                var statsTask = AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
+                var logsTask  = AuditLogApiService.Instance.GetLogsAsync(pageSize: 10, userId: effectiveUserId);
 
-                // Run stats, breakdown, and recent logs in parallel
-                var statsTask     = AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
-                var logsTask      = AuditLogApiService.Instance.GetLogsAsync(pageSize: 10, userId: effectiveUserId);
-                var breakdownTask = AnalyticsApiService.Instance.GetBarangayBreakdownAsync(quarter: currentQuarter, year: DateTime.Today.Year);
+                await Task.WhenAll(statsTask, logsTask);
 
-                await System.Threading.Tasks.Task.WhenAll(statsTask, logsTask, breakdownTask);
-
-                // Apply stats
                 var statsResponse = statsTask.Result;
                 if (statsResponse != null && statsResponse.Succeeded && statsResponse.Data != null)
                     Apply(statsResponse.Data);
@@ -209,66 +147,12 @@ namespace SOLUM_UI.ViewModels
                         ? string.Join(Environment.NewLine, statsResponse.Errors)
                         : "Failed to load dashboard data.";
 
-                // Apply quarterly barangay breakdown
-                var breakdownResponse = breakdownTask.Result;
-                if (breakdownResponse != null && breakdownResponse.Succeeded && breakdownResponse.Data != null)
-                {
-                    QuarterPeriodLabel = !string.IsNullOrWhiteSpace(breakdownResponse.Data.PeriodLabel)
-                        ? breakdownResponse.Data.PeriodLabel
-                        : $"Q{currentQuarter} {DateTime.Today.Year}";
-                    QuarterGrandTotal = breakdownResponse.Data.GrandTotalSoloParents;
-
-                    TopBarangays.Clear();
-                    if (breakdownResponse.Data.Barangays != null)
-                    {
-                        foreach (var b in breakdownResponse.Data.Barangays.OrderByDescending(x => x.TotalSoloParents).Take(5))
-                        {
-                            TopBarangays.Add(b);
-                        }
-                    }
-                }
-
-                // Apply recent logs
                 var logsResponse = logsTask.Result;
                 RecentLogs.Clear();
                 if (logsResponse != null && logsResponse.Succeeded && logsResponse.Data?.Items != null)
                 {
                     foreach (var dto in logsResponse.Data.Items)
                         RecentLogs.Add(MapDtoToLog(dto));
-                }
-
-                // Load accurate monthly registration chart from API
-                try
-                {
-                    var monthlyCounts = new System.Collections.Generic.Dictionary<string, int>();
-                    var currentDt = DateTime.Today;
-                    var monthTasks = new System.Collections.Generic.List<(string Key, Task<BaseResponse<MonthlyAnalyticsDto>> Task)>();
-
-                    for (int i = 5; i >= 0; i--)
-                    {
-                        var target = currentDt.AddMonths(-i);
-                        string key = target.ToString("yyyy-MM");
-                        var t = AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(target.Year, target.Month);
-                        monthTasks.Add((key, t));
-                    }
-
-                    await Task.WhenAll(monthTasks.Select(x => x.Task));
-
-                    foreach (var item in monthTasks)
-                    {
-                        var res = item.Task.Result;
-                        if (res?.Succeeded == true && res.Data != null)
-                        {
-                            monthlyCounts[item.Key] = res.Data.TotalSoloParents;
-                        }
-                    }
-
-                    LoadChart(monthlyCounts);
-                }
-                catch
-                {
-                    // Fallback to initial chart if monthly analytics query fails
-                    LoadChart();
                 }
             }
             catch (Exception ex)
@@ -285,9 +169,7 @@ namespace SOLUM_UI.ViewModels
         {
             RegisteredSoloParents = d.TotalRegistered;
             ActiveSoloParents     = d.ActiveRecords;
-            InactiveSoloParents   = d.InactiveRecords > 0 ? d.InactiveRecords : (d.TotalRegistered - d.ActiveRecords);
             RenewalsDueThisMonth  = d.RenewalsDueThisMonth;
-            RenewalsThisMonth     = d.RenewalsThisMonth;
 
             RegisteredDelta = $"↑ {d.RegisteredThisMonth:N0} this month";
 
@@ -298,9 +180,7 @@ namespace SOLUM_UI.ViewModels
                     ? $"↓ {Math.Abs(d.ActiveChangeFromLastMonth):N0} from last month"
                     : "No change from last month";
 
-            RenewalsDelta = d.RenewalsThisMonth > 0
-                ? $"↑ {d.RenewalsThisMonth:N0} this month"
-                : $"↑ {d.RenewalsCompletedToday:N0} completed today";
+            RenewalsDelta = $"↑ {d.RenewalsCompletedToday:N0} completed today";
         }
 
         private static AuditLog MapDtoToLog(SOLUM_UI.Models.Api.AuditLogDto dto)
@@ -355,41 +235,12 @@ namespace SOLUM_UI.ViewModels
             }
         }
 
-        private void LoadChart(System.Collections.Generic.Dictionary<string, int> monthlyCounts = null)
+        private void LoadChart()
         {
-            var bars = new System.Collections.Generic.List<(string Label, int Count)>();
-            int currentYear = DateTime.Today.Year;
-            int currentMonth = DateTime.Today.Month;
-
-            // Generate the last 6 months dynamically up to the current month
-            for (int i = 5; i >= 0; i--)
-            {
-                var dt = DateTime.Today.AddMonths(-i);
-                string label = dt.ToString("MMM");
-                string key = dt.ToString("yyyy-MM");
-                int val = (monthlyCounts != null && monthlyCounts.TryGetValue(key, out var c)) ? c : 0;
-                bars.Add((label, val));
-            }
-
-            // Determine max value for chart scaling with clean rounding
-            int maxVal = bars.Max(b => b.Count);
-            if (maxVal <= 0) maxVal = 10;
-            else if (maxVal <= 50) maxVal = ((maxVal + 9) / 10) * 10;
-            else maxVal = ((maxVal + 49) / 50) * 50;
-
-            YAxisMax = maxVal;
-            YAxisMidHigh = (int)(maxVal * 0.75);
-            YAxisMidLow = (int)(maxVal * 0.50);
-            YAxisMin = 0;
-
-            var firstMonth = DateTime.Today.AddMonths(-5);
-            ChartSubtitle = $"New solo parents registered — {firstMonth:MMM yyyy} to {DateTime.Today:MMM yyyy}";
-
+            int max = _monthlyValues.Max();
             MonthlyBars.Clear();
-            foreach (var b in bars)
-            {
-                MonthlyBars.Add(new MonthBar { Month = b.Label, Value = b.Count, MaxValue = maxVal });
-            }
+            for (int i = 0; i < _monthLabels.Length; i++)
+                MonthlyBars.Add(new MonthBar { Month = _monthLabels[i], Value = _monthlyValues[i], MaxValue = max });
         }
 
         private static (bool isEncoder, string userId) GetEncoderContext()

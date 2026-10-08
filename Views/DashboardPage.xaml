@@ -4,6 +4,7 @@
       xmlns:vm="clr-namespace:SOLUM_UI.ViewModels"
       xmlns:local="clr-namespace:SOLUM_UI"
       xmlns:converters="clr-namespace:SOLUM_UI.Converters"
+      xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
       Background="Transparent"
       Title="Dashboard">
     <Page.Resources>
@@ -31,12 +32,41 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                        <TextBlock x:Name="TxtWelcome" Text="Welcome back!"
-                                   FontFamily="Segoe UI" FontSize="26" FontWeight="Bold"
-                                   Foreground="#702943"/>
-                        <TextBlock Text="Here's what's happening with your solo parent program today."
-                                   FontFamily="Segoe UI" FontSize="14"
-                                   Foreground="#A06080" Margin="0,5,0,0"/>
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock x:Name="TxtWelcome" Text="Welcome back!"
+                                           FontFamily="Segoe UI" FontSize="26" FontWeight="Bold"
+                                           Foreground="#702943"/>
+                                <TextBlock Text="Here's what's happening with your solo parent program today."
+                                           FontFamily="Segoe UI" FontSize="14"
+                                           Foreground="#A06080" Margin="0,5,0,0"/>
+                            </StackPanel>
+                            <Button x:Name="BtnRefreshDashboard"
+                                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                                    Width="40" Height="40" Cursor="Hand"
+                                    BorderThickness="0" Background="White"
+                                    ToolTip="Refresh dashboard data"
+                                    Command="{Binding RefreshCommand}">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="{TemplateBinding Background}"
+                                                CornerRadius="20" BorderBrush="#E0D0D5" BorderThickness="1.5">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="Background" Value="#F5ECEE"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Opacity" Value="0.45"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
+                                      Fill="#702943" Stretch="Uniform" Width="16" Height="16"/>
+                            </Button>
+                        </Grid>
                     </StackPanel>
 
                     <Grid Grid.Row="1" Margin="0,0,0,18">
@@ -60,8 +90,7 @@
                                 <TextBlock Text="{Binding RegisteredSoloParents, StringFormat={}{0:N0}}"
                                            FontFamily="Segoe UI" FontSize="44" FontWeight="Bold" Foreground="#702943"/>
                                 <TextBlock Text="Solo Parents" FontFamily="Segoe UI" FontSize="14" Foreground="#888888" Margin="0,3,0,10"/>
-                                <Border Background="#F0E8EC" CornerRadius="7" Padding="10,5" HorizontalAlignment="Left"
-                                        ToolTip="{Binding InactiveSoloParents, StringFormat={}{0:N0} inactive records}">
+                                <Border Background="#F0E8EC" CornerRadius="7" Padding="10,5" HorizontalAlignment="Left">
                                     <TextBlock Text="{Binding RegisteredDelta}" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
                                 </Border>
                             </StackPanel>
@@ -113,36 +142,22 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <Grid Grid.Row="0" Margin="0,0,0,18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Monthly Registrations"
-                                               FontFamily="Segoe UI" FontSize="16" FontWeight="Bold" Foreground="#702943"/>
-                                    <TextBlock Text="{Binding ChartSubtitle}"
-                                               FontFamily="Segoe UI" FontSize="13" Foreground="#A06080" Margin="0,4,0,0"/>
-                                </StackPanel>
-                                <Border Grid.Column="1" Background="#FFF5F8" BorderBrush="#E8C8D4" BorderThickness="1"
-                                        CornerRadius="8" Padding="10,6" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding QuarterPeriodLabel}" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="#702943"/>
-                                        <TextBlock Text=": " FontFamily="Segoe UI" FontSize="12" Foreground="#702943"/>
-                                        <TextBlock Text="{Binding QuarterGrandTotal, StringFormat={}{0:N0} registered}" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#9B3060"/>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
+                            <StackPanel Grid.Row="0" Margin="0,0,0,18">
+                                <TextBlock Text="Monthly Registrations"
+                                           FontFamily="Segoe UI" FontSize="16" FontWeight="Bold" Foreground="#702943"/>
+                                <TextBlock Text="New solo parents registered — Jan to Jul 2026"
+                                           FontFamily="Segoe UI" FontSize="13" Foreground="#A06080" Margin="0,4,0,0"/>
+                            </StackPanel>
                             <Grid Grid.Row="1">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="40"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid Grid.Column="0" Margin="0,0,8,32">
-                                    <TextBlock Text="{Binding YAxisMax}" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-                                    <TextBlock Text="{Binding YAxisMidHigh}" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,-10,0,0"/>
-                                    <TextBlock Text="{Binding YAxisMidLow}" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,0,32"/>
-                                    <TextBlock Text="{Binding YAxisMin}"   FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+                                    <TextBlock Text="350" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+                                    <TextBlock Text="250" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,-10,0,0"/>
+                                    <TextBlock Text="150" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,0,32"/>
+                                    <TextBlock Text="0"   FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                                 </Grid>
                                 <ItemsControl Grid.Column="1" ItemsSource="{Binding MonthlyBars}">
                                     <ItemsControl.ItemsPanel>
@@ -279,8 +294,10 @@
                                                     <Border.Background>
                                                         <SolidColorBrush Color="{Binding DotColor}"/>
                                                     </Border.Background>
-                                                    <TextBlock Text="{Binding DotLabel}" FontSize="14" FontWeight="Bold"
-                                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <Viewbox Width="16" Height="16"
+                                                             HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <Path Data="{Binding DotIcon}" Fill="White" Stretch="Uniform"/>
+                                                    </Viewbox>
                                                 </Border>
                                                 <StackPanel Grid.Column="1" Margin="10,0,0,0">
                                                     <TextBlock Text="{Binding Description}"
@@ -527,6 +544,10 @@
             </Border>
         </Grid>
 
+        <components:LoadingOverlay Grid.RowSpan="99" Grid.ColumnSpan="99"
+                                   x:Name="DashboardLoadingOverlay"
+                                   IsLoading="{Binding IsLoading}"
+                                   Panel.ZIndex="9999"/>
     </Grid>
 </Page>
 

@@ -5,13 +5,14 @@ using System.Windows.Media;
 
 namespace SOLUM_UI
 {
+    public enum ConfirmMode { Add, Edit, Renew }
+
     public partial class ConfirmDialog : Window
     {
         public bool Confirmed { get; private set; }
 
         private static readonly SolidColorBrush _label   = Clr(0x77, 0x77, 0x77);
         private static readonly SolidColorBrush _value   = Clr(0x11, 0x11, 0x11);
-        private static readonly SolidColorBrush _changed = Clr(0x1E, 0x8B, 0x4E);
         private static readonly SolidColorBrush _old     = Clr(0xBB, 0xBB, 0xBB);
         private static readonly SolidColorBrush _border  = Clr(0xE4, 0xE6, 0xEB);
         private static readonly SolidColorBrush _accent  = Clr(0x70, 0x29, 0x43);
@@ -21,13 +22,19 @@ namespace SOLUM_UI
         private static readonly SolidColorBrush _chipTxt = Clr(0x70, 0x29, 0x43);
         private static readonly SolidColorBrush _divider = Clr(0xEE, 0xEE, 0xF2);
 
+        // Mode-specific colors
+        private SolidColorBrush _iconBg;    // icon circle background
+        private SolidColorBrush _btnColor;  // confirm button
+        private SolidColorBrush _changed;   // "after" value color for changed fields
+
         private static SolidColorBrush Clr(byte r, byte g, byte b) =>
             new SolidColorBrush(Color.FromRgb(r, g, b));
 
         public ConfirmDialog(string title, string subtitle, string confirmLabel,
                              List<ConfirmField> fields,
                              double screenW, double screenH,
-                             double screenLeft, double screenTop)
+                             double screenLeft, double screenTop,
+                             ConfirmMode mode = ConfirmMode.Add)
         {
             InitializeComponent();
             Width  = screenW;
@@ -40,7 +47,54 @@ namespace SOLUM_UI
             TxtSubtitle.Text   = subtitle;
             TxtConfirmBtn.Text = confirmLabel;
 
+            // Apply mode colors
+            switch (mode)
+            {
+                case ConfirmMode.Renew:
+                    // Green — same as add
+                    _iconBg   = Clr(0x27, 0xAE, 0x60);
+                    _btnColor = Clr(0x27, 0xAE, 0x60);
+                    _changed  = Clr(0x1E, 0x8B, 0x4E);
+                    SetIconCircle("#27AE60", "↻");
+                    SetConfirmBtn("#27AE60");
+                    break;
+
+                case ConfirmMode.Edit:
+                    // Amber
+                    _iconBg   = Clr(0xF5, 0xA6, 0x23);
+                    _btnColor = Clr(0xD4, 0x7D, 0x00);
+                    _changed  = Clr(0xB3, 0x6A, 0x00);
+                    SetIconCircle("#F5A623", "✎");
+                    SetConfirmBtn("#D47D00");
+                    break;
+
+                default: // Add
+                    _iconBg   = Clr(0x27, 0xAE, 0x60);
+                    _btnColor = Clr(0x27, 0xAE, 0x60);
+                    _changed  = Clr(0x1E, 0x8B, 0x4E);
+                    // default XAML icon/btn already green — no change needed
+                    break;
+            }
+
             BuildContent(fields);
+        }
+
+        private void SetIconCircle(string hexColor, string symbol)
+        {
+            if (IconCircle != null)
+            {
+                IconCircle.Background = (SolidColorBrush)new BrushConverter().ConvertFrom(hexColor);
+                IconSymbol.Text       = symbol;
+            }
+        }
+
+        private void SetConfirmBtn(string hexColor)
+        {
+            // Named elements inside ControlTemplates aren't direct fields;
+            // set the Background on the Button itself and let XAML propagate it.
+            BtnConfirm.Background = (SolidColorBrush)new BrushConverter().ConvertFrom(hexColor);
+            // Also override via tag so the template border picks it up
+            BtnConfirm.Tag = hexColor;
         }
 
         private void BuildContent(List<ConfirmField> fields)
@@ -197,7 +251,7 @@ namespace SOLUM_UI
                         if (sf.IsChanged)
                         {
                             cell.Children.Add(new TextBlock { Text = string.IsNullOrEmpty(sf.OldValue) ? "—" : sf.OldValue, FontSize = 12, Foreground = _old, TextDecorations = TextDecorations.Strikethrough, FontFamily = new FontFamily("Segoe UI"), TextWrapping = TextWrapping.Wrap });
-                            cell.Children.Add(new TextBlock { Text = string.IsNullOrEmpty(sf.NewValue) ? "—" : sf.NewValue, FontSize = 15, FontWeight = FontWeights.SemiBold, Foreground = _changed, FontFamily = new FontFamily("Segoe UI"), TextWrapping = TextWrapping.Wrap });
+                            cell.Children.Add(new TextBlock { Text = string.IsNullOrEmpty(sf.NewValue) ? "—" : sf.NewValue, FontSize = 15, FontWeight = FontWeights.SemiBold, Foreground = _changed ?? Clr(0x1E,0x8B,0x4E), FontFamily = new FontFamily("Segoe UI"), TextWrapping = TextWrapping.Wrap });
                         }
                         else
                         {

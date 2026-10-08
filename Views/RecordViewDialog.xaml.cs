@@ -1,43 +1,41 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using SOLUM_UI.Models;
-using SOLUM_UI.Services.Api;
+using SOLUM_UI.ViewModels;
 
 namespace SOLUM_UI
 {
     public partial class RecordViewDialog : Window
     {
-        private readonly SoloParentRecord _record;
-        public bool OpenedEdit { get; private set; }
-        public bool Renewed { get; private set; }
+        private readonly RecordViewDialogViewModel _vm;
 
-        private static readonly SolidColorBrush _label   = Clr(0x88, 0x88, 0x88);
-        private static readonly SolidColorBrush _value   = Clr(0x11, 0x11, 0x11);
-        private static readonly SolidColorBrush _cardBdr = Clr(0x70, 0x29, 0x43);
-        private static readonly SolidColorBrush _divider = Clr(0xE8, 0xD8, 0xDE);
-        private static readonly SolidColorBrush _head    = Clr(0x70, 0x29, 0x43);
-        private static readonly SolidColorBrush _chipBg  = Clr(0xF5, 0xEC, 0xEF);
-        private static readonly SolidColorBrush _chipTxt = Clr(0x70, 0x29, 0x43);
-        private static readonly SolidColorBrush _rowAlt  = Clr(0xFD, 0xF5, 0xF7);
-        private static readonly SolidColorBrush _secBg   = Clr(0xFF, 0xFF, 0xFF);
-
-        private static SolidColorBrush Clr(byte r, byte g, byte b) =>
-            new SolidColorBrush(Color.FromRgb(r, g, b));
+        // ── Public result surface — unchanged API for all call-sites ──────────
+        public bool OpenedEdit    => _vm.OpenedEdit;
+        public bool Renewed       => _vm.Renewed;        // kept for compat
+        public bool OpenedRenew   => _vm.OpenedRenew;
+        public bool OpenedDelete  => _vm.OpenedDelete;
+        public SoloParentRecord RenewalResult => _vm.RenewalResult;
 
         public RecordViewDialog(SoloParentRecord record)
         {
             InitializeComponent();
-            _record = record;
+
+            _vm = new RecordViewDialogViewModel(record);
+            DataContext = _vm;
+
+            // When the VM decides the dialog should close it fires RequestClose;
+            // the code-behind is the only layer that can touch Window.DialogResult.
+            _vm.RequestClose += result => { DialogResult = result; Close(); };
+
             Loaded += (s, e) => { ApplySize(); BuildContent(); };
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e) => ApplySize();
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) { }
 
+        // ── UI-layout logic (permitted in code-behind per AGENT.md §2) ────────
         private void ApplySize()
         {
             double screenW, screenH, screenLeft, screenTop;
@@ -70,9 +68,11 @@ namespace SOLUM_UI
             DialogShell.Width     = Math.Min(screenW * 0.62, 880);
         }
 
+        // ── Programmatic card-builders (Phase 4 will replace with UserControls) ─
+
         private void BuildContent()
         {
-            var r = _record;
+            var r = _vm.Record;
 
             TxtRecordName.Text = r.Name ?? string.Empty;
 
@@ -82,53 +82,26 @@ namespace SOLUM_UI
                 age = DateTime.Today.Year - r.DateOfBirth.Year;
                 if (r.DateOfBirth.Date > DateTime.Today.AddYears(-age)) age--;
             }
-            TxtSexAge.Text    = (r.Sex ?? "—") + (age > 0 ? "  ·  " + age + " years old" : string.Empty);
-            TxtContact.Text   = string.IsNullOrWhiteSpace(r.ContactNumber) ? string.Empty : SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber);
+            TxtSexAge.Text      = (r.Sex ?? "—") + (age > 0 ? "  ·  " + age + " years old" : string.Empty);
+            TxtContact.Text     = string.IsNullOrWhiteSpace(r.ContactNumber) ? string.Empty : SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber);
             TxtStatusBadge.Text = string.IsNullOrWhiteSpace(r.Status) ? string.Empty : r.Status;
-            TxtSpId.Text      = r.Id ?? string.Empty;
+            TxtSpId.Text        = r.Id ?? string.Empty;
 
             if (r.Status == "Inactive")
             {
-                StatusBadge.Background = Clr(0xF0, 0xF0, 0xF0);
-                TxtStatusBadge.Foreground = Clr(0x88, 0x88, 0x88);
-            }
-            else if (r.Status == "Terminated")
-            {
-                StatusBadge.Background = Clr(0xFD, 0xE8, 0xE8);
-                TxtStatusBadge.Foreground = Clr(0xE0, 0x24, 0x24);
-            }
-            else
-            {
-                StatusBadge.Background = Clr(0xE6, 0xF9, 0xEE);
-                TxtStatusBadge.Foreground = Clr(0x27, 0xAE, 0x60);
+                StatusBadge.Background    = RecordViewDialogViewModel.Clr(0xF0, 0xF0, 0xF0);
+                TxtStatusBadge.Foreground = RecordViewDialogViewModel.Clr(0x88, 0x88, 0x88);
             }
 
             CardPanel.Children.Clear();
 
             string appType = r.IsNewApplicant ? "New Applicant" : r.IsRenewal ? "For Renewal" : "—";
-            string expiryStr = r.CurrentTermExpiresAt.HasValue
-                ? r.CurrentTermExpiresAt.Value.ToString("MMMM d, yyyy")
-                : (r.LastUpdated != DateTime.MinValue ? r.LastUpdated.AddYears(1).ToString("MMMM d, yyyy") : "—");
 
-            var appItems = new List<(string, string)>
+            AddCard("Application", new[]
             {
-                ("Type", appType),
+                ("Type",                appType),
                 ("Date of Application", r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("MMMM d, yyyy") : "—"),
-                ("Term Expiration", expiryStr)
-            };
-
-            if (r.RecordTerms != null && r.RecordTerms.Count > 0)
-            {
-                var latestTerm = r.RecordTerms.Last();
-                if (!string.IsNullOrWhiteSpace(latestTerm.Type))
-                    appItems.Add(("Latest Term Type", latestTerm.Type));
-                if (!string.IsNullOrWhiteSpace(latestTerm.StartsAt))
-                    appItems.Add(("Term Starts", latestTerm.StartsAt));
-                if (!string.IsNullOrWhiteSpace(latestTerm.ExpiresAt))
-                    appItems.Add(("Term Ends", latestTerm.ExpiresAt));
-            }
-
-            AddCard("Application & Validity", appItems.ToArray());
+            });
 
             AddCard("Identity", new[]
             {
@@ -239,15 +212,15 @@ namespace SOLUM_UI
                     if (string.IsNullOrWhiteSpace(line)) continue;
                     wrap.Children.Add(new Border
                     {
-                        Background   = _chipBg,
+                        Background   = RecordViewDialogViewModel.BrChipBg,
                         CornerRadius = new CornerRadius(6),
                         Padding      = new Thickness(10, 5, 10, 5),
                         Margin       = new Thickness(0, 0, 8, 8),
                         Child        = new TextBlock
                         {
-                            Text         = line.Trim(), FontSize = 12,
-                            FontWeight   = FontWeights.SemiBold,
-                            Foreground   = _chipTxt, FontFamily = new FontFamily("Segoe UI")
+                            Text       = line.Trim(), FontSize = 12,
+                            FontWeight = FontWeights.SemiBold,
+                            Foreground = RecordViewDialogViewModel.BrChipTxt, FontFamily = new FontFamily("Segoe UI")
                         }
                     });
                 }
@@ -256,7 +229,7 @@ namespace SOLUM_UI
             {
                 wrap.Children.Add(new TextBlock
                 {
-                    Text = "None selected", FontSize = 13, Foreground = _label,
+                    Text = "None selected", FontSize = 13, Foreground = RecordViewDialogViewModel.BrLabel,
                     FontFamily = new FontFamily("Segoe UI")
                 });
             }
@@ -284,21 +257,21 @@ namespace SOLUM_UI
                 var tb = new TextBlock
                 {
                     Text = colLabels[c], FontSize = 10, FontWeight = FontWeights.Bold,
-                    Foreground = _head, Margin = new Thickness(4, 0, 4, 0),
+                    Foreground = RecordViewDialogViewModel.BrHead, Margin = new Thickness(4, 0, 4, 0),
                     FontFamily = new FontFamily("Segoe UI")
                 };
                 Grid.SetColumn(tb, c);
                 headerGrid.Children.Add(tb);
             }
             inner.Children.Add(headerGrid);
-            inner.Children.Add(new Border { Height = 1, Background = _divider, Margin = new Thickness(0, 4, 0, 0) });
+            inner.Children.Add(new Border { Height = 1, Background = RecordViewDialogViewModel.BrDivider, Margin = new Thickness(0, 4, 0, 0) });
 
             bool alt = false;
             foreach (var m in members)
             {
                 var rowBorder = new Border
                 {
-                    Background   = alt ? _rowAlt : Brushes.White,
+                    Background   = alt ? RecordViewDialogViewModel.BrRowAlt : Brushes.White,
                     CornerRadius = new CornerRadius(5),
                     Padding      = new Thickness(0, 6, 0, 6),
                     Margin       = new Thickness(0, 1, 0, 0)
@@ -314,7 +287,7 @@ namespace SOLUM_UI
                     var tb = new TextBlock
                     {
                         Text         = string.IsNullOrWhiteSpace(vals[c]) ? "—" : vals[c],
-                        FontSize     = 12, Foreground = _value, TextWrapping = TextWrapping.Wrap,
+                        FontSize     = 12, Foreground = RecordViewDialogViewModel.BrValue, TextWrapping = TextWrapping.Wrap,
                         Margin       = new Thickness(4, 0, 4, 0), FontFamily = new FontFamily("Segoe UI")
                     };
                     Grid.SetColumn(tb, c);
@@ -333,7 +306,7 @@ namespace SOLUM_UI
         {
             Background      = Brushes.White,
             CornerRadius    = new CornerRadius(10),
-            BorderBrush     = _cardBdr,
+            BorderBrush     = RecordViewDialogViewModel.BrCardBdr,
             BorderThickness = new Thickness(1),
             Padding         = new Thickness(16, 14, 16, 12),
             Margin          = new Thickness(0, 0, 0, 10)
@@ -347,13 +320,13 @@ namespace SOLUM_UI
                 CornerRadius    = new CornerRadius(0),
                 Padding         = new Thickness(0, 0, 0, 6),
                 Margin          = new Thickness(0, 0, 0, 0),
-                BorderBrush     = _divider,
+                BorderBrush     = RecordViewDialogViewModel.BrDivider,
                 BorderThickness = new Thickness(0, 0, 0, 1)
             };
             container.Child = new TextBlock
             {
                 Text = title.ToUpper(), FontSize = 12, FontWeight = FontWeights.Bold,
-                Foreground = _head, FontFamily = new FontFamily("Segoe UI"),
+                Foreground = RecordViewDialogViewModel.BrHead, FontFamily = new FontFamily("Segoe UI"),
                 VerticalAlignment = VerticalAlignment.Center
             };
             return container;
@@ -364,7 +337,7 @@ namespace SOLUM_UI
             var sp = new StackPanel { Margin = new Thickness(4, 0, 4, 14) };
             sp.Children.Add(new TextBlock
             {
-                Text = label, FontSize = 10, Foreground = _label,
+                Text = label, FontSize = 10, Foreground = RecordViewDialogViewModel.BrLabel,
                 Margin = new Thickness(0, 0, 0, 3), FontFamily = new FontFamily("Segoe UI"),
                 FontWeight = FontWeights.SemiBold
             });
@@ -372,58 +345,88 @@ namespace SOLUM_UI
             {
                 Text         = string.IsNullOrWhiteSpace(value) ? "—" : value,
                 FontSize     = 14, FontWeight = FontWeights.SemiBold,
-                Foreground   = _value, TextWrapping = TextWrapping.Wrap,
+                Foreground   = RecordViewDialogViewModel.BrValue, TextWrapping = TextWrapping.Wrap,
                 FontFamily   = new FontFamily("Segoe UI")
             });
             return sp;
         }
 
-        private async void Renew_Click(object sender, RoutedEventArgs e)
-        {
-            if (_record == null || string.IsNullOrWhiteSpace(_record.Id)) return;
+        // ── Event handlers — delegate state changes to the ViewModel ──────────
 
-            if (Guid.TryParse(_record.Id, out var id))
+        private void BtnToolbarToggle_Click(object sender, RoutedEventArgs e)
+        {
+            _vm.HandleToolbarToggle();
+            if (ActionToolbar == null) return;
+
+            if (_vm.IsToolbarCollapsed)
             {
-                BtnRenew.IsEnabled = false;
-                try
+                BtnRenew.Visibility  = Visibility.Collapsed;
+                BtnEdit.Visibility   = Visibility.Collapsed;
+                BtnDelete.Visibility = Visibility.Collapsed;
+                ActionToolbar.Width  = 58;
+
+                if (BtnToolbarToggle.ToolTip is System.Windows.Controls.ToolTip t1)
                 {
-                    var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(id);
-                    if (resp.Succeeded)
+                    if (t1.Template != null)
                     {
-                        Renewed = true;
-                        ToastNotification.Show("Record Renewed", "Record validity extended for 1 year.", ToastType.Success);
-                        Close();
+                        t1.ApplyTemplate();
+                        var tb = t1.Template.FindName("Content", t1) as TextBlock;
                     }
-                    else
-                    {
-                        string err = resp.Errors != null && resp.Errors.Count > 0
-                            ? string.Join("\n", resp.Errors)
-                            : "Failed to renew record.";
-                        MessageBox.Show(err, "Renew Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    }
-                }
-                finally
-                {
-                    BtnRenew.IsEnabled = true;
                 }
             }
             else
             {
-                MessageBox.Show("Cannot renew record without a valid backend ID.", "Renew", MessageBoxButton.OK, MessageBoxImage.Information);
+                BtnRenew.Visibility  = Visibility.Visible;
+                BtnEdit.Visibility   = Visibility.Visible;
+                BtnDelete.Visibility = Visibility.Visible;
+                ActionToolbar.Width  = 58;
             }
+        }
+
+        private void Renew_Click(object sender, RoutedEventArgs e)
+        {
+            if (_vm.Record == null || string.IsNullOrWhiteSpace(_vm.Record.Id)) return;
+
+            // Open RecordDialog in renewal mode — identity fields locked,
+            // only Civil Status / Income / Employment are editable.
+            var dialog = new RecordDialog(_vm.Record, isRenewal: true) { Owner = Owner ?? this };
+            if (dialog.ShowDialog() != true || dialog.Result == null) return;
+
+            // Relay the renewal result to the VM; it sets the flags and fires
+            // RequestClose(true) which the constructor lambda handles.
+            _vm.HandleRenewResult(dialog.Result);
         }
 
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
-            OpenedEdit   = true;
-            DialogResult = true;
-            Close();
+            // VM sets OpenedEdit = true and fires RequestClose(true).
+            _vm.HandleEdit();
+        }
+
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            _vm.HandleDeleteRequest();
+            DeleteConfirmOverlay.Visibility = Visibility.Visible;
+        }
+
+        private void DeleteCancel_Click(object sender, RoutedEventArgs e)
+        {
+            _vm.HandleDeleteCancel();
+            DeleteConfirmOverlay.Visibility = Visibility.Collapsed;
+        }
+
+        private void DeleteConfirm_Click(object sender, RoutedEventArgs e)
+        {
+            DeleteConfirmOverlay.Visibility = Visibility.Collapsed;
+            // VM sets OpenedDelete = true and fires RequestClose(true).
+            _vm.HandleDeleteConfirm();
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
-            Close();
+            // VM fires RequestClose(false).
+            _vm.HandleClose();
         }
     }
 }
+
