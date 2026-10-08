@@ -181,6 +181,9 @@
     <Compile Include="Views\Components\LoadingOverlay.xaml.cs">
       <DependentUpon>LoadingOverlay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Components\RecordActionToolbar.xaml.cs">
+      <DependentUpon>RecordActionToolbar.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\AnalyticsPage.xaml.cs">
       <DependentUpon>AnalyticsPage.xaml</DependentUpon>
     </Compile>
@@ -211,7 +214,7 @@
     <Compile Include="Views\RecordDialog.xaml.cs">
       <DependentUpon>RecordDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\RecordViewDialog.xaml.cs">
+    <Compile Include="Views\Dialogs\RecordViewDialog.xaml.cs">
       <DependentUpon>RecordViewDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\RenewDialog.xaml.cs">
@@ -271,6 +274,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Components\RecordActionToolbar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AnalyticsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -311,7 +318,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\RecordViewDialog.xaml">
+    <Page Include="Views\Dialogs\RecordViewDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

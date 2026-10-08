@@ -5,7 +5,7 @@ using System.Windows.Media;
 using SOLUM_UI.Models;
 using SOLUM_UI.ViewModels;
 
-namespace SOLUM_UI
+namespace SOLUM_UI.Views.Dialogs
 {
     public partial class RecordViewDialog : Window
     {
@@ -351,74 +351,18 @@ namespace SOLUM_UI
             return sp;
         }
 
-        // ── Event handlers — delegate state changes to the ViewModel ──────────
-
-        private void BtnToolbarToggle_Click(object sender, RoutedEventArgs e)
-        {
-            _vm.HandleToolbarToggle();
-            if (ActionToolbar == null) return;
-
-            if (_vm.IsToolbarCollapsed)
-            {
-                BtnRenew.Visibility  = Visibility.Collapsed;
-                BtnEdit.Visibility   = Visibility.Collapsed;
-                BtnDelete.Visibility = Visibility.Collapsed;
-                ActionToolbar.Width  = 58;
-
-                if (BtnToolbarToggle.ToolTip is System.Windows.Controls.ToolTip t1)
-                {
-                    if (t1.Template != null)
-                    {
-                        t1.ApplyTemplate();
-                        var tb = t1.Template.FindName("Content", t1) as TextBlock;
-                    }
-                }
-            }
-            else
-            {
-                BtnRenew.Visibility  = Visibility.Visible;
-                BtnEdit.Visibility   = Visibility.Visible;
-                BtnDelete.Visibility = Visibility.Visible;
-                ActionToolbar.Width  = 58;
-            }
-        }
-
-        private void Renew_Click(object sender, RoutedEventArgs e)
-        {
-            if (_vm.Record == null || string.IsNullOrWhiteSpace(_vm.Record.Id)) return;
-
-            // Open RecordDialog in renewal mode — identity fields locked,
-            // only Civil Status / Income / Employment are editable.
-            var dialog = new RecordDialog(_vm.Record, isRenewal: true) { Owner = Owner ?? this };
-            if (dialog.ShowDialog() != true || dialog.Result == null) return;
-
-            // Relay the renewal result to the VM; it sets the flags and fires
-            // RequestClose(true) which the constructor lambda handles.
-            _vm.HandleRenewResult(dialog.Result);
-        }
-
-        private void Edit_Click(object sender, RoutedEventArgs e)
-        {
-            // VM sets OpenedEdit = true and fires RequestClose(true).
-            _vm.HandleEdit();
-        }
-
-        private void Delete_Click(object sender, RoutedEventArgs e)
-        {
-            _vm.HandleDeleteRequest();
-            DeleteConfirmOverlay.Visibility = Visibility.Visible;
-        }
+        // ── Event handlers — overlay cancel / confirm stay here; toolbar handlers moved to RecordActionToolbar ──
 
         private void DeleteCancel_Click(object sender, RoutedEventArgs e)
         {
+            // VM sets IsDeleteOverlayVisible = false → binding collapses overlay.
             _vm.HandleDeleteCancel();
-            DeleteConfirmOverlay.Visibility = Visibility.Collapsed;
         }
 
         private void DeleteConfirm_Click(object sender, RoutedEventArgs e)
         {
-            DeleteConfirmOverlay.Visibility = Visibility.Collapsed;
-            // VM sets OpenedDelete = true and fires RequestClose(true).
+            // VM sets IsDeleteOverlayVisible = false, OpenedDelete = true,
+            // then fires RequestClose(true) → constructor lambda closes the Window.
             _vm.HandleDeleteConfirm();
         }
 
@@ -429,4 +373,3 @@ namespace SOLUM_UI
         }
     }
 }
-
