@@ -3,104 +3,76 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
       Title="Analytics"
-      Background="#F5F0F2">
+      Background="#FFFFFF">
 
     <Page.Resources>
-
-        <Style x:Key="AnalyticsCombo" TargetType="ComboBox">
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="#333333"/>
+        <!-- Date Picker Style (matching PreCheckDialog) -->
+        <Style x:Key="AnalyticsDatePicker" TargetType="DatePicker">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#111111"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D0B8C0"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="Padding" Value="12,0"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderBrush" Value="#D9A3AB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="ComboBox">
-                        <Grid>
-                            <Border x:Name="CmbBg" Background="White" BorderBrush="#D0B8C0" BorderThickness="1.5" CornerRadius="8">
-                                <Grid Margin="12,0,36,0">
-                                    <ContentPresenter x:Name="ContentSite"
-                                                      Content="{TemplateBinding SelectionBoxItem}"
-                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                                      VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                </Grid>
-                            </Border>
-                            <ToggleButton HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                          Background="Transparent" BorderThickness="0"
-                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                          Focusable="False" Opacity="0"/>
-                            <Path HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0"
-                                  Data="M7,10L12,15L17,10H7Z" Fill="#702943" Stretch="Uniform" Width="12" Height="12" IsHitTestVisible="False"/>
-                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
-                                   AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                                <Border Background="White" CornerRadius="10" BorderBrush="#D0B8C0" BorderThickness="1"
-                                        MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200" Margin="0,2,0,0">
+                    <ControlTemplate TargetType="DatePicker">
+                        <Grid HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="32"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.ColumnSpan="2" Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="6"
+                                    BorderThickness="{TemplateBinding BorderThickness}"/>
+                            <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0"
+                                               Foreground="#111111" Background="Transparent"
+                                               BorderThickness="0" Padding="10,0"
+                                               VerticalAlignment="Center" FontSize="12"/>
+                            <ToggleButton x:Name="PART_Button" Grid.Column="1"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    Width="18" Height="18"
+                                    Background="Transparent" BorderThickness="0"
+                                    Cursor="Hand" Focusable="False"
+                                    IsChecked="{Binding IsOpen, ElementName=PART_Popup, Mode=TwoWay}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Path Data="M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z"
+                                              Fill="#7B1426" Stretch="Uniform" Width="14" Height="14"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <Popup x:Name="PART_Popup" Grid.ColumnSpan="2" AllowsTransparency="True"
+                                   Placement="Bottom" StaysOpen="False" MaxWidth="280">
+                                <Border Background="White" CornerRadius="8" BorderBrush="#D9A3AB"
+                                        BorderThickness="1" Padding="8,6" Margin="0,2,0,0">
                                     <Border.Effect>
-                                        <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.14"/>
+                                        <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="3" Opacity="0.08"/>
                                     </Border.Effect>
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                        <ItemsPresenter/>
-                                    </ScrollViewer>
+                                    <Calendar x:Name="PART_Calendar" Background="White"
+                                              BorderThickness="0" Foreground="#222222" FontSize="12"/>
                                 </Border>
                             </Popup>
                         </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="CmbBg" Property="BorderBrush" Value="#702943"/>
-                            </Trigger>
-                            <Trigger Property="IsDropDownOpen" Value="True">
-                                <Setter TargetName="CmbBg" Property="BorderBrush" Value="#702943"/>
-                                <Setter TargetName="CmbBg" Property="BorderThickness" Value="2"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Style.Resources>
-                <Style TargetType="ComboBoxItem">
-                    <Setter Property="Padding" Value="12,8"/>
-                    <Setter Property="FontSize" Value="13"/>
-                    <Setter Property="Foreground" Value="#333333"/>
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="ComboBoxItem">
-                                <Border x:Name="ItemBg" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="6" Margin="4,2">
-                                    <ContentPresenter/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="ItemBg" Property="Background" Value="#FDF0F3"/>
-                                    </Trigger>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="ItemBg" Property="Background" Value="#F0E4E8"/>
-                                        <Setter Property="Foreground" Value="#702943"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </Style.Resources>
         </Style>
 
-        <Style x:Key="Card" TargetType="Border">
+        <!-- ComboBox Style (matching app design) -->
+        <Style x:Key="AnalyticsComboBox" TargetType="ComboBox">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="12"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="CornerRadius" Value="16"/>
-            <Setter Property="BorderThickness" Value="0"/>
-        </Style>
-
-        <Style x:Key="SectionLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="#5A1E33"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Foreground" Value="#111111"/>
+            <Setter Property="BorderBrush" Value="#D9A3AB"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource AnalyticsComboBoxItemStyle}"/>
         </Style>
 
         <Style x:Key="StatNum" TargetType="TextBlock">
@@ -182,707 +154,296 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Missing Brushes for Filter Panel -->
+        <SolidColorBrush x:Key="BodyTextBrush" Color="#2B1A1C"/>
+        <SolidColorBrush x:Key="PrimaryMaroonBrush" Color="#7B1426"/>
+        <SolidColorBrush x:Key="BorderMaroonBrush" Color="#EAD9DB"/>
+
     </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="80"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- top bar -->
-        <Border Grid.Row="0" Padding="26,14,26,14">
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#6B1F3A" Offset="0"/>
-                    <GradientStop Color="#9B3060" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.Background>
+        <!-- Top Bar -->
+        <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource BorderMaroonBrush}" BorderThickness="0,0,0,1" Padding="16,12,16,14">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+
+                <!-- Date Range Picker -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#F5EEF1" CornerRadius="8" Padding="12,5" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6" Fill="#702943" Margin="0,0,7,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="TxtLastRefresh" Text="" FontSize="11"
-                       Foreground="#702943" FontFamily="Segoe UI" FontWeight="SemiBold"/>
-                        </StackPanel>
-                    </Border>
-                    <Border x:Name="ActiveFilterBadge" Background="#702943" CornerRadius="8"
-            Padding="12,5" Margin="8,0,0,0" VerticalAlignment="Center" Visibility="Collapsed">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="White"
-                  Stretch="Uniform" Width="9" Height="9" Margin="0,0,6,0"/>
-                            <TextBlock x:Name="TxtActiveFilter" Text="" FontSize="11"
-                       Foreground="White" FontFamily="Segoe UI" FontWeight="SemiBold"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- NEW -->
-                    <Button x:Name="BtnRefresh" Width="28" Height="28" Margin="8,0,0,0"
-            Background="Transparent" BorderThickness="0" Cursor="Hand"
-            Click="BtnRefresh_Click" ToolTip="Refresh this period's data"
-            VerticalAlignment="Center">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="Bg" Background="#F5EEF1" CornerRadius="8" Padding="6">
-                                    <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
-                          Fill="#702943" Stretch="Uniform" Width="13" Height="13"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="#EDD8DF"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-
+                    <DatePicker x:Name="DpDateFrom" Style="{StaticResource AnalyticsDatePicker}" Width="140"
+                                SelectedDateChanged="DateRange_Changed" ToolTip="Start date" Margin="0,0,8,0"/>
+                    <TextBlock Text="—" VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" FontSize="14" Margin="0,0,8,0"/>
+                    <DatePicker x:Name="DpDateTo" Style="{StaticResource AnalyticsDatePicker}" Width="140"
+                                SelectedDateChanged="DateRange_Changed" ToolTip="End date"/>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#FFFFFF28" CornerRadius="20" Margin="0,0,8,0">
-                        <Button x:Name="FilterDropBtn" Background="Transparent" BorderThickness="0"
-                                Cursor="Hand" Height="36" Padding="14,0" Click="FilterDrop_Click">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="Transparent" CornerRadius="20" Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                            <StackPanel Orientation="Horizontal">
-                                <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="#111111"
-                                      Stretch="Uniform" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,7,0"/>
-                                <TextBlock Text="Filter" FontSize="12" FontWeight="SemiBold"
-                                           Foreground="#111111" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                    </Border>
-                    <Button Height="36" Padding="16,0" Cursor="Hand" Click="ExportXlsx_Click">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="Bg" Background="White" CornerRadius="20" Padding="{TemplateBinding Padding}">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" Fill="#702943"
-                                  Stretch="Uniform" Width="12" Height="12" Margin="0,0,6,0"/>
-                            <TextBlock Text="Export xlsx" FontSize="12" FontWeight="SemiBold"
-                                       Foreground="#702943" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
+                <!-- Filter Button -->
+                <Button Grid.Column="1" x:Name="FilterBtn" Style="{StaticResource AnalyticsButtonStyle}" 
+                        Click="FilterDrop_Click" Padding="12,6" Margin="12,0,0,0" Height="36"
+                        ToolTip="Filter data by year, month, barangay">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="{StaticResource BodyTextBrush}"
+                              Stretch="Uniform" Width="11" Height="11" Margin="0,0,6,0"/>
+                        <TextBlock Text="Filter" Foreground="{StaticResource BodyTextBrush}" FontSize="11"/>
+                    </StackPanel>
+                </Button>
 
-                    <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterDropBtn}"
-       Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
-                        <Border Background="White" CornerRadius="16" BorderBrush="#E8D4DA"
-            BorderThickness="1.5" Padding="20,18" MinWidth="260" Margin="0,4,0,0">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#702943" BlurRadius="20" ShadowDepth="4" Opacity="0.12"/>
-                            </Border.Effect>
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                    <Border Width="4" CornerRadius="2" Background="#702943" Margin="0,1,10,1"/>
-                                    <TextBlock Text="FILTER DATA" FontFamily="Segoe UI" FontSize="10"
-                           FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
-                                </StackPanel>
-                                <TextBlock Text="Year" FontFamily="Segoe UI" FontSize="13"
-                       FontWeight="SemiBold" Foreground="#1A1A1A" Margin="0,0,0,8"/>
-                                <ComboBox x:Name="CmbFilterYear" Style="{StaticResource AnalyticsCombo}" Margin="0,0,0,16"/>
-                                <TextBlock Text="Month" FontFamily="Segoe UI" FontSize="13"
-                       FontWeight="SemiBold" Foreground="#1A1A1A" Margin="0,0,0,8"/>
-                                <ComboBox x:Name="CmbFilterMonth" Style="{StaticResource AnalyticsCombo}" Margin="0,0,0,16"/>
+                <!-- Export Button -->
+                <Button Grid.Column="2" Style="{StaticResource AnalyticsButtonStyle}" 
+                        Click="ExportXlsx_Click" Padding="12,6" Margin="8,0,0,0" Height="36"
+                        ToolTip="Export to Excel">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" Fill="{StaticResource BodyTextBrush}"
+                              Stretch="Uniform" Width="11" Height="11" Margin="0,0,6,0"/>
+                        <TextBlock Text="Export" Foreground="{StaticResource BodyTextBrush}" FontSize="11"/>
+                    </StackPanel>
+                </Button>
 
-                                <!-- NEW -->
-                                <TextBlock Text="Barangay" FontFamily="Segoe UI" FontSize="13"
-                       FontWeight="SemiBold" Foreground="#1A1A1A" Margin="0,0,0,8"/>
-                                <ComboBox x:Name="CmbFilterBarangay" Style="{StaticResource AnalyticsCombo}" Margin="0,0,0,16"/>
-                                <!-- END NEW -->
+                <!-- Last Refresh -->
+                <Border Grid.Column="3" Background="{StaticResource TintMaroonBrush}" CornerRadius="4" 
+                        Padding="10,6" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="5" Height="5" Fill="{StaticResource PrimaryMaroonBrush}" 
+                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="TxtLastRefresh" Text="" FontSize="10" Foreground="{StaticResource MutedTextBrush}"/>
+                    </StackPanel>
+                </Border>
 
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="8"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Button Grid.Column="0" Height="40" Cursor="Hand" Click="FilterReset_Click">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border x:Name="Bg" Background="#F5ECEE" CornerRadius="10" BorderBrush="#D0B8C0" BorderThickness="1">
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="Bg" Property="Background" Value="#EDD8DF"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                        <TextBlock Text="Reset" FontFamily="Segoe UI" FontSize="13"
-                               FontWeight="SemiBold" Foreground="#702943"/>
-                                    </Button>
-                                    <Button Grid.Column="2" Height="40" Cursor="Hand" Click="FilterApply_Click">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border x:Name="Bg" Background="#702943" CornerRadius="10">
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                        <TextBlock Text="Apply" FontFamily="Segoe UI" FontSize="13"
-                               FontWeight="SemiBold" Foreground="White"/>
-                                    </Button>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-                    </Popup>
-                </StackPanel>
+                <!-- Avatar Placeholder -->
+                <Border Grid.Column="4" Width="36" Height="36" CornerRadius="18" 
+                        Background="{StaticResource PrimaryMaroonBrush}" Margin="12,0,0,0"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="A" FontSize="16" FontWeight="Bold" Foreground="White"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+
             </Grid>
         </Border>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled" Background="#F5F0F2">
-            <StackPanel Margin="20,16,20,24">
+        <!-- Filter Dropdown Popup (Card style, below button) -->
+        <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterBtn}" Placement="Bottom" 
+               StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade" Margin="0,4,0,0">
+            <Border Background="White" CornerRadius="14" BorderBrush="#E0D0D5" BorderThickness="1" 
+                    Padding="20,18,20,18" MinWidth="280">
+                <Border.Effect>
+                    <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="4" Opacity="0.18"/>
+                </Border.Effect>
+                <StackPanel>
+                    <!-- Year -->
+                    <TextBlock Text="Year" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" 
+                               Foreground="#1A1A1A" Margin="0,0,0,8"/>
+                    <ComboBox x:Name="CmbFilterYear" Style="{StaticResource AnalyticsComboBox}" Margin="0,0,0,16"/>
 
-                <!-- stat cards row -->
-                <Grid Margin="0,0,0,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                    <!-- Month -->
+                    <TextBlock Text="Month" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" 
+                               Foreground="#1A1A1A" Margin="0,0,0,8"/>
+                    <ComboBox x:Name="CmbFilterMonth" Style="{StaticResource AnalyticsComboBox}" Margin="0,0,0,16"/>
 
-                    <!-- TOTAL -->
-                    <Border Grid.Column="0" CornerRadius="16" ClipToBounds="True">
-                        <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.14" Direction="270"/></Border.Effect>
-                        <Grid>
-                            <Border CornerRadius="16">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                        <GradientStop Color="#702943" Offset="0"/>
-                                        <GradientStop Color="#A8415E" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                            </Border>
-                            <StackPanel Margin="20,18,20,18">
-                                <TextBlock Text="TOTAL SOLO PARENTS" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold" Foreground="#FFD8E4" Margin="0,0,0,8"/>
-                                <TextBlock x:Name="TxtTotalRecords" FontFamily="Segoe UI" FontSize="36"
-                                           FontWeight="Bold" Foreground="White" Text="0"/>
-                                <TextBlock Text="registered" FontFamily="Segoe UI" FontSize="11"
-                                           Foreground="#FFD8E4" Margin="0,2,0,10"/>
-                                <Border Background="#FFFFFF40" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
-                                    <TextBlock x:Name="TxtPeriodLabel" Text="All time" FontSize="10"
-                                               Foreground="#111111" FontFamily="Segoe UI" FontWeight="SemiBold"/>
-                                </Border>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
+                    <!-- Barangay -->
+                    <TextBlock Text="Barangay" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" 
+                               Foreground="#1A1A1A" Margin="0,0,0,8"/>
+                    <ComboBox x:Name="CmbFilterBarangay" Style="{StaticResource AnalyticsComboBox}" Margin="0,0,0,16"/>
 
-                    <!-- VALID -->
-                    <Border Grid.Column="2" CornerRadius="16" ClipToBounds="True">
-                        <Border.Effect><DropShadowEffect Color="#A8D5B0" BlurRadius="16" ShadowDepth="2" Opacity="0.14" Direction="270"/></Border.Effect>
-                        <Grid>
-                            <Border CornerRadius="16">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                        <GradientStop Color="#1A8C46" Offset="0"/>
-                                        <GradientStop Color="#27AE60" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                            </Border>
-                            <StackPanel Margin="20,18,20,18">
-                                <TextBlock Text="VALID RECORDS" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold" Foreground="#CFFADA" Margin="0,0,0,8"/>
-                                <TextBlock x:Name="TxtValidRecords" FontFamily="Segoe UI" FontSize="36"
-                                           FontWeight="Bold" Foreground="White" Text="0"/>
-                                <TextBlock Text="active" FontFamily="Segoe UI" FontSize="11"
-                                           Foreground="#CFFADA" Margin="0,2,0,10"/>
-                                <Border Background="#FFFFFF40" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
-                                    <TextBlock x:Name="TxtValidRate" Text="0%" FontSize="10"
-                                               Foreground="#111111" FontFamily="Segoe UI" FontWeight="SemiBold"/>
-                                </Border>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- INACTIVE -->
-                    <Border Grid.Column="4" Style="{StaticResource Card}">
-                        <Border.Effect><DropShadowEffect Color="#C0C0C0" BlurRadius="16" ShadowDepth="2" Opacity="0.10" Direction="270"/></Border.Effect>
-                        <StackPanel Margin="20,18,20,18">
-                            <TextBlock Text="INACTIVE" FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
-                                       Foreground="#BBBBBB" Margin="0,0,0,8"/>
-                            <TextBlock x:Name="TxtInactiveRecords" FontFamily="Segoe UI" FontSize="36"
-                                       FontWeight="Bold" Foreground="#333333" Text="0"/>
-                            <TextBlock Text="records" FontFamily="Segoe UI" FontSize="11"
-                                       Foreground="#999999" Margin="0,2,0,10"/>
-                            <Border Background="#F2F2F2" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
-                                <TextBlock x:Name="TxtInactiveRate" Text="0%" FontSize="10"
-                                           Foreground="#888888" FontFamily="Segoe UI" FontWeight="SemiBold"/>
-                            </Border>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- DEPENDANTS -->
-                    <Border Grid.Column="6" CornerRadius="16" ClipToBounds="True">
-                        <Border.Effect><DropShadowEffect Color="#F5C870" BlurRadius="16" ShadowDepth="2" Opacity="0.14" Direction="270"/></Border.Effect>
-                        <Grid>
-                            <Border CornerRadius="16">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                        <GradientStop Color="#C07820" Offset="0"/>
-                                        <GradientStop Color="#E8A030" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                            </Border>
-                            <StackPanel Margin="20,18,20,18">
-                                <TextBlock Text="DEPENDANTS" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold" Foreground="#FFF0C4" Margin="0,0,0,8"/>
-                                <TextBlock x:Name="TxtTotalChildren" FontFamily="Segoe UI" FontSize="36"
-                                           FontWeight="Bold" Foreground="White" Text="0"/>
-                                <TextBlock Text="total" FontFamily="Segoe UI" FontSize="11"
-                                           Foreground="#FFF0C4" Margin="0,2,0,10"/>
-                                <Border Background="#FFFFFF40" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
-                                    <TextBlock x:Name="TxtAvgChildren" Text="0.0 avg." FontSize="10"
-                                               Foreground="#1A0A00" FontFamily="Segoe UI" FontWeight="SemiBold"/>
-                                </Border>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- NEW SPIC -->
-                    <Border Grid.Column="8" Style="{StaticResource Card}">
-                        <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.10" Direction="270"/></Border.Effect>
-                        <StackPanel Margin="20,18,20,18">
-                            <TextBlock Text="NEW SPIC" FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
-                                       Foreground="#8B5A6E" Margin="0,0,0,8"/>
-                            <TextBlock x:Name="TxtNewSpic" FontFamily="Segoe UI" FontSize="36"
-                                       FontWeight="Bold" Foreground="#702943" Text="0"/>
-                            <TextBlock Text="newly issued" FontFamily="Segoe UI" FontSize="11"
-                                       Foreground="#555555" Margin="0,2,0,10"/>
-                            <Border Background="#F5EEF1" CornerRadius="6" Padding="8,3" HorizontalAlignment="Left">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock x:Name="TxtRenewedSpic" Text="0" FontSize="10"
-                                               Foreground="#9B3060" FontFamily="Segoe UI" FontWeight="SemiBold"/>
-                                    <TextBlock Text=" renewed" FontSize="10" Foreground="#9B3060" FontFamily="Segoe UI"/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- SEX -->
-                    <Border Grid.Column="10" Style="{StaticResource Card}">
-                        <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.10" Direction="270"/></Border.Effect>
-                        <StackPanel Margin="20,18,20,18">
-                            <TextBlock Text="SEX SPLIT" FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
-                                       Foreground="#8B5A6E" Margin="0,0,0,10"/>
-                            <!-- donut arc canvas -->
-                            <Canvas x:Name="GenderDonut" Width="80" Height="80"
-                                    HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Ellipse Width="7" Height="7" Fill="#702943" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBlock x:Name="TxtFemaleCircle" Text="0" FontFamily="Segoe UI" FontSize="12"
-                                           FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
-                                <TextBlock Text=" F" FontFamily="Segoe UI" FontSize="11" Foreground="#6B3A4A"
-                                           VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                <Ellipse Width="7" Height="7" Fill="#C4788E" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBlock x:Name="TxtMaleCircle" Text="0" FontFamily="Segoe UI" FontSize="12"
-                                           FontWeight="Bold" Foreground="#9B4A62" VerticalAlignment="Center"/>
-                                <TextBlock Text=" M" FontFamily="Segoe UI" FontSize="11" Foreground="#6B3A4A"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <!-- barangay + age/civil row -->
-                <Grid Margin="0,0,0,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="3*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="2*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- barangay chart -->
-                    <Border Grid.Column="0" Style="{StaticResource Card}">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
-                        </Border.Effect>
-                        <StackPanel Margin="20,18,20,18">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#702943" Offset="0"/>
-                                            <GradientStop Color="#9B3060" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                </Border>
-                                <TextBlock Text="RECORDS BY BARANGAY" Style="{StaticResource SectionLabel}"/>
-                                <Border Background="#F5EEF1" CornerRadius="6" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="Top 10" FontFamily="Segoe UI" FontSize="9"
-                                               FontWeight="SemiBold" Foreground="#702943"/>
-                                </Border>
-                            </StackPanel>
-                            <Border Background="#FAF5F7" CornerRadius="12" Padding="10,8">
-                                <StackPanel>
-                                    <Canvas x:Name="BarangayCanvas" Height="160" Margin="0,0,0,8"/>
-                                    <ItemsControl x:Name="BarangayLabels">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <UniformGrid Rows="1"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Label}" Style="{StaticResource BarLbl}"
-                                                           TextTrimming="CharacterEllipsis" TextAlignment="Center"
-                                                           FontSize="9" Margin="2,4,2,0"/>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- age + civil status -->
-                    <Grid Grid.Column="2">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="10"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <Border Grid.Row="0" Style="{StaticResource Card}">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
-                            </Border.Effect>
-                            <StackPanel Margin="20,18,20,18">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                    <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
-                                        <Border.Background>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                <GradientStop Color="#702943" Offset="0"/>
-                                                <GradientStop Color="#C4788E" Offset="1"/>
-                                            </LinearGradientBrush>
-                                        </Border.Background>
+                    <!-- Action Buttons -->
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Button Grid.Column="0" Height="42" Click="FilterReset_Click" Cursor="Hand">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#F0F0F0" CornerRadius="10">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
-                                    <TextBlock Text="AGE GROUP" Style="{StaticResource SectionLabel}"/>
-                                </StackPanel>
-                                <ItemsControl x:Name="AgeChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
-                            </StackPanel>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#E0E0E0"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="Reset" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" 
+                                       Foreground="#555555"/>
+                        </Button>
+                        
+                        <Button Grid.Column="2" Height="42" Click="FilterApply_Click" Cursor="Hand">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#702943" CornerRadius="10">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="Apply Now" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" 
+                                       Foreground="White"/>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- Content Area -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Background="White">
+            <Grid Margin="16,16,16,24" MinWidth="1100" MinHeight="700">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Column: KPI Cards (6 cards stacked with progressive color darkening) -->
+                <StackPanel Grid.Column="0">
+                    <components:KpiCard Value="{Binding PantawidBeneficiaryCount}" Label="Pantawid"
+                                       CardStyle="{StaticResource KpiCardStyle1}"
+                                       ValueStyle="{StaticResource KpiValueStyle1}"
+                                       LabelStyle="{StaticResource KpiLabelStyle1}" Margin="0,0,0,10"/>
+                    <components:KpiCard Value="{Binding LgbtCount}" Label="LGBT" Margin="0,0,0,10"
+                                       CardStyle="{StaticResource KpiCardStyle2}"
+                                       ValueStyle="{StaticResource KpiValueStyle2}"
+                                       LabelStyle="{StaticResource KpiLabelStyle2}"/>
+                    <components:KpiCard Value="{Binding TotalDependents}" Label="Total Dependents" Margin="0,0,0,10"
+                                       CardStyle="{StaticResource KpiCardStyle3}"
+                                       ValueStyle="{StaticResource KpiValueStyle3}"
+                                       LabelStyle="{StaticResource KpiLabelStyle3}"/>
+                    <components:KpiCard Value="{Binding MaleCount}" Label="Male" Margin="0,0,0,10"
+                                       CardStyle="{StaticResource KpiCardStyle4}"
+                                       ValueStyle="{StaticResource KpiValueStyle4}"
+                                       LabelStyle="{StaticResource KpiLabelStyle4}"/>
+                    <components:KpiCard Value="{Binding FemaleCount}" Label="Female" Margin="0,0,0,10"
+                                       CardStyle="{StaticResource KpiCardStyle5}"
+                                       ValueStyle="{StaticResource KpiValueStyle5}"
+                                       LabelStyle="{StaticResource KpiLabelStyle5}"/>
+                    <components:KpiCard Value="{Binding TotalSoloParents}" Label="Total Solo Parents"
+                                       CardStyle="{StaticResource KpiCardStyle6}"
+                                       ValueStyle="{StaticResource KpiValueStyle6}"
+                                       LabelStyle="{StaticResource KpiLabelStyle6}"/>
+                </StackPanel>
+
+                <!-- Right Column: Charts Grid -->
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="16"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="16"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Row 1: Area Chart (Top 10 Barangays) - Full Width -->
+                    <Border Grid.Row="0" Style="{StaticResource CardContainerStyle}" Height="250">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Top 10 Barangays" Style="{StaticResource ChartTitleStyle}" Margin="0,0,0,10"/>
+                            <components:AreaChart Grid.Row="1" x:Name="AreaChartBarangay" Data="{Binding BarangayData}"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 2: 3-Column Grid (Donut, Civil Status, Employment) -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Donut: Age Group -->
+                        <Border Grid.Column="0" Style="{StaticResource CardContainerStyle}" Height="280">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Age Group" Style="{StaticResource ChartTitleStyle}" Margin="0,0,0,10"/>
+                                <components:DonutChart Grid.Row="1" x:Name="DonutChartAge" Data="{Binding AgeGroupData}"/>
+                            </Grid>
                         </Border>
 
-                        <Border Grid.Row="2" Style="{StaticResource Card}">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
-                            </Border.Effect>
-                            <StackPanel Margin="20,18,20,18">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                    <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
-                                        <Border.Background>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                <GradientStop Color="#9B3060" Offset="0"/>
-                                                <GradientStop Color="#C4788E" Offset="1"/>
-                                            </LinearGradientBrush>
-                                        </Border.Background>
-                                    </Border>
-                                    <TextBlock Text="CIVIL STATUS" Style="{StaticResource SectionLabel}"/>
-                                </StackPanel>
-                                <ItemsControl x:Name="CivilStatusChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
-                            </StackPanel>
+                        <!-- List: Civil Status -->
+                        <Border Grid.Column="2" Style="{StaticResource CardContainerStyle}" Height="280">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Civil Status" Style="{StaticResource ChartTitleStyle}" Margin="0,0,0,10"/>
+                                <components:CivilStatusListCard Grid.Row="1" x:Name="CivilStatusListCard" Data="{Binding CivilStatusData}"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Progress Rows: Employment Status -->
+                        <Border Grid.Column="4" Style="{StaticResource CardContainerStyle}" Height="280">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Employment" Style="{StaticResource ChartTitleStyle}" Margin="0,0,0,10"/>
+                                <components:ProgressRowList Grid.Row="1" x:Name="EmploymentProgressList" Data="{Binding EmploymentStatusData}"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- Row 3: 2-Column Grid (Column Chart for Dependents, Progress for Income) -->
+                    <Grid Grid.Row="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Column Chart: Dependents Age -->
+                        <Border Grid.Column="0" Style="{StaticResource CardContainerStyle}" Height="280">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Dependents Age" Style="{StaticResource ChartTitleStyle}" Margin="0,0,0,10"/>
+                                <components:ColumnChart Grid.Row="1" x:Name="ColumnChartDependents" Data="{Binding DependentsAgeData}"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Progress Rows: Income Brackets -->
+                        <Border Grid.Column="2" Style="{StaticResource CardContainerStyle}" Height="280">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Income" Style="{StaticResource ChartTitleStyle}" Margin="0,0,0,10"/>
+                                <components:ProgressRowList Grid.Row="1" x:Name="IncomeProgressList" Data="{Binding IncomeBracketData}"/>
+                            </Grid>
                         </Border>
                     </Grid>
                 </Grid>
-
-
-                <!-- employment / income / dependants row -->
-                <Grid Margin="0,0,0,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Column="0" Style="{StaticResource Card}">
-                        <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/></Border.Effect>
-                        <StackPanel Margin="20,18,20,18">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#702943" Offset="0"/>
-                                            <GradientStop Color="#D4A0B0" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                </Border>
-                                <TextBlock Text="EMPLOYMENT STATUS" Style="{StaticResource SectionLabel}"/>
-                            </StackPanel>
-                            <ItemsControl x:Name="EmploymentChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Column="2" Style="{StaticResource Card}">
-                        <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/></Border.Effect>
-                        <StackPanel Margin="20,18,20,18">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#702943" Offset="0"/>
-                                            <GradientStop Color="#9B3060" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                </Border>
-                                <TextBlock Text="MONTHLY INCOME" Style="{StaticResource SectionLabel}"/>
-                            </StackPanel>
-                            <ItemsControl x:Name="IncomeChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
-                        </StackPanel>
-                    </Border>
-                    
-                    
-
-                    <Border Grid.Column="4" Style="{StaticResource Card}">
-                        <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/></Border.Effect>
-                        <StackPanel Margin="20,18,20,18">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#C07820" Offset="0"/>
-                                            <GradientStop Color="#E8A030" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                </Border>
-                                <TextBlock Text="DEPENDANTS AGE" Style="{StaticResource SectionLabel}"/>
-                            </StackPanel>
-                            <ItemsControl x:Name="DependantsAgeChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <!-- sectors row: LGBT / Pantawid / Indigenous -->
-                <Grid Margin="0,0,0,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- LGBT -->
-                    <Border Grid.Column="0" Style="{StaticResource Card}">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
-                        </Border.Effect>
-                        <StackPanel Margin="20,18,20,18">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#702943" Offset="0"/>
-                                            <GradientStop Color="#C4788E" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                </Border>
-                                <TextBlock Text="LGBT" Style="{StaticResource SectionLabel}"/>
-                            </StackPanel>
-                            <ItemsControl x:Name="LgbtChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Pantawid Beneficiary -->
-                    <Border Grid.Column="2" Style="{StaticResource Card}">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
-                        </Border.Effect>
-                        <StackPanel Margin="20,18,20,18">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#9B3060" Offset="0"/>
-                                            <GradientStop Color="#C4788E" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                </Border>
-                                <TextBlock Text="PANTAWID BENEFICIARY" Style="{StaticResource SectionLabel}"/>
-                            </StackPanel>
-                            <ItemsControl x:Name="PantawidChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Indigenous -->
-                    <Border Grid.Column="4" Style="{StaticResource Card}">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/>
-                        </Border.Effect>
-                        <StackPanel Margin="20,18,20,18">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#C4788E" Offset="0"/>
-                                            <GradientStop Color="#D4A0B0" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                </Border>
-                                <TextBlock Text="INDIGENOUS PERSON" Style="{StaticResource SectionLabel}"/>
-                            </StackPanel>
-                            <ItemsControl x:Name="IndigenousChart" ItemTemplate="{StaticResource StatRowTemplate}"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <!-- category -->
-                <Border Style="{StaticResource Card}" Margin="0,0,0,14">
-                    <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/></Border.Effect>
-                    <StackPanel Margin="20,18,20,18">
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                            <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                        <GradientStop Color="#702943" Offset="0"/>
-                                        <GradientStop Color="#9B3060" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                            </Border>
-                            <TextBlock Text="SOLO PARENT CATEGORY" Style="{StaticResource SectionLabel}"/>
-                            <Border Background="#F5EEF1" CornerRadius="6" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="12 circumstances" FontFamily="Segoe UI" FontSize="9"
-                                           FontWeight="SemiBold" Foreground="#702943"/>
-                            </Border>
-                        </StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="24"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <ItemsControl x:Name="CategoryChartLeft"  Grid.Column="0" ItemTemplate="{StaticResource StatRowTemplate}"/>
-                            <ItemsControl x:Name="CategoryChartRight" Grid.Column="2" ItemTemplate="{StaticResource StatRowTemplate}"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <!-- recently updated -->
-                <Border Style="{StaticResource Card}">
-                    <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="16" ShadowDepth="2" Opacity="0.08" Direction="270"/></Border.Effect>
-                    <StackPanel Margin="20,18,20,18">
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                            <Border Width="4" CornerRadius="2" Margin="0,1,10,1">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                        <GradientStop Color="#702943" Offset="0"/>
-                                        <GradientStop Color="#9B3060" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                            </Border>
-                            <TextBlock Text="RECENTLY UPDATED" Style="{StaticResource SectionLabel}"/>
-                            <Border Background="#F5EEF1" CornerRadius="6" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="click to view" FontFamily="Segoe UI" FontSize="9"
-                                           FontWeight="SemiBold" Foreground="#702943"/>
-                            </Border>
-                        </StackPanel>
-                        <ItemsControl x:Name="RecentList">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid Columns="4" HorizontalAlignment="Stretch"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Style="{StaticResource RecentItem}"
-                                            MouseLeftButtonDown="RecentRecord_Click"
-                                            Tag="{Binding SpId}">
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-                                            <!-- avatar + status -->
-                                            <Grid Grid.Row="0" Margin="0,0,0,8">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17"
-                                                        Margin="0,0,10,0">
-                                                    <Border.Background>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                            <GradientStop Color="#702943" Offset="0"/>
-                                                            <GradientStop Color="#9B3060" Offset="1"/>
-                                                        </LinearGradientBrush>
-                                                    </Border.Background>
-                                                    <TextBlock Text="{Binding Initials}" FontFamily="Segoe UI"
-                                                               FontSize="13" FontWeight="Bold" Foreground="White"
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <TextBlock Grid.Column="1" Text="{Binding SpId}" FontSize="10"
-                                                           Foreground="#AAAAAA" FontFamily="Segoe UI"
-                                                           VerticalAlignment="Center"/>
-                                                <Border Grid.Column="2" CornerRadius="5" Background="{Binding StatusBg}"
-                                                        Padding="6,2" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Status}" FontSize="9" FontWeight="Bold"
-                                                               Foreground="{Binding StatusFg}" FontFamily="Segoe UI"/>
-                                                </Border>
-                                            </Grid>
-                                            <TextBlock Grid.Row="1" Text="{Binding Name}" FontSize="12"
-                                                       FontWeight="SemiBold" Foreground="#111111"
-                                                       FontFamily="Segoe UI" TextTrimming="CharacterEllipsis" Margin="0,0,0,2"/>
-                                            <TextBlock Grid.Row="2" Text="{Binding Barangay}" FontSize="10"
-                                                       Foreground="#AAAAAA" FontFamily="Segoe UI" Margin="0,0,0,6"/>
-                                            <!-- divider -->
-                                            <Border Grid.Row="3" Height="1" Background="#F0E8EC" Margin="0,0,0,6"/>
-                                            <StackPanel Grid.Row="4" Orientation="Horizontal">
-                                                <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z"
-                                                      Fill="#D4A0B0" Stretch="Uniform" Width="9" Height="9" Margin="0,0,4,0"/>
-                                                <TextBlock Text="{Binding DateLabel}" FontSize="9"
-                                                           Foreground="#BBBBBB" FontFamily="Segoe UI"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                </Border>
-
-            </StackPanel>
+            </Grid>
         </ScrollViewer>
 
-        <components:LoadingOverlay x:Name="AnalyticsLoadingOverlay"
-                                   Grid.RowSpan="2" Grid.ColumnSpan="99"
-                                   Panel.ZIndex="9999"/>
+        <!-- Loading Overlay -->
+        <components:LoadingOverlay x:Name="AnalyticsLoadingOverlay" Grid.RowSpan="2" Panel.ZIndex="9999"/>
     </Grid>
 </Page>
-
-

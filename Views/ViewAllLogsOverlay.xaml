@@ -773,54 +773,118 @@
                                            Style="{StaticResource MetaValue}"/>
                             </Grid>
 
-                            <!-- ── What changed (UPDATE actions) ─────────────────── -->
-                            <Border Visibility="{Binding SelectedLog.HasChangeDetail,
-                                                 Converter={StaticResource BoolToVisibilityConverter}}"
-                                    Background="#FDF5F7" CornerRadius="12" Padding="20,18" Margin="0,0,0,4">
+                            <!-- ── Changes Recorded (diff table) ─────────────────── -->
+                            <Border Background="#FDF5F7" CornerRadius="12" Padding="20,16" Margin="0,0,0,4">
                                 <StackPanel>
-                                    <TextBlock Text="WHAT CHANGED"
+                                    <TextBlock Text="CHANGES RECORDED"
                                                FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
-                                               Foreground="#9B3060" Margin="0,0,0,14"/>
+                                               Foreground="#9B3060" Margin="0,0,0,12"/>
 
-                                    <Grid Margin="0,0,0,12">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="Field" Style="{StaticResource MetaLabel}"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding SelectedLog.FieldChanged}"
-                                                   FontFamily="Segoe UI" FontSize="13" FontWeight="Normal"
-                                                   Foreground="#1A1A1A" TextWrapping="Wrap"/>
-                                    </Grid>
+                                    <!-- ── Table: has changes ─── -->
+                                    <StackPanel Visibility="{Binding SelectedLog.HasChangeDetail,
+                                                             Converter={StaticResource BoolToVisibilityConverter}}">
 
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="Before" Style="{StaticResource MetaLabel}"/>
-                                        <Border Grid.Column="1" Background="#FFE8E8" CornerRadius="6" Padding="12,6">
-                                            <TextBlock Text="{Binding SelectedLog.OldValue}"
-                                                       FontFamily="Segoe UI" FontSize="13" FontWeight="Normal"
-                                                       Foreground="#DC3545" TextWrapping="Wrap"/>
-                                        </Border>
-                                    </Grid>
+                                        <!-- Column headers -->
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Field"
+                                                       FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
+                                                       Foreground="#9B3060" Padding="8,0,0,0"/>
+                                            <TextBlock Grid.Column="1" Text="Previous Value"
+                                                       FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
+                                                       Foreground="#9B3060" Padding="4,0,0,0"/>
+                                            <TextBlock Grid.Column="2" Text="New / Current Value"
+                                                       FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
+                                                       Foreground="#9B3060" Padding="4,0,0,0"/>
+                                        </Grid>
+                                        <Rectangle Height="1" Fill="#E8D4DC" Margin="0,0,0,6"/>
 
-                                    <TextBlock Text="↓" FontSize="18" Foreground="#CCCCCC"
-                                               HorizontalAlignment="Left" Margin="80,4,0,8"/>
+                                        <!-- Multi-field rows (new API format) -->
+                                        <ItemsControl ItemsSource="{Binding SelectedLog.Changes}"
+                                                      Visibility="{Binding SelectedLog.Changes.Count,
+                                                                   Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,0,0,4" MinHeight="34">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <!-- Field name -->
+                                                        <Border Grid.Column="0" Background="White"
+                                                                CornerRadius="6" Padding="8,6" Margin="0,0,3,0">
+                                                            <TextBlock Text="{Binding FieldName}"
+                                                                       FontFamily="Segoe UI" FontSize="12"
+                                                                       FontWeight="SemiBold" Foreground="#1A1A1A"
+                                                                       TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <!-- Previous value -->
+                                                        <Border Grid.Column="1" Background="#FFE8E8"
+                                                                CornerRadius="6" Padding="8,6" Margin="3,0,3,0">
+                                                            <TextBlock Text="{Binding OldValue, TargetNullValue='—', FallbackValue='—'}"
+                                                                       FontFamily="Segoe UI" FontSize="12"
+                                                                       Foreground="#DC3545" TextWrapping="Wrap"
+                                                                       VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <!-- New value -->
+                                                        <Border Grid.Column="2" Background="#E8F5E9"
+                                                                CornerRadius="6" Padding="8,6" Margin="3,0,0,0">
+                                                            <TextBlock Text="{Binding NewValue, TargetNullValue='—', FallbackValue='—'}"
+                                                                       FontFamily="Segoe UI" FontSize="12"
+                                                                       FontWeight="SemiBold" Foreground="#27AE60"
+                                                                       TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
 
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="80"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="After" Style="{StaticResource MetaLabel}"/>
-                                        <Border Grid.Column="1" Background="#E8F5E9" CornerRadius="6" Padding="12,6">
-                                            <TextBlock Text="{Binding SelectedLog.NewValue}"
-                                                       FontFamily="Segoe UI" FontSize="13" FontWeight="Normal"
-                                                       Foreground="#27AE60" TextWrapping="Wrap"/>
-                                        </Border>
-                                    </Grid>
+                                        <!-- Legacy single-field row (backward compat, shown only when Changes list is empty) -->
+                                        <Grid Visibility="{Binding SelectedLog.Changes.Count,
+                                                           Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                                              MinHeight="34">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Background="White"
+                                                    CornerRadius="6" Padding="8,6" Margin="0,0,3,0">
+                                                <TextBlock Text="{Binding SelectedLog.FieldChanged, TargetNullValue='—'}"
+                                                           FontFamily="Segoe UI" FontSize="12"
+                                                           FontWeight="SemiBold" Foreground="#1A1A1A"
+                                                           TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Column="1" Background="#FFE8E8"
+                                                    CornerRadius="6" Padding="8,6" Margin="3,0,3,0">
+                                                <TextBlock Text="{Binding SelectedLog.OldValue, TargetNullValue='—'}"
+                                                           FontFamily="Segoe UI" FontSize="12"
+                                                           Foreground="#DC3545" TextWrapping="Wrap"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Column="2" Background="#E8F5E9"
+                                                    CornerRadius="6" Padding="8,6" Margin="3,0,0,0">
+                                                <TextBlock Text="{Binding SelectedLog.NewValue, TargetNullValue='—'}"
+                                                           FontFamily="Segoe UI" FontSize="12"
+                                                           FontWeight="SemiBold" Foreground="#27AE60"
+                                                           TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </Grid>
+
+                                    </StackPanel>
+
+                                    <!-- ── Empty state: no changes recorded ─── -->
+                                    <TextBlock Visibility="{Binding SelectedLog.HasChangeDetail,
+                                                            Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                                               Text="No field modifications recorded for this log entry."
+                                               FontFamily="Segoe UI" FontSize="12" Foreground="#AAAAAA"
+                                               FontStyle="Italic" HorizontalAlignment="Center"
+                                               Margin="0,4,0,4"/>
                                 </StackPanel>
                             </Border>
 

@@ -55,6 +55,15 @@ namespace SOLUM_UI.Models
         public DateTime? CurrentTermExpiresAt { get; set; }
         public List<SOLUM_UI.Models.Api.RecordTermDto> RecordTerms { get; set; } = new List<SOLUM_UI.Models.Api.RecordTermDto>();
 
+        /// <summary>
+        /// Human-readable application type derived from <see cref="IsNewApplicant"/> and
+        /// <see cref="IsRenewal"/>. Set automatically by the entry-point flow; never
+        /// set from a UI checkbox.
+        /// </summary>
+        public string ApplicationType =>
+            IsNewApplicant ? "New Record" :
+            IsRenewal      ? "Renewed" : "—";
+
         // name
         public string Name          { get; set; }
         public string Surname       { get; set; }

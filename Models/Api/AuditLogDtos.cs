@@ -15,14 +15,26 @@ namespace SOLUM_UI.Models.Api
         public DateTimeOffset  Timestamp   { get; set; }
     }
 
+    /// <summary>
+    /// A single field-level change as returned by the API in metadata.changes[].
+    /// </summary>
+    public class ChangeItemDto
+    {
+        public string FieldName { get; set; }
+        public string OldValue  { get; set; }
+        public string NewValue  { get; set; }
+    }
+
     public class AuditLogMetadata
     {
         public string IpAddress    { get; set; }
         public string Status       { get; set; }
-        // Field-level change data (for UPDATE actions)
+        // Legacy single-field change data (kept for backward compatibility)
         public string FieldChanged { get; set; }
         public string OldValue     { get; set; }
         public string NewValue     { get; set; }
+        // Multi-field change list returned by the API for UPDATE actions
+        public List<ChangeItemDto> Changes { get; set; } = new List<ChangeItemDto>();
     }
 
     public class AuditLogActor

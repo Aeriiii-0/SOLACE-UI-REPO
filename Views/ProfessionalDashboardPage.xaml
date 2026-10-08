@@ -1,0 +1,297 @@
+<Page x:Class="SOLUM_UI.ProfessionalDashboardPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Professional Dashboard"
+      Background="#F5F0F2">
+
+    <Page.Resources>
+        <!-- Color Palette -->
+        <SolidColorBrush x:Key="BurgundyColor">#702943</SolidColorBrush>
+        <SolidColorBrush x:Key="PinkColor">#C8556D</SolidColorBrush>
+        <SolidColorBrush x:Key="LightPinkColor">#E8D0D8</SolidColorBrush>
+        <SolidColorBrush x:Key="CardBackground">White</SolidColorBrush>
+
+        <!-- Card Title Style -->
+        <Style x:Key="CardTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Card Subtitle Style -->
+        <Style x:Key="CardSubtitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#999999"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <!-- Card Style -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="1" Opacity="0.08"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Button Style -->
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#702943"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.88"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="#F5F0F2">
+        <StackPanel Margin="24,24,24,36">
+            <!-- Page Title -->
+            <TextBlock Text="Professional Analytics Dashboard" FontSize="28" FontWeight="Bold" 
+                       Foreground="#702943" Margin="0,0,0,28" FontFamily="Segoe UI"/>
+
+            <!-- Top Row: 3x1 Grid -->
+            <Grid Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Card 1: Age Breakdown (Column Chart) -->
+                <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Solo Parents Served" Style="{StaticResource CardTitleStyle}"/>
+                        <TextBlock Text="Age Breakdown" Style="{StaticResource CardSubtitleStyle}"/>
+                        <!-- Placeholder for column chart -->
+                        <Rectangle Fill="#E8D0D8" Height="240" CornerRadius="8" Margin="0,0,0,12"/>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                <TextBlock Text="0" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="19 & Below" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <TextBlock Text="118" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="20-39" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                <TextBlock Text="287" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="40-59" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                                <TextBlock Text="20" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="60+" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Card 2: Civil Status Distribution (Pie Chart) -->
+                <Border Grid.Column="2" Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Civil Status Distribution" Style="{StaticResource CardTitleStyle}"/>
+                        <TextBlock Text="Breakdown of marital status" Style="{StaticResource CardSubtitleStyle}"/>
+                        <!-- Placeholder for pie chart -->
+                        <Rectangle Fill="#E8D0D8" Height="240" CornerRadius="8" Margin="0,0,0,12"/>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                <Ellipse Width="12" Height="12" Fill="#702943" Margin="0,0,0,6" HorizontalAlignment="Center"/>
+                                <TextBlock Text="175" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Single" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <Ellipse Width="12" Height="12" Fill="#C8556D" Margin="0,0,0,6" HorizontalAlignment="Center"/>
+                                <TextBlock Text="105" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Married" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                <Ellipse Width="12" Height="12" Fill="#E8A0B0" Margin="0,0,0,6" HorizontalAlignment="Center"/>
+                                <TextBlock Text="137" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Widowed" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                                <Ellipse Width="12" Height="12" Fill="#F0D0D8" Margin="0,0,0,6" HorizontalAlignment="Center"/>
+                                <TextBlock Text="8" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Separated" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Card 3: Yearly Applications (Line Chart) -->
+                <Border Grid.Column="4" Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Yearly Applications" Style="{StaticResource CardTitleStyle}"/>
+                        <TextBlock Text="2021-2025 trend" Style="{StaticResource CardSubtitleStyle}"/>
+                        <!-- Placeholder for line chart -->
+                        <Rectangle Fill="#E8D0D8" Height="240" CornerRadius="8" Margin="0,0,0,12"/>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                <TextBlock Text="220" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="2021" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <TextBlock Text="280" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="2022" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                <TextBlock Text="310" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="2023" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                                <TextBlock Text="290" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="2024" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" HorizontalAlignment="Center">
+                                <TextBlock Text="325" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="2025" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Middle Row: 3x1 Grid -->
+            <Grid Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Card 4: Top Categories (Column Chart) -->
+                <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Top Solo Parent Categories" Style="{StaticResource CardTitleStyle}" Margin="0"/>
+                            <Button Grid.Column="1" Content="Filter by Category" Style="{StaticResource ActionButtonStyle}"/>
+                        </Grid>
+                        <!-- Placeholder for column chart -->
+                        <Rectangle Fill="#E8D0D8" Height="240" CornerRadius="8"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Card 5: Children/Dependents (Column Chart) -->
+                <Border Grid.Column="2" Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="No. of Children/Dependents" Style="{StaticResource CardTitleStyle}"/>
+                        <TextBlock Text="Distribution by age group" Style="{StaticResource CardSubtitleStyle}"/>
+                        <!-- Placeholder for column chart -->
+                        <Rectangle Fill="#E8D0D8" Height="240" CornerRadius="8" Margin="0,0,0,12"/>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                <TextBlock Text="78" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="6 & Below" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <TextBlock Text="630" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="7-22" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                <TextBlock Text="71" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="22+" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Card 6: Solo Parents by Sex (Line-Area Chart) -->
+                <Border Grid.Column="4" Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Solo Parents by Sex (2025)" Style="{StaticResource CardTitleStyle}"/>
+                        <TextBlock Text="Female vs Male distribution" Style="{StaticResource CardSubtitleStyle}"/>
+                        <!-- Placeholder for line-area chart -->
+                        <Rectangle Fill="#E8D0D8" Height="240" CornerRadius="8" Margin="0,0,0,12"/>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                <Ellipse Width="10" Height="10" Fill="#702943" Margin="0,0,0,6" HorizontalAlignment="Center"/>
+                                <TextBlock Text="380" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Female" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <Ellipse Width="10" Height="10" Fill="#C8556D" Margin="0,0,0,6" HorizontalAlignment="Center"/>
+                                <TextBlock Text="45" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Male" FontSize="10" Foreground="#999999" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Bottom Row: Full Width Card -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Monthly Income vs. Employment" Style="{StaticResource CardTitleStyle}" Margin="0"/>
+                        <Button Grid.Column="1" Content="Add New Entry" Style="{StaticResource ActionButtonStyle}"/>
+                    </Grid>
+                    <!-- Placeholder for grouped column chart -->
+                    <Rectangle Fill="#E8D0D8" Height="300" CornerRadius="8"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

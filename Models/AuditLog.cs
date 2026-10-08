@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace SOLUM_UI.Models
 {
@@ -33,10 +34,17 @@ namespace SOLUM_UI.Models
         public string      Status          { get; set; }
         public string      TargetType      { get; set; }
 
+        /// <summary>
+        /// Collection of detailed field-level changes for this audit entry.
+        /// Used when multiple fields are modified in a single update.
+        /// </summary>
+        public List<ChangeDetail> Changes { get; set; } = new List<ChangeDetail>();
+
         public bool HasChangeDetail =>
             !string.IsNullOrWhiteSpace(FieldChanged) ||
             !string.IsNullOrWhiteSpace(OldValue)     ||
-            !string.IsNullOrWhiteSpace(NewValue);
+            !string.IsNullOrWhiteSpace(NewValue)     ||
+            Changes.Count > 0;
 
         public string ActionTitle
         {

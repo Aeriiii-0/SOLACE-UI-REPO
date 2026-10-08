@@ -57,6 +57,33 @@ namespace SOLUM_UI.Services
             Log(AuditAction.Update, desc, by, role, recordId, recordName, field, oldVal, newVal);
         }
 
+        /// <summary>
+        /// Log an update with multiple field-level changes tracked in detail.
+        /// </summary>
+        public void LogUpdateWithChanges(string recordId, string recordName, string by, string role = "",
+            List<ChangeDetail> changes = null)
+        {
+            var changeCount = changes?.Count ?? 0;
+            string desc = changeCount == 0
+                ? $"Updated record: {recordName} [{recordId}]"
+                : $"Updated record: {recordName} [{recordId}] — {changeCount} field(s) changed";
+
+            var log = new AuditLog
+            {
+                Id              = _nextId++,
+                Action          = AuditAction.Update,
+                Description     = desc,
+                PerformedBy     = by,
+                PerformedByRole = role,
+                RecordId        = recordId,
+                RecordName      = recordName,
+                Timestamp       = DateTime.Now,
+                Changes         = changes ?? new List<ChangeDetail>()
+            };
+
+            Logs.Insert(0, log);
+        }
+
         public void LogDelete(string recordId, string recordName, string by, string role = "")
             => Log(AuditAction.Delete,
                    $"Deleted record: {recordName} [{recordId}]",

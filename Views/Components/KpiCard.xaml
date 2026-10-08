@@ -1,0 +1,22 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.KpiCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="140"
+             Height="Auto">
+
+    <Border x:Name="CardBorder" 
+            Style="{StaticResource KpiCardStyle}" 
+            Height="120"
+            Cursor="Hand">
+        <StackPanel VerticalAlignment="Center">
+            <TextBlock x:Name="ValueTextBlock" 
+                       Text="0" 
+                       Style="{StaticResource KpiValueTextStyle}"/>
+            <TextBlock x:Name="LabelTextBlock" 
+                       Text="Label" 
+                       Style="{StaticResource KpiLabelTextStyle}"
+                       TextWrapping="Wrap"
+                       Margin="0,4,0,0"/>
+        </StackPanel>
+    </Border>
+</UserControl>

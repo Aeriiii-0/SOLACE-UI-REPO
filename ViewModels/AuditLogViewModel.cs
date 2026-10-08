@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -346,6 +347,15 @@ namespace SOLUM_UI.ViewModels
                 FieldChanged    = dto.Metadata?.FieldChanged ?? string.Empty,
                 OldValue        = dto.Metadata?.OldValue     ?? string.Empty,
                 NewValue        = dto.Metadata?.NewValue     ?? string.Empty,
+                // Map the multi-field changes list from the API (for UPDATE actions)
+                Changes         = dto.Metadata?.Changes != null && dto.Metadata.Changes.Count > 0
+                    ? dto.Metadata.Changes
+                          .Select(c => new ChangeDetail(
+                              c.FieldName ?? string.Empty,
+                              c.OldValue,
+                              c.NewValue))
+                          .ToList()
+                    : new List<ChangeDetail>(),
             };
         }
 

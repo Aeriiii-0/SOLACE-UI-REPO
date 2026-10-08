@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -299,6 +300,14 @@ namespace SOLUM_UI.ViewModels
                 FieldChanged    = dto.Metadata?.FieldChanged ?? string.Empty,
                 OldValue        = dto.Metadata?.OldValue     ?? string.Empty,
                 NewValue        = dto.Metadata?.NewValue     ?? string.Empty,
+                Changes         = dto.Metadata?.Changes != null && dto.Metadata.Changes.Count > 0
+                    ? dto.Metadata.Changes
+                          .Select(c => new ChangeDetail(
+                              c.FieldName ?? string.Empty,
+                              c.OldValue,
+                              c.NewValue))
+                          .ToList()
+                    : new List<ChangeDetail>(),
             };
         }
 

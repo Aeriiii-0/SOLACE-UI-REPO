@@ -999,6 +999,17 @@ namespace SOLUM_UI
             }
         }
 
+        private void ToUpperBox(TextBox tb)
+        {
+            if (tb == null) return;
+            if (tb.Text != tb.Text.ToUpper())
+            {
+                int caret = tb.SelectionStart;
+                tb.Text = tb.Text.ToUpper();
+                tb.SelectionStart = Math.Min(caret + 1, tb.Text.Length);
+            }
+        }
+
         private void Phone_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Back && sender is TextBox tb)
@@ -1059,24 +1070,28 @@ namespace SOLUM_UI
 
         private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)
         {
+            ToUpperBox(TxtLastName);
             ClearFieldError(TxtLastName, ErrLastName);
             MarkBadgeEdited(Badge_LastName, TxtConf_LastName);
         }
 
         private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)
         {
+            ToUpperBox(TxtFirstName);
             ClearFieldError(TxtFirstName, ErrFirstName);
             MarkBadgeEdited(Badge_FirstName, TxtConf_FirstName);
         }
 
         private void TxtBarangay_TextChanged(object sender, TextChangedEventArgs e)
         {
+            ToUpperBox(TxtBarangay);
             ClearFieldError(TxtBarangay, ErrBarangay);
             MarkBadgeEdited(Badge_Barangay, TxtConf_Barangay);
         }
 
         private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)
         {
+            ToUpperBox(TxtAddress);
             ClearFieldError(TxtAddress, ErrAddress);
             MarkBadgeEdited(Badge_Address, TxtConf_Address);
         }
@@ -1096,9 +1111,20 @@ namespace SOLUM_UI
 
         private void TxtPlaceOfBirth_TextChanged(object sender, TextChangedEventArgs e)
         {
+            ToUpperBox(TxtPlaceOfBirth);
             ClearFieldError(TxtPlaceOfBirth, ErrPlaceOfBirth);
             MarkBadgeEdited(Badge_Birthplace, TxtConf_Birthplace);
         }
+
+        private void TxtMiddleName_TextChanged(object sender, TextChangedEventArgs e)  { ToUpperBox(TxtMiddleName); MarkBadgeEdited(Badge_MiddleName, TxtConf_MiddleName); }
+        private void TxtExtension_TextChanged(object sender, TextChangedEventArgs e)    { ToUpperBox(TxtExtension); }
+        private void TxtPhilSys_TextChanged(object sender, TextChangedEventArgs e)      { ToUpperBox(TxtPhilSys); }
+        private void TxtReligion_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtReligion); }
+        private void TxtOccupation_TextChanged(object sender, TextChangedEventArgs e)   { ToUpperBox(TxtOccupation); }
+        private void TxtEmergencyContact_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyContact); MarkBadgeEdited(Badge_EmergencyContact, TxtConf_EmergencyContact); }
+        private void TxtEmergencyAddress_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyAddress); }
+        private void TxtA2Cause_TextChanged(object sender, TextChangedEventArgs e)      { ToUpperBox(TxtA2Cause); }
+        private void TxtA4Disability_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtA4Disability); }
 
         private void CmbSex_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -1347,8 +1373,10 @@ namespace SOLUM_UI
                 Status        = GetComboValue(CmbStatus),
                 LastUpdated   = DateTime.Now,
 
-                IsNewApplicant      = ChkNewApplicant.IsChecked == true,
-                IsRenewal           = ChkRenewal.IsChecked == true,
+                // ApplicationType is determined by entry-point flow, not a checkbox.
+                // OcrScanDialog is always the Add New Record flow.
+                IsNewApplicant      = true,
+                IsRenewal           = false,
                 DateOfApplication   = DpDateOfApplication.SelectedDate ?? DateTime.Today,
 
                 EducationalAttainment = GetComboValue(CmbEducation),

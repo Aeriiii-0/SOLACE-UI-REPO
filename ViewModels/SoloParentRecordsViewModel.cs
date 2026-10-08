@@ -467,8 +467,12 @@ namespace SOLUM_UI.ViewModels
             }
 
             ToastNotification.Show("Record Updated", editedRecord.Name + " was updated.", ToastType.Info);
-            _auditLog.LogUpdate(editedRecord.Id, editedRecord.Name, GetCurrentUser(), CurrentUserRole,
-                BuildDiff(rawRecord, editedRecord));
+            
+            // Track all field-level changes for detailed audit trail
+            var changeService = new ChangeTrackingService();
+            var changes = changeService.DetectChanges(rawRecord, editedRecord);
+            
+            _auditLog.LogUpdateWithChanges(editedRecord.Id, editedRecord.Name, GetCurrentUser(), CurrentUserRole, changes);
             await LoadRecordsAsync();
         }
 
@@ -501,8 +505,20 @@ namespace SOLUM_UI.ViewModels
 
             string newExpiry = DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
             ToastNotification.Show("Record Renewed", original.Name + " — valid until " + newExpiry + ".", ToastType.Success);
-            _auditLog.LogUpdate(original.Id, original.Name, GetCurrentUser(), CurrentUserRole,
-                "Record renewed. Valid until " + newExpiry + ".");
+            
+            // Track changes made during renewal
+            var changeService = new ChangeTrackingService();
+            var changes = changeService.DetectChanges(original, updated);
+            if (changes.Count > 0)
+            {
+                _auditLog.LogUpdateWithChanges(original.Id, original.Name, GetCurrentUser(), CurrentUserRole, changes);
+            }
+            else
+            {
+                _auditLog.LogUpdate(original.Id, original.Name, GetCurrentUser(), CurrentUserRole,
+                    "Record renewed. Valid until " + newExpiry + ".");
+            }
+            
             await LoadRecordsAsync();
         }
 
@@ -659,34 +675,6 @@ namespace SOLUM_UI.ViewModels
         // ── Utilities ─────────────────────────────────────────────────────────
         private string GetCurrentUser() =>
             !string.IsNullOrEmpty(CurrentUserName) ? CurrentUserName : "Admin";
-
-        private static string BuildDiff(SoloParentRecord before, SoloParentRecord after)
-        {
-            var changes = new List<string>();
-            void Check(string label, string a, string b)
-            {
-                if (!string.Equals(a ?? "", b ?? "", StringComparison.Ordinal))
-                    changes.Add(label + ": \"" + (a ?? "") + "\" => \"" + (b ?? "") + "\"");
-            }
-            Check("Last Name",    before.Surname,               after.Surname);
-            Check("First Name",   before.FirstName,             after.FirstName);
-            Check("Middle Name",  before.MiddleName,            after.MiddleName);
-            Check("Extension",    before.ExtensionName,         after.ExtensionName);
-            Check("Sex",          before.Sex,                   after.Sex);
-            Check("Civil Status", before.CivilStatus,           after.CivilStatus);
-            Check("Birthplace",   before.PlaceOfBirth,          after.PlaceOfBirth);
-            Check("Address",      before.Address,               after.Address);
-            Check("Barangay",     before.Barangay,              after.Barangay);
-            Check("Contact",      before.ContactNumber,         after.ContactNumber);
-            Check("Status",       before.Status,                after.Status);
-            Check("Education",    before.EducationalAttainment, after.EducationalAttainment);
-            Check("Occupation",   before.Occupation,            after.Occupation);
-            Check("Religion",     before.Religion,              after.Religion);
-            if (before.DateOfBirth != after.DateOfBirth)
-                changes.Add("Date of Birth: \"" + before.DateOfBirth.ToString("yyyy-MM-dd") +
-                            "\" => \"" + after.DateOfBirth.ToString("yyyy-MM-dd") + "\"");
-            return string.Join("; ", changes);
-        }
     }
 
     // ── Argument DTOs for events ─────────────────────────────────────────────

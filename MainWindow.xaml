@@ -249,37 +249,6 @@
                     </Grid>
                 </Border>
 
-                <!-- Sidebar toggle button — sits outside the sidebar so it's visible when collapsed -->
-                <Button x:Name="BtnToggleSidebar"
-                        Width="18" Height="44"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        Margin="92,16,0,0"
-                        BorderThickness="0"
-                        Background="#F0E4E4"
-                        Cursor="Hand"
-                        ToolTip="Toggle sidebar"
-                        Click="BtnToggleSidebar_Click"
-                        Panel.ZIndex="10">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bg" Background="{TemplateBinding Background}"
-                                    CornerRadius="0,6,6,0">
-                                <Path x:Name="Arrow"
-                                      Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
-                                      Fill="#702943" Stretch="Uniform"
-                                      Width="10" Height="10"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#E0C8CE"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-
                 <!-- Content area -->
                 <Grid x:Name="ContentArea" Margin="112,0,20,20">
                     <Grid.RowDefinitions>

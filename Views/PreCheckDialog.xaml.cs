@@ -55,17 +55,31 @@ namespace SOLUM_UI
 
         private void Name_TextChanged(object sender, TextChangedEventArgs e)
         {
+            var tb = sender as TextBox;
+            ToUpperBox(tb);
             _foundRecord = null;
             HideBanner();
-            ClearNameError(sender as TextBox);
+            ClearNameError(tb);
         }
 
         private void PhilSys_TextChanged(object sender, TextChangedEventArgs e)
         {
+            ToUpperBox(TxtPhilSys);
             _foundRecord = null;
             HideBanner();
             if (ErrPhilSys != null) ErrPhilSys.Visibility = Visibility.Collapsed;
             if (TxtPhilSys != null) { TxtPhilSys.BorderBrush = DefaultBrush; TxtPhilSys.BorderThickness = new Thickness(1.2); }
+        }
+
+        private void ToUpperBox(TextBox tb)
+        {
+            if (tb == null) return;
+            if (tb.Text != tb.Text.ToUpper())
+            {
+                int caret = tb.SelectionStart;
+                tb.Text = tb.Text.ToUpper();
+                tb.SelectionStart = Math.Min(caret + 1, tb.Text.Length);
+            }
         }
 
         private void Birthdate_Changed(object sender, SelectionChangedEventArgs e)

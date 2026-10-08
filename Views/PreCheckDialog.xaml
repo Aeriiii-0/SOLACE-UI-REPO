@@ -70,19 +70,20 @@
                                                Foreground="#111111" Background="Transparent"
                                                BorderThickness="0" Padding="12,0"
                                                VerticalAlignment="Center" FontSize="14"/>
-                            <Button x:Name="PART_Button" Grid.Column="1"
+                            <ToggleButton x:Name="PART_Button" Grid.Column="1"
                                     HorizontalAlignment="Center" VerticalAlignment="Center"
                                     Width="20" Height="20"
                                     Background="Transparent" BorderThickness="0"
-                                    Cursor="Hand" Focusable="False">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
+                                    Cursor="Hand" Focusable="False"
+                                    IsChecked="{Binding IsOpen, ElementName=PART_Popup, Mode=TwoWay}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
                                         <Path Data="M19,3H18V1H16V3H8V1H6V3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z"
                                               Fill="#702943" Stretch="Uniform" Width="16" Height="16"
                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </ControlTemplate>
-                                </Button.Template>
-                            </Button>
+                                </ToggleButton.Template>
+                            </ToggleButton>
                             <Popup x:Name="PART_Popup" Grid.Column="0" AllowsTransparency="True"
                                    Placement="Bottom" StaysOpen="False">
                                 <Border Background="White" CornerRadius="12" BorderBrush="#E0E0E0"
@@ -311,7 +312,8 @@
                                 <StackPanel Grid.Column="4">
                                     <TextBlock Text="Middle Name" Style="{StaticResource FieldLabel}"/>
                                     <TextBox x:Name="TxtMiddleName" Style="{StaticResource FormBox}"
-                                             PreviewTextInput="NameOnly_PreviewTextInput"/>
+                                             PreviewTextInput="NameOnly_PreviewTextInput"
+                                             TextChanged="Name_TextChanged"/>
                                 </StackPanel>
                             </Grid>
 

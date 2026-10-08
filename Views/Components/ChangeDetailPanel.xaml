@@ -1,0 +1,62 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.ChangeDetailPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:SOLUM_UI.Converters">
+
+    <UserControl.Resources>
+        <!-- Label style for field names -->
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#888888"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <!-- Field name -->
+        <Grid Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Field" Style="{StaticResource FieldLabel}"/>
+            <TextBlock Grid.Column="1" Text="{Binding FieldName}"
+                       FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
+                       Foreground="#1A1A1A" VerticalAlignment="Center" TextWrapping="Wrap"/>
+        </Grid>
+
+        <!-- Before value -->
+        <Grid Margin="0,0,0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Before" Style="{StaticResource FieldLabel}"/>
+            <Border Grid.Column="1" Background="#FFE8E8" CornerRadius="6" Padding="12,6" MinHeight="32">
+                <TextBlock Text="{Binding OldValue, TargetNullValue='-'}"
+                           FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold"
+                           Foreground="#DC3545" TextWrapping="Wrap" VerticalAlignment="Center"/>
+            </Border>
+        </Grid>
+
+        <!-- Arrow -->
+        <TextBlock Text="&#x2192;" FontSize="14" Foreground="#C0A0AA"
+                   HorizontalAlignment="Left" Margin="80,0,0,6"/>
+
+        <!-- After value -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="After" Style="{StaticResource FieldLabel}"/>
+            <Border Grid.Column="1" Background="#E8F5E9" CornerRadius="6" Padding="12,6" MinHeight="32">
+                <TextBlock Text="{Binding NewValue, TargetNullValue='-'}"
+                           FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold"
+                           Foreground="#27AE60" TextWrapping="Wrap" VerticalAlignment="Center"/>
+            </Border>
+        </Grid>
+    </StackPanel>
+
+</UserControl>

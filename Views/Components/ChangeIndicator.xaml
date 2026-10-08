@@ -1,0 +1,17 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.ChangeIndicator"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:SOLUM_UI.Converters">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Border Background="#F0E8EC" CornerRadius="6" Padding="10,4"
+            Visibility="{Binding HasChangeDetail, Converter={StaticResource BoolToVisibilityConverter}}">
+        <TextBlock Text="Has Changes"
+                   FontFamily="Segoe UI" FontSize="10"
+                   FontWeight="SemiBold" Foreground="#702943"/>
+    </Border>
+
+</UserControl>

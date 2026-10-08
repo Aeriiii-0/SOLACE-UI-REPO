@@ -250,17 +250,49 @@ namespace SOLUM_UI.Services.Api
             bool isActive = dto.IsActive;
             DateTime validUntil = dto.CurrentTermExpiresAt ?? DateTime.MinValue;
 
+            // Derive application-type flags and latest-activity date from RecordTerms.
+            // The API never returns IsNewApplicant / IsRenewal directly; RecordTermDto.Type
+            // ("New" or "Renewal") is the only authoritative source for these values.
+            bool   isNewApplicant  = false;
+            bool   isRenewal       = false;
+            DateTime lastTermStart = DateTime.MinValue;   // best proxy for "last updated"
+
             if (dto.RecordTerms != null && dto.RecordTerms.Count > 0)
             {
                 foreach (var rt in dto.RecordTerms)
                 {
+                    // Validity window
                     if (DateTime.TryParse(rt.ExpiresAt, out var exp))
                     {
                         if (exp > validUntil) validUntil = exp;
                         if (exp >= DateTime.Today && !dto.IsDeleted) isActive = true;
                     }
+
+                    // Track start date so we can pick the most-recent term
+                    DateTime termStart = rt.DateCreated ?? DateTime.MinValue;
+                    if (!DateTime.TryParse(rt.StartsAt, out var startParsed))
+                        startParsed = DateTime.MinValue;
+                    if (startParsed > termStart) termStart = startParsed;
+
+                    if (termStart >= lastTermStart)
+                    {
+                        // Most-recent (or equal) term — use its Type to classify the record
+                        lastTermStart = termStart;
+                        string termType = rt.Type ?? string.Empty;
+                        isRenewal      = termType.Equals("Renewal", StringComparison.OrdinalIgnoreCase);
+                        isNewApplicant = termType.Equals("New",     StringComparison.OrdinalIgnoreCase);
+                    }
                 }
             }
+
+            // Fall back: if no terms came back, treat every record as a new applicant so
+            // ApplicationType shows "New Record" instead of the empty "—" sentinel.
+            if (!isNewApplicant && !isRenewal)
+                isNewApplicant = true;
+
+            // LastUpdated: prefer the most-recent term's start date over DateCreated because
+            // DateCreated never changes after the initial insert.
+            DateTime lastUpdated = lastTermStart != DateTime.MinValue ? lastTermStart : dto.DateCreated;
 
             string computedStatus = "Inactive";
             if (!string.IsNullOrWhiteSpace(dto.Status))
@@ -276,9 +308,11 @@ namespace SOLUM_UI.Services.Api
             {
                 Id = dto.Id.ToString(),
                 CreatedBy = "Admin",
-                LastUpdated = dto.DateCreated,
+                LastUpdated = lastUpdated,
                 Status = computedStatus,
                 DateOfApplication = dto.DateCreated,
+                IsNewApplicant = isNewApplicant,
+                IsRenewal      = isRenewal,
                 CurrentTermExpiresAt = dto.CurrentTermExpiresAt ?? (validUntil != DateTime.MinValue ? (DateTime?)validUntil : null),
                 RecordTerms = dto.RecordTerms ?? new List<RecordTermDto>(),
 

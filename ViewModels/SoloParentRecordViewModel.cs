@@ -35,15 +35,19 @@ namespace SOLUM_UI.ViewModels
         public string Status => _model.Status;
         public string LastUpdatedFormatted => _model.LastUpdatedFormatted;
         public string DateOfBirthFormatted => _model.DateOfBirthFormatted;
-        public string ValidUntilFormatted  =>
-            _model.LastUpdated != System.DateTime.MinValue
-                ? _model.LastUpdated.AddYears(1).ToString("yyyy-MM-dd")
-                : "—";
+        public string ValidUntilFormatted =>
+            _model.CurrentTermExpiresAt.HasValue
+                ? _model.CurrentTermExpiresAt.Value.ToString("yyyy-MM-dd")
+                : _model.LastUpdated != System.DateTime.MinValue
+                    ? _model.LastUpdated.AddYears(1).ToString("yyyy-MM-dd")
+                    : "—";
 
-        /// <summary>True when the record's 1-year validity window has passed.</summary>
+        /// <summary>True when the record's validity window has passed.</summary>
         public bool IsExpired =>
-            _model.LastUpdated != System.DateTime.MinValue &&
-            _model.LastUpdated.AddYears(1).Date < System.DateTime.Today;
+            _model.CurrentTermExpiresAt.HasValue
+                ? _model.CurrentTermExpiresAt.Value.Date < System.DateTime.Today
+                : _model.LastUpdated != System.DateTime.MinValue &&
+                  _model.LastUpdated.AddYears(1).Date < System.DateTime.Today;
 
         public SoloParentRecord RawModel => _model;
 

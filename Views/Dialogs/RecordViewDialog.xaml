@@ -205,6 +205,20 @@
                             </Border>
                         </Grid>
 
+                        <!-- ── Notification card overlay – floats at bottom-right ── -->
+                        <!-- Bound to VM: IsNotificationVisible, NotificationTitle,   -->
+                        <!-- NotificationMessage, IsNotificationSuccess.              -->
+                        <components:NotificationCardComponent
+                            Grid.Row="0" Grid.RowSpan="3"
+                            Panel.ZIndex="100"
+                            VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                            Margin="0,0,16,16"
+                            Title="{Binding NotificationTitle}"
+                            Message="{Binding NotificationMessage}"
+                            IsSuccess="{Binding IsNotificationSuccess}"
+                            Visibility="{Binding IsNotificationVisible,
+                                Converter={StaticResource BoolToVisibilityConverter}}"/>
+
                     </Grid>
                 </Border>
 

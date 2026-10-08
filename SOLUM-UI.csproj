@@ -181,8 +181,35 @@
     <Compile Include="Views\Components\LoadingOverlay.xaml.cs">
       <DependentUpon>LoadingOverlay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Components\NotificationCardComponent.xaml.cs">
+      <DependentUpon>NotificationCardComponent.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Components\RecordActionToolbar.xaml.cs">
       <DependentUpon>RecordActionToolbar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\ChangeDetailPanel.xaml.cs">
+      <DependentUpon>ChangeDetailPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\ChangeIndicator.xaml.cs">
+      <DependentUpon>ChangeIndicator.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\KpiCard.xaml.cs">
+      <DependentUpon>KpiCard.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\DonutChart.xaml.cs">
+      <DependentUpon>DonutChart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\AreaChart.xaml.cs">
+      <DependentUpon>AreaChart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\ProgressRowList.xaml.cs">
+      <DependentUpon>ProgressRowList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\ColumnChart.xaml.cs">
+      <DependentUpon>ColumnChart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\CivilStatusListCard.xaml.cs">
+      <DependentUpon>CivilStatusListCard.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\AnalyticsPage.xaml.cs">
       <DependentUpon>AnalyticsPage.xaml</DependentUpon>
@@ -250,6 +277,7 @@
     </Compile>
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Models\AuditLog.cs" />
+    <Compile Include="Models\ChangeDetail.cs" />
     <Compile Include="Models\EmergencyContact.cs" />
     <Compile Include="Models\HouseholdMember.cs" />
     <Compile Include="Models\OcrModels.cs" />
@@ -267,8 +295,10 @@
     <Compile Include="Services\AnalyticsExportService.cs" />
     <Compile Include="Services\SoloParentExportService.cs" />
     <Compile Include="Services\AuditLogService.cs" />
+    <Compile Include="Services\ChangeTrackingService.cs" />
     <Compile Include="Services\OcrService.cs" />
     <Compile Include="Services\WiaScannerService.cs" />
+    <Compile Include="ViewModels\AnalyticsViewModel.cs" />
     <Compile Include="ViewModels\AuditLogViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />
     <Compile Include="ViewModels\SoloParentRecordViewModel.cs" />
@@ -277,7 +307,43 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Components\NotificationCardComponent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Components\RecordActionToolbar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\ChangeDetailPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\ChangeIndicator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\KpiCard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\DonutChart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\AreaChart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\ProgressRowList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\ColumnChart.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\CivilStatusListCard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -368,6 +434,10 @@
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\AnalyticsTheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>

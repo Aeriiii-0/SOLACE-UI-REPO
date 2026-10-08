@@ -12,6 +12,9 @@ namespace SOLUM_UI.Converters
         {
             if (value is bool b)
                 return b ? Visibility.Visible : Visibility.Collapsed;
+            // Support int (e.g. Collection.Count) — treat > 0 as true
+            if (value is int i)
+                return i > 0 ? Visibility.Visible : Visibility.Collapsed;
             return Visibility.Collapsed;
         }
 
@@ -30,6 +33,9 @@ namespace SOLUM_UI.Converters
         {
             if (value is bool b)
                 return b ? Visibility.Collapsed : Visibility.Visible;
+            // Support int (e.g. Collection.Count) — treat > 0 as true (so Collapsed)
+            if (value is int i)
+                return i > 0 ? Visibility.Collapsed : Visibility.Visible;
             return Visibility.Visible;
         }
 

@@ -587,8 +587,9 @@ namespace SOLUM_UI
                 }
 
                 ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
-                AuditLogService.Instance.LogUpdate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole,
-                    BuildDiff(rawRecord, dialog.Result));
+                var changeList = BuildChangeList(rawRecord, dialog.Result);
+                AuditLogService.Instance.LogUpdateWithChanges(dialog.Result.Id, dialog.Result.Name,
+                    GetCurrentUser(), CurrentUserRole, changeList);
                 await LoadRecordsAsync();
             }
         }
@@ -799,32 +800,51 @@ namespace SOLUM_UI
 
         private string GetCurrentUser() => !string.IsNullOrEmpty(CurrentUserName) ? CurrentUserName : "Admin";
 
-        /// <summary>Compares two records field-by-field and returns a comma-separated summary of changed fields.</summary>
-        private static string BuildDiff(SOLUM_UI.Models.SoloParentRecord before, SOLUM_UI.Models.SoloParentRecord after)
+        /// <summary>
+        /// Compares two records field-by-field and returns a structured list of
+        /// <see cref="SOLUM_UI.Models.ChangeDetail"/> entries — one per changed field.
+        /// </summary>
+        private static List<SOLUM_UI.Models.ChangeDetail> BuildChangeList(
+            SOLUM_UI.Models.SoloParentRecord before,
+            SOLUM_UI.Models.SoloParentRecord after)
         {
-            var changes = new System.Collections.Generic.List<string>();
+            var changes = new List<SOLUM_UI.Models.ChangeDetail>();
+
             void Check(string label, string a, string b)
             {
-                if (!string.Equals(a ?? "", b ?? "", StringComparison.Ordinal))
-                    changes.Add(label + ": \"" + (a ?? "") + "\" → \"" + (b ?? "") + "\"");
+                string oldVal = a ?? string.Empty;
+                string newVal = b ?? string.Empty;
+                if (!string.Equals(oldVal, newVal, StringComparison.Ordinal))
+                    changes.Add(new SOLUM_UI.Models.ChangeDetail(label, oldVal, newVal));
             }
-            Check("Last Name",    before.Surname,       after.Surname);
-            Check("First Name",   before.FirstName,     after.FirstName);
-            Check("Middle Name",  before.MiddleName,    after.MiddleName);
-            Check("Extension",    before.ExtensionName, after.ExtensionName);
-            Check("Sex",          before.Sex,           after.Sex);
-            Check("Civil Status", before.CivilStatus,   after.CivilStatus);
-            Check("Birthplace",   before.PlaceOfBirth,  after.PlaceOfBirth);
-            Check("Address",      before.Address,       after.Address);
-            Check("Barangay",     before.Barangay,      after.Barangay);
-            Check("Contact",      before.ContactNumber, after.ContactNumber);
-            Check("Status",       before.Status,        after.Status);
-            Check("Education",    before.EducationalAttainment, after.EducationalAttainment);
-            Check("Occupation",   before.Occupation,    after.Occupation);
-            Check("Religion",     before.Religion,      after.Religion);
+
+            Check("Last Name",          before.Surname,              after.Surname);
+            Check("First Name",         before.FirstName,            after.FirstName);
+            Check("Middle Name",        before.MiddleName,           after.MiddleName);
+            Check("Extension",          before.ExtensionName,        after.ExtensionName);
+            Check("Sex",                before.Sex,                  after.Sex);
+            Check("Civil Status",       before.CivilStatus,          after.CivilStatus);
+            Check("Birthplace",         before.PlaceOfBirth,         after.PlaceOfBirth);
+            Check("Address",            before.Address,              after.Address);
+            Check("Barangay",           before.Barangay,             after.Barangay);
+            Check("Contact",            before.ContactNumber,        after.ContactNumber);
+            Check("Status",             before.Status,               after.Status);
+            Check("Education",          before.EducationalAttainment, after.EducationalAttainment);
+            Check("Occupation",         before.Occupation,           after.Occupation);
+            Check("Religion",           before.Religion,             after.Religion);
+            Check("Monthly Income",     before.MonthlyIncome,        after.MonthlyIncome);
+            Check("Occupation",         before.Occupation,           after.Occupation);
+            Check("PhilSys Number",     before.PhilSysNumber,        after.PhilSysNumber);
+            Check("Emergency Contact",  before.EmergencyContactName, after.EmergencyContactName);
+            Check("Emergency Number",   before.EmergencyContactNumber, after.EmergencyContactNumber);
+
             if (before.DateOfBirth != after.DateOfBirth)
-                changes.Add("Date of Birth: \"" + before.DateOfBirth.ToString("yyyy-MM-dd") + "\" → \"" + after.DateOfBirth.ToString("yyyy-MM-dd") + "\"");
-            return string.Join("; ", changes);
+                changes.Add(new SOLUM_UI.Models.ChangeDetail(
+                    "Date of Birth",
+                    before.DateOfBirth != DateTime.MinValue ? before.DateOfBirth.ToString("yyyy-MM-dd") : "—",
+                    after.DateOfBirth  != DateTime.MinValue ? after.DateOfBirth.ToString("yyyy-MM-dd")  : "—"));
+
+            return changes;
         }
 
         public SoloParentRecordViewModel FindRecord(string spId)

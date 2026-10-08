@@ -162,36 +162,6 @@ namespace SOLUM_UI
             }
         }
 
-        private bool _sidebarCollapsed = false;
-
-        private void BtnToggleSidebar_Click(object sender, RoutedEventArgs e)
-        {
-            _sidebarCollapsed = !_sidebarCollapsed;
-
-            if (_sidebarCollapsed)
-            {
-                Sidebar.Width      = 0;
-                Sidebar.Visibility = Visibility.Collapsed;
-                ContentArea.Margin = new Thickness(32, 0, 20, 20);
-                BtnToggleSidebar.Margin = new Thickness(10, 16, 0, 0);
-
-                var path = BtnToggleSidebar.Template.FindName("Arrow", BtnToggleSidebar) as System.Windows.Shapes.Path;
-                if (path != null)
-                    path.Data = System.Windows.Media.Geometry.Parse("M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z");
-            }
-            else
-            {
-                Sidebar.Visibility = Visibility.Visible;
-                Sidebar.Width      = 68;
-                ContentArea.Margin = new Thickness(112, 0, 20, 20);
-                BtnToggleSidebar.Margin = new Thickness(92, 16, 0, 0);
-
-                var path = BtnToggleSidebar.Template.FindName("Arrow", BtnToggleSidebar) as System.Windows.Shapes.Path;
-                if (path != null)
-                    path.Data = System.Windows.Media.Geometry.Parse("M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z");
-            }
-        }
-
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ButtonState == MouseButtonState.Pressed)

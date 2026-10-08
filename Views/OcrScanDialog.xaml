@@ -162,19 +162,20 @@
                                     </Style>
                                 </DatePickerTextBox.Style>
                             </DatePickerTextBox>
-                            <Button x:Name="PART_Button" Grid.Column="1"
+                            <ToggleButton x:Name="PART_Button" Grid.Column="1"
                                     HorizontalAlignment="Center" VerticalAlignment="Center"
                                     Width="18" Height="18" Background="Transparent"
                                     BorderThickness="0" Cursor="Hand"
-                                    FocusVisualStyle="{x:Null}">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
+                                    FocusVisualStyle="{x:Null}"
+                                    IsChecked="{Binding IsOpen, ElementName=PART_Popup, Mode=TwoWay}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
                                         <Path Data="M19,4H18V2H16V4H8V2H6V4H5C3.89,4 3,4.9 3,6V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V6A2,2 0 0,0 19,4M19,20H5V10H19V20M19,8H5V6H19V8Z"
                                               Fill="#702943" Stretch="Uniform" Width="14" Height="14"
                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </ControlTemplate>
-                                </Button.Template>
-                            </Button>
+                                </ToggleButton.Template>
+                            </ToggleButton>
                             <Popup x:Name="PART_Popup" Grid.Column="0" Placement="Bottom"
                                    AllowsTransparency="True" StaysOpen="False">
                                 <Border Background="White" CornerRadius="8" BorderBrush="#E0E0E0"
@@ -660,7 +661,8 @@
                                                             </Grid>
                                                             <TextBox x:Name="TxtMiddleName" Style="{StaticResource FormBox}"
                                                                      Tag="middle_name" GotFocus="Field_GotFocus"
-                                                                     PreviewTextInput="NameOnly_PreviewTextInput"/>
+                                                                     PreviewTextInput="NameOnly_PreviewTextInput"
+                                                                     TextChanged="TxtMiddleName_TextChanged"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="3">
@@ -675,7 +677,8 @@
                                                                 </Border>
                                                             </Grid>
                                                             <TextBox x:Name="TxtExtension" Style="{StaticResource FormBox}"
-                                                                     Tag="ext_name" GotFocus="Field_GotFocus"/>
+                                                                     Tag="ext_name" GotFocus="Field_GotFocus"
+                                                                     TextChanged="TxtExtension_TextChanged"/>
                                                         </StackPanel>
                                                     </Grid>
 
@@ -817,7 +820,8 @@
                                                                 </Border>
                                                             </Grid>
                                                             <TextBox x:Name="TxtPhilSys" Style="{StaticResource FormBox}"
-                                                                     Tag="philsys_number" GotFocus="Field_GotFocus"/>
+                                                                     Tag="philsys_number" GotFocus="Field_GotFocus"
+                                                                     TextChanged="TxtPhilSys_TextChanged"/>
                                                         </StackPanel>
                                                     </Grid>
 
@@ -841,7 +845,8 @@
                                                                 </Border>
                                                             </Grid>
                                                             <TextBox x:Name="TxtReligion" Style="{StaticResource FormBox}"
-                                                                     Tag="religion" GotFocus="Field_GotFocus"/>
+                                                                     Tag="religion" GotFocus="Field_GotFocus"
+                                                                     TextChanged="TxtReligion_TextChanged"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="1" Margin="0,0,8,0">
@@ -856,7 +861,8 @@
                                                                 </Border>
                                                             </Grid>
                                                             <TextBox x:Name="TxtOccupation" Style="{StaticResource FormBox}"
-                                                                     Tag="occupation" GotFocus="Field_GotFocus"/>
+                                                                     Tag="occupation" GotFocus="Field_GotFocus"
+                                                                     TextChanged="TxtOccupation_TextChanged"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="2">
@@ -991,7 +997,8 @@
                                                             </Grid>
                                                             <TextBox x:Name="TxtEmergencyContact" Style="{StaticResource FormBox}"
                                                                      Tag="emergency_name" GotFocus="Field_GotFocus"
-                                                                     PreviewTextInput="NameOnly_PreviewTextInput"/>
+                                                                     PreviewTextInput="NameOnly_PreviewTextInput"
+                                                                     TextChanged="TxtEmergencyContact_TextChanged"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="1" Margin="0,0,8,0">
@@ -1043,7 +1050,8 @@
                                                                 </Border>
                                                             </Grid>
                                                             <TextBox x:Name="TxtEmergencyAddress" Style="{StaticResource FormBox}"
-                                                                     Tag="emergency_address" GotFocus="Field_GotFocus"/>
+                                                                     Tag="emergency_address" GotFocus="Field_GotFocus"
+                                                                     TextChanged="TxtEmergencyAddress_TextChanged"/>
                                                         </StackPanel>
                                                     </Grid>
 
@@ -1110,7 +1118,8 @@
                                                                     </Grid.ColumnDefinitions>
                                                                     <StackPanel Grid.Column="0">
                                                                         <TextBlock Text="Cause of death" Style="{StaticResource FieldLabelSm}"/>
-                                                                        <TextBox x:Name="TxtA2Cause" Style="{StaticResource FormBoxSm}" Tag="circ_a2_cause" GotFocus="Field_GotFocus"/>
+                                                                        <TextBox x:Name="TxtA2Cause" Style="{StaticResource FormBoxSm}" Tag="circ_a2_cause" GotFocus="Field_GotFocus"
+                                                                                 TextChanged="TxtA2Cause_TextChanged"/>
                                                                     </StackPanel>
                                                                     <StackPanel Grid.Column="2">
                                                                         <TextBlock Text="Date" Style="{StaticResource FieldLabelSm}"/>
@@ -1140,7 +1149,8 @@
                                                             </RadioButton>
                                                             <StackPanel x:Name="PnlA4" Visibility="Collapsed" Margin="18,0,0,4">
                                                                 <TextBlock Text="Type of disability" Style="{StaticResource FieldLabelSm}"/>
-                                                                <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBoxSm}" Tag="circ_a4_disability" GotFocus="Field_GotFocus"/>
+                                                                <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBoxSm}" Tag="circ_a4_disability" GotFocus="Field_GotFocus"
+                                                                         TextChanged="TxtA4Disability_TextChanged"/>
                                                             </StackPanel>
                                                         </StackPanel>
 

@@ -33,7 +33,7 @@ namespace SOLUM_UI
         public string MemberName
         {
             get => _memberName;
-            set { _memberName = value; N(nameof(MemberName)); }
+            set { _memberName = value?.ToUpper() ?? string.Empty; N(nameof(MemberName)); }
         }
 
         public string Sex
@@ -160,7 +160,7 @@ namespace SOLUM_UI
                 N(nameof(Relationship));
             }
         }
-        public string EducationEmployment { get => _educationEmployment; set { _educationEmployment = value; N(nameof(EducationEmployment)); } }
+        public string EducationEmployment { get => _educationEmployment; set { _educationEmployment = value?.ToUpper() ?? string.Empty; N(nameof(EducationEmployment)); } }
 
         public string Income
         {
@@ -215,6 +215,7 @@ namespace SOLUM_UI
             {
                 FormSubtitle.Text = "Add New Record";
                 DpDateOfApplication.SelectedDate = DateTime.Today;
+                SetComboByContent(CmbStatus, "Valid");   // new records default to Active/Valid
                 // Show add-mode stripe when Loaded
                 Loaded += (s, e) => ApplyModeStyle(isRenewal: false);
             }
@@ -334,7 +335,7 @@ namespace SOLUM_UI
             LockBox(TxtAddress); LockBox(TxtBarangay); LockBox(TxtContact);
 
             // Emergency contact
-            LockBox(TxtEmergencyContact); LockBox(TxtRelationship);
+            LockBox(TxtEmergencyContact); LockCombo(CmbRelationship);
             LockBox(TxtEmergencyAddress); LockBox(TxtEmergencyNumber);
 
             // Date of application
@@ -522,7 +523,7 @@ namespace SOLUM_UI
             else if (r.IsNotEmployed) ChkNotEmployed.IsChecked = true;
 
             TxtEmergencyContact.Text = r.EmergencyContactName   ?? string.Empty;
-            TxtRelationship.Text     = r.EmergencyRelationship  ?? string.Empty;
+            SetComboByContent(CmbRelationship, r.EmergencyRelationship);
             TxtEmergencyAddress.Text = r.EmergencyAddress       ?? string.Empty;
             TxtEmergencyNumber.Text  = SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.EmergencyContactNumber ?? string.Empty);
 
@@ -739,6 +740,17 @@ namespace SOLUM_UI
             }
         }
 
+        private void ToUpperBox(TextBox tb)
+        {
+            if (tb == null) return;
+            if (tb.Text != tb.Text.ToUpper())
+            {
+                int caret = tb.SelectionStart;
+                tb.Text = tb.Text.ToUpper();
+                tb.SelectionStart = Math.Min(caret + 1, tb.Text.Length);
+            }
+        }
+
         private void Phone_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Back && sender is TextBox tb)
@@ -767,10 +779,12 @@ namespace SOLUM_UI
             e.Handled = !Regex.IsMatch(e.Text, @"^\d+$");
         }
 
-        private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)       => ClearFieldError(TxtLastName,     ErrLastName);
-        private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)      => ClearFieldError(TxtFirstName,    ErrFirstName);
-        private void TxtBarangay_TextChanged(object sender, TextChangedEventArgs e)       => ClearFieldError(TxtBarangay,     ErrBarangay);
-        private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)        => ClearFieldError(TxtAddress,      ErrAddress);
+        private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtLastName); ClearFieldError(TxtLastName,     ErrLastName); }
+        private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)      { ToUpperBox(TxtFirstName); ClearFieldError(TxtFirstName,    ErrFirstName); }
+        private void TxtMiddleName_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtMiddleName); }
+        private void TxtExtension_TextChanged(object sender, TextChangedEventArgs e)      { ToUpperBox(TxtExtension); }
+        private void TxtBarangay_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtBarangay); ClearFieldError(TxtBarangay,     ErrBarangay); }
+        private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)        { ToUpperBox(TxtAddress); ClearFieldError(TxtAddress,      ErrAddress); }
         private void TxtContact_TextChanged(object sender, TextChangedEventArgs e)
         {
             FormatPhoneBox(TxtContact);
@@ -781,7 +795,18 @@ namespace SOLUM_UI
         {
             FormatPhoneBox(TxtEmergencyNumber);
         }
-        private void TxtPlaceOfBirth_TextChanged(object sender, TextChangedEventArgs e)   => ClearFieldError(TxtPlaceOfBirth, ErrPlaceOfBirth);
+        private void TxtPlaceOfBirth_TextChanged(object sender, TextChangedEventArgs e)   { ToUpperBox(TxtPlaceOfBirth); ClearFieldError(TxtPlaceOfBirth, ErrPlaceOfBirth); }
+        private void TxtPhilSys_TextChanged(object sender, TextChangedEventArgs e)        { ToUpperBox(TxtPhilSys); }
+        private void TxtReligion_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtReligion); }
+        private void TxtOccupation_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtOccupation); }
+        private void TxtEmergencyContact_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyContact); }
+        private void TxtEmergencyAddress_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyAddress); }
+        private void TxtA2Cause_TextChanged(object sender, TextChangedEventArgs e)        { ToUpperBox(TxtA2Cause); }
+        private void TxtA4Disability_TextChanged(object sender, TextChangedEventArgs e)   { ToUpperBox(TxtA4Disability); }
+        private void TxtA5Period_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtA5Period); }
+        private void TxtBStayAbroad_TextChanged(object sender, TextChangedEventArgs e)    { ToUpperBox(TxtBStayAbroad); }
+        private void TxtNeeds_TextChanged(object sender, TextChangedEventArgs e)          { ToUpperBox(TxtNeeds); }
+        private void TxtOtherIncome_TextChanged(object sender, TextChangedEventArgs e)    { ToUpperBox(TxtOtherIncome); }
         private void CmbSex_SelectionChanged(object sender, SelectionChangedEventArgs e)         => ClearFieldError(CmbSex,         ErrSex);
         private void CmbCivilStatus_SelectionChanged(object sender, SelectionChangedEventArgs e) => ClearFieldError(CmbCivilStatus, ErrCivilStatus);
         private void CmbStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)      => ClearFieldError(CmbStatus,      ErrStatus);
@@ -892,6 +917,29 @@ namespace SOLUM_UI
 
             if (CmbStatus.SelectedItem == null)
             { MarkError(CmbStatus, ErrStatus, "Required."); missing.Add("Application Status"); ok = false; }
+
+            // Family composition: every named row must be fully filled
+            int rowNum = 0;
+            foreach (var item in _familyRowData)
+            {
+                var row = item as FamilyMemberRow;
+                if (row == null || string.IsNullOrWhiteSpace(row.MemberName)) continue;
+                rowNum++;
+
+                var rowMissing = new List<string>();
+                if (string.IsNullOrWhiteSpace(row.Sex))                 rowMissing.Add("Sex");
+                if (!row.BirthdateDate.HasValue)                         rowMissing.Add("Birthdate");
+                if (string.IsNullOrWhiteSpace(row.CivilStatus))         rowMissing.Add("Civil Status");
+                if (string.IsNullOrWhiteSpace(row.Relationship))        rowMissing.Add("Relationship");
+                if (string.IsNullOrWhiteSpace(row.EducationEmployment)) rowMissing.Add("Education/Employment");
+                if (string.IsNullOrWhiteSpace(row.Income))              rowMissing.Add("Income");
+
+                if (rowMissing.Count > 0)
+                {
+                    missing.Add($"Family member #{rowNum} ({row.MemberName}) — missing: {string.Join(", ", rowMissing)}");
+                    ok = false;
+                }
+            }
 
             if (!ok && missing.Count > 0)
                 SetValidationMessage(missing);
@@ -1080,7 +1128,7 @@ namespace SOLUM_UI
                 IsNotEmployed         = ChkNotEmployed.IsChecked == true && ChkNotEmployed.IsEnabled,
 
                 EmergencyContactName   = TxtEmergencyContact.Text.Trim(),
-                EmergencyRelationship  = TxtRelationship.Text.Trim(),
+                EmergencyRelationship  = GetComboValue(CmbRelationship),
                 EmergencyAddress       = TxtEmergencyAddress.Text.Trim(),
                 EmergencyContactNumber = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtEmergencyNumber.Text.Trim()),
 
