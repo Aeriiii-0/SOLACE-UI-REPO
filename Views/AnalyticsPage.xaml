@@ -150,15 +150,20 @@
                 </Grid>
                 <!-- gradient progress bar -->
                 <Border Grid.Row="1" CornerRadius="3" Background="#EAE0E5" Height="6" VerticalAlignment="Bottom">
-                    <Border CornerRadius="3" Height="6" HorizontalAlignment="Left"
-                            Width="{Binding BarWidthPx}" VerticalAlignment="Stretch">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="{Binding GradStart}" Offset="0"/>
-                                <GradientStop Color="{Binding GradEnd}"   Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                    </Border>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="{Binding FillGridLength}"/>
+                            <ColumnDefinition Width="{Binding EmptyGridLength}"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" CornerRadius="3" Height="6" VerticalAlignment="Stretch">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="{Binding GradStart}" Offset="0"/>
+                                    <GradientStop Color="{Binding GradEnd}"   Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </Grid>
                 </Border>
             </Grid>
         </DataTemplate>

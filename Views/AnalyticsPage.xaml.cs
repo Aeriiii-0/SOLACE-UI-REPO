@@ -291,52 +291,48 @@ namespace SOLUM_UI
 
         private List<ChartRow> BuildBucketedRows(Dictionary<string, int> data, (string key, string label)[] knownOrder, string hexColor)
         {
-            var color = (Color)ColorConverter.ConvertFromString(hexColor);
-            var brush = new SolidColorBrush(color);
-            int total = data.Values.Sum();
-
-            var rows = knownOrder.Select(k =>
-            {
-                int count = data.TryGetValue(k.key, out var c) ? c : 0;
-                return new ChartRow
-                {
-                    Label = k.label,
-                    Count = count,
-                    Pct = total > 0 ? Math.Round(count * 100.0 / total, 0).ToString("0") + "%" : "—",
-                    BarColor = brush
-                };
-            }).ToList();
-
-            return rows;
-        }
-
-        private void bindBucketedBars(ItemsControl chart, Dictionary<string, int> data, (string key, string label)[] knownOrder, string hexColor)
-        {
-            var rows = knownOrder.Select(k => new
-            {
-                label = k.label,
-                count = data != null && data.TryGetValue(k.key, out var i) ? i : 0
-            }).ToArray();
-
-            int total = rows.Sum(r => r.count);
-            int maxCount = rows.Length > 0 ? rows.Max(r => r.count) : 1;
             var c = (Color)ColorConverter.ConvertFromString(hexColor);
+            var brush = new SolidColorBrush(c);
 
             var lighter = Color.FromRgb(
                 (byte)Math.Min(255, c.R + 60),
                 (byte)Math.Min(255, c.G + 40),
                 (byte)Math.Min(255, c.B + 50));
+            string gradEnd = "#" + lighter.R.ToString("X2") + lighter.G.ToString("X2") + lighter.B.ToString("X2");
 
-            chart.ItemsSource = rows.Select(r => new ChartRow
+            var rows = knownOrder.Select(k => new
             {
-                Label = r.label,
-                Count = r.count,
-                Pct = total > 0 ? Math.Round(r.count * 100.0 / total, 0).ToString("0") + "%" : "—",
-                BarColor = new SolidColorBrush(c),
-                BarWidthPx = maxCount > 0 ? Math.Max(4, r.count * 180.0 / maxCount) : 0,
-                GradStart = hexColor,
-                GradEnd = "#" + lighter.R.ToString("X2") + lighter.G.ToString("X2") + lighter.B.ToString("X2"),
+                label = k.label,
+                count = data != null && data.TryGetValue(k.key, out var countVal) ? countVal : 0
             }).ToList();
+
+            int total = rows.Sum(r => r.count);
+
+            return rows.Select(r =>
+            {
+                double pctNum = total > 0 ? (r.count * 100.0 / total) : 0.0;
+                double fill = (r.count > 0 && total > 0) ? Math.Max(1.0, Math.Min(100.0, pctNum)) : 0.0;
+                double empty = Math.Max(0.0, 100.0 - fill);
+
+                return new ChartRow
+                {
+                    Label = r.label,
+                    Count = r.count,
+                    Pct = total > 0 ? Math.Round(pctNum, 0).ToString("0") + "%" : "—",
+                    BarColor = brush,
+                    BarWidthPx = fill,
+                    FillGridLength = new GridLength(fill, GridUnitType.Star),
+                    EmptyGridLength = new GridLength(empty, GridUnitType.Star),
+                    GradStart = hexColor,
+                    GradEnd = gradEnd
+                };
+            }).ToList();
+        }
+
+        private void bindBucketedBars(ItemsControl chart, Dictionary<string, int> data, (string key, string label)[] knownOrder, string hexColor)
+        {
+            if (chart == null) return;
+            chart.ItemsSource = BuildBucketedRows(data, knownOrder, hexColor);
         }
 
         private void DrawBarangayChart(List<BarangayBreakdownItemDto> barangays)
@@ -589,6 +585,8 @@ namespace SOLUM_UI
             public string Pct { get; set; }
             public SolidColorBrush BarColor { get; set; }
             public double BarWidthPx { get; set; }
+            public GridLength FillGridLength { get; set; }
+            public GridLength EmptyGridLength { get; set; }
             public string GradStart { get; set; }
             public string GradEnd { get; set; }
         }
