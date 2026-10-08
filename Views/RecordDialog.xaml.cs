@@ -24,6 +24,9 @@ namespace SOLUM_UI
         private string _educationEmployment;
         private string _income;
 
+        public Guid? Id { get; set; }
+        public bool IsNew { get; set; } = true;
+
         public event PropertyChangedEventHandler PropertyChanged;
         private void N(string p) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(p));
 
@@ -109,8 +112,54 @@ namespace SOLUM_UI
             }
         }
 
-        public string CivilStatus         { get => _civilStatus;         set { _civilStatus = value;         N(nameof(CivilStatus)); } }
-        public string Relationship        { get => _relationship;        set { _relationship = value;        N(nameof(Relationship)); } }
+        public string CivilStatus
+        {
+            get => _civilStatus;
+            set
+            {
+                string s = value?.Trim() ?? string.Empty;
+                if (s.Equals("Single", StringComparison.OrdinalIgnoreCase)) _civilStatus = "Single";
+                else if (s.Equals("Married", StringComparison.OrdinalIgnoreCase)) _civilStatus = "Married";
+                else if (s.Equals("Widowed", StringComparison.OrdinalIgnoreCase)) _civilStatus = "Widowed";
+                else if (s.Equals("Separated", StringComparison.OrdinalIgnoreCase) || s.Equals("Sep", StringComparison.OrdinalIgnoreCase) || s.Equals("Divorced", StringComparison.OrdinalIgnoreCase)) _civilStatus = "Separated";
+                else if (s.Equals("Annulled", StringComparison.OrdinalIgnoreCase)) _civilStatus = "Annulled";
+                else if (!string.IsNullOrWhiteSpace(s)) _civilStatus = char.ToUpper(s[0]) + (s.Length > 1 ? s.Substring(1) : "");
+                else _civilStatus = string.Empty;
+                N(nameof(CivilStatus));
+            }
+        }
+
+        public string Relationship
+        {
+            get => _relationship;
+            set
+            {
+                string s = value?.Trim() ?? string.Empty;
+                if (s.Equals("Child", StringComparison.OrdinalIgnoreCase) || s.Equals("Son", StringComparison.OrdinalIgnoreCase) || s.Equals("Daughter", StringComparison.OrdinalIgnoreCase))
+                    _relationship = "Child";
+                else if (s.Equals("Spouse", StringComparison.OrdinalIgnoreCase) || s.Equals("Husband", StringComparison.OrdinalIgnoreCase) || s.Equals("Wife", StringComparison.OrdinalIgnoreCase))
+                    _relationship = "Spouse";
+                else if (s.Equals("Parent", StringComparison.OrdinalIgnoreCase) || s.Equals("Father", StringComparison.OrdinalIgnoreCase) || s.Equals("Mother", StringComparison.OrdinalIgnoreCase))
+                    _relationship = "Parent";
+                else if (s.Equals("Sibling", StringComparison.OrdinalIgnoreCase) || s.Equals("Brother", StringComparison.OrdinalIgnoreCase) || s.Equals("Sister", StringComparison.OrdinalIgnoreCase))
+                    _relationship = "Sibling";
+                else if (s.Equals("Grandchild", StringComparison.OrdinalIgnoreCase) || s.Equals("Grandson", StringComparison.OrdinalIgnoreCase) || s.Equals("Granddaughter", StringComparison.OrdinalIgnoreCase))
+                    _relationship = "Grandchild";
+                else if (s.Equals("Grandparent", StringComparison.OrdinalIgnoreCase) || s.Equals("Grandfather", StringComparison.OrdinalIgnoreCase) || s.Equals("Grandmother", StringComparison.OrdinalIgnoreCase))
+                    _relationship = "Grandparent";
+                else if (s.Equals("Relative", StringComparison.OrdinalIgnoreCase))
+                    _relationship = "Relative";
+                else if (s.Equals("Ward", StringComparison.OrdinalIgnoreCase))
+                    _relationship = "Ward";
+                else if (s.Equals("Other", StringComparison.OrdinalIgnoreCase))
+                    _relationship = "Other";
+                else if (!string.IsNullOrWhiteSpace(s))
+                    _relationship = char.ToUpper(s[0]) + (s.Length > 1 ? s.Substring(1) : "");
+                else
+                    _relationship = string.Empty;
+                N(nameof(Relationship));
+            }
+        }
         public string EducationEmployment { get => _educationEmployment; set { _educationEmployment = value; N(nameof(EducationEmployment)); } }
 
         public string Income
@@ -136,6 +185,7 @@ namespace SOLUM_UI
         private int _currentStep = 1;
         private bool _savedSuccessfully = false;
         private readonly ObservableCollection<FamilyMemberRow> _familyRowData = new ObservableCollection<FamilyMemberRow>();
+        private readonly List<Guid> _removedFamilyMemberIds = new List<Guid>();
 
         private static readonly SolidColorBrush ErrorBrush   = new SolidColorBrush(Color.FromRgb(0xE5, 0x39, 0x35));
         private static readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(0xD0, 0xB8, 0xC0));
@@ -416,13 +466,25 @@ namespace SOLUM_UI
 
         private void AddFamilyRow_Click(object sender, RoutedEventArgs e)
         {
-            _familyRowData.Add(MakeFamilyRow());
+            _familyRowData.Add(MakeFamilyRow(id: null, isNew: true));
         }
 
-        private FamilyMemberRow MakeFamilyRow()
+        private FamilyMemberRow MakeFamilyRow(Guid? id = null, bool isNew = true)
         {
-            var row = new FamilyMemberRow();
-            row.DeleteCommand = new RelayCommand(() => _familyRowData.Remove(row));
+            var row = new FamilyMemberRow
+            {
+                Id = id,
+                IsNew = isNew
+            };
+            row.DeleteCommand = new RelayCommand(() =>
+            {
+                if (!row.IsNew && row.Id.HasValue)
+                {
+                    if (!_removedFamilyMemberIds.Contains(row.Id.Value))
+                        _removedFamilyMemberIds.Add(row.Id.Value);
+                }
+                _familyRowData.Remove(row);
+            });
             return row;
         }
         
@@ -508,6 +570,12 @@ namespace SOLUM_UI
             if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
             {
                 _familyRowData.Clear();
+                _removedFamilyMemberIds.Clear();
+                if (r.RemovedFamilyMemberIds != null)
+                {
+                    _removedFamilyMemberIds.AddRange(r.RemovedFamilyMemberIds);
+                }
+
                 foreach (var fm in r.FamilyMembers)
                 {
                     string normDob = SOLUM_UI.Services.OcrService.NormalizeDateString(fm.Birthdate, out DateTime? dt);
@@ -521,7 +589,7 @@ namespace SOLUM_UI
                         }
                     }
 
-                    var row = MakeFamilyRow();
+                    var row = MakeFamilyRow(fm.Id, fm.IsNew);
                     row.MemberName          = fm.MemberName;
                     row.Sex                 = fm.Sex;
                     row.Age                 = ageVal;
@@ -962,6 +1030,8 @@ namespace SOLUM_UI
 
                     members.Add(new FamilyMember
                     {
+                        Id                  = row.Id,
+                        IsNew               = row.IsNew,
                         MemberName          = SOLUM_UI.Services.OcrService.CleanPersonName(row.MemberName),
                         Sex                 = row.OfficialSex,
                         Age                 = ageVal,
@@ -1034,12 +1104,14 @@ namespace SOLUM_UI
                 CircumstanceE              = _isRenewal ? _existing.CircumstanceE  : (ChkE.IsChecked  == true && ChkE.IsEnabled),
                 CircumstanceF              = _isRenewal ? _existing.CircumstanceF  : (ChkF.IsChecked  == true && ChkF.IsEnabled),
 
-                FamilyMembers   = members,
-                NeedsAndProblems  = _isRenewal ? (_existing?.NeedsAndProblems ?? string.Empty) : TxtNeeds.Text.Trim(),
-                OtherIncomeSource = _isRenewal ? (_existing?.OtherIncomeSource ?? string.Empty) : TxtOtherIncome.Text.Trim(),
-                IsPantawidBeneficiary = _isRenewal ? _existing.IsPantawidBeneficiary : (ChkPantawid.IsChecked == true),
-                IsIndigenous    = _isRenewal ? _existing.IsIndigenous : (ChkIndigenous.IsChecked == true),
-                IsLGBT          = _isRenewal ? _existing.IsLGBT      : (ChkLGBTQ.IsChecked == true),
+
+                FamilyMembers          = members,
+                RemovedFamilyMemberIds = new List<Guid>(_removedFamilyMemberIds),
+                NeedsAndProblems       = _isRenewal ? (_existing?.NeedsAndProblems ?? string.Empty) : TxtNeeds.Text.Trim(),
+                OtherIncomeSource      = _isRenewal ? (_existing?.OtherIncomeSource ?? string.Empty) : TxtOtherIncome.Text.Trim(),
+                IsPantawidBeneficiary  = _isRenewal ? _existing.IsPantawidBeneficiary : (ChkPantawid.IsChecked == true),
+                IsIndigenous           = _isRenewal ? _existing.IsIndigenous           : (ChkIndigenous.IsChecked == true),
+                IsLGBT                 = _isRenewal ? _existing.IsLGBT                 : (ChkLGBTQ.IsChecked == true),
                 Children          = members.Count
             };
         }
