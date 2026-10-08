@@ -22,7 +22,7 @@ namespace SOLUM_UI.Models.Api
         public int TotalNewRegistrations { get; set; }
         public int TotalRenewals { get; set; }
         public string PeriodLabel { get; set; } = string.Empty;
-        public object FilterType { get; set; }
+        public string FilterType { get; set; } = string.Empty;
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string FilteredBarangay { get; set; } = "ALL";

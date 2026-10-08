@@ -217,6 +217,9 @@
     <Compile Include="Views\Dialogs\RecordViewDialog.xaml.cs">
       <DependentUpon>RecordViewDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\ActionConfirmDialog.xaml.cs">
+      <DependentUpon>ActionConfirmDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\RenewDialog.xaml.cs">
       <DependentUpon>RenewDialog.xaml</DependentUpon>
     </Compile>
@@ -319,6 +322,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\RecordViewDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\ActionConfirmDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

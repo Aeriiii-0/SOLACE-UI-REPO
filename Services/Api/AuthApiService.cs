@@ -52,6 +52,23 @@ namespace SOLUM_UI.Services.Api
             return resp;
         }
 
+        public event Action<string> OnSessionExpired;
+
+        public void ClearSession()
+        {
+            Token = string.Empty;
+            RefreshToken = string.Empty;
+            CurrentUserEmail = string.Empty;
+            CurrentRoles.Clear();
+            ApiClient.Instance.ClearBearerToken();
+        }
+
+        public void NotifySessionExpired(string message = "Session expired or revoked. Please log in again.")
+        {
+            ClearSession();
+            OnSessionExpired?.Invoke(message);
+        }
+
         public async Task<BaseResponse<bool>> LogoutAsync()
         {
             try
@@ -63,11 +80,7 @@ namespace SOLUM_UI.Services.Api
             }
             finally
             {
-                Token = string.Empty;
-                RefreshToken = string.Empty;
-                CurrentUserEmail = string.Empty;
-                CurrentRoles.Clear();
-                ApiClient.Instance.ClearBearerToken();
+                ClearSession();
             }
 
             return new BaseResponse<bool> { Succeeded = true, Data = true };
@@ -101,17 +114,32 @@ namespace SOLUM_UI.Services.Api
             return resp;
         }
 
-        public async Task<BaseResponse<RegisterResponse>> RegisterAsync(string email, string password, string firstName, string lastName)
+        public async Task<BaseResponse<RegisterResponse>> RegisterAsync(string email, string password, string firstName, string lastName, string contactNumber = "")
         {
             var req = new RegisterUserRequest
             {
                 Email = email?.Trim() ?? string.Empty,
                 Password = password ?? string.Empty,
                 FirstName = firstName?.Trim() ?? string.Empty,
-                LastName = lastName?.Trim() ?? string.Empty
+                LastName = lastName?.Trim() ?? string.Empty,
+                ContactNumber = contactNumber?.Trim() ?? string.Empty
             };
 
             return await ApiClient.Instance.PostAsync<RegisterUserRequest, RegisterResponse>("api/auth/register", req);
+        }
+
+        public async Task<BaseResponse<RegisterResponse>> RegisterAdminAsync(string email, string password, string firstName, string lastName, string contactNumber = "")
+        {
+            var req = new RegisterUserRequest
+            {
+                Email = email?.Trim() ?? string.Empty,
+                Password = password ?? string.Empty,
+                FirstName = firstName?.Trim() ?? string.Empty,
+                LastName = lastName?.Trim() ?? string.Empty,
+                ContactNumber = contactNumber?.Trim() ?? string.Empty
+            };
+
+            return await ApiClient.Instance.PostAsync<RegisterUserRequest, RegisterResponse>("api/auth/register-admin", req);
         }
 
         public async Task<BaseResponse<string>> ChangePasswordAsync(string currentPassword, string newPassword)

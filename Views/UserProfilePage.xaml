@@ -173,6 +173,13 @@
                         <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,16"/>
 
                         <StackPanel Margin="0,0,0,16">
+                            <TextBlock Text="Contact Number" Style="{StaticResource FieldLabel}"/>
+                            <TextBlock x:Name="TxtContactNumber" Text="—" Style="{StaticResource FieldValue}"/>
+                        </StackPanel>
+
+                        <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,16"/>
+
+                        <StackPanel Margin="0,0,0,16">
                             <TextBlock Text="Assigned Barangay" Style="{StaticResource FieldLabel}"/>
                             <TextBlock x:Name="TxtBarangay" Text="—" Style="{StaticResource FieldValue}"/>
                         </StackPanel>

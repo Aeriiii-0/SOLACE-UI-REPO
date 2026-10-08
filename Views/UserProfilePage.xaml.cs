@@ -25,6 +25,7 @@ namespace SOLUM_UI
             string firstName = MainWindow.FirstName;
             string lastName = MainWindow.LastName;
             string email    = MainWindow.CurrentUserEmail;
+            string contactNumber = MainWindow.ContactNumber;
 
             TxtDisplayName.Text  = name;
             TxtDisplayRole.Text  = role;
@@ -32,6 +33,7 @@ namespace SOLUM_UI
             TxtFullName.Text     = name;
             TxtRole.Text         = role;
             TxtEmail.Text        = email;
+            TxtContactNumber.Text = string.IsNullOrWhiteSpace(contactNumber) ? "—" : contactNumber;
             TxtBarangay.Text     = string.IsNullOrWhiteSpace(barangay) ? "All Barangays" : barangay;
             TxtInitial.Text      = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "U";
 

@@ -212,6 +212,15 @@ namespace SOLUM_UI
 
                 _current = response.Data;
                 BuildAnalytics(_current);
+
+                var breakdownResponse = await AnalyticsApiService.Instance.GetBarangayBreakdownAsync(
+                    year: _filterYear,
+                    barangay: _filterBarangay != "ALL" ? _filterBarangay : null);
+
+                if (breakdownResponse.Succeeded && breakdownResponse.Data != null)
+                {
+                    DrawBarangayChart(breakdownResponse.Data.Barangays);
+                }
             }
             finally
             {
@@ -227,6 +236,19 @@ namespace SOLUM_UI
             TxtPeriodLabel.Text = period;
             _currentPeriod = period;
             TxtLastRefresh.Text = "Updated " + DateTime.Now.ToString("MMM d, h:mm tt");
+
+            TxtValidRecords.Text = d.ActiveSoloParents.ToString();
+            TxtValidRate.Text = d.TotalSoloParents > 0
+                ? Math.Round((double)d.ActiveSoloParents * 100 / d.TotalSoloParents, 0) + "%"
+                : "0%";
+
+            TxtInactiveRecords.Text = d.InactiveSoloParents.ToString();
+            TxtInactiveRate.Text = d.TotalSoloParents > 0
+                ? Math.Round((double)d.InactiveSoloParents * 100 / d.TotalSoloParents, 0) + "%"
+                : "0%";
+
+            TxtNewSpic.Text = d.NewRegistrations.ToString();
+            TxtRenewedSpic.Text = d.Renewals.ToString();
 
             int female = d.Sex.TryGetValue("Female", out var f) ? f : 0;
             int male = d.Sex.TryGetValue("Male", out var m) ? m : 0;
@@ -264,11 +286,6 @@ namespace SOLUM_UI
             CategoryChartLeft.ItemsSource = catRows.Take(half).ToList();
             CategoryChartRight.ItemsSource = catRows.Skip(half).ToList();
 
-            // Barangay breakdown chart and recent-records list are left empty —
-            // see the commented-out DrawBarangayChart method below for the original
-            // logic and what data source it would need to work again.
-            BarangayCanvas.Children.Clear();
-            BarangayLabels.ItemsSource = null;
             RecentList.ItemsSource = null;
         }
 
@@ -322,30 +339,28 @@ namespace SOLUM_UI
             }).ToList();
         }
 
-        /* OLD: per-barangay breakdown chart. Needs a data source that returns counts
-           PER barangay for the period — the current endpoint only returns totals for
-           ONE barangay (or "ALL") at a time, so this can't be fed directly anymore.
-           Either: (a) call GetMonthlyAnalyticsAsync once per known barangay and
-           assemble the bars from d.TotalSoloParents of each response, or (b) get a
-           dedicated "grouped by barangay" endpoint from the backend.
-
-        private void DrawBarangayChart(List<SoloParentRecord> data)
+        private void DrawBarangayChart(List<BarangayBreakdownItemDto> barangays)
         {
             BarangayCanvas.Children.Clear();
             BarangayLabels.ItemsSource = null;
 
-            var groups = data.GroupBy(r => r.Barangay ?? "Unknown")
-                             .OrderByDescending(g => g.Count())
-                             .Take(10).ToList();
-            if (!groups.Any()) return;
+            if (barangays == null || barangays.Count == 0) return;
 
-            double canvasH  = BarangayCanvas.ActualHeight > 0 ? BarangayCanvas.ActualHeight : 160;
-            double canvasW  = BarangayCanvas.ActualWidth  > 0 ? BarangayCanvas.ActualWidth  : 400;
-            int    maxCount = groups.Max(g => g.Count());
-            int    n        = groups.Count;
-            double barW     = Math.Floor((canvasW * 0.72) / n);
-            double gap      = (canvasW - barW * n) / (n + 1);
-            double chartH   = canvasH - 4;
+            var topBarangays = barangays
+                .OrderByDescending(b => b.TotalSoloParents)
+                .Take(10)
+                .ToList();
+
+            if (!topBarangays.Any()) return;
+
+            double canvasH = BarangayCanvas.ActualHeight > 0 ? BarangayCanvas.ActualHeight : 160;
+            double canvasW = BarangayCanvas.ActualWidth > 0 ? BarangayCanvas.ActualWidth : 400;
+            int maxCount = topBarangays.Max(b => b.TotalSoloParents);
+            if (maxCount == 0) maxCount = 1;
+            int n = topBarangays.Count;
+            double barW = Math.Floor((canvasW * 0.72) / n);
+            double gap = (canvasW - barW * n) / (n + 1);
+            double chartH = canvasH - 4;
 
             var gridBrush = new SolidColorBrush(Color.FromRgb(0xE8, 0xD8, 0xDE));
             for (int step = 1; step <= 4; step++)
@@ -375,32 +390,35 @@ namespace SOLUM_UI
 
             for (int i = 0; i < n; i++)
             {
-                double barH   = Math.Max(6, groups[i].Count() * chartH / maxCount);
-                double x      = gap + i * (barW + gap);
-                double y      = chartH - barH;
-                var    fillC  = palette[i % palette.Length];
-                var    lightC = Color.FromRgb(
+                var item = topBarangays[i];
+                double barH = Math.Max(6, item.TotalSoloParents * chartH / maxCount);
+                double x = gap + i * (barW + gap);
+                double y = chartH - barH;
+                var fillC = palette[i % palette.Length];
+                var lightC = Color.FromRgb(
                     (byte)Math.Min(255, fillC.R + 55),
                     (byte)Math.Min(255, fillC.G + 35),
                     (byte)Math.Min(255, fillC.B + 45));
 
+                string tooltip = $"{item.BarangayName}\n" +
+                                 $"Total: {item.TotalSoloParents} ({item.PercentageShare:F1}%)\n" +
+                                 $"Active: {item.ActiveCount} | Inactive: {item.InactiveCount}\n" +
+                                 $"New: {item.NewRegistrationsCount} | Renewals: {item.RenewalsCount}";
+
                 var rect = new Rectangle
                 {
-                    Width   = barW,
-                    Height  = barH,
+                    Width = barW,
+                    Height = barH,
                     RadiusX = 5,
                     RadiusY = 5,
-                    Tag     = groups[i].Key,
-                    Cursor  = Cursors.Hand,
-                    ToolTip = groups[i].Key + "  ·  " + groups[i].Count() + " record(s)",
-                    Fill    = new LinearGradientBrush(
-                        fillC, lightC,
-                        new Point(0, 1), new Point(0, 0))
+                    Tag = item.BarangayName,
+                    Cursor = Cursors.Hand,
+                    ToolTip = tooltip,
+                    Fill = new LinearGradientBrush(fillC, lightC, new Point(0, 1), new Point(0, 0))
                 };
                 Canvas.SetLeft(rect, x);
                 Canvas.SetTop(rect, y);
 
-                var captureFill  = new SolidColorBrush(fillC);
                 var captureHover = new SolidColorBrush(lightC);
                 rect.MouseEnter += (s, e) => ((Rectangle)s).Fill = captureHover;
                 rect.MouseLeave += (s, e) => ((Rectangle)s).Fill = new LinearGradientBrush(
@@ -409,8 +427,8 @@ namespace SOLUM_UI
 
                 var lbl = new TextBlock
                 {
-                    Text       = groups[i].Count().ToString(),
-                    FontSize   = 9,
+                    Text = item.TotalSoloParents.ToString(),
+                    FontSize = 9,
                     FontWeight = FontWeights.Bold,
                     Foreground = new SolidColorBrush(fillC),
                     FontFamily = new FontFamily("Segoe UI")
@@ -420,9 +438,8 @@ namespace SOLUM_UI
                 BarangayCanvas.Children.Add(lbl);
             }
 
-            BarangayLabels.ItemsSource = groups.Select(g => new ChartRow { Label = g.Key }).ToList();
+            BarangayLabels.ItemsSource = topBarangays.Select(g => new ChartRow { Label = g.BarangayName }).ToList();
         }
-        */
 
         private void RecentRecord_Click(object sender, MouseButtonEventArgs e)
         {

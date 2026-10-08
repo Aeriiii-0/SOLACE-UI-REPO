@@ -38,6 +38,23 @@ namespace SOLUM_UI.Models
             !string.IsNullOrWhiteSpace(OldValue)     ||
             !string.IsNullOrWhiteSpace(NewValue);
 
+        public string ActionTitle
+        {
+            get => ActionLabel;
+            set { }
+        }
+
+        public bool HasTargetId => !string.IsNullOrWhiteSpace(RecordId);
+        public string TargetIdDisplay
+        {
+            get => HasTargetId ? RecordId : "—";
+            set { }
+        }
+
+        public bool HasTargetName => !string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, RecordId, StringComparison.OrdinalIgnoreCase);
+
+        public bool HasTargetType => !string.IsNullOrWhiteSpace(TargetType);
+
         public string TimeAgo
         {
             get
@@ -48,9 +65,26 @@ namespace SOLUM_UI.Models
                 if (diff.TotalHours   < 24) return (int)diff.TotalHours   + " hours ago";
                 return (int)diff.TotalDays + " days ago";
             }
+            set { }
         }
 
-        public string TimestampFormatted => Timestamp.ToString("MMM dd, yyyy  hh:mm tt");
+        public string TimestampFormatted
+        {
+            get => Timestamp.ToString("MMM dd, yyyy  hh:mm tt");
+            set { }
+        }
+
+        public string PerformedByDisplay
+        {
+            get => !string.IsNullOrWhiteSpace(PerformedBy) ? PerformedBy : "System";
+            set { }
+        }
+
+        public string DateDisplay
+        {
+            get => $"{TimestampFormatted} ({TimeAgo})";
+            set { }
+        }
 
         // ── Display helpers ────────────────────────────────────────────────────
         // When RawActionType is set (API path), switch on the raw string.
@@ -107,14 +141,14 @@ namespace SOLUM_UI.Models
 
                 switch (Action)
                 {
-                    case AuditAction.Create:  return "Created";
-                    case AuditAction.Update:  return "Updated";
-                    case AuditAction.Delete:  return "Deleted";
-                    case AuditAction.View:    return "Viewed";
-                    case AuditAction.Login:   return "Logged In";
-                    case AuditAction.Logout:  return "Logged Out";
-                    case AuditAction.System:  return "System";
-                    default:                  return "Unknown";
+                    case AuditAction.Create:  return "Create Record";
+                    case AuditAction.Update:  return "Update Record";
+                    case AuditAction.Delete:  return "Delete Record";
+                    case AuditAction.View:    return "View Record";
+                    case AuditAction.Login:   return "Login";
+                    case AuditAction.Logout:  return "Logout";
+                    case AuditAction.System:  return "System Action";
+                    default:                  return "Activity";
                 }
             }
         }
@@ -173,11 +207,13 @@ namespace SOLUM_UI.Models
                 case "REGISTER_ADMIN":       return "Register Admin";
                 case "UPDATE_USER":          return "Update User";
                 case "DISABLE_USER":         return "Disable User";
-                case "CREATE_SOLO_PARENT":   return "Create Record";
-                case "UPDATE_SOLO_PARENT":   return "Update Record";
-                case "DELETE_SOLO_PARENT":   return "Delete Record";
-                case "RENEW_SOLO_PARENT":    return "Renew Record";
-                default:                     return raw; // show as-is if unknown
+                case "CREATE_SOLO_PARENT":   return "Create Solo Parent";
+                case "UPDATE_SOLO_PARENT":   return "Update Solo Parent";
+                case "DELETE_SOLO_PARENT":   return "Delete Solo Parent";
+                case "RENEW_SOLO_PARENT":    return "Renew Solo Parent";
+                default:
+                    return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(
+                        raw.Replace('_', ' ').ToLowerInvariant());
             }
         }
 

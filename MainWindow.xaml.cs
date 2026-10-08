@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,6 +8,7 @@ using System.Windows.Navigation;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
+using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
 {
@@ -31,6 +33,8 @@ namespace SOLUM_UI
 
         public static string LastName { get; set; } = string.Empty;
 
+        public static string ContactNumber { get; set; } = string.Empty;
+
         public static string FullName => $"{FirstName} {LastName}".Trim();
 
         public static void SetCurrentUser(ApplicationUserDTO user)
@@ -43,6 +47,7 @@ namespace SOLUM_UI
                 LastName = user.LastName;
                 CurrentUserBarangay = string.Empty; // Assuming barangay is set elsewhere
                 CurrentUserEmail = user.Email;
+                ContactNumber = user.ContactNumber ?? string.Empty;
             }
             else
             {
@@ -58,6 +63,9 @@ namespace SOLUM_UI
             InitializeComponent();
             RegisterNavButtons();
             MainFrame.Navigated += MainFrame_Navigated;
+            AuthApiService.Instance.OnSessionExpired += HandleSessionExpired;
+            Closed += (s, e) => AuthApiService.Instance.OnSessionExpired -= HandleSessionExpired;
+            Closing += MainWindow_Closing;
             Loaded += (s, e) =>
             {
                 TopBarControl.SetUser(CurrentUserName, CurrentUserRole);
@@ -190,7 +198,61 @@ namespace SOLUM_UI
                 this.DragMove();
         }
 
-        private void CloseButton_Click(object sender, RoutedEventArgs e) => this.Close();
+        private bool _isExiting = false;
+
+        private async void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (_isExiting) return;
+
+            e.Cancel = true;
+            await PromptExitAndLogoutAsync();
+        }
+
+        private async void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            await PromptExitAndLogoutAsync();
+        }
+
+        private async Task PromptExitAndLogoutAsync()
+        {
+            if (_isExiting) return;
+
+            const string logoutIcon = "M17,7L15.59,8.41L18.17,11H8V13H18.17L15.59,15.58L17,17L22,12M4,5H12V3H4A2,2 0 0,0 2,5V19A2,2 0 0,0 4,21H12V19H4V5Z";
+
+            bool isConfirmed = ActionConfirmDialog.Show(
+                title: "Exit Application",
+                message: "Are you sure you want to sign out and exit the application?",
+                confirmText: "Exit & Sign Out",
+                cancelText: "Cancel",
+                theme: ConfirmThemeType.Primary,
+                owner: this,
+                customIconData: logoutIcon);
+
+            if (!isConfirmed) return;
+
+            _isExiting = true;
+
+            if (LogoutLoadingOverlay != null)
+            {
+                LogoutLoadingOverlay.Visibility = Visibility.Visible;
+            }
+
+            try
+            {
+                await AuthApiService.Instance.LogoutAsync();
+            }
+            catch { }
+
+            try
+            {
+                AuditLogService.Instance.LogLogout(CurrentUserName, CurrentUserRole);
+            }
+            catch { }
+
+            AuthApiService.Instance.OnSessionExpired -= HandleSessionExpired;
+
+            Application.Current.Shutdown();
+        }
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e) => this.WindowState = WindowState.Minimized;
 
@@ -281,6 +343,23 @@ namespace SOLUM_UI
             LogoutOverlay.Visibility = Visibility.Visible;
         }
 
+        private bool _isSessionExpiredRedirecting = false;
+
+        private void HandleSessionExpired(string message)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (_isSessionExpiredRedirecting) return;
+                _isSessionExpiredRedirecting = true;
+                AuthApiService.Instance.OnSessionExpired -= HandleSessionExpired;
+
+                var login = new LoginPage(message);
+                login.Show();
+                _isExiting = true;
+                this.Close();
+            });
+        }
+
         private void LogoutCancel_Click(object sender, RoutedEventArgs e)
         {
             LogoutOverlay.Visibility = Visibility.Collapsed;
@@ -298,10 +377,12 @@ namespace SOLUM_UI
             }
             catch { }
 
+            AuthApiService.Instance.OnSessionExpired -= HandleSessionExpired;
             var login = new LoginPage();
             login.Show();
             AuditLogService.Instance.LogLogout(CurrentUserName, CurrentUserRole);
             ToastNotification.Show("Logged Out", "You have been logged out.", ToastType.Info);
+            _isExiting = true;
             this.Close();
         }
 

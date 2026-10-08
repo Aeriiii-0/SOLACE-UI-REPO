@@ -9,6 +9,7 @@ using System.Windows.Media;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
+using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
 {
@@ -18,10 +19,11 @@ namespace SOLUM_UI
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        public string Role { get; set; } = "Encoder"; // CHANGED — fixed value, page only manages Encoders
-        public string ContactNumber { get; set; } = string.Empty; // NOT PERSISTED — no backend field
+        public string Role { get; set; } = "Encoder";
+        public string ContactNumber { get; set; } = string.Empty;
+        public bool IsActive { get; set; } = true;
         public string Password { get; set; }
-        public string DateAdded { get; set; } = "—"; // NOT AVAILABLE — no backend field
+        public string DateAdded { get; set; } = "—";
 
         public string FullName => FirstName + " " + LastName;
 
@@ -35,8 +37,40 @@ namespace SOLUM_UI
             }
         }
 
-        public SolidColorBrush RoleBadgeColor => new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9)); // always Encoder styling now
+        public SolidColorBrush RoleBadgeColor => new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9));
         public SolidColorBrush RoleTextColor => new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
+
+        public string StatusText => IsActive ? "Active" : "Disabled";
+        public SolidColorBrush StatusBadgeColor => IsActive
+            ? new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9))
+            : new SolidColorBrush(Color.FromRgb(0xFE, 0xEB, 0xEE)); // Soft red/pink for disabled
+        public SolidColorBrush StatusBadgeBorder => IsActive
+            ? new SolidColorBrush(Color.FromRgb(0xA5, 0xD6, 0xA7))
+            : new SolidColorBrush(Color.FromRgb(0xEF, 0x9A, 0x9A));
+        public SolidColorBrush StatusTextColor => IsActive
+            ? new SolidColorBrush(Color.FromRgb(0x1B, 0x5E, 0x20))
+            : new SolidColorBrush(Color.FromRgb(0xC6, 0x28, 0x28));
+        public SolidColorBrush StatusDotColor => IsActive
+            ? new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32))
+            : new SolidColorBrush(Color.FromRgb(0xD3, 0x2F, 0x2F));
+
+        public string ToggleActionToolTip => IsActive ? "Disable User Account" : "Re-enable User Account";
+        public string ToggleButtonText => IsActive ? "Disable" : "Re-enable";
+        public SolidColorBrush ToggleButtonBorder => IsActive
+            ? new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0))
+            : new SolidColorBrush(Color.FromRgb(0xA5, 0xD6, 0xA7));
+        public SolidColorBrush ToggleButtonBg => IsActive
+            ? new SolidColorBrush(Color.FromRgb(0xFA, 0xFA, 0xFA))
+            : new SolidColorBrush(Color.FromRgb(0xEB, 0xF8, 0xEE));
+        public SolidColorBrush ToggleButtonTextColor => IsActive
+            ? new SolidColorBrush(Color.FromRgb(0x61, 0x61, 0x61))
+            : new SolidColorBrush(Color.FromRgb(0x1B, 0x5E, 0x20));
+        public string ToggleIconData => IsActive
+            ? "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,13.85 19.37,15.55 18.31,16.9L7.1,5.69C8.45,4.63 10.15,4 12,4M4,12C4,10.15 4.63,8.45 5.69,7.1L16.9,18.31C15.55,19.37 13.85,20 12,20A8,8 0 0,1 4,12Z" // slashed/prohibition circle
+            : "M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M10,17L15,12L10,7V17Z"; // check or activate/play arrow
+        public SolidColorBrush ToggleIconBrush => IsActive
+            ? new SolidColorBrush(Color.FromRgb(0x75, 0x75, 0x75))
+            : new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
     }
 
     public partial class UserAdministrationPage : Page
@@ -61,57 +95,157 @@ namespace SOLUM_UI
             if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = false;
             try
             {
-            var request = new GetApplicationUserRequest
-            {
-                Role = "Encoder",
-                SearchTerm = SearchBox?.Text?.Trim(),
-                Page = _currentPage,
-                PageSize = PageSize,
-                IsActive = true
-            };
+                string statusTag = (CmbUserStatus?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "ALL";
+                string searchTerm = SearchBox?.Text?.Trim();
 
-            var response = await UserApiService.Instance.GetApplicationUsersAsync(request);
-
-            if (!response.Succeeded || response.Data == null)
-            {
-                string err = response.Errors != null && response.Errors.Count > 0
-                    ? string.Join("\n", response.Errors)
-                    : "Unable to load users.";
-                ToastNotification.Show("Load Failed", err, ToastType.Warning);
-                _allUsers = new List<AppUser>();
-                _totalPages = 1;
-            }
-            else
-            {
-                _allUsers = response.Data.Items.Select(dto => new AppUser
+                if (statusTag == "ACTIVE")
                 {
-                    Id = dto.Id,
-                    FirstName = dto.FirstName,
-                    LastName = dto.LastName,
-                    Email = dto.Email,
-                    Role = "Encoder"
-                }).ToList();
+                    var request = new GetApplicationUserRequest
+                    {
+                        Role = "Encoder",
+                        SearchTerm = searchTerm,
+                        Page = _currentPage,
+                        PageSize = PageSize,
+                        IsActive = true
+                    };
 
-                int totalCount = response.Data.TotalCount;
-                _totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
-
-                if (_currentPage > _totalPages)
-                {
-                    _currentPage = _totalPages;
-                    await LoadUsersAsync();
-                    return;
+                    var response = await UserApiService.Instance.GetApplicationUsersAsync(request);
+                    if (!response.Succeeded || response.Data == null)
+                    {
+                        string err = response.Errors != null && response.Errors.Count > 0
+                            ? string.Join("\n", response.Errors)
+                            : "Unable to load users.";
+                        ToastNotification.Show("Load Failed", err, ToastType.Warning);
+                        _allUsers = new List<AppUser>();
+                        _totalPages = 1;
+                    }
+                    else
+                    {
+                        PopulateUsersFromResponse(response.Data.Items, response.Data.TotalCount, defaultIsActive: true);
+                    }
                 }
-            }
+                else if (statusTag == "DISABLED")
+                {
+                    var request = new GetApplicationUserRequest
+                    {
+                        Role = "Encoder",
+                        SearchTerm = searchTerm,
+                        Page = _currentPage,
+                        PageSize = PageSize,
+                        IsActive = false
+                    };
 
-            _filtered = new List<AppUser>(_allUsers);
-            RefreshList();
-            UpdatePagingControls();
+                    var response = await UserApiService.Instance.GetApplicationUsersAsync(request);
+                    if (!response.Succeeded || response.Data == null)
+                    {
+                        string err = response.Errors != null && response.Errors.Count > 0
+                            ? string.Join("\n", response.Errors)
+                            : "Unable to load users.";
+                        ToastNotification.Show("Load Failed", err, ToastType.Warning);
+                        _allUsers = new List<AppUser>();
+                        _totalPages = 1;
+                    }
+                    else
+                    {
+                        PopulateUsersFromResponse(response.Data.Items, response.Data.TotalCount, defaultIsActive: false);
+                    }
+                }
+                else
+                {
+                    // "ALL" Status: fetch active and disabled users and combine
+                    var activeTask = UserApiService.Instance.GetApplicationUsersAsync(new GetApplicationUserRequest
+                    {
+                        Role = "Encoder",
+                        SearchTerm = searchTerm,
+                        Page = 1,
+                        PageSize = 100,
+                        IsActive = true
+                    });
+                    var disabledTask = UserApiService.Instance.GetApplicationUsersAsync(new GetApplicationUserRequest
+                    {
+                        Role = "Encoder",
+                        SearchTerm = searchTerm,
+                        Page = 1,
+                        PageSize = 100,
+                        IsActive = false
+                    });
+
+                    await Task.WhenAll(activeTask, disabledTask);
+                    var activeRes = activeTask.Result;
+                    var disabledRes = disabledTask.Result;
+
+                    var userMap = new Dictionary<Guid, (ApplicationUserDTO dto, bool isActive)>();
+
+                    if (activeRes?.Succeeded == true && activeRes.Data?.Items != null)
+                    {
+                        foreach (var dto in activeRes.Data.Items)
+                        {
+                            bool active = dto.IsActive ?? true;
+                            userMap[dto.Id] = (dto, active);
+                        }
+                    }
+
+                    if (disabledRes?.Succeeded == true && disabledRes.Data?.Items != null)
+                    {
+                        foreach (var dto in disabledRes.Data.Items)
+                        {
+                            // A user returned in disabled query is disabled
+                            userMap[dto.Id] = (dto, false);
+                        }
+                    }
+
+                    var allCombined = userMap.Values.Select(pair => new AppUser
+                    {
+                        Id = pair.dto.Id,
+                        FirstName = pair.dto.FirstName,
+                        LastName = pair.dto.LastName,
+                        Email = pair.dto.Email,
+                        ContactNumber = pair.dto.ContactNumber ?? string.Empty,
+                        IsActive = pair.isActive,
+                        Role = string.IsNullOrWhiteSpace(pair.dto.Role) ? "Encoder" : pair.dto.Role
+                    }).ToList();
+
+                    int totalCount = allCombined.Count;
+                    _totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
+                    if (_currentPage > _totalPages) _currentPage = _totalPages;
+
+                    _allUsers = allCombined
+                        .Skip((_currentPage - 1) * PageSize)
+                        .Take(PageSize)
+                        .ToList();
+                }
+
+                _filtered = new List<AppUser>(_allUsers);
+                RefreshList();
+                UpdatePagingControls();
             }
             finally
             {
-                if (UsersLoadingOverlay  != null) UsersLoadingOverlay.IsLoading  = false;
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
                 if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = true;
             }
+        }
+
+        private void PopulateUsersFromResponse(IEnumerable<ApplicationUserDTO> items, int totalCount, bool defaultIsActive = true)
+        {
+            _allUsers = items.Select(dto => new AppUser
+            {
+                Id = dto.Id,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = dto.Email,
+                ContactNumber = dto.ContactNumber ?? string.Empty,
+                IsActive = dto.IsActive ?? defaultIsActive,
+                Role = string.IsNullOrWhiteSpace(dto.Role) ? "Encoder" : dto.Role
+            }).ToList();
+
+            _totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
+        }
+
+        private async void CmbUserStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _currentPage = 1;
+            await LoadUsersAsync();
         }
 
         private async void BtnRefreshUsers_Click(object sender, RoutedEventArgs e)
@@ -166,8 +300,6 @@ namespace SOLUM_UI
             ColPanel.Width = new GridLength(324);
         }
 
-        // CHANGED — looks up by Id now, not Email. Update your XAML so each row's edit button
-        // sets Tag="{Binding Id}" instead of Tag="{Binding Email}".
         private void EditUser_Click(object sender, RoutedEventArgs e)
         {
             string tagStr = (sender as Button)?.Tag?.ToString() ?? string.Empty;
@@ -180,14 +312,74 @@ namespace SOLUM_UI
             TxtFirstName.Text = user.FirstName;
             TxtLastName.Text = user.LastName;
             TxtEmail.Text = user.Email;
-            TxtEmail.IsReadOnly = true;   // NEW — email can't be changed via UpdateApplicationUserRequest
-            TxtContactNumber.Text = string.Empty; // not available from backend
+            TxtEmail.IsReadOnly = true;
+            TxtContactNumber.Text = user.ContactNumber ?? string.Empty;
             PwdPassword.Password = string.Empty;
             PwdConfirm.Password = string.Empty;
+
+            if (CmbEditStatus != null)
+            {
+                CmbEditStatus.SelectedIndex = user.IsActive ? 0 : 1;
+            }
 
             SetPanelMode(true);
             ClearErrors(null, null);
             ColPanel.Width = new GridLength(324);
+        }
+
+        private async void ToggleStatus_Click(object sender, RoutedEventArgs e)
+        {
+            string tagStr = (sender as Button)?.Tag?.ToString() ?? string.Empty;
+            if (!Guid.TryParse(tagStr, out var id)) return;
+
+            AppUser user = _allUsers.Find(u => u.Id == id);
+            if (user == null) return;
+
+            bool newStatus = !user.IsActive;
+            string actionVerb = newStatus ? "re-enable" : "disable";
+            string actionTitle = newStatus ? "Re-enable User" : "Disable User";
+            string confirmText = newStatus ? "Re-enable" : "Disable";
+            var theme = newStatus ? ConfirmThemeType.Success : ConfirmThemeType.Warning;
+
+            bool isConfirmed = ActionConfirmDialog.Show(
+                title: actionTitle,
+                message: $"Are you sure you want to {actionVerb} this user account ({user.FullName})?",
+                confirmText: confirmText,
+                cancelText: "Cancel",
+                theme: theme,
+                owner: Window.GetWindow(this));
+
+            if (!isConfirmed) return;
+
+            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
+            try
+            {
+                var response = await UserApiService.Instance.UpdateUserStatusAsync(id, newStatus);
+
+                if (!response.Succeeded)
+                {
+                    string err = response.Errors != null && response.Errors.Count > 0
+                        ? string.Join("\n", response.Errors)
+                        : $"Unable to {actionVerb} user.";
+                    ToastNotification.Show("Status Update Failed", err, ToastType.Warning);
+                    return;
+                }
+
+                user.IsActive = newStatus;
+                RefreshList();
+
+                ToastNotification.Show("Status Updated", $"{user.FullName} was {(newStatus ? "re-enabled" : "disabled")}.", ToastType.Success);
+                AuditLogService.Instance.LogUserAdmin($"status changed to {(newStatus ? "Active" : "Disabled")}",
+                    $"{user.FullName} ({user.Email})",
+                    MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
+                    user.Id.ToString());
+
+                await LoadUsersAsync();
+            }
+            finally
+            {
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
+            }
         }
 
         // CHANGED — Id-based lookup, calls real delete endpoint
@@ -199,9 +391,15 @@ namespace SOLUM_UI
             AppUser user = _allUsers.Find(u => u.Id == id);
             if (user == null) return;
 
-            var result = MessageBox.Show("Delete " + user.FullName + "?", "Confirm Delete",
-                MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result != MessageBoxResult.Yes) return;
+            bool isConfirmed = ActionConfirmDialog.Show(
+                title: "Delete User",
+                message: $"Are you sure you want to permanently delete {user.FullName}? This action cannot be undone.",
+                confirmText: "Delete User",
+                cancelText: "Cancel",
+                theme: ConfirmThemeType.Danger,
+                owner: Window.GetWindow(this));
+
+            if (!isConfirmed) return;
 
             var response = await UserApiService.Instance.DeleteApplicationUserAsync(id);
 
@@ -217,7 +415,8 @@ namespace SOLUM_UI
             if (_editTarget == user) ClosePanel_Click(null, null);
             ToastNotification.Show("User Deleted", user.FullName + " was removed.", ToastType.Warning);
             AuditLogService.Instance.LogUserAdmin("deleted", user.FullName + " (" + user.Email + ")",
-                MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
+                MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
+                user.Id.ToString());
 
             await LoadUsersAsync();
         }
@@ -237,6 +436,7 @@ namespace SOLUM_UI
             string firstName = TxtFirstName.Text.Trim();
             string lastName = TxtLastName.Text.Trim();
             string email = TxtEmail.Text.Trim();
+            string contactNumber = TxtContactNumber.Text.Trim();
             string password = PwdPassword.Password;
             string confirm = PwdConfirm.Password;
             bool ok = true;
@@ -283,7 +483,8 @@ namespace SOLUM_UI
                 {
                     Id = _editTarget.Id,
                     FirstName = firstName,
-                    LastName = lastName
+                    LastName = lastName,
+                    ContactNumber = contactNumber
                 };
 
                 var response = await UserApiService.Instance.UpdateApplicationUserAsync(updateReq);
@@ -298,16 +499,40 @@ namespace SOLUM_UI
                     return;
                 }
 
+                // Check if account status was toggled in the edit dropdown
+                bool selectedStatus = (CmbEditStatus?.SelectedItem as ComboBoxItem)?.Tag?.ToString() == "true";
+                if (selectedStatus != _editTarget.IsActive)
+                {
+                    var statusResponse = await UserApiService.Instance.UpdateUserStatusAsync(_editTarget.Id, selectedStatus);
+                    if (!statusResponse.Succeeded)
+                    {
+                        string err = statusResponse.Errors != null && statusResponse.Errors.Count > 0
+                            ? string.Join("\n", statusResponse.Errors)
+                            : "Account details updated, but status update failed.";
+                        ToastNotification.Show("Status Update Issue", err, ToastType.Warning);
+                    }
+                    else
+                    {
+                        _editTarget.IsActive = selectedStatus;
+                        RefreshList();
+                        AuditLogService.Instance.LogUserAdmin($"status changed to {(selectedStatus ? "Active" : "Disabled")}",
+                            $"{_editTarget.FullName} ({_editTarget.Email})",
+                            MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
+                            _editTarget.Id.ToString());
+                    }
+                }
+
                 ToastNotification.Show("User Updated", firstName + " " + lastName + " was updated.", ToastType.Info);
                 AuditLogService.Instance.LogUserAdmin("updated",
                     firstName + " " + lastName + " (" + _editTarget.Email + ")",
-                    MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
+                    MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
+                    _editTarget.Id.ToString());
                 ClosePanel_Click(null, null);
                 await LoadUsersAsync();
             }
             else
             {
-                var response = await AuthApiService.Instance.RegisterAsync(email, password, firstName, lastName);
+                var response = await AuthApiService.Instance.RegisterAsync(email, password, firstName, lastName, contactNumber);
 
                 if (!response.Succeeded)
                 {
@@ -333,6 +558,13 @@ namespace SOLUM_UI
             TxtPanelTitle.Text = editMode ? "Edit User" : "Add New User";
             TxtPanelSub.Text = editMode ? "Update account details." : "Create a new user account.";
             TxtSubmitBtn.Text = editMode ? "Save Changes" : "Create Account";
+
+            if (PnlAccountStatus != null)
+                PnlAccountStatus.Visibility = editMode ? Visibility.Visible : Visibility.Collapsed;
+            if (PnlPassword != null)
+                PnlPassword.Visibility = editMode ? Visibility.Collapsed : Visibility.Visible;
+            if (PnlConfirm != null)
+                PnlConfirm.Visibility = editMode ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void ResetForm()
@@ -344,6 +576,7 @@ namespace SOLUM_UI
             TxtContactNumber.Text = string.Empty;
             PwdPassword.Password = string.Empty;
             PwdConfirm.Password = string.Empty;
+            if (CmbEditStatus != null) CmbEditStatus.SelectedIndex = 0;
             FormErrorBanner.Visibility = Visibility.Collapsed;
             SetPanelMode(false);
         }

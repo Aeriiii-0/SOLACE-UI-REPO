@@ -19,6 +19,14 @@ namespace SOLUM_UI
             InitializeComponent();
         }
 
+        public LoginPage(string sessionNotice) : this()
+        {
+            if (!string.IsNullOrWhiteSpace(sessionNotice))
+            {
+                Loaded += (s, e) => ShowNotice(sessionNotice, "Session Expired");
+            }
+        }
+
         private void TxtEmail_TextChanged(object sender, TextChangedEventArgs e)
         {
             PlaceholderEmail.Visibility = string.IsNullOrEmpty(TxtEmail.Text)
@@ -113,8 +121,16 @@ namespace SOLUM_UI
             }
         }
 
+        public void ShowNotice(string message, string title = "Session Expired")
+        {
+            if (TxtErrorModalTitle != null) TxtErrorModalTitle.Text = title;
+            TxtErrorModal.Text = message;
+            ErrorModalOverlay.Visibility = Visibility.Visible;
+        }
+
         private void ShowError(string message)
         {
+            if (TxtErrorModalTitle != null) TxtErrorModalTitle.Text = "Sign In Failed";
             TxtErrorModal.Text = message;
             ErrorModalOverlay.Visibility = Visibility.Visible;
         }

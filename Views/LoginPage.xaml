@@ -1,4 +1,4 @@
-﻿<Window x:Class="SOLUM_UI.LoginPage"
+<Window x:Class="SOLUM_UI.LoginPage"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -268,7 +268,7 @@
                     <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="3" Opacity="0.22"/>
                 </Border.Effect>
                 <StackPanel>
-                    <TextBlock Text="Sign In Failed" FontFamily="Segoe UI" FontSize="15"
+                    <TextBlock x:Name="TxtErrorModalTitle" Text="Sign In Failed" FontFamily="Segoe UI" FontSize="15"
                                FontWeight="Bold" Foreground="#8B1A4A" Margin="0,0,0,10"/>
                     <TextBlock x:Name="TxtErrorModal" Text="" FontFamily="Segoe UI" FontSize="12"
                                Foreground="#444444" TextWrapping="Wrap" Margin="0,0,0,20"/>

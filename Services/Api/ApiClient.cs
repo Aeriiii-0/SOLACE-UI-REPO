@@ -47,6 +47,8 @@ namespace SOLUM_UI.Services.Api
             };
         }
 
+        private readonly System.Threading.SemaphoreSlim _refreshLock = new System.Threading.SemaphoreSlim(1, 1);
+
         public void SetBearerToken(string token)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -70,7 +72,7 @@ namespace SOLUM_UI.Services.Api
             try
             {
                 var response = await _httpClient.GetAsync(endpoint);
-                return await HandleResponseAsync<T>(response);
+                return await HandleResponseAsync<T>(response, endpoint, () => GetAsync<T>(endpoint));
             }
             catch (Exception ex)
             {
@@ -85,7 +87,7 @@ namespace SOLUM_UI.Services.Api
                 string json = JsonConvert.SerializeObject(payload, _jsonSettings);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 var response = await _httpClient.PostAsync(endpoint, content);
-                return await HandleResponseAsync<TResponse>(response);
+                return await HandleResponseAsync<TResponse>(response, endpoint, () => PostAsync<TRequest, TResponse>(endpoint, payload));
             }
             catch (Exception ex)
             {
@@ -100,7 +102,23 @@ namespace SOLUM_UI.Services.Api
                 string json = JsonConvert.SerializeObject(payload, _jsonSettings);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 var response = await _httpClient.PutAsync(endpoint, content);
-                return await HandleResponseAsync<TResponse>(response);
+                return await HandleResponseAsync<TResponse>(response, endpoint, () => PutAsync<TRequest, TResponse>(endpoint, payload));
+            }
+            catch (Exception ex)
+            {
+                return ConnectionError<TResponse>(ex);
+            }
+        }
+
+        public async Task<BaseResponse<TResponse>> PatchAsync<TRequest, TResponse>(string endpoint, TRequest payload)
+        {
+            try
+            {
+                string json = JsonConvert.SerializeObject(payload, _jsonSettings);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var request = new HttpRequestMessage(new HttpMethod("PATCH"), endpoint) { Content = content };
+                var response = await _httpClient.SendAsync(request);
+                return await HandleResponseAsync<TResponse>(response, endpoint, () => PatchAsync<TRequest, TResponse>(endpoint, payload));
             }
             catch (Exception ex)
             {
@@ -113,7 +131,7 @@ namespace SOLUM_UI.Services.Api
             try
             {
                 var response = await _httpClient.DeleteAsync(endpoint);
-                return await HandleResponseAsync<TResponse>(response);
+                return await HandleResponseAsync<TResponse>(response, endpoint, () => DeleteAsync<TResponse>(endpoint));
             }
             catch (Exception ex)
             {
@@ -121,7 +139,11 @@ namespace SOLUM_UI.Services.Api
             }
         }
 
-        private async Task<BaseResponse<T>> HandleResponseAsync<T>(HttpResponseMessage response)
+        private async Task<BaseResponse<T>> HandleResponseAsync<T>(
+            HttpResponseMessage response,
+            string endpoint = null,
+            Func<Task<BaseResponse<T>>> retryFunc = null,
+            bool isRetry = false)
         {
             string body = await response.Content.ReadAsStringAsync();
 
@@ -141,7 +163,6 @@ namespace SOLUM_UI.Services.Api
                         return baseResp;
                     }
 
-                    
                     var rawData = JsonConvert.DeserializeObject<T>(body, _jsonSettings);
                     return new BaseResponse<T>
                     {
@@ -164,6 +185,48 @@ namespace SOLUM_UI.Services.Api
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
+                bool isAuthEndpoint = !string.IsNullOrEmpty(endpoint) &&
+                    (endpoint.IndexOf("api/auth/login", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     endpoint.IndexOf("api/auth/refresh-token", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     endpoint.IndexOf("api/auth/logout", StringComparison.OrdinalIgnoreCase) >= 0);
+
+                if (!isRetry && retryFunc != null && !isAuthEndpoint &&
+                    !string.IsNullOrWhiteSpace(AuthApiService.Instance.Token) &&
+                    !string.IsNullOrWhiteSpace(AuthApiService.Instance.RefreshToken))
+                {
+                    bool lockAcquired = false;
+                    try
+                    {
+                        lockAcquired = await _refreshLock.WaitAsync(TimeSpan.FromSeconds(10));
+                        var refreshResult = await AuthApiService.Instance.RefreshTokenAsync();
+                        if (refreshResult != null && refreshResult.Succeeded && refreshResult.Data != null && !string.IsNullOrWhiteSpace(refreshResult.Data.Token))
+                        {
+                            return await retryFunc();
+                        }
+                        else
+                        {
+                            AuthApiService.Instance.NotifySessionExpired("Session expired or revoked. Please log in again.");
+                            return BaseResponse<T>.Fail("Session expired or revoked. Please log in again.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AuthApiService.Instance.NotifySessionExpired("Session expired or revoked. Please log in again.");
+                        return BaseResponse<T>.Fail("Session expired or revoked. Please log in again.", ex.Message);
+                    }
+                    finally
+                    {
+                        if (lockAcquired)
+                        {
+                            _refreshLock.Release();
+                        }
+                    }
+                }
+                else if (!isAuthEndpoint)
+                {
+                    AuthApiService.Instance.NotifySessionExpired("Session expired or revoked. Please log in again.");
+                }
+
                 errorResult.Errors.Add("Unauthorized access. Please log in again.");
                 return errorResult;
             }

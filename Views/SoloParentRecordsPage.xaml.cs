@@ -29,7 +29,7 @@ namespace SOLUM_UI
         private string _barangayFilter = "All";
         private string _sortOption     = "Name A-Z";
 
-        private const int PageSize = 10;
+        private int _pageSize      = 10;
         private int _currentPage   = 1;
         private int _totalPages    = 1;
         private bool _isLoading    = false;
@@ -153,7 +153,7 @@ namespace SOLUM_UI
                     SortBy = sortBy,
                     SortOrder = sortOrder,
                     Page = _currentPage,
-                    PageSize = PageSize
+                    PageSize = Math.Min(100, Math.Max(10, _pageSize))
                 };
 
                 // Fetch the list page, then retrieve full details in parallel (the list
@@ -276,6 +276,16 @@ namespace SOLUM_UI
             if (_currentPage > 1)
             {
                 _currentPage--;
+                _ = LoadRecordsAsync();
+            }
+        }
+
+        private void CmbPageSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmbPageSize?.SelectedItem is ComboBoxItem item && int.TryParse(item.Content?.ToString(), out int newSize))
+            {
+                _pageSize = Math.Min(100, Math.Max(10, newSize));
+                _currentPage = 1;
                 _ = LoadRecordsAsync();
             }
         }
@@ -638,6 +648,16 @@ namespace SOLUM_UI
                 ToastNotification.Show("Invalid ID", "Cannot delete record without a valid ID.", ToastType.Warning);
                 return;
             }
+
+            bool isConfirmed = ActionConfirmDialog.Show(
+                title: "Delete Record",
+                message: $"Are you sure you want to permanently delete the record for {recordName}? This action cannot be undone.",
+                confirmText: "Delete Record",
+                cancelText: "Cancel",
+                theme: ConfirmThemeType.Danger,
+                owner: Window.GetWindow(this));
+
+            if (!isConfirmed) return;
 
             var deleteResp = await SoloParentApiService.Instance.DeleteSoloParentAsync(guid);
             if (!deleteResp.Succeeded)

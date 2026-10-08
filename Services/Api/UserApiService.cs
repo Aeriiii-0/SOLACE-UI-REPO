@@ -1,4 +1,4 @@
-﻿using SOLUM_UI.Models.Api;
+using SOLUM_UI.Models.Api;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +28,8 @@ namespace SOLUM_UI.Services.Api
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
                 queryParams.Add($"searchTerm={Uri.EscapeDataString(request.SearchTerm.Trim())}");
 
-            queryParams.Add($"isActive={request.IsActive.ToString().ToLowerInvariant()}");
+            if (request.IsActive.HasValue)
+                queryParams.Add($"isActive={request.IsActive.Value.ToString().ToLowerInvariant()}");
             queryParams.Add($"page={request.Page}");
             queryParams.Add($"pageSize={request.PageSize}");
 
@@ -39,6 +40,11 @@ namespace SOLUM_UI.Services.Api
         public async Task<BaseResponse<bool>> UpdateApplicationUserAsync(UpdateApplicationUserRequest request)
         {
             return await ApiClient.Instance.PutAsync<UpdateApplicationUserRequest, bool>("api/user", request);
+        }
+
+        public async Task<BaseResponse<bool>> UpdateUserStatusAsync(Guid id, bool isActive)
+        {
+            return await ApiClient.Instance.PatchAsync<UpdateUserStatusRequest, bool>($"api/user/{id}/status", new UpdateUserStatusRequest { IsActive = isActive });
         }
 
         public async Task<BaseResponse<bool>> DeleteApplicationUserAsync(Guid id)

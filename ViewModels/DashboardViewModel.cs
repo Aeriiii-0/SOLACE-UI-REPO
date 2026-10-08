@@ -13,19 +13,45 @@ namespace SOLUM_UI.ViewModels
 {
     public class MonthBar : INotifyPropertyChanged
     {
-        public string Month { get; set; }
-        public int Value { get; set; }
-        public int MaxValue { get; set; }
+        private string _month;
+        private int _value;
+        private int _maxValue;
+        private string _tooltipText;
+
+        public string Month
+        {
+            get => _month;
+            set { _month = value; OnPropertyChanged(); }
+        }
+
+        public int Value
+        {
+            get => _value;
+            set { _value = value; OnPropertyChanged(); OnPropertyChanged(nameof(BarHeight)); }
+        }
+
+        public int MaxValue
+        {
+            get => _maxValue;
+            set { _maxValue = value; OnPropertyChanged(); OnPropertyChanged(nameof(BarHeight)); }
+        }
+
+        public string TooltipText
+        {
+            get => _tooltipText;
+            set { _tooltipText = value; OnPropertyChanged(); }
+        }
 
         public double BarHeight => MaxValue > 0 ? (Value / (double)MaxValue) * 200.0 : 0;
 
         public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     public class DashboardViewModel : INotifyPropertyChanged
     {
-        private static readonly int[] _monthlyValues = { 330, 295, 245, 325, 295, 235, 330 };
-        private static readonly string[] _monthLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul" };
+        private static readonly string[] _monthLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
         private int _registeredSoloParents;
         public int RegisteredSoloParents
@@ -96,6 +122,34 @@ namespace SOLUM_UI.ViewModels
         }
         public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
+        private string _chartSubtitle = $"New solo parents registered — Jan to Dec {DateTime.Now.Year}";
+        public string ChartSubtitle
+        {
+            get => _chartSubtitle;
+            set { _chartSubtitle = value; OnPropertyChanged(); }
+        }
+
+        private string _chartYMax = "400";
+        public string ChartYMax
+        {
+            get => _chartYMax;
+            set { _chartYMax = value; OnPropertyChanged(); }
+        }
+
+        private string _chartYMid = "200";
+        public string ChartYMid
+        {
+            get => _chartYMid;
+            set { _chartYMid = value; OnPropertyChanged(); }
+        }
+
+        private string _chartYLow = "100";
+        public string ChartYLow
+        {
+            get => _chartYLow;
+            set { _chartYLow = value; OnPropertyChanged(); }
+        }
+
         public ObservableCollection<MonthBar> MonthlyBars { get; } = new ObservableCollection<MonthBar>();
         public ObservableCollection<AuditLog> RecentLogs  { get; } = new ObservableCollection<AuditLog>();
 
@@ -134,10 +188,16 @@ namespace SOLUM_UI.ViewModels
                 var (isEncoder, currentUserId) = GetEncoderContext();
                 string effectiveUserId = isEncoder && !string.IsNullOrWhiteSpace(currentUserId) ? currentUserId : null;
 
+                int currentYear = DateTime.Now.Year;
+                ChartSubtitle = $"New solo parents registered — Jan to Dec {currentYear}";
+
                 var statsTask = AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
                 var logsTask  = AuditLogApiService.Instance.GetLogsAsync(pageSize: 10, userId: effectiveUserId);
+                var monthlyTasks = Enumerable.Range(1, 12)
+                    .Select(m => AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(currentYear, m))
+                    .ToArray();
 
-                await Task.WhenAll(statsTask, logsTask);
+                await Task.WhenAll(new Task[] { statsTask, logsTask }.Concat(monthlyTasks));
 
                 var statsResponse = statsTask.Result;
                 if (statsResponse != null && statsResponse.Succeeded && statsResponse.Data != null)
@@ -153,6 +213,35 @@ namespace SOLUM_UI.ViewModels
                 {
                     foreach (var dto in logsResponse.Data.Items)
                         RecentLogs.Add(MapDtoToLog(dto));
+                }
+
+                // Populate 12-month chart from API responses
+                var monthlyValues = new int[12];
+                for (int i = 0; i < 12; i++)
+                {
+                    var res = monthlyTasks[i].Result;
+                    if (res != null && res.Succeeded && res.Data != null)
+                    {
+                        monthlyValues[i] = res.Data.NewRegistrations;
+                    }
+                }
+
+                int maxVal = Math.Max(10, monthlyValues.Max());
+                ChartYMax = maxVal.ToString();
+                ChartYMid = (maxVal / 2).ToString();
+                ChartYLow = (maxVal / 4).ToString();
+
+                MonthlyBars.Clear();
+                for (int i = 0; i < 12; i++)
+                {
+                    int val = monthlyValues[i];
+                    MonthlyBars.Add(new MonthBar
+                    {
+                        Month = _monthLabels[i],
+                        Value = val,
+                        MaxValue = maxVal,
+                        TooltipText = $"{_monthLabels[i]} {currentYear}: {val:N0} new registrations"
+                    });
                 }
             }
             catch (Exception ex)
@@ -188,24 +277,50 @@ namespace SOLUM_UI.ViewModels
             string rawType    = dto.ActionType  ?? string.Empty;
             string userId     = dto.PerformedBy?.UserId ?? string.Empty;
             string userRole   = dto.PerformedBy?.Role   ?? string.Empty;
+            string targetId   = dto.Target?.TargetId    ?? string.Empty;
             string targetType = dto.Target?.TargetType  ?? string.Empty;
             string targetName = dto.Target?.TargetName  ?? string.Empty;
             string status     = dto.Metadata?.Status    ?? string.Empty;
-            string recordName = !string.IsNullOrWhiteSpace(targetName) ? targetName : targetType;
+            string recordName = !string.IsNullOrWhiteSpace(targetName) ? targetName : (!string.IsNullOrWhiteSpace(targetId) ? targetId : targetType);
 
             return new AuditLog
             {
                 RawActionType   = rawType,
-                Action          = AuditAction.System,
+                Action          = MapAction(rawType),
                 Description     = BuildLogDescription(rawType, userId, recordName, status),
                 PerformedBy     = userId,
                 PerformedByRole = userRole,
                 Timestamp       = dto.Timestamp.LocalDateTime,
+                RecordId        = targetId,
                 RecordName      = recordName,
                 IpAddress       = dto.Metadata?.IpAddress ?? string.Empty,
                 Status          = status,
                 TargetType      = targetType,
+                FieldChanged    = dto.Metadata?.FieldChanged ?? string.Empty,
+                OldValue        = dto.Metadata?.OldValue     ?? string.Empty,
+                NewValue        = dto.Metadata?.NewValue     ?? string.Empty,
             };
+        }
+
+        private static AuditAction MapAction(string actionType)
+        {
+            if (string.IsNullOrWhiteSpace(actionType)) return AuditAction.System;
+            switch (actionType.Trim().ToUpperInvariant())
+            {
+                case "CREATE_SOLO_PARENT":
+                case "REGISTER_USER":
+                case "REGISTER_ADMIN":   return AuditAction.Create;
+                case "UPDATE_SOLO_PARENT":
+                case "UPDATE_USER":
+                case "CHANGE_PASSWORD":
+                case "RENEW_SOLO_PARENT":
+                case "REFRESH_TOKEN":    return AuditAction.Update;
+                case "DELETE_SOLO_PARENT":
+                case "DISABLE_USER":     return AuditAction.Delete;
+                case "LOGIN":            return AuditAction.Login;
+                case "LOGOUT":           return AuditAction.Logout;
+                default:                 return AuditAction.System;
+            }
         }
 
         private static string BuildLogDescription(string rawType, string actor, string target, string status)
@@ -237,10 +352,18 @@ namespace SOLUM_UI.ViewModels
 
         private void LoadChart()
         {
-            int max = _monthlyValues.Max();
             MonthlyBars.Clear();
+            int currentYear = DateTime.Now.Year;
             for (int i = 0; i < _monthLabels.Length; i++)
-                MonthlyBars.Add(new MonthBar { Month = _monthLabels[i], Value = _monthlyValues[i], MaxValue = max });
+            {
+                MonthlyBars.Add(new MonthBar
+                {
+                    Month = _monthLabels[i],
+                    Value = 0,
+                    MaxValue = 100,
+                    TooltipText = $"{_monthLabels[i]} {currentYear}: 0 new registrations"
+                });
+            }
         }
 
         private static (bool isEncoder, string userId) GetEncoderContext()

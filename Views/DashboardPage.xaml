@@ -9,6 +9,7 @@
       Title="Dashboard">
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
     </Page.Resources>
     <Page.DataContext>
         <vm:DashboardViewModel/>
@@ -145,7 +146,7 @@
                             <StackPanel Grid.Row="0" Margin="0,0,0,18">
                                 <TextBlock Text="Monthly Registrations"
                                            FontFamily="Segoe UI" FontSize="16" FontWeight="Bold" Foreground="#702943"/>
-                                <TextBlock Text="New solo parents registered — Jan to Jul 2026"
+                                <TextBlock Text="{Binding ChartSubtitle}"
                                            FontFamily="Segoe UI" FontSize="13" Foreground="#A06080" Margin="0,4,0,0"/>
                             </StackPanel>
                             <Grid Grid.Row="1">
@@ -154,9 +155,9 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid Grid.Column="0" Margin="0,0,8,32">
-                                    <TextBlock Text="350" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-                                    <TextBlock Text="250" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,-10,0,0"/>
-                                    <TextBlock Text="150" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,0,32"/>
+                                    <TextBlock Text="{Binding ChartYMax}" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+                                    <TextBlock Text="{Binding ChartYMid}" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,-10,0,0"/>
+                                    <TextBlock Text="{Binding ChartYLow}" FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,0,32"/>
                                     <TextBlock Text="0"   FontSize="11" Foreground="#C0A0AA" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                                 </Grid>
                                 <ItemsControl Grid.Column="1" ItemsSource="{Binding MonthlyBars}">
@@ -174,9 +175,9 @@
                                                     <RowDefinition Height="32"/>
                                                 </Grid.RowDefinitions>
                                                 <Border Grid.Row="1" Background="#D4A0B0"
-                                                        CornerRadius="5,5,0,0"
+                                                        CornerRadius="4,4,0,0"
                                                         Height="{Binding BarHeight}"
-                                                        Margin="8,0" VerticalAlignment="Bottom">
+                                                        Margin="4,0" VerticalAlignment="Bottom">
                                                     <Border.Style>
                                                         <Style TargetType="Border">
                                                             <Style.Triggers>
@@ -187,11 +188,11 @@
                                                         </Style>
                                                     </Border.Style>
                                                     <Border.ToolTip>
-                                                        <ToolTip Content="{Binding Value}"/>
+                                                        <ToolTip Content="{Binding TooltipText}"/>
                                                     </Border.ToolTip>
                                                 </Border>
                                                 <TextBlock Grid.Row="2" Text="{Binding Month}"
-                                                           FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold"
+                                                           FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold"
                                                            Foreground="#702943"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Grid>
@@ -263,10 +264,10 @@
                             <ItemsControl ItemsSource="{Binding RecentLogs}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="#FAFAFA" CornerRadius="10"
-                                                BorderBrush="#EEE4E8" BorderThickness="1"
-                                                Padding="14,12" Margin="0,0,0,10"
-                                                Cursor="Hand">
+                                        <Border Background="White" CornerRadius="8"
+                                                BorderBrush="#E5D8DC" BorderThickness="1"
+                                                Padding="14,12" Margin="0,0,0,8"
+                                                Cursor="Hand" ToolTip="Click to view details">
                                             <Border.InputBindings>
                                                 <MouseBinding MouseAction="LeftClick"
                                                               Command="{Binding DataContext.SelectLogCommand,
@@ -275,11 +276,12 @@
                                             </Border.InputBindings>
                                             <Border.Style>
                                                 <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#FAFAFA"/>
+                                                    <Setter Property="Background" Value="White"/>
+                                                    <Setter Property="BorderBrush" Value="#E5D8DC"/>
                                                     <Style.Triggers>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#FDF3F6"/>
-                                                            <Setter Property="BorderBrush" Value="#D0B8C0"/>
+                                                            <Setter Property="Background" Value="#FDF6F8"/>
+                                                            <Setter Property="BorderBrush" Value="#702943"/>
                                                         </Trigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -289,8 +291,10 @@
                                                     <ColumnDefinition Width="38"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
+
+                                                <!-- Action type icon & color -->
                                                 <Border Grid.Column="0" Width="34" Height="34"
-                                                        CornerRadius="17" VerticalAlignment="Top">
+                                                        CornerRadius="17" VerticalAlignment="Center">
                                                     <Border.Background>
                                                         <SolidColorBrush Color="{Binding DotColor}"/>
                                                     </Border.Background>
@@ -299,15 +303,25 @@
                                                         <Path Data="{Binding DotIcon}" Fill="White" Stretch="Uniform"/>
                                                     </Viewbox>
                                                 </Border>
+
+                                                <!-- Text attributes -->
                                                 <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                                                    <TextBlock Text="{Binding Description}"
-                                                               FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold"
-                                                               Foreground="#111111" TextWrapping="Wrap"/>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                                        <TextBlock Text="{Binding PerformedBy}" FontFamily="Segoe UI" FontSize="12" Foreground="#666666"/>
-                                                        <TextBlock Text=" · " FontFamily="Segoe UI" FontSize="12" Foreground="#CCCCCC"/>
-                                                        <TextBlock Text="{Binding TimeAgo}" FontFamily="Segoe UI" FontSize="12" Foreground="#AAAAAA"/>
-                                                    </StackPanel>
+                                                    <TextBlock FontFamily="Segoe UI" FontSize="12.5" Margin="0,0,0,3" TextTrimming="CharacterEllipsis">
+                                                        <Run Text="Action: " FontWeight="Bold" Foreground="#222222"/>
+                                                        <Run Text="{Binding ActionTitle, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
+                                                    </TextBlock>
+                                                    <TextBlock FontFamily="Segoe UI" FontSize="12" Margin="0,0,0,3" TextTrimming="CharacterEllipsis">
+                                                        <Run Text="Target ID: " FontWeight="Bold" Foreground="#222222"/>
+                                                        <Run Text="{Binding TargetIdDisplay, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
+                                                    </TextBlock>
+                                                    <TextBlock FontFamily="Segoe UI" FontSize="12" Margin="0,0,0,3" TextTrimming="CharacterEllipsis">
+                                                        <Run Text="Performed By: " FontWeight="Bold" Foreground="#222222"/>
+                                                        <Run Text="{Binding PerformedByDisplay, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
+                                                    </TextBlock>
+                                                    <TextBlock FontFamily="Segoe UI" FontSize="11.5" Margin="0,0,0,0" TextTrimming="CharacterEllipsis">
+                                                        <Run Text="Date: " FontWeight="Bold" Foreground="#222222"/>
+                                                        <Run Text="{Binding DateDisplay, Mode=OneWay}" FontWeight="Normal" Foreground="#555555"/>
+                                                    </TextBlock>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -427,11 +441,11 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Performed by"
                                        FontFamily="Segoe UI" FontSize="12"
-                                       Foreground="#888888" VerticalAlignment="Center"/>
+                                       FontWeight="Bold" Foreground="#333333" VerticalAlignment="Center"/>
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <TextBlock Text="{Binding PerformedBy}"
+                                <TextBlock Text="{Binding PerformedByDisplay}"
                                            FontFamily="Segoe UI" FontSize="13"
-                                           FontWeight="SemiBold" Foreground="#1A1A1A"
+                                           FontWeight="Normal" Foreground="#1A1A1A"
                                            VerticalAlignment="Center"/>
                                 <Border CornerRadius="5" Background="#F0E8EC"
                                         Padding="8,3" Margin="8,0,0,0" VerticalAlignment="Center">
@@ -450,18 +464,24 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Target"
                                        FontFamily="Segoe UI" FontSize="12"
-                                       Foreground="#888888" VerticalAlignment="Center"/>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <TextBlock Text="{Binding RecordId}"
-                                           FontFamily="Segoe UI" FontSize="13"
-                                           FontWeight="Bold" Foreground="#702943"
-                                           VerticalAlignment="Center"/>
-                                <Border CornerRadius="5" Background="#EEF2FF"
-                                        Padding="8,3" Margin="8,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding TargetType}"
-                                               FontFamily="Segoe UI" FontSize="10"
-                                               FontWeight="SemiBold" Foreground="#4F46E5"/>
-                                </Border>
+                                       FontWeight="Bold" Foreground="#333333" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding TargetIdDisplay}"
+                                               FontFamily="Segoe UI" FontSize="13"
+                                               FontWeight="Normal" Foreground="#1A1A1A"
+                                               VerticalAlignment="Center"/>
+                                    <Border CornerRadius="5" Background="#EEF2FF"
+                                            Padding="8,3" Margin="8,0,0,0" VerticalAlignment="Center"
+                                            Visibility="{Binding HasTargetType, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock Text="{Binding TargetType}"
+                                                   FontFamily="Segoe UI" FontSize="10"
+                                                   FontWeight="SemiBold" Foreground="#4F46E5"/>
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Text="{Binding RecordName, StringFormat='Name: {0}'}"
+                                           FontFamily="Segoe UI" FontSize="12" Foreground="#666666" Margin="0,2,0,0"
+                                           Visibility="{Binding HasTargetName, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             </StackPanel>
                         </Grid>
 
@@ -473,7 +493,7 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Status"
                                        FontFamily="Segoe UI" FontSize="12"
-                                       Foreground="#888888" VerticalAlignment="Center"/>
+                                       FontWeight="Bold" Foreground="#333333" VerticalAlignment="Center"/>
                             <Border Grid.Column="1" CornerRadius="6" Padding="10,4"
                                     HorizontalAlignment="Left">
                                 <Border.Style>
@@ -491,7 +511,7 @@
                                 </Border.Style>
                                 <TextBlock Text="{Binding Status}"
                                            FontFamily="Segoe UI" FontSize="12"
-                                           FontWeight="Bold">
+                                           FontWeight="SemiBold">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Foreground" Value="#27AE60"/>
@@ -517,7 +537,7 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="IP Address"
                                        FontFamily="Segoe UI" FontSize="12"
-                                       Foreground="#888888" VerticalAlignment="Center"/>
+                                       FontWeight="Bold" Foreground="#333333" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1" Text="{Binding IpAddress}"
                                        FontFamily="Consolas" FontSize="12"
                                        Foreground="#444444" TextWrapping="Wrap"
@@ -532,10 +552,10 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Timestamp"
                                        FontFamily="Segoe UI" FontSize="12"
-                                       Foreground="#888888" VerticalAlignment="Center"/>
+                                       FontWeight="Bold" Foreground="#333333" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1" Text="{Binding TimestampFormatted}"
                                        FontFamily="Segoe UI" FontSize="13"
-                                       FontWeight="SemiBold" Foreground="#1A1A1A"
+                                       FontWeight="Normal" Foreground="#1A1A1A"
                                        VerticalAlignment="Center"/>
                         </Grid>
 

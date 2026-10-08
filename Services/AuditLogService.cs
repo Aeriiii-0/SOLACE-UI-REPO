@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -73,10 +73,10 @@ namespace SOLUM_UI.Services
         public void LogLogout(string by, string role = "")
             => Log(AuditAction.Logout, $"User logged out: {by}", by, role);
 
-        public void LogUserAdmin(string action, string targetUser, string by, string role = "")
+        public void LogUserAdmin(string action, string targetUser, string by, string role = "", string targetUserId = "")
             => Log(AuditAction.System,
                    $"User account {action}: {targetUser} (by {by})",
-                   by, role, "", targetUser);
+                   by, role, targetUserId, targetUser);
 
         public void LogSystem(string description)
             => Log(AuditAction.System, description, "System");
