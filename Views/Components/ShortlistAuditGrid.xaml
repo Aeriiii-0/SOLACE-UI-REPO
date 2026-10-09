@@ -186,9 +186,9 @@
                             <GridViewColumn x:Name="ColName" Header="SOLO PARENT" Width="150">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="8,0"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Barangay}" FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <!-- Col 4: Score -->
-                            <GridViewColumn x:Name="ColScore" Header="SCORE" Width="64">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="4,0"><TextBlock Text="{Binding ScoreLabel}" FontSize="13.5" FontWeight="Bold" Foreground="{Binding ScoreBarColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            <!-- Col 4: Score & Origin Badge -->
+                            <GridViewColumn x:Name="ColScore" Header="SCORE" Width="76">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="2,1"><StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"><TextBlock Text="{Binding ScoreLabel}" FontSize="13.5" FontWeight="Bold" Foreground="{Binding ScoreBarColor}" HorizontalAlignment="Center"/><Border Background="{Binding ModelSourceBg}" BorderBrush="{Binding ModelSourceBorder}" BorderThickness="1" CornerRadius="3" Padding="4,1" Margin="0,2,0,0" ToolTip="{Binding ModelSourceTooltip}"><TextBlock Text="{Binding ModelSourceBadge}" FontSize="8.5" FontWeight="Bold" Foreground="{Binding ModelSourceFg}" HorizontalAlignment="Center"/></Border></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 5: Cross-Check -->
                             <GridViewColumn x:Name="ColCrossCheck" Header="CROSS-CHECK" Width="110">
@@ -217,8 +217,8 @@
                             <GridViewColumn x:Name="ColAction" Header="ACTIONS" Width="170">
                                 <GridViewColumn.CellTemplate><DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <!-- Confirm Button -->
-                                        <Button Height="26" Padding="8,0" Margin="0,0,5,0" Cursor="Hand" ToolTip="Confirm Grantee" Command="{Binding DataContext.ConfirmShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
+                                        <!-- Confirm Button (Toggle) -->
+                                        <Button Height="26" Padding="8,0" Margin="0,0,5,0" Cursor="Hand" ToolTip="{Binding ConfirmButtonToolTip}" Command="{Binding DataContext.ConfirmShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
                                             <Button.Template><ControlTemplate TargetType="Button"><Border Background="{Binding ConfirmButtonBg}" BorderBrush="{Binding ConfirmButtonBorder}" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="{Binding ConfirmButtonText}" FontSize="10" FontWeight="Bold" Foreground="{Binding ConfirmButtonFg}" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                                         </Button>
                                         <!-- Revoke Button -->

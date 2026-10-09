@@ -118,12 +118,17 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <!-- Col 4: Vulnerability Score -->
-                    <GridViewColumn x:Name="ColScore" Header="SCORE" Width="68">
+                    <!-- Col 4: Vulnerability Score & Origin Badge -->
+                    <GridViewColumn x:Name="ColScore" Header="SCORE" Width="76">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="4,0">
-                                    <TextBlock Text="{Binding ScoreLabel}" FontSize="14" FontWeight="Bold" Foreground="{Binding ScoreBarColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="2,1">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding ScoreLabel}" FontSize="13.5" FontWeight="Bold" Foreground="{Binding ScoreBarColor}" HorizontalAlignment="Center"/>
+                                        <Border Background="{Binding ModelSourceBg}" BorderBrush="{Binding ModelSourceBorder}" BorderThickness="1" CornerRadius="3" Padding="4,1" Margin="0,2,0,0" HorizontalAlignment="Center" ToolTip="{Binding ModelSourceTooltip}">
+                                            <TextBlock Text="{Binding ModelSourceBadge}" FontSize="8.5" FontWeight="Bold" Foreground="{Binding ModelSourceFg}" HorizontalAlignment="Center"/>
+                                        </Border>
+                                    </StackPanel>
                                 </Border>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -183,18 +188,13 @@
                     <GridViewColumn x:Name="ColAction" Header="ACTIONS" Width="118">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <!-- Accept Button (✓) -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">                                    <!-- Accept Button (✓) -->
                                     <Button Width="26" Height="26" Margin="0,0,4,0" Cursor="Hand" ToolTip="Accept &amp; Shortlist Candidate"
                                             Command="{Binding DataContext.QuickAcceptRowCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
-                                                <Border x:Name="Bg" Background="#EAF6F0" BorderBrush="#86EFAC" BorderThickness="1" CornerRadius="13">
-                                                    <TextBlock Text="✓" FontSize="12" FontWeight="Bold" Foreground="#16A34A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#DCFCE7"/></Trigger>
-                                                </ControlTemplate.Triggers>
+                                                <Border x:Name="Bg" Background="#EAF6F0" BorderBrush="#86EFAC" BorderThickness="1" CornerRadius="13"><TextBlock Text="✓" FontSize="12" FontWeight="Bold" Foreground="#16A34A" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                                                <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#DCFCE7"/></Trigger></ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
@@ -204,12 +204,8 @@
                                             Command="{Binding DataContext.QuickRejectRowCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
-                                                <Border x:Name="Bg" Background="#FEF2F2" BorderBrush="#FCA5A5" BorderThickness="1" CornerRadius="13">
-                                                    <TextBlock Text="✕" FontSize="11" FontWeight="Bold" Foreground="#DC2626" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FEE2E2"/></Trigger>
-                                                </ControlTemplate.Triggers>
+                                                <Border x:Name="Bg" Background="#FEF2F2" BorderBrush="#FCA5A5" BorderThickness="1" CornerRadius="13"><TextBlock Text="✕" FontSize="11" FontWeight="Bold" Foreground="#DC2626" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                                                <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FEE2E2"/></Trigger></ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
@@ -219,12 +215,8 @@
                                             Command="{Binding DataContext.OpenExplainDrawerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
-                                                <Border x:Name="Bg" Background="#702943" CornerRadius="13">
-                                                    <TextBlock Text="▸" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="1,0,0,0"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.85"/></Trigger>
-                                                </ControlTemplate.Triggers>
+                                                <Border x:Name="Bg" Background="#702943" CornerRadius="13"><TextBlock Text="▸" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="1,0,0,0"/></Border>
+                                                <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.85"/></Trigger></ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>

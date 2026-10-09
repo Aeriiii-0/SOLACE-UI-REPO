@@ -12,6 +12,9 @@ namespace SOLUM_UI.Models
         public bool IsSelected { get => _isSelected; set => SetProperty(ref _isSelected, value); }
 
         public int Rank { get; set; }
+        public Guid EvaluationId { get; set; }
+        public Guid CycleId { get; set; }
+        public Guid SoloParentId { get; set; }
         public string SpId { get; set; }
         public string Name { get; set; }
         public string Barangay { get; set; }
@@ -38,6 +41,7 @@ namespace SOLUM_UI.Models
                     OnPropertyChanged(nameof(ConfirmButtonBg));
                     OnPropertyChanged(nameof(ConfirmButtonFg));
                     OnPropertyChanged(nameof(ConfirmButtonBorder));
+                    OnPropertyChanged(nameof(ConfirmButtonToolTip));
                 }
             }
         }
@@ -142,6 +146,7 @@ namespace SOLUM_UI.Models
             : $"{CollegeAgeDependentsCount} College-Age Dependent(s) (17–24y)";
 
         public string ConfirmButtonText => IsFinalGrantee ? "✓ Confirmed" : "Confirm";
+        public string ConfirmButtonToolTip => IsFinalGrantee ? "Click to remove from final grantees" : "Confirm as final grantee";
         public SolidColorBrush ConfirmButtonBg => IsFinalGrantee
             ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9"))
             : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
@@ -167,52 +172,19 @@ namespace SOLUM_UI.Models
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFDF5"))
                 : new SolidColorBrush(Colors.White);
 
-        public SolidColorBrush ScoreBarColor
-        {
-            get
-            {
-                if (Score >= 75) return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545"));
-                if (Score >= 50) return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17"));
-                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
-            }
-        }
-
-        public SolidColorBrush PriorityColor
-        {
-            get
-            {
-                switch (Priority)
-                {
-                    case "High": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8"));
-                    case "Medium": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1"));
-                    default: return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9"));
-                }
-            }
-        }
-
-        public SolidColorBrush PriorityTextColor
-        {
-            get
-            {
-                switch (Priority)
-                {
-                    case "High": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545"));
-                    case "Medium": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17"));
-                    default: return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
-                }
-            }
-        }
-
-        public SolidColorBrush FinalBadgeColor =>
-            IsFinalGrantee
-                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9"))
-                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0F0F0"));
-
+        public SolidColorBrush ScoreBarColor => Score >= 75 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Score >= 50 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")));
+        public SolidColorBrush PriorityColor => string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8")) : (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")));
+        public SolidColorBrush PriorityTextColor => string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")));
+        public SolidColorBrush FinalBadgeColor => IsFinalGrantee ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0F0F0"));
         public string FinalBadgeText => IsFinalGrantee ? "✓ Granted" : "Pending";
+        public SolidColorBrush FinalBadgeTextColor => IsFinalGrantee ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#999999"));
 
-        public SolidColorBrush FinalBadgeTextColor =>
-            IsFinalGrantee
-                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"))
-                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#999999"));
+        public string ModelVersion { get; set; } = "v0.3.2-development";
+        public bool IsFallbackScore => !string.IsNullOrEmpty(ModelVersion) && ModelVersion.IndexOf("fallback", StringComparison.OrdinalIgnoreCase) >= 0;
+        public string ModelSourceBadge => IsFallbackScore ? "⚠ Fallback" : "ML";
+        public string ModelSourceTooltip => IsFallbackScore ? "Rule-Based Fallback: Estimated via statutory income rules because the ML microservice was offline." : $"SOLUM ML Model ({ModelVersion})";
+        public SolidColorBrush ModelSourceBg => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E0F2FE"));
+        public SolidColorBrush ModelSourceFg => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0369A1"));
+        public SolidColorBrush ModelSourceBorder => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FCD34D")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BAE6FD"));
     }
 }

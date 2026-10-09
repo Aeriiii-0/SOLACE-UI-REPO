@@ -13,6 +13,9 @@ namespace SOLUM_UI.Models
         private int _rank;
 
         public int Rank { get => _rank; set => SetProperty(ref _rank, value); }
+        public Guid EvaluationId { get; set; }
+        public Guid CycleId { get; set; }
+        public Guid SoloParentId { get; set; }
         public string SpId { get; set; }
         public string Name { get; set; }
         public string Barangay { get; set; }
@@ -63,6 +66,18 @@ namespace SOLUM_UI.Models
         public double Confidence { get; set; } = 0.85;
         public string ConfidencePercentLabel => $"{(Confidence * 100):0}% Confidence";
 
+        public string ModelVersion { get; set; } = "v0.3.2-development";
+        public bool IsFallbackScore => !string.IsNullOrEmpty(ModelVersion) && ModelVersion.IndexOf("fallback", StringComparison.OrdinalIgnoreCase) >= 0;
+        public bool ShowModelConfidence => !IsFallbackScore;
+        public string ModelSourceBadge => IsFallbackScore ? "⚠ Fallback" : "ML";
+        public string ModelSourceFullBadge => IsFallbackScore ? "⚠ Statutory Heuristic (Fallback)" : $"SOLUM ML Model ({ModelVersion})";
+        public string ModelSourceTooltip => IsFallbackScore ? "Rule-Based Heuristic: Calculated via statutory income rules because the ML microservice was unreachable." : $"Live ML Inference: Evaluated by SOLUM Model ({ModelVersion}) with {ConfidencePercentLabel}.";
+        public SolidColorBrush ModelSourceBg => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E0F2FE"));
+        public SolidColorBrush ModelSourceFg => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0369A1"));
+        public SolidColorBrush ModelSourceBorder => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FCD34D")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BAE6FD"));
+        public string FallbackAlertTitle => "⚠️ Rule-Based Heuristic Fallback";
+        public string FallbackAlertDesc => "This score was computed using statutory income criteria because the Python ML microservice was offline during evaluation. Re-evaluating will score with the live ML model.";
+
         // Triage Driver Labels & Brushes
         public string IncomeLabel => $"₱{MonthlyIncome:N0}/mo";
         public string PerCapitaLabel => $"₱{IncomePerCapita:N0} / capita";
@@ -107,8 +122,8 @@ namespace SOLUM_UI.Models
         public string AuditBannerDesc => "Applicant has college-age dependent(s). Cross-reference with City Education Dept scholarship roster.";
 
         public string Status { get => _status; set { if (SetProperty(ref _status, value)) { OnPropertyChanged(nameof(StatusColor)); OnPropertyChanged(nameof(StatusTextColor)); } } }
-        public SolidColorBrush PriorityColor => Priority == "High" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8")) : (Priority == "Medium" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")));
-        public SolidColorBrush PriorityTextColor => Priority == "High" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Priority == "Medium" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")));
+        public SolidColorBrush PriorityColor => string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8")) : (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")));
+        public SolidColorBrush PriorityTextColor => string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")));
         public SolidColorBrush ScoreBarColor => Score >= 75 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Score >= 50 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")));
         public SolidColorBrush StatusColor => Status == "Approved" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")) : (Status == "Rejected" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8")) : (Status == "Waitlisted" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF0F5"))));
         public SolidColorBrush StatusTextColor => Status == "Approved" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")) : (Status == "Rejected" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Status == "Waitlisted" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943"))));

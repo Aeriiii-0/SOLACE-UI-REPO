@@ -10,6 +10,7 @@ using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
 using SOLUM_UI.Views.Dialogs;
 using SOLUM_UI.Views.Pages;
+using SOLUM_UI.ViewModels;
 
 namespace SOLUM_UI
 {
@@ -88,9 +89,16 @@ namespace SOLUM_UI
             return page;
         }
 
+        public void ClearPageCache(string tag)
+        {
+            if (_pageCache.ContainsKey(tag)) _pageCache.Remove(tag);
+        }
+
         private void ApplyRoleNavVisibility()
         {
-            bool isAdmin = string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase);
+            bool isAdmin = string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
+                           string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase) ||
+                           SOLUM_UI.Services.Api.AuthApiService.Instance.IsAdmin;
             if (_navButtons.ContainsKey("UserAdministration"))
                 _navButtons["UserAdministration"].Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
             if (_navButtons.ContainsKey("SubsidyRecommendation"))
@@ -276,7 +284,22 @@ namespace SOLUM_UI
                     NavigatePage(GetOrCreatePage("Analytics", () => new AnalyticsPage())); // CHANGED
                     break;
                 case "SubsidyRecommendation":
-                    NavigatePage(GetOrCreatePage("SubsidyRecommendation", () => new SubsidyRecommendationPage())); // CHANGED
+                    bool isSubsidyAdmin = string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
+                                         string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase) ||
+                                         SOLUM_UI.Services.Api.AuthApiService.Instance.IsAdmin;
+                    if (!isSubsidyAdmin)
+                    {
+                        ToastNotification.Show("Access Denied", "Only administrators can access Subsidy Recommendations.", ToastType.Error);
+                        ActivateButton("Dashboard");
+                        NavigateTo("Dashboard");
+                        return;
+                    }
+                    var subPage = (SubsidyRecommendationPage)GetOrCreatePage("SubsidyRecommendation", () => new SubsidyRecommendationPage());
+                    if (subPage.DataContext is SubsidyRecommendationViewModel subVm)
+                    {
+                        _ = subVm.RefreshDataAsync();
+                    }
+                    NavigatePage(subPage);
                     break;
                 case "UserProfile":
                     NavigatePage(GetOrCreatePage("UserProfile", () => new UserProfilePage())); // CHANGED

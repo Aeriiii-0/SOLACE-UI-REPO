@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -448,6 +448,7 @@ namespace SOLUM_UI.ViewModels
             record.Id = createResp.Data.ToString();
             ToastNotification.Show("Record Added", record.Name + " was added successfully.", ToastType.Success);
             _auditLog.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
+            (System.Windows.Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
             await LoadRecordsAsync();
         }
 

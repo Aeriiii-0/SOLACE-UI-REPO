@@ -284,11 +284,16 @@
     <Compile Include="DTOs\QuotaAllocationDto.cs" />
     <Compile Include="DTOs\OutlierRejectionDto.cs" />
     <Compile Include="DTOs\FinalGranteeConfirmationDto.cs" />
+    <Compile Include="DTOs\SubsidyCycleDto.cs" />
+    <Compile Include="DTOs\GranteeDto.cs" />
+    <Compile Include="DTOs\SubsidyRequests.cs" />
     <Compile Include="Models\SubsidyItem.cs" />
     <Compile Include="Models\SelectionRow.cs" />
     <Compile Include="Services\Interfaces\ISubsidyApiService.cs" />
     <Compile Include="Services\Implementations\SubsidyApiService.cs" />
+    <Compile Include="Services\SubsidyModelMapper.cs" />
     <Compile Include="ViewModels\SubsidyRecommendationViewModel.cs" />
+    <Compile Include="ViewModels\SubsidyRecommendationViewModel.Commands.cs" />
     <Compile Include="Views\ToastNotification.xaml.cs">
       <DependentUpon>ToastNotification.xaml</DependentUpon>
     </Compile>

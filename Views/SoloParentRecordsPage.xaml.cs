@@ -495,6 +495,7 @@ namespace SOLUM_UI
             record.Id = createResp.Data.ToString();
             ToastNotification.Show("Record Added", record.Name + " was added successfully.", ToastType.Success);
             AuditLogService.Instance.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
+            (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
             await LoadRecordsAsync();
         }
 

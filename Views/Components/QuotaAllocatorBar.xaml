@@ -13,6 +13,23 @@
         <!-- Right-Aligned Toolbar: Filter, Budget, Slots, Batch Select & Actions -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
             
+            <!-- Refresh Queue Button -->
+            <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="0,0,10,0">
+                <Button Background="Transparent" BorderThickness="0" Cursor="Hand" Height="38" Padding="12,0" Command="{Binding RefreshCommand}" ToolTip="Refresh recommendations queue from server">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="↻" FontSize="14" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center" Margin="0,-2,6,0"/>
+                        <TextBlock Text="Refresh" FontSize="11.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Border>
+
             <!-- Cross-Check Filter Dropdown (Placed on left side of Budget & Batch select) -->
             <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="0,0,10,0">
                 <Button x:Name="FilterDropBtn" Background="Transparent" BorderThickness="0" Cursor="Hand" Height="38" Padding="12,0" Click="FilterDrop_Click">

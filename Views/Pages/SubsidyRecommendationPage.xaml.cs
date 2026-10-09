@@ -8,7 +8,15 @@ namespace SOLUM_UI.Views.Pages
         public SubsidyRecommendationPage(SubsidyRecommendationViewModel viewModel = null)
         {
             InitializeComponent();
-            DataContext = viewModel ?? new SubsidyRecommendationViewModel();
+            var vm = viewModel ?? new SubsidyRecommendationViewModel();
+            DataContext = vm;
+            Loaded += async (s, e) =>
+            {
+                if (DataContext is SubsidyRecommendationViewModel activeVm)
+                {
+                    await activeVm.RefreshDataAsync();
+                }
+            };
         }
     }
 }
