@@ -41,15 +41,11 @@
                         </Border>
                         <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="AuditFilterOpt_Click" Tag="Clean">
                             <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FDF3F5"/></Trigger></Style.Triggers></Style></Border.Style>
-                            <TextBlock Text="✓ No Overlap (Clean)" FontSize="11.5" FontWeight="SemiBold" Foreground="#15803D" Padding="12,7"/>
+                            <TextBlock Text="✓ Cleared (Standard)" FontSize="11.5" FontWeight="SemiBold" Foreground="#15803D" Padding="12,7"/>
                         </Border>
                         <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="AuditFilterOpt_Click" Tag="CollegeAge">
                             <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FDF3F5"/></Trigger></Style.Triggers></Style></Border.Style>
-                            <TextBlock Text="⚠️ City Educ Check" FontSize="11.5" FontWeight="SemiBold" Foreground="#B45309" Padding="12,7"/>
-                        </Border>
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="AuditFilterOpt_Click" Tag="Pantawid">
-                            <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FDF3F5"/></Trigger></Style.Triggers></Style></Border.Style>
-                            <TextBlock Text="ℹ️ Pantawid 4Ps" FontSize="11.5" FontWeight="SemiBold" Foreground="#1D4ED8" Padding="12,7"/>
+                            <TextBlock Text="⚠️ City Educ Check (17–24y)" FontSize="11.5" FontWeight="SemiBold" Foreground="#B45309" Padding="12,7"/>
                         </Border>
                     </StackPanel>
                 </Border>

@@ -22,6 +22,7 @@ namespace SOLUM_UI.DTOs
         public string HousingTenure { get; set; } = "Rented";
         public string Circumstance { get; set; } = "Abandonment (A2)";
         public string CivilStatus { get; set; }
+        public string Sex { get; set; } = "Female";
         public string OtherIncomeSource { get; set; } = "None";
         public string NeedsAndProblems { get; set; } = "Financial & Livelihood Aid";
         public List<ChildDetailDto> Children { get; set; } = new List<ChildDetailDto>();

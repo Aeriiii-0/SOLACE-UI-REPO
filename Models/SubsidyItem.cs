@@ -20,6 +20,7 @@ namespace SOLUM_UI.Models
         public string Priority { get; set; }
         public int Dependants { get; set; }
         public string CivilStatus { get; set; }
+        public string Sex { get; set; } = "Female";
         public double Score { get; set; }
         public string DependantsLabel => Dependants == 1 ? "1 Dependent" : $"{Dependants} Dependents";
         public string ScoreLabel => Score.ToString("0") + "%";
@@ -92,18 +93,18 @@ namespace SOLUM_UI.Models
         // Cross-Check Overlap Flags (1-3 words, clean text, no emojis)
         public bool HasCollegeAgeDependent => CollegeAgeDependentsCount > 0;
         public bool IsPantawidBeneficiary { get; set; }
-        public string CrossCheckText => HasCollegeAgeDependent ? "City Educ Check" : (IsPantawidBeneficiary ? "Pantawid 4Ps" : "None");
-        public SolidColorBrush CrossCheckFg => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : (IsPantawidBeneficiary ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1D4ED8")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9CA3AF")));
+        public string CrossCheckText => HasCollegeAgeDependent ? "City Educ Check" : "None";
+        public SolidColorBrush CrossCheckFg => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9CA3AF"));
         public string AuditBadgeText => CrossCheckText;
-        public SolidColorBrush AuditBadgeBg => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFBEB")) : (IsPantawidBeneficiary ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EFF6FF")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0FDF4")));
+        public SolidColorBrush AuditBadgeBg => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFBEB")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0FDF4"));
         public SolidColorBrush AuditBadgeFg => CrossCheckFg;
-        public SolidColorBrush AuditBadgeBorder => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FDE68A")) : (IsPantawidBeneficiary ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BFDBFE")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BBF7D0")));
+        public SolidColorBrush AuditBadgeBorder => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FDE68A")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BBF7D0"));
 
         public bool IsDisqualified { get; set; }
         public string DisqualificationReason { get; set; }
-        public bool HasAuditNotice => HasCollegeAgeDependent || IsPantawidBeneficiary;
-        public string AuditBannerTitle => HasCollegeAgeDependent ? "⚠️ Departmental Cross-Check Required" : "ℹ️ Social Welfare Benefit Overlap Check";
-        public string AuditBannerDesc => HasCollegeAgeDependent ? "Applicant has college-age dependent(s). Cross-reference with City Education Dept scholarship roster." : "Applicant tagged as Pantawid Pamilya (4Ps) beneficiary. Ensure subsidy deduplication.";
+        public bool HasAuditNotice => HasCollegeAgeDependent;
+        public string AuditBannerTitle => "⚠️ Departmental Cross-Check Required";
+        public string AuditBannerDesc => "Applicant has college-age dependent(s). Cross-reference with City Education Dept scholarship roster.";
 
         public string Status { get => _status; set { if (SetProperty(ref _status, value)) { OnPropertyChanged(nameof(StatusColor)); OnPropertyChanged(nameof(StatusTextColor)); } } }
         public SolidColorBrush PriorityColor => Priority == "High" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8")) : (Priority == "Medium" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")));

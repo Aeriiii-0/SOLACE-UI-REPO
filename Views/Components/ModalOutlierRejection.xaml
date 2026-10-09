@@ -137,9 +137,9 @@
                 <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="6" Opacity="0.25"/>
             </Border.Effect>
             <StackPanel>
-                <!-- Header (Clean, No Emojis) -->
+                <!-- Header (Clean, Dynamic) -->
                 <Grid Margin="0,0,0,14">
-                    <TextBlock Text="Disqualify Candidate" FontSize="16" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding OutlierModalTitle, FallbackValue='Disqualify Candidate'}" FontSize="16" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
                     <Button HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Cursor="Hand" Command="{Binding CloseOutlierModalCommand}">
                         <TextBlock Text="✕" FontSize="16" Foreground="#888888" FontWeight="Bold"/>
                     </Button>
@@ -148,12 +148,13 @@
                 <TextBlock Text="{Binding OutlierTargetNameAndId}" FontSize="12.5" FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,16"/>
 
                 <!-- Reason Dropdown Styled after FormCombo -->
-                <TextBlock Text="Disqualification Reason *" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222" Margin="0,0,0,6"/>
+                <TextBlock Text="Disqualification / Revocation Reason *" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222" Margin="0,0,6,0"/>
                 <ComboBox SelectedValue="{Binding OutlierRejectionReason, Mode=TwoWay}"
                           SelectedValuePath="Content"
                           Style="{StaticResource ModalFormCombo}"
                           Margin="0,0,0,16">
                     <ComboBoxItem Content="Ineligible Income / Undisclosed Assets" IsSelected="True"/>
+                    <ComboBoxItem Content="City Educ Scholarship Overlap / Conflict"/>
                     <ComboBoxItem Content="Duplicate / Existing Government Grantee"/>
                     <ComboBoxItem Content="Child Over Age / No Qualified Minor Dependents"/>
                     <ComboBoxItem Content="Falsified Circumstance or Documentation"/>
@@ -162,7 +163,7 @@
                 </ComboBox>
 
                 <!-- Audit Notes & Justification -->
-                <TextBlock Text="Audit Notes &amp; Justification" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222" Margin="0,0,0,6"/>
+                <TextBlock Text="Audit Notes &amp; Justification" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222" Margin="0,0,6,0"/>
                 <TextBox Height="72" TextWrapping="Wrap" AcceptsReturn="True"
                          Style="{StaticResource ModalFormBox}"
                          Text="{Binding OutlierNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -181,7 +182,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Content="Cancel" Style="{StaticResource ModalCancelBtn}" Command="{Binding CloseOutlierModalCommand}"/>
-                    <Button Grid.Column="2" Content="Confirm Rejection" Style="{StaticResource ModalConfirmBtn}" Command="{Binding ConfirmOutlierRejectionCommand}"/>
+                    <Button Grid.Column="2" Content="{Binding OutlierModalConfirmButtonText, FallbackValue='Confirm Rejection'}" Style="{StaticResource ModalConfirmBtn}" Command="{Binding ConfirmOutlierRejectionCommand}"/>
                 </Grid>
             </StackPanel>
         </Border>

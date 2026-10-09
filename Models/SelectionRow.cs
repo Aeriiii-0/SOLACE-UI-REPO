@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Media;
 using SOLUM_UI.Core;
 
@@ -6,7 +8,8 @@ namespace SOLUM_UI.Models
 {
     public class SelectionRow : ObservableObject
     {
-        private bool _isFinalGrantee;
+        private bool _isFinalGrantee, _isSelected;
+        public bool IsSelected { get => _isSelected; set => SetProperty(ref _isSelected, value); }
 
         public int Rank { get; set; }
         public string SpId { get; set; }
@@ -16,7 +19,7 @@ namespace SOLUM_UI.Models
         public string Priority { get; set; }
         public double Score { get; set; }
         public bool IsWaitlisted { get; set; }
-        public string StatusText => IsWaitlisted ? "Waitlisted" : "Shortlisted";
+        public string StatusText => IsFinalGrantee ? "Confirmed" : "Waitlisted";
 
         public bool IsFinalGrantee
         {
@@ -25,9 +28,16 @@ namespace SOLUM_UI.Models
             {
                 if (SetProperty(ref _isFinalGrantee, value))
                 {
+                    OnPropertyChanged(nameof(StatusText));
+                    OnPropertyChanged(nameof(RankBg));
+                    OnPropertyChanged(nameof(RankFg));
                     OnPropertyChanged(nameof(FinalBadgeColor));
                     OnPropertyChanged(nameof(FinalBadgeText));
                     OnPropertyChanged(nameof(FinalBadgeTextColor));
+                    OnPropertyChanged(nameof(ConfirmButtonText));
+                    OnPropertyChanged(nameof(ConfirmButtonBg));
+                    OnPropertyChanged(nameof(ConfirmButtonFg));
+                    OnPropertyChanged(nameof(ConfirmButtonBorder));
                 }
             }
         }
@@ -51,18 +61,15 @@ namespace SOLUM_UI.Models
         public bool HasCollegeAgeDependent { get; set; }
         public int CollegeAgeDependentsCount { get; set; }
         public bool IsPantawidBeneficiary { get; set; }
+        public List<ChildDetailItem> CollegeAgeDependents { get; set; } = new List<ChildDetailItem>();
 
         public string CrossCheckText =>
-            HasCollegeAgeDependent
-                ? "City Educ Check"
-                : (IsPantawidBeneficiary ? "Pantawid 4Ps" : "Cleared");
+            HasCollegeAgeDependent ? "City Educ Check" : "Cleared";
 
         public SolidColorBrush CrossCheckFg =>
             HasCollegeAgeDependent
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309"))
-                : (IsPantawidBeneficiary
-                    ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1D4ED8"))
-                    : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#16A34A")));
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#16A34A"));
 
         public string ComplianceRemark
         {
@@ -71,12 +78,10 @@ namespace SOLUM_UI.Models
                 string depWord = Dependants == 1 ? "1 Dependent" : $"{Dependants} Dependents";
                 if (HasCollegeAgeDependent)
                 {
-                    string colWord = CollegeAgeDependentsCount == 1 ? "1 College-Age" : $"{CollegeAgeDependentsCount} College-Age";
-                    return $"{depWord} ({colWord}: 17–24y) • City Educ Scholarship Match Req.";
-                }
-                if (IsPantawidBeneficiary)
-                {
-                    return $"{depWord} • DSWD Pantawid 4Ps Overlap (Deduplication Req.)";
+                    var studentList = (CollegeAgeDependents != null && CollegeAgeDependents.Count > 0)
+                        ? string.Join(", ", CollegeAgeDependents.Select(c => $"{c.Name} ({c.Age}y)"))
+                        : (CollegeAgeDependentsCount == 1 ? "1 College-Age" : $"{CollegeAgeDependentsCount} College-Age");
+                    return $"{depWord} • Student: {studentList} • City Educ Scholarship Match Req.";
                 }
                 string minWord = MinorDependentsCount == 1 ? "1 Minor" : $"{MinorDependentsCount} Minors";
                 return $"{depWord} ({minWord}) • Cleared (No Inter-Agency Overlap)";
@@ -86,44 +91,76 @@ namespace SOLUM_UI.Models
         public SolidColorBrush ComplianceRemarkFg =>
             HasCollegeAgeDependent
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#92400E"))
-                : (IsPantawidBeneficiary
-                    ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E40AF"))
-                    : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#166534")));
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#166534"));
 
         public SolidColorBrush ComplianceRemarkBg =>
             HasCollegeAgeDependent
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7"))
-                : (IsPantawidBeneficiary
-                    ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DBEAFE"))
-                    : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DCFCE7")));
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DCFCE7"));
 
-        public string AuditBadgeText => CrossCheckText;
+        public string Id => SpId;
+        public string Sex { get; set; } = "Female";
+        public string CivilStatus { get; set; } = "Single";
+        public string DateOfBirthFormatted { get; set; } = "1988-05-14";
+        public string LastUpdatedFormatted { get; set; } = "2026-10-04";
+        private string _validUntilFormatted;
+        public string ValidUntilFormatted
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_validUntilFormatted)) return _validUntilFormatted;
+                int hash = Math.Abs((SpId ?? Name ?? "0").GetHashCode());
+                return $"2027-{((hash % 12) + 1):D2}-{((hash % 25) + 1):D2}";
+            }
+            set => _validUntilFormatted = value;
+        }
+        public string RecordStatus { get; set; } = "Active";
+        public SolidColorBrush RecordStatusBg => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
+        public SolidColorBrush RecordStatusFg => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
 
-        public SolidColorBrush AuditBadgeBg =>
-            HasCollegeAgeDependent
-                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFBEB"))
-                : (IsPantawidBeneficiary
-                    ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EFF6FF"))
-                    : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0FDF4")));
+        public string ScholarshipEligibilityNotice => HasCollegeAgeDependent
+            ? $"Has dependents eligible for scholarship grants: {CollegeStudentSummary}"
+            : "No dependents eligible for scholarship grants";
 
-        public SolidColorBrush AuditBadgeFg => CrossCheckFg;
+        public SolidColorBrush ScholarshipEligibilityFg => HasCollegeAgeDependent
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309"))
+            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280"));
 
-        public SolidColorBrush AuditBadgeBorder =>
-            HasCollegeAgeDependent
-                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FDE68A"))
-                : (IsPantawidBeneficiary
-                    ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BFDBFE"))
-                    : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BBF7D0")));
+        public string DependantsDetailLabel
+        {
+            get
+            {
+                string depWord = Dependants == 1 ? "1 dependent" : $"{Dependants} dependents";
+                string minWord = MinorDependentsCount == 1 ? "1 minor" : $"{MinorDependentsCount} minors";
+                string todWord = ToddlersUnder5Count > 0 ? $", {ToddlersUnder5Count} toddler" + (ToddlersUnder5Count == 1 ? "" : "s") : "";
+                return $"{depWord} ({minWord}{todWord})";
+            }
+        }
+
+        public string CollegeStudentSummary => (CollegeAgeDependents != null && CollegeAgeDependents.Count > 0)
+            ? string.Join(", ", CollegeAgeDependents.Select(c => $"{c.Name} ({c.Age}y)"))
+            : $"{CollegeAgeDependentsCount} College-Age Dependent(s) (17–24y)";
+
+        public string ConfirmButtonText => IsFinalGrantee ? "✓ Confirmed" : "Confirm";
+        public SolidColorBrush ConfirmButtonBg => IsFinalGrantee
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9"))
+            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
+        public SolidColorBrush ConfirmButtonFg => IsFinalGrantee
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#16A34A"))
+            : new SolidColorBrush(Colors.White);
+        public SolidColorBrush ConfirmButtonBorder => IsFinalGrantee
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#86EFAC"))
+            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
 
         public SolidColorBrush RankBg =>
-            IsWaitlisted
-                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1"))
-                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EAF6F0"));
+            IsFinalGrantee
+                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EAF6F0"))
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1"));
 
         public SolidColorBrush RankFg =>
-            IsWaitlisted
-                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17"))
-                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
+            IsFinalGrantee
+                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"))
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D97706"));
 
         public SolidColorBrush RowBg =>
             IsWaitlisted

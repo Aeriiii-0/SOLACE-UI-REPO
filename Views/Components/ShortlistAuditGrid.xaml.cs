@@ -21,12 +21,12 @@ namespace SOLUM_UI.Views.Components
             double totalWidth = ShortlistListView.ActualWidth;
             if (totalWidth <= 0) return;
 
-            double fixedWidth = 48 + 80 + 68 + 125 + 95 + 108;
+            double fixedWidth = 36 + 46 + 76 + 64 + 110 + 95 + 90 + 170;
             double flexibleWidth = totalWidth - fixedWidth - 25;
             if (flexibleWidth > 200)
             {
-                ColName.Width = Math.Max(140, flexibleWidth * 0.35);
-                ColCompliance.Width = Math.Max(220, flexibleWidth * 0.65);
+                ColName.Width = Math.Max(130, flexibleWidth * 0.32);
+                ColCompliance.Width = Math.Max(240, flexibleWidth * 0.68);
             }
         }
 
@@ -37,6 +37,35 @@ namespace SOLUM_UI.Views.Components
                 vm.OpenExplainDrawerCommand.Execute(row);
                 e.Handled = true;
             }
+        }
+
+        private void RowCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is SubsidyRecommendationViewModel vm)
+                vm.RecalculateShortlistSelectionCounts();
+        }
+
+        private void FilterDropBtn_Click(object sender, RoutedEventArgs e) => FilterPopup.IsOpen = !FilterPopup.IsOpen;
+
+        private void FilterOpt_Click(object sender, MouseButtonEventArgs e)
+        {
+            FilterPopup.IsOpen = false;
+            if (sender is FrameworkElement elem && elem.Tag is string tag && DataContext is SubsidyRecommendationViewModel vm)
+                vm.ApplyShortlistAuditFilter(tag);
+        }
+
+        private void ExportDropBtn_Click(object sender, RoutedEventArgs e) => ExportPopup.IsOpen = !ExportPopup.IsOpen;
+
+        private void ExportCityEducOpt_Click(object sender, MouseButtonEventArgs e)
+        {
+            ExportPopup.IsOpen = false;
+            if (DataContext is SubsidyRecommendationViewModel vm) vm.ExportCityEducCommand.Execute(null);
+        }
+
+        private void ExportPantawidOpt_Click(object sender, MouseButtonEventArgs e)
+        {
+            ExportPopup.IsOpen = false;
+            if (DataContext is SubsidyRecommendationViewModel vm) vm.ExportPantawid4PsCommand.Execute(null);
         }
     }
 }

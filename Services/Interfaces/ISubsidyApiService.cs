@@ -14,6 +14,7 @@ namespace SOLUM_UI.Services.Interfaces
         Task<List<SelectionRow>> GetFinalGranteesByYearAsync(int fiscalYear);
         Task<bool> ConfirmFinalGranteesAsync(List<string> spIds, int fiscalYear);
         Task<string> ExportCityEducRosterCsvAsync(List<SelectionRow> items);
+        Task<string> ExportPantawid4PsRosterCsvAsync(List<SelectionRow> items);
         Task<string> ExportFinalLedgerCsvAsync(List<SelectionRow> items, int fiscalYear);
         Task<string> ExportAllQueueCsvAsync(List<SubsidyItem> items);
     }

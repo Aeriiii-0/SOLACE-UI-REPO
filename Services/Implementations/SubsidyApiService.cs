@@ -43,12 +43,12 @@ namespace SOLUM_UI.Services.Implementations
             var list = new List<SelectionRow>();
             if (fiscalYear == 2025)
             {
-                list.Add(new SelectionRow { Rank = 1, SpId = "SP-2025-0019", Name = "Aquino, Corazon Santos", Barangay = "Poblacion", Priority = "High", Score = 96, IsFinalGrantee = true });
-                list.Add(new SelectionRow { Rank = 2, SpId = "SP-2025-0044", Name = "Ramos, Fidelina Cruz", Barangay = "San Roque", Priority = "High", Score = 93, IsFinalGrantee = true });
+                list.Add(new SelectionRow { Rank = 1, SpId = "SP-2025-0019", Name = "Aquino, Corazon Santos", Barangay = "Poblacion", Sex = "Female", CivilStatus = "Widowed", DateOfBirthFormatted = "1983-01-25", LastUpdatedFormatted = "2025-10-15", ValidUntilFormatted = "2026-10-15", Priority = "High", Score = 96, IsFinalGrantee = true });
+                list.Add(new SelectionRow { Rank = 2, SpId = "SP-2025-0044", Name = "Ramos, Fidelina Cruz", Barangay = "San Roque", Sex = "Female", CivilStatus = "Separated", DateOfBirthFormatted = "1987-07-19", LastUpdatedFormatted = "2025-10-20", ValidUntilFormatted = "2026-10-20", Priority = "High", Score = 93, IsFinalGrantee = true });
             }
             else if (fiscalYear == 2024)
             {
-                list.Add(new SelectionRow { Rank = 1, SpId = "SP-2024-0011", Name = "Estrada, Luisa Ejercito", Barangay = "San Isidro", Priority = "High", Score = 94, IsFinalGrantee = true });
+                list.Add(new SelectionRow { Rank = 1, SpId = "SP-2024-0011", Name = "Estrada, Luisa Ejercito", Barangay = "San Isidro", Sex = "Female", CivilStatus = "Single", DateOfBirthFormatted = "1985-04-12", LastUpdatedFormatted = "2024-10-18", ValidUntilFormatted = "2025-10-18", Priority = "High", Score = 94, IsFinalGrantee = true });
             }
             return Task.FromResult(list);
         }
@@ -58,9 +58,35 @@ namespace SOLUM_UI.Services.Implementations
         public Task<string> ExportCityEducRosterCsvAsync(List<SelectionRow> items)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("Rank,SP ID,Candidate Name,Barangay,College-Age Dependents (17-24 yrs),Audit Status,Export Timestamp");
+            sb.AppendLine("Item #,College Student Name,Age,Category,Parent SP ID,Solo Parent Name,Barangay,Household Income,Audit Status,Export Timestamp");
+            int count = 0;
             foreach (var r in items.Where(i => i.HasCollegeAgeDependent))
-                sb.AppendLine($"{r.Rank},{r.SpId},\"{r.Name}\",{r.Barangay},{r.CollegeAgeDependentsCount},Requires City Educ Scholarship Verification,{DateTime.Now:yyyy-MM-dd HH:mm}");
+            {
+                if (r.CollegeAgeDependents != null && r.CollegeAgeDependents.Count > 0)
+                {
+                    foreach (var child in r.CollegeAgeDependents)
+                    {
+                        count++;
+                        sb.AppendLine($"{count},\"{child.Name}\",{child.Age},College-Age (17–24y),{r.SpId},\"{r.Name}\",{r.Barangay},\"{r.IncomeLabel}\",Pending City Educ Scholarship Verification,{DateTime.Now:yyyy-MM-dd HH:mm}");
+                    }
+                }
+                else
+                {
+                    count++;
+                    sb.AppendLine($"{count},\"College-Age Dependent\",{r.CollegeAgeDependentsCount},College-Age (17–24y),{r.SpId},\"{r.Name}\",{r.Barangay},\"{r.IncomeLabel}\",Pending City Educ Scholarship Verification,{DateTime.Now:yyyy-MM-dd HH:mm}");
+                }
+            }
+            return Task.FromResult(sb.ToString());
+        }
+
+        public Task<string> ExportPantawid4PsRosterCsvAsync(List<SelectionRow> items)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("Rank,SP ID,Solo Parent Name,Barangay,Monthly Income,Income Per Capita,Total Dependents,Minor Dependents,Circumstance,4Ps Status,Export Timestamp");
+            foreach (var r in items.Where(i => i.IsPantawidBeneficiary))
+            {
+                sb.AppendLine($"{r.Rank},{r.SpId},\"{r.Name}\",{r.Barangay},\"{r.IncomeLabel}\",\"{r.PerCapitaLabel}\",{r.Dependants},{r.MinorDependentsCount},\"{r.Circumstance}\",Enrolled (DSWD 4Ps),{DateTime.Now:yyyy-MM-dd HH:mm}");
+            }
             return Task.FromResult(sb.ToString());
         }
 
