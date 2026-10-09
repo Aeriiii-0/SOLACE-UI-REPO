@@ -347,17 +347,24 @@
         <Setter Property="Margin" Value="0,6,0,0"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
     </Style>
-    <!-- ComboBox Item Style (for dropdown options) -->
+    <!-- ComboBox Item Style (for dropdown options) - styled in containers -->
     <Style x:Key="AnalyticsComboBoxItemStyle" TargetType="ComboBoxItem">
         <Setter Property="Background" Value="White"/>
         <Setter Property="Foreground" Value="#2B1A1C"/>
-        <Setter Property="Padding" Value="10,8"/>
-        <Setter Property="Height" Value="32"/>
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="Margin" Value="4,2"/>
+        <Setter Property="Height" Value="Auto"/>
+        <Setter Property="MinHeight" Value="32"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBoxItem">
-                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                        <ContentPresenter/>
+                    <Border Background="{TemplateBinding Background}" 
+                            BorderBrush="#E0D0D5" 
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}" 
+                            Margin="{TemplateBinding Margin}">
+                        <ContentPresenter VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
@@ -365,7 +372,7 @@
                             <Setter Property="Foreground" Value="#7B1426"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="#EAD9DB"/>
+                            <Setter Property="Background" Value="#E8D4DA"/>
                             <Setter Property="Foreground" Value="#7B1426"/>
                         </Trigger>
                     </ControlTemplate.Triggers>

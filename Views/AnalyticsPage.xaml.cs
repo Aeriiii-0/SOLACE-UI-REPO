@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using SOLUM_UI.Models;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
@@ -13,220 +13,251 @@ namespace SOLUM_UI
 {
     public partial class AnalyticsPage : Page
     {
-        private int _filterYear;
-        private int _filterMonth;
-        private string _filterBarangay = "ALL";
-        private AnalyticsViewModel _viewModel;
-
-        private readonly Dictionary<(int year, int month, string barangay), MonthlyAnalyticsDto> _cache = 
-            new Dictionary<(int, int, string), MonthlyAnalyticsDto>();
-
-        private static readonly string[] Barangays =
-        {
-            "BiÃ±an", "Bungahan", "Canlalay", "Casile", "De La Paz", "Ganado",
-            "Langkiwa", "Loma", "Malaban", "Malamig", "Mamplasan", "Platero",
-            "Poblacion", "San Antonio", "San Francisco", "San Jose", "San Vicente",
-            "Santo Domingo", "Santo NiÃ±o", "Santo Tomas", "Soro-Soro", "Timbao",
-            "Tubigan", "Zapote"
-        };
+        private AnalyticsViewModel _vm;
 
         public AnalyticsPage()
         {
             InitializeComponent();
-            _viewModel = new AnalyticsViewModel();
-            this.DataContext = _viewModel;
-            
-            Loaded += async (s, e) =>
-            {
-                _filterYear = DateTime.Today.Year;
-                _filterMonth = DateTime.Today.Month;
-                PopulateFilterDropdowns();
-                await LoadAndBuildAnalyticsAsync();
-            };
+            _vm = new AnalyticsViewModel();
+            DataContext = _vm;
+            Loaded += async (s, e) => await LoadDataAsync();
         }
 
-        private async Task<BaseResponse<MonthlyAnalyticsDto>> GetMonthlyAnalyticsCachedAsync(int year, int month, string barangay)
+        private async System.Threading.Tasks.Task LoadDataAsync()
         {
-            var key = (year, month, barangay ?? "ALL");
-
-            if (_cache.TryGetValue(key, out var cached))
-            {
-                return new BaseResponse<MonthlyAnalyticsDto> { Succeeded = true, Data = cached };
-            }
-
-            var response = await AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(year, month, barangay);
-
-            if (response.Succeeded && response.Data != null)
-            {
-                _cache[key] = response.Data;
-            }
-
-            return response;
-        }
-
-        private void PopulateFilterDropdowns()
-        {
-            CmbFilterYear.Items.Clear();
-            int thisYear = DateTime.Today.Year;
-            for (int y = thisYear; y >= thisYear - 4; y--)
-                CmbFilterYear.Items.Add(new ComboBoxItem { Content = y.ToString(), Tag = y });
-            CmbFilterYear.SelectedItem = CmbFilterYear.Items
-                .Cast<ComboBoxItem>().FirstOrDefault(i => (int)i.Tag == _filterYear);
-
-            CmbFilterMonth.Items.Clear();
-            for (int m = 1; m <= 12; m++)
-                CmbFilterMonth.Items.Add(new ComboBoxItem { Content = new DateTime(2000, m, 1).ToString("MMMM"), Tag = m });
-            CmbFilterMonth.SelectedItem = CmbFilterMonth.Items
-                .Cast<ComboBoxItem>().FirstOrDefault(i => (int)i.Tag == _filterMonth);
-
-            CmbFilterBarangay.Items.Clear();
-            CmbFilterBarangay.Items.Add(new ComboBoxItem { Content = "All Barangays", Tag = "ALL" });
-            foreach (var b in Barangays)
-                CmbFilterBarangay.Items.Add(new ComboBoxItem { Content = b, Tag = b });
-            CmbFilterBarangay.SelectedItem = CmbFilterBarangay.Items
-                .Cast<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == _filterBarangay);
-        }
-
-        private void FilterDrop_Click(object sender, RoutedEventArgs e)
-        {
-            // Open the filter popup
-            FilterPopup.IsOpen = !FilterPopup.IsOpen;
-        }
-
-        private async void FilterApply_Click(object sender, RoutedEventArgs e)
-        {
-            _filterYear = (int)((CmbFilterYear.SelectedItem as ComboBoxItem)?.Tag ?? DateTime.Today.Year);
-            _filterMonth = (int)((CmbFilterMonth.SelectedItem as ComboBoxItem)?.Tag ?? DateTime.Today.Month);
-            _filterBarangay = (string)((CmbFilterBarangay.SelectedItem as ComboBoxItem)?.Tag ?? "ALL");
-            FilterPopup.IsOpen = false;
-            await LoadAndBuildAnalyticsAsync();
-        }
-
-        private async void FilterReset_Click(object sender, RoutedEventArgs e)
-        {
-            _filterYear = DateTime.Today.Year;
-            _filterMonth = DateTime.Today.Month;
-            _filterBarangay = "ALL";
-            DpDateFrom.SelectedDate = null;
-            DpDateTo.SelectedDate = null;
-            PopulateFilterDropdowns();
-            FilterPopup.IsOpen = false;
-            await LoadAndBuildAnalyticsAsync();
-        }
-
-        private async void DateRange_Changed(object sender, SelectionChangedEventArgs e)
-        {
-            // Trigger reload when date range is changed
-            if (DpDateFrom.SelectedDate.HasValue && DpDateTo.SelectedDate.HasValue)
-            {
-                // For now, just reload with current filter
-                // In the future, this could implement date range filtering
-                await LoadAndBuildAnalyticsAsync();
-            }
-        }
-
-        private async Task LoadAndBuildAnalyticsAsync()
-        {
-            if (AnalyticsLoadingOverlay != null) AnalyticsLoadingOverlay.IsLoading = true;
-            if (_viewModel != null) _viewModel.IsLoading = true;
-
             try
             {
-                System.Diagnostics.Debug.WriteLine($"[Analytics] Loading data for {_filterYear}-{_filterMonth} (Barangay: {_filterBarangay})");
-                
-                var response = await GetMonthlyAnalyticsCachedAsync(_filterYear, _filterMonth, _filterBarangay);
+                var response = await AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(
+                    DateTime.Today.Year, DateTime.Today.Month, "ALL");
 
-                System.Diagnostics.Debug.WriteLine($"[Analytics] API Response: Succeeded={response.Succeeded}, Data={response.Data != null}");
-                
-                if (!response.Succeeded || response.Data == null)
-                {
-                    string err = response.Errors != null && response.Errors.Count > 0
-                        ? string.Join("\n", response.Errors)
-                        : "Unable to load analytics for this period.";
-                    System.Diagnostics.Debug.WriteLine($"[Analytics] Error: {err}");
-                    ToastNotification.Show("Load Failed", err, ToastType.Warning);
-                    return;
-                }
-
-                System.Diagnostics.Debug.WriteLine($"[Analytics] Received data: TotalSoloParents={response.Data.TotalSoloParents}");
-
-                // Populate ViewModel from DTO
-                _viewModel.LoadFromAnalyticsDto(response.Data);
-                
-                System.Diagnostics.Debug.WriteLine($"[Analytics] ViewModel updated: TotalSoloParents={_viewModel.TotalSoloParents}, AgeGroupData.Count={_viewModel.AgeGroupData.Count}");
-                
-                // Update refresh timestamp
-                _viewModel.LastRefreshTime = DateTime.Now;
-                TxtLastRefresh.Text = "Updated " + DateTime.Now.ToString("MMM d, h:mm tt");
-            }
-            finally
-            {
-                if (AnalyticsLoadingOverlay != null) AnalyticsLoadingOverlay.IsLoading = false;
-                if (_viewModel != null) _viewModel.IsLoading = false;
-            }
-        }
-        private async void ExportXlsx_Click(object sender, RoutedEventArgs e)
-        {
-            var saveDlg = new Microsoft.Win32.SaveFileDialog
-            {
-                FileName = "SoloParents_Quarterly_" + DateTime.Now.ToString("yyyyMMdd"),
-                DefaultExt = ".xlsx",
-                Filter = "Excel Workbook (*.xlsx)|*.xlsx"
-            };
-            if (saveDlg.ShowDialog() != true) return;
-
-            // Derive the quarter from the currently selected month
-            int q = (_filterMonth - 1) / 3 + 1;
-            int startMonth = (q - 1) * 3 + 1;
-            var months = new[] { startMonth, startMonth + 1, startMonth + 2 };
-
-            var results = new List<MonthlyAnalyticsDto>();
-            foreach (var mo in months)
-            {
-                var resp = await GetMonthlyAnalyticsCachedAsync(_filterYear, mo, _filterBarangay);
-                if (!resp.Succeeded || resp.Data == null)
-                {
-                    string err = resp.Errors != null && resp.Errors.Count > 0
-                        ? string.Join("\n", resp.Errors)
-                        : $"Unable to load data for {new DateTime(2000, mo, 1):MMMM} {_filterYear}.";
-                    ToastNotification.Show("Export Failed", err, ToastType.Warning);
-                    return;
-                }
-                results.Add(resp.Data);
-            }
-
-            string periodLabel = new DateTime(2000, months[2], 1).ToString("MMMM").ToUpper() + " " + _filterYear;
-
-            var mw = Window.GetWindow(this) as MainWindow;
-            if (mw != null) mw.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
-
-            double w = mw?.Width ?? 1280, h = mw?.Height ?? 800, l = mw?.Left ?? 0, t = mw?.Top ?? 0;
-            var optsDlg = new ExportOptionsDialog(System.IO.Path.GetFileName(saveDlg.FileName), w, h, l, t)
-            { Owner = mw ?? Window.GetWindow(this) };
-            optsDlg.ShowDialog();
-
-            if (mw != null) mw.MainContent.Effect = null;
-            if (!optsDlg.Confirmed) return;
-
-            try
-            {
-                AnalyticsExportService.ExportQuarterlySummary(
-                    saveDlg.FileName,
-                    results[0], results[1], results[2],
-                    periodLabel,
-                    MainWindow.CurrentUserName,
-                    password: optsDlg.Password);
-
-                ToastNotification.Show("Exported", "Saved to " + System.IO.Path.GetFileName(saveDlg.FileName), ToastType.Success);
-                if (optsDlg.OpenAfter)
-                    System.Diagnostics.Process.Start(saveDlg.FileName);
+                if (response.Succeeded && response.Data != null)
+                    _vm.LoadFromAnalyticsDto(response.Data);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Export failed:\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Analytics load error: {ex.Message}");
             }
         }
+
+        private void PreviousBarangayButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            _vm.PreviousBarangayPage();
+        }
+
+        private void NextBarangayButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            _vm.NextBarangayPage();
+        }
+
+        private void FilterDrop_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (FilterPopup != null)
+            {
+                FilterPopup.IsOpen = !FilterPopup.IsOpen;
+            }
+        }
+
+        private void FilterCombo_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            // Filter combo selections have changed, update preview or trigger auto-apply if needed
+        }
+
+        private void FilterReset_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (CmbFilterBarangay != null)
+                CmbFilterBarangay.SelectedIndex = 0;
+        }
+
+        private void FilterApply_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (FilterPopup != null)
+                FilterPopup.IsOpen = false;
+        }
+
+        private void ExportBtn_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            // Export feature IN PROGRESS - EPPlus license issue
+            MessageBox.Show(
+                "Export feature is currently IN PROGRESS.\n\n" +
+                "We encountered an EPPlus 8+ license compatibility issue.\n" +
+                "The team is working on this feature.\n\n" +
+                "Status: Diagnostic phase\n" +
+                "Expected: Next update\n\n" +
+                "Please use the browser dashboard for export in the meantime.",
+                "Export - IN PROGRESS",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+
+        private MonthlyAnalyticsDto BuildMonthlyAnalyticsFromViewModel()
+        {
+            // Create analytics DTO from current ViewModel data
+            var dto = new MonthlyAnalyticsDto
+            {
+                Year = DateTime.Now.Year,
+                Month = DateTime.Now.Month,
+                Barangay = "ALL",
+                TotalSoloParents = _vm.TotalSoloParents,
+                NewRegistrations = 0,  // TODO: Get from ViewModel if available
+                Renewals = 0,           // TODO: Get from ViewModel if available
+                Sex = new System.Collections.Generic.Dictionary<string, int>
+                {
+                    { "Female", _vm.FemaleCount },
+                    { "Male", _vm.MaleCount }
+                },
+                CivilStatus = new System.Collections.Generic.Dictionary<string, int>
+                {
+                    { "Single", _vm.SingleCount },
+                    { "Married", _vm.MarriedCount },
+                    { "Widowed", _vm.WidowedCount },
+                    { "Separated", _vm.SeparatedCount },
+                    { "Annulled", _vm.AnnulledCount }
+                },
+                EmploymentStatus = new System.Collections.Generic.Dictionary<string, int>(),
+                AgeBrackets = new System.Collections.Generic.Dictionary<string, int>(),
+                MonthlyIncomeBrackets = new System.Collections.Generic.Dictionary<string, int>(),
+                DependentsAgeBrackets = new System.Collections.Generic.Dictionary<string, int>
+                {
+                    { "6_AND_BELOW", _vm.AgeGroup0_5 },
+                    { "7_TO_22", _vm.AgeGroup6_12 },
+                    { "22_AND_ABOVE", _vm.AgeGroup13_17 }
+                },
+                Categories = new System.Collections.Generic.Dictionary<string, int>(),
+                Lgbt = new System.Collections.Generic.Dictionary<string, int>
+                {
+                    { "Yes", _vm.LgbtCount },
+                    { "No", _vm.TotalSoloParents - _vm.LgbtCount }
+                },
+                PantawidBeneficiary = new System.Collections.Generic.Dictionary<string, int>
+                {
+                    { "Yes", _vm.PantawidBeneficiaryCount },
+                    { "No", _vm.TotalSoloParents - _vm.PantawidBeneficiaryCount }
+                },
+                Indigenous = new System.Collections.Generic.Dictionary<string, int>()
+            };
+
+            // Populate employment from ViewModel text values
+            if (!string.IsNullOrEmpty(_vm.EmployedText))
+            {
+                var parts = _vm.EmployedText.Split('(');
+                if (parts.Length > 0 && int.TryParse(parts[0].Trim(), out int employed))
+                    dto.EmploymentStatus["employed"] = employed;
+            }
+            if (!string.IsNullOrEmpty(_vm.SelfEmployedText))
+            {
+                var parts = _vm.SelfEmployedText.Split('(');
+                if (parts.Length > 0 && int.TryParse(parts[0].Trim(), out int selfEmp))
+                    dto.EmploymentStatus["self_employed"] = selfEmp;
+            }
+            if (!string.IsNullOrEmpty(_vm.NotEmployedText))
+            {
+                var parts = _vm.NotEmployedText.Split('(');
+                if (parts.Length > 0 && int.TryParse(parts[0].Trim(), out int notEmp))
+                    dto.EmploymentStatus["not_employed"] = notEmp;
+            }
+
+            // Populate from observable collections if available
+            if (_vm.EmploymentStatusData != null && _vm.EmploymentStatusData.Count > 0)
+            {
+                var empLabels = new[] { "employed", "self_employed", "not_employed" };
+                int i = 0;
+                foreach (var item in _vm.EmploymentStatusData)
+                {
+                    if (i < empLabels.Length)
+                        dto.EmploymentStatus[empLabels[i]] = item.Value;
+                    i++;
+                }
+            }
+
+            if (_vm.AgeGroupData != null && _vm.AgeGroupData.Count > 0)
+            {
+                var ageKeys = new[] { "19_AND_BELOW", "20_39", "40_59", "60_AND_ABOVE" };
+                int i = 0;
+                foreach (var item in _vm.AgeGroupData)
+                {
+                    if (i < ageKeys.Length)
+                        dto.AgeBrackets[ageKeys[i]] = item.Value;
+                    i++;
+                }
+            }
+
+            if (_vm.IncomeBracketData != null && _vm.IncomeBracketData.Count > 0)
+            {
+                var incomeKeys = new[] { "BELOW_MINIMUM_WAGE", "MIN_WAGE_PLUS1_TO_20833", "20834_AND_ABOVE" };
+                int i = 0;
+                foreach (var item in _vm.IncomeBracketData)
+                {
+                    if (i < incomeKeys.Length)
+                        dto.MonthlyIncomeBrackets[incomeKeys[i]] = item.Value;
+                    i++;
+                }
+            }
+
+            // Populate categories from BarangayData or TopCasesData if representing categories
+            if (_vm.TopCasesData != null && _vm.TopCasesData.Count > 0)
+            {
+                int i = 0;
+                var categoryKeys = new[] { "A1", "A2", "A3", "A4", "A5", "A6", "A7", "B", "C", "D", "E", "F" };
+                foreach (var item in _vm.TopCasesData)
+                {
+                    if (i < categoryKeys.Length)
+                        dto.Categories[categoryKeys[i]] = item.Value;
+                    i++;
+                }
+            }
+
+            return dto;
+        }
+
+        private async void RefreshBtn_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            try
+            {
+                // Disable button and show loader
+                RefreshBtn.IsEnabled = false;
+                
+                // Find the loader and icon elements in the button content
+                if (RefreshBtn.Content is Grid contentGrid)
+                {
+                    var refreshIcon = contentGrid.Children.OfType<System.Windows.Shapes.Path>().FirstOrDefault();
+                    var loadingSpinner = contentGrid.Children.OfType<StackPanel>().FirstOrDefault();
+                    
+                    if (refreshIcon != null)
+                        refreshIcon.Visibility = System.Windows.Visibility.Collapsed;
+                    if (loadingSpinner != null)
+                        loadingSpinner.Visibility = System.Windows.Visibility.Visible;
+                }
+                
+                // Refresh analytics data
+                await LoadDataAsync();
+                
+                // Show success notification
+                MessageBox.Show("Analytics data refreshed successfully.", "Refresh Complete",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                // Show error notification
+                MessageBox.Show($"Refresh failed: {ex.Message}", "Refresh Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Refresh error: {ex}");
+            }
+            finally
+            {
+                // Restore icon and hide loader
+                if (RefreshBtn.Content is Grid contentGrid)
+                {
+                    var refreshIcon = contentGrid.Children.OfType<System.Windows.Shapes.Path>().FirstOrDefault();
+                    var loadingSpinner = contentGrid.Children.OfType<StackPanel>().FirstOrDefault();
+                    
+                    if (refreshIcon != null)
+                        refreshIcon.Visibility = System.Windows.Visibility.Visible;
+                    if (loadingSpinner != null)
+                        loadingSpinner.Visibility = System.Windows.Visibility.Collapsed;
+                }
+                
+                RefreshBtn.IsEnabled = true;
+            }
         }
     }
-
-
+}

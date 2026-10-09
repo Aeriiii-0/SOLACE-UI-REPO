@@ -2,6 +2,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using SOLUM_UI.ViewModels;
@@ -19,6 +21,8 @@ namespace SOLUM_UI.Views.Components
             get => (ObservableCollection<AreaChartData>)GetValue(DataProperty);
             set => SetValue(DataProperty, value);
         }
+
+        private ToolTip _currentToolTip;
 
         public AreaChart()
         {
@@ -51,15 +55,17 @@ namespace SOLUM_UI.Views.Components
 
         private void RenderChart()
         {
-            ChartCanvas.Children.Clear();
-
-            if (Data == null || Data.Count == 0)
+            try
             {
-                NoDataPanel.Visibility = Visibility.Visible;
-                return;
-            }
+                ChartCanvas.Children.Clear();
 
-            NoDataPanel.Visibility = Visibility.Collapsed;
+                if (Data == null || Data.Count == 0)
+                {
+                    if (NoDataPanel != null) NoDataPanel.Visibility = Visibility.Visible;
+                    return;
+                }
+
+                if (NoDataPanel != null) NoDataPanel.Visibility = Visibility.Collapsed;
 
             double padding = 40;
             double chartWidth = ChartCanvas.ActualWidth > 0 ? ChartCanvas.ActualWidth - 2 * padding : 400;
@@ -146,7 +152,7 @@ namespace SOLUM_UI.Views.Components
                 points.Add(new Point(x, y));
             }
 
-            // Draw smooth area using Bezier curves instead of straight lines
+            // Draw smooth gradient area under the line
             PathGeometry areaGeometry = new PathGeometry();
             PathFigure areaFigure = new PathFigure { StartPoint = new Point(padding, padding + chartHeight) };
 
@@ -184,12 +190,24 @@ namespace SOLUM_UI.Views.Components
             areaFigure.IsClosed = true;
             areaGeometry.Figures.Add(areaFigure);
 
+            // Create gradient for area (light to transparent)
+            LinearGradientBrush areaGradient = new LinearGradientBrush
+            {
+                StartPoint = new Point(0, 0),
+                EndPoint = new Point(0, 1),
+                GradientStops = new GradientStopCollection
+                {
+                    new GradientStop(Color.FromArgb(100, 123, 20, 38), 0),
+                    new GradientStop(Color.FromArgb(20, 123, 20, 38), 1)
+                }
+            };
+
             Path areaPath = new Path
             {
                 Data = areaGeometry,
-                Fill = new SolidColorBrush(Color.FromArgb(120, 161, 68, 82)), // Adjusted semi-transparent maroon
+                Fill = areaGradient,
                 Stroke = new SolidColorBrush(Color.FromArgb(255, 123, 20, 38)),
-                StrokeThickness = 2.5
+                StrokeThickness = 0
             };
             ChartCanvas.Children.Add(areaPath);
 
@@ -223,56 +241,156 @@ namespace SOLUM_UI.Views.Components
             {
                 Data = lineGeometry,
                 Stroke = new SolidColorBrush(Color.FromArgb(255, 123, 20, 38)),
-                StrokeThickness = 2.5,
+                StrokeThickness = 3.5,
                 IsHitTestVisible = false
             };
             ChartCanvas.Children.Add(linePath);
 
-            // Draw points, labels, and value indicators
+            // Draw points with hover tooltips (interactive)
             for (int i = 0; i < Data.Count; i++)
             {
                 double pointX = points[i].X;
                 double pointY = points[i].Y;
+                int recordCount = Data[i].Value;
+                string barangayName = Data[i].Label;
 
-                // Circle point
+                // Create a larger hit-test area for better interactivity
+                Ellipse hitTestCircle = new Ellipse
+                {
+                    Width = 18,
+                    Height = 18,
+                    Fill = new SolidColorBrush(Colors.Transparent),
+                    Cursor = Cursors.Hand
+                };
+                Canvas.SetLeft(hitTestCircle, pointX - 9);
+                Canvas.SetTop(hitTestCircle, pointY - 9);
+                
+                // Store data in Tag for hover
+                hitTestCircle.Tag = new { Barangay = barangayName, Count = recordCount };
+                
+                hitTestCircle.MouseEnter += (s, e) => ShowTooltip(hitTestCircle, barangayName, recordCount, pointX, pointY);
+                hitTestCircle.MouseLeave += (s, e) => HideTooltip();
+                
+                ChartCanvas.Children.Add(hitTestCircle);
+
+                // Visible point circle
                 Ellipse pointCircle = new Ellipse
                 {
-                    Width = 8,
-                    Height = 8,
+                    Width = 10,
+                    Height = 10,
                     Fill = new SolidColorBrush(Color.FromArgb(255, 123, 20, 38)),
                     Stroke = new SolidColorBrush(Colors.White),
-                    StrokeThickness = 2
+                    StrokeThickness = 2.5,
+                    IsHitTestVisible = false
                 };
-                Canvas.SetLeft(pointCircle, pointX - 4);
-                Canvas.SetTop(pointCircle, pointY - 4);
+                Canvas.SetLeft(pointCircle, pointX - 5);
+                Canvas.SetTop(pointCircle, pointY - 5);
                 ChartCanvas.Children.Add(pointCircle);
 
-                // Value label above point
-                TextBlock valueLabel = new TextBlock
-                {
-                    Text = Data[i].Value.ToString(),
-                    Foreground = new SolidColorBrush(Color.FromArgb(255, 123, 20, 38)),
-                    FontSize = 9,
-                    FontWeight = FontWeights.SemiBold,
-                    TextAlignment = TextAlignment.Center,
-                    Width = 40
-                };
-                Canvas.SetLeft(valueLabel, pointX - 20);
-                Canvas.SetTop(valueLabel, pointY - 20);
-                ChartCanvas.Children.Add(valueLabel);
-
-                // X-axis label
+                // X-axis label (barangay name, truncated if needed)
+                string displayLabel = barangayName.Length > 12 ? barangayName.Substring(0, 10) + ".." : barangayName;
                 TextBlock xLabel = new TextBlock
                 {
-                    Text = Data[i].Label,
+                    Text = displayLabel,
                     Foreground = new SolidColorBrush(Color.FromArgb(255, 122, 92, 96)),
-                    FontSize = 9,
+                    FontSize = 8,
                     TextAlignment = TextAlignment.Center,
-                    Width = 50
+                    Width = 50,
+                    IsHitTestVisible = false
                 };
                 Canvas.SetLeft(xLabel, pointX - 25);
                 Canvas.SetTop(xLabel, padding + chartHeight + 10);
                 ChartCanvas.Children.Add(xLabel);
+            }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AreaChart] RenderChart error: {ex.Message}\n{ex.StackTrace}");
+                if (NoDataPanel != null)
+                {
+                    NoDataPanel.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        private void ShowTooltip(UIElement target, string barangay, int count, double x, double y)
+        {
+            try
+            {
+                if (target == null || string.IsNullOrEmpty(barangay)) return;
+
+                Border tooltipBorder = new Border
+                {
+                    Background = new SolidColorBrush(Color.FromArgb(240, 123, 20, 38)),
+                    CornerRadius = new CornerRadius(6),
+                    Padding = new Thickness(10, 8, 10, 8),
+                    Opacity = 0
+                };
+                
+                StackPanel tooltipContent = new StackPanel
+                {
+                    Orientation = Orientation.Vertical
+                };
+
+                TextBlock barangayLabel = new TextBlock
+                {
+                    Text = barangay,
+                    Foreground = new SolidColorBrush(Colors.White),
+                    FontSize = 12,
+                    FontWeight = FontWeights.SemiBold
+                };
+
+                TextBlock countLabel = new TextBlock
+                {
+                    Text = $"{count} records",
+                    Foreground = new SolidColorBrush(Color.FromArgb(220, 255, 255, 255)),
+                    FontSize = 11,
+                    Margin = new Thickness(0, 4, 0, 0)
+                };
+
+                tooltipContent.Children.Add(barangayLabel);
+                tooltipContent.Children.Add(countLabel);
+                tooltipBorder.Child = tooltipContent;
+
+                Canvas.SetLeft(tooltipBorder, x + 15);
+                Canvas.SetTop(tooltipBorder, y - 35);
+
+                _currentToolTip = new ToolTip { Content = tooltipBorder, Placement = PlacementMode.Relative };
+                ToolTipService.SetToolTip(target, _currentToolTip);
+
+                // Fade-in animation
+                var animation = new System.Windows.Media.Animation.DoubleAnimation
+                {
+                    From = 0,
+                    To = 1,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(200))
+                };
+                tooltipBorder.BeginAnimation(OpacityProperty, animation);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AreaChart] ShowTooltip error: {ex.Message}");
+            }
+        }
+
+        private void HideTooltip()
+        {
+            try
+            {
+                if (_currentToolTip != null && _currentToolTip.Content is Border tooltipBorder)
+                {
+                    var animation = new System.Windows.Media.Animation.DoubleAnimation
+                    {
+                        From = 1,
+                        To = 0,
+                        Duration = new Duration(TimeSpan.FromMilliseconds(150))
+                    };
+                    tooltipBorder.BeginAnimation(OpacityProperty, animation);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AreaChart] HideTooltip error: {ex.Message}");
             }
         }
     }

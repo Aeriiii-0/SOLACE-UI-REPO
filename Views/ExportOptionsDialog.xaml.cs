@@ -60,12 +60,14 @@ namespace SOLUM_UI
             }
             OpenAfter = ChkOpenAfter.IsChecked == true;
             Confirmed = true;
+            DialogResult = true;
             Close();
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             Confirmed = false;
+            DialogResult = false;
             Close();
         }
     }

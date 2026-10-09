@@ -8,6 +8,7 @@ namespace SOLUM_UI
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            
             // Launch local background OCR engine if not already running
             _ = OcrService.EnsureServerRunningAsync();
         }
@@ -20,3 +21,4 @@ namespace SOLUM_UI
         }
     }
 }
+

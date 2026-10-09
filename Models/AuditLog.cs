@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace SOLUM_UI.Models
 {
@@ -115,6 +116,22 @@ namespace SOLUM_UI.Models
                     case AuditAction.Logout:  return "#6B7280";
                     case AuditAction.System:  return "#F59E0B";
                     default:                  return "#6B7280";
+                }
+            }
+        }
+
+        public Brush DotColorBrush
+        {
+            get
+            {
+                var hexColor = DotColor;
+                try
+                {
+                    return new SolidColorBrush((Color)ColorConverter.ConvertFromString(hexColor));
+                }
+                catch
+                {
+                    return new SolidColorBrush(Colors.Gray);
                 }
             }
         }

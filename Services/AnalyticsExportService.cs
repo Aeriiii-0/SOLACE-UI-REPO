@@ -32,6 +32,182 @@ namespace SOLUM_UI.Services
             }
         }
 
+        /// <summary>
+        /// Export monthly analytics data as LGU Summary report (from MonthlyAnalyticsDto)
+        /// </summary>
+        public static void ExportMonthlyAnalytics(
+            string filePath,
+            MonthlyAnalyticsDto analytics,
+            string submittedByName = "",
+            string cityProvince = "BINAN, LAGUNA",
+            string region = "IV-A",
+            string password = null)
+        {
+            using (var pkg = new ExcelPackage())
+            {
+                buildMonthlyAnalyticsSheet(pkg, analytics, submittedByName, cityProvince, region);
+
+                if (!string.IsNullOrEmpty(password))
+                    pkg.SaveAs(new System.IO.FileInfo(filePath), password);
+                else
+                    pkg.SaveAs(new System.IO.FileInfo(filePath));
+            }
+        }
+
+        private static void buildMonthlyAnalyticsSheet(
+            ExcelPackage pkg,
+            MonthlyAnalyticsDto data,
+            string submittedByName,
+            string cityProvince,
+            string region)
+        {
+            var ws = pkg.Workbook.Worksheets.Add("LGU Summary");
+
+            var accent = Color.FromArgb(0x70, 0x29, 0x43);      // Burgundy
+            var light = Color.FromArgb(0xF0, 0xE8, 0xEC);       // Light pink
+            var grey = Color.FromArgb(0x77, 0x77, 0x77);        // Dark grey
+
+            int row = 1;
+
+            // Header
+            ws.Cells[row, 1].Value = "LGU SUMMARY OF SOLO PARENTS";
+            headerStyle(ws.Cells[row, 1, row, 3], accent, Color.White, 13);
+            ws.Row(row).Height = 22;
+            row++;
+
+            // Period
+            string periodLabel = $"{System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(data.Month)} {data.Year}";
+            ws.Cells[row, 1].Value = "As of " + periodLabel;
+            labelStyle(ws.Cells[row, 1], grey);
+            row += 2;
+
+            // Location info
+            infoRow(ws, ref row, "City / Municipality / Province", cityProvince);
+            infoRow(ws, ref row, "Region", region);
+            row++;
+
+            // Total solo parents
+            infoRow(ws, ref row, "Number of Solo Parents served for " + data.Year, data.TotalSoloParents.ToString());
+            row++;
+
+            // Age brackets
+            sectionHeader(ws, ref row, "Age", accent, light);
+            dataRow(ws, ref row, "19 years old and below", getValue(data.AgeBrackets, "19_AND_BELOW"));
+            dataRow(ws, ref row, "20-39 years old", getValue(data.AgeBrackets, "20_39"));
+            dataRow(ws, ref row, "40-59 years old", getValue(data.AgeBrackets, "40_59"));
+            dataRow(ws, ref row, "60 and above", getValue(data.AgeBrackets, "60_AND_ABOVE"));
+            row++;
+
+            // Sex
+            sectionHeader(ws, ref row, "Sex", accent, light);
+            dataRow(ws, ref row, "Male", getValue(data.Sex, "Male"));
+            dataRow(ws, ref row, "Female", getValue(data.Sex, "Female"));
+            row++;
+
+            // Civil Status
+            sectionHeader(ws, ref row, "Civil Status", accent, light);
+            dataRow(ws, ref row, "Single", getValue(data.CivilStatus, "Single"));
+            dataRow(ws, ref row, "Married", getValue(data.CivilStatus, "Married"));
+            dataRow(ws, ref row, "Widowed", getValue(data.CivilStatus, "Widowed"));
+            int sepAnnulled = getValue(data.CivilStatus, "Separated") + getValue(data.CivilStatus, "Annulled");
+            dataRow(ws, ref row, "Legally Separated / Annulled", sepAnnulled);
+            row++;
+
+            // Employment Status
+            sectionHeader(ws, ref row, "Employment Status", accent, light);
+            dataRow(ws, ref row, "Employed (public & private)", getValue(data.EmploymentStatus, "employed"));
+            dataRow(ws, ref row, "Self employed", getValue(data.EmploymentStatus, "self_employed"));
+            dataRow(ws, ref row, "Not employed", getValue(data.EmploymentStatus, "not_employed"));
+            row++;
+
+            // Monthly Income
+            sectionHeader(ws, ref row, "Monthly Income", accent, light);
+            dataRow(ws, ref row, "below minimum wage", getValue(data.MonthlyIncomeBrackets, "BELOW_MINIMUM_WAGE"));
+            dataRow(ws, ref row, "Minimum wage +1 to Php 20833", getValue(data.MonthlyIncomeBrackets, "MIN_WAGE_PLUS1_TO_20833"));
+            dataRow(ws, ref row, "Php 20834 and above", getValue(data.MonthlyIncomeBrackets, "20834_AND_ABOVE"));
+            row++;
+
+            // Dependents by age
+            sectionHeader(ws, ref row, "No. of Children / Dependent", accent, light);
+            dataRow(ws, ref row, "6 years old and below", getValue(data.DependentsAgeBrackets, "6_AND_BELOW"));
+            dataRow(ws, ref row, "7-22 years old", getValue(data.DependentsAgeBrackets, "7_TO_22"));
+            dataRow(ws, ref row, "22 years old and above", getValue(data.DependentsAgeBrackets, "22_AND_ABOVE"));
+            row++;
+
+            // Categories
+            sectionHeader(ws, ref row, "Category", accent, light);
+            var categoryLabels = new (string key, string label)[]
+            {
+                ("A1", "a1. Consequence of rape"),
+                ("A2", "a2. Widow/widower"),
+                ("A3", "a3. Spouse of PDL"),
+                ("A4", "a4. Spouse of PWD"),
+                ("A5", "a5. Separated or de facto separated"),
+                ("A6", "a6. Annulled"),
+                ("A7", "a7. Abandoned"),
+                ("B", "b. Spouse/Relative of OFW"),
+                ("C", "c. Unmarried person"),
+                ("D", "d. Legal Guardian, Adoptive or Foster Parent"),
+                ("E", "e. Relative"),
+                ("F", "f. Pregnant woman"),
+            };
+            foreach (var (key, label) in categoryLabels)
+                dataRow(ws, ref row, label, getValue(data.Categories, key));
+            row++;
+
+            // Solo Parent ID Card
+            sectionHeader(ws, ref row, "Solo Parent Identification Card", accent, light);
+            dataRow(ws, ref row, "Newly issued SPIC", data.NewRegistrations);
+            dataRow(ws, ref row, "Renewed SPIC", data.Renewals);
+            dataRow(ws, ref row, "Terminated SPIC", 0);
+            row++;
+
+            // Pantawid Beneficiary
+            sectionHeader(ws, ref row, "Pantawid Beneficiary", accent, light);
+            dataRow(ws, ref row, "Yes", getValue(data.PantawidBeneficiary, "Yes"));
+            dataRow(ws, ref row, "No", getValue(data.PantawidBeneficiary, "No"));
+            row++;
+
+            // Indigenous Person
+            sectionHeader(ws, ref row, "Indigenous Person", accent, light);
+            dataRow(ws, ref row, "Yes", getValue(data.Indigenous, "Yes"));
+            dataRow(ws, ref row, "No", getValue(data.Indigenous, "No"));
+            row++;
+
+            // LGBTQ+
+            sectionHeader(ws, ref row, "LGBTQ+", accent, light);
+            dataRow(ws, ref row, "Yes", getValue(data.Lgbt, "Yes"));
+            dataRow(ws, ref row, "No", getValue(data.Lgbt, "No"));
+            row += 2;
+
+            // Submitted by
+            ws.Cells[row, 1].Value = "Submitted by:";
+            labelStyle(ws.Cells[row, 1], grey);
+            row += 2;
+
+            ws.Cells[row, 1].Value = submittedByName;
+            ws.Cells[row, 1].Style.Font.Bold = true;
+            ws.Cells[row, 1].Style.Font.Size = 10;
+            row++;
+
+            ws.Cells[row, 1].Value = "Name of Solo Parent Focal Person:";
+            labelStyle(ws.Cells[row, 1], grey);
+            row++;
+
+            ws.Cells[row, 1].Value = "Date of Submission: " + DateTime.Today.ToString("MMMM d, yyyy");
+            labelStyle(ws.Cells[row, 1], grey);
+
+            ws.Column(1).Width = 36;
+            ws.Column(2).Width = 48;
+            ws.Column(3).Width = 14;
+        }
+
+        // Helper to safely get dictionary value
+        private static int getValue(Dictionary<string, int> dict, string key)
+        {
+            return dict != null && dict.ContainsKey(key) ? dict[key] : 0;
+        }
+
         private static void buildSummarySheet(ExcelPackage pkg, List<SoloParentRecord> d, string period)
         {
             var ws = pkg.Workbook.Worksheets.Add("LGU Summary");
