@@ -596,12 +596,14 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="First Name *" Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="TxtFirstName" Style="{StaticResource FormBox}" TextChanged="ClearErrors"/>
+                                <TextBox x:Name="TxtFirstName" Style="{StaticResource FormBox}" TextChanged="ClearErrors"
+                                         PreviewTextInput="Name_PreviewTextInput" MaxLength="50"/>
                                 <TextBlock x:Name="ErrFirstName" Text="Required." Style="{StaticResource ErrorText}"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Last Name *" Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="TxtLastName" Style="{StaticResource FormBox}" TextChanged="ClearErrors"/>
+                                <TextBox x:Name="TxtLastName" Style="{StaticResource FormBox}" TextChanged="ClearErrors"
+                                         PreviewTextInput="Name_PreviewTextInput" MaxLength="50"/>
                                 <TextBlock x:Name="ErrLastName" Text="Required." Style="{StaticResource ErrorText}"/>
                             </StackPanel>
                         </Grid>
@@ -627,7 +629,8 @@
 
                         <StackPanel Margin="0,0,0,14">
                             <TextBlock Text="Contact Number *" Style="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="TxtContactNumber" Style="{StaticResource FormBox}" TextChanged="ClearErrors"/>
+                            <TextBox x:Name="TxtContactNumber" Style="{StaticResource FormBox}" TextChanged="ClearErrors"
+                                     PreviewTextInput="ContactNumber_PreviewTextInput" MaxLength="13"/>
                             <TextBlock x:Name="ErrContactNumber" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
 

@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
@@ -86,7 +87,11 @@ namespace SOLUM_UI
         public UserAdministrationPage()
         {
             InitializeComponent();
-            Loaded += async (s, e) => await LoadUsersAsync(); 
+            Loaded += async (s, e) => await LoadUsersAsync();
+
+            DataObject.AddPastingHandler(TxtFirstName, NamePasteHandler);
+            DataObject.AddPastingHandler(TxtLastName, NamePasteHandler);
+            DataObject.AddPastingHandler(TxtContactNumber, ContactPasteHandler);
         }
 
         private async Task LoadUsersAsync()
@@ -442,10 +447,49 @@ namespace SOLUM_UI
             bool ok = true;
 
             if (string.IsNullOrWhiteSpace(firstName))
-            { ErrFirstName.Visibility = Visibility.Visible; ok = false; }
+            {
+                ErrFirstName.Text = "Required.";
+                ErrFirstName.Visibility = Visibility.Visible;
+                ok = false;
+            }
+            else if (!Regex.IsMatch(firstName, @"^[a-zA-ZñÑ\.\s]+$"))
+            {
+                ErrFirstName.Text = "Only letters, spaces, and '.' are allowed.";
+                ErrFirstName.Visibility = Visibility.Visible;
+                ok = false;
+            }
 
             if (string.IsNullOrWhiteSpace(lastName))
-            { ErrLastName.Visibility = Visibility.Visible; ok = false; }
+            {
+                ErrLastName.Text = "Required.";
+                ErrLastName.Visibility = Visibility.Visible;
+                ok = false;
+            }
+            else if (!Regex.IsMatch(lastName, @"^[a-zA-ZñÑ\.\s]+$"))
+            {
+                ErrLastName.Text = "Only letters, spaces, and '.' are allowed.";
+                ErrLastName.Visibility = Visibility.Visible;
+                ok = false;
+            }
+
+            if (string.IsNullOrWhiteSpace(contactNumber))
+            {
+                ErrContactNumber.Text = "Required.";
+                ErrContactNumber.Visibility = Visibility.Visible;
+                ok = false;
+            }
+            else
+            {
+                bool is09 = Regex.IsMatch(contactNumber, @"^09\d{9}$");
+                bool is63 = Regex.IsMatch(contactNumber, @"^\+63\d{9,10}$");
+
+                if (!is09 && !is63)
+                {
+                    ErrContactNumber.Text = "Must be 11 digits (starts with 09) or start with +63.";
+                    ErrContactNumber.Visibility = Visibility.Visible;
+                    ok = false;
+                }
+            }
 
             // Email validation only matters for CREATE — it's locked/read-only in edit mode
             if (_editTarget == null)
@@ -479,15 +523,36 @@ namespace SOLUM_UI
 
             if (_editTarget != null)
             {
-                var updateReq = new UpdateApplicationUserRequest
-                {
-                    Id = _editTarget.Id,
-                    FirstName = firstName,
-                    LastName = lastName,
-                    ContactNumber = contactNumber
-                };
+                bool selectedStatus = (CmbEditStatus?.SelectedItem as ComboBoxItem)?.Tag?.ToString() == "true";
+                bool statusChanging = selectedStatus != _editTarget.IsActive;
 
-                var response = await UserApiService.Instance.UpdateApplicationUserAsync(updateReq);
+                string confirmMsg = statusChanging
+                    ? $"Are you sure you want to save changes to this user account ({_editTarget.FullName}) and set status to {(selectedStatus ? "Active" : "Disabled")}?"
+                    : $"Are you sure you want to save changes to this user account ({_editTarget.FullName})?";
+
+                bool isConfirmed = ActionConfirmDialog.Show(
+                    title: "Update User Account",
+                    message: confirmMsg,
+                    confirmText: "Save Changes",
+                    cancelText: "Cancel",
+                    theme: ConfirmThemeType.Primary,
+                    owner: Window.GetWindow(this),
+                    customIconData: "M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.07,6.19L3,17.25Z");
+
+                if (!isConfirmed) return;
+
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
+                try
+                {
+                    var updateReq = new UpdateApplicationUserRequest
+                    {
+                        Id = _editTarget.Id,
+                        FirstName = firstName,
+                        LastName = lastName,
+                        ContactNumber = contactNumber
+                    };
+
+                    var response = await UserApiService.Instance.UpdateApplicationUserAsync(updateReq);
 
                 if (!response.Succeeded)
                 {
@@ -500,8 +565,7 @@ namespace SOLUM_UI
                 }
 
                 // Check if account status was toggled in the edit dropdown
-                bool selectedStatus = (CmbEditStatus?.SelectedItem as ComboBoxItem)?.Tag?.ToString() == "true";
-                if (selectedStatus != _editTarget.IsActive)
+                if (statusChanging)
                 {
                     var statusResponse = await UserApiService.Instance.UpdateUserStatusAsync(_editTarget.Id, selectedStatus);
                     if (!statusResponse.Succeeded)
@@ -530,6 +594,11 @@ namespace SOLUM_UI
                 ClosePanel_Click(null, null);
                 await LoadUsersAsync();
             }
+            finally
+            {
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
+            }
+        }
             else
             {
                 var response = await AuthApiService.Instance.RegisterAsync(email, password, firstName, lastName, contactNumber);
@@ -590,6 +659,130 @@ namespace SOLUM_UI
             ErrPassword.Visibility = Visibility.Collapsed;
             ErrConfirm.Visibility = Visibility.Collapsed;
             FormErrorBanner.Visibility = Visibility.Collapsed;
+        }
+
+        private void Name_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Only letters (including Filipino ñ/Ñ), space, and period '.'
+            e.Handled = !Regex.IsMatch(e.Text, @"^[a-zA-ZñÑ\.\s]+$");
+        }
+
+        private void NamePasteHandler(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = ((string)e.DataObject.GetData(typeof(string))) ?? "";
+                if (!Regex.IsMatch(text, @"^[a-zA-ZñÑ\.\s]+$"))
+                {
+                    e.CancelCommand();
+                }
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+
+        private void ContactNumber_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (!(sender is TextBox tb)) return;
+
+            // Only '+' and digits are allowed
+            if (e.Text != "+" && !char.IsDigit(e.Text, 0))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            string current = tb.Text ?? "";
+            int selStart = tb.SelectionStart;
+            int selLen = tb.SelectionLength;
+            string resulting = current.Remove(selStart, selLen).Insert(selStart, e.Text);
+
+            // Must start with '0' or '+'
+            if (!resulting.StartsWith("0") && !resulting.StartsWith("+"))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if (resulting.StartsWith("0"))
+            {
+                if (resulting.Contains("+"))
+                {
+                    e.Handled = true;
+                    return;
+                }
+                if (resulting.Length >= 2 && resulting[1] != '9')
+                {
+                    e.Handled = true;
+                    return;
+                }
+                if (!Regex.IsMatch(resulting, @"^\d+$"))
+                {
+                    e.Handled = true;
+                    return;
+                }
+                if (resulting.Length > 11)
+                {
+                    e.Handled = true;
+                    return;
+                }
+            }
+            else if (resulting.StartsWith("+"))
+            {
+                if (resulting.IndexOf('+', 1) != -1)
+                {
+                    e.Handled = true;
+                    return;
+                }
+                if (resulting.Length >= 2 && resulting[1] != '6')
+                {
+                    e.Handled = true;
+                    return;
+                }
+                if (resulting.Length >= 3 && resulting[2] != '3')
+                {
+                    e.Handled = true;
+                    return;
+                }
+                if (resulting.Length > 3 && !Regex.IsMatch(resulting.Substring(1), @"^\d+$"))
+                {
+                    e.Handled = true;
+                    return;
+                }
+                if (resulting.Length > 13)
+                {
+                    e.Handled = true;
+                    return;
+                }
+            }
+        }
+
+        private void ContactPasteHandler(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string text = ((string)e.DataObject.GetData(typeof(string)))?.Trim() ?? "";
+                if (!(sender is TextBox tb)) { e.CancelCommand(); return; }
+
+                string current = tb.Text ?? "";
+                int selStart = tb.SelectionStart;
+                int selLen = tb.SelectionLength;
+                string resulting = current.Remove(selStart, selLen).Insert(selStart, text);
+
+                bool valid09 = Regex.IsMatch(resulting, @"^09\d{0,9}$") && resulting.Length <= 11;
+                bool valid63 = Regex.IsMatch(resulting, @"^\+63\d{0,10}$") && resulting.Length <= 13;
+
+                if (!valid09 && !valid63)
+                {
+                    e.CancelCommand();
+                }
+            }
+            else
+            {
+                e.CancelCommand();
+            }
         }
     }
 }
