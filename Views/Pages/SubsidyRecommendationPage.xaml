@@ -1,0 +1,175 @@
+<Page x:Class="SOLUM_UI.Views.Pages.SubsidyRecommendationPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:c="clr-namespace:SOLUM_UI.Views.Components"
+      xmlns:vm="clr-namespace:SOLUM_UI.ViewModels"
+      mc:Ignorable="d" 
+      d:DesignHeight="850" d:DesignWidth="1200"
+      Title="Subsidy Recommendation"
+      Background="#FFFFFF">
+    
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <Style x:Key="PageTabBtn" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#A06080"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="TabBg" Background="Transparent" BorderBrush="Transparent" BorderThickness="0,0,0,3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBg" Property="Background" Value="#FDF5F7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: Page Title & Metrics Header -->
+        <Grid Grid.Row="0" Margin="24,16,24,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Subsidy Recommendation" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
+                <TextBlock Text="ML vulnerability triage and quota allocation awaiting staff review." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,4,0,0"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="#FFF0F5" CornerRadius="8" Padding="14,8" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="8" Height="8" Fill="#702943" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding GranteeSlotsText}" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#E8F5E9" CornerRadius="8" Padding="14,8">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="8" Height="8" Fill="#27AE60" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding FinalSummaryText}" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#27AE60"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- Row 1: Tab Navigation Bar -->
+        <Border Grid.Row="1" BorderBrush="#E8D8DE" BorderThickness="0,0,0,1" Margin="24,0,24,0">
+            <StackPanel Orientation="Horizontal">
+                <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="0">
+                    <TextBlock Text="Recommendations Queue" FontSize="13">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#A06080"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding TabRecommendationsVisible}" Value="True">
+                                        <Setter Property="Foreground" Value="#702943"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Button>
+                <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="1">
+                    <TextBlock Text="Approved Selection &amp; Audit" FontSize="13">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#A06080"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding TabShortlistVisible}" Value="True">
+                                        <Setter Property="Foreground" Value="#702943"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Button>
+                <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="2">
+                    <TextBlock Text="Final Grantees &amp; Archive" FontSize="13">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#A06080"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding TabFinalVisible}" Value="True">
+                                        <Setter Property="Foreground" Value="#702943"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- Row 2: Live Quota Allocator Bar (Visible on Tab 0) -->
+        <c:QuotaAllocatorBar Grid.Row="2" Visibility="{Binding TabRecommendationsVisible, Converter={StaticResource BoolToVis}}"/>
+
+        <!-- Row 3: Tab Content Area -->
+        <Grid Grid.Row="3" Margin="24,0,24,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Tab Grids -->
+            <Grid Grid.Column="0">
+                <c:RecommendationQueueGrid Visibility="{Binding TabRecommendationsVisible, Converter={StaticResource BoolToVis}}"/>
+                <c:ShortlistAuditGrid Visibility="{Binding TabShortlistVisible, Converter={StaticResource BoolToVis}}"/>
+                <c:FinalGranteesArchiveGrid Visibility="{Binding TabFinalVisible, Converter={StaticResource BoolToVis}}"/>
+            </Grid>
+
+            <!-- Detail / Explain Drawer (Accessible on Tab 0 and Tab 1) -->
+            <c:SubsidyExplainDrawer Grid.Column="1" Margin="12,0,0,0"
+                                    Visibility="{Binding IsDrawerOpen, Converter={StaticResource BoolToVis}}"/>
+        </Grid>
+
+        <!-- Row 4: AI Model Status Footer Banner -->
+        <Border Grid.Row="4" Margin="24,8,24,14" Background="#702943" CornerRadius="12" Padding="14,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Width="34" Height="34" Background="#9B3060" CornerRadius="17" Margin="0,0,12,0">
+                    <TextBlock Text="🤖" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="ML Model ran 14 new subsidy recommendations" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="10 high-priority cases await staff approval · Last retrained 4 hours ago" FontFamily="Segoe UI" FontSize="10" Foreground="#E8C8D4" Margin="0,2,0,0"/>
+                </StackPanel>
+                <Border Grid.Column="2" Background="#9B3060" CornerRadius="8" Padding="12,6" VerticalAlignment="Center">
+                    <TextBlock Text="Model v2.4" FontFamily="Segoe UI" FontSize="10" FontWeight="SemiBold" Foreground="White"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Outlier Rejection Modal Overlay (Spans all rows) -->
+        <c:ModalOutlierRejection Grid.RowSpan="5"/>
+    </Grid>
+</Page>

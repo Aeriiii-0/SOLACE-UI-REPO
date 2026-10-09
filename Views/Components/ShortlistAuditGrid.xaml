@@ -1,0 +1,237 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.ShortlistAuditGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1050">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Style x:Key="ColHeader" TargetType="GridViewColumnHeader">
+            <Setter Property="Background" Value="#FBF5F7"/>
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="FontSize" Value="10.5"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Padding" Value="6,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewColumnHeader">
+                        <Border Background="#FBF5F7" BorderBrush="#702943" BorderThickness="0,0,0,1">
+                            <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" TextBlock.Foreground="#702943"/>
+                            </Border>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SelRow" TargetType="ListViewItem">
+            <EventSetter Event="MouseDoubleClick" Handler="Row_MouseDoubleClick"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Background="White" BorderBrush="#EFE5E8" BorderThickness="0,0,0,1">
+                            <Border x:Name="AccentBorder" BorderThickness="4,0,0,0" BorderBrush="#27AE60" Background="Transparent">
+                                <GridViewRowPresenter VerticalAlignment="Center" Margin="0,5"/>
+                            </Border>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsFinalGrantee}" Value="False"><Setter TargetName="AccentBorder" Property="BorderBrush" Value="#F59E0B"/></DataTrigger>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="AccentBorder" Property="Background" Value="#FDF0F3"/></Trigger>
+                            <Trigger Property="IsSelected" Value="True"><Setter TargetName="AccentBorder" Property="Background" Value="#F5E2E8"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+
+        <!-- Top Header & Filter Bar -->
+        <Border Grid.Row="0" Background="#FBF5F7" CornerRadius="12" BorderBrush="#D4A0B0" BorderThickness="1" Padding="14,8" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="Shortlisted Candidates for Audit &amp; Verification" FontSize="13" FontWeight="SemiBold" Foreground="#702943"/>
+                    <TextBlock Text="Verify records and manage candidate shortlist before final grant confirmation." FontSize="10.5" Foreground="#A06080" Margin="0,1,0,0"/>
+                </StackPanel>
+
+                <!-- Filter Dropdown Button & Popup -->
+                <Grid Grid.Column="1" Margin="14,0,8,0" VerticalAlignment="Center">
+                    <Button x:Name="FilterDropBtn" Height="32" Padding="10,0" Cursor="Hand" Click="FilterDropBtn_Click">
+                        <Button.Template><ControlTemplate TargetType="Button"><Border Background="White" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="#702943" Stretch="Uniform" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="{Binding ShortlistAuditFilterLabel}" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterDropBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                        <Border Background="White" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="6" MinWidth="210">
+                            <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.16"/></Border.Effect>
+                            <StackPanel>
+                                <Border CornerRadius="6" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="All" Padding="10,6"><TextBlock Text="👥 All Candidates" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/></Border>
+                                <Border CornerRadius="6" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="CollegeAge" Padding="10,6"><TextBlock Text="🎓 City Educ Scholars (17–24y)" FontSize="11" FontWeight="SemiBold" Foreground="#B45309"/></Border>
+                                <Border CornerRadius="6" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="Clean" Padding="10,6"><TextBlock Text="✓ Cleared Standard" FontSize="11" FontWeight="SemiBold" Foreground="#15803D"/></Border>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+
+                <!-- Search Box for Tab 2 Audit -->
+                <Border Grid.Column="2" Background="White" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Height="32" Margin="0,0,10,0" VerticalAlignment="Center">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🔍" FontSize="10.5" Margin="8,0,5,0" VerticalAlignment="Center" Foreground="#A06080"/>
+                        <TextBox Grid.Column="1" Text="{Binding ShortlistSearchText, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" BorderThickness="0" Background="Transparent" FontSize="11" Foreground="#1F2937" Padding="0,0,6,0" ToolTip="Search shortlist by name, SP ID, 4Ps, or college-age keywords"/>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="3" Background="#FFF0F5" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Padding="10,5" Margin="0,0,8,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Tab2QuotaSummary}" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
+                </Border>
+
+                <!-- Consolidated Export Rosters Dropdown -->
+                <Grid Grid.Column="4">
+                    <Button x:Name="ExportDropBtn" Height="32" Padding="12,0" Cursor="Hand" Click="ExportDropBtn_Click">
+                        <Button.Template><ControlTemplate TargetType="Button"><Border Background="#702943" CornerRadius="8" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Opacity" Value="0.88"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template>
+                        <TextBlock Text="📥 Export Rosters ▾" FontSize="11" FontWeight="SemiBold" Foreground="White"/>
+                    </Button>
+                    <Popup x:Name="ExportPopup" PlacementTarget="{Binding ElementName=ExportDropBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                        <Border Background="White" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="6" MinWidth="250">
+                            <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.16"/></Border.Effect>
+                            <StackPanel>
+                                <Border CornerRadius="6" Cursor="Hand" Padding="10,7" MouseLeftButtonDown="ExportCityEducOpt_Click">
+                                    <StackPanel><TextBlock Text="🎓 City Educ Roster (17–24 yrs)" FontSize="11.5" FontWeight="SemiBold" Foreground="#702943"/><TextBlock Text="Exports college students with names &amp; ages" FontSize="10" Foreground="#888888" Margin="0,1,0,0"/></StackPanel>
+                                </Border>
+                                <Border Height="1" Background="#F0E0E6" Margin="4,2"/>
+                                <Border CornerRadius="6" Cursor="Hand" Padding="10,7" MouseLeftButtonDown="ExportPantawidOpt_Click">
+                                    <StackPanel><TextBlock Text="📋 4Ps Beneficiaries List" FontSize="11.5" FontWeight="SemiBold" Foreground="#1D4ED8"/><TextBlock Text="Exports all Pantawid Pamilya recipients" FontSize="10" Foreground="#888888" Margin="0,1,0,0"/></StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Main Shortlist Table with Batch Actions Bar -->
+        <Border Grid.Row="1" BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True" Background="White">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <!-- Sub-header: Quota Live Stats + Batch Selection Action Bar -->
+                <Border Grid.Row="0" Background="#F8FAFC" Padding="12,6" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Fill="#27AE60" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="{Binding ShortlistSummary}" FontSize="11" Foreground="#334155" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Batch Action Buttons (Adheres to active filter, no header checkbox) -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Height="26" Padding="8,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Toggle select all filtered candidates" Command="{Binding SelectAllShortlistCommand}">
+                                <Button.Template><ControlTemplate TargetType="Button"><Border Background="#FFF0F5" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="{Binding SelectAllShortlistButtonText}" FontSize="10.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                            </Button>
+                            <Border Background="#FDF0F3" CornerRadius="6" Padding="8,3" Margin="0,0,8,0" Visibility="{Binding HasShortlistSelection, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="{Binding ShortlistBatchActionLabel}" FontSize="11" FontWeight="Bold" Foreground="#702943"/>
+                            </Border>
+                            <Button Height="26" Padding="10,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Confirm selected candidates" Command="{Binding BatchConfirmShortlistCommand}" Visibility="{Binding HasShortlistSelection, Converter={StaticResource BoolToVis}}">
+                                <Button.Template><ControlTemplate TargetType="Button"><Border Background="#27AE60" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="✓ Confirm Selected" FontSize="10.5" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                            </Button>
+                            <Button Height="26" Padding="10,0" Cursor="Hand" ToolTip="Revoke selected candidates" Command="{Binding BatchRevokeShortlistCommand}" Visibility="{Binding HasShortlistSelection, Converter={StaticResource BoolToVis}}">
+                                <Button.Template><ControlTemplate TargetType="Button"><Border Background="#E11D48" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="✕ Revoke Selected" FontSize="10.5" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- ListView with Columns -->
+                <ListView x:Name="ShortlistListView" Grid.Row="1" ItemsSource="{Binding FilteredShortlistRows}"
+                          BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource SelRow}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          SizeChanged="ShortlistListView_SizeChanged" Margin="0,4,0,0">
+                    <ListView.View>
+                        <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
+                            <!-- Col 0: Checkbox Selection (No header checkbox) -->
+                            <GridViewColumn x:Name="ColSelect" Header="" Width="36">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Click="RowCheckBox_Click"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 1: Rank -->
+                            <GridViewColumn x:Name="ColRank" Header="RANK" Width="46">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"><TextBlock Text="{Binding Rank, StringFormat='#{0}'}" FontSize="12" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 2: SP ID -->
+                            <GridViewColumn x:Name="ColSpId" Header="SP ID" Width="76">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"><TextBlock Text="{Binding SpId}" FontSize="11" FontWeight="SemiBold" Foreground="#702943" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 3: Solo Parent Details -->
+                            <GridViewColumn x:Name="ColName" Header="SOLO PARENT" Width="150">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="8,0"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Barangay}" FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 4: Score -->
+                            <GridViewColumn x:Name="ColScore" Header="SCORE" Width="64">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="4,0"><TextBlock Text="{Binding ScoreLabel}" FontSize="13.5" FontWeight="Bold" Foreground="{Binding ScoreBarColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 5: Cross-Check -->
+                            <GridViewColumn x:Name="ColCrossCheck" Header="CROSS-CHECK" Width="110">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="6,0"><TextBlock Text="{Binding CrossCheckText}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding CrossCheckFg}" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 6: Compliance Detail (No badges, structured scholarship eligibility indication) -->
+                            <GridViewColumn x:Name="ColCompliance" Header="AUDIT &amp; COMPLIANCE DETAIL" Width="280">
+                                <GridViewColumn.CellTemplate><DataTemplate>
+                                    <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="8,3">
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding DependantsDetailLabel}" FontSize="11" FontWeight="SemiBold" Foreground="#1F2937" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding ScholarshipEligibilityNotice}" FontSize="10" FontWeight="SemiBold" Foreground="{Binding ScholarshipEligibilityFg}" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 7: Validity of Record -->
+                            <GridViewColumn x:Name="ColValidUntil" Header="VALID UNTIL" Width="95">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"><TextBlock Text="{Binding ValidUntilFormatted}" FontSize="11" Foreground="#333333" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 8: Quota Status (Confirmed vs Waitlisted) -->
+                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="90">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="4,0"><Border CornerRadius="10" Padding="8,2" Background="{Binding RankBg}" HorizontalAlignment="Center"><TextBlock Text="{Binding StatusText}" FontSize="10.5" FontWeight="Bold" Foreground="{Binding RankFg}"/></Border></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 8: Actions (Confirm & Revoke, No Clipping) -->
+                            <GridViewColumn x:Name="ColAction" Header="ACTIONS" Width="170">
+                                <GridViewColumn.CellTemplate><DataTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <!-- Confirm Button -->
+                                        <Button Height="26" Padding="8,0" Margin="0,0,5,0" Cursor="Hand" ToolTip="Confirm Grantee" Command="{Binding DataContext.ConfirmShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
+                                            <Button.Template><ControlTemplate TargetType="Button"><Border Background="{Binding ConfirmButtonBg}" BorderBrush="{Binding ConfirmButtonBorder}" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="{Binding ConfirmButtonText}" FontSize="10" FontWeight="Bold" Foreground="{Binding ConfirmButtonFg}" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                                        </Button>
+                                        <!-- Revoke Button -->
+                                        <Button Height="26" Padding="8,0" Cursor="Hand" ToolTip="Revoke Grant / Selection" Command="{Binding DataContext.RevokeShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
+                                            <Button.Template><ControlTemplate TargetType="Button"><Border Background="#FFF1F2" BorderBrush="#FDA4AF" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="Revoke" FontSize="10.5" FontWeight="SemiBold" Foreground="#E11D48" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

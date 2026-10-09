@@ -257,9 +257,38 @@
     <Compile Include="Views\SoloParentRecordsPage.xaml.cs">
       <DependentUpon>SoloParentRecordsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SubsidyRecommendationPage.xaml.cs">
+    <Compile Include="Views\Pages\SubsidyRecommendationPage.xaml.cs">
       <DependentUpon>SubsidyRecommendationPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Components\QuotaAllocatorBar.xaml.cs">
+      <DependentUpon>QuotaAllocatorBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\RecommendationQueueGrid.xaml.cs">
+      <DependentUpon>RecommendationQueueGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\SubsidyExplainDrawer.xaml.cs">
+      <DependentUpon>SubsidyExplainDrawer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\ShortlistAuditGrid.xaml.cs">
+      <DependentUpon>ShortlistAuditGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\FinalGranteesArchiveGrid.xaml.cs">
+      <DependentUpon>FinalGranteesArchiveGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\ModalOutlierRejection.xaml.cs">
+      <DependentUpon>ModalOutlierRejection.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Core\ObservableObject.cs" />
+    <Compile Include="Core\RelayCommand.cs" />
+    <Compile Include="DTOs\SubsidyRecommendationDto.cs" />
+    <Compile Include="DTOs\QuotaAllocationDto.cs" />
+    <Compile Include="DTOs\OutlierRejectionDto.cs" />
+    <Compile Include="DTOs\FinalGranteeConfirmationDto.cs" />
+    <Compile Include="Models\SubsidyItem.cs" />
+    <Compile Include="Models\SelectionRow.cs" />
+    <Compile Include="Services\Interfaces\ISubsidyApiService.cs" />
+    <Compile Include="Services\Implementations\SubsidyApiService.cs" />
+    <Compile Include="ViewModels\SubsidyRecommendationViewModel.cs" />
     <Compile Include="Views\ToastNotification.xaml.cs">
       <DependentUpon>ToastNotification.xaml</DependentUpon>
     </Compile>
@@ -407,7 +436,31 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SubsidyRecommendationPage.xaml">
+    <Page Include="Views\Pages\SubsidyRecommendationPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\QuotaAllocatorBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\RecommendationQueueGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\SubsidyExplainDrawer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\ShortlistAuditGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\FinalGranteesArchiveGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\ModalOutlierRejection.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
