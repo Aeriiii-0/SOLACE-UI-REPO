@@ -18,6 +18,50 @@ namespace SOLUM_UI.Services.Implementations
             return await ApiClient.Instance.GetAsync<SubsidyCycleDto>("api/subsidy/cycles/active");
         }
 
+        public async Task<BaseResponse<List<SubsidyCycleDto>>> GetCyclesAsync()
+        {
+            var resp = await ApiClient.Instance.GetAsync<List<SubsidyCycleDto>>("api/subsidy/cycles");
+            if (resp != null && resp.Succeeded && resp.Data != null && resp.Data.Count > 0)
+            {
+                return resp;
+            }
+
+            var list = new List<SubsidyCycleDto>();
+            var activeResp = await GetActiveCycleAsync();
+            int activeYear = DateTime.Now.Year;
+            if (activeResp?.Data != null)
+            {
+                list.Add(activeResp.Data);
+                activeYear = activeResp.Data.FiscalYear;
+            }
+
+            for (int y = activeYear - 1; y >= activeYear - 2; y--)
+            {
+                if (!list.Any(c => c.FiscalYear == y))
+                {
+                    var gr = await GetGranteesByFiscalYearAsync(y);
+                    if (gr?.Data != null && gr.Data.Count > 0)
+                    {
+                        list.Add(new SubsidyCycleDto
+                        {
+                            FiscalYear = y,
+                            Status = "Finalized",
+                            TotalFinalGrantees = gr.Data.Count,
+                            AllocatedSlots = Math.Max(100, gr.Data.Count),
+                            TotalBudget = Math.Max(100000m, gr.Data.Count * 1000m)
+                        });
+                    }
+                }
+            }
+
+            return BaseResponse<List<SubsidyCycleDto>>.Success(list.OrderByDescending(c => c.FiscalYear).ToList());
+        }
+
+        public async Task<BaseResponse<SubsidyCycleDto>> CreateCycleAsync(CreateSubsidyCycleRequest request)
+        {
+            return await ApiClient.Instance.PostAsync<CreateSubsidyCycleRequest, SubsidyCycleDto>("api/subsidy/cycles", request);
+        }
+
         public async Task<BaseResponse<int>> GenerateRecommendationsAsync(Guid? cycleId = null)
         {
             string url = "api/subsidy/generate-recommendations" + (cycleId.HasValue ? $"?cycleId={cycleId.Value}" : "");
@@ -93,14 +137,39 @@ namespace SOLUM_UI.Services.Implementations
             return Task.FromResult(sb.ToString());
         }
 
-        public Task<string> ExportFinalLedgerCsvAsync(List<SelectionRow> items, int fiscalYear)
+        public async Task<string> ExportFinalLedgerCsvAsync(List<SelectionRow> items, int fiscalYear)
         {
-            var sb = new StringBuilder();
-            sb.AppendLine($"Fiscal Year {fiscalYear} - Final Grantee Confirmation Ledger");
-            sb.AppendLine("Rank,SP ID,Name,Barangay,Score,Priority,Allowance Type,Confirmation Status");
             foreach (var r in items)
-                sb.AppendLine($"{r.Rank},{r.SpId},\"{r.Name}\",{r.Barangay},{r.ScoreLabel},{r.Priority},{r.SubsidyType},{(r.IsFinalGrantee ? "Granted" : "Pending Confirmation")}");
-            return Task.FromResult(sb.ToString());
+            {
+                if (r.SoloParentId != Guid.Empty && string.IsNullOrEmpty(r.EmergencyContactNumber))
+                {
+                    try
+                    {
+                        var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(r.SoloParentId);
+                        if (detailResp?.Data != null)
+                        {
+                            if (string.IsNullOrEmpty(r.ContactNumber)) r.ContactNumber = detailResp.Data.ContactDetails?.ApplicantContactNumber;
+                            if (string.IsNullOrEmpty(r.Address)) r.Address = detailResp.Data.AddressDetails?.Address;
+                            r.EmergencyContactName = detailResp.Data.EmergencyContact?.EmergencyPersonName;
+                            r.EmergencyContactNumber = detailResp.Data.EmergencyContact?.EmergencyPersonContactNumber;
+                        }
+                    }
+                    catch { }
+                }
+            }
+            var sb = new StringBuilder();
+            sb.AppendLine($"Fiscal Year {fiscalYear} - Final Grantee Contact & Confirmation Ledger");
+            sb.AppendLine("Rank,SP ID,Full Name,Contact Number,Barangay,Residential Address,Emergency Contact Person,Emergency Contact Number,Status,Grant Amount");
+            foreach (var r in items)
+            {
+                string contact = !string.IsNullOrWhiteSpace(r.ContactNumber) ? r.ContactNumber : "—";
+                string addr = !string.IsNullOrWhiteSpace(r.Address) ? r.Address : "—";
+                string emName = !string.IsNullOrWhiteSpace(r.EmergencyContactName) ? r.EmergencyContactName : "—";
+                string emPhone = !string.IsNullOrWhiteSpace(r.EmergencyContactNumber) ? r.EmergencyContactNumber : "—";
+                string status = r.IsFinalGrantee ? "Confirmed Grantee" : "Pending Confirmation";
+                sb.AppendLine($"{r.Rank},{r.SpId},\"{r.Name}\",\"{contact}\",\"{r.Barangay}\",\"{addr}\",\"{emName}\",\"{emPhone}\",\"{status}\",₱1000.00");
+            }
+            return sb.ToString();
         }
 
         public Task<string> ExportAllQueueCsvAsync(List<SubsidyItem> items)

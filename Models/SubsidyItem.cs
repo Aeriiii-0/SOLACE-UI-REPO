@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Media;
 using SOLUM_UI.Core;
 
@@ -21,7 +22,8 @@ namespace SOLUM_UI.Models
         public string Barangay { get; set; }
         public string SubsidyType { get; set; } = "Allowance";
         public string Priority { get; set; }
-        public int Dependants { get; set; }
+        private int _dependants;
+        public int Dependants { get => _dependants > 0 ? _dependants : (ChildrenDetails != null && ChildrenDetails.Count > 0 ? ChildrenDetails.Count : (_children0To6Count + _children7To22Count)); set { if (SetProperty(ref _dependants, value)) { OnPropertyChanged(nameof(DependantsLabel)); OnPropertyChanged(nameof(DepPrimaryMetric)); OnPropertyChanged(nameof(MinorsLabel)); } } }
         public string CivilStatus { get; set; }
         public string Sex { get; set; } = "Female";
         public double Score { get; set; }
@@ -59,9 +61,12 @@ namespace SOLUM_UI.Models
         public int MinorDependentsCount { get; set; }
         public int ToddlersUnder5Count { get; set; }
         public int CollegeAgeDependentsCount { get; set; }
-        public string Circumstance { get; set; } = "Abandonment (A2)";
-        public string OtherIncomeSource { get; set; } = "None";
-        public string NeedsAndProblems { get; set; } = "Financial & Livelihood Aid";
+        private string _circumstance = string.Empty;
+        public string Circumstance { get => _circumstance; set { if (SetProperty(ref _circumstance, value)) { OnPropertyChanged(nameof(DepSecondaryMetric)); OnPropertyChanged(nameof(CircumstanceDisplay)); } } }
+        private string _otherIncomeSource = string.Empty;
+        public string OtherIncomeSource { get => _otherIncomeSource; set { if (SetProperty(ref _otherIncomeSource, value)) OnPropertyChanged(nameof(OtherIncomeDisplay)); } }
+        private string _needsAndProblems = string.Empty;
+        public string NeedsAndProblems { get => _needsAndProblems; set { if (SetProperty(ref _needsAndProblems, value)) OnPropertyChanged(nameof(NeedsAndProblemsDisplay)); } }
 
         public double Confidence { get; set; } = 0.85;
         public string ConfidencePercentLabel => $"{(Confidence * 100):0}% Confidence";
@@ -69,22 +74,22 @@ namespace SOLUM_UI.Models
         public string ModelVersion { get; set; } = "v0.3.2-development";
         public bool IsFallbackScore => !string.IsNullOrEmpty(ModelVersion) && ModelVersion.IndexOf("fallback", StringComparison.OrdinalIgnoreCase) >= 0;
         public bool ShowModelConfidence => !IsFallbackScore;
-        public string ModelSourceBadge => IsFallbackScore ? "⚠ Fallback" : "ML";
-        public string ModelSourceFullBadge => IsFallbackScore ? "⚠ Statutory Heuristic (Fallback)" : $"SOLUM ML Model ({ModelVersion})";
+        public string ModelSourceBadge => IsFallbackScore ? "Fallback" : "ML";
+        public string ModelSourceFullBadge => IsFallbackScore ? "Statutory Heuristic (Fallback)" : $"SOLUM ML Model ({ModelVersion})";
         public string ModelSourceTooltip => IsFallbackScore ? "Rule-Based Heuristic: Calculated via statutory income rules because the ML microservice was unreachable." : $"Live ML Inference: Evaluated by SOLUM Model ({ModelVersion}) with {ConfidencePercentLabel}.";
         public SolidColorBrush ModelSourceBg => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E0F2FE"));
         public SolidColorBrush ModelSourceFg => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0369A1"));
         public SolidColorBrush ModelSourceBorder => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FCD34D")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BAE6FD"));
-        public string FallbackAlertTitle => "⚠️ Rule-Based Heuristic Fallback";
+        public string FallbackAlertTitle => "Rule-Based Heuristic Fallback";
         public string FallbackAlertDesc => "This score was computed using statutory income criteria because the Python ML microservice was offline during evaluation. Re-evaluating will score with the live ML model.";
 
         // Triage Driver Labels & Brushes
         public string IncomeLabel => $"₱{MonthlyIncome:N0}/mo";
         public string PerCapitaLabel => $"₱{IncomePerCapita:N0} / capita";
         public SolidColorBrush PerCapitaFg => IncomePerCapita < 1500 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (IncomePerCapita < 2500 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4B5563")));
-        public string MinorsLabel => $"{MinorDependentsCount} minor" + (MinorDependentsCount == 1 ? "" : "s");
-        public string ToddlersLabel => ToddlersUnder5Count > 0 ? $"{ToddlersUnder5Count} toddler" + (ToddlersUnder5Count == 1 ? "" : "s") : "0 toddlers";
-        public SolidColorBrush ToddlersFg => ToddlersUnder5Count >= 2 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (ToddlersUnder5Count == 1 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")));
+        public string MinorsLabel => Dependants == 1 ? "1 Dependent" : $"{Dependants} Dependents";
+        public string ToddlersLabel => Children0To6Count > 0 ? (Children0To6Count == 1 ? "1 Dependent (0–6y)" : $"{Children0To6Count} Dependents (0–6y)") : "0 Dependents (0–6y)";
+        public SolidColorBrush ToddlersFg => Children0To6Count >= 2 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Children0To6Count == 1 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")));
 
         // Prominent Metrics for the 4 Dimensions
         public string EconomicStrainPercentLabel => $"{EconomicStrainScore * 100:0}%";
@@ -93,16 +98,61 @@ namespace SOLUM_UI.Models
         public string ResourceAdequacyPercentLabel => $"{ResourceAdequacyScore * 100:0}%";
 
         public string EcoPrimaryMetric => $"₱{MonthlyIncome:N0} / month";
-        public string EcoSecondaryMetric => $"₱{IncomePerCapita:N0} per capita • {EmploymentStatus}";
-        public string DepPrimaryMetric => $"{MinorDependentsCount} Minor Children";
-        public string DepSecondaryMetric => $"Sole earner supporting {Dependants} total • {CivilStatus}";
-        public string CarePrimaryMetric => ToddlersUnder5Count > 0 ? $"{ToddlersUnder5Count} Toddler" + (ToddlersUnder5Count == 1 ? " under 5 yrs" : "s under 5 yrs") : "No Toddlers (<5 yrs)";
-        public string CareSecondaryMetric => ToddlersUnder5Count > 0 ? "Sole primary caregiver • Work constrained" : "School-age dependents only";
-        public string ResPrimaryMetric => string.IsNullOrWhiteSpace(OtherIncomeSource) || OtherIncomeSource.Equals("None", StringComparison.OrdinalIgnoreCase) ? "Other Income: None Reported" : $"Other Income: {OtherIncomeSource}";
-        public string ResSecondaryMetric => $"Needs: {(string.IsNullOrWhiteSpace(NeedsAndProblems) ? "Financial Aid" : NeedsAndProblems)} • {(IsPantawidBeneficiary ? "4Ps Beneficiary" : "Non-4Ps")}";
+        public string EcoSecondaryMetric => string.IsNullOrWhiteSpace(EmploymentStatus) ? "Employment: Not Specified" : $"Employment: {EmploymentStatus}";
+        public string DepPrimaryMetric => $"{Dependants} Total Dependent" + (Dependants == 1 ? "" : "s");
+        public string DepSecondaryMetric => string.IsNullOrWhiteSpace(CivilStatus)
+            ? (string.IsNullOrWhiteSpace(Circumstance) ? "Sole earner supporting family" : $"Sole earner supporting family • {Circumstance}")
+            : $"Sole earner supporting family • {CivilStatus}";
+
+        private int _children0To6Count, _children7To22Count;
+        public int Children0To6Count
+        {
+            get => _children0To6Count > 0 ? _children0To6Count : (ChildrenDetails != null && ChildrenDetails.Count > 0 ? ChildrenDetails.Count(c => c.Age >= 0 && c.Age <= 6) : ToddlersUnder5Count);
+            set { if (SetProperty(ref _children0To6Count, value)) { OnPropertyChanged(nameof(Children0To6Text)); OnPropertyChanged(nameof(ShowCareBurden)); OnPropertyChanged(nameof(CarePrimaryMetric)); OnPropertyChanged(nameof(ToddlersLabel)); OnPropertyChanged(nameof(ToddlersFg)); } }
+        }
+        public int Children7To22Count
+        {
+            get => _children7To22Count > 0 ? _children7To22Count : (ChildrenDetails != null && ChildrenDetails.Count > 0 ? ChildrenDetails.Count(c => c.Age >= 7 && c.Age <= 22) : Math.Max(0, Dependants - Children0To6Count));
+            set { if (SetProperty(ref _children7To22Count, value)) { OnPropertyChanged(nameof(Children7To22Text)); OnPropertyChanged(nameof(ShowCareBurden)); } }
+        }
+        public string Children7To22Text => Children7To22Count == 1 ? "1 Dependent aged 7–22" : $"{Children7To22Count} Dependents aged 7–22";
+        public string Children0To6Text => Children0To6Count == 1 ? "1 Dependent aged 0–6" : $"{Children0To6Count} Dependents aged 0–6";
+        public bool HasChildren7To22 => Children7To22Count > 0;
+        public bool HasChildren0To6 => Children0To6Count > 0;
+        public bool ShowCareBurden => Children0To6Count > 0 && Children7To22Count == 0;
+
+        public string CarePrimaryMetric => Children0To6Count > 0 ? (Children0To6Count == 1 ? "1 Dependent (0–6 yrs)" : $"{Children0To6Count} Dependents (0–6 yrs)") : "0 Dependents (0–6 yrs)";
+        public string CareSecondaryMetric => "Sole primary caregiver • Work constrained";
+
+        public string CircumstanceDisplay => !string.IsNullOrWhiteSpace(Circumstance) && !Circumstance.Equals("None", StringComparison.OrdinalIgnoreCase) ? Circumstance : "—";
+        public string NeedsAndProblemsDisplay => !string.IsNullOrWhiteSpace(NeedsAndProblems) && !NeedsAndProblems.Equals("None", StringComparison.OrdinalIgnoreCase) ? NeedsAndProblems : "—";
+        public string OtherIncomeDisplay => !string.IsNullOrWhiteSpace(OtherIncomeSource) && !OtherIncomeSource.Equals("None", StringComparison.OrdinalIgnoreCase) ? OtherIncomeSource : "—";
 
         // Specific Children List for Dependency Dimension Vertical List
-        public List<ChildDetailItem> ChildrenDetails { get; set; } = new List<ChildDetailItem>();
+        private List<ChildDetailItem> _childrenDetails = new List<ChildDetailItem>();
+        public List<ChildDetailItem> ChildrenDetails
+        {
+            get => _childrenDetails;
+            set
+            {
+                if (SetProperty(ref _childrenDetails, value))
+                {
+                    OnPropertyChanged(nameof(HasChildrenDetails));
+                    OnPropertyChanged(nameof(Children0To6Count));
+                    OnPropertyChanged(nameof(Children7To22Count));
+                    OnPropertyChanged(nameof(Children7To22Text));
+                    OnPropertyChanged(nameof(Children0To6Text));
+                    OnPropertyChanged(nameof(ShowCareBurden));
+                    OnPropertyChanged(nameof(CarePrimaryMetric));
+                    OnPropertyChanged(nameof(DepPrimaryMetric));
+                    OnPropertyChanged(nameof(Dependants));
+                    OnPropertyChanged(nameof(DependantsLabel));
+                    OnPropertyChanged(nameof(MinorsLabel));
+                    OnPropertyChanged(nameof(ToddlersLabel));
+                    OnPropertyChanged(nameof(ToddlersFg));
+                }
+            }
+        }
         public bool HasChildrenDetails => ChildrenDetails != null && ChildrenDetails.Count > 0;
 
         // Cross-Check Overlap Flags (1-3 words, clean text, no emojis)
@@ -118,7 +168,7 @@ namespace SOLUM_UI.Models
         public bool IsDisqualified { get; set; }
         public string DisqualificationReason { get; set; }
         public bool HasAuditNotice => HasCollegeAgeDependent;
-        public string AuditBannerTitle => "⚠️ Departmental Cross-Check Required";
+        public string AuditBannerTitle => "Departmental Cross-Check Required";
         public string AuditBannerDesc => "Applicant has college-age dependent(s). Cross-reference with City Education Dept scholarship roster.";
 
         public string Status { get => _status; set { if (SetProperty(ref _status, value)) { OnPropertyChanged(nameof(StatusColor)); OnPropertyChanged(nameof(StatusTextColor)); } } }

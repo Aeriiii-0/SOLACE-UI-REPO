@@ -26,8 +26,24 @@ namespace SOLUM_UI.ViewModels
             QuickAcceptRowCommand = new RelayCommand(p => { if (p is SubsidyItem item) ShortlistCandidate(item); });
             QuickRejectRowCommand = new RelayCommand(p => { OutlierTarget = p as SubsidyItem; if (OutlierTarget != null) { _shortlistRevokeTargets = null; OutlierModalTitle = "Disqualify Candidate"; OutlierTargetNameAndId = null; IsOutlierModalOpen = true; } });
             OpenExplainDrawerCommand = new RelayCommand(p => {
-                if (p is SubsidyItem item) { ActiveCandidate = item; IsDrawerOpen = true; }
-                else if (p is SelectionRow r) { ActiveCandidate = _allItems.FirstOrDefault(x => x.SpId == r.SpId) ?? new SubsidyItem { SoloParentId = r.SoloParentId, SpId = r.SpId, Name = r.Name, Barangay = r.Barangay, Priority = r.Priority, Score = r.Score, MonthlyIncome = r.MonthlyIncome, IncomePerCapita = r.IncomePerCapita, MinorDependentsCount = r.MinorDependentsCount, ToddlersUnder5Count = r.ToddlersUnder5Count, Circumstance = r.Circumstance, CollegeAgeDependentsCount = r.CollegeAgeDependentsCount, IsPantawidBeneficiary = r.IsPantawidBeneficiary, ModelVersion = r.ModelVersion }; IsDrawerOpen = true; }
+                SubsidyItem item = null;
+                if (p is SubsidyItem it) item = it;
+                else if (p is SelectionRow r)
+                {
+                    item = _allItems.FirstOrDefault(x => x.SpId == r.SpId) ?? new SubsidyItem
+                    {
+                        SoloParentId = r.SoloParentId, SpId = r.SpId, Name = r.Name, Barangay = r.Barangay,
+                        Priority = r.Priority, Score = r.Score, MonthlyIncome = r.MonthlyIncome,
+                        IncomePerCapita = r.IncomePerCapita, MinorDependentsCount = r.MinorDependentsCount,
+                        ToddlersUnder5Count = r.ToddlersUnder5Count, Circumstance = r.Circumstance,
+                        CollegeAgeDependentsCount = r.CollegeAgeDependentsCount,
+                        IsPantawidBeneficiary = r.IsPantawidBeneficiary, ModelVersion = r.ModelVersion,
+                        Children0To6Count = r.Children0To6Count, Children7To22Count = r.Children7To22Count,
+                        OtherIncomeSource = r.OtherIncomeSource, NeedsAndProblems = r.NeedsAndProblems,
+                        ChildrenDetails = r.ChildrenDetails
+                    };
+                }
+                if (item != null) { ActiveCandidate = item; IsDrawerOpen = true; _ = FetchRecordForDrawerAsync(item); }
             });
             CloseExplainDrawerCommand = new RelayCommand(_ => IsDrawerOpen = false);
             DrawerShortlistCommand = new RelayCommand(_ => { if (ActiveCandidate != null) { ShortlistCandidate(ActiveCandidate); IsDrawerOpen = false; } });
@@ -54,12 +70,14 @@ namespace SOLUM_UI.ViewModels
             });
             ExportFinalLedgerCommand = new RelayCommand(async _ => {
                 if (FinalGranteesList.Count == 0) { ToastNotification.Show("Ledger Empty", "No confirmed grantees to export.", ToastType.Warning); return; }
-                int yr = SelectedFiscalYearIndex == 1 ? 2025 : SelectedFiscalYearIndex == 2 ? 2024 : 2026;
+                int yr = SelectedFiscalCycle?.FiscalYear ?? ActiveCycleFiscalYear;
                 await ExportCsvAsync($"Final_Grantee_Ledger_FY{yr}", _apiService.ExportFinalLedgerCsvAsync(FinalGranteesList.ToList(), yr), $"Final grantee ledger for FY {yr} exported successfully.");
             });
             ViewFullRecordCommand = new RelayCommand(async p => await OpenFullRecordViewAsync(p as SubsidyItem ?? ActiveCandidate));
             RefreshCommand = new RelayCommand(async _ => await RefreshDataAsync());
             GenerateRecommendationsCommand = new RelayCommand(async _ => await GenerateAndRefreshAsync());
+            ToggleRosterLockCommand = new RelayCommand(_ => ToggleRosterLock());
+            StartNewCycleCommand = new RelayCommand(async _ => await StartNewCycleAsync());
         }
 
         private async Task GenerateAndRefreshAsync()
@@ -70,7 +88,8 @@ namespace SOLUM_UI.ViewModels
                 if (res != null && res.Succeeded)
                 {
                     ToastNotification.Show("Evaluations Generated", $"{res.Data} candidate(s) processed.", ToastType.Success);
-                    await RefreshDataAsync();
+                    if (SelectedFiscalCycle != null) await LoadCycleDataAsync(SelectedFiscalCycle);
+                    else await RefreshDataAsync();
                 }
             }
             catch (Exception ex) { ToastNotification.Show("Generation Error", ex.Message, ToastType.Error); }
@@ -125,7 +144,7 @@ namespace SOLUM_UI.ViewModels
         {
             if (r == null) return;
             _shortlistRevokeTargets = new List<SelectionRow> { r }; OutlierTarget = _allItems.FirstOrDefault(x => x.SpId == r.SpId);
-            OutlierModalTitle = "Revoke Candidate"; OutlierTargetNameAndId = $"Candidate: {r.Name} ({r.SpId})";
+            OutlierModalTitle = "Revoke Candidate"; OutlierTargetNameAndId = $"Candidate: {r.Name}";
             OnPropertyChanged(nameof(OutlierModalConfirmButtonText)); IsOutlierModalOpen = true;
         }
 
@@ -185,28 +204,8 @@ namespace SOLUM_UI.ViewModels
             else if (!confirm && row.EvaluationId != Guid.Empty)
                 await _apiService.RevokeGrantAsync(row.EvaluationId, "Revoked from Final Grantees", "Admin manual action");
             UpdateShortlistAndFinalCollections();
+            NotifyQuotaMetricsChanged();
             ToastNotification.Show(confirm ? "Confirmed" : "Revoked", $"{row.Name} {(confirm ? "confirmed as final grantee." : "removed from final grantees.")}", confirm ? ToastType.Success : ToastType.Warning);
-        }
-
-        private async Task OnFiscalYearChangedAsync(int index)
-        {
-            FinalGranteesList.Clear();
-            if (index == 0)
-            {
-                foreach (var r in ShortlistRows.Where(x => x.IsFinalGrantee).OrderBy(x => x.Name)) FinalGranteesList.Add(r);
-            }
-            else
-            {
-                int yr = index == 1 ? 2025 : 2024;
-                var resp = await _apiService.GetGranteesByFiscalYearAsync(yr);
-                if (resp?.Data != null && resp.Data.Count > 0)
-                {
-                    int rk = 1;
-                    foreach (var g in resp.Data.OrderBy(x => x.FullName))
-                        FinalGranteesList.Add(new SelectionRow { Rank = rk++, EvaluationId = g.EvaluationId, CycleId = g.CycleId, SoloParentId = g.SoloParentId, SpId = g.SoloParentId != Guid.Empty ? "SP-" + g.SoloParentId.ToString().Substring(0, 8).ToUpper() : $"SP-{yr}-{rk:D4}", Name = g.FullName, Barangay = g.Barangay, Priority = g.PredictedPriority, Score = (double)g.PriorityScore, MonthlyIncome = (double)g.MonthlyIncome, Dependants = g.ChildrenTotal, IsFinalGrantee = true });
-                }
-            }
-            OnPropertyChanged(nameof(FinalSummaryText));
         }
 
         private async Task ExportCsvAsync(string name, Task<string> generator, string msg) { var dlg = new SaveFileDialog { FileName = name, DefaultExt = ".csv", Filter = "CSV file (*.csv)|*.csv" }; if (dlg.ShowDialog() == true) { File.WriteAllText(dlg.FileName, await generator); ToastNotification.Show("Export Complete", msg, ToastType.Success); } }
@@ -226,11 +225,21 @@ namespace SOLUM_UI.ViewModels
                 }
                 if (recordToView == null)
                     recordToView = new SoloParentRecord { Id = item.SpId, Name = item.Name, Barangay = item.Barangay, Sex = item.Sex, CivilStatus = item.CivilStatus, MonthlyIncome = item.MonthlyIncome.ToString("N2"), Status = "Active" };
-
-                var dlg = new RecordViewDialog(recordToView) { Owner = Application.Current.MainWindow };
-                dlg.ShowDialog();
+                new RecordViewDialog(recordToView) { Owner = Application.Current.MainWindow }.ShowDialog();
             }
             catch (Exception ex) { ToastNotification.Show("Unable to Open Record", ex.Message, ToastType.Error); }
+        }
+
+        private async Task FetchRecordForDrawerAsync(SubsidyItem item)
+        {
+            if (item == null || item.SoloParentId == Guid.Empty) return;
+            try
+            {
+                var resp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.SoloParentId);
+                if (resp?.Data != null)
+                    Application.Current?.Dispatcher?.Invoke(() => { SubsidyModelMapper.EnrichItemFromRecord(item, resp.Data); if (ActiveCandidate == item) OnPropertyChanged(nameof(ActiveCandidate)); });
+            }
+            catch { }
         }
     }
 }

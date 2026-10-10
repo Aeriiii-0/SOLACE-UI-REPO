@@ -45,11 +45,11 @@ namespace SOLUM_UI.DTOs
         public int Children7To22 { get; set; }
         public int Children23Plus { get; set; }
         public string HousingTenure { get; set; } = "Rented";
-        public string Circumstance { get; set; } = "Abandonment (A2)";
+        public string Circumstance { get; set; } = string.Empty;
         public string CivilStatus { get; set; }
         public string Sex { get; set; } = "Female";
-        public string OtherIncomeSource { get; set; } = "None";
-        public string NeedsAndProblems { get; set; } = "Financial & Livelihood Aid";
+        public string OtherIncomeSource { get; set; } = string.Empty;
+        public string NeedsAndProblems { get; set; } = string.Empty;
         public List<ChildDetailDto> Children { get; set; } = new List<ChildDetailDto>();
 
         // Explainability Scores
@@ -77,7 +77,7 @@ namespace SOLUM_UI.DTOs
         public string Priority { get => !string.IsNullOrEmpty(PredictedPriority) ? PredictedPriority : _priority; set => _priority = value; }
         public double Score { get => PriorityScore > 0 ? (double)PriorityScore : _score; set => _score = value; }
         public double Confidence { get => ModelConfidence > 0 ? (double)ModelConfidence : _confidence; set => _confidence = value; }
-        public int Dependants { get => ChildrenTotal > 0 ? ChildrenTotal : _dependants; set => _dependants = value; }
+        public int Dependants { get => ChildrenTotal > 0 ? ChildrenTotal : (_dependants > 0 ? _dependants : (Children0To6 + Children7To22)); set => _dependants = value; }
         public int MinorDependentsCount { get => Children0To6 + Children7To22 > 0 ? Children0To6 + Children7To22 : _minorDependentsCount; set => _minorDependentsCount = value; }
         public int ToddlersUnder5Count { get => Children0To6 > 0 ? Children0To6 : _toddlersUnder5Count; set => _toddlersUnder5Count = value; }
         public int CollegeAgeDependentsCount { get => CollegeDependentsCount > 0 ? CollegeDependentsCount : (HasCollegeDependent ? 1 : _collegeAgeDependentsCount); set => _collegeAgeDependentsCount = value; }

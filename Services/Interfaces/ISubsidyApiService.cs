@@ -10,6 +10,8 @@ namespace SOLUM_UI.Services.Interfaces
     public interface ISubsidyApiService
     {
         Task<BaseResponse<SubsidyCycleDto>> GetActiveCycleAsync();
+        Task<BaseResponse<List<SubsidyCycleDto>>> GetCyclesAsync();
+        Task<BaseResponse<SubsidyCycleDto>> CreateCycleAsync(CreateSubsidyCycleRequest request);
         Task<BaseResponse<int>> GenerateRecommendationsAsync(Guid? cycleId = null);
         Task<BaseResponse<List<SubsidyRecommendationDto>>> GetRecommendationsAsync(Guid? cycleId = null);
         Task<BaseResponse<List<SubsidyRecommendationDto>>> GetShortlistAsync(Guid? cycleId = null);

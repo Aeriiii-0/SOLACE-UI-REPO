@@ -12,11 +12,16 @@ namespace SOLUM_UI.Views.Pages
             DataContext = vm;
             Loaded += async (s, e) =>
             {
-                if (DataContext is SubsidyRecommendationViewModel activeVm)
+                if (DataContext is SubsidyRecommendationViewModel activeVm && activeVm.AvailableFiscalCycles.Count == 0)
                 {
                     await activeVm.RefreshDataAsync();
                 }
             };
+        }
+
+        private void SlotBreakdownBtn_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (SlotPopup != null) SlotPopup.IsOpen = !SlotPopup.IsOpen;
         }
     }
 }

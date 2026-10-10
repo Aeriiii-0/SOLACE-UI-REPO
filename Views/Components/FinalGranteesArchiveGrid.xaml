@@ -105,109 +105,132 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="PagerBtn" TargetType="Button">
+            <Setter Property="Height" Value="26"/><Setter Property="Padding" Value="10,0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Background" Value="White"/><Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter>
+            <Style.Triggers><Trigger Property="IsEnabled" Value="False"><Setter Property="Background" Value="#F1F5F9"/><Setter Property="Foreground" Value="#94A3B8"/></Trigger></Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
 
         <!-- Top Banner: App Theme, Fiscal Year & Export Final Ledger -->
-        <Border Grid.Row="0" Background="#FBF5F7" CornerRadius="12" BorderBrush="#D4A0B0" BorderThickness="1" Padding="14,8" Margin="0,0,0,10">
-            <Grid>
+        <Border Grid.Row="0" Height="54" Background="#FBF5F7" CornerRadius="12" BorderBrush="#D4A0B0" BorderThickness="1" Padding="14,0" Margin="0,0,0,10">
+            <Grid VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="Final Grantees Confirmation &amp; Historical Archive" FontSize="13" FontWeight="SemiBold" Foreground="#702943"/>
-                    <TextBlock Text="{Binding FinalSummaryText}" FontSize="10.5" Foreground="#A06080" Margin="0,1,0,0"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Final Grantees Confirmation &amp; Historical Archive" FontSize="13" FontWeight="SemiBold" Foreground="#702943"/>
+                        <Border Background="{Binding RosterStatusBadgeBg}" CornerRadius="10" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding RosterStatusBadgeText}" FontSize="10" FontWeight="Bold" Foreground="{Binding RosterStatusBadgeFg}"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="{Binding FinalSummaryText}" FontSize="10.5" Foreground="#A06080" Margin="0,2,0,0"/>
                 </StackPanel>
 
                 <!-- Fiscal Year Dropdown (App Theme) -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
                     <TextBlock Text="Fiscal Year:" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                    <ComboBox Style="{StaticResource AppThemeComboBox}" SelectedIndex="{Binding SelectedFiscalYearIndex, Mode=TwoWay}" Width="150">
-                        <ComboBoxItem Content="📅 2026 (Active)"/>
-                        <ComboBoxItem Content="📁 2025 (Archived)"/>
-                        <ComboBoxItem Content="📁 2024 (Archived)"/>
-                    </ComboBox>
+                    <ComboBox Style="{StaticResource AppThemeComboBox}" ItemsSource="{Binding AvailableFiscalCycles}" SelectedItem="{Binding SelectedFiscalCycle, Mode=TwoWay}" DisplayMemberPath="DisplayName" Width="165"/>
                 </StackPanel>
 
-                <!-- Export Final Ledger (App Theme #702943) -->
-                <Button Grid.Column="2" Height="32" Padding="14,0" Cursor="Hand" Command="{Binding ExportFinalLedgerCommand}">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="#702943" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True"><Setter Property="Opacity" Value="0.88"/></Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                    <TextBlock Text="📥 Export Final Ledger" FontSize="11" FontWeight="SemiBold" Foreground="White"/>
+                <!-- Lock / Unlock Roster Button -->
+                <Button Grid.Column="2" Height="32" Padding="12,0" Cursor="Hand" Margin="0,0,8,0" Command="{Binding ToggleRosterLockCommand}">
+                    <Button.Template><ControlTemplate TargetType="Button"><Border Background="{Binding RosterLockActionBg}" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}"><TextBlock Text="{Binding RosterLockActionText}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding RosterLockActionFg}" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                </Button>
+
+                <!-- Start New Cycle Button -->
+                <Button Grid.Column="3" Height="32" Padding="12,0" Cursor="Hand" Margin="0,0,8,0" Command="{Binding StartNewCycleCommand}" ToolTip="Initialize next fiscal year cycle">
+                    <Button.Template><ControlTemplate TargetType="Button"><Border Background="#F0FDF4" BorderBrush="#86EFAC" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}"><TextBlock Text="+ Start New Cycle" FontSize="11" FontWeight="SemiBold" Foreground="#16A34A" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                </Button>
+
+                <!-- Export Final Ledger -->
+                <Button Grid.Column="4" Height="32" Padding="14,0" Cursor="Hand" Command="{Binding ExportFinalLedgerCommand}">
+                    <Button.Template><ControlTemplate TargetType="Button"><Border Background="#702943" CornerRadius="8" Padding="{TemplateBinding Padding}"><TextBlock Text="Export Final Ledger" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Opacity" Value="0.88"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template>
                 </Button>
             </Grid>
         </Border>
 
         <!-- Main Ledger Table: Exact Record Page Column Content -->
         <Border Grid.Row="1" BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True" Background="White">
-            <ListView x:Name="FinalGranteesListView"
-                      ItemsSource="{Binding FinalGranteesList}"
-                      BorderThickness="0" Background="Transparent"
-                      ItemContainerStyle="{StaticResource SelRow}"
-                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      SizeChanged="FinalGranteesListView_SizeChanged"
-                      Margin="0,4,0,0">
-                <ListView.View>
-                    <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
-                        <!-- Col 0: ID -->
-                        <GridViewColumn x:Name="ColId" Header="ID" Width="140">
-                            <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"><TextBlock Text="{Binding SpId}" FontSize="11.5" FontWeight="SemiBold" Foreground="#702943" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <!-- Col 1: NAME -->
-                        <GridViewColumn x:Name="ColName" Header="NAME" Width="180">
-                            <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="12,0"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <!-- Col 2: BARANGAY -->
-                        <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="120">
-                            <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="10,0"><TextBlock Text="{Binding Barangay}" FontSize="11" Foreground="#333333" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <!-- Col 3: SEX -->
-                        <GridViewColumn x:Name="ColSex" Header="SEX" Width="55">
-                            <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"><TextBlock Text="{Binding Sex}" FontSize="11" Foreground="#333333" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <!-- Col 4: CIVIL STATUS -->
-                        <GridViewColumn x:Name="ColCivilStatus" Header="CIVIL STATUS" Width="95">
-                            <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"><TextBlock Text="{Binding CivilStatus}" FontSize="11" Foreground="#333333" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <!-- Col 5: DATE OF BIRTH -->
-                        <GridViewColumn x:Name="ColDob" Header="DATE OF BIRTH" Width="95">
-                            <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"><TextBlock Text="{Binding DateOfBirthFormatted}" FontSize="11" Foreground="#333333" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <!-- Col 6: LAST UPDATED -->
-                        <GridViewColumn x:Name="ColLastUpdated" Header="LAST UPDATED" Width="95">
-                            <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"><TextBlock Text="{Binding LastUpdatedFormatted}" FontSize="11" Foreground="#333333" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <!-- Col 7: VALID UNTIL -->
-                        <GridViewColumn x:Name="ColValidUntil" Header="VALID UNTIL" Width="95">
-                            <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"><TextBlock Text="{Binding ValidUntilFormatted}" FontSize="11" Foreground="#333333" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <!-- Col 8: STATUS -->
-                        <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="80">
-                            <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="4,0"><Border CornerRadius="10" Padding="8,2" Background="{Binding RecordStatusBg}" HorizontalAlignment="Center"><TextBlock Text="{Binding RecordStatus}" FontSize="10.5" FontWeight="Bold" Foreground="{Binding RecordStatusFg}"/></Border></Border></DataTemplate></GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <!-- Col 9: ACTIONS (Revoke Only) -->
-                        <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="90">
-                            <GridViewColumn.CellTemplate><DataTemplate><StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"><Button Height="26" Padding="10,0" Cursor="Hand" ToolTip="Revoke Grantee" Command="{Binding DataContext.RevokeShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border Background="#FFF1F2" BorderBrush="#FDA4AF" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="✕ Revoke" FontSize="10.5" FontWeight="SemiBold" Foreground="#E11D48" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template></Button></StackPanel></DataTemplate></GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="36"/><RowDefinition Height="*"/><RowDefinition Height="42"/></Grid.RowDefinitions>
+                <!-- Sub-header -->
+                <Border Grid.Row="0" Background="#F8FAFC" Padding="12,0" Height="36" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
+                    <Grid VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Fill="#27AE60" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="{Binding FinalSummaryText}" FontSize="11" Foreground="#334155" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- ListView -->
+                <ListView Grid.Row="1" x:Name="FinalGranteesListView" ItemsSource="{Binding PagedFinalGrantees}"
+                          BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource SelRow}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          SizeChanged="FinalGranteesListView_SizeChanged">
+                    <ListView.View>
+                        <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
+                            <!-- Col 1: BENEFICIARY NAME -->
+                            <GridViewColumn x:Name="ColName" Header="BENEFICIARY NAME" Width="170">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="12,0"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 2: CONTACT NUMBER -->
+                            <GridViewColumn x:Name="ColContact" Header="CONTACT NUMBER" Width="130">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="8,0"><TextBlock Text="{Binding ContactNumberFormatted}" FontSize="11.5" FontWeight="SemiBold" Foreground="#15803D" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 3: BARANGAY -->
+                            <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="120">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="10,0"><TextBlock Text="{Binding Barangay}" FontSize="11" Foreground="#333333" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 4: RESIDENTIAL ADDRESS -->
+                            <GridViewColumn x:Name="ColAddress" Header="RESIDENTIAL ADDRESS" Width="170">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="10,0"><TextBlock Text="{Binding FullAddress}" FontSize="11" Foreground="#333333" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 5: EMERGENCY CONTACT -->
+                            <GridViewColumn x:Name="ColEmergencyName" Header="EMERGENCY CONTACT" Width="140">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="10,0"><TextBlock Text="{Binding EmergencyContactName}" FontSize="11" Foreground="#333333" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 6: EMERGENCY PHONE -->
+                            <GridViewColumn x:Name="ColEmergencyPhone" Header="EMERGENCY PHONE" Width="130">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="8,0"><TextBlock Text="{Binding EmergencyContactFormatted}" FontSize="11" Foreground="#555555" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 7: STATUS -->
+                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="85">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0" Padding="4,0"><Border CornerRadius="10" Padding="8,2" Background="{Binding RecordStatusBg}" HorizontalAlignment="Center"><TextBlock Text="{Binding RecordStatus}" FontSize="10.5" FontWeight="Bold" Foreground="{Binding RecordStatusFg}"/></Border></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <!-- Col 8: ACTIONS (Revoke Only) -->
+                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="90">
+                                <GridViewColumn.CellTemplate><DataTemplate><StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"><Button Height="26" Padding="10,0" Cursor="Hand" ToolTip="Revoke Grantee" IsEnabled="{Binding DataContext.CanModifyGrantees, RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.RevokeShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border Background="#FFF1F2" BorderBrush="#FDA4AF" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="✕ Revoke" FontSize="10.5" FontWeight="SemiBold" Foreground="#E11D48" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button></StackPanel></DataTemplate></GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <!-- Pagination Footer (Row 2) -->
+                <Border Grid.Row="2" Background="#FAFAFA" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Height="42" Padding="14,0">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding FinalPageSummary}" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Style="{StaticResource PagerBtn}" Margin="0,0,6,0" Command="{Binding FinalPrevPageCommand}" IsEnabled="{Binding CanFinalPrevPage}" ToolTip="Previous page">
+                                <TextBlock Text="‹ Previous" FontSize="10.5" FontWeight="SemiBold"/>
+                            </Button>
+                            <Border Background="#F1F5F9" CornerRadius="6" Padding="8,4" Margin="0,0,6,0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding FinalPageNumberLabel}" FontSize="10.5" FontWeight="Bold" Foreground="#702943"/>
+                            </Border>
+                            <Button Style="{StaticResource PagerBtn}" Command="{Binding FinalNextPageCommand}" IsEnabled="{Binding CanFinalNextPage}" ToolTip="Next page">
+                                <TextBlock Text="Next ›" FontSize="10.5" FontWeight="SemiBold"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

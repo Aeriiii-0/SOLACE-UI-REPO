@@ -248,6 +248,9 @@
     <Compile Include="Views\Dialogs\ActionConfirmDialog.xaml.cs">
       <DependentUpon>ActionConfirmDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\NewCycleDialog.xaml.cs">
+      <DependentUpon>NewCycleDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\RenewDialog.xaml.cs">
       <DependentUpon>RenewDialog.xaml</DependentUpon>
     </Compile>
@@ -290,11 +293,14 @@
     <Compile Include="DTOs\SubsidyRequests.cs" />
     <Compile Include="Models\SubsidyItem.cs" />
     <Compile Include="Models\SelectionRow.cs" />
+    <Compile Include="Models\FiscalCycleOption.cs" />
     <Compile Include="Services\Interfaces\ISubsidyApiService.cs" />
     <Compile Include="Services\Implementations\SubsidyApiService.cs" />
     <Compile Include="Services\SubsidyModelMapper.cs" />
     <Compile Include="ViewModels\SubsidyRecommendationViewModel.cs" />
     <Compile Include="ViewModels\SubsidyRecommendationViewModel.Commands.cs" />
+    <Compile Include="ViewModels\SubsidyRecommendationViewModel.Lifecycle.cs" />
+    <Compile Include="ViewModels\SubsidyRecommendationViewModel.Pagination.cs" />
     <Compile Include="Views\ToastNotification.xaml.cs">
       <DependentUpon>ToastNotification.xaml</DependentUpon>
     </Compile>
@@ -428,6 +434,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\ActionConfirmDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\NewCycleDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
