@@ -315,7 +315,7 @@
                 </Border>
             </Grid>
 
-            <Border Grid.Row="2" Margin="24,12,24,0" Background="#FBF5F7" CornerRadius="10,10,0,0"
+            <Border Grid.Row="2" Margin="24,12,24,0" Background="#FBF5F7"
                     BorderBrush="#702943" BorderThickness="1,1,1,1" Padding="0" Height="44">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -344,7 +344,7 @@
             </Border>
 
             <Border Grid.Row="3" Margin="24,0,24,24" Background="White"
-                    CornerRadius="0,0,10,10" BorderBrush="#702943" BorderThickness="1"
+                    BorderBrush="#702943" BorderThickness="1"
                     ClipToBounds="True">
                 <ListView x:Name="UserList"
                           BorderThickness="0" Background="Transparent"

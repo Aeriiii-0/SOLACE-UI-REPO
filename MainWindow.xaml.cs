@@ -47,7 +47,11 @@ namespace SOLUM_UI
                 CurrentUserName = user.Email;
                 FirstName = user.FirstName;
                 LastName = user.LastName;
-                CurrentUserBarangay = string.Empty; // Assuming barangay is set elsewhere
+                // Barangay is set elsewhere (e.g., during login or profile setup) - default to "ALL" for safety
+                if (string.IsNullOrWhiteSpace(CurrentUserBarangay))
+                {
+                    CurrentUserBarangay = "ALL";
+                }
                 CurrentUserEmail = user.Email;
                 ContactNumber = user.ContactNumber ?? string.Empty;
             }
@@ -55,6 +59,15 @@ namespace SOLUM_UI
             {
                 CurrentUserId = AuthApiService.Instance.CurrentUserId ?? string.Empty;
             }
+        }
+
+        /// <summary>
+        /// Gets the current user's barangay with null safety. 
+        /// Returns the barangay if set, otherwise returns "ALL" as safe default.
+        /// </summary>
+        public static string GetSafeBarangay()
+        {
+            return !string.IsNullOrWhiteSpace(CurrentUserBarangay) ? CurrentUserBarangay : "ALL";
         }
 
         private Dictionary<string, Button> _navButtons = new Dictionary<string, Button>();
@@ -322,8 +335,7 @@ namespace SOLUM_UI
         {
             ActivateButton("UserProfile");
             TopBarControl.PageTitle = "User Profile";
-            var page = (UserProfilePage)GetOrCreatePage("UserProfile", () => new UserProfilePage()); // CHANGED
-            page.ScrollToChangePassword();
+            var page = (UserProfilePage)GetOrCreatePage("UserProfile", () => new UserProfilePage());
             NavigatePage(page);
         }
 

@@ -478,7 +478,10 @@ namespace SOLUM_UI
         private async Task SaveNewRecordAsync(SoloParentRecord record)
         {
             record.CreatedBy = CurrentUserName;
-            record.Barangay  = string.IsNullOrEmpty(record.Barangay) ? CurrentUserBarangay : record.Barangay;
+            // Use safe barangay: if record doesn't have one, use user's barangay or fallback to "ALL"
+            record.Barangay = string.IsNullOrWhiteSpace(record.Barangay) 
+                ? (!string.IsNullOrWhiteSpace(CurrentUserBarangay) ? CurrentUserBarangay : "ALL")
+                : record.Barangay;
 
             var createReq = SoloParentApiService.Instance.MapToCreateRequest(record);
             var createResp = await SoloParentApiService.Instance.CreateSoloParentAsync(createReq);

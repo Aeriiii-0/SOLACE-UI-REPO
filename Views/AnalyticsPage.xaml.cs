@@ -31,10 +31,20 @@ namespace SOLUM_UI
                     DateTime.Today.Year, DateTime.Today.Month, "ALL");
 
                 if (response.Succeeded && response.Data != null)
+                {
                     _vm.LoadFromAnalyticsDto(response.Data);
+                }
+                else if (!response.Succeeded)
+                {
+                    string errorMsg = response.Errors != null && response.Errors.Count > 0
+                        ? string.Join("\n", response.Errors)
+                        : "Unable to load analytics data.";
+                    MessageBox.Show(errorMsg, "Load Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Analytics load error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 System.Diagnostics.Debug.WriteLine($"Analytics load error: {ex.Message}");
             }
         }
@@ -59,7 +69,23 @@ namespace SOLUM_UI
 
         private void FilterCombo_Changed(object sender, SelectionChangedEventArgs e)
         {
-            // Filter combo selections have changed, update preview or trigger auto-apply if needed
+            // Barangay filter changed - update selected barangay
+            if (CmbFilterBarangay != null && CmbFilterBarangay.SelectedItem != null)
+            {
+                // Extract Content property from ComboBoxItem instead of calling ToString()
+                string barangay = "ALL";
+                
+                if (CmbFilterBarangay.SelectedItem is ComboBoxItem comboItem && comboItem.Content is string content)
+                {
+                    barangay = content;
+                }
+                else if (CmbFilterBarangay.SelectedItem is string strItem)
+                {
+                    barangay = strItem;
+                }
+                
+                _vm.SelectedBarangay = barangay;
+            }
         }
 
         private void FilterReset_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -71,7 +97,63 @@ namespace SOLUM_UI
         private void FilterApply_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (FilterPopup != null)
+            {
                 FilterPopup.IsOpen = false;
+                
+                // Apply filters - reload data with selected filters
+                _ = ApplyFiltersAsync();
+            }
+        }
+
+        private async System.Threading.Tasks.Task ApplyFiltersAsync()
+        {
+            try
+            {
+                // Get selected barangay from filter dropdown with null safety
+                string barangay = _vm?.SelectedBarangay ?? "ALL";
+                
+                // Validate barangay is not empty or only whitespace
+                if (string.IsNullOrWhiteSpace(barangay))
+                {
+                    barangay = "ALL";
+                }
+                
+                // Normalize "All" variants to "ALL"
+                if (barangay.Equals("All", StringComparison.OrdinalIgnoreCase))
+                {
+                    barangay = "ALL";
+                }
+
+                // Get analytics data for selected period and barangay
+                var response = await AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(
+                    DateTime.Now.Year, 
+                    DateTime.Now.Month, 
+                    barangay);
+
+                if (response.Succeeded && response.Data != null)
+                {
+                    _vm.LoadFromAnalyticsDto(response.Data);
+                    
+                    // Show success notification
+                    MessageBox.Show(
+                        $"Filters applied successfully.\n\nBarangay: {barangay}\nPeriod: {DateTime.Now:MMMM yyyy}",
+                        "Filters Applied",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else
+                {
+                    string errorMsg = response.Errors != null && response.Errors.Count > 0
+                        ? string.Join("\n", response.Errors)
+                        : "Failed to load filtered data.";
+                    MessageBox.Show(errorMsg, "Filter Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Filter application failed: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Diagnostics.Debug.WriteLine($"Filter error: {ex}");
+            }
         }
 
         private void ExportBtn_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -231,7 +313,7 @@ namespace SOLUM_UI
                 // Refresh analytics data
                 await LoadDataAsync();
                 
-                // Show success notification
+                // Show success notification (only if no error message was already shown)
                 MessageBox.Show("Analytics data refreshed successfully.", "Refresh Complete",
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }

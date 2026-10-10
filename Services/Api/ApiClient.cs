@@ -288,12 +288,55 @@ namespace SOLUM_UI.Services.Api
 
         private BaseResponse<T> ConnectionError<T>(Exception ex)
         {
+            // Check if it's specifically a network connectivity issue
+            if (IsNoInternetError(ex))
+            {
+                return BaseResponse<T>.Fail("No internet connection detected. Please check your network and try again.");
+            }
+
             string msg = $"Unable to communicate with the API server at {BaseUrl}. Please ensure the Solum.API backend is running.";
             if (ex is TaskCanceledException)
             {
                 msg = "The request to the server timed out. Please try again.";
             }
             return BaseResponse<T>.Fail(msg, ex.Message);
+        }
+
+        private bool IsNoInternetError(Exception ex)
+        {
+            // Check for common network connectivity exceptions
+            if (ex is HttpRequestException httpEx)
+            {
+                // Check inner exceptions for specific network errors
+                var innerEx = httpEx.InnerException;
+                if (innerEx != null)
+                {
+                    string exceptionTypeName = innerEx.GetType().Name;
+                    
+                    // Common network connectivity error types
+                    if (exceptionTypeName.Contains("IOException") ||
+                        exceptionTypeName.Contains("SocketException") ||
+                        exceptionTypeName.Contains("NetworkInformationException") ||
+                        innerEx.Message.IndexOf("unable to reach", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        innerEx.Message.IndexOf("no such host", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        innerEx.Message.IndexOf("name resolution", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        innerEx.Message.IndexOf("connection refused", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        innerEx.Message.IndexOf("network is unreachable", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        return true;
+                    }
+                }
+                
+                // Check the main exception message
+                if (ex.Message.IndexOf("unable to reach", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    ex.Message.IndexOf("no such host", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    ex.Message.IndexOf("connection refused", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+            
+            return false;
         }
     }
 }

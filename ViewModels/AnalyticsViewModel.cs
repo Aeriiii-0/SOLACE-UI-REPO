@@ -428,6 +428,17 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _ageGroup13_17BarHeight, value);
         }
 
+        // Selected Barangay Filter
+        private string _selectedBarangay = "ALL";
+        public string SelectedBarangay
+        {
+            get => _selectedBarangay;
+            set => SetProperty(ref _selectedBarangay, value);
+        }
+
+        /// <summary>
+        /// Constructor - Initializes collections and default values
+        /// </summary>
         public AnalyticsViewModel()
         {
             AgeGroupData = new ObservableCollection<DonutSegment>();
@@ -444,6 +455,11 @@ namespace SOLUM_UI.ViewModels
             TotalBarangayPages = 1;
             HasNextBarangayPage = false;
             HasPreviousBarangayPage = false;
+            
+            // Initialize date range to current month
+            StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            EndDate = DateTime.Now;
+            SelectedBarangay = "ALL";
         }
 
         /// <summary>

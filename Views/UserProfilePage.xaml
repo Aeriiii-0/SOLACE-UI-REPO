@@ -32,6 +32,38 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="#1A1A1A"/>
         </Style>
+        <Style x:Key="FormInputPassword" TargetType="PasswordBox">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Foreground" Value="#1A1A1A"/>
+            <Setter Property="BorderBrush" Value="#D0B8C0"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#C4788E"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="FormInput" TargetType="TextBox">
             <Setter Property="Height" Value="44"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -166,13 +198,6 @@
                         <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,16"/>
 
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="Email Address" Style="{StaticResource FieldLabel}"/>
-                            <TextBlock x:Name="TxtEmail" Text="" Style="{StaticResource FieldValue}"/>
-                        </StackPanel>
-
-                        <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,16"/>
-
-                        <StackPanel Margin="0,0,0,16">
                             <TextBlock Text="Contact Number" Style="{StaticResource FieldLabel}"/>
                             <TextBlock x:Name="TxtContactNumber" Text="—" Style="{StaticResource FieldValue}"/>
                         </StackPanel>
@@ -202,71 +227,74 @@
 
                 <Border x:Name="ChangePasswordSection" Style="{StaticResource SectionCard}">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                             <Border Width="4" CornerRadius="2" Background="#702943" Margin="0,1,12,1"/>
-                            <TextBlock Text="CHANGE PASSWORD" Style="{StaticResource SectionTitle}" Margin="0"/>
-                        </StackPanel>
-                        <TextBlock Text="Enter your registered email address. A password reset link will be sent to your inbox."
-                                   FontFamily="Segoe UI" FontSize="13" Foreground="#666666"
-                                   TextWrapping="Wrap" Margin="0,0,0,24"/>
-
-                        <Grid Margin="0,0,0,16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="First Name" Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="TxtPwdFirstName" Style="{StaticResource FormInput}"
-                                         IsReadOnly="True" Background="#F8F5F6"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Last Name" Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="TxtPwdLastName" Style="{StaticResource FormInput}"
-                                         IsReadOnly="True" Background="#F8F5F6"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="Current Role" Style="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="TxtPwdRole" Style="{StaticResource FormInput}"
-                                     IsReadOnly="True" Background="#F8F5F6"/>
+                            <TextBlock Text="PASSWORD" Style="{StaticResource SectionTitle}" Margin="0"/>
                         </StackPanel>
 
-                        <StackPanel Margin="0,0,0,8">
-                            <TextBlock Text="Registered Email Address *" Style="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="TxtPwdEmail" Style="{StaticResource FormInput}"
-                                     TextChanged="TxtPwdEmail_TextChanged"/>
-                        </StackPanel>
-                        <TextBlock x:Name="ErrPwdEmail" Text=""
-                                   FontFamily="Segoe UI" FontSize="11" Foreground="#DC3545"
-                                   Margin="0,0,0,20" Visibility="Collapsed"/>
-
-                        <Border x:Name="ResetSentBanner" Visibility="Collapsed"
-                                Background="#E8F5E9" CornerRadius="8" BorderBrush="#A8D5B0"
-                                BorderThickness="1" Padding="16,12" Margin="0,0,0,20">
-                            <StackPanel Orientation="Horizontal">
-                                <Path Data="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"
-                                      Fill="#27AE60" Stretch="Uniform" Width="16" Height="16" Margin="0,0,10,0"/>
-                                <TextBlock x:Name="TxtResetSent"
-                                           Text="Reset link sent! Please check your email."
-                                           FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold"
-                                           Foreground="#1E7E34" TextWrapping="Wrap"/>
-                            </StackPanel>
-                        </Border>
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button x:Name="BtnCancelReset" Style="{StaticResource SecondaryBtn}"
-                                    Margin="0,0,10,0" Click="CancelReset_Click">
-                                <TextBlock Text="Clear" FontFamily="Segoe UI" FontSize="13"
-                                           FontWeight="SemiBold" Foreground="#702943"/>
-                            </Button>
-                            <Button x:Name="BtnSendReset" Style="{StaticResource PrimaryBtn}"
-                                    Click="SendReset_Click">
-                                <TextBlock Text="Send Reset Link" FontFamily="Segoe UI" FontSize="13"
+                        <!-- Change Password Button (Visible by default) -->
+                        <StackPanel x:Name="ChangePasswordButtonPanel">
+                            <TextBlock Text="Update your password to keep your account secure."
+                                       FontFamily="Segoe UI" FontSize="13" Foreground="#666666"
+                                       TextWrapping="Wrap" Margin="0,0,0,16"/>
+                            <Button x:Name="BtnChangePassword" Style="{StaticResource PrimaryBtn}"
+                                    Width="160" HorizontalAlignment="Left" Click="BtnChangePassword_Click">
+                                <TextBlock Text="Change Password" FontFamily="Segoe UI" FontSize="13"
                                            FontWeight="SemiBold" Foreground="White"/>
                             </Button>
+                        </StackPanel>
+
+                        <!-- Change Password Form (Hidden by default) -->
+                        <StackPanel x:Name="ChangePasswordFormPanel" Visibility="Collapsed">
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="Current Password *" Style="{StaticResource FieldLabel}"/>
+                                <PasswordBox x:Name="PwdCurrentPassword" Style="{StaticResource FormInputPassword}"/>
+                            </StackPanel>
+                            <TextBlock x:Name="ErrCurrentPassword" Text=""
+                                       FontFamily="Segoe UI" FontSize="11" Foreground="#DC3545"
+                                       Margin="0,0,0,16" Visibility="Collapsed"/>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="New Password *" Style="{StaticResource FieldLabel}"/>
+                                <PasswordBox x:Name="PwdNewPassword" Style="{StaticResource FormInputPassword}"/>
+                            </StackPanel>
+                            <TextBlock x:Name="ErrNewPassword" Text=""
+                                       FontFamily="Segoe UI" FontSize="11" Foreground="#DC3545"
+                                       Margin="0,0,0,16" Visibility="Collapsed"/>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="Confirm Password *" Style="{StaticResource FieldLabel}"/>
+                                <PasswordBox x:Name="PwdConfirmPassword" Style="{StaticResource FormInputPassword}"/>
+                            </StackPanel>
+                            <TextBlock x:Name="ErrConfirmPassword" Text=""
+                                       FontFamily="Segoe UI" FontSize="11" Foreground="#DC3545"
+                                       Margin="0,0,0,20" Visibility="Collapsed"/>
+
+                            <Border x:Name="ChangePasswordSuccessBanner" Visibility="Collapsed"
+                                    Background="#E8F5E9" CornerRadius="8" BorderBrush="#A8D5B0"
+                                    BorderThickness="1" Padding="16,12" Margin="0,0,0,20">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"
+                                          Fill="#27AE60" Stretch="Uniform" Width="16" Height="16" Margin="0,0,10,0"/>
+                                    <TextBlock x:Name="TxtChangePasswordSuccess"
+                                               Text="Password changed successfully!"
+                                               FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold"
+                                               Foreground="#1E7E34" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button x:Name="BtnCancelChangePassword" Style="{StaticResource SecondaryBtn}"
+                                        Margin="0,0,10,0" Click="BtnCancelChangePassword_Click">
+                                    <TextBlock Text="Cancel" FontFamily="Segoe UI" FontSize="13"
+                                               FontWeight="SemiBold" Foreground="#702943"/>
+                                </Button>
+                                <Button x:Name="BtnSaveChangePassword" Style="{StaticResource PrimaryBtn}"
+                                        Click="BtnSaveChangePassword_Click">
+                                    <TextBlock Text="Save New Password" FontFamily="Segoe UI" FontSize="13"
+                                               FontWeight="SemiBold" Foreground="White"/>
+                                </Button>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -310,95 +338,6 @@
                                 <TextBlock Text="Production" FontFamily="Segoe UI"
                                            FontSize="13" FontWeight="SemiBold" Foreground="#27AE60"/>
                             </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <Border Style="{StaticResource SectionCard}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                            <Border Width="4" CornerRadius="2" Background="#702943" Margin="0,1,12,1"/>
-                            <TextBlock Text="MY ACTIVITY SUMMARY" Style="{StaticResource SectionTitle}" Margin="0"/>
-                        </StackPanel>
-
-                        <Grid Margin="0,0,0,14">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Border Grid.Column="0" Background="#FDF5F7" CornerRadius="10"
-                                    BorderBrush="#E0D0D5" BorderThickness="1"
-                                    Padding="16,14">
-                                <StackPanel>
-                                    <TextBlock x:Name="TxtMyActions" Text="0"
-                                               FontFamily="Segoe UI" FontSize="28" FontWeight="Bold"
-                                               Foreground="#702943"/>
-                                    <TextBlock Text="My Actions" Style="{StaticResource FieldLabel}" Margin="0,2,0,0"/>
-                                    <Border Background="#F0E8EC" CornerRadius="5" Padding="7,3"
-                                            Margin="0,8,0,0" HorizontalAlignment="Left">
-                                        <TextBlock Text="All time" FontFamily="Segoe UI"
-                                                   FontSize="9" Foreground="#702943" FontWeight="SemiBold"/>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Column="2" Background="#F0FFF4" CornerRadius="10"
-                                    BorderBrush="#C6E8CE" BorderThickness="1"
-                                    Padding="16,14">
-                                <StackPanel>
-                                    <TextBlock x:Name="TxtMyCreates" Text="0"
-                                               FontFamily="Segoe UI" FontSize="28" FontWeight="Bold"
-                                               Foreground="#27AE60"/>
-                                    <TextBlock Text="Records Created" Style="{StaticResource FieldLabel}" Margin="0,2,0,0"/>
-                                    <Border Background="#E8F5E9" CornerRadius="5" Padding="7,3"
-                                            Margin="0,8,0,0" HorizontalAlignment="Left">
-                                        <TextBlock Text="By me" FontFamily="Segoe UI"
-                                                   FontSize="9" Foreground="#27AE60" FontWeight="SemiBold"/>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Border Grid.Column="0" Background="#FFF8EE" CornerRadius="10"
-                                    BorderBrush="#F5D8A8" BorderThickness="1"
-                                    Padding="16,14">
-                                <StackPanel>
-                                    <TextBlock x:Name="TxtMyUpdates" Text="0"
-                                               FontFamily="Segoe UI" FontSize="28" FontWeight="Bold"
-                                               Foreground="#C0762A"/>
-                                    <TextBlock Text="Records Updated" Style="{StaticResource FieldLabel}" Margin="0,2,0,0"/>
-                                    <Border Background="#FFF4E3" CornerRadius="5" Padding="7,3"
-                                            Margin="0,8,0,0" HorizontalAlignment="Left">
-                                        <TextBlock Text="Edits made" FontFamily="Segoe UI"
-                                                   FontSize="9" Foreground="#C0762A" FontWeight="SemiBold"/>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Column="2" Background="#FDF5F7" CornerRadius="10"
-                                    BorderBrush="#E0D0D5" BorderThickness="1"
-                                    Padding="16,14">
-                                <StackPanel>
-                                    <TextBlock x:Name="TxtMyViews" Text="0"
-                                               FontFamily="Segoe UI" FontSize="28" FontWeight="Bold"
-                                               Foreground="#888888"/>
-                                    <TextBlock Text="Records Viewed" Style="{StaticResource FieldLabel}" Margin="0,2,0,0"/>
-                                    <Border Background="#F2F2F2" CornerRadius="5" Padding="7,3"
-                                            Margin="0,8,0,0" HorizontalAlignment="Left">
-                                        <TextBlock Text="Read-only" FontFamily="Segoe UI"
-                                                   FontSize="9" Foreground="#888888" FontWeight="SemiBold"/>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
                         </Grid>
                     </StackPanel>
                 </Border>

@@ -32,92 +32,120 @@ namespace SOLUM_UI
             TxtDisplayEmail.Text = email;
             TxtFullName.Text     = name;
             TxtRole.Text         = role;
-            TxtEmail.Text        = email;
             TxtContactNumber.Text = string.IsNullOrWhiteSpace(contactNumber) ? "—" : contactNumber;
             TxtBarangay.Text     = string.IsNullOrWhiteSpace(barangay) ? "All Barangays" : barangay;
             TxtInitial.Text      = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "U";
 
             string[] parts = name.Split(' ');
-            TxtPwdFirstName.Text = firstName;
-            TxtPwdLastName.Text  = lastName;
-            TxtPwdRole.Text      = role;
 
             TxtSessionStart.Text = _sessionStart.ToString("MMM d, yyyy  h:mm tt");
-
-            var myLogs = Services.AuditLogService.Instance.GetForUser(name, role).ToList();
-            TxtMyActions.Text  = myLogs.Count.ToString();
-            TxtMyCreates.Text  = myLogs.Count(l => l.Action == Models.AuditAction.Create).ToString();
-            TxtMyUpdates.Text  = myLogs.Count(l => l.Action == Models.AuditAction.Update).ToString();
-            TxtMyViews.Text    = myLogs.Count(l => l.Action == Models.AuditAction.View).ToString();
         }
 
-        /// <summary>Scrolls the page to the Change Password section.</summary>
-        public void ScrollToChangePassword()
+        /// <summary>Show the change password form when button is clicked.</summary>
+        private void BtnChangePassword_Click(object sender, RoutedEventArgs e)
         {
-            Loaded += (s, e) =>
-            {
-                ChangePasswordSection.BringIntoView();
-                TxtPwdEmail.Focus();
-            };
+            ChangePasswordButtonPanel.Visibility = Visibility.Collapsed;
+            ChangePasswordFormPanel.Visibility = Visibility.Visible;
+            PwdCurrentPassword.Focus();
         }
 
-        private void TxtPwdEmail_TextChanged(object sender, TextChangedEventArgs e)
+        /// <summary>Cancel change password and hide the form.</summary>
+        private void BtnCancelChangePassword_Click(object sender, RoutedEventArgs e)
         {
-            ErrPwdEmail.Visibility  = Visibility.Collapsed;
-            ResetSentBanner.Visibility = Visibility.Collapsed;
+            ClearChangePasswordForm();
+            ChangePasswordFormPanel.Visibility = Visibility.Collapsed;
+            ChangePasswordButtonPanel.Visibility = Visibility.Visible;
         }
 
-        /// <summary>Validates email and simulates sending a reset link.</summary>
-        private void SendReset_Click(object sender, RoutedEventArgs e)
+        /// <summary>Validate and save the new password.</summary>
+        private void BtnSaveChangePassword_Click(object sender, RoutedEventArgs e)
         {
-            ErrPwdEmail.Visibility     = Visibility.Collapsed;
-            ResetSentBanner.Visibility = Visibility.Collapsed;
+            ClearErrorMessages();
 
-            string email = TxtPwdEmail.Text.Trim();
+            string currentPassword = PwdCurrentPassword.Password;
+            string newPassword = PwdNewPassword.Password;
+            string confirmPassword = PwdConfirmPassword.Password;
 
-            if (string.IsNullOrWhiteSpace(email))
+            bool hasErrors = false;
+
+            // Validate current password
+            if (string.IsNullOrWhiteSpace(currentPassword))
             {
-                ErrPwdEmail.Text       = "Email address is required.";
-                ErrPwdEmail.Visibility = Visibility.Visible;
-                return;
+                ErrCurrentPassword.Text = "Current password is required.";
+                ErrCurrentPassword.Visibility = Visibility.Visible;
+                hasErrors = true;
             }
 
-            if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            // Validate new password
+            if (string.IsNullOrWhiteSpace(newPassword))
             {
-                ErrPwdEmail.Text       = "Please enter a valid email address.";
-                ErrPwdEmail.Visibility = Visibility.Visible;
-                return;
+                ErrNewPassword.Text = "New password is required.";
+                ErrNewPassword.Visibility = Visibility.Visible;
+                hasErrors = true;
+            }
+            else if (newPassword.Length < 6)
+            {
+                ErrNewPassword.Text = "New password must be at least 6 characters.";
+                ErrNewPassword.Visibility = Visibility.Visible;
+                hasErrors = true;
             }
 
-            string expectedEmail = TxtEmail.Text.Trim().ToLower();
-            if (!string.Equals(email, expectedEmail, StringComparison.OrdinalIgnoreCase))
+            // Validate confirm password
+            if (string.IsNullOrWhiteSpace(confirmPassword))
             {
-                ErrPwdEmail.Text       = "This email does not match the registered email for your account.";
-                ErrPwdEmail.Visibility = Visibility.Visible;
-                return;
+                ErrConfirmPassword.Text = "Confirm password is required.";
+                ErrConfirmPassword.Visibility = Visibility.Visible;
+                hasErrors = true;
+            }
+            else if (newPassword != confirmPassword)
+            {
+                ErrConfirmPassword.Text = "Passwords do not match.";
+                ErrConfirmPassword.Visibility = Visibility.Visible;
+                hasErrors = true;
             }
 
-            TxtResetSent.Text          = "Reset link sent to " + email + ". Please check your inbox.";
-            ResetSentBanner.Visibility = Visibility.Visible;
-            TxtPwdEmail.IsReadOnly     = true;
-            BtnSendReset.IsEnabled     = false;
+            if (hasErrors)
+                return;
 
-            ToastNotification.Show("Reset Link Sent",
-                "A password reset link has been sent to " + email + ".",
+            // TODO: Add actual password change logic via API call
+            // For now, simulate success
+            ChangePasswordSuccessBanner.Visibility = Visibility.Visible;
+
+            ToastNotification.Show("Success",
+                "Your password has been changed successfully!",
                 ToastType.Success);
 
             Services.AuditLogService.Instance.LogSystem(
-                "Password reset requested by " + MainWindow.CurrentUserName + " (" + email + ")");
+                "Password changed by " + MainWindow.CurrentUserName);
+
+            // Hide form after success
+            System.Threading.Tasks.Task.Delay(2000).ContinueWith(_ =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    ClearChangePasswordForm();
+                    ChangePasswordFormPanel.Visibility = Visibility.Collapsed;
+                    ChangePasswordButtonPanel.Visibility = Visibility.Visible;
+                });
+            });
         }
 
-        /// <summary>Clears the email field and resets the form state.</summary>
-        private void CancelReset_Click(object sender, RoutedEventArgs e)
+        /// <summary>Clear all error messages.</summary>
+        private void ClearErrorMessages()
         {
-            TxtPwdEmail.Text           = string.Empty;
-            TxtPwdEmail.IsReadOnly     = false;
-            BtnSendReset.IsEnabled     = true;
-            ErrPwdEmail.Visibility     = Visibility.Collapsed;
-            ResetSentBanner.Visibility = Visibility.Collapsed;
+            ErrCurrentPassword.Visibility = Visibility.Collapsed;
+            ErrNewPassword.Visibility = Visibility.Collapsed;
+            ErrConfirmPassword.Visibility = Visibility.Collapsed;
+            ChangePasswordSuccessBanner.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>Clear all password fields.</summary>
+        private void ClearChangePasswordForm()
+        {
+            PwdCurrentPassword.Clear();
+            PwdNewPassword.Clear();
+            PwdConfirmPassword.Clear();
+            ClearErrorMessages();
         }
     }
 }

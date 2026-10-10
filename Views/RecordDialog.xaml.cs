@@ -646,12 +646,31 @@ namespace SOLUM_UI
             if (!dob.HasValue || dob.Value == DateTime.MinValue)
             {
                 TxtAge.Text = string.Empty;
+                ErrBirthdate.Visibility = Visibility.Collapsed;
                 return;
             }
             DateTime today = DateTime.Today;
             int age = today.Year - dob.Value.Year;
             if (dob.Value.Date > today.AddYears(-age)) age--;
+            
+            // Validate age - cannot exceed 120
+            if (age > 120)
+            {
+                TxtAge.Text = string.Empty;
+                ErrBirthdate.Text = "Age cannot exceed 120 years.";
+                ErrBirthdate.Visibility = Visibility.Visible;
+                DpBirthdate.SelectedDate = null;
+                MessageBox.Show(
+                    "Invalid date of birth.\n\nAge cannot exceed 120 years.\n\nPlease select a valid birthdate.",
+                    "Invalid Age",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+            
+            // Valid age - clear any errors
             TxtAge.Text = age.ToString();
+            ErrBirthdate.Visibility = Visibility.Collapsed;
         }
 
         private void DpBirthdate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)

@@ -61,9 +61,9 @@
             <Setter Property="Height" Value="44"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Foreground" Value="#111111"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#C0A0AA"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
             <Setter Property="Padding" Value="10,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -72,7 +72,10 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid HorizontalAlignment="Stretch">
-                            <Border x:Name="ComboBg" Background="Transparent" BorderThickness="0">
+                            <Border x:Name="ComboBg" Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6">
                                 <Grid Margin="10,0,28,0">
                                     <ContentPresenter x:Name="ContentSite"
                                                       Content="{TemplateBinding SelectionBoxItem}"
@@ -96,8 +99,8 @@
                             <Popup x:Name="Popup" Placement="Bottom"
                                    IsOpen="{TemplateBinding IsDropDownOpen}"
                                    AllowsTransparency="True" Focusable="False" PopupAnimation="None">
-                                <Border Background="White" CornerRadius="10" BorderBrush="#E0E0E0"
-                                        BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}"
+                                <Border Background="White" CornerRadius="10" BorderBrush="#C0A0AA"
+                                        BorderThickness="1.2" MinWidth="{TemplateBinding ActualWidth}"
                                         MaxHeight="200" Margin="0,2,0,0">
                                     <Border.Effect>
                                         <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="3" Opacity="0.08"/>
@@ -111,6 +114,13 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="SelectedIndex" Value="-1">
                                 <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#A08090"/>
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#702943"/>
+                                <Setter TargetName="ComboBg" Property="BorderThickness" Value="1.5"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -556,28 +566,24 @@
                                             </StackPanel>
                                             <StackPanel Grid.Column="4" Margin="0,0,10,0">
                                                 <TextBlock Text="Civil Status *" Style="{StaticResource FieldLabel}"/>
-                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                    <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
-                                                              SelectionChanged="CmbCivilStatus_SelectionChanged">
-                                                        <ComboBoxItem Content="Single"/>
-                                                        <ComboBoxItem Content="Married"/>
-                                                        <ComboBoxItem Content="Widowed"/>
-                                                        <ComboBoxItem Content="Separated"/>
-                                                        <ComboBoxItem Content="Divorced"/>
-                                                        <ComboBoxItem Content="Annulled"/>
-                                                    </ComboBox>
-                                                </Border>
+                                                <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
+                                                          SelectionChanged="CmbCivilStatus_SelectionChanged">
+                                                    <ComboBoxItem Content="Single"/>
+                                                    <ComboBoxItem Content="Married"/>
+                                                    <ComboBoxItem Content="Widowed"/>
+                                                    <ComboBoxItem Content="Separated"/>
+                                                    <ComboBoxItem Content="Divorced"/>
+                                                    <ComboBoxItem Content="Annulled"/>
+                                                </ComboBox>
                                                 <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="5">
                                                 <TextBlock Text="Sex *" Style="{StaticResource FieldLabel}"/>
-                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                    <ComboBox x:Name="CmbSex" Style="{StaticResource FormCombo}"
-                                                              SelectionChanged="CmbSex_SelectionChanged">
-                                                        <ComboBoxItem Content="Male"/>
-                                                        <ComboBoxItem Content="Female"/>
-                                                    </ComboBox>
-                                                </Border>
+                                                <ComboBox x:Name="CmbSex" Style="{StaticResource FormCombo}"
+                                                          SelectionChanged="CmbSex_SelectionChanged">
+                                                    <ComboBoxItem Content="Male"/>
+                                                    <ComboBoxItem Content="Female"/>
+                                                </ComboBox>
                                                 <TextBlock x:Name="ErrSex" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                         </Grid>
@@ -612,15 +618,13 @@
                                             </StackPanel>
                                             <StackPanel Grid.Column="3" Margin="0,0,10,0">
                                                 <TextBlock Text="Educational Attainment" Style="{StaticResource FieldLabel}"/>
-                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                    <ComboBox x:Name="CmbEducation" Style="{StaticResource FormCombo}">
-                                                        <ComboBoxItem Content="Elementary"/>
-                                                        <ComboBoxItem Content="High School"/>
-                                                        <ComboBoxItem Content="Vocational"/>
-                                                        <ComboBoxItem Content="College"/>
-                                                        <ComboBoxItem Content="Post Graduate"/>
-                                                    </ComboBox>
-                                                </Border>
+                                                <ComboBox x:Name="CmbEducation" Style="{StaticResource FormCombo}">
+                                                    <ComboBoxItem Content="Elementary"/>
+                                                    <ComboBoxItem Content="High School"/>
+                                                    <ComboBoxItem Content="Vocational"/>
+                                                    <ComboBoxItem Content="College"/>
+                                                    <ComboBoxItem Content="Post Graduate"/>
+                                                </ComboBox>
                                             </StackPanel>
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="PhilSys Card Number" Style="{StaticResource FieldLabel}"/>

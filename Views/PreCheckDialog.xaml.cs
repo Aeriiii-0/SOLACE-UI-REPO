@@ -167,6 +167,14 @@ namespace SOLUM_UI
                 ok = false;
             }
 
+            // Enforce barangay validation - user must have a valid barangay assigned
+            string userBarangay = MainWindow.CurrentUserBarangay;
+            if (string.IsNullOrWhiteSpace(userBarangay))
+            {
+                ShowErrorBanner("Cannot proceed: Your user account does not have a barangay assigned. Contact system administrator.");
+                ok = false;
+            }
+
             return ok;
         }
 
@@ -252,13 +260,18 @@ namespace SOLUM_UI
         private void ProceedWithForm()
         {
             ProceedToFullForm = true;
+            // Use safe barangay - get from current user with "ALL" fallback if empty
+            string userBarangay = MainWindow.CurrentUserBarangay;
+            string safeBarangay = !string.IsNullOrWhiteSpace(userBarangay) ? userBarangay : "ALL";
+            
             PrimaryData = new PreCheckResult
             {
                 LastName   = TxtLastName.Text.Trim(),
                 FirstName  = TxtFirstName.Text.Trim(),
                 MiddleName = TxtMiddleName.Text.Trim(),
                 Birthdate  = DpBirthdate.SelectedDate,
-                PhilSys    = TxtPhilSys.Text.Trim()
+                PhilSys    = TxtPhilSys.Text.Trim(),
+                Barangay   = safeBarangay
             };
             DialogResult = true;
             Close();
@@ -330,5 +343,6 @@ namespace SOLUM_UI
         public string    MiddleName { get; set; }
         public DateTime? Birthdate  { get; set; }
         public string    PhilSys    { get; set; }
+        public string    Barangay   { get; set; }
     }
 }
