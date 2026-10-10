@@ -313,6 +313,26 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _isLoading, value);
         }
 
+        /// <summary>True when the current data set has at least one record.</summary>
+        private bool _hasData;
+        public bool HasData
+        {
+            get => _hasData;
+            set
+            {
+                if (!Equals(_hasData, value))
+                {
+                    _hasData = value;
+                    OnPropertyChanged(nameof(HasData));
+                    OnPropertyChanged(nameof(IsNoData));
+                }
+            }
+        }
+
+        /// <summary>True when the filter returned zero results — drives the empty-state banner.</summary>
+        public bool IsNoData => !_hasData;
+
+
         // Pagination properties
         private int _currentBarangayPage;
         public int CurrentBarangayPage
@@ -436,6 +456,14 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _selectedBarangay, value);
         }
 
+        // Analytics DTO for export purposes
+        private MonthlyAnalyticsDto _analyticsData;
+        public MonthlyAnalyticsDto AnalyticsData
+        {
+            get => _analyticsData;
+            set => SetProperty(ref _analyticsData, value);
+        }
+
         /// <summary>
         /// Constructor - Initializes collections and default values
         /// </summary>
@@ -514,12 +542,16 @@ namespace SOLUM_UI.ViewModels
             if (dto == null)
                 return;
 
+            // Store the DTO for export purposes
+            AnalyticsData = dto;
+
             // Calculate KPIs
             TotalSoloParents = dto.TotalSoloParents;
             
-            // Female/Male from Sex dictionary
-            int female = dto.Sex.ContainsKey("Female") ? dto.Sex["Female"] : 0;
-            int male = dto.Sex.ContainsKey("Male") ? dto.Sex["Male"] : 0;
+            // Female/Male from Sex dictionary (null-safe)
+            var sex = dto.Sex ?? new System.Collections.Generic.Dictionary<string, int>();
+            int female = sex.ContainsKey("Female") ? sex["Female"] : 0;
+            int male = sex.ContainsKey("Male") ? sex["Male"] : 0;
             FemaleCount = female;
             MaleCount = male;
 
@@ -537,38 +569,43 @@ namespace SOLUM_UI.ViewModels
                 FemalePercentWidth = 0;
             }
 
-            // Total dependents sum
+            // Total dependents sum (null-safe)
+            var dependentsAge = dto.DependentsAgeBrackets ?? new System.Collections.Generic.Dictionary<string, int>();
             TotalDependents = 0;
-            foreach (var kvp in dto.DependentsAgeBrackets)
+            foreach (var kvp in dependentsAge)
             {
                 TotalDependents += kvp.Value;
             }
 
-            // LGBT count - sum from Lgbt dictionary
+            // LGBT count - sum from Lgbt dictionary (null-safe)
+            var lgbt = dto.Lgbt ?? new System.Collections.Generic.Dictionary<string, int>();
             LgbtCount = 0;
-            foreach (var kvp in dto.Lgbt)
+            foreach (var kvp in lgbt)
             {
                 LgbtCount += kvp.Value;
             }
 
-            // Pantawid Beneficiary - sum from PantawidBeneficiary dictionary
+            // Pantawid Beneficiary - sum from PantawidBeneficiary dictionary (null-safe)
+            var pantawid = dto.PantawidBeneficiary ?? new System.Collections.Generic.Dictionary<string, int>();
             PantawidBeneficiaryCount = 0;
-            foreach (var kvp in dto.PantawidBeneficiary)
+            foreach (var kvp in pantawid)
             {
                 PantawidBeneficiaryCount += kvp.Value;
             }
 
-            // Load civil status simple counts
-            SingleCount = dto.CivilStatus.ContainsKey("Single") ? dto.CivilStatus["Single"] : 0;
-            MarriedCount = dto.CivilStatus.ContainsKey("Married") ? dto.CivilStatus["Married"] : 0;
-            WidowedCount = dto.CivilStatus.ContainsKey("Widowed") ? dto.CivilStatus["Widowed"] : 0;
-            SeparatedCount = dto.CivilStatus.ContainsKey("Separated") ? dto.CivilStatus["Separated"] : 0;
-            AnnulledCount = dto.CivilStatus.ContainsKey("Annulled") ? dto.CivilStatus["Annulled"] : 0;
+            // Load civil status simple counts (null-safe)
+            var civilStatus = dto.CivilStatus ?? new System.Collections.Generic.Dictionary<string, int>();
+            SingleCount = civilStatus.ContainsKey("Single") ? civilStatus["Single"] : 0;
+            MarriedCount = civilStatus.ContainsKey("Married") ? civilStatus["Married"] : 0;
+            WidowedCount = civilStatus.ContainsKey("Widowed") ? civilStatus["Widowed"] : 0;
+            SeparatedCount = civilStatus.ContainsKey("Separated") ? civilStatus["Separated"] : 0;
+            AnnulledCount = civilStatus.ContainsKey("Annulled") ? civilStatus["Annulled"] : 0;
 
-            // Load employment status simple text counts
-            int employed = dto.EmploymentStatus.ContainsKey("employed") ? dto.EmploymentStatus["employed"] : 0;
-            int selfEmployed = dto.EmploymentStatus.ContainsKey("self_employed") ? dto.EmploymentStatus["self_employed"] : 0;
-            int notEmployed = dto.EmploymentStatus.ContainsKey("not_employed") ? dto.EmploymentStatus["not_employed"] : 0;
+            // Load employment status simple text counts (null-safe)
+            var employment = dto.EmploymentStatus ?? new System.Collections.Generic.Dictionary<string, int>();
+            int employed = employment.ContainsKey("employed") ? employment["employed"] : 0;
+            int selfEmployed = employment.ContainsKey("self_employed") ? employment["self_employed"] : 0;
+            int notEmployed = employment.ContainsKey("not_employed") ? employment["not_employed"] : 0;
             
             EmployedText = $"{employed} ({(TotalSoloParents > 0 ? (employed * 100.0 / TotalSoloParents) : 0):F1}%)";
             SelfEmployedText = $"{selfEmployed} ({(TotalSoloParents > 0 ? (selfEmployed * 100.0 / TotalSoloParents) : 0):F1}%)";
@@ -584,10 +621,10 @@ namespace SOLUM_UI.ViewModels
             SelfEmployedArcPath = GenerateArcPath(SelfEmployedPercent);
             NotEmployedArcPath = GenerateArcPath(NotEmployedPercent);
 
-            // Load dependents age brackets
-            AgeGroup0_5 = dto.DependentsAgeBrackets.ContainsKey("6_AND_BELOW") ? dto.DependentsAgeBrackets["6_AND_BELOW"] : 0;
-            AgeGroup6_12 = dto.DependentsAgeBrackets.ContainsKey("7_TO_22") ? dto.DependentsAgeBrackets["7_TO_22"] : 0;
-            AgeGroup13_17 = dto.DependentsAgeBrackets.ContainsKey("22_AND_ABOVE") ? dto.DependentsAgeBrackets["22_AND_ABOVE"] : 0;
+            // Load dependents age brackets (reuse null-safe local)
+            AgeGroup0_5 = dependentsAge.ContainsKey("6_AND_BELOW") ? dependentsAge["6_AND_BELOW"] : 0;
+            AgeGroup6_12 = dependentsAge.ContainsKey("7_TO_22") ? dependentsAge["7_TO_22"] : 0;
+            AgeGroup13_17 = dependentsAge.ContainsKey("22_AND_ABOVE") ? dependentsAge["22_AND_ABOVE"] : 0;
 
             // Calculate age group percentages
             int totalDependentsByAge = AgeGroup0_5 + AgeGroup6_12 + AgeGroup13_17;
@@ -604,13 +641,14 @@ namespace SOLUM_UI.ViewModels
                 AgeGroup13_17Percent = 0;
             }
 
-            // Load income brackets with detailed calculations
-            int incomeBelowMin = dto.MonthlyIncomeBrackets.ContainsKey("BELOW_MINIMUM_WAGE") 
-                ? dto.MonthlyIncomeBrackets["BELOW_MINIMUM_WAGE"] : 0;
-            int incomeMinWagePlus = dto.MonthlyIncomeBrackets.ContainsKey("MIN_WAGE_PLUS1_TO_20833") 
-                ? dto.MonthlyIncomeBrackets["MIN_WAGE_PLUS1_TO_20833"] : 0;
-            int incomeAboveMin = dto.MonthlyIncomeBrackets.ContainsKey("20834_AND_ABOVE")
-                ? dto.MonthlyIncomeBrackets["20834_AND_ABOVE"] : 0;
+            // Load income brackets with detailed calculations (null-safe)
+            var incomeBrackets = dto.MonthlyIncomeBrackets ?? new System.Collections.Generic.Dictionary<string, int>();
+            int incomeBelowMin = incomeBrackets.ContainsKey("BELOW_MINIMUM_WAGE") 
+                ? incomeBrackets["BELOW_MINIMUM_WAGE"] : 0;
+            int incomeMinWagePlus = incomeBrackets.ContainsKey("MIN_WAGE_PLUS1_TO_20833") 
+                ? incomeBrackets["MIN_WAGE_PLUS1_TO_20833"] : 0;
+            int incomeAboveMin = incomeBrackets.ContainsKey("20834_AND_ABOVE")
+                ? incomeBrackets["20834_AND_ABOVE"] : 0;
             
             int totalWithIncome = incomeBelowMin + incomeMinWagePlus + incomeAboveMin;
             
@@ -660,7 +698,8 @@ namespace SOLUM_UI.ViewModels
                 AgeGroup13_17BarHeight = 0;
             }
 
-            // Load Age Group Data for Donut Chart
+            // Load Age Group Data for Donut Chart (null-safe)
+            var ageBrackets = dto.AgeBrackets ?? new System.Collections.Generic.Dictionary<string, int>();
             AgeGroupData.Clear();
             var ageColors = new[] { "#7B1426", "#A14452", "#D9A3AB", "#EAD9DB" };
             var ageLabels = new[] { "19 & Below", "20-39", "40-59", "60 & Above" };
@@ -668,7 +707,7 @@ namespace SOLUM_UI.ViewModels
             
             for (int i = 0; i < ageKeys.Length; i++)
             {
-                int count = dto.AgeBrackets.ContainsKey(ageKeys[i]) ? dto.AgeBrackets[ageKeys[i]] : 0;
+                int count = ageBrackets.ContainsKey(ageKeys[i]) ? ageBrackets[ageKeys[i]] : 0;
                 AgeGroupData.Add(new DonutSegment 
                 { 
                     Label = ageLabels[i], 
@@ -677,22 +716,22 @@ namespace SOLUM_UI.ViewModels
                 });
             }
 
-            // Load Civil Status Data
+            // Load Civil Status Data (reuse null-safe local)
             CivilStatusData.Clear();
             var civilStatusOrder = new[] { "Single", "Married", "Widowed", "Separated", "Annulled" };
             foreach (var status in civilStatusOrder)
             {
-                int count = dto.CivilStatus.ContainsKey(status) ? dto.CivilStatus[status] : 0;
+                int count = civilStatus.ContainsKey(status) ? civilStatus[status] : 0;
                 CivilStatusData.Add(new ListItem { Label = status, Value = count });
             }
 
-            // Load Employment Status Data
+            // Load Employment Status Data (reuse null-safe local)
             EmploymentStatusData.Clear();
             var empLabels = new[] { "Employed", "Self-Employed", "Not Employed" };
             var empKeys = new[] { "employed", "self_employed", "not_employed" };
             for (int i = 0; i < empKeys.Length; i++)
             {
-                int count = dto.EmploymentStatus.ContainsKey(empKeys[i]) ? dto.EmploymentStatus[empKeys[i]] : 0;
+                int count = employment.ContainsKey(empKeys[i]) ? employment[empKeys[i]] : 0;
                 double percentage = TotalSoloParents > 0 ? (count * 100.0 / TotalSoloParents) : 0;
                 EmploymentStatusData.Add(new ProgressItem 
                 { 
@@ -702,14 +741,14 @@ namespace SOLUM_UI.ViewModels
                 });
             }
 
-            // Load Income Bracket Data
+            // Load Income Bracket Data (reuse null-safe local)
             IncomeBracketData.Clear();
             var incomeLabels = new[] { "Below Minimum Wage", "Min Wage + ₱1-₱20,833", "₱20,834 & Above" };
             var incomeKeys = new[] { "BELOW_MINIMUM_WAGE", "MIN_WAGE_PLUS1_TO_20833", "20834_AND_ABOVE" };
             for (int i = 0; i < incomeKeys.Length; i++)
             {
-                int count = dto.MonthlyIncomeBrackets.ContainsKey(incomeKeys[i]) 
-                    ? dto.MonthlyIncomeBrackets[incomeKeys[i]] : 0;
+                int count = incomeBrackets.ContainsKey(incomeKeys[i]) 
+                    ? incomeBrackets[incomeKeys[i]] : 0;
                 double percentage = TotalSoloParents > 0 ? (count * 100.0 / TotalSoloParents) : 0;
                 IncomeBracketData.Add(new ProgressItem 
                 { 
@@ -719,14 +758,14 @@ namespace SOLUM_UI.ViewModels
                 });
             }
 
-            // Load Dependents Age Data for Column Chart
+            // Load Dependents Age Data for Column Chart (reuse null-safe local)
             DependentsAgeData.Clear();
             var depLabels = new[] { "6 & Below", "7-22", "22 & Above" };
             var depKeys = new[] { "6_AND_BELOW", "7_TO_22", "22_AND_ABOVE" };
             for (int i = 0; i < depKeys.Length; i++)
             {
-                int count = dto.DependentsAgeBrackets.ContainsKey(depKeys[i]) 
-                    ? dto.DependentsAgeBrackets[depKeys[i]] : 0;
+                int count = dependentsAge.ContainsKey(depKeys[i]) 
+                    ? dependentsAge[depKeys[i]] : 0;
                 DependentsAgeData.Add(new ColumnChartData 
                 { 
                     Label = depLabels[i], 
@@ -735,10 +774,11 @@ namespace SOLUM_UI.ViewModels
                 });
             }
 
-            // Load Barangay Data (ALL barangays - for pagination)
+            // Load Barangay Data (ALL barangays - for pagination) (null-safe)
+            var categories = dto.Categories ?? new System.Collections.Generic.Dictionary<string, int>();
             AllBarangayData.Clear();
             var barangayList = new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, int>>();
-            foreach (var kvp in dto.Categories)
+            foreach (var kvp in categories)
             {
                 if (string.IsNullOrEmpty(kvp.Key) || kvp.Key.Equals("null", StringComparison.OrdinalIgnoreCase) || 
                     kvp.Key.Equals("No Barangay", StringComparison.OrdinalIgnoreCase))
@@ -777,10 +817,10 @@ namespace SOLUM_UI.ViewModels
             CurrentBarangayPage = 1;
             UpdateBarangayPage();
 
-            // Load Top Cases Presented Data (from Categories/ClassificationCircumstance)
+            // Load Top Cases Presented Data (from Categories/ClassificationCircumstance) (reuse null-safe local)
             TopCasesData.Clear();
             var casesList = new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, int>>();
-            foreach (var kvp in dto.Categories)
+            foreach (var kvp in categories)
             {
                 // Skip empty/null entries
                 if (string.IsNullOrEmpty(kvp.Key) || kvp.Key.Equals("null", StringComparison.OrdinalIgnoreCase))
@@ -816,7 +856,11 @@ namespace SOLUM_UI.ViewModels
             }
 
             LastRefreshTime = DateTime.Now;
+
+            // Update empty-state flag
+            HasData = TotalSoloParents > 0;
         }
+
 
         /// <summary>
         /// Generate SVG arc path for employment ring charts.

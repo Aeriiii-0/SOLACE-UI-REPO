@@ -1127,32 +1127,6 @@
                                     </StackPanel>
                                 </Border>
 
-                                <!-- CARD: VI. APPLICATION STATUS -->
-                                <Border Style="{StaticResource CardSection}">
-                                    <StackPanel>
-                                        <Border Style="{StaticResource CardSectionHeader}">
-                                            <TextBlock Text="VI. APPLICATION STATUS" Style="{StaticResource SectionLabel}"/>
-                                        </Border>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="260"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Status *" Style="{StaticResource FieldLabel}"/>
-                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                    <ComboBox x:Name="CmbStatus" Style="{StaticResource FormCombo}"
-                                                              BorderThickness="0" Background="Transparent"
-                                                              SelectionChanged="CmbStatus_SelectionChanged">
-                                                        <ComboBoxItem Content="Valid"/>
-                                                        <ComboBoxItem Content="Inactive"/>
-                                                    </ComboBox>
-                                                </Border>
-                                                <TextBlock x:Name="ErrStatus" Text="Required." Style="{StaticResource ErrorText}"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </StackPanel>
-                                </Border>
 
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>

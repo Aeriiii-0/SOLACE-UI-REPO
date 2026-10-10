@@ -215,7 +215,6 @@ namespace SOLUM_UI
             {
                 FormSubtitle.Text = "Add New Record";
                 DpDateOfApplication.SelectedDate = DateTime.Today;
-                SetComboByContent(CmbStatus, "Valid");   // new records default to Active/Valid
                 // Show add-mode stripe when Loaded
                 Loaded += (s, e) => ApplyModeStyle(isRenewal: false);
             }
@@ -506,7 +505,6 @@ namespace SOLUM_UI
 
             SetComboByContent(CmbSex,         r.Sex);
             SetComboByContent(CmbCivilStatus, r.CivilStatus);
-            SetComboByContent(CmbStatus,      r.Status);
             SetComboByContent(CmbEducation,   r.EducationalAttainment);
 
             TxtPhilSys.Text        = r.PhilSysNumber   ?? string.Empty;
@@ -828,7 +826,6 @@ namespace SOLUM_UI
         private void TxtOtherIncome_TextChanged(object sender, TextChangedEventArgs e)    { ToUpperBox(TxtOtherIncome); }
         private void CmbSex_SelectionChanged(object sender, SelectionChangedEventArgs e)         => ClearFieldError(CmbSex,         ErrSex);
         private void CmbCivilStatus_SelectionChanged(object sender, SelectionChangedEventArgs e) => ClearFieldError(CmbCivilStatus, ErrCivilStatus);
-        private void CmbStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)      => ClearFieldError(CmbStatus,      ErrStatus);
 
         private void MarkError(Control ctrl, TextBlock lbl, string msg)
         {
@@ -934,8 +931,6 @@ namespace SOLUM_UI
             bool ok = ValidateStep1();
             var missing = new List<string>();
 
-            if (CmbStatus.SelectedItem == null)
-            { MarkError(CmbStatus, ErrStatus, "Required."); missing.Add("Application Status"); ok = false; }
 
             // Family composition: every named row must be fully filled
             int rowNum = 0;
@@ -1130,7 +1125,6 @@ namespace SOLUM_UI
                 Address       = TxtAddress.Text.Trim(),
                 ContactNumber = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtContact.Text.Trim()),
                 Barangay      = TxtBarangay.Text.Trim(),
-                Status        = GetComboValue(CmbStatus),
                 LastUpdated   = DateTime.Today,
 
                 IsNewApplicant      = !_isRenewal,
@@ -1315,9 +1309,6 @@ namespace SOLUM_UI
             Add(sec, "Pantawid Beneficiary", r.IsPantawidBeneficiary ? "✓ Yes" : "No", _existing != null ? (_existing.IsPantawidBeneficiary ? "✓ Yes" : "No") : null);
             Add(sec, "Indigenous Person",    r.IsIndigenous ? "✓ Yes" : "No",    _existing != null ? (_existing.IsIndigenous ? "✓ Yes" : "No") : null);
             Add(sec, "LGBTQ+",               r.IsLGBT ? "✓ Yes" : "No",               _existing != null ? (_existing.IsLGBT ? "✓ Yes" : "No") : null);
-
-            sec = "Application Status";
-            Add(sec, "Status", r.Status, _existing?.Status);
 
             return list;
         }

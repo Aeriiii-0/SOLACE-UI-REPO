@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -27,8 +27,14 @@ namespace SOLUM_UI
         {
             try
             {
+                // Use ViewModel's current date range (defaults to current month)
+                int year = _vm.StartDate.HasValue ? _vm.StartDate.Value.Year : DateTime.Today.Year;
+                int month = _vm.StartDate.HasValue ? _vm.StartDate.Value.Month : DateTime.Today.Month;
+                string barangay = _vm?.SelectedBarangay ?? "ALL";
+
                 var response = await AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(
-                    DateTime.Today.Year, DateTime.Today.Month, "ALL");
+                    year, month, barangay,
+                    _vm?.StartDate, _vm?.EndDate);
 
                 if (response.Succeeded && response.Data != null)
                 {
@@ -69,29 +75,38 @@ namespace SOLUM_UI
 
         private void FilterCombo_Changed(object sender, SelectionChangedEventArgs e)
         {
-            // Barangay filter changed - update selected barangay
-            if (CmbFilterBarangay != null && CmbFilterBarangay.SelectedItem != null)
-            {
-                // Extract Content property from ComboBoxItem instead of calling ToString()
-                string barangay = "ALL";
-                
-                if (CmbFilterBarangay.SelectedItem is ComboBoxItem comboItem && comboItem.Content is string content)
-                {
-                    barangay = content;
-                }
-                else if (CmbFilterBarangay.SelectedItem is string strItem)
-                {
-                    barangay = strItem;
-                }
-                
-                _vm.SelectedBarangay = barangay;
-            }
+            // Guard: event can fire during InitializeComponent() before _vm is assigned
+            if (_vm == null || CmbFilterBarangay == null || CmbFilterBarangay.SelectedItem == null)
+                return;
+
+            // Extract Content property from ComboBoxItem instead of calling ToString()
+            string barangay = "ALL";
+
+            if (CmbFilterBarangay.SelectedItem is ComboBoxItem comboItem && comboItem.Content is string content)
+                barangay = content;
+            else if (CmbFilterBarangay.SelectedItem is string strItem)
+                barangay = strItem;
+
+            // Normalize "All" → "ALL"
+            if (barangay.Equals("All", StringComparison.OrdinalIgnoreCase))
+                barangay = "ALL";
+
+            _vm.SelectedBarangay = barangay;
         }
 
         private void FilterReset_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            // Reset barangay combo
             if (CmbFilterBarangay != null)
                 CmbFilterBarangay.SelectedIndex = 0;
+
+            // Reset ViewModel dates to current month
+            if (_vm != null)
+            {
+                _vm.StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                _vm.EndDate = DateTime.Now;
+                _vm.SelectedBarangay = "ALL";
+            }
         }
 
         private void FilterApply_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -114,32 +129,31 @@ namespace SOLUM_UI
                 
                 // Validate barangay is not empty or only whitespace
                 if (string.IsNullOrWhiteSpace(barangay))
-                {
                     barangay = "ALL";
-                }
                 
                 // Normalize "All" variants to "ALL"
                 if (barangay.Equals("All", StringComparison.OrdinalIgnoreCase))
-                {
                     barangay = "ALL";
-                }
+
+                // Resolve year/month from StartDate (fall back to current month)
+                DateTime start = _vm?.StartDate ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                DateTime end   = _vm?.EndDate   ?? DateTime.Now;
+
+                // Clamp: end must not be before start
+                if (end < start) end = start;
+
+                int year  = start.Year;
+                int month = start.Month;
 
                 // Get analytics data for selected period and barangay
                 var response = await AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(
-                    DateTime.Now.Year, 
-                    DateTime.Now.Month, 
-                    barangay);
+                    year, month, barangay, start, end);
 
                 if (response.Succeeded && response.Data != null)
                 {
                     _vm.LoadFromAnalyticsDto(response.Data);
-                    
-                    // Show success notification
-                    MessageBox.Show(
-                        $"Filters applied successfully.\n\nBarangay: {barangay}\nPeriod: {DateTime.Now:MMMM yyyy}",
-                        "Filters Applied",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[Analytics] Filters applied — Barangay: {barangay}, Period: {start:yyyy-MM-dd} → {end:yyyy-MM-dd}");
                 }
                 else
                 {
@@ -158,17 +172,67 @@ namespace SOLUM_UI
 
         private void ExportBtn_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            // Export feature IN PROGRESS - EPPlus license issue
-            MessageBox.Show(
-                "Export feature is currently IN PROGRESS.\n\n" +
-                "We encountered an EPPlus 8+ license compatibility issue.\n" +
-                "The team is working on this feature.\n\n" +
-                "Status: Diagnostic phase\n" +
-                "Expected: Next update\n\n" +
-                "Please use the browser dashboard for export in the meantime.",
-                "Export - IN PROGRESS",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            try
+            {
+                // Get current filter values
+                string selectedBarangay = _vm?.SelectedBarangay ?? "ALL";
+                if (string.IsNullOrWhiteSpace(selectedBarangay))
+                    selectedBarangay = "ALL";
+
+                // Get analytics data from the view model
+                if (_vm == null || _vm.AnalyticsData == null)
+                {
+                    System.Windows.MessageBox.Show(
+                        "No analytics data loaded. Please refresh the data first.",
+                        "No Data",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Open file save dialog
+                var saveDialog = new System.Windows.Forms.SaveFileDialog
+                {
+                    Filter = "Excel Files (*.xlsx)|*.xlsx|All Files (*.*)|*.*",
+                    FileName = $"Solo_Parents_Analytics_{DateTime.Today:yyyyMMdd}.xlsx",
+                    InitialDirectory = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop)
+                };
+
+                if (saveDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    // Get municipality and region (can be enhanced to be dynamic)
+                    string municipality = selectedBarangay != "ALL" ? selectedBarangay : "Biñan City";
+                    string region = "CALABARZON (IV-A)";
+                    string focalPersonName = MainWindow.FullName;
+
+                    // Export using the new service
+                    AnalyticsExcelExportService.ExportAnalyticsReport(
+                        saveDialog.FileName,
+                        _vm.AnalyticsData,
+                        municipality,
+                        region,
+                        focalPersonName);
+
+                    ToastNotification.Show(
+                        "Export Successful",
+                        $"Analytics report exported to:\n{System.IO.Path.GetFileName(saveDialog.FileName)}",
+                        ToastType.Success);
+
+                    // Log the export action
+                    Services.AuditLogService.Instance.LogSystem(
+                        $"Analytics report exported for {municipality} by {focalPersonName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Export failed: {ex.Message}",
+                    "Export Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                System.Diagnostics.Debug.WriteLine($"Export error: {ex.StackTrace}");
+            }
         }
 
         private MonthlyAnalyticsDto BuildMonthlyAnalyticsFromViewModel()

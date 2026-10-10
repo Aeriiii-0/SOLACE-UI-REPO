@@ -15,13 +15,32 @@ namespace SOLUM_UI.Services.Api
 
         private AnalyticsApiService() { }
 
-        public async Task<BaseResponse<MonthlyAnalyticsDto>> GetMonthlyAnalyticsAsync(int year, int month, string barangay = null)
+        public async Task<BaseResponse<MonthlyAnalyticsDto>> GetMonthlyAnalyticsAsync(
+            int year, int month, string barangay = null,
+            DateTime? startDate = null, DateTime? endDate = null)
         {
             string url = $"api/analytics/monthly/{year}/{month}";
 
+            var queryParams = new List<string>();
+
             if (!string.IsNullOrWhiteSpace(barangay) && !barangay.Equals("ALL", StringComparison.OrdinalIgnoreCase))
             {
-                url += $"?barangay={Uri.EscapeDataString(barangay.Trim())}";
+                queryParams.Add($"barangay={Uri.EscapeDataString(barangay.Trim())}");
+            }
+
+            if (startDate.HasValue)
+            {
+                queryParams.Add($"startDate={startDate.Value:yyyy-MM-dd}");
+            }
+
+            if (endDate.HasValue)
+            {
+                queryParams.Add($"endDate={endDate.Value:yyyy-MM-dd}");
+            }
+
+            if (queryParams.Count > 0)
+            {
+                url += "?" + string.Join("&", queryParams);
             }
 
             return await ApiClient.Instance.GetAsync<MonthlyAnalyticsDto>(url);

@@ -519,6 +519,34 @@
                     </Border>
                 </Popup>
 
+                <!-- No-Data Empty State Banner (shown when filter returns 0 records) -->
+                <Border Margin="0,0,0,18"
+                        Background="#FFF8F0" CornerRadius="12"
+                        BorderBrush="#F59E0B" BorderThickness="1.5"
+                        Padding="20,14"
+                        Visibility="{Binding IsNoData, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <!-- Warning icon -->
+                        <Path Grid.Column="0"
+                              Data="M12,2L1,21H23M12,6L19.5,19H4.5M11,10V14H13V10M11,16V18H13V16"
+                              Fill="#F59E0B" Stretch="Uniform"
+                              Width="22" Height="22" Margin="0,0,14,0"
+                              VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="No data for the selected filter"
+                                       FontFamily="Segoe UI" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="#92400E"/>
+                            <TextBlock Text="The selected barangay or date range returned no records. Try adjusting the filter or click Reset."
+                                       FontFamily="Segoe UI" FontSize="12"
+                                       Foreground="#B45309" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
                 <!-- Row 1: KPI Cards (Featured + 3 Standard) -->
                 <Grid Margin="0,0,0,24" Height="160">
                     <Grid.ColumnDefinitions>
