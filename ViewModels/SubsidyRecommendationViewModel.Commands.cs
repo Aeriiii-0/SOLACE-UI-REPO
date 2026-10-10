@@ -208,7 +208,7 @@ namespace SOLUM_UI.ViewModels
             ToastNotification.Show(confirm ? "Confirmed" : "Revoked", $"{row.Name} {(confirm ? "confirmed as final grantee." : "removed from final grantees.")}", confirm ? ToastType.Success : ToastType.Warning);
         }
 
-        private async Task ExportCsvAsync(string name, Task<string> generator, string msg) { var dlg = new SaveFileDialog { FileName = name, DefaultExt = ".csv", Filter = "CSV file (*.csv)|*.csv" }; if (dlg.ShowDialog() == true) { File.WriteAllText(dlg.FileName, await generator); ToastNotification.Show("Export Complete", msg, ToastType.Success); } }
+        private async Task ExportCsvAsync(string name, Task<string> generator, string msg) { var dlg = new SaveFileDialog { FileName = name, DefaultExt = ".csv", Filter = "CSV file (*.csv)|*.csv" }; if (dlg.ShowDialog() == true) { File.WriteAllText(dlg.FileName, await generator, new System.Text.UTF8Encoding(true)); ToastNotification.Show("Export Complete", msg, ToastType.Success); } }
 
         private async Task OpenFullRecordViewAsync(SubsidyItem item)
         {

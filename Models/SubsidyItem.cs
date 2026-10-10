@@ -183,6 +183,7 @@ namespace SOLUM_UI.Models
     {
         public string Name { get; set; }
         public int Age { get; set; }
+        public string EducationalLevel { get; set; } = string.Empty;
         public string AgeDisplay => $"{Age} yr" + (Age == 1 ? " old" : "s old");
         public SolidColorBrush BadgeBg => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F3F4F6"));
         public SolidColorBrush BadgeFg => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4B5563"));

@@ -109,13 +109,14 @@ namespace SOLUM_UI.Services
             if (dto.FamilyMembers != null && dto.FamilyMembers.Count > 0)
             {
                 var children = dto.FamilyMembers
-                    .Where(f => !f.IsDeleted && (string.IsNullOrEmpty(f.Relationship) || f.Relationship.IndexOf("child", StringComparison.OrdinalIgnoreCase) >= 0 || f.Age <= 22))
-                    .Select(f => new ChildDetailItem { Name = f.Name, Age = f.Age }).ToList();
+                    .Where(f => !f.IsDeleted && (string.IsNullOrEmpty(f.Relationship) || f.Relationship.IndexOf("child", StringComparison.OrdinalIgnoreCase) >= 0 || f.Age <= 24))
+                    .Select(f => new ChildDetailItem { Name = f.Name, Age = f.Age, EducationalLevel = f.EducationalLevel ?? string.Empty }).ToList();
                 if (children.Count > 0)
                 {
                     item.ChildrenDetails = children;
                     item.Children0To6Count = children.Count(c => c.Age >= 0 && c.Age <= 6);
                     item.Children7To22Count = children.Count(c => c.Age >= 7 && c.Age <= 22);
+                    item.CollegeAgeDependentsCount = children.Count(c => c.Age >= 17 && c.Age <= 24);
                     item.Dependants = children.Count;
                     item.MinorDependentsCount = item.Children0To6Count + item.Children7To22Count;
                 }
@@ -134,16 +135,19 @@ namespace SOLUM_UI.Services
             string needs = ResolveNeedsAndProblems(dto.ProblemPresented);
             if (!string.IsNullOrEmpty(needs)) row.NeedsAndProblems = needs;
 
+            if (dto.PersonalInfo?.Birthdate != null && dto.PersonalInfo.Birthdate != DateTime.MinValue)
+                row.DateOfBirthFormatted = dto.PersonalInfo.Birthdate.ToString("yyyy-MM-dd");
             if (string.IsNullOrEmpty(row.ContactNumber)) row.ContactNumber = dto.ContactDetails?.ApplicantContactNumber;
             if (string.IsNullOrEmpty(row.Address)) row.Address = dto.AddressDetails?.Address;
+            if (string.IsNullOrEmpty(row.Barangay) && !string.IsNullOrEmpty(dto.AddressDetails?.Barangay)) row.Barangay = dto.AddressDetails.Barangay;
             row.EmergencyContactName = dto.EmergencyContact?.EmergencyPersonName;
             row.EmergencyContactNumber = dto.EmergencyContact?.EmergencyPersonContactNumber;
 
             if (dto.FamilyMembers != null && dto.FamilyMembers.Count > 0)
             {
                 var children = dto.FamilyMembers
-                    .Where(f => !f.IsDeleted && (string.IsNullOrEmpty(f.Relationship) || f.Relationship.IndexOf("child", StringComparison.OrdinalIgnoreCase) >= 0 || f.Age <= 22))
-                    .Select(f => new ChildDetailItem { Name = f.Name, Age = f.Age }).ToList();
+                    .Where(f => !f.IsDeleted && (string.IsNullOrEmpty(f.Relationship) || f.Relationship.IndexOf("child", StringComparison.OrdinalIgnoreCase) >= 0 || f.Age <= 24))
+                    .Select(f => new ChildDetailItem { Name = f.Name, Age = f.Age, EducationalLevel = f.EducationalLevel ?? string.Empty }).ToList();
                 if (children.Count > 0)
                 {
                     row.ChildrenDetails = children;
@@ -151,6 +155,8 @@ namespace SOLUM_UI.Services
                     row.Children7To22Count = children.Count(c => c.Age >= 7 && c.Age <= 22);
                     row.Dependants = children.Count;
                     row.MinorDependentsCount = row.Children0To6Count + row.Children7To22Count;
+                    var college = children.Where(c => c.Age >= 17 && c.Age <= 24).ToList();
+                    if (college.Count > 0) { row.CollegeAgeDependents = college; row.CollegeAgeDependentsCount = college.Count; row.HasCollegeAgeDependent = true; }
                 }
             }
         }

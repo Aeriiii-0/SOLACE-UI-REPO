@@ -108,29 +108,45 @@ namespace SOLUM_UI.Services.Implementations
             return await ApiClient.Instance.PostAsync<RevokeGrantRequest, bool>($"api/subsidy/grantees/{evaluationId}/revoke", req);
         }
 
-        public Task<string> ExportCityEducRosterCsvAsync(List<SelectionRow> items)
+        public async Task<string> ExportCityEducRosterCsvAsync(List<SelectionRow> items)
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("Item #,College Student Name,Age,Category,Parent SP ID,Solo Parent Name,Barangay,Household Income,Audit Status,Export Timestamp");
+            foreach (var r in items.Where(i => i.HasCollegeAgeDependent && (i.CollegeAgeDependents == null || i.CollegeAgeDependents.Count == 0)))
+            {
+                if (r.SoloParentId != Guid.Empty)
+                {
+                    try
+                    {
+                        var resp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(r.SoloParentId);
+                        if (resp?.Data != null) SubsidyModelMapper.EnrichRowFromRecord(r, resp.Data);
+                    }
+                    catch { }
+                }
+            }
+            var sb = new StringBuilder("\uFEFF");
+            sb.AppendLine($"City Educ Scholarship Cross-Check Roster - {DateTime.Now:yyyy}");
+            sb.AppendLine("No.,Name of Solo Parent,Name of Dependent,Age of Dependent,Education of Dependent");
             int count = 0;
             foreach (var r in items.Where(i => i.HasCollegeAgeDependent))
             {
                 if (r.CollegeAgeDependents != null && r.CollegeAgeDependents.Count > 0)
                 {
                     foreach (var child in r.CollegeAgeDependents)
-                        sb.AppendLine($"{++count},\"{child.Name}\",{child.Age},College-Age (17–24y),{r.SpId},\"{r.Name}\",{r.Barangay},\"{r.IncomeLabel}\",Pending City Educ Verification,{DateTime.Now:yyyy-MM-dd HH:mm}");
+                    {
+                        string edu = !string.IsNullOrWhiteSpace(child.EducationalLevel) ? child.EducationalLevel : "—";
+                        sb.AppendLine($"{++count},\"{r.Name}\",\"{child.Name}\",{child.Age},\"{edu}\"");
+                    }
                 }
                 else
                 {
-                    sb.AppendLine($"{++count},\"College-Age Dependent\",{r.CollegeAgeDependentsCount},College-Age (17–24y),{r.SpId},\"{r.Name}\",{r.Barangay},\"{r.IncomeLabel}\",Pending City Educ Verification,{DateTime.Now:yyyy-MM-dd HH:mm}");
+                    sb.AppendLine($"{++count},\"{r.Name}\",\"Dependent (Age 17–24)\",18,\"College Level\"");
                 }
             }
-            return Task.FromResult(sb.ToString());
+            return sb.ToString();
         }
 
         public Task<string> ExportPantawid4PsRosterCsvAsync(List<SelectionRow> items)
         {
-            var sb = new StringBuilder();
+            var sb = new StringBuilder("\uFEFF");
             sb.AppendLine("Rank,SP ID,Solo Parent Name,Barangay,Monthly Income,Income Per Capita,Total Dependents,Minor Dependents,Circumstance,4Ps Status,Export Timestamp");
             foreach (var r in items.Where(i => i.IsPantawidBeneficiary))
                 sb.AppendLine($"{r.Rank},{r.SpId},\"{r.Name}\",{r.Barangay},\"{r.IncomeLabel}\",\"{r.PerCapitaLabel}\",{r.Dependants},{r.MinorDependentsCount},\"{r.Circumstance}\",Enrolled (DSWD 4Ps),{DateTime.Now:yyyy-MM-dd HH:mm}");
@@ -141,33 +157,28 @@ namespace SOLUM_UI.Services.Implementations
         {
             foreach (var r in items)
             {
-                if (r.SoloParentId != Guid.Empty && string.IsNullOrEmpty(r.EmergencyContactNumber))
+                if (r.SoloParentId != Guid.Empty && (string.IsNullOrEmpty(r.Address) || string.IsNullOrEmpty(r.ContactNumber) || string.IsNullOrEmpty(r.DateOfBirthFormatted) || r.DateOfBirthFormatted == "—"))
                 {
                     try
                     {
                         var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(r.SoloParentId);
                         if (detailResp?.Data != null)
-                        {
-                            if (string.IsNullOrEmpty(r.ContactNumber)) r.ContactNumber = detailResp.Data.ContactDetails?.ApplicantContactNumber;
-                            if (string.IsNullOrEmpty(r.Address)) r.Address = detailResp.Data.AddressDetails?.Address;
-                            r.EmergencyContactName = detailResp.Data.EmergencyContact?.EmergencyPersonName;
-                            r.EmergencyContactNumber = detailResp.Data.EmergencyContact?.EmergencyPersonContactNumber;
-                        }
+                            SubsidyModelMapper.EnrichRowFromRecord(r, detailResp.Data);
                     }
                     catch { }
                 }
             }
-            var sb = new StringBuilder();
-            sb.AppendLine($"Fiscal Year {fiscalYear} - Final Grantee Contact & Confirmation Ledger");
-            sb.AppendLine("Rank,SP ID,Full Name,Contact Number,Barangay,Residential Address,Emergency Contact Person,Emergency Contact Number,Status,Grant Amount");
+            var sb = new StringBuilder("\uFEFF");
+            sb.AppendLine($"Fiscal Year {fiscalYear} - Final Grantee Ledger");
+            sb.AppendLine("No.,Full Name,Contact Number,Barangay,Address,Birthday,Status,Grant Amount");
+            int count = 0;
             foreach (var r in items)
             {
-                string contact = !string.IsNullOrWhiteSpace(r.ContactNumber) ? r.ContactNumber : "—";
-                string addr = !string.IsNullOrWhiteSpace(r.Address) ? r.Address : "—";
-                string emName = !string.IsNullOrWhiteSpace(r.EmergencyContactName) ? r.EmergencyContactName : "—";
-                string emPhone = !string.IsNullOrWhiteSpace(r.EmergencyContactNumber) ? r.EmergencyContactNumber : "—";
-                string status = r.IsFinalGrantee ? "Confirmed Grantee" : "Pending Confirmation";
-                sb.AppendLine($"{r.Rank},{r.SpId},\"{r.Name}\",\"{contact}\",\"{r.Barangay}\",\"{addr}\",\"{emName}\",\"{emPhone}\",\"{status}\",₱1000.00");
+                string contact = !string.IsNullOrWhiteSpace(r.ContactNumberFormatted) && r.ContactNumberFormatted != "—" ? r.ContactNumberFormatted : (!string.IsNullOrWhiteSpace(r.ContactNumber) ? r.ContactNumber : "—");
+                string addr = !string.IsNullOrWhiteSpace(r.FullAddress) && r.FullAddress != "—" ? r.FullAddress : (!string.IsNullOrWhiteSpace(r.Address) ? r.Address : "—");
+                string bday = !string.IsNullOrWhiteSpace(r.DateOfBirthFormatted) ? r.DateOfBirthFormatted : "—";
+                string status = r.IsFinalGrantee ? "Confirmed" : "Pending";
+                sb.AppendLine($"{++count},\"{r.Name}\",\"{contact}\",\"{r.Barangay}\",\"{addr}\",\"{bday}\",\"{status}\",\"₱1,000.00\"");
             }
             return sb.ToString();
         }
