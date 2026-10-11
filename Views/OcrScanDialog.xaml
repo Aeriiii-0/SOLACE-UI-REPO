@@ -26,9 +26,9 @@
             <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
         <Style x:Key="FormBox" TargetType="TextBox">
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="Padding" Value="12,0"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="Foreground" Value="#111111"/>
             <Setter Property="BorderBrush" Value="#D0B8C0"/>
             <Setter Property="BorderThickness" Value="1.2"/>
@@ -59,13 +59,13 @@
             </Setter>
         </Style>
         <Style x:Key="FormCombo" TargetType="ComboBox">
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="Foreground" Value="#111111"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#C0A0AA"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="Padding" Value="10,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -73,14 +73,17 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid HorizontalAlignment="Stretch">
-                            <Border x:Name="ComboBg" Background="Transparent" BorderThickness="0">
-                                <Grid Margin="8,0,26,0">
+                            <Border x:Name="ComboBg" Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6">
+                                <Grid Margin="10,0,28,0">
                                     <ContentPresenter x:Name="ContentSite"
                                                       Content="{TemplateBinding SelectionBoxItem}"
                                                       ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                                       VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                     <TextBlock x:Name="Placeholder" Text="Select..."
-                                               Foreground="#BBBBBB" FontSize="13"
+                                               Foreground="#BBBBBB" FontSize="14"
                                                VerticalAlignment="Center" IsHitTestVisible="False"
                                                Visibility="Collapsed"/>
                                 </Grid>
@@ -91,20 +94,20 @@
                                               RelativeSource={RelativeSource TemplatedParent}}"
                                           Focusable="False" Opacity="0"/>
                             <Path HorizontalAlignment="Right" VerticalAlignment="Center"
-                                  Margin="0,0,8,0" Data="M7,10L12,15L17,10H7Z"
-                                  Fill="#702943" Stretch="Uniform" Width="10" Height="10"
+                                  Margin="0,0,10,0" Data="M7,10L12,15L17,10H7Z"
+                                  Fill="#702943" Stretch="Uniform" Width="12" Height="12"
                                   IsHitTestVisible="False"/>
                             <Popup x:Name="Popup" Placement="Bottom"
                                    IsOpen="{TemplateBinding IsDropDownOpen}"
                                    AllowsTransparency="True" Focusable="False" PopupAnimation="None">
-                                <Border Background="White" CornerRadius="8" BorderBrush="#E0D0D5"
-                                        BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}"
-                                        MaxHeight="200" Margin="0,4,0,0">
+                                <Border Background="White" CornerRadius="10" BorderBrush="#C0A0AA"
+                                        BorderThickness="1.2" MinWidth="{TemplateBinding ActualWidth}"
+                                        MaxHeight="200" Margin="0,2,0,0">
                                     <Border.Effect>
-                                        <DropShadowEffect Color="#702943" BlurRadius="12" ShadowDepth="3" Opacity="0.10"/>
+                                        <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="3" Opacity="0.08"/>
                                     </Border.Effect>
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsPresenter/>
                                     </ScrollViewer>
                                 </Border>
                             </Popup>
@@ -113,15 +116,49 @@
                             <Trigger Property="SelectedIndex" Value="-1">
                                 <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
                             </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#A08090"/>
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#702943"/>
+                                <Setter TargetName="ComboBg" Property="BorderThickness" Value="1.5"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Resources>
+                <Style TargetType="ComboBoxItem">
+                    <Setter Property="Padding" Value="14,9"/>
+                    <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="Foreground" Value="#222222"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ComboBoxItem">
+                                <Border x:Name="ItemBg" Background="Transparent"
+                                        Padding="{TemplateBinding Padding}" CornerRadius="6" Margin="4,2">
+                                    <ContentPresenter/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#FDF0F3"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#F0E4E8"/>
+                                        <Setter Property="Foreground" Value="#702943"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Style.Resources>
         </Style>
 
         <Style x:Key="FormDate" TargetType="DatePicker">
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="Foreground" Value="#111111"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
@@ -591,7 +628,7 @@
                                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                                 <TextBlock Text="Date of Application:" FontSize="11" FontWeight="SemiBold"
                                                                            Foreground="#222222" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                                                <Border BorderBrush="#7B1426" BorderThickness="1.5" CornerRadius="6" Background="White" Width="180" Height="32" Padding="8,0,8,0">
+                                                                <Border BorderBrush="#7B1426" BorderThickness="1.5" CornerRadius="6" Background="White" Width="180" Height="44" Padding="8,0,8,0">
                                                                     <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDateSm}"
                                                                                 Tag="application_date" GotFocus="Field_GotFocus"
                                                                                 GotKeyboardFocus="Field_GotFocus"
@@ -940,27 +977,30 @@
                                                                           BorderThickness="0" Background="Transparent"
                                                                           Tag="barangay" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
                                                                     <ComboBoxItem Content=""/>
-                                                                    <ComboBoxItem Content="De La Paz"/>
+                                                                    <ComboBoxItem Content="Biñan"/>
                                                                     <ComboBoxItem Content="Bungahan"/>
-                                                                    <ComboBoxItem Content="Batino"/>
-                                                                    <ComboBoxItem Content="Canumay"/>
-                                                                    <ComboBoxItem Content="Cawit"/>
-                                                                    <ComboBoxItem Content="Centro"/>
-                                                                    <ComboBoxItem Content="Guyong"/>
-                                                                    <ComboBoxItem Content="Halang"/>
-                                                                    <ComboBoxItem Content="Laya"/>
-                                                                    <ComboBoxItem Content="Magtaking"/>
-                                                                    <ComboBoxItem Content="Maharlika"/>
-                                                                    <ComboBoxItem Content="Mangga"/>
-                                                                    <ComboBoxItem Content="Milagrosa"/>
-                                                                    <ComboBoxItem Content="Paciano Rizal"/>
-                                                                    <ComboBoxItem Content="Paliparan"/>
-                                                                    <ComboBoxItem Content="Paya"/>
-                                                                    <ComboBoxItem Content="Quinabang"/>
-                                                                    <ComboBoxItem Content="San Juan"/>
-                                                                    <ComboBoxItem Content="Santa Cruz"/>
-                                                                    <ComboBoxItem Content="Santa Rosa"/>
-                                                                    <ComboBoxItem Content="Talon"/>
+                                                                    <ComboBoxItem Content="Canlalay"/>
+                                                                    <ComboBoxItem Content="Casile"/>
+                                                                    <ComboBoxItem Content="De La Paz"/>
+                                                                    <ComboBoxItem Content="Ganado"/>
+                                                                    <ComboBoxItem Content="Langkiwa"/>
+                                                                    <ComboBoxItem Content="Loma"/>
+                                                                    <ComboBoxItem Content="Malaban"/>
+                                                                    <ComboBoxItem Content="Malamig"/>
+                                                                    <ComboBoxItem Content="Mampalasan"/>
+                                                                    <ComboBoxItem Content="Platero"/>
+                                                                    <ComboBoxItem Content="Poblacion"/>
+                                                                    <ComboBoxItem Content="San Antonio"/>
+                                                                    <ComboBoxItem Content="San Francisco"/>
+                                                                    <ComboBoxItem Content="San Jose"/>
+                                                                    <ComboBoxItem Content="San Vicente"/>
+                                                                    <ComboBoxItem Content="Santo Domingo"/>
+                                                                    <ComboBoxItem Content="Santo Niño"/>
+                                                                    <ComboBoxItem Content="Santo Tomas"/>
+                                                                    <ComboBoxItem Content="Soro-Soro"/>
+                                                                    <ComboBoxItem Content="Timbao"/>
+                                                                    <ComboBoxItem Content="Tubigan"/>
+                                                                    <ComboBoxItem Content="Zapote"/>
                                                                 </ComboBox>
                                                             </Border>
                                                             <TextBlock x:Name="ErrBarangay" Text="Required." Style="{StaticResource ErrorText}"/>
@@ -1353,7 +1393,7 @@
                                                                         <ColumnDefinition Width="34"/>
                                                                     </Grid.ColumnDefinitions>
                                                                     <Border Grid.Column="0" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,4,0">
-                                                                        <TextBox Height="32" FontSize="12"
+                                                                        <TextBox Height="44" FontSize="12"
                                                                                  BorderThickness="0"
                                                                                  Background="Transparent" Padding="6,0"
                                                                                  VerticalContentAlignment="Center"
@@ -1363,7 +1403,7 @@
                                                                                  Text="{Binding MemberName, UpdateSourceTrigger=PropertyChanged}"/>
                                                                     </Border>
                                                                     <Border Grid.Column="1" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,4,0">
-                                                                        <ComboBox Height="32"
+                                                                        <ComboBox Height="44"
                                                                                   Style="{StaticResource FormCombo}"
                                                                                   BorderThickness="0" Background="Transparent"
                                                                                   Tag="fam_row1_sex" GotFocus="Field_GotFocus"
@@ -1374,7 +1414,7 @@
                                                                         </ComboBox>
                                                                     </Border>
                                                                     <Border Grid.Column="2" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="#F5F5F5" Margin="0,0,4,0">
-                                                                        <TextBox Height="32" FontSize="12"
+                                                                        <TextBox Height="44" FontSize="12"
                                                                                  BorderThickness="0"
                                                                                  Background="Transparent" Padding="2,0"
                                                                                  VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
@@ -1384,14 +1424,14 @@
                                                                                  Text="{Binding Age, Mode=OneWay}"/>
                                                                     </Border>
                                                                     <Border Grid.Column="3" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,4,0">
-                                                                        <DatePicker Height="32"
+                                                                        <DatePicker Height="44"
                                                                                     Style="{StaticResource FormDate}"
                                                                                     BorderThickness="0" Background="Transparent"
                                                                                     Tag="fam_row1_dob" GotFocus="Field_GotFocus"
                                                                                     SelectedDate="{Binding BirthdateDate, UpdateSourceTrigger=PropertyChanged}"/>
                                                                     </Border>
                                                                     <Border Grid.Column="4" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,4,0">
-                                                                        <ComboBox Height="32"
+                                                                        <ComboBox Height="44"
                                                                                   Style="{StaticResource FormCombo}"
                                                                                   BorderThickness="0" Background="Transparent"
                                                                                   Tag="fam_row1_civ" GotFocus="Field_GotFocus"
@@ -1405,7 +1445,7 @@
                                                                         </ComboBox>
                                                                     </Border>
                                                                     <Border Grid.Column="5" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,4,0">
-                                                                        <ComboBox Height="32"
+                                                                        <ComboBox Height="44"
                                                                                   Style="{StaticResource FormCombo}"
                                                                                   BorderThickness="0" Background="Transparent"
                                                                                   Tag="fam_row1_rel" GotFocus="Field_GotFocus"
@@ -1423,7 +1463,7 @@
                                                                         </ComboBox>
                                                                     </Border>
                                                                     <Border Grid.Column="6" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,4,0">
-                                                                        <TextBox Height="32" FontSize="12"
+                                                                        <TextBox Height="44" FontSize="12"
                                                                                  BorderThickness="0"
                                                                                  Background="Transparent" Padding="6,0"
                                                                                  VerticalContentAlignment="Center"
@@ -1431,14 +1471,14 @@
                                                                                  Text="{Binding EducationEmployment, UpdateSourceTrigger=PropertyChanged}"/>
                                                                     </Border>
                                                                     <Border Grid.Column="7" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,4,0">
-                                                                        <TextBox Height="32" FontSize="12"
+                                                                        <TextBox Height="44" FontSize="12"
                                                                                  BorderThickness="0"
                                                                                  Background="Transparent" Padding="6,0"
                                                                                  VerticalContentAlignment="Center"
                                                                                  Tag="fam_row1_inc" GotFocus="Field_GotFocus"
                                                                                  Text="{Binding Income, UpdateSourceTrigger=PropertyChanged}"/>
                                                                     </Border>
-                                                                    <Button Grid.Column="8" Height="32" Width="30" Cursor="Hand"
+                                                                    <Button Grid.Column="8" Height="44" Width="30" Cursor="Hand"
                                                                             ToolTip="Remove row" Command="{Binding DeleteCommand}">
                                                                         <Button.Template>
                                                                             <ControlTemplate TargetType="Button">

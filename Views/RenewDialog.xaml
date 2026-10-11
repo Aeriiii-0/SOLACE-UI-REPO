@@ -424,37 +424,29 @@
                                 <Border Style="{StaticResource Card}">
                                     <StackPanel>
                                         <Border Style="{StaticResource CardHeader}">
-                                            <TextBlock Text="UPDATE THESE FIELDS AS NEEDED" Style="{StaticResource SectionLabel}"/>
+                                            <TextBlock Text="EDITABLE FIELDS FOR RENEWAL" Style="{StaticResource SectionLabel}"/>
                                         </Border>
 
-                                        <!-- Civil status + employment -->
+                                        <!-- Row 1: Occupation -->
+                                        <Grid Margin="0,0,0,14">
+                                            <StackPanel>
+                                                <TextBlock Text="Occupation / Source of Income" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="TxtOccupation" Style="{StaticResource FormBox}"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Row 2: Monthly Income + Employment Status -->
                                         <Grid Margin="0,0,0,14">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="2*"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0" Margin="0,0,14,0">
-                                                <TextBlock Text="Civil Status *" Style="{StaticResource FieldLabel}"/>
-                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                    <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
-                                                              SelectionChanged="CmbCivilStatus_SelectionChanged">
-                                                        <ComboBoxItem Content="Single"/>
-                                                        <ComboBoxItem Content="Married"/>
-                                                        <ComboBoxItem Content="Widowed"/>
-                                                        <ComboBoxItem Content="Separated"/>
-                                                        <ComboBoxItem Content="Divorced"/>
-                                                        <ComboBoxItem Content="Annulled"/>
-                                                    </ComboBox>
-                                                </Border>
-                                                <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="1" Margin="0,0,14,0">
                                                 <TextBlock Text="Monthly Income" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtMonthlyIncome" Style="{StaticResource FormBox}"
                                                          PreviewTextInput="NumberOnly_PreviewTextInput"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="2">
+                                            <StackPanel Grid.Column="1">
                                                 <TextBlock Text="Employment Status" Style="{StaticResource FieldLabel}"/>
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Height="42">
                                                     <RadioButton x:Name="ChkEmployed"     Content="Employed"
@@ -473,54 +465,43 @@
                                             </StackPanel>
                                         </Grid>
 
-                                        <!-- Address + contact -->
+                                        <!-- Row 3: Other sources of income -->
                                         <Grid Margin="0,0,0,14">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="3*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Margin="0,0,14,0">
-                                                <TextBlock Text="Address *" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtAddress" Style="{StaticResource FormBox}"
-                                                         TextChanged="TxtAddress_TextChanged"/>
-                                                <TextBlock x:Name="ErrAddress" Text="Required." Style="{StaticResource ErrorText}"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="1" Margin="0,0,14,0">
-                                                <TextBlock Text="Barangay *" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtBarangay" Style="{StaticResource FormBox}"
-                                                         TextChanged="TxtBarangay_TextChanged"/>
-                                                <TextBlock x:Name="ErrBarangay" Text="Required." Style="{StaticResource ErrorText}"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="2">
-                                                <TextBlock Text="Contact Number *" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtContact" Style="{StaticResource FormBox}"
-                                                         MaxLength="13"
-                                                         PreviewTextInput="Phone_PreviewTextInput"
-                                                         PreviewKeyDown="Phone_PreviewKeyDown"
-                                                         TextChanged="TxtContact_TextChanged"/>
-                                                <TextBlock x:Name="ErrContact" Text="Required." Style="{StaticResource ErrorText}"/>
+                                            <StackPanel>
+                                                <TextBlock Text="III. PROBLEM PRESENTED / CIRCUMSTANCE OF BEING SOLO PARENT" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="TxtCasePresented" Style="{StaticResource FormBox}" Height="80" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
                                             </StackPanel>
                                         </Grid>
 
-                                        <!-- Occupation -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Margin="0,0,14,0">
-                                                <TextBlock Text="Occupation / Source of Income" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtOccupation" Style="{StaticResource FormBox}"/>
+                                        <!-- Row 4: Problem Presented -->
+                                        <Grid Margin="0,0,0,14">
+                                            <StackPanel>
+                                                <TextBlock Text="IV. FAMILY COMPOSITION (Include other members of the household.)" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="TxtFamilyComposition" Style="{StaticResource FormBox}" Height="100" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock Text="Status" Style="{StaticResource FieldLabel}"/>
-                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                    <ComboBox x:Name="CmbStatus" Style="{StaticResource FormCombo}">
-                                                        <ComboBoxItem Content="Valid"/>
-                                                        <ComboBoxItem Content="Inactive"/>
-                                                    </ComboBox>
-                                                </Border>
+                                        </Grid>
+
+                                        <!-- Row 5: Needs and Problems -->
+                                        <Grid Margin="0,0,0,14">
+                                            <StackPanel>
+                                                <TextBlock Text="V. NEEDS AND PROBLEMS" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="TxtNeedsProblems" Style="{StaticResource FormBox}" Height="80" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Row 6: Other Sources of Income -->
+                                        <Grid Margin="0,0,0,14">
+                                            <StackPanel>
+                                                <TextBlock Text="VI. OTHER SOURCES OF INCOME" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="TxtOtherIncome" Style="{StaticResource FormBox}" Height="80" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Row 7: Additional Classifications -->
+                                        <Grid Margin="0,0,0,14">
+                                            <StackPanel>
+                                                <TextBlock Text="Additional Classifications" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="TxtAdditionalClassifications" Style="{StaticResource FormBox}" Height="80" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
                                             </StackPanel>
                                         </Grid>
 

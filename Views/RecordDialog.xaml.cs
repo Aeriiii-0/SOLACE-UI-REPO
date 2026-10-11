@@ -556,7 +556,6 @@ namespace SOLUM_UI
             SetComboByContent(CmbSex,         r.Sex);
             SetComboByContent(CmbCivilStatus, r.CivilStatus);
             SetComboByContent(CmbEducation,   r.EducationalAttainment);
-            SetComboByContent(CmbExtensionName, r.ExtensionName);
             SetComboByContent(CmbBarangay,    r.Barangay);
 
             TxtPhilSys.Text        = r.PhilSysNumber   ?? string.Empty;
@@ -1162,7 +1161,7 @@ namespace SOLUM_UI
                 Surname       = surname,
                 FirstName     = first,
                 MiddleName    = middle,
-                ExtensionName = GetComboValue(CmbExtensionName),
+                ExtensionName = string.Empty,
                 Name          = surname + ", " + first + (string.IsNullOrEmpty(middle) ? "" : " " + middle),
                 DateOfBirth   = DpBirthdate.SelectedDate.Value,
                 PlaceOfBirth  = TxtPlaceOfBirth.Text.Trim(),

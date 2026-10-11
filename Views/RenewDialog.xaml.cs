@@ -133,13 +133,13 @@ namespace SOLUM_UI
             TxtPhilSys.Text   = r.PhilSysNumber ?? string.Empty;
 
             // Editable fields — pre-fill from existing record
-            SetCombo(CmbCivilStatus, r.CivilStatus);
-            TxtMonthlyIncome.Text = r.MonthlyIncome  ?? string.Empty;
-            TxtOccupation.Text    = r.Occupation      ?? string.Empty;
-            TxtAddress.Text       = r.Address         ?? string.Empty;
-            TxtBarangay.Text      = r.Barangay        ?? string.Empty;
-            TxtContact.Text       = SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber ?? string.Empty);
-            SetCombo(CmbStatus, string.IsNullOrWhiteSpace(r.Status) ? "Valid" : r.Status);
+            TxtOccupation.Text       = r.Occupation          ?? string.Empty;
+            TxtMonthlyIncome.Text    = r.MonthlyIncome       ?? string.Empty;
+            TxtCasePresented.Text    = r.ProblemPresented    ?? string.Empty;
+            TxtFamilyComposition.Text = r.FamilyComposition  ?? string.Empty;
+            TxtNeedsProblems.Text    = r.NeedsAndProblems    ?? string.Empty;
+            TxtOtherIncome.Text      = r.OtherIncomeSource   ?? string.Empty;
+            TxtAdditionalClassifications.Text = r.AdditionalClassifications ?? string.Empty;
 
             if (r.IsEmployed)         ChkEmployed.IsChecked     = true;
             else if (r.IsSelfEmployed) ChkSelfEmployed.IsChecked = true;
@@ -167,55 +167,11 @@ namespace SOLUM_UI
 
         private bool Validate()
         {
-            bool ok = true;
-            var  missing = new List<string>();
-
-            if (CmbCivilStatus.SelectedItem == null)
-            {
-                MarkErr(CmbCivilStatus, ErrCivilStatus, "Required.");
-                missing.Add("Civil Status");
-                ok = false;
-            }
-
-            if (string.IsNullOrWhiteSpace(TxtAddress.Text))
-            {
-                MarkErr(TxtAddress, ErrAddress, "Required.");
-                missing.Add("Address");
-                ok = false;
-            }
-
-            if (string.IsNullOrWhiteSpace(TxtBarangay.Text))
-            {
-                MarkErr(TxtBarangay, ErrBarangay, "Required.");
-                missing.Add("Barangay");
-                ok = false;
-            }
-
-            string digits = Regex.Replace(TxtContact.Text ?? "", @"\D", "");
-            if (string.IsNullOrWhiteSpace(digits))
-            {
-                MarkErr(TxtContact, ErrContact, "Required.");
-                missing.Add("Contact Number");
-                ok = false;
-            }
-            else if (digits.Length != 11)
-            {
-                MarkErr(TxtContact, ErrContact, "Must be 11 digits.");
-                missing.Add("Contact Number (11 digits)");
-                ok = false;
-            }
-
-            if (!ok)
-            {
-                TxtValidationMsg.Text       = "Missing: " + string.Join(", ", missing) + ".";
-                TxtValidationMsg.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                TxtValidationMsg.Visibility = Visibility.Collapsed;
-            }
-
-            return ok;
+            // In renewal mode, all editable fields are optional
+            // The user is just updating what they want to update
+            // We don't need strict validation like we do for new records
+            TxtValidationMsg.Visibility = Visibility.Collapsed;
+            return true;
         }
 
         private void MarkErr(Control ctrl, TextBlock lbl, string msg)
@@ -289,17 +245,17 @@ namespace SOLUM_UI
             RevSex.Text     = F(r.Sex);
             RevPhilSys.Text = F(r.PhilSysNumber);
 
-            // Changed fields summary
-            string newCivil     = GetCombo(CmbCivilStatus);
-            string newIncome    = TxtMonthlyIncome.Text.Trim();
-            string newEmpStatus = ChkEmployed.IsChecked     == true ? "Employed"
-                                : ChkSelfEmployed.IsChecked == true ? "Self-Employed"
-                                : "Not Employed";
-            string newAddress   = TxtAddress.Text.Trim();
-            string newBarangay  = TxtBarangay.Text.Trim();
-            string newContact   = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtContact.Text.Trim());
-            string newOccupation = TxtOccupation.Text.Trim();
-            string newStatus    = GetCombo(CmbStatus);
+            // Changed fields summary - RENEWAL MODE (editable sections 3-6)
+            string newIncome         = TxtMonthlyIncome.Text.Trim();
+            string newEmpStatus      = ChkEmployed.IsChecked     == true ? "Employed"
+                                     : ChkSelfEmployed.IsChecked == true ? "Self-Employed"
+                                     : "Not Employed";
+            string newOccupation     = TxtOccupation.Text.Trim();
+            string newCasePresented  = TxtCasePresented.Text.Trim();
+            string newFamily         = TxtFamilyComposition.Text.Trim();
+            string newNeeds          = TxtNeedsProblems.Text.Trim();
+            string newOtherIncome    = TxtOtherIncome.Text.Trim();
+            string newClassifications = TxtAdditionalClassifications.Text.Trim();
 
             string oldEmpStatus = r.IsEmployed ? "Employed"
                                 : r.IsSelfEmployed ? "Self-Employed"
@@ -307,15 +263,14 @@ namespace SOLUM_UI
 
             var rows = new List<RenewReviewRow>
             {
-                MakeRow("Civil Status",      F(r.CivilStatus),   F(newCivil)),
-                MakeRow("Monthly Income",    F(r.MonthlyIncome), F(string.IsNullOrWhiteSpace(newIncome) ? "—" : newIncome)),
-                MakeRow("Employment",        oldEmpStatus,       newEmpStatus),
-                MakeRow("Address",           F(r.Address),       F(newAddress)),
-                MakeRow("Barangay",          F(r.Barangay),      F(newBarangay)),
-                MakeRow("Contact Number",    F(SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber)),
-                                             F(newContact)),
-                MakeRow("Occupation",        F(r.Occupation),    F(newOccupation)),
-                MakeRow("Status",            F(r.Status),        F(newStatus)),
+                MakeRow("Occupation",                F(r.Occupation),          F(newOccupation)),
+                MakeRow("Monthly Income",            F(r.MonthlyIncome),        F(string.IsNullOrWhiteSpace(newIncome) ? "—" : newIncome)),
+                MakeRow("Employment Status",         oldEmpStatus,              newEmpStatus),
+                MakeRow("III. Problem Presented",    F(r.ProblemPresented),     F(newCasePresented)),
+                MakeRow("IV. Family Composition",    F(r.FamilyComposition),    F(newFamily)),
+                MakeRow("V. Needs and Problems",     F(r.NeedsAndProblems),     F(newNeeds)),
+                MakeRow("VI. Other Sources",         F(r.OtherIncomeSource),    F(newOtherIncome)),
+                MakeRow("Additional Classifications", F(r.AdditionalClassifications), F(newClassifications)),
             };
 
             ReviewList.ItemsSource = rows;
@@ -382,8 +337,6 @@ namespace SOLUM_UI
                 CircumstanceE           = r.CircumstanceE,
                 CircumstanceF           = r.CircumstanceF,
 
-                NeedsAndProblems  = r.NeedsAndProblems,
-                OtherIncomeSource = r.OtherIncomeSource,
                 IsPantawidBeneficiary = r.IsPantawidBeneficiary,
                 IsIndigenous      = r.IsIndigenous,
                 IsLGBT            = r.IsLGBT,
@@ -395,16 +348,23 @@ namespace SOLUM_UI
                 IsRenewal      = true,
                 LastUpdated    = DateTime.Today,   // signals the 1-year validity reset
 
-                CivilStatus    = GetCombo(CmbCivilStatus),
                 MonthlyIncome  = TxtMonthlyIncome.Text.Trim(),
                 IsEmployed     = ChkEmployed.IsChecked     == true,
                 IsSelfEmployed = ChkSelfEmployed.IsChecked == true,
                 IsNotEmployed  = ChkNotEmployed.IsChecked  == true,
                 Occupation     = TxtOccupation.Text.Trim(),
-                Address        = TxtAddress.Text.Trim(),
-                Barangay       = TxtBarangay.Text.Trim(),
-                ContactNumber  = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtContact.Text.Trim()),
-                Status         = GetCombo(CmbStatus),
+                ProblemPresented = TxtCasePresented.Text.Trim(),
+                FamilyComposition = TxtFamilyComposition.Text.Trim(),
+                NeedsAndProblems = TxtNeedsProblems.Text.Trim(),
+                OtherIncomeSource = TxtOtherIncome.Text.Trim(),
+                AdditionalClassifications = TxtAdditionalClassifications.Text.Trim(),
+
+                // carry-over locked fields from original record
+                CivilStatus    = r.CivilStatus,
+                Address        = r.Address,
+                Barangay       = r.Barangay,
+                ContactNumber  = r.ContactNumber,
+                Status         = r.Status,
 
                 // carry-through BloodType / Citizenship / Height / Weight
                 Citizenship    = r.Citizenship,
@@ -441,7 +401,6 @@ namespace SOLUM_UI
             DialogResult = false;
             Close();
         }
-
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
@@ -449,21 +408,8 @@ namespace SOLUM_UI
         }
 
         // ── field change / validation clear ───────────────────────────────────
-
-        private void CmbCivilStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
-            => ClearErr(CmbCivilStatus, ErrCivilStatus);
-
-        private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)
-            => ClearErr(TxtAddress, ErrAddress);
-
-        private void TxtBarangay_TextChanged(object sender, TextChangedEventArgs e)
-            => ClearErr(TxtBarangay, ErrBarangay);
-
-        private void TxtContact_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            FormatPhoneBox(TxtContact);
-            ClearErr(TxtContact, ErrContact);
-        }
+        // Note: In renewal, we only have editable text fields (Occupation, Monthly Income, etc.)
+        // Error validation is handled during the Validate() method
 
         private bool _formattingPhone = false;
 

@@ -131,6 +131,9 @@ namespace SOLUM_UI.Models
         // needs & other income 
         public string NeedsAndProblems  { get; set; }
         public string OtherIncomeSource { get; set; }
+        public string ProblemPresented { get; set; }
+        public string FamilyComposition { get; set; }
+        public string AdditionalClassifications { get; set; }
 
         public bool IsLGBT { get; set; }
         public bool IsPantawidBeneficiary { get; set; }
