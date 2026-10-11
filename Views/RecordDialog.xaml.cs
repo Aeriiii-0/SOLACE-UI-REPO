@@ -219,6 +219,7 @@ namespace SOLUM_UI
             {
                 FormSubtitle.Text = "Add New Record";
                 DpDateOfApplication.SelectedDate = DateTime.Today;
+                CmbEmploymentStatus.SelectedIndex = 0; // Default to empty selection
                 // Show add-mode stripe when Loaded
                 Loaded += (s, e) => ApplyModeStyle(isRenewal: false);
             }
@@ -344,7 +345,7 @@ namespace SOLUM_UI
             LockCombo(CmbEducation); LockBox(TxtReligion); LockBox(TxtOccupation);
 
             // Address & contact
-            LockBox(TxtAddress); LockBox(TxtBarangay); LockBox(TxtContact);
+            LockBox(TxtAddress); LockCombo(CmbBarangay); LockBox(TxtContact);
 
             // Emergency contact
             LockBox(TxtEmergencyContact); LockCombo(CmbRelationship);
@@ -359,13 +360,13 @@ namespace SOLUM_UI
                   ChkB, ChkC, ChkD, ChkE, ChkF })
             { if (chk != null) { chk.IsEnabled = false; chk.Opacity = 0.50; } }
 
-            // Family composition, notes, classifications
+            // Family composition, notes, and additional information
             FamilyRows.IsEnabled = false; FamilyRows.Opacity = 0.55;
             LockBox(TxtNeeds); LockBox(TxtOtherIncome);
             ChkPantawid.IsEnabled   = false; ChkPantawid.Opacity   = 0.55;
             ChkIndigenous.IsEnabled = false; ChkIndigenous.Opacity = 0.55;
             ChkLGBTQ.IsEnabled      = false; ChkLGBTQ.Opacity      = 0.55;
-            // CmbCivilStatus, TxtMonthlyIncome, ChkEmployed/ChkSelfEmployed/ChkNotEmployed stay ENABLED
+            // CmbEmploymentStatus remains ENABLED for renewal updates
         }
 
         /// <summary>
@@ -374,17 +375,14 @@ namespace SOLUM_UI
         /// with our custom MM/DD/YYYY placeholder.
         /// Family composition DatePickers use standard FormDate styling with no overlay.
         /// </summary>
+        /// <summary>
+        /// Watermark suppression is now handled via XAML ControlTemplate in FormDate style.
+        /// This method is kept for compatibility but no longer needed.
+        /// </summary>
         private void SuppressDatePickerWatermarks()
         {
-            // Find all DatePickerTextBox elements in the visual tree
-            // These are only in the main form fields, NOT in ItemsControl templates
-            var textBoxes = FindVisualChildren<DatePickerTextBox>(this);
-            foreach (var tb in textBoxes)
-            {
-                // Hide the DatePickerTextBox to prevent "Select a date" watermark overlap
-                // The custom MM/DD/YYYY placeholder and DatePicker button will still be visible
-                tb.Visibility = Visibility.Hidden;
-            }
+            // XAML template now properly suppresses native watermark by wrapping ScrollViewer in Grid
+            // This prevents rendering of PART_Watermark element, so no code-behind suppression needed
         }
 
         /// <summary>
@@ -501,7 +499,7 @@ namespace SOLUM_UI
             if (!string.IsNullOrWhiteSpace(TxtFirstName.Text))  return true;
             if (!string.IsNullOrWhiteSpace(TxtMiddleName.Text)) return true;
             if (!string.IsNullOrWhiteSpace(TxtAddress.Text))    return true;
-            if (!string.IsNullOrWhiteSpace(TxtBarangay.Text))   return true;
+            if (CmbBarangay.SelectedItem != null)               return true;
             if (!string.IsNullOrWhiteSpace(TxtContact.Text))    return true;
             if (DpBirthdate.SelectedDate.HasValue)               return true;
             if (CmbSex.SelectedItem != null)                     return true;
@@ -551,7 +549,6 @@ namespace SOLUM_UI
             TxtPlaceOfBirth.Text = r.PlaceOfBirth  ?? string.Empty;
             TxtAddress.Text      = r.Address       ?? string.Empty;
             TxtContact.Text      = SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber ?? string.Empty);
-            TxtBarangay.Text     = r.Barangay      ?? string.Empty;
 
             if (r.DateOfBirth != DateTime.MinValue) DpBirthdate.SelectedDate = r.DateOfBirth;
             DpDateOfApplication.SelectedDate = r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication : DateTime.Today;
@@ -559,19 +556,19 @@ namespace SOLUM_UI
             SetComboByContent(CmbSex,         r.Sex);
             SetComboByContent(CmbCivilStatus, r.CivilStatus);
             SetComboByContent(CmbEducation,   r.EducationalAttainment);
+            SetComboByContent(CmbExtensionName, r.ExtensionName);
+            SetComboByContent(CmbBarangay,    r.Barangay);
 
             TxtPhilSys.Text        = r.PhilSysNumber   ?? string.Empty;
             TxtReligion.Text       = r.Religion         ?? string.Empty;
             TxtOccupation.Text     = r.Occupation       ?? string.Empty;
             TxtMonthlyIncome.Text  = r.MonthlyIncome    ?? string.Empty;
 
-            ChkEmployed.IsChecked    = false;
-            ChkSelfEmployed.IsChecked = false;
-            ChkNotEmployed.IsChecked  = false;
-            
-            if (r.IsEmployed) ChkEmployed.IsChecked = true;
-            else if (r.IsSelfEmployed) ChkSelfEmployed.IsChecked = true;
-            else if (r.IsNotEmployed) ChkNotEmployed.IsChecked = true;
+            // Set Employment Status dropdown
+            if (r.IsEmployed) SetComboByContent(CmbEmploymentStatus, "Employed");
+            else if (r.IsSelfEmployed) SetComboByContent(CmbEmploymentStatus, "Self-Employed");
+            else if (r.IsNotEmployed) SetComboByContent(CmbEmploymentStatus, "Not Employed");
+            else CmbEmploymentStatus.SelectedIndex = 0;
 
             TxtEmergencyContact.Text = r.EmergencyContactName   ?? string.Empty;
             SetComboByContent(CmbRelationship, r.EmergencyRelationship);
@@ -852,7 +849,7 @@ namespace SOLUM_UI
         private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtLastName); ClearFieldError(TxtLastName,     ErrLastName); }
         private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)      { ToUpperBox(TxtFirstName); ClearFieldError(TxtFirstName,    ErrFirstName); }
         private void TxtMiddleName_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtMiddleName); }
-        private void TxtBarangay_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtBarangay); ClearFieldError(TxtBarangay,     ErrBarangay); }
+
         private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)        { ToUpperBox(TxtAddress); ClearFieldError(TxtAddress,      ErrAddress); }
         private void TxtContact_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -969,8 +966,9 @@ namespace SOLUM_UI
             else if (contactDigits.Length != 11)
             { MarkError(TxtContact, ErrContact, "Must be 11 digits."); missing.Add("Contact Number (11 digits)"); ok = false; }
 
-            if (string.IsNullOrWhiteSpace(TxtBarangay.Text))
-            { MarkError(TxtBarangay, ErrBarangay, "Required."); missing.Add("Barangay"); ok = false; }
+            string barangayValue = GetComboValue(CmbBarangay);
+            if (string.IsNullOrWhiteSpace(barangayValue))
+            { MarkError(CmbBarangay, ErrBarangay, "Required."); missing.Add("Barangay"); ok = false; }
 
             if (!ok)
                 SetValidationMessage(missing);
@@ -1164,6 +1162,7 @@ namespace SOLUM_UI
                 Surname       = surname,
                 FirstName     = first,
                 MiddleName    = middle,
+                ExtensionName = GetComboValue(CmbExtensionName),
                 Name          = surname + ", " + first + (string.IsNullOrEmpty(middle) ? "" : " " + middle),
                 DateOfBirth   = DpBirthdate.SelectedDate.Value,
                 PlaceOfBirth  = TxtPlaceOfBirth.Text.Trim(),
@@ -1175,7 +1174,7 @@ namespace SOLUM_UI
                 Weight        = string.Empty,
                 Address       = TxtAddress.Text.Trim(),
                 ContactNumber = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtContact.Text.Trim()),
-                Barangay      = TxtBarangay.Text.Trim(),
+                Barangay      = GetComboValue(CmbBarangay),
                 LastUpdated   = DateTime.Today,
 
                 IsNewApplicant      = !_isRenewal,
@@ -1187,9 +1186,9 @@ namespace SOLUM_UI
                 Religion              = TxtReligion.Text.Trim(),
                 Occupation            = TxtOccupation.Text.Trim(),
                 MonthlyIncome         = TxtMonthlyIncome.Text.Trim(),
-                IsEmployed            = ChkEmployed.IsChecked == true && ChkEmployed.IsEnabled,
-                IsSelfEmployed        = ChkSelfEmployed.IsChecked == true && ChkSelfEmployed.IsEnabled,
-                IsNotEmployed         = ChkNotEmployed.IsChecked == true && ChkNotEmployed.IsEnabled,
+                IsEmployed            = GetComboValue(CmbEmploymentStatus) == "Employed",
+                IsSelfEmployed        = GetComboValue(CmbEmploymentStatus) == "Self-Employed",
+                IsNotEmployed         = GetComboValue(CmbEmploymentStatus) == "Not Employed",
 
                 EmergencyContactName   = TxtEmergencyContact.Text.Trim(),
                 EmergencyRelationship  = GetComboValue(CmbRelationship),

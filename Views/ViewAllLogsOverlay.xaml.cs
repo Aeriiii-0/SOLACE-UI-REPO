@@ -41,16 +41,14 @@ namespace SOLUM_UI
         /// Suppresses the default "Select a date" watermark in all DatePickerTextBox controls
         /// to avoid overlapping with our custom MM/DD/YYYY placeholder.
         /// </summary>
+        /// <summary>
+        /// Watermark suppression is now handled via XAML ControlTemplate in BrandDatePicker style.
+        /// This method is kept for compatibility but no longer needed.
+        /// </summary>
         private void SuppressDatePickerWatermarks()
         {
-            // Find all DatePickerTextBox elements in the visual tree
-            var textBoxes = FindVisualChildren<DatePickerTextBox>(this);
-            foreach (var tb in textBoxes)
-            {
-                // Clear any watermark text by setting an empty placeholder
-                tb.Foreground = new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00));
-                tb.Opacity = 0; // Hide the default WPF watermark text
-            }
+            // XAML template now properly suppresses native watermark by wrapping ScrollViewer in Grid
+            // This prevents rendering of PART_Watermark element, so no code-behind suppression needed
         }
 
         /// <summary>

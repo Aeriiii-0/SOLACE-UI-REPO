@@ -174,10 +174,30 @@
                                 <DatePickerTextBox x:Name="PART_TextBox"
                                                    Foreground="#111111" Background="Transparent"
                                                    BorderThickness="0" Padding="10,0"
-                                                   VerticalAlignment="Center" FontSize="14"/>
+                                                   VerticalAlignment="Center" FontSize="14">
+                                    <DatePickerTextBox.Style>
+                                        <Style TargetType="DatePickerTextBox">
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="DatePickerTextBox">
+                                                        <Grid>
+                                                            <ScrollViewer x:Name="PART_ContentHost"
+                                                                          Focusable="False"
+                                                                          HorizontalScrollBarVisibility="Hidden"
+                                                                          VerticalScrollBarVisibility="Hidden"/>
+                                                            <!-- Suppress the native watermark by not displaying PART_Watermark -->
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </DatePickerTextBox.Style>
+                                </DatePickerTextBox>
+                                <!-- Custom clean placeholder - only visible when input is empty -->
                                 <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="14"
                                            Padding="10,0" VerticalAlignment="Center"
-                                           IsHitTestVisible="False" Opacity="0.8">
+                                           IsHitTestVisible="False" Opacity="0.7">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -540,52 +560,7 @@
                                                     <TextBlock Text="Date of Application:" FontSize="12" FontWeight="SemiBold"
                                                                Foreground="#555555" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                     <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Width="180">
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*"/>
-                                                            </Grid.ColumnDefinitions>
-
-                                                            <DatePickerTextBox x:Name="PART_TextBox_DateOfApplication"
-                                                                               Foreground="#111111" Background="Transparent"
-                                                                               BorderThickness="0" Padding="10,0"
-                                                                               VerticalAlignment="Center" FontSize="12">
-                                                                <DatePickerTextBox.Style>
-                                                                    <Style TargetType="DatePickerTextBox">
-                                                                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                                                                        <Setter Property="Template">
-                                                                            <Setter.Value>
-                                                                                <ControlTemplate TargetType="DatePickerTextBox">
-                                                                                    <ScrollViewer x:Name="PART_ContentHost"
-                                                                                                  Focusable="False"
-                                                                                                  HorizontalScrollBarVisibility="Hidden"
-                                                                                                  VerticalScrollBarVisibility="Hidden"/>
-                                                                                </ControlTemplate>
-                                                                            </Setter.Value>
-                                                                        </Setter>
-                                                                    </Style>
-                                                                </DatePickerTextBox.Style>
-                                                            </DatePickerTextBox>
-                                                            <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="12"
-                                                                       Padding="10,0" VerticalAlignment="Center"
-                                                                       IsHitTestVisible="False" Opacity="0.8">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding Text, ElementName=PART_TextBox_DateOfApplication}" Value="">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                            <DataTrigger Binding="{Binding Text, ElementName=PART_TextBox_DateOfApplication}" Value="{x:Null}">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-
-                                                            <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDate}" Height="32"
-                                                                        Grid.Column="0"/>
-                                                        </Grid>
+                                                        <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDate}" Height="32"/>
                                                     </Border>
                                                 </StackPanel>
                                             </Grid>
@@ -631,6 +606,8 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="10"/>
                                                 <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="Civil Status *" Style="{StaticResource FieldLabel}"/>
@@ -653,6 +630,21 @@
                                                     <ComboBoxItem Content="Female"/>
                                                 </ComboBox>
                                                 <TextBlock x:Name="ErrSex" Text="Required." Style="{StaticResource ErrorText}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Text="Name Extension" Style="{StaticResource FieldLabel}"/>
+                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                    <ComboBox x:Name="CmbExtensionName" Style="{StaticResource FormCombo}"
+                                                              BorderThickness="0" Background="Transparent">
+                                                        <ComboBoxItem Content=""/>
+                                                        <ComboBoxItem Content="Jr."/>
+                                                        <ComboBoxItem Content="Sr."/>
+                                                        <ComboBoxItem Content="II"/>
+                                                        <ComboBoxItem Content="III"/>
+                                                        <ComboBoxItem Content="IV"/>
+                                                        <ComboBoxItem Content="V"/>
+                                                    </ComboBox>
+                                                </Border>
                                             </StackPanel>
                                         </Grid>
 
@@ -716,31 +708,30 @@
                                                 <ColumnDefinition Width="2*"/>
                                                 <ColumnDefinition Width="10"/>
                                                 <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="Occupation / Source of Income" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtOccupation" Style="{StaticResource FormBox}"
                                                          TextChanged="TxtOccupation_TextChanged"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="2">
+                                            <StackPanel Grid.Column="2" Margin="0,0,10,0">
                                                 <TextBlock Text="Monthly Income" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtMonthlyIncome" Style="{StaticResource FormBox}"
                                                          PreviewTextInput="NumberOnly_PreviewTextInput"/>
                                             </StackPanel>
-                                        </Grid>
-
-                                        <!-- employment status row -->
-                                        <Grid Margin="0,0,0,12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0">
+                                            <StackPanel Grid.Column="4">
                                                 <TextBlock Text="Employment Status" Style="{StaticResource FieldLabel}"/>
-                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Height="44">
-                                                    <RadioButton x:Name="ChkEmployed"     Content="Employed"      Style="{StaticResource FormCheck}" GroupName="Employment"/>
-                                                    <RadioButton x:Name="ChkSelfEmployed" Content="Self-Employed" Style="{StaticResource FormCheck}" GroupName="Employment"/>
-                                                    <RadioButton x:Name="ChkNotEmployed"  Content="Not Employed"  Style="{StaticResource FormCheck}" GroupName="Employment"/>
-                                                </StackPanel>
+                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                    <ComboBox x:Name="CmbEmploymentStatus" Style="{StaticResource FormCombo}"
+                                                              BorderThickness="0" Background="Transparent">
+                                                        <ComboBoxItem Content=""/>
+                                                        <ComboBoxItem Content="Employed"/>
+                                                        <ComboBoxItem Content="Self-Employed"/>
+                                                        <ComboBoxItem Content="Not Employed"/>
+                                                    </ComboBox>
+                                                </Border>
                                             </StackPanel>
                                         </Grid>
 
@@ -767,8 +758,33 @@
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Margin="0,0,10,0">
                                                 <TextBlock Text="Barangay *" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtBarangay" Style="{StaticResource FormBox}"
-                                                         TextChanged="TxtBarangay_TextChanged"/>
+                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                    <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
+                                                              BorderThickness="0" Background="Transparent">
+                                                        <ComboBoxItem Content=""/>
+                                                        <ComboBoxItem Content="De La Paz"/>
+                                                        <ComboBoxItem Content="Bungahan"/>
+                                                        <ComboBoxItem Content="Batino"/>
+                                                        <ComboBoxItem Content="Canumay"/>
+                                                        <ComboBoxItem Content="Cawit"/>
+                                                        <ComboBoxItem Content="Centro"/>
+                                                        <ComboBoxItem Content="Guyong"/>
+                                                        <ComboBoxItem Content="Halang"/>
+                                                        <ComboBoxItem Content="Laya"/>
+                                                        <ComboBoxItem Content="Magtaking"/>
+                                                        <ComboBoxItem Content="Maharlika"/>
+                                                        <ComboBoxItem Content="Mangga"/>
+                                                        <ComboBoxItem Content="Milagrosa"/>
+                                                        <ComboBoxItem Content="Paciano Rizal"/>
+                                                        <ComboBoxItem Content="Paliparan"/>
+                                                        <ComboBoxItem Content="Paya"/>
+                                                        <ComboBoxItem Content="Quinabang"/>
+                                                        <ComboBoxItem Content="San Juan"/>
+                                                        <ComboBoxItem Content="Santa Cruz"/>
+                                                        <ComboBoxItem Content="Santa Rosa"/>
+                                                        <ComboBoxItem Content="Talon"/>
+                                                    </ComboBox>
+                                                </Border>
                                                 <TextBlock x:Name="ErrBarangay" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
@@ -782,7 +798,15 @@
                                             </StackPanel>
                                         </Grid>
 
-                                        <!-- emergency contact row -->
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- CARD: II. PERSON IN CASE OF EMERGENCY -->
+                                <Border Style="{StaticResource CardSection}">
+                                    <StackPanel>
+                                        <Border Style="{StaticResource CardSectionHeader}">
+                                            <TextBlock Text="II. PERSON IN CASE OF EMERGENCY" Style="{StaticResource SectionLabel}"/>
+                                        </Border>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="2*"/>
@@ -828,7 +852,21 @@
                                                          TextChanged="TxtEmergencyNumber_TextChanged"/>
                                             </StackPanel>
                                         </Grid>
+                                    </StackPanel>
+                                </Border>
 
+                                <!-- CARD: ADDITIONAL INFORMATION -->
+                                <Border Style="{StaticResource CardSection}">
+                                    <StackPanel>
+                                        <Border Style="{StaticResource CardSectionHeader}">
+                                            <TextBlock Text="ADDITIONAL INFORMATION" Style="{StaticResource SectionLabel}"/>
+                                        </Border>
+                                        <CheckBox x:Name="ChkPantawid" Content="Pantawid Beneficiary"
+                                                  FontSize="13" Foreground="#333333" Margin="0,8,0,10"/>
+                                        <CheckBox x:Name="ChkIndigenous" Content="Indigenous Person"
+                                                  FontSize="13" Foreground="#333333" Margin="0,0,0,10"/>
+                                        <CheckBox x:Name="ChkLGBTQ" Content="LGBTQ+"
+                                                  FontSize="13" Foreground="#333333" Margin="0,0,0,8"/>
                                     </StackPanel>
                                 </Border>
 
@@ -841,11 +879,11 @@
                                       Background="#F4F6F9" Visibility="Collapsed">
                             <StackPanel Margin="32,12,32,16">
 
-                                <!-- CARD: II. PROBLEM PRESENTED -->
+                                <!-- CARD: III. PROBLEM PRESENTED -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
                                         <Border Style="{StaticResource CardSectionHeader}">
-                                            <TextBlock Text="II. PROBLEM PRESENTED / CIRCUMSTANCE OF BEING SOLO PARENT"
+                                            <TextBlock Text="III. PROBLEM PRESENTED / CIRCUMSTANCE OF BEING SOLO PARENT"
                                                        Style="{StaticResource SectionLabel}"/>
                                         </Border>
 
@@ -1000,11 +1038,11 @@
                                     </StackPanel>
                                 </Border>
 
-                                <!-- CARD: III. FAMILY COMPOSITION -->
+                                <!-- CARD: IV. FAMILY COMPOSITION -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
                                         <Border Style="{StaticResource CardSectionHeader}">
-                                            <TextBlock Text="III. FAMILY COMPOSITION (Include other members of the household.)"
+                                            <TextBlock Text="IV. FAMILY COMPOSITION (Include other members of the household.)"
                                                        Style="{StaticResource SectionLabel}"/>
                                         </Border>
 
@@ -1184,11 +1222,11 @@
                                     </StackPanel>
                                 </Border>
 
-                                <!-- CARD: IV. NEEDS AND PROBLEMS -->
+                                <!-- CARD: V. NEEDS AND PROBLEMS -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
                                         <Border Style="{StaticResource CardSectionHeader}">
-                                            <TextBlock Text="IV. NEEDS AND PROBLEMS" Style="{StaticResource SectionLabel}"/>
+                                            <TextBlock Text="V. NEEDS AND PROBLEMS" Style="{StaticResource SectionLabel}"/>
                                         </Border>
                                         <TextBox x:Name="TxtNeeds" Style="{StaticResource FormBox}"
                                                  Height="80" TextWrapping="Wrap" AcceptsReturn="True"
@@ -1198,11 +1236,11 @@
                                     </StackPanel>
                                 </Border>
 
-                                <!-- CARD: V. OTHER SOURCES OF INCOME -->
+                                <!-- CARD: VI. OTHER SOURCES OF INCOME -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
                                         <Border Style="{StaticResource CardSectionHeader}">
-                                            <TextBlock Text="V. OTHER SOURCES OF INCOME" Style="{StaticResource SectionLabel}"/>
+                                            <TextBlock Text="VI. OTHER SOURCES OF INCOME" Style="{StaticResource SectionLabel}"/>
                                         </Border>
                                         <TextBox x:Name="TxtOtherIncome" Style="{StaticResource FormBox}"
                                                  Height="70" TextWrapping="Wrap" AcceptsReturn="True"
@@ -1212,20 +1250,6 @@
                                     </StackPanel>
                                 </Border>
 
-
-                                <Border Style="{StaticResource CardSection}">
-                                    <StackPanel>
-                                        <Border Style="{StaticResource CardSectionHeader}">
-                                            <TextBlock Text="VII. ADDITIONAL CLASSIFICATIONS" Style="{StaticResource SectionLabel}"/>
-                                        </Border>
-                                        <CheckBox x:Name="ChkPantawid" Content="Pantawid Beneficiary"
-                                                  FontSize="13" Foreground="#333333" Margin="0,8,0,10"/>
-                                        <CheckBox x:Name="ChkIndigenous" Content="Indigenous Person"
-                                                  FontSize="13" Foreground="#333333" Margin="0,0,0,10"/>
-                                        <CheckBox x:Name="ChkLGBTQ" Content="LGBTQ+"
-                                                  FontSize="13" Foreground="#333333" Margin="0,0,0,8"/>
-                                    </StackPanel>
-                                </Border>
 
                             </StackPanel>
                         </ScrollViewer>

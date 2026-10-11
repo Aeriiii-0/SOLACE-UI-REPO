@@ -140,17 +140,14 @@ namespace SOLUM_UI
         /// Suppresses the default "Select a date" watermark in DatePickerTextBox controls
         /// to avoid overlapping with our custom MM/DD/YYYY placeholder in main form fields.
         /// </summary>
+        /// <summary>
+        /// Watermark suppression is now handled via XAML ControlTemplate in FormDate style.
+        /// This method is kept for compatibility but no longer needed.
+        /// </summary>
         private void SuppressDatePickerWatermarks()
         {
-            // Find all DatePickerTextBox elements in the visual tree
-            // These are only used in the main form fields (DateOfApplication, Birthdate, etc.)
-            var textBoxes = FindVisualChildren<DatePickerTextBox>(this);
-            foreach (var tb in textBoxes)
-            {
-                // Hide the DatePickerTextBox to prevent "Select a date" watermark overlap
-                // The custom MM/DD/YYYY placeholder and DatePicker button will still be visible
-                tb.Visibility = Visibility.Hidden;
-            }
+            // XAML template now properly suppresses native watermark by wrapping ScrollViewer in Grid
+            // This prevents rendering of PART_Watermark element, so no code-behind suppression needed
         }
 
         /// <summary>
@@ -187,10 +184,11 @@ namespace SOLUM_UI
          private void UpdateEngineStatus(OcrEngineState state, string message)
          {
              Color dotColor;
+
              switch (state)
              {
                  case OcrEngineState.Ready:
-                     dotColor = (Color)ColorConverter.ConvertFromString("#10B981"); // Vibrant Green
+                     dotColor = (Color)ColorConverter.ConvertFromString("#7B1426"); // Maroon
                      break;
                  case OcrEngineState.Loading:
                      dotColor = (Color)ColorConverter.ConvertFromString("#F59E0B"); // Orange
@@ -678,16 +676,13 @@ namespace SOLUM_UI
                 TxtMonthlyIncome.Text = OcrService.FuzzyMatchIncome(GetVal(resp, "monthly_income"));
 
                 string empRaw = GetVal(resp, "employment_status").ToLower();
-                ChkEmployed.IsChecked     = false;
-                ChkSelfEmployed.IsChecked = false;
-                ChkNotEmployed.IsChecked  = false;
-                
-                if (empRaw.Contains("self")) ChkSelfEmployed.IsChecked = true;
-                else if (empRaw.Contains("not") || empRaw.Contains("unemployed")) ChkNotEmployed.IsChecked = true;
-                else if (empRaw.Contains("employed")) ChkEmployed.IsChecked = true;
+                if (empRaw.Contains("self")) SetComboByContent(CmbEmploymentStatus, "Self-Employed");
+                else if (empRaw.Contains("not") || empRaw.Contains("unemployed")) SetComboByContent(CmbEmploymentStatus, "Not Employed");
+                else if (empRaw.Contains("employed")) SetComboByContent(CmbEmploymentStatus, "Employed");
+                else CmbEmploymentStatus.SelectedIndex = 0;
 
                 TxtAddress.Text   = GetVal(resp, "address");
-                TxtBarangay.Text  = OcrService.FuzzyMatchBarangay(GetVal(resp, "barangay"));
+                SetComboByContent(CmbBarangay, OcrService.FuzzyMatchBarangay(GetVal(resp, "barangay")));
                 TxtContact.Text   = OcrService.FormatPhoneNumber(GetVal(resp, "contact_number"));
 
                 TxtEmergencyContact.Text = OcrService.CleanPersonName(GetVal(resp, "emergency_name"));
@@ -1081,14 +1076,6 @@ namespace SOLUM_UI
             e.Handled = !Regex.IsMatch(e.Text, @"^\d+$");
         }
 
-        private void ApplicantType_Changed(object sender, RoutedEventArgs e)
-        {
-            CheckBox clicked = sender as CheckBox;
-            if (clicked == null) return;
-            if (clicked == ChkNewApplicant && ChkNewApplicant.IsChecked == true) ChkRenewal.IsChecked = false;
-            else if (clicked == ChkRenewal && ChkRenewal.IsChecked == true) ChkNewApplicant.IsChecked = false;
-        }
-
         private void Circumstance_Changed(object sender, RoutedEventArgs e)
         {
             if (PnlA2 != null) PnlA2.Visibility = ChkA2.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
@@ -1123,13 +1110,6 @@ namespace SOLUM_UI
             ToUpperBox(TxtFirstName);
             ClearFieldError(TxtFirstName, ErrFirstName);
             MarkBadgeEdited(Badge_FirstName, TxtConf_FirstName);
-        }
-
-        private void TxtBarangay_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ToUpperBox(TxtBarangay);
-            ClearFieldError(TxtBarangay, ErrBarangay);
-            MarkBadgeEdited(Badge_Barangay, TxtConf_Barangay);
         }
 
         private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)
@@ -1280,8 +1260,9 @@ namespace SOLUM_UI
             else if (contactDigits.Length != 11)
             { MarkError(TxtContact, ErrContact, "Must be 11 digits."); missing.Add("Contact Number (11 digits)"); ok = false; }
 
-            if (string.IsNullOrWhiteSpace(TxtBarangay.Text))
-            { MarkError(TxtBarangay, ErrBarangay, "Required."); missing.Add("Barangay"); ok = false; }
+            string barangayValue = GetComboValue(CmbBarangay);
+            if (string.IsNullOrWhiteSpace(barangayValue))
+            { MarkError(CmbBarangay, ErrBarangay, "Required."); missing.Add("Barangay"); ok = false; }
 
             if (!ok)
                 SetValidationMessage(missing);
@@ -1412,7 +1393,7 @@ namespace SOLUM_UI
                 Weight        = string.Empty,
                 Address       = TxtAddress.Text.Trim(),
                 ContactNumber = OcrService.FormatPhoneNumber(TxtContact.Text.Trim()),
-                Barangay      = TxtBarangay.Text.Trim(),
+                Barangay      = GetComboValue(CmbBarangay),
                 Status        = GetComboValue(CmbStatus),
                 LastUpdated   = DateTime.Now,
 
@@ -1427,9 +1408,9 @@ namespace SOLUM_UI
                 Religion              = TxtReligion.Text.Trim(),
                 Occupation            = TxtOccupation.Text.Trim(),
                 MonthlyIncome         = TxtMonthlyIncome.Text.Trim(),
-                IsEmployed            = ChkEmployed.IsChecked == true && ChkEmployed.IsEnabled,
-                IsSelfEmployed        = ChkSelfEmployed.IsChecked == true && ChkSelfEmployed.IsEnabled,
-                IsNotEmployed         = ChkNotEmployed.IsChecked == true && ChkNotEmployed.IsEnabled,
+                IsEmployed            = GetComboValue(CmbEmploymentStatus) == "Employed",
+                IsSelfEmployed        = GetComboValue(CmbEmploymentStatus) == "Self-Employed",
+                IsNotEmployed         = GetComboValue(CmbEmploymentStatus) == "Not Employed",
 
                 EmergencyContactName   = TxtEmergencyContact.Text.Trim(),
                 EmergencyRelationship  = TxtRelationship.Text.Trim(),
