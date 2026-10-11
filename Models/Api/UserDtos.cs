@@ -55,4 +55,9 @@ namespace SOLUM_UI.Models.Api
     {
         public bool IsActive { get; set; }
     }
+
+    public class AdminResetPasswordRequest
+    {
+        public string NewPassword { get; set; } = string.Empty;
+    }
 }

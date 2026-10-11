@@ -248,6 +248,9 @@
     <Compile Include="Views\Dialogs\ActionConfirmDialog.xaml.cs">
       <DependentUpon>ActionConfirmDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\AccountCreatedDialog.xaml.cs">
+      <DependentUpon>AccountCreatedDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\NewCycleDialog.xaml.cs">
       <DependentUpon>NewCycleDialog.xaml</DependentUpon>
     </Compile>
@@ -340,6 +343,7 @@
     <Compile Include="Services\ChangeTrackingService.cs" />
     <Compile Include="Services\OcrService.cs" />
     <Compile Include="Services\WiaScannerService.cs" />
+    <Compile Include="Services\PasswordGenerator.cs" />
     <Compile Include="ViewModels\AnalyticsViewModel.cs" />
     <Compile Include="ViewModels\AuditLogViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />
@@ -434,6 +438,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\ActionConfirmDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\AccountCreatedDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

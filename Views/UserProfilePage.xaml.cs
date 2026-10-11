@@ -1,8 +1,11 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using SOLUM_UI.Services;
+using SOLUM_UI.Services.Api;
 
 namespace SOLUM_UI
 {
@@ -58,7 +61,7 @@ namespace SOLUM_UI
         }
 
         /// <summary>Validate and save the new password.</summary>
-        private void BtnSaveChangePassword_Click(object sender, RoutedEventArgs e)
+        private async void BtnSaveChangePassword_Click(object sender, RoutedEventArgs e)
         {
             ClearErrorMessages();
 
@@ -103,31 +106,69 @@ namespace SOLUM_UI
                 ErrConfirmPassword.Visibility = Visibility.Visible;
                 hasErrors = true;
             }
+            else if (currentPassword == newPassword)
+            {
+                ErrNewPassword.Text = "New password must be different from current password.";
+                ErrNewPassword.Visibility = Visibility.Visible;
+                hasErrors = true;
+            }
 
             if (hasErrors)
                 return;
 
-            // TODO: Add actual password change logic via API call
-            // For now, simulate success
-            ChangePasswordSuccessBanner.Visibility = Visibility.Visible;
+            BtnSaveChangePassword.IsEnabled = false;
 
-            ToastNotification.Show("Success",
-                "Your password has been changed successfully!",
-                ToastType.Success);
-
-            Services.AuditLogService.Instance.LogSystem(
-                "Password changed by " + MainWindow.CurrentUserName);
-
-            // Hide form after success
-            System.Threading.Tasks.Task.Delay(2000).ContinueWith(_ =>
+            try
             {
-                Dispatcher.Invoke(() =>
+                var resp = await AuthApiService.Instance.ChangePasswordAsync(currentPassword, newPassword);
+
+                if (resp != null && resp.Succeeded)
                 {
+                    ChangePasswordSuccessBanner.Visibility = Visibility.Visible;
+
+                    ToastNotification.Show("Success",
+                        "Your password has been changed successfully!",
+                        ToastType.Success);
+
+                    Services.AuditLogService.Instance.LogSystem(
+                        "Password changed by " + MainWindow.CurrentUserName);
+
+                    // Clear fields and hide form after 2 seconds
+                    await Task.Delay(2000);
                     ClearChangePasswordForm();
                     ChangePasswordFormPanel.Visibility = Visibility.Collapsed;
                     ChangePasswordButtonPanel.Visibility = Visibility.Visible;
-                });
-            });
+                }
+                else
+                {
+                    string errorMsg = (resp?.Errors != null && resp.Errors.Count > 0)
+                        ? string.Join("\n", resp.Errors)
+                        : "Failed to change password. Please check your current password.";
+
+                    // If error mentions current or old password, display under current password
+                    if (errorMsg.IndexOf("current", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        errorMsg.IndexOf("incorrect", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        ErrCurrentPassword.Text = errorMsg;
+                        ErrCurrentPassword.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        ErrNewPassword.Text = errorMsg;
+                        ErrNewPassword.Visibility = Visibility.Visible;
+                    }
+
+                    ToastNotification.Show("Password Change Failed", errorMsg, ToastType.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show("Error", "An unexpected error occurred: " + ex.Message, ToastType.Error);
+            }
+            finally
+            {
+                BtnSaveChangePassword.IsEnabled = true;
+            }
         }
 
         /// <summary>Clear all error messages.</summary>

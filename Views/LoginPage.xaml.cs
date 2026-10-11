@@ -7,6 +7,7 @@ using System.Windows.Input;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
+using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
 {
@@ -204,6 +205,17 @@ namespace SOLUM_UI
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void LinkForgotPassword_Click(object sender, RoutedEventArgs e)
+        {
+            ActionConfirmDialog.Show(
+                title: "Password Recovery",
+                message: "For internal security, passwords in SOLACE cannot be recovered online.\n\nPlease contact your System Administrator (MSWDO / IT Head) to issue a temporary password reset.",
+                confirmText: "Understood",
+                cancelText: "Close",
+                theme: ConfirmThemeType.Primary,
+                owner: this);
         }
     }
 }
