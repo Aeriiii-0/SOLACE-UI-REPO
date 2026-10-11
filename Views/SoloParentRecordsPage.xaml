@@ -109,6 +109,115 @@
             </Setter>
         </Style>
 
+        <Style x:Key="SearchModeCombo" TargetType="ComboBox">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="Bd" Background="#FBF7F8" CornerRadius="17" Padding="10,0,6,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="20"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter x:Name="ContentSite"
+                                                      Grid.Column="0"
+                                                      Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                      ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                      IsHitTestVisible="False"
+                                                      VerticalAlignment="Center"/>
+                                    <Path Grid.Column="1"
+                                          Data="M7,10L12,15L17,10H7Z"
+                                          Fill="#702943" Stretch="Uniform"
+                                          Width="9" Height="9"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          IsHitTestVisible="False"/>
+                                    <ToggleButton Grid.ColumnSpan="2"
+                                                  Focusable="False"
+                                                  IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                                  ClickMode="Press"
+                                                  Cursor="Hand">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent"/>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
+                            <Popup x:Name="PART_Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Grid x:Name="DropDown"
+                                      SnapsToDevicePixels="True"
+                                      MinWidth="140"
+                                      MaxHeight="260">
+                                    <Border x:Name="DropDownBorder"
+                                            Background="White"
+                                            BorderThickness="1"
+                                            BorderBrush="#E0D0D5"
+                                            CornerRadius="8"
+                                            Margin="0,4,0,0">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.15"/>
+                                        </Border.Effect>
+                                        <ScrollViewer Margin="4,6" SnapsToDevicePixels="True" CanContentScroll="True" VerticalScrollBarVisibility="Auto">
+                                            <ItemsPresenter/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#F5ECEE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="FontFamily" Value="Segoe UI"/>
+                        <Setter Property="Foreground" Value="#333333"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ComboBoxItem">
+                                    <Border x:Name="ItemBg" Background="Transparent"
+                                            CornerRadius="6" Margin="2,1" Padding="10,6">
+                                        <ContentPresenter/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="ItemBg" Property="Background" Value="#FDF0F3"/>
+                                            <Setter Property="Foreground" Value="#702943"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="ItemBg" Property="Background" Value="#F5E2E8"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                            <Setter Property="Foreground" Value="#702943"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="StatusBadge" TargetType="Border">
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Padding" Value="10,3"/>
@@ -297,96 +406,26 @@
                 <Grid Height="44">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="1"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1"/>
-                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="ID" FontSize="10" FontWeight="Bold" Foreground="#702943"
-                               VerticalAlignment="Center" Margin="14,0,6,0" Visibility="Collapsed"/>
-                    <TextBox x:Name="SearchId" Grid.Column="1"
-                             BorderThickness="0" Background="Transparent"
-                             FontSize="13" Foreground="#333333" VerticalAlignment="Center"
-                             TextChanged="SearchFields_TextChanged"
-                             KeyDown="SearchBox_KeyDown"
-                             Visibility="Collapsed">
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TextBox">
-                                            <Grid>
-                                                <TextBlock Text="e.g. SP-001" Foreground="#C0A8B0" FontSize="13"
-                                                           VerticalAlignment="Center" IsHitTestVisible="False">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                            </Grid>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
+                    <ComboBox x:Name="CmbSearchMode" Grid.Column="0"
+                              Style="{StaticResource SearchModeCombo}"
+                              Margin="5,0,5,0"
+                              SelectionChanged="CmbSearchMode_SelectionChanged">
+                        <ComboBoxItem Content="All / Auto" Tag="AUTO" IsSelected="True"/>
+                        <ComboBoxItem Content="First Name" Tag="FIRST_NAME"/>
+                        <ComboBoxItem Content="Last Name" Tag="LAST_NAME"/>
+                        <ComboBoxItem Content="Full Name" Tag="FULL_NAME"/>
+                        <ComboBoxItem Content="PhilSys ID" Tag="PHILSYS_ID"/>
+                    </ComboBox>
 
-                    <Rectangle Grid.Column="2" Fill="#E0D0D5" Width="1" Margin="0,10" Visibility="Collapsed"/>
+                    <Rectangle Grid.Column="1" Fill="#E0D0D5" Width="1" Margin="2,10,8,10"/>
 
-                    <TextBlock Grid.Column="3" Text="NAME" FontSize="10" FontWeight="Bold" Foreground="#702943"
-                               VerticalAlignment="Center" Margin="10,0,6,0"/>
-                    <TextBox x:Name="SearchName" Grid.Column="4"
-                             BorderThickness="0" Background="Transparent"
-                             FontSize="13" Foreground="#333333" VerticalAlignment="Center"
-                             ToolTip="Full name searches require exact matches (e.g., 'Juan Dela Cruz')"
-                             TextChanged="SearchFields_TextChanged"
-                             KeyDown="SearchBox_KeyDown">
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TextBox">
-                                            <Grid>
-                                                <TextBlock Text="Search exact full name..." Foreground="#C0A8B0" FontSize="13"
-                                                           VerticalAlignment="Center" IsHitTestVisible="False">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                            </Grid>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
-
-                    <Rectangle Grid.Column="5" Fill="#E0D0D5" Width="1" Margin="0,10"/>
-
-                    <TextBlock Grid.Column="6" Text="BARANGAY" FontSize="10" FontWeight="Bold" Foreground="#702943"
-                               VerticalAlignment="Center" Margin="10,0,6,0"/>
-                    <TextBox x:Name="SearchBarangay" Grid.Column="7"
+                    <TextBox x:Name="SearchName" Grid.Column="2"
                              BorderThickness="0" Background="Transparent"
                              FontSize="13" Foreground="#333333" VerticalAlignment="Center"
                              TextChanged="SearchFields_TextChanged"
@@ -397,7 +436,8 @@
                                     <Setter.Value>
                                         <ControlTemplate TargetType="TextBox">
                                             <Grid>
-                                                <TextBlock Text="Search by barangay..." Foreground="#C0A8B0" FontSize="13"
+                                                <TextBlock Text="{Binding SearchPlaceholder, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                           Foreground="#C0A8B0" FontSize="13"
                                                            VerticalAlignment="Center" IsHitTestVisible="False">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
@@ -419,7 +459,7 @@
                         </TextBox.Style>
                     </TextBox>
 
-                    <Button x:Name="ClearSearchBtn" Grid.Column="8"
+                    <Button x:Name="ClearSearchBtn" Grid.Column="3"
                             Width="26" Height="26" Margin="4,0,2,0"
                             Cursor="Hand" Visibility="Collapsed"
                             Click="ClearSearch_Click" ToolTip="Clear">
@@ -439,7 +479,7 @@
                               Fill="#C0A0AA" Stretch="Uniform" Width="11" Height="11"/>
                     </Button>
 
-                    <Button Grid.Column="9"
+                    <Button Grid.Column="4"
                             Width="34" Height="34" Margin="2,0,5,0"
                             Cursor="Hand" Click="SearchBtn_Click" ToolTip="Search">
                         <Button.Template>

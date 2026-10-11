@@ -189,6 +189,8 @@ namespace SOLUM_UI.Models.Api
     public class GetSoloParentRequest
     {
         public Guid? Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string Fullname { get; set; }
         public string PhilsysId { get; set; }
         public string Sex { get; set; }

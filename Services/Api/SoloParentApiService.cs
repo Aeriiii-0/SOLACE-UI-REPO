@@ -56,11 +56,17 @@ namespace SOLUM_UI.Services.Api
             if (request.Id.HasValue)
                 queryParams.Add($"id={request.Id.Value}");
 
+            if (!string.IsNullOrWhiteSpace(request.FirstName))
+                queryParams.Add($"firstName={Uri.EscapeDataString(request.FirstName.Trim())}");
+
+            if (!string.IsNullOrWhiteSpace(request.LastName))
+                queryParams.Add($"lastName={Uri.EscapeDataString(request.LastName.Trim())}");
+
             if (!string.IsNullOrWhiteSpace(request.Fullname))
                 queryParams.Add($"fullname={Uri.EscapeDataString(request.Fullname.Trim())}");
 
             if (!string.IsNullOrWhiteSpace(request.PhilsysId))
-                queryParams.Add($"philsys_id={Uri.EscapeDataString(request.PhilsysId.Trim())}");
+                queryParams.Add($"philsysId={Uri.EscapeDataString(request.PhilsysId.Trim())}");
 
             if (!string.IsNullOrWhiteSpace(request.Sex) && !request.Sex.Equals("All", StringComparison.OrdinalIgnoreCase))
                 queryParams.Add($"sex={Uri.EscapeDataString(request.Sex.Trim())}");

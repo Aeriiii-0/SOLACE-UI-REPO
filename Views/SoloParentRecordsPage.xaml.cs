@@ -34,6 +34,19 @@ namespace SOLUM_UI
         private int _totalPages    = 1;
         private bool _isLoading    = false;
 
+        public static readonly DependencyProperty SearchPlaceholderProperty =
+            DependencyProperty.Register(
+                nameof(SearchPlaceholder),
+                typeof(string),
+                typeof(SoloParentRecordsPage),
+                new PropertyMetadata("Search records (name, PhilSys ID)..."));
+
+        public string SearchPlaceholder
+        {
+            get => (string)GetValue(SearchPlaceholderProperty);
+            set => SetValue(SearchPlaceholderProperty, value);
+        }
+
         private bool IsAdmin     => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
                                     string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase);
         private bool IsBasicUser => string.Equals(CurrentUserRole, "BasicUser", StringComparison.OrdinalIgnoreCase);
@@ -71,13 +84,6 @@ namespace SOLUM_UI
                 if (ColBarangay    != null) ColBarangay.Width    = 0;
                 if (ColActions     != null) ColActions.Width     = 300;
             }
-            else if (IsEncoder)
-            {
-                AdminToolbar.Visibility       = Visibility.Collapsed;
-                BasicUserToolbar.Visibility   = Visibility.Collapsed;
-                EncoderSearchPanel.Visibility = Visibility.Visible;
-                PagingRow.Visibility          = Visibility.Visible;
-            }
             else
             {
                 AdminToolbar.Visibility       = Visibility.Visible;
@@ -97,20 +103,76 @@ namespace SOLUM_UI
             try
             {
                 string effectiveBarangay = IsBasicUser ? CurrentUserBarangay : _barangayFilter;
-                string idQuery = SearchId?.Text?.Trim() ?? string.Empty;
-                string nameQuery = SearchName?.Text?.Trim() ?? string.Empty;
-                string barangayQuery = SearchBarangay?.Text?.Trim() ?? string.Empty;
+                string query = (IsBasicUser ? BasicSearchName?.Text : SearchName?.Text)?.Trim() ?? string.Empty;
 
-                if (IsBasicUser)
+                string selectedMode = "AUTO";
+                if (!IsBasicUser && CmbSearchMode?.SelectedItem is ComboBoxItem modeItem)
                 {
-                    nameQuery = BasicSearchName?.Text?.Trim() ?? string.Empty;
-                    barangayQuery = string.Empty;
+                    selectedMode = modeItem.Tag?.ToString() ?? "AUTO";
                 }
 
                 Guid? searchGuid = null;
-                if (Guid.TryParse(idQuery, out var parsedGuid))
+                string firstName = null;
+                string lastName = null;
+                string fullname = null;
+                string philsysId = null;
+
+                if (!string.IsNullOrWhiteSpace(query))
                 {
-                    searchGuid = parsedGuid;
+                    if (Guid.TryParse(query, out var parsedGuid))
+                    {
+                        searchGuid = parsedGuid;
+                    }
+                    else
+                    {
+                        switch (selectedMode)
+                        {
+                            case "FIRST_NAME":
+                                firstName = query;
+                                break;
+
+                            case "LAST_NAME":
+                                lastName = query;
+                                break;
+
+                            case "FULL_NAME":
+                                fullname = query;
+                                break;
+
+                            case "PHILSYS_ID":
+                                philsysId = query;
+                                break;
+
+                            case "AUTO":
+                            default:
+                                // If input consists only of digits and hyphens/spaces and has >= 4 digits, treat as PhilSys ID
+                                string digitsOnly = System.Text.RegularExpressions.Regex.Replace(query, @"\D", "");
+                                if (digitsOnly.Length >= 4 && System.Text.RegularExpressions.Regex.IsMatch(query, @"^[\d\s\-]+$"))
+                                {
+                                    philsysId = query;
+                                }
+                                else if (query.Contains(","))
+                                {
+                                    // Comma format: "Dela Cruz, Juana" -> Last Name = "Dela Cruz", First Name = "Juana"
+                                    var parts = query.Split(new[] { ',' }, 2);
+                                    lastName = parts[0].Trim();
+                                    firstName = parts.Length > 1 ? parts[1].Trim() : null;
+                                }
+                                else if (query.Contains(" "))
+                                {
+                                    // Space format: "Juana Dela Cruz" -> First Name = "Juana", Last Name = "Dela Cruz"
+                                    int firstSpace = query.IndexOf(' ');
+                                    firstName = query.Substring(0, firstSpace).Trim();
+                                    lastName = query.Substring(firstSpace + 1).Trim();
+                                }
+                                else
+                                {
+                                    // Single word fallback to full name search
+                                    fullname = query;
+                                }
+                                break;
+                        }
+                    }
                 }
 
                 bool? isActive = null;
@@ -122,11 +184,7 @@ namespace SOLUM_UI
                 string sex = (!IsBasicUser && _sexFilter != "All") ? _sexFilter : null;
 
                 string barangay = null;
-                if (!string.IsNullOrWhiteSpace(barangayQuery))
-                {
-                    barangay = barangayQuery;
-                }
-                else if (!string.IsNullOrEmpty(effectiveBarangay) && effectiveBarangay != "All")
+                if (!string.IsNullOrEmpty(effectiveBarangay) && effectiveBarangay != "All")
                 {
                     barangay = effectiveBarangay;
                 }
@@ -146,7 +204,10 @@ namespace SOLUM_UI
                 var req = new GetSoloParentRequest
                 {
                     Id = searchGuid,
-                    Fullname = !string.IsNullOrWhiteSpace(nameQuery) ? nameQuery : null,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Fullname = fullname,
+                    PhilsysId = philsysId,
                     Barangay = barangay,
                     Sex = sex,
                     IsActive = isActive,
@@ -299,11 +360,41 @@ namespace SOLUM_UI
             if (e.Key == Key.Enter) ApplyFiltersAndPage();
         }
 
+        private void CmbSearchMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmbSearchMode?.SelectedItem is ComboBoxItem item)
+            {
+                string mode = item.Tag?.ToString() ?? "AUTO";
+                switch (mode)
+                {
+                    case "FIRST_NAME":
+                        SearchPlaceholder = "Search by first name (e.g. Juana)...";
+                        break;
+                    case "LAST_NAME":
+                        SearchPlaceholder = "Search by last name (e.g. Dela Cruz)...";
+                        break;
+                    case "FULL_NAME":
+                        SearchPlaceholder = "Search by full name (e.g. Juana Dela Cruz)...";
+                        break;
+                    case "PHILSYS_ID":
+                        SearchPlaceholder = "Search by PhilSys ID (e.g. 1234-5678-9012)...";
+                        break;
+                    case "AUTO":
+                    default:
+                        SearchPlaceholder = "Search records (name, PhilSys ID)...";
+                        break;
+                }
+
+                if (!string.IsNullOrWhiteSpace(SearchName?.Text))
+                {
+                    ApplyFiltersAndPage();
+                }
+            }
+        }
+
         private void SearchFields_TextChanged(object sender, TextChangedEventArgs e)
         {
-            bool hasText = !string.IsNullOrEmpty(SearchId?.Text)
-                        || !string.IsNullOrEmpty(SearchName?.Text)
-                        || !string.IsNullOrEmpty(SearchBarangay?.Text);
+            bool hasText = !string.IsNullOrEmpty(SearchName?.Text);
 
             if (ClearSearchBtn != null)
                 ClearSearchBtn.Visibility = hasText ? Visibility.Visible : Visibility.Collapsed;
@@ -316,10 +407,8 @@ namespace SOLUM_UI
 
         private void ClearSearch_Click(object sender, RoutedEventArgs e)
         {
-            SearchId.Text = string.Empty;
-            SearchName.Text = string.Empty;
-            SearchBarangay.Text = string.Empty;
-            ClearSearchBtn.Visibility = Visibility.Collapsed;
+            if (SearchName != null) SearchName.Text = string.Empty;
+            if (ClearSearchBtn != null) ClearSearchBtn.Visibility = Visibility.Collapsed;
             ApplyFiltersAndPage();
         }
 
