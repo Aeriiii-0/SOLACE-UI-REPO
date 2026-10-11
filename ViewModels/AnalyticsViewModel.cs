@@ -479,6 +479,7 @@ namespace SOLUM_UI.ViewModels
             TopCasesData = new ObservableCollection<AreaChartData>();
             LastRefreshTime = DateTime.Now;
             IsLoading = false;
+            HasData = true; // Assume data exists until a load proves otherwise
             CurrentBarangayPage = 1;
             TotalBarangayPages = 1;
             HasNextBarangayPage = false;
@@ -489,6 +490,7 @@ namespace SOLUM_UI.ViewModels
             EndDate = DateTime.Now;
             SelectedBarangay = "ALL";
         }
+
 
         /// <summary>
         /// Navigate to next barangay page
@@ -540,13 +542,19 @@ namespace SOLUM_UI.ViewModels
         public void LoadFromAnalyticsDto(MonthlyAnalyticsDto dto)
         {
             if (dto == null)
+            {
+                System.Diagnostics.Debug.WriteLine("✗ LoadFromAnalyticsDto: dto is null");
                 return;
+            }
+
+            System.Diagnostics.Debug.WriteLine("→ LoadFromAnalyticsDto: Processing analytics data...");
 
             // Store the DTO for export purposes
             AnalyticsData = dto;
 
             // Calculate KPIs
             TotalSoloParents = dto.TotalSoloParents;
+            System.Diagnostics.Debug.WriteLine($"  TotalSoloParents: {TotalSoloParents}");
             
             // Female/Male from Sex dictionary (null-safe)
             var sex = dto.Sex ?? new System.Collections.Generic.Dictionary<string, int>();
@@ -554,6 +562,7 @@ namespace SOLUM_UI.ViewModels
             int male = sex.ContainsKey("Male") ? sex["Male"] : 0;
             FemaleCount = female;
             MaleCount = male;
+            System.Diagnostics.Debug.WriteLine($"  Female: {female}, Male: {male}");
 
             // Calculate female/male percentages for progress bar
             if (TotalSoloParents > 0)
@@ -778,6 +787,9 @@ namespace SOLUM_UI.ViewModels
             var categories = dto.Categories ?? new System.Collections.Generic.Dictionary<string, int>();
             AllBarangayData.Clear();
             var barangayList = new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, int>>();
+            
+            System.Diagnostics.Debug.WriteLine($"  Categories count: {categories.Count}");
+            
             foreach (var kvp in categories)
             {
                 if (string.IsNullOrEmpty(kvp.Key) || kvp.Key.Equals("null", StringComparison.OrdinalIgnoreCase) || 
@@ -789,6 +801,7 @@ namespace SOLUM_UI.ViewModels
             }
 
             barangayList.Sort((a, b) => b.Value.CompareTo(a.Value));
+            System.Diagnostics.Debug.WriteLine($"  Barangay list count after filtering: {barangayList.Count}");
             
             // Find max value for bar width calculation
             int maxBarangayValue = barangayList.Count > 0 ? barangayList[0].Value : 1;
@@ -815,7 +828,10 @@ namespace SOLUM_UI.ViewModels
             const int barangaysPerPage = 10;
             TotalBarangayPages = (int)Math.Ceiling(AllBarangayData.Count / (double)barangaysPerPage);
             CurrentBarangayPage = 1;
+            System.Diagnostics.Debug.WriteLine($"  AllBarangayData loaded: {AllBarangayData.Count} items, {TotalBarangayPages} pages");
+            
             UpdateBarangayPage();
+            System.Diagnostics.Debug.WriteLine($"✓ BarangayData after UpdateBarangayPage: {BarangayData.Count} items");
 
             // Load Top Cases Presented Data (from Categories/ClassificationCircumstance) (reuse null-safe local)
             TopCasesData.Clear();

@@ -48,7 +48,37 @@
                                                    Padding="12,0,0,0"
                                                    VerticalContentAlignment="Center"
                                                    FontFamily="Segoe UI"
-                                                   FontSize="13"/>
+                                                   FontSize="13">
+                                    <DatePickerTextBox.Style>
+                                        <Style TargetType="DatePickerTextBox">
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="DatePickerTextBox">
+                                                        <ScrollViewer x:Name="PART_ContentHost"
+                                                                      Focusable="False"
+                                                                      HorizontalScrollBarVisibility="Hidden"
+                                                                      VerticalScrollBarVisibility="Hidden"/>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </DatePickerTextBox.Style>
+                                </DatePickerTextBox>
+                                <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="13"
+                                           Padding="12,0,0,0" VerticalAlignment="Center"
+                                           IsHitTestVisible="False" Opacity="0.8">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=PART_TextBox}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
 
                                 <Button x:Name="PART_Button"
                                         Grid.Column="1"

@@ -170,10 +170,26 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="36"/>
                             </Grid.ColumnDefinitions>
-                            <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0"
-                                               Foreground="#111111" Background="Transparent"
-                                               BorderThickness="0" Padding="10,0"
-                                               VerticalAlignment="Center" FontSize="14"/>
+                            <Grid Grid.Column="0">
+                                <DatePickerTextBox x:Name="PART_TextBox"
+                                                   Foreground="#111111" Background="Transparent"
+                                                   BorderThickness="0" Padding="10,0"
+                                                   VerticalAlignment="Center" FontSize="14"/>
+                                <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="14"
+                                           Padding="10,0" VerticalAlignment="Center"
+                                           IsHitTestVisible="False" Opacity="0.8">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=PART_TextBox}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
                             <ToggleButton x:Name="PART_Button" Grid.Column="1"
                                     HorizontalAlignment="Center" VerticalAlignment="Center"
                                     Width="20" Height="20"
@@ -383,7 +399,8 @@
             </Border.Effect>
             <Border x:Name="DialogShell" Background="White" CornerRadius="16"
                     ClipToBounds="True"
-                    VerticalAlignment="Center" HorizontalAlignment="Center">
+                    VerticalAlignment="Center" HorizontalAlignment="Center"
+                    BorderBrush="#C8E6C9" BorderThickness="2">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/><!-- header -->
@@ -523,48 +540,99 @@
                                                     <TextBlock Text="Date of Application:" FontSize="12" FontWeight="SemiBold"
                                                                Foreground="#555555" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                     <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Width="180">
-                                                        <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDate}" Height="32"/>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <DatePickerTextBox x:Name="PART_TextBox_DateOfApplication"
+                                                                               Foreground="#111111" Background="Transparent"
+                                                                               BorderThickness="0" Padding="10,0"
+                                                                               VerticalAlignment="Center" FontSize="12">
+                                                                <DatePickerTextBox.Style>
+                                                                    <Style TargetType="DatePickerTextBox">
+                                                                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                                                        <Setter Property="Template">
+                                                                            <Setter.Value>
+                                                                                <ControlTemplate TargetType="DatePickerTextBox">
+                                                                                    <ScrollViewer x:Name="PART_ContentHost"
+                                                                                                  Focusable="False"
+                                                                                                  HorizontalScrollBarVisibility="Hidden"
+                                                                                                  VerticalScrollBarVisibility="Hidden"/>
+                                                                                </ControlTemplate>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </Style>
+                                                                </DatePickerTextBox.Style>
+                                                            </DatePickerTextBox>
+                                                            <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="12"
+                                                                       Padding="10,0" VerticalAlignment="Center"
+                                                                       IsHitTestVisible="False" Opacity="0.8">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Text, ElementName=PART_TextBox_DateOfApplication}" Value="">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding Text, ElementName=PART_TextBox_DateOfApplication}" Value="{x:Null}">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+
+                                                            <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDate}" Height="32"
+                                                                        Grid.Column="0"/>
+                                                        </Grid>
                                                     </Border>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
 
-                                        <!-- name row -->
+                                        <!-- name row (identity fields hidden - pre-filled from Phase 1) -->
                                         <Grid Margin="0,0,0,12">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="2.5*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="100"/>
-                                                <ColumnDefinition Width="160"/>
-                                                <ColumnDefinition Width="110"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                            <!-- Hidden: Last Name (pre-filled from Phase 1) -->
+                                            <StackPanel Grid.Column="0" Visibility="Collapsed">
                                                 <TextBlock Text="Last Name *" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtLastName" Style="{StaticResource FormBox}"
                                                          PreviewTextInput="NameOnly_PreviewTextInput"
                                                          TextChanged="TxtLastName_TextChanged"/>
                                                 <TextBlock x:Name="ErrLastName" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                                            <!-- Hidden: First Name (pre-filled from Phase 1) -->
+                                            <StackPanel Grid.Column="2" Visibility="Collapsed">
                                                 <TextBlock Text="First Name *" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtFirstName" Style="{StaticResource FormBox}"
                                                          PreviewTextInput="NameOnly_PreviewTextInput"
                                                          TextChanged="TxtFirstName_TextChanged"/>
                                                 <TextBlock x:Name="ErrFirstName" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                                            <!-- Hidden: Middle Name (pre-filled from Phase 1) -->
+                                            <StackPanel Grid.Column="4" Visibility="Collapsed">
                                                 <TextBlock Text="Middle Name" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtMiddleName" Style="{StaticResource FormBox}"
                                                          PreviewTextInput="NameOnly_PreviewTextInput"
                                                          TextChanged="TxtMiddleName_TextChanged"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="3" Margin="0,0,10,0">
-                                                <TextBlock Text="Ext." Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtExtension" Style="{StaticResource FormBox}"
-                                                         TextChanged="TxtExtension_TextChanged"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="4" Margin="0,0,10,0">
+                                        </Grid>
+
+                                        <!-- civil status & sex row -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
                                                 <TextBlock Text="Civil Status *" Style="{StaticResource FieldLabel}"/>
                                                 <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
                                                           SelectionChanged="CmbCivilStatus_SelectionChanged">
@@ -577,7 +645,7 @@
                                                 </ComboBox>
                                                 <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="5">
+                                            <StackPanel Grid.Column="2">
                                                 <TextBlock Text="Sex *" Style="{StaticResource FieldLabel}"/>
                                                 <ComboBox x:Name="CmbSex" Style="{StaticResource FormCombo}"
                                                           SelectionChanged="CmbSex_SelectionChanged">
@@ -588,35 +656,44 @@
                                             </StackPanel>
                                         </Grid>
 
-                                        <!-- birth / education row -->
+                                        <!-- birthplace & age row -->
                                         <Grid Margin="0,0,0,12">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="180"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="90"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="10"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                                <TextBlock Text="Birthdate *" Style="{StaticResource FieldLabel}"/>
-                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                    <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
-                                                                SelectedDateChanged="DpBirthdate_SelectedDateChanged"/>
-                                                </Border>
-                                                <TextBlock x:Name="ErrBirthdate" Text="Required." Style="{StaticResource ErrorText}"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                                            <StackPanel Grid.Column="0">
                                                 <TextBlock Text="Birthplace *" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtPlaceOfBirth" Style="{StaticResource FormBox}"
                                                          TextChanged="TxtPlaceOfBirth_TextChanged"/>
                                                 <TextBlock x:Name="ErrPlaceOfBirth" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                                            <StackPanel Grid.Column="2">
                                                 <TextBlock Text="Age" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtAge" Style="{StaticResource FormBox}"
                                                          IsReadOnly="True" Background="#F0F0F0"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="3" Margin="0,0,10,0">
+                                        </Grid>
+
+                                        <!-- Hidden: Birthdate (pre-filled from Phase 1) -->
+                                        <StackPanel Visibility="Collapsed" Margin="0,0,0,0">
+                                            <TextBlock Text="Birthdate *" Style="{StaticResource FieldLabel}"/>
+                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
+                                                            SelectedDateChanged="DpBirthdate_SelectedDateChanged"/>
+                                            </Border>
+                                            <TextBlock x:Name="ErrBirthdate" Text="Required." Style="{StaticResource ErrorText}"/>
+                                        </StackPanel>
+
+                                        <!-- education & religion row -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
                                                 <TextBlock Text="Educational Attainment" Style="{StaticResource FieldLabel}"/>
                                                 <ComboBox x:Name="CmbEducation" Style="{StaticResource FormCombo}">
                                                     <ComboBoxItem Content="Elementary"/>
@@ -626,37 +703,38 @@
                                                     <ComboBoxItem Content="Post Graduate"/>
                                                 </ComboBox>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="4">
-                                                <TextBlock Text="PhilSys Card Number" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtPhilSys" Style="{StaticResource FormBox}"
-                                                         TextChanged="TxtPhilSys_TextChanged"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- religion / occupation / income / employment row -->
-                                        <Grid Margin="0,0,0,12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                            <StackPanel Grid.Column="2">
                                                 <TextBlock Text="Religion" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtReligion" Style="{StaticResource FormBox}"
                                                          TextChanged="TxtReligion_TextChanged"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                                        </Grid>
+
+                                        <!-- occupation & monthly income row -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
                                                 <TextBlock Text="Occupation / Source of Income" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtOccupation" Style="{StaticResource FormBox}"
                                                          TextChanged="TxtOccupation_TextChanged"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                                            <StackPanel Grid.Column="2">
                                                 <TextBlock Text="Monthly Income" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtMonthlyIncome" Style="{StaticResource FormBox}"
                                                          PreviewTextInput="NumberOnly_PreviewTextInput"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="3">
+                                        </Grid>
+
+                                        <!-- employment status row -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
                                                 <TextBlock Text="Employment Status" Style="{StaticResource FieldLabel}"/>
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Height="44">
                                                     <RadioButton x:Name="ChkEmployed"     Content="Employed"      Style="{StaticResource FormCheck}" GroupName="Employment"/>
@@ -665,6 +743,13 @@
                                                 </StackPanel>
                                             </StackPanel>
                                         </Grid>
+
+                                        <!-- Hidden: PhilSys Card Number (pre-filled from Phase 1) -->
+                                        <StackPanel Visibility="Collapsed" Margin="0,0,0,0">
+                                            <TextBlock Text="PhilSys Card Number" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox x:Name="TxtPhilSys" Style="{StaticResource FormBox}"
+                                                     TextChanged="TxtPhilSys_TextChanged"/>
+                                        </StackPanel>
 
                                         <!-- address row -->
                                         <Grid Margin="0,0,0,12">
@@ -1150,7 +1235,7 @@
 
                     <!-- Footer bar -->
                     <Border Grid.Row="4" Background="White" BorderBrush="#EEEEEE"
-                            BorderThickness="0,1,0,0" Padding="32,14">
+                            BorderThickness="0,1,0,0" Padding="32,14" CornerRadius="0,0,16,16">
                         <Grid>
                         <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
                             <TextBlock x:Name="ValidationMessage"

@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using SOLUM_UI.Models;
 using SOLUM_UI.Models.Api;
@@ -39,6 +42,45 @@ namespace SOLUM_UI
         public PreCheckDialog()
         {
             InitializeComponent();
+            Loaded += (s, e) => SuppressDatePickerWatermarks();
+        }
+
+        /// <summary>
+        /// Suppresses the default "Select a date" watermark in all DatePickerTextBox controls
+        /// to avoid overlapping with our custom MM/DD/YYYY placeholder.
+        /// </summary>
+        private void SuppressDatePickerWatermarks()
+        {
+            // Find all DatePickerTextBox elements in the visual tree
+            var textBoxes = FindVisualChildren<DatePickerTextBox>(this);
+            foreach (var tb in textBoxes)
+            {
+                // Clear any watermark text by setting an empty placeholder
+                tb.Foreground = new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00));
+                tb.Opacity = 0; // Hide the default WPF watermark text
+            }
+        }
+
+        /// <summary>
+        /// Helper method to find all visual children of a given type.
+        /// </summary>
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject obj) where T : DependencyObject
+        {
+            if (obj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                    if (child is T typed)
+                    {
+                        yield return typed;
+                    }
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
         }
 
         // ── UI event handlers ─────────────────────────────────────────────────────
@@ -60,6 +102,12 @@ namespace SOLUM_UI
             _foundRecord = null;
             HideBanner();
             ClearNameError(tb);
+        }
+
+        private void Extension_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            _foundRecord = null;
+            HideBanner();
         }
 
         private void PhilSys_TextChanged(object sender, TextChangedEventArgs e)
@@ -156,12 +204,8 @@ namespace SOLUM_UI
                 ok = false;
             }
 
-            if (string.IsNullOrWhiteSpace(TxtPhilSys.Text))
-            {
-                MarkError(TxtPhilSys, ErrPhilSys, "PhilSys number is required.");
-                ok = false;
-            }
-            else if (!Regex.IsMatch(TxtPhilSys.Text.Trim(), @"^\d+$"))
+            // PhilSys is now optional, but if provided, must contain digits only
+            if (!string.IsNullOrWhiteSpace(TxtPhilSys.Text) && !Regex.IsMatch(TxtPhilSys.Text.Trim(), @"^\d+$"))
             {
                 MarkError(TxtPhilSys, ErrPhilSys, "PhilSys number must contain digits only.");
                 ok = false;
@@ -271,7 +315,8 @@ namespace SOLUM_UI
                 MiddleName = TxtMiddleName.Text.Trim(),
                 Birthdate  = DpBirthdate.SelectedDate,
                 PhilSys    = TxtPhilSys.Text.Trim(),
-                Barangay   = safeBarangay
+                Barangay   = safeBarangay,
+                ExtensionName = (CmbExtension.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty
             };
             DialogResult = true;
             Close();
@@ -344,5 +389,6 @@ namespace SOLUM_UI
         public DateTime? Birthdate  { get; set; }
         public string    PhilSys    { get; set; }
         public string    Barangay   { get; set; }
+        public string    ExtensionName { get; set; }
     }
 }

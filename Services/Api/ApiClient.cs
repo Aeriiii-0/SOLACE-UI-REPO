@@ -294,7 +294,7 @@ namespace SOLUM_UI.Services.Api
                 return BaseResponse<T>.Fail("No internet connection detected. Please check your network and try again.");
             }
 
-            string msg = $"Unable to communicate with the API server at {BaseUrl}. Please ensure the Solum.API backend is running.";
+            string msg = "Unable to connect to the server. Please check your internet connection and ensure the application server is running.";
             if (ex is TaskCanceledException)
             {
                 msg = "The request to the server timed out. Please try again.";

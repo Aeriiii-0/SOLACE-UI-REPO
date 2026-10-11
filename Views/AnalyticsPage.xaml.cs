@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using SOLUM_UI.Models;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
@@ -11,47 +14,136 @@ using SOLUM_UI.ViewModels;
 
 namespace SOLUM_UI
 {
+    /// <summary>
+    /// Interaction logic for AnalyticsPage.xaml
+    /// </summary>
     public partial class AnalyticsPage : Page
     {
         private AnalyticsViewModel _vm;
 
         public AnalyticsPage()
         {
-            InitializeComponent();
-            _vm = new AnalyticsViewModel();
-            DataContext = _vm;
-            Loaded += async (s, e) => await LoadDataAsync();
+            // Load XAML content manually since code-behind isn't generated
+            try
+            {
+                var resourceUri = new Uri("/Views/AnalyticsPage.xaml", UriKind.Relative);
+                System.Windows.Application.LoadComponent(this, resourceUri);
+                System.Diagnostics.Debug.WriteLine("✓ AnalyticsPage XAML loaded successfully");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ XAML load error: {ex.Message}\n{ex.StackTrace}");
+                MessageBox.Show($"Failed to load Analytics page XAML: {ex.Message}", "XAML Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            
+            try
+            {
+                _vm = new AnalyticsViewModel();
+                System.Diagnostics.Debug.WriteLine("✓ AnalyticsViewModel created");
+                
+                DataContext = _vm;
+                System.Diagnostics.Debug.WriteLine($"✓ DataContext set. BarangayData count: {_vm.BarangayData.Count}");
+                
+                // Add Loaded handler - this should trigger when page is fully loaded
+                Loaded += async (s, e) => 
+                {
+                    System.Diagnostics.Debug.WriteLine("→ Page Loaded event firing, calling LoadDataAsync...");
+                    await LoadDataAsync();
+                    SuppressDatePickerWatermarks();
+                };
+
+                // Also try loading data immediately as a fallback
+                System.Diagnostics.Debug.WriteLine("→ Attempting immediate data load (may load before UI is ready)...");
+                _ = LoadDataAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Constructor error: {ex.Message}\n{ex.StackTrace}");
+                MessageBox.Show($"Failed to initialize Analytics page: {ex.Message}", "Init Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private async System.Threading.Tasks.Task LoadDataAsync()
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine("→ LoadDataAsync started");
+                
                 // Use ViewModel's current date range (defaults to current month)
                 int year = _vm.StartDate.HasValue ? _vm.StartDate.Value.Year : DateTime.Today.Year;
                 int month = _vm.StartDate.HasValue ? _vm.StartDate.Value.Month : DateTime.Today.Month;
                 string barangay = _vm?.SelectedBarangay ?? "ALL";
 
+                System.Diagnostics.Debug.WriteLine($"  Calling API: year={year}, month={month}, barangay={barangay}");
+                
                 var response = await AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(
                     year, month, barangay,
                     _vm?.StartDate, _vm?.EndDate);
 
+                System.Diagnostics.Debug.WriteLine($"  API Response succeeded: {response.Succeeded}");
+                
                 if (response.Succeeded && response.Data != null)
                 {
+                    System.Diagnostics.Debug.WriteLine($"  Loading data into ViewModel...");
                     _vm.LoadFromAnalyticsDto(response.Data);
+                    System.Diagnostics.Debug.WriteLine($"✓ Data loaded. BarangayData count: {_vm.BarangayData.Count}, AllBarangayData count: {_vm.AllBarangayData.Count}");
                 }
                 else if (!response.Succeeded)
                 {
                     string errorMsg = response.Errors != null && response.Errors.Count > 0
                         ? string.Join("\n", response.Errors)
                         : "Unable to load analytics data.";
+                    System.Diagnostics.Debug.WriteLine($"✗ API Error: {errorMsg}");
                     MessageBox.Show(errorMsg, "Load Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"✗ API returned null data");
                 }
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"✗ Analytics load error: {ex.Message}\n{ex.StackTrace}");
                 MessageBox.Show($"Analytics load error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                System.Diagnostics.Debug.WriteLine($"Analytics load error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Suppresses the default "Select a date" watermark in all DatePickerTextBox controls
+        /// to avoid overlapping with our custom MM/DD/YYYY placeholder.
+        /// </summary>
+        private void SuppressDatePickerWatermarks()
+        {
+            // Find all DatePickerTextBox elements in the visual tree
+            var textBoxes = FindVisualChildren<DatePickerTextBox>(this);
+            foreach (var tb in textBoxes)
+            {
+                // Clear any watermark text by setting an empty placeholder
+                tb.Foreground = new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00));
+                tb.Opacity = 0; // Hide the default WPF watermark text
+            }
+        }
+
+        /// <summary>
+        /// Helper method to find all visual children of a given type.
+        /// </summary>
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject obj) where T : DependencyObject
+        {
+            if (obj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                    if (child is T typed)
+                    {
+                        yield return typed;
+                    }
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
             }
         }
 
@@ -67,56 +159,88 @@ namespace SOLUM_UI
 
         private void FilterDrop_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (FilterPopup != null)
+            try
             {
-                FilterPopup.IsOpen = !FilterPopup.IsOpen;
+                var popup = this.FindName("FilterPopup") as Popup;
+                if (popup != null)
+                {
+                    popup.IsOpen = !popup.IsOpen;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"FilterDrop_Click error: {ex.Message}");
             }
         }
 
         private void FilterCombo_Changed(object sender, SelectionChangedEventArgs e)
         {
             // Guard: event can fire during InitializeComponent() before _vm is assigned
-            if (_vm == null || CmbFilterBarangay == null || CmbFilterBarangay.SelectedItem == null)
-                return;
+            try
+            {
+                var cmbFilterBarangay = this.FindName("CmbFilterBarangay") as ComboBox;
+                if (_vm == null || cmbFilterBarangay == null || cmbFilterBarangay.SelectedItem == null)
+                    return;
 
-            // Extract Content property from ComboBoxItem instead of calling ToString()
-            string barangay = "ALL";
+                // Extract Content property from ComboBoxItem instead of calling ToString()
+                string barangay = "ALL";
 
-            if (CmbFilterBarangay.SelectedItem is ComboBoxItem comboItem && comboItem.Content is string content)
-                barangay = content;
-            else if (CmbFilterBarangay.SelectedItem is string strItem)
-                barangay = strItem;
+                if (cmbFilterBarangay.SelectedItem is ComboBoxItem comboItem && comboItem.Content is string content)
+                    barangay = content;
+                else if (cmbFilterBarangay.SelectedItem is string strItem)
+                    barangay = strItem;
 
-            // Normalize "All" → "ALL"
-            if (barangay.Equals("All", StringComparison.OrdinalIgnoreCase))
-                barangay = "ALL";
+                // Normalize "All" → "ALL"
+                if (barangay.Equals("All", StringComparison.OrdinalIgnoreCase))
+                    barangay = "ALL";
 
-            _vm.SelectedBarangay = barangay;
+                _vm.SelectedBarangay = barangay;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"FilterCombo_Changed error: {ex.Message}");
+            }
         }
 
         private void FilterReset_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            // Reset barangay combo
-            if (CmbFilterBarangay != null)
-                CmbFilterBarangay.SelectedIndex = 0;
-
-            // Reset ViewModel dates to current month
-            if (_vm != null)
+            try
             {
-                _vm.StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-                _vm.EndDate = DateTime.Now;
-                _vm.SelectedBarangay = "ALL";
+                // Reset barangay combo
+                var cmbFilterBarangay = this.FindName("CmbFilterBarangay") as ComboBox;
+                if (cmbFilterBarangay != null)
+                    cmbFilterBarangay.SelectedIndex = 0;
+
+                // Reset ViewModel dates to current month
+                if (_vm != null)
+                {
+                    _vm.StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                    _vm.EndDate = DateTime.Now;
+                    _vm.SelectedBarangay = "ALL";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"FilterReset_Click error: {ex.Message}");
             }
         }
 
         private void FilterApply_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (FilterPopup != null)
+            try
             {
-                FilterPopup.IsOpen = false;
-                
-                // Apply filters - reload data with selected filters
-                _ = ApplyFiltersAsync();
+                var popup = this.FindName("FilterPopup") as Popup;
+                if (popup != null)
+                {
+                    popup.IsOpen = false;
+                    
+                    // Apply filters - reload data with selected filters
+                    _ = ApplyFiltersAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"FilterApply_Click error: {ex.Message}");
             }
         }
 
@@ -359,11 +483,15 @@ namespace SOLUM_UI
         {
             try
             {
+                var refreshBtn = this.FindName("RefreshBtn") as Button;
+                if (refreshBtn == null)
+                    return;
+
                 // Disable button and show loader
-                RefreshBtn.IsEnabled = false;
+                refreshBtn.IsEnabled = false;
                 
                 // Find the loader and icon elements in the button content
-                if (RefreshBtn.Content is Grid contentGrid)
+                if (refreshBtn.Content is Grid contentGrid)
                 {
                     var refreshIcon = contentGrid.Children.OfType<System.Windows.Shapes.Path>().FirstOrDefault();
                     var loadingSpinner = contentGrid.Children.OfType<StackPanel>().FirstOrDefault();
@@ -391,18 +519,26 @@ namespace SOLUM_UI
             finally
             {
                 // Restore icon and hide loader
-                if (RefreshBtn.Content is Grid contentGrid)
+                try
                 {
-                    var refreshIcon = contentGrid.Children.OfType<System.Windows.Shapes.Path>().FirstOrDefault();
-                    var loadingSpinner = contentGrid.Children.OfType<StackPanel>().FirstOrDefault();
-                    
-                    if (refreshIcon != null)
-                        refreshIcon.Visibility = System.Windows.Visibility.Visible;
-                    if (loadingSpinner != null)
-                        loadingSpinner.Visibility = System.Windows.Visibility.Collapsed;
+                    var refreshBtn = this.FindName("RefreshBtn") as Button;
+                    if (refreshBtn != null && refreshBtn.Content is Grid contentGrid)
+                    {
+                        var refreshIcon = contentGrid.Children.OfType<System.Windows.Shapes.Path>().FirstOrDefault();
+                        var loadingSpinner = contentGrid.Children.OfType<StackPanel>().FirstOrDefault();
+                        
+                        if (refreshIcon != null)
+                            refreshIcon.Visibility = System.Windows.Visibility.Visible;
+                        if (loadingSpinner != null)
+                            loadingSpinner.Visibility = System.Windows.Visibility.Collapsed;
+                        
+                        refreshBtn.IsEnabled = true;
+                    }
                 }
-                
-                RefreshBtn.IsEnabled = true;
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Refresh finally error: {ex.Message}");
+                }
             }
         }
     }

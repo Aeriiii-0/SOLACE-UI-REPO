@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using SOLUM_UI.Models;
@@ -201,6 +203,8 @@ namespace SOLUM_UI
                 _familyRowData.Add(MakeFamilyRow());
             FamilyRows.ItemsSource = _familyRowData;
 
+            Loaded += (s, e) => SuppressDatePickerWatermarks();
+
             if (_existing != null)
             {
                 FormSubtitle.Text = string.IsNullOrEmpty(_existing.Id)
@@ -257,6 +261,9 @@ namespace SOLUM_UI
                 ModeStripeIcon.Data       = Geometry.Parse("M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z");
                 ModeStripeIcon.Fill       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
                 Step1Dot.Background       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
+                
+                // Set DialogShell border to green for renewal mode
+                DialogShell.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xC8, 0xE6, 0xC9));
             }
             else
             {
@@ -276,6 +283,9 @@ namespace SOLUM_UI
                 ModeStripeIcon.Data       = Geometry.Parse("M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z");
                 ModeStripeIcon.Fill       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
                 Step1Dot.Background       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
+                
+                // Set DialogShell border to green for add mode
+                DialogShell.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xC8, 0xE6, 0xC9));
             }
 
             ModeStripe.Visibility = Visibility.Visible;
@@ -300,6 +310,9 @@ namespace SOLUM_UI
             ModeStripeIcon.Data       = Geometry.Parse("M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25Z");
             ModeStripeIcon.Fill       = new SolidColorBrush(Color.FromRgb(0xB3, 0x6A, 0x00));
             Step1Dot.Background       = new SolidColorBrush(Color.FromRgb(0xE6, 0x5C, 0x00));
+            
+            // Set DialogShell border to yellow for edit mode
+            DialogShell.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xFF, 0xD5, 0x4F));
 
             ModeStripe.Visibility = Visibility.Visible;
             ModeBadge.Visibility  = Visibility.Collapsed;
@@ -324,7 +337,7 @@ namespace SOLUM_UI
             void LockDate(DatePicker dp) { if (dp == null)  return; dp.IsEnabled  = false; dp.Opacity  = 0.55; }
 
             // Identity
-            LockBox(TxtLastName); LockBox(TxtFirstName); LockBox(TxtMiddleName); LockBox(TxtExtension);
+            LockBox(TxtLastName); LockBox(TxtFirstName); LockBox(TxtMiddleName);
             LockDate(DpBirthdate); LockBox(TxtPlaceOfBirth); LockCombo(CmbSex); LockBox(TxtPhilSys);
 
             // Background (fixed for renewal)
@@ -353,6 +366,47 @@ namespace SOLUM_UI
             ChkIndigenous.IsEnabled = false; ChkIndigenous.Opacity = 0.55;
             ChkLGBTQ.IsEnabled      = false; ChkLGBTQ.Opacity      = 0.55;
             // CmbCivilStatus, TxtMonthlyIncome, ChkEmployed/ChkSelfEmployed/ChkNotEmployed stay ENABLED
+        }
+
+        /// <summary>
+        /// Suppresses the default "Select a date" watermark in DatePickerTextBox controls
+        /// used for main form fields (DateOfApplication, Birthdate) to avoid overlapping 
+        /// with our custom MM/DD/YYYY placeholder.
+        /// Family composition DatePickers use standard FormDate styling with no overlay.
+        /// </summary>
+        private void SuppressDatePickerWatermarks()
+        {
+            // Find all DatePickerTextBox elements in the visual tree
+            // These are only in the main form fields, NOT in ItemsControl templates
+            var textBoxes = FindVisualChildren<DatePickerTextBox>(this);
+            foreach (var tb in textBoxes)
+            {
+                // Hide the DatePickerTextBox to prevent "Select a date" watermark overlap
+                // The custom MM/DD/YYYY placeholder and DatePicker button will still be visible
+                tb.Visibility = Visibility.Hidden;
+            }
+        }
+
+        /// <summary>
+        /// Helper method to find all visual children of a given type.
+        /// </summary>
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject obj) where T : DependencyObject
+        {
+            if (obj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                    if (child is T typed)
+                    {
+                        yield return typed;
+                    }
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -494,7 +548,6 @@ namespace SOLUM_UI
             TxtLastName.Text     = r.Surname       ?? string.Empty;
             TxtFirstName.Text    = r.FirstName     ?? string.Empty;
             TxtMiddleName.Text   = r.MiddleName    ?? string.Empty;
-            TxtExtension.Text    = r.ExtensionName ?? string.Empty;
             TxtPlaceOfBirth.Text = r.PlaceOfBirth  ?? string.Empty;
             TxtAddress.Text      = r.Address       ?? string.Empty;
             TxtContact.Text      = SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber ?? string.Empty);
@@ -799,7 +852,6 @@ namespace SOLUM_UI
         private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtLastName); ClearFieldError(TxtLastName,     ErrLastName); }
         private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)      { ToUpperBox(TxtFirstName); ClearFieldError(TxtFirstName,    ErrFirstName); }
         private void TxtMiddleName_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtMiddleName); }
-        private void TxtExtension_TextChanged(object sender, TextChangedEventArgs e)      { ToUpperBox(TxtExtension); }
         private void TxtBarangay_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtBarangay); ClearFieldError(TxtBarangay,     ErrBarangay); }
         private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)        { ToUpperBox(TxtAddress); ClearFieldError(TxtAddress,      ErrAddress); }
         private void TxtContact_TextChanged(object sender, TextChangedEventArgs e)
@@ -1112,7 +1164,6 @@ namespace SOLUM_UI
                 Surname       = surname,
                 FirstName     = first,
                 MiddleName    = middle,
-                ExtensionName = TxtExtension.Text.Trim(),
                 Name          = surname + ", " + first + (string.IsNullOrEmpty(middle) ? "" : " " + middle),
                 DateOfBirth   = DpBirthdate.SelectedDate.Value,
                 PlaceOfBirth  = TxtPlaceOfBirth.Text.Trim(),

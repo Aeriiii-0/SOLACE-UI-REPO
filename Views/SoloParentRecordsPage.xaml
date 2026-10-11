@@ -308,21 +308,20 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="ID" FontSize="10" FontWeight="Bold" Foreground="#702943"
-                               VerticalAlignment="Center" Margin="14,0,6,0" Visibility="Collapsed"/>
-                    <TextBox x:Name="SearchId" Grid.Column="1"
+                    <TextBlock Grid.Column="0" Text="FIRST NAME" FontSize="10" FontWeight="Bold" Foreground="#702943"
+                               VerticalAlignment="Center" Margin="10,0,6,0"/>
+                    <TextBox x:Name="SearchFirstName" Grid.Column="1"
                              BorderThickness="0" Background="Transparent"
                              FontSize="13" Foreground="#333333" VerticalAlignment="Center"
                              TextChanged="SearchFields_TextChanged"
-                             KeyDown="SearchBox_KeyDown"
-                             Visibility="Collapsed">
+                             KeyDown="SearchBox_KeyDown">
                         <TextBox.Style>
                             <Style TargetType="TextBox">
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="TextBox">
                                             <Grid>
-                                                <TextBlock Text="e.g. SP-001" Foreground="#C0A8B0" FontSize="13"
+                                                <TextBlock Text="Search first name..." Foreground="#C0A8B0" FontSize="13"
                                                            VerticalAlignment="Center" IsHitTestVisible="False">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
@@ -344,14 +343,13 @@
                         </TextBox.Style>
                     </TextBox>
 
-                    <Rectangle Grid.Column="2" Fill="#E0D0D5" Width="1" Margin="0,10" Visibility="Collapsed"/>
+                    <Rectangle Grid.Column="2" Fill="#E0D0D5" Width="1" Margin="0,10"/>
 
-                    <TextBlock Grid.Column="3" Text="NAME" FontSize="10" FontWeight="Bold" Foreground="#702943"
+                    <TextBlock Grid.Column="3" Text="LAST NAME" FontSize="10" FontWeight="Bold" Foreground="#702943"
                                VerticalAlignment="Center" Margin="10,0,6,0"/>
-                    <TextBox x:Name="SearchName" Grid.Column="4"
+                    <TextBox x:Name="SearchLastName" Grid.Column="4"
                              BorderThickness="0" Background="Transparent"
                              FontSize="13" Foreground="#333333" VerticalAlignment="Center"
-                             ToolTip="Full name searches require exact matches (e.g., 'Juan Dela Cruz')"
                              TextChanged="SearchFields_TextChanged"
                              KeyDown="SearchBox_KeyDown">
                         <TextBox.Style>
@@ -360,7 +358,7 @@
                                     <Setter.Value>
                                         <ControlTemplate TargetType="TextBox">
                                             <Grid>
-                                                <TextBlock Text="Search exact full name..." Foreground="#C0A8B0" FontSize="13"
+                                                <TextBlock Text="Search last name..." Foreground="#C0A8B0" FontSize="13"
                                                            VerticalAlignment="Center" IsHitTestVisible="False">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
@@ -384,9 +382,9 @@
 
                     <Rectangle Grid.Column="5" Fill="#E0D0D5" Width="1" Margin="0,10"/>
 
-                    <TextBlock Grid.Column="6" Text="BARANGAY" FontSize="10" FontWeight="Bold" Foreground="#702943"
+                    <TextBlock Grid.Column="6" Text="PHILSYS ID" FontSize="10" FontWeight="Bold" Foreground="#702943"
                                VerticalAlignment="Center" Margin="10,0,6,0"/>
-                    <TextBox x:Name="SearchBarangay" Grid.Column="7"
+                    <TextBox x:Name="SearchPhilSysId" Grid.Column="7"
                              BorderThickness="0" Background="Transparent"
                              FontSize="13" Foreground="#333333" VerticalAlignment="Center"
                              TextChanged="SearchFields_TextChanged"
@@ -397,7 +395,7 @@
                                     <Setter.Value>
                                         <ControlTemplate TargetType="TextBox">
                                             <Grid>
-                                                <TextBlock Text="Search by barangay..." Foreground="#C0A8B0" FontSize="13"
+                                                <TextBlock Text="Search PhilSys ID..." Foreground="#C0A8B0" FontSize="13"
                                                            VerticalAlignment="Center" IsHitTestVisible="False">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
@@ -670,28 +668,7 @@
                 <TextBlock Text="+ Add New Record" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
             </Button>
 
-            <Button Grid.Column="4"
-                    Width="44" Height="44"
-                    BorderThickness="0" Background="#FFFFFF"
-                    Cursor="Hand" ToolTip="Export">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                CornerRadius="22" BorderBrush="#E0D0D5" BorderThickness="1.5">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F5ECEE"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
-                <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"
-                      Fill="#702943" Stretch="Uniform" Width="16" Height="16"/>
-            </Button>
-
-            <Button x:Name="BtnRefreshRecords" Grid.Column="5"
+            <Button x:Name="BtnRefreshRecords" Grid.Column="4"
                     Width="44" Height="44" Margin="6,0,0,0"
                     BorderThickness="0" Background="#FFFFFF"
                     Cursor="Hand" ToolTip="Refresh records"

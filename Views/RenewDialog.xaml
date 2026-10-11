@@ -251,7 +251,8 @@
             </Border.Effect>
 
             <Border x:Name="DialogShell" Background="White" CornerRadius="16"
-                    ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    BorderBrush="#C8E6C9" BorderThickness="2">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/><!-- header -->
@@ -649,7 +650,7 @@
 
                     <!-- ── FOOTER ── -->
                     <Border Grid.Row="3" Background="White" BorderBrush="#EEEEEE"
-                            BorderThickness="0,1,0,0" Padding="32,14">
+                            BorderThickness="0,1,0,0" Padding="32,14" CornerRadius="0,0,16,16">
                         <Grid>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock x:Name="TxtValidationMsg" Text="" FontSize="12"

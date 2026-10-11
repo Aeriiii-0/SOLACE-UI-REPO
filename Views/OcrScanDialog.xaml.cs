@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -49,6 +51,8 @@ namespace SOLUM_UI
         public OcrScanDialog()
         {
             InitializeComponent();
+
+            Loaded += (s, e) => SuppressDatePickerWatermarks();
 
             for (int i = 0; i < 5; i++)
                 _familyRowData.Add(MakeFamilyRow());
@@ -130,6 +134,45 @@ namespace SOLUM_UI
             return !string.IsNullOrWhiteSpace(TxtLastName?.Text) ||
                    !string.IsNullOrWhiteSpace(TxtFirstName?.Text) ||
                    !string.IsNullOrWhiteSpace(_currentImagePath);
+        }
+
+        /// <summary>
+        /// Suppresses the default "Select a date" watermark in DatePickerTextBox controls
+        /// to avoid overlapping with our custom MM/DD/YYYY placeholder in main form fields.
+        /// </summary>
+        private void SuppressDatePickerWatermarks()
+        {
+            // Find all DatePickerTextBox elements in the visual tree
+            // These are only used in the main form fields (DateOfApplication, Birthdate, etc.)
+            var textBoxes = FindVisualChildren<DatePickerTextBox>(this);
+            foreach (var tb in textBoxes)
+            {
+                // Hide the DatePickerTextBox to prevent "Select a date" watermark overlap
+                // The custom MM/DD/YYYY placeholder and DatePicker button will still be visible
+                tb.Visibility = Visibility.Hidden;
+            }
+        }
+
+        /// <summary>
+        /// Helper method to find all visual children of a given type.
+        /// </summary>
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject obj) where T : DependencyObject
+        {
+            if (obj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                    if (child is T typed)
+                    {
+                        yield return typed;
+                    }
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
         }
 
         #region Server Health Check

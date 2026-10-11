@@ -42,6 +42,7 @@ namespace SOLUM_UI.Services
             string focalPersonName = "",
             string password = null)
         {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using (var pkg = new ExcelPackage())
             {
                 BuildAnalyticsSheet(pkg, analyticsData, municipality, region, focalPersonName);
@@ -87,39 +88,39 @@ namespace SOLUM_UI.Services
             // ===== DATA ROWS - DYNAMIC FROM BACKEND =====
 
             // Age Group Breakdown
-            BuildBreakdownSection(ws, ref row, "Age Group", data.AgeBrackets);
+            BuildBreakdownSection(ws, ref row, "Age Group", data.AgeBrackets ?? new System.Collections.Generic.Dictionary<string, int>());
 
             // Sex Breakdown
-            BuildBreakdownSection(ws, ref row, "Sex", data.Sex);
+            BuildBreakdownSection(ws, ref row, "Sex", data.Sex ?? new System.Collections.Generic.Dictionary<string, int>());
 
             // Civil Status Breakdown
-            BuildBreakdownSection(ws, ref row, "Civil Status", data.CivilStatus);
+            BuildBreakdownSection(ws, ref row, "Civil Status", data.CivilStatus ?? new System.Collections.Generic.Dictionary<string, int>());
 
             // Employment Status Breakdown
-            BuildBreakdownSection(ws, ref row, "Employment Status", data.EmploymentStatus);
+            BuildBreakdownSection(ws, ref row, "Employment Status", data.EmploymentStatus ?? new System.Collections.Generic.Dictionary<string, int>());
 
             // Monthly Income Breakdown
-            BuildBreakdownSection(ws, ref row, "Monthly Income", data.MonthlyIncomeBrackets);
+            BuildBreakdownSection(ws, ref row, "Monthly Income", data.MonthlyIncomeBrackets ?? new System.Collections.Generic.Dictionary<string, int>());
 
             // Children/Dependents Age Range Breakdown
-            BuildBreakdownSection(ws, ref row, "Children/Dependents Age Range", data.DependentsAgeBrackets);
+            BuildBreakdownSection(ws, ref row, "Children/Dependents Age Range", data.DependentsAgeBrackets ?? new System.Collections.Generic.Dictionary<string, int>());
 
             // Solo Parent Classification/Category Breakdown
-            BuildBreakdownSection(ws, ref row, "Solo Parent Classification", data.Categories);
+            BuildBreakdownSection(ws, ref row, "Solo Parent Classification", data.Categories ?? new System.Collections.Generic.Dictionary<string, int>());
 
             // Educational Attainment Breakdown
             if (data.EducationalAttainment != null && data.EducationalAttainment.Count > 0)
                 BuildBreakdownSection(ws, ref row, "Educational Attainment", data.EducationalAttainment);
 
             // Program Flags - Pantawid/4Ps
-            BuildBreakdownSection(ws, ref row, "Pantawid / 4Ps Beneficiary", data.PantawidBeneficiary);
+            BuildBreakdownSection(ws, ref row, "Pantawid / 4Ps Beneficiary", data.PantawidBeneficiary ?? new System.Collections.Generic.Dictionary<string, int>());
 
             // Program Flags - Indigenous People (IP)
             if (data.Indigenous != null && data.Indigenous.Count > 0)
                 BuildBreakdownSection(ws, ref row, "Indigenous People (IP)", data.Indigenous);
 
             // Program Flags - LGBTQ+
-            BuildBreakdownSection(ws, ref row, "LGBTQ+", data.Lgbt);
+            BuildBreakdownSection(ws, ref row, "LGBTQ+", data.Lgbt ?? new System.Collections.Generic.Dictionary<string, int>());
 
             // Summary Statistics
             row += 1;
@@ -247,26 +248,30 @@ namespace SOLUM_UI.Services
 
             bool isAlternate = false;
 
-            // Key metrics
-            ApplyDataRow(ws, row, "", "Total Solo Parents", data.TotalSoloParents, isAlternate);
+            // Key metrics - handle potential null/default values
+            int totalSoloParents = data.TotalSoloParents;
+            int activeSoloParents = data.ActiveSoloParents > 0 ? data.ActiveSoloParents : (totalSoloParents > 0 ? totalSoloParents : 0);
+            int inactiveSoloParents = data.InactiveSoloParents > 0 ? data.InactiveSoloParents : 0;
+            int newRegistrations = data.NewRegistrations > 0 ? data.NewRegistrations : 0;
+            int renewals = data.Renewals > 0 ? data.Renewals : 0;
+
+            ApplyDataRow(ws, row, "", "Total Solo Parents", totalSoloParents, isAlternate);
             isAlternate = !isAlternate;
             row++;
 
-            int activeSoloParents = data.ActiveSoloParents > 0 ? data.ActiveSoloParents : (data.TotalSoloParents > 0 ? data.TotalSoloParents : 0);
             ApplyDataRow(ws, row, "", "Active Solo Parents", activeSoloParents, isAlternate);
             isAlternate = !isAlternate;
             row++;
 
-            int inactiveSoloParents = data.InactiveSoloParents > 0 ? data.InactiveSoloParents : 0;
             ApplyDataRow(ws, row, "", "Inactive Solo Parents", inactiveSoloParents, isAlternate);
             isAlternate = !isAlternate;
             row++;
 
-            ApplyDataRow(ws, row, "", "New Registrations", data.NewRegistrations, isAlternate);
+            ApplyDataRow(ws, row, "", "New Registrations", newRegistrations, isAlternate);
             isAlternate = !isAlternate;
             row++;
 
-            ApplyDataRow(ws, row, "", "Renewals", data.Renewals, isAlternate);
+            ApplyDataRow(ws, row, "", "Renewals", renewals, isAlternate);
             row++;
         }
 

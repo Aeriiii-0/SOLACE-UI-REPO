@@ -50,6 +50,103 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="FormCombo" TargetType="ComboBox">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#111111"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#C0A0AA"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid HorizontalAlignment="Stretch">
+                            <Border x:Name="ComboBg" Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="8">
+                                <Grid Margin="10,0,28,0">
+                                    <ContentPresenter x:Name="ContentSite"
+                                                      Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                      VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                    <TextBlock x:Name="Placeholder" Text="Select..."
+                                               Foreground="#BBBBBB" FontSize="14"
+                                               VerticalAlignment="Center" IsHitTestVisible="False"
+                                               Visibility="Collapsed"/>
+                                </Grid>
+                            </Border>
+                            <ToggleButton HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                          Background="Transparent" BorderThickness="0"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay,
+                                              RelativeSource={RelativeSource TemplatedParent}}"
+                                          Focusable="False" Opacity="0"/>
+                            <Path HorizontalAlignment="Right" VerticalAlignment="Center"
+                                  Margin="0,0,10,0" Data="M7,10L12,15L17,10H7Z"
+                                  Fill="#702943" Stretch="Uniform" Width="12" Height="12"
+                                  IsHitTestVisible="False"/>
+                            <Popup x:Name="Popup" Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Focusable="False" PopupAnimation="None">
+                                <Border Background="White" CornerRadius="10" BorderBrush="#C0A0AA"
+                                        BorderThickness="1.2" MinWidth="{TemplateBinding ActualWidth}"
+                                        MaxHeight="200" Margin="0,2,0,0">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="3" Opacity="0.08"/>
+                                    </Border.Effect>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="SelectedIndex" Value="-1">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#A08090"/>
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#702943"/>
+                                <Setter TargetName="ComboBg" Property="BorderThickness" Value="1.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Resources>
+                <Style TargetType="ComboBoxItem">
+                    <Setter Property="Padding" Value="14,9"/>
+                    <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="Foreground" Value="#222222"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ComboBoxItem">
+                                <Border x:Name="ItemBg" Background="Transparent"
+                                        Padding="{TemplateBinding Padding}" CornerRadius="8" Margin="4,2">
+                                    <ContentPresenter/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#FDF0F3"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#F0E4E8"/>
+                                        <Setter Property="Foreground" Value="#702943"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Style.Resources>
+        </Style>
         <Style x:Key="FormDate" TargetType="DatePicker">
             <Setter Property="Height" Value="44"/>
             <Setter Property="FontSize" Value="14"/>
@@ -66,10 +163,42 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="36"/>
                             </Grid.ColumnDefinitions>
-                            <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0"
-                                               Foreground="#111111" Background="Transparent"
-                                               BorderThickness="0" Padding="12,0"
-                                               VerticalAlignment="Center" FontSize="14"/>
+                            <Grid Grid.Column="0">
+                                <DatePickerTextBox x:Name="PART_TextBox"
+                                                   Foreground="#111111" Background="Transparent"
+                                                   BorderThickness="0" Padding="12,0"
+                                                   VerticalAlignment="Center" FontSize="14">
+                                    <DatePickerTextBox.Style>
+                                        <Style TargetType="DatePickerTextBox">
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="DatePickerTextBox">
+                                                        <ScrollViewer x:Name="PART_ContentHost"
+                                                                      Focusable="False"
+                                                                      HorizontalScrollBarVisibility="Hidden"
+                                                                      VerticalScrollBarVisibility="Hidden"/>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </DatePickerTextBox.Style>
+                                </DatePickerTextBox>
+                                <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="14"
+                                           Padding="12,0" VerticalAlignment="Center"
+                                           IsHitTestVisible="False" Opacity="0.8">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=PART_TextBox}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
                             <ToggleButton x:Name="PART_Button" Grid.Column="1"
                                     HorizontalAlignment="Center" VerticalAlignment="Center"
                                     Width="20" Height="20"
@@ -200,7 +329,7 @@
 
             <Border x:Name="DialogShell" Background="White" CornerRadius="18"
                     ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Width="740">
+                    Width="780" MinHeight="620" BorderBrush="#90CAF9" BorderThickness="2">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -209,24 +338,15 @@
                     </Grid.RowDefinitions>
 
                     <!-- Header -->
-                    <Border Grid.Row="0" Background="#702943" CornerRadius="18,18,0,0" Padding="36,24,36,24">
+                    <Border Grid.Row="0" Background="#E3F2FD" CornerRadius="18,18,0,0" Padding="36,24,36,24">
                         <Grid>
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,6">
-                                    <Border Width="36" Height="36" CornerRadius="18"
-                                            Background="#88FFFFFF" Margin="0,0,14,0">
-                                        <Viewbox Width="18" Height="18">
-                                            <Canvas Width="24" Height="24">
-                                                <Path Fill="White"
-                                                      Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A4,4 0 0,0 8,10A4,4 0 0,0 12,14A4,4 0 0,0 16,10A4,4 0 0,0 12,6M12,8A2,2 0 0,1 14,10A2,2 0 0,1 12,12A2,2 0 0,1 10,10A2,2 0 0,1 12,8M6.22,18A8,8 0 0,0 12,20A8,8 0 0,0 17.78,18C16.54,16.78 14.36,16 12,16C9.64,16 7.46,16.78 6.22,18Z"/>
-                                            </Canvas>
-                                        </Viewbox>
-                                    </Border>
                                     <StackPanel>
                                         <TextBlock Text="Identity Verification" FontSize="20" FontWeight="Bold"
-                                                   Foreground="White"/>
+                                                   Foreground="#0D47A1"/>
                                         <TextBlock Text="Check for existing records before proceeding to the full form."
-                                                   FontSize="12" Foreground="#FFCCD8" Margin="0,2,0,0"/>
+                                                   FontSize="12" Foreground="#1565C0" Margin="0,2,0,0"/>
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
@@ -236,12 +356,12 @@
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="CloseBg" Background="Transparent" CornerRadius="16">
-                                            <TextBlock Text="&#x2715;" FontSize="14" Foreground="#FFAACC"
+                                            <TextBlock Text="&#x2715;" FontSize="14" Foreground="#1565C0"
                                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="CloseBg" Property="Background" Value="#44000000"/>
+                                                <Setter TargetName="CloseBg" Property="Background" Value="#F0F0F0"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -253,22 +373,22 @@
                     <!-- Form body -->
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled"
-                                  Background="#F7F3F5" Padding="36,28,36,20">
+                                  Background="White" Padding="36,28,36,20">
                         <StackPanel>
 
                             <!-- Step hint -->
-                            <Border Background="#FBF0F3" CornerRadius="10" Padding="16,12" Margin="0,0,0,24"
-                                    BorderBrush="#EDD0DA" BorderThickness="1">
+                            <Border Background="#E3F2FD" CornerRadius="10" Padding="16,12" Margin="0,0,0,24"
+                                    BorderBrush="#90CAF9" BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
                                     <Border Width="28" Height="28" CornerRadius="14"
-                                            Background="#702943" Margin="0,0,12,0" VerticalAlignment="Center">
+                                            Background="#0D47A1" Margin="0,0,12,0" VerticalAlignment="Center">
                                         <TextBlock Text="1" FontSize="13" FontWeight="Bold" Foreground="White"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#702943"
+                                        <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#0D47A1"
                                                    Text="Step 1 of 2 — Identity Verification"/>
-                                        <TextBlock FontSize="11" Foreground="#886677" Margin="0,2,0,0"
+                                        <TextBlock FontSize="11" Foreground="#1565C0" Margin="0,2,0,0"
                                                    Text="Fill in the fields below, then click Check &amp; Continue to search for duplicates."/>
                                     </StackPanel>
                                 </StackPanel>
@@ -287,6 +407,8 @@
                                     <ColumnDefinition Width="1.2*"/>
                                     <ColumnDefinition Width="14"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="14"/>
+                                    <ColumnDefinition Width="140"/>
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0">
@@ -314,6 +436,19 @@
                                     <TextBox x:Name="TxtMiddleName" Style="{StaticResource FormBox}"
                                              PreviewTextInput="NameOnly_PreviewTextInput"
                                              TextChanged="Name_TextChanged"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="6">
+                                    <TextBlock Text="Extension (Optional)" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox x:Name="CmbExtension" Style="{StaticResource FormCombo}"
+                                              SelectionChanged="Extension_Changed">
+                                        <ComboBoxItem Content=""/>
+                                        <ComboBoxItem Content="Jr."/>
+                                        <ComboBoxItem Content="Sr."/>
+                                        <ComboBoxItem Content="III"/>
+                                        <ComboBoxItem Content="IV"/>
+                                        <ComboBoxItem Content="V"/>
+                                    </ComboBox>
                                 </StackPanel>
                             </Grid>
 
@@ -343,12 +478,12 @@
 
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Style="{StaticResource FieldLabel}">
-                                        PhilSys Card Number <Run Text="*" Foreground="#D32F2F"/>
+                                        PhilSys Card Number (Optional)
                                     </TextBlock>
                                     <TextBox x:Name="TxtPhilSys" Style="{StaticResource FormBox}"
                                              PreviewTextInput="NumberOnly_PreviewTextInput"
                                              TextChanged="PhilSys_TextChanged"/>
-                                    <TextBlock x:Name="ErrPhilSys" Text="PhilSys number is required (digits only)." Style="{StaticResource ErrorText}"/>
+                                    <TextBlock x:Name="ErrPhilSys" Text="PhilSys number must contain digits only." Style="{StaticResource ErrorText}"/>
                                 </StackPanel>
                             </Grid>
 
@@ -384,7 +519,7 @@
 
                     <!-- Footer -->
                     <Border Grid.Row="2" Background="White" BorderBrush="#EEEEEE"
-                            BorderThickness="0,1,0,0" Padding="36,18">
+                            BorderThickness="0,1,0,0" Padding="36,18" CornerRadius="0,0,18,18">
                         <Grid>
                             <Button x:Name="BtnCancel" Content="Cancel"
                                     Style="{StaticResource SecondaryBtn}"
