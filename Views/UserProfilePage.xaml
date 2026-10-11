@@ -163,12 +163,12 @@
                                        Foreground="White"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <TextBlock x:Name="TxtDisplayName" Text="Admin User"
+                        <TextBlock x:Name="TxtDisplayName" Text="ADMIN USER"
                                    FontFamily="Segoe UI" FontSize="20" FontWeight="Bold"
                                    Foreground="#1A1A1A"/>
                         <StackPanel Orientation="Horizontal" Margin="0,6,0,4">
                             <Border Background="#F0E8EC" CornerRadius="6" Padding="10,4">
-                                <TextBlock x:Name="TxtDisplayRole" Text="Administrator"
+                                <TextBlock x:Name="TxtDisplayRole" Text="ADMINISTRATOR"
                                            FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
                                            Foreground="#702943"/>
                             </Border>
@@ -185,14 +185,14 @@
 
                         <StackPanel Margin="0,0,0,16">
                             <TextBlock Text="Full Name" Style="{StaticResource FieldLabel}"/>
-                            <TextBlock x:Name="TxtFullName" Text="Admin User" Style="{StaticResource FieldValue}"/>
+                            <TextBlock x:Name="TxtFullName" Text="ADMIN USER" Style="{StaticResource FieldValue}"/>
                         </StackPanel>
 
                         <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,16"/>
 
                         <StackPanel Margin="0,0,0,16">
                             <TextBlock Text="Role" Style="{StaticResource FieldLabel}"/>
-                            <TextBlock x:Name="TxtRole" Text="Administrator" Style="{StaticResource FieldValue}"/>
+                            <TextBlock x:Name="TxtRole" Text="ADMINISTRATOR" Style="{StaticResource FieldValue}"/>
                         </StackPanel>
 
                         <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,16"/>
@@ -215,7 +215,7 @@
                             <TextBlock Text="Account Status" Style="{StaticResource FieldLabel}"/>
                             <StackPanel Orientation="Horizontal">
                                 <Ellipse Width="8" Height="8" Fill="#27AE60" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Active" FontFamily="Segoe UI" FontSize="14"
+                                <TextBlock Text="ACTIVE" FontFamily="Segoe UI" FontSize="14"
                                            FontWeight="SemiBold" Foreground="#27AE60"/>
                             </StackPanel>
                         </StackPanel>
@@ -335,7 +335,7 @@
                             </StackPanel>
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="Environment" Style="{StaticResource FieldLabel}"/>
-                                <TextBlock Text="Production" FontFamily="Segoe UI"
+                                <TextBlock Text="PRODUCTION" FontFamily="Segoe UI"
                                            FontSize="13" FontWeight="SemiBold" Foreground="#27AE60"/>
                             </StackPanel>
                         </Grid>

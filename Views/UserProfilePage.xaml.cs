@@ -30,13 +30,15 @@ namespace SOLUM_UI
             string email    = MainWindow.CurrentUserEmail;
             string contactNumber = MainWindow.ContactNumber;
 
-            TxtDisplayName.Text  = name;
-            TxtDisplayRole.Text  = role;
+            TxtDisplayName.Text  = (name ?? string.Empty).ToUpper();
+            TxtDisplayRole.Text  = (role ?? string.Empty).ToUpper();
             TxtDisplayEmail.Text = email;
-            TxtFullName.Text     = name;
-            TxtRole.Text         = role;
+            TxtFullName.Text     = (name ?? string.Empty).ToUpper();
+            TxtRole.Text         = (role ?? string.Empty).ToUpper();
             TxtContactNumber.Text = string.IsNullOrWhiteSpace(contactNumber) ? "—" : contactNumber;
-            TxtBarangay.Text     = string.IsNullOrWhiteSpace(barangay) ? "All Barangays" : barangay;
+            TxtBarangay.Text     = (string.IsNullOrWhiteSpace(barangay) || barangay.Equals("ALL", StringComparison.OrdinalIgnoreCase))
+                ? "ALL BARANGAYS"
+                : barangay.ToUpper();
             TxtInitial.Text      = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "U";
 
             string[] parts = name.Split(' ');

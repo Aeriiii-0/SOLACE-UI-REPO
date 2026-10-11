@@ -24,18 +24,18 @@ namespace SOLUM_UI.Views.Dialogs
             if (TxtSubheading != null && !string.IsNullOrEmpty(subheading))
                 TxtSubheading.Text = subheading;
 
-            TxtFullName.Text = _fullName;
+            TxtFullName.Text = _fullName.ToUpper();
             TxtEmail.Text = _email;
             TxtPassword.Text = _password;
-            TxtRole.Text = _role;
+            TxtRole.Text = _role.ToUpper();
         }
 
         private void BtnCopy_Click(object sender, RoutedEventArgs e)
         {
             var sb = new StringBuilder();
             sb.AppendLine("=== SOLACE SYSTEM CREDENTIALS ===");
-            sb.AppendLine($"Name: {_fullName}");
-            sb.AppendLine($"Position: {_role}");
+            sb.AppendLine($"Name: {_fullName.ToUpper()}");
+            sb.AppendLine($"Position: {_role.ToUpper()}");
             sb.AppendLine($"Email: {_email}");
             sb.AppendLine($"Temporary Password: {_password}");
             sb.AppendLine("=================================");

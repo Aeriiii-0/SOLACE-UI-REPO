@@ -617,13 +617,13 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="First Name *" Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="TxtFirstName" Style="{StaticResource FormBox}" TextChanged="ClearErrors"
+                                <TextBox x:Name="TxtFirstName" Style="{StaticResource FormBox}" TextChanged="TxtFirstName_TextChanged"
                                          PreviewTextInput="Name_PreviewTextInput" MaxLength="50"/>
                                 <TextBlock x:Name="ErrFirstName" Text="Required." Style="{StaticResource ErrorText}"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Last Name *" Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="TxtLastName" Style="{StaticResource FormBox}" TextChanged="ClearErrors"
+                                <TextBox x:Name="TxtLastName" Style="{StaticResource FormBox}" TextChanged="TxtLastName_TextChanged"
                                          PreviewTextInput="Name_PreviewTextInput" MaxLength="50"/>
                                 <TextBlock x:Name="ErrLastName" Text="Required." Style="{StaticResource ErrorText}"/>
                             </StackPanel>
@@ -637,14 +637,14 @@
 
                         <StackPanel Margin="0,0,0,14">
                             <TextBlock Text="Position" Style="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="TxtPosition" Text="Encoder" Style="{StaticResource FormBoxReadOnly}"/>
+                            <TextBox x:Name="TxtPosition" Text="ENCODER" Style="{StaticResource FormBoxReadOnly}"/>
                         </StackPanel>
 
                         <StackPanel x:Name="PnlAccountStatus" Margin="0,0,0,14" Visibility="Collapsed">
                             <TextBlock Text="Account Status *" Style="{StaticResource FieldLabel}"/>
                             <ComboBox x:Name="CmbEditStatus" Style="{StaticResource FormCombo}">
-                                <ComboBoxItem Content="Active" Tag="true"/>
-                                <ComboBoxItem Content="Disabled" Tag="false"/>
+                                <ComboBoxItem Content="ACTIVE" Tag="true"/>
+                                <ComboBoxItem Content="DISABLED" Tag="false"/>
                             </ComboBox>
                         </StackPanel>
 

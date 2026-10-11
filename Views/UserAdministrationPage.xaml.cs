@@ -20,13 +20,13 @@ namespace SOLUM_UI
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        public string Role { get; set; } = "Encoder";
+        public string Role { get; set; } = "ENCODER";
         public string ContactNumber { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public string Password { get; set; }
         public string DateAdded { get; set; } = "—";
 
-        public string FullName => FirstName + " " + LastName;
+        public string FullName => $"{FirstName} {LastName}".Trim().ToUpper();
 
         public string Initials
         {
@@ -41,7 +41,7 @@ namespace SOLUM_UI
         public SolidColorBrush RoleBadgeColor => new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9));
         public SolidColorBrush RoleTextColor => new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
 
-        public string StatusText => IsActive ? "Active" : "Disabled";
+        public string StatusText => IsActive ? "ACTIVE" : "DISABLED";
         public SolidColorBrush StatusBadgeColor => IsActive
             ? new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9))
             : new SolidColorBrush(Color.FromRgb(0xFE, 0xEB, 0xEE)); // Soft red/pink for disabled
@@ -204,12 +204,12 @@ namespace SOLUM_UI
                     var allCombined = userMap.Values.Select(pair => new AppUser
                     {
                         Id = pair.dto.Id,
-                        FirstName = pair.dto.FirstName,
-                        LastName = pair.dto.LastName,
+                        FirstName = pair.dto.FirstName?.ToUpper(),
+                        LastName = pair.dto.LastName?.ToUpper(),
                         Email = pair.dto.Email,
                         ContactNumber = pair.dto.ContactNumber ?? string.Empty,
                         IsActive = pair.isActive,
-                        Role = string.IsNullOrWhiteSpace(pair.dto.Role) ? "Encoder" : pair.dto.Role
+                        Role = (string.IsNullOrWhiteSpace(pair.dto.Role) ? "ENCODER" : pair.dto.Role).ToUpper()
                     }).ToList();
 
                     int totalCount = allCombined.Count;
@@ -238,12 +238,12 @@ namespace SOLUM_UI
             _allUsers = items.Select(dto => new AppUser
             {
                 Id = dto.Id,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
+                FirstName = dto.FirstName?.ToUpper(),
+                LastName = dto.LastName?.ToUpper(),
                 Email = dto.Email,
                 ContactNumber = dto.ContactNumber ?? string.Empty,
                 IsActive = dto.IsActive ?? defaultIsActive,
-                Role = string.IsNullOrWhiteSpace(dto.Role) ? "Encoder" : dto.Role
+                Role = (string.IsNullOrWhiteSpace(dto.Role) ? "ENCODER" : dto.Role).ToUpper()
             }).ToList();
 
             _totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
@@ -316,8 +316,8 @@ namespace SOLUM_UI
             if (user == null) return;
 
             _editTarget = user;
-            TxtFirstName.Text = user.FirstName;
-            TxtLastName.Text = user.LastName;
+            TxtFirstName.Text = user.FirstName?.ToUpper() ?? string.Empty;
+            TxtLastName.Text = user.LastName?.ToUpper() ?? string.Empty;
             TxtEmail.Text = user.Email;
             TxtEmail.IsReadOnly = true;
             TxtContactNumber.Text = user.ContactNumber ?? string.Empty;
@@ -493,8 +493,8 @@ namespace SOLUM_UI
         {
             ClearErrors(null, null);
 
-            string firstName = TxtFirstName.Text.Trim();
-            string lastName = TxtLastName.Text.Trim();
+            string firstName = TxtFirstName.Text.Trim().ToUpper();
+            string lastName = TxtLastName.Text.Trim().ToUpper();
             string email = TxtEmail.Text.Trim();
             string contactNumber = TxtContactNumber.Text.Trim();
             string password = _generatedPassword;
@@ -673,7 +673,7 @@ namespace SOLUM_UI
                 ClosePanel_Click(null, null);
                 await LoadUsersAsync();
 
-                AccountCreatedDialog.Show(createdName, createdEmail, createdPassword, "Encoder", Window.GetWindow(this));
+                AccountCreatedDialog.Show(createdName, createdEmail, createdPassword, "ENCODER", Window.GetWindow(this));
             }
         }
 
@@ -709,6 +709,29 @@ namespace SOLUM_UI
             if (CmbEditStatus != null) CmbEditStatus.SelectedIndex = 0;
             FormErrorBanner.Visibility = Visibility.Collapsed;
             SetPanelMode(false);
+        }
+
+        private void ToUpperBox(TextBox tb)
+        {
+            if (tb == null) return;
+            if (tb.Text != tb.Text.ToUpper())
+            {
+                int caret = tb.SelectionStart;
+                tb.Text = tb.Text.ToUpper();
+                tb.SelectionStart = Math.Min(caret + 1, tb.Text.Length);
+            }
+        }
+
+        private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ToUpperBox(TxtFirstName);
+            ClearErrors(null, null);
+        }
+
+        private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ToUpperBox(TxtLastName);
+            ClearErrors(null, null);
         }
 
         private void ClearErrors(object sender, object e)
