@@ -664,16 +664,21 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="Performed by" Style="{StaticResource MetaLabel}"/>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <TextBlock Text="{Binding SelectedLog.PerformedByDisplay}"
-                                               FontFamily="Segoe UI" FontSize="13" FontWeight="Normal"
-                                               Foreground="#1A1A1A" VerticalAlignment="Center"/>
-                                    <Border CornerRadius="5" Background="#F0E8EC" Padding="8,3"
-                                            Margin="8,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding SelectedLog.PerformedByRole}"
-                                                   FontFamily="Segoe UI" FontSize="10"
-                                                   FontWeight="SemiBold" Foreground="#702943"/>
-                                    </Border>
+                                <StackPanel Grid.Column="1" Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding SelectedLog.PerformedByDisplay}"
+                                                   FontFamily="Segoe UI" FontSize="13" FontWeight="Normal"
+                                                   Foreground="#1A1A1A" VerticalAlignment="Center"/>
+                                        <Border CornerRadius="5" Background="#F0E8EC" Padding="8,3"
+                                                Margin="8,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding SelectedLog.PerformedByRole}"
+                                                       FontFamily="Segoe UI" FontSize="10"
+                                                       FontWeight="SemiBold" Foreground="#702943"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding SelectedLog.PerformedByUserId, StringFormat='ID: {0}'}"
+                                               FontFamily="Segoe UI" FontSize="11" Foreground="#888888" Margin="0,2,0,0"
+                                               Visibility="{Binding SelectedLog.HasPerformedByUserId, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                 </StackPanel>
                             </Grid>
 

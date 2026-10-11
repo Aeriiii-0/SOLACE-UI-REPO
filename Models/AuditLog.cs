@@ -23,6 +23,8 @@ namespace SOLUM_UI.Models
 
         public string      Description     { get; set; }
         public string      PerformedBy     { get; set; }
+        public string      PerformedByName { get; set; }
+        public string      PerformedByUserId { get; set; }
         public string      PerformedByRole { get; set; }
         public DateTime    Timestamp       { get; set; }
         public string      RecordId        { get; set; }
@@ -60,9 +62,14 @@ namespace SOLUM_UI.Models
             set { }
         }
 
-        public bool HasTargetName => !string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, RecordId, StringComparison.OrdinalIgnoreCase);
+        public bool HasTargetName => !string.IsNullOrWhiteSpace(RecordName)
+            && !string.Equals(RecordName, RecordId, StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(RecordName, TargetType, StringComparison.OrdinalIgnoreCase);
 
         public bool HasTargetType => !string.IsNullOrWhiteSpace(TargetType);
+
+        public bool HasPerformedByUserId => !string.IsNullOrWhiteSpace(PerformedByUserId)
+            && !string.Equals(PerformedByName, PerformedByUserId, StringComparison.OrdinalIgnoreCase);
 
         public string TimeAgo
         {
@@ -85,7 +92,28 @@ namespace SOLUM_UI.Models
 
         public string PerformedByDisplay
         {
-            get => !string.IsNullOrWhiteSpace(PerformedBy) ? PerformedBy : "System";
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(PerformedByName))
+                    return PerformedByName;
+                if (!string.IsNullOrWhiteSpace(PerformedBy))
+                    return PerformedBy;
+                return "System";
+            }
+            set { }
+        }
+
+        public string PerformedByWithId
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(PerformedByName) && !string.IsNullOrWhiteSpace(PerformedByUserId)
+                    && !string.Equals(PerformedByName, PerformedByUserId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return $"{PerformedByName} ({PerformedByUserId})";
+                }
+                return PerformedByDisplay;
+            }
             set { }
         }
 

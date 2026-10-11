@@ -34,6 +34,13 @@ namespace SOLUM_UI.ViewModels
         private readonly Dictionary<int, PageCacheEntry> _pageCache
             = new Dictionary<int, PageCacheEntry>();
 
+        // ── User name cache (UserId -> FullName) ──────────────────────────────
+        private static readonly Dictionary<string, string> _userNamesCache =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private static bool _userCacheLoaded = false;
+        private static readonly System.Threading.SemaphoreSlim _userCacheLock =
+            new System.Threading.SemaphoreSlim(1, 1);
+
         // ── Loading / error state ──────────────────────────────────────────────
         private bool _isLoading;
         public bool IsLoading
@@ -273,6 +280,9 @@ namespace SOLUM_UI.ViewModels
                 if (_currentPageIndex == _pageStack.Count - 1 && _hasMore)
                     _pageStack.Add((page.NextCursorTimestamp, page.NextCursorId));
 
+                // Ensure user names cache is loaded in background/parallel
+                await EnsureUserCacheLoadedAsync();
+
                 // Populate list
                 PagedLogs.Clear();
                 foreach (var dto in page.Items)
@@ -297,6 +307,117 @@ namespace SOLUM_UI.ViewModels
                 IsLoading = false;
                 RaiseNavChanged();
             }
+        }
+
+        public static async Task EnsureUserCacheLoadedAsync()
+        {
+            // Seed current logged-in user immediately
+            string curId = MainWindow.CurrentUserId;
+            string curName = MainWindow.FullName;
+            if (!string.IsNullOrWhiteSpace(curId) && !string.IsNullOrWhiteSpace(curName))
+            {
+                lock (_userNamesCache)
+                {
+                    _userNamesCache[curId] = curName;
+                }
+            }
+
+            if (_userCacheLoaded) return;
+
+            if (!await _userCacheLock.WaitAsync(0)) return;
+
+            try
+            {
+                if (_userCacheLoaded) return;
+
+                // Fetch up to 50 encoders
+                var encoderReq = new GetApplicationUserRequest
+                {
+                    Role = "Encoder",
+                    Page = 1,
+                    PageSize = 50
+                };
+                var encoderTask = UserApiService.Instance.GetApplicationUsersAsync(encoderReq);
+
+                // Fetch up to 50 admins
+                var adminReq = new GetApplicationUserRequest
+                {
+                    Role = "Admin",
+                    Page = 1,
+                    PageSize = 50
+                };
+                var adminTask = UserApiService.Instance.GetApplicationUsersAsync(adminReq);
+
+                await Task.WhenAll(encoderTask, adminTask);
+
+                lock (_userNamesCache)
+                {
+                    if (encoderTask.Result?.Succeeded == true && encoderTask.Result.Data?.Items != null)
+                    {
+                        foreach (var u in encoderTask.Result.Data.Items)
+                        {
+                            string fullName = $"{u.FirstName} {u.LastName}".Trim();
+                            if (!string.IsNullOrWhiteSpace(fullName))
+                            {
+                                _userNamesCache[u.Id.ToString()] = fullName;
+                                if (!string.IsNullOrWhiteSpace(u.Email))
+                                    _userNamesCache[u.Email] = fullName;
+                            }
+                        }
+                    }
+
+                    if (adminTask.Result?.Succeeded == true && adminTask.Result.Data?.Items != null)
+                    {
+                        foreach (var u in adminTask.Result.Data.Items)
+                        {
+                            string fullName = $"{u.FirstName} {u.LastName}".Trim();
+                            if (!string.IsNullOrWhiteSpace(fullName))
+                            {
+                                _userNamesCache[u.Id.ToString()] = fullName;
+                                if (!string.IsNullOrWhiteSpace(u.Email))
+                                    _userNamesCache[u.Email] = fullName;
+                            }
+                        }
+                    }
+                }
+
+                _userCacheLoaded = true;
+            }
+            catch
+            {
+                // Soft-fail: fallback to IDs if user list couldn't be loaded
+            }
+            finally
+            {
+                _userCacheLock.Release();
+            }
+        }
+
+        public static string ResolveUserName(string rawUserId)
+        {
+            if (string.IsNullOrWhiteSpace(rawUserId))
+                return string.Empty;
+
+            // Direct check in cache
+            lock (_userNamesCache)
+            {
+                if (_userNamesCache.TryGetValue(rawUserId.Trim(), out var name) && !string.IsNullOrWhiteSpace(name))
+                    return name;
+            }
+
+            // Check if matches current user id or email
+            if (!string.IsNullOrWhiteSpace(MainWindow.CurrentUserId) &&
+                string.Equals(rawUserId.Trim(), MainWindow.CurrentUserId.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                return MainWindow.FullName;
+            }
+            if (!string.IsNullOrWhiteSpace(MainWindow.CurrentUserEmail) &&
+                string.Equals(rawUserId.Trim(), MainWindow.CurrentUserEmail.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                return MainWindow.FullName;
+            }
+
+            return string.Empty;
         }
 
         private void UpdatePageInfo()
@@ -327,28 +448,33 @@ namespace SOLUM_UI.ViewModels
             string status     = dto.Metadata?.Status    ?? string.Empty;
             string rawType    = dto.ActionType           ?? string.Empty;
 
+            string resolvedName = ResolveUserName(userId);
+            string displayName = !string.IsNullOrWhiteSpace(resolvedName) ? resolvedName : userId;
+
             string recordName = !string.IsNullOrWhiteSpace(targetName) ? targetName : targetType;
-            string description = BuildDescription(rawType, userId, recordName, status);
+            string description = BuildDescription(rawType, displayName, recordName, status);
 
             return new AuditLog
             {
-                Id              = 0,
-                RawActionType   = rawType,
-                Action          = MapAction(rawType),
-                Description     = description,
-                PerformedBy     = userId,
-                PerformedByRole = userRole,
-                Timestamp       = dto.Timestamp.LocalDateTime,
-                RecordId        = targetId,
-                RecordName      = recordName,
-                IpAddress       = ipAddress,
-                Status          = status,
-                TargetType      = targetType,
-                FieldChanged    = dto.Metadata?.FieldChanged ?? string.Empty,
-                OldValue        = dto.Metadata?.OldValue     ?? string.Empty,
-                NewValue        = dto.Metadata?.NewValue     ?? string.Empty,
+                Id                = 0,
+                RawActionType     = rawType,
+                Action            = MapAction(rawType),
+                Description       = description,
+                PerformedBy       = displayName,
+                PerformedByName   = resolvedName,
+                PerformedByUserId = userId,
+                PerformedByRole   = userRole,
+                Timestamp         = dto.Timestamp.LocalDateTime,
+                RecordId          = targetId,
+                RecordName        = recordName,
+                IpAddress         = ipAddress,
+                Status            = status,
+                TargetType        = targetType,
+                FieldChanged      = dto.Metadata?.FieldChanged ?? string.Empty,
+                OldValue          = dto.Metadata?.OldValue     ?? string.Empty,
+                NewValue          = dto.Metadata?.NewValue     ?? string.Empty,
                 // Map the multi-field changes list from the API (for UPDATE actions)
-                Changes         = dto.Metadata?.Changes != null && dto.Metadata.Changes.Count > 0
+                Changes           = dto.Metadata?.Changes != null && dto.Metadata.Changes.Count > 0
                     ? dto.Metadata.Changes
                           .Select(c => new ChangeDetail(
                               c.FieldName ?? string.Empty,
