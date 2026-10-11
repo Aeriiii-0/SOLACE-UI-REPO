@@ -34,6 +34,19 @@ namespace SOLUM_UI
         private int _totalPages    = 1;
         private bool _isLoading    = false;
 
+        public static readonly DependencyProperty SearchPlaceholderProperty =
+            DependencyProperty.Register(
+                nameof(SearchPlaceholder),
+                typeof(string),
+                typeof(SoloParentRecordsPage),
+                new PropertyMetadata("Search records (name, PhilSys ID)..."));
+
+        public string SearchPlaceholder
+        {
+            get => (string)GetValue(SearchPlaceholderProperty);
+            set => SetValue(SearchPlaceholderProperty, value);
+        }
+
         private bool IsAdmin     => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
                                     string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase);
         private bool IsBasicUser => string.Equals(CurrentUserRole, "BasicUser", StringComparison.OrdinalIgnoreCase);
@@ -71,13 +84,6 @@ namespace SOLUM_UI
                 if (ColBarangay    != null) ColBarangay.Width    = 0;
                 if (ColActions     != null) ColActions.Width     = 300;
             }
-            else if (IsEncoder)
-            {
-                AdminToolbar.Visibility       = Visibility.Collapsed;
-                BasicUserToolbar.Visibility   = Visibility.Collapsed;
-                EncoderSearchPanel.Visibility = Visibility.Visible;
-                PagingRow.Visibility          = Visibility.Visible;
-            }
             else
             {
                 AdminToolbar.Visibility       = Visibility.Visible;
@@ -97,15 +103,76 @@ namespace SOLUM_UI
             try
             {
                 string effectiveBarangay = IsBasicUser ? CurrentUserBarangay : _barangayFilter;
-                string firstNameQuery = SearchFirstName?.Text?.Trim() ?? string.Empty;
-                string lastNameQuery = SearchLastName?.Text?.Trim() ?? string.Empty;
-                string philSysIdQuery = SearchPhilSysId?.Text?.Trim() ?? string.Empty;
+                string query = (IsBasicUser ? BasicSearchName?.Text : SearchName?.Text)?.Trim() ?? string.Empty;
 
-                if (IsBasicUser)
+                string selectedMode = "AUTO";
+                if (!IsBasicUser && CmbSearchMode?.SelectedItem is ComboBoxItem modeItem)
                 {
-                    firstNameQuery = BasicSearchName?.Text?.Trim() ?? string.Empty;
-                    lastNameQuery = string.Empty;
-                    philSysIdQuery = string.Empty;
+                    selectedMode = modeItem.Tag?.ToString() ?? "AUTO";
+                }
+
+                Guid? searchGuid = null;
+                string firstName = null;
+                string lastName = null;
+                string fullname = null;
+                string philsysId = null;
+
+                if (!string.IsNullOrWhiteSpace(query))
+                {
+                    if (Guid.TryParse(query, out var parsedGuid))
+                    {
+                        searchGuid = parsedGuid;
+                    }
+                    else
+                    {
+                        switch (selectedMode)
+                        {
+                            case "FIRST_NAME":
+                                firstName = query;
+                                break;
+
+                            case "LAST_NAME":
+                                lastName = query;
+                                break;
+
+                            case "FULL_NAME":
+                                fullname = query;
+                                break;
+
+                            case "PHILSYS_ID":
+                                philsysId = query;
+                                break;
+
+                            case "AUTO":
+                            default:
+                                // If input consists only of digits and hyphens/spaces and has >= 4 digits, treat as PhilSys ID
+                                string digitsOnly = System.Text.RegularExpressions.Regex.Replace(query, @"\D", "");
+                                if (digitsOnly.Length >= 4 && System.Text.RegularExpressions.Regex.IsMatch(query, @"^[\d\s\-]+$"))
+                                {
+                                    philsysId = query;
+                                }
+                                else if (query.Contains(","))
+                                {
+                                    // Comma format: "Dela Cruz, Juana" -> Last Name = "Dela Cruz", First Name = "Juana"
+                                    var parts = query.Split(new[] { ',' }, 2);
+                                    lastName = parts[0].Trim();
+                                    firstName = parts.Length > 1 ? parts[1].Trim() : null;
+                                }
+                                else if (query.Contains(" "))
+                                {
+                                    // Space format: "Juana Dela Cruz" -> First Name = "Juana", Last Name = "Dela Cruz"
+                                    int firstSpace = query.IndexOf(' ');
+                                    firstName = query.Substring(0, firstSpace).Trim();
+                                    lastName = query.Substring(firstSpace + 1).Trim();
+                                }
+                                else
+                                {
+                                    // Single word fallback to full name search
+                                    fullname = query;
+                                }
+                                break;
+                        }
+                    }
                 }
 
                 bool? isActive = null;
@@ -136,9 +203,11 @@ namespace SOLUM_UI
 
                 var req = new GetSoloParentRequest
                 {
-                    Id = null,
-                    Fullname = BuildFullnameQuery(firstNameQuery, lastNameQuery),
-                    PhilsysId = !string.IsNullOrWhiteSpace(philSysIdQuery) ? philSysIdQuery : null,
+                    Id = searchGuid,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Fullname = fullname,
+                    PhilsysId = philsysId,
                     Barangay = barangay,
                     Sex = sex,
                     IsActive = isActive,
@@ -291,11 +360,41 @@ namespace SOLUM_UI
             if (e.Key == Key.Enter) ApplyFiltersAndPage();
         }
 
+        private void CmbSearchMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CmbSearchMode?.SelectedItem is ComboBoxItem item)
+            {
+                string mode = item.Tag?.ToString() ?? "AUTO";
+                switch (mode)
+                {
+                    case "FIRST_NAME":
+                        SearchPlaceholder = "Search by first name (e.g. Juana)...";
+                        break;
+                    case "LAST_NAME":
+                        SearchPlaceholder = "Search by last name (e.g. Dela Cruz)...";
+                        break;
+                    case "FULL_NAME":
+                        SearchPlaceholder = "Search by full name (e.g. Juana Dela Cruz)...";
+                        break;
+                    case "PHILSYS_ID":
+                        SearchPlaceholder = "Search by PhilSys ID (e.g. 1234-5678-9012)...";
+                        break;
+                    case "AUTO":
+                    default:
+                        SearchPlaceholder = "Search records (name, PhilSys ID)...";
+                        break;
+                }
+
+                if (!string.IsNullOrWhiteSpace(SearchName?.Text))
+                {
+                    ApplyFiltersAndPage();
+                }
+            }
+        }
+
         private void SearchFields_TextChanged(object sender, TextChangedEventArgs e)
         {
-            bool hasText = !string.IsNullOrEmpty(SearchFirstName?.Text)
-                        || !string.IsNullOrEmpty(SearchLastName?.Text)
-                        || !string.IsNullOrEmpty(SearchPhilSysId?.Text);
+            bool hasText = !string.IsNullOrEmpty(SearchName?.Text);
 
             if (ClearSearchBtn != null)
                 ClearSearchBtn.Visibility = hasText ? Visibility.Visible : Visibility.Collapsed;
@@ -308,10 +407,8 @@ namespace SOLUM_UI
 
         private void ClearSearch_Click(object sender, RoutedEventArgs e)
         {
-            SearchFirstName.Text = string.Empty;
-            SearchLastName.Text = string.Empty;
-            SearchPhilSysId.Text = string.Empty;
-            ClearSearchBtn.Visibility = Visibility.Collapsed;
+            if (SearchName != null) SearchName.Text = string.Empty;
+            if (ClearSearchBtn != null) ClearSearchBtn.Visibility = Visibility.Collapsed;
             ApplyFiltersAndPage();
         }
 
@@ -469,38 +566,29 @@ namespace SOLUM_UI
 
         private async Task SaveNewRecordAsync(SoloParentRecord record)
         {
-            if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
-            
-            try
+            record.CreatedBy = CurrentUserName;
+            // Use safe barangay: if record doesn't have one, use user's barangay or fallback to "ALL"
+            record.Barangay = string.IsNullOrWhiteSpace(record.Barangay) 
+                ? (!string.IsNullOrWhiteSpace(CurrentUserBarangay) ? CurrentUserBarangay : "ALL")
+                : record.Barangay;
+
+            var createReq = SoloParentApiService.Instance.MapToCreateRequest(record);
+            var createResp = await SoloParentApiService.Instance.CreateSoloParentAsync(createReq);
+
+            if (!createResp.Succeeded)
             {
-                record.CreatedBy = CurrentUserName;
-                // Use safe barangay: if record doesn't have one, use user's barangay or fallback to "ALL"
-                record.Barangay = string.IsNullOrWhiteSpace(record.Barangay) 
-                    ? (!string.IsNullOrWhiteSpace(CurrentUserBarangay) ? CurrentUserBarangay : "ALL")
-                    : record.Barangay;
-
-                var createReq = SoloParentApiService.Instance.MapToCreateRequest(record);
-                var createResp = await SoloParentApiService.Instance.CreateSoloParentAsync(createReq);
-
-                if (!createResp.Succeeded)
-                {
-                    string err = createResp.Errors != null && createResp.Errors.Count > 0
-                        ? string.Join("\n", createResp.Errors)
-                        : "Failed to create record on the server.";
-                    MessageBox.Show(err, "Creation Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                record.Id = createResp.Data.ToString();
-                ToastNotification.Show("Record Added", record.Name + " was added successfully.", ToastType.Success);
-                AuditLogService.Instance.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
-                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
-                await LoadRecordsAsync();
+                string err = createResp.Errors != null && createResp.Errors.Count > 0
+                    ? string.Join("\n", createResp.Errors)
+                    : "Failed to create record on the server.";
+                MessageBox.Show(err, "Creation Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
-            finally
-            {
-                if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
-            }
+
+            record.Id = createResp.Data.ToString();
+            ToastNotification.Show("Record Added", record.Name + " was added successfully.", ToastType.Success);
+            AuditLogService.Instance.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
+            (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
+            await LoadRecordsAsync();
         }
 
         private async void Edit_Click(object sender, RoutedEventArgs e)
@@ -561,54 +649,41 @@ namespace SOLUM_UI
             if (mainWindow != null)
                 mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
 
-            if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
-
-            try
+            SoloParentDto existingDto = null;
+            if (Guid.TryParse(rawRecord.Id, out var id))
             {
-                SoloParentDto existingDto = null;
-                if (Guid.TryParse(rawRecord.Id, out var id))
+                var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(id);
+                if (fetch.Succeeded && fetch.Data != null)
                 {
-                    var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(id);
-                    if (fetch.Succeeded && fetch.Data != null)
-                    {
-                        existingDto = fetch.Data;
-                        rawRecord = SoloParentApiService.Instance.MapToRecord(existingDto);
-                    }
-                }
-
-                if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
-
-                RecordDialog dialog = new RecordDialog(rawRecord) { Owner = Window.GetWindow(this) };
-                dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
-
-                if (dialog.ShowDialog() == true && dialog.Result != null)
-                {
-                    if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
-
-                    if (Guid.TryParse(rawRecord.Id, out var guid))
-                    {
-                        var updateReq = SoloParentApiService.Instance.MapToUpdateRequest(guid, dialog.Result, existingDto);
-                        var updateResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(guid, updateReq);
-                        if (!updateResp.Succeeded)
-                        {
-                            string err = updateResp.Errors != null && updateResp.Errors.Count > 0
-                                ? string.Join("\n", updateResp.Errors)
-                                : "Failed to update record on the server.";
-                            MessageBox.Show(err, "Update Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            return;
-                        }
-                    }
-
-                    ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
-                    var changeList = BuildChangeList(rawRecord, dialog.Result);
-                    AuditLogService.Instance.LogUpdateWithChanges(dialog.Result.Id, dialog.Result.Name,
-                        GetCurrentUser(), CurrentUserRole, changeList);
-                    await LoadRecordsAsync();
+                    existingDto = fetch.Data;
+                    rawRecord = SoloParentApiService.Instance.MapToRecord(existingDto);
                 }
             }
-            finally
+
+            RecordDialog dialog = new RecordDialog(rawRecord) { Owner = Window.GetWindow(this) };
+            dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
+
+            if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
+                if (Guid.TryParse(rawRecord.Id, out var guid))
+                {
+                    var updateReq = SoloParentApiService.Instance.MapToUpdateRequest(guid, dialog.Result, existingDto);
+                    var updateResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(guid, updateReq);
+                    if (!updateResp.Succeeded)
+                    {
+                        string err = updateResp.Errors != null && updateResp.Errors.Count > 0
+                            ? string.Join("\n", updateResp.Errors)
+                            : "Failed to update record on the server.";
+                        MessageBox.Show(err, "Update Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+
+                ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
+                var changeList = BuildChangeList(rawRecord, dialog.Result);
+                AuditLogService.Instance.LogUpdateWithChanges(dialog.Result.Id, dialog.Result.Name,
+                    GetCurrentUser(), CurrentUserRole, changeList);
+                await LoadRecordsAsync();
             }
         }
 
@@ -621,31 +696,22 @@ namespace SOLUM_UI
                 return;
             }
 
-            if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
+            SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
+            string recordName = vm != null ? vm.Name : id;
 
-            try
+            var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid);
+            if (resp.Succeeded)
             {
-                SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
-                string recordName = vm != null ? vm.Name : id;
-
-                var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid);
-                if (resp.Succeeded)
-                {
-                    ToastNotification.Show("Record Renewed", recordName + " validity extended for 1 year.", ToastType.Success);
-                    AuditLogService.Instance.LogUpdate(id, recordName, GetCurrentUser(), CurrentUserRole, "Validity extended for 1 year");
-                    await LoadRecordsAsync();
-                }
-                else
-                {
-                    string err = resp.Errors != null && resp.Errors.Count > 0
-                        ? string.Join("\n", resp.Errors)
-                        : "Failed to renew record.";
-                    MessageBox.Show(err, "Renew Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
+                ToastNotification.Show("Record Renewed", recordName + " validity extended for 1 year.", ToastType.Success);
+                AuditLogService.Instance.LogUpdate(id, recordName, GetCurrentUser(), CurrentUserRole, "Validity extended for 1 year");
+                await LoadRecordsAsync();
             }
-            finally
+            else
             {
-                if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
+                string err = resp.Errors != null && resp.Errors.Count > 0
+                    ? string.Join("\n", resp.Errors)
+                    : "Failed to renew record.";
+                MessageBox.Show(err, "Renew Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -826,17 +892,6 @@ namespace SOLUM_UI
         }
 
         private string GetCurrentUser() => !string.IsNullOrEmpty(CurrentUserName) ? CurrentUserName : "Admin";
-
-        private string BuildFullnameQuery(string firstName, string lastName)
-        {
-            if (string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(lastName))
-                return null;
-
-            if (!string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(lastName))
-                return $"{firstName} {lastName}";
-
-            return !string.IsNullOrWhiteSpace(firstName) ? firstName : lastName;
-        }
 
         /// <summary>
         /// Compares two records field-by-field and returns a structured list of

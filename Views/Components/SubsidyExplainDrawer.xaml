@@ -26,11 +26,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="{Binding ActiveCandidate.Name}" FontSize="14" FontWeight="Bold" Foreground="#702943" TextTrimming="CharacterEllipsis"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                            <TextBlock Text="{Binding ActiveCandidate.SpId}" FontSize="11" FontWeight="SemiBold" Foreground="#994466"/>
-                            <TextBlock Text=" • " FontSize="11" Foreground="#AAAAAA"/>
-                            <TextBlock Text="{Binding ActiveCandidate.Barangay}" FontSize="11" Foreground="#666666"/>
-                        </StackPanel>
+                        <TextBlock Text="{Binding ActiveCandidate.Barangay}" FontSize="11" Foreground="#666666" Margin="0,2,0,0"/>
                     </StackPanel>
                     <Button Grid.Column="1" Background="Transparent" BorderThickness="0" Cursor="Hand"
                             Command="{Binding CloseExplainDrawerCommand}" Padding="4">
@@ -81,47 +77,46 @@
                     </Border>
 
                     <!-- 4-Dimension Breakdown Section with Prominent Content -->
-                    <TextBlock Text="Vulnerability Dimensions" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,8"/>
+                    <TextBlock Text="Case Vulnerability Indicators" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,8"/>
 
                     <!-- Dimension 1: Economic Strain -->
                     <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#EEEEEE" BorderThickness="1" Padding="12,10" Margin="0,0,0,8">
                         <StackPanel>
-                            <Grid Margin="0,0,0,4">
-                                <TextBlock Text="1. Economic Strain" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
-                                <Border Background="#FFF1F2" CornerRadius="4" Padding="6,1" HorizontalAlignment="Right">
-                                    <TextBlock Text="{Binding ActiveCandidate.EconomicStrainPercentLabel}" FontSize="11.5" FontWeight="Bold" Foreground="#DC3545"/>
-                                </Border>
-                            </Grid>
+                            <TextBlock Text="1. Economic Strain" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,4"/>
                             <TextBlock Text="{Binding ActiveCandidate.EcoPrimaryMetric}" FontSize="13.5" FontWeight="Bold" Foreground="#111827"/>
-                            <TextBlock Text="{Binding ActiveCandidate.EcoSecondaryMetric}" FontSize="10.5" FontWeight="SemiBold" Foreground="{Binding ActiveCandidate.PerCapitaFg}" Margin="0,2,0,0"/>
+                            <TextBlock Text="{Binding ActiveCandidate.EcoSecondaryMetric}" FontSize="10.5" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,2,0,0"/>
                         </StackPanel>
                     </Border>
 
                     <!-- Dimension 2: Dependency Burden -->
                     <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#EEEEEE" BorderThickness="1" Padding="12,10" Margin="0,0,0,8">
                         <StackPanel>
-                            <Grid Margin="0,0,0,4">
-                                <TextBlock Text="2. Dependency Burden" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
-                                <Border Background="#FFF1F2" CornerRadius="4" Padding="6,1" HorizontalAlignment="Right">
-                                    <TextBlock Text="{Binding ActiveCandidate.DependencyBurdenPercentLabel}" FontSize="11.5" FontWeight="Bold" Foreground="#DC3545"/>
-                                </Border>
-                            </Grid>
+                            <TextBlock Text="2. Dependency Burden" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,4"/>
                             <TextBlock Text="{Binding ActiveCandidate.DepPrimaryMetric}" FontSize="13.5" FontWeight="Bold" Foreground="#111827"/>
-                            <TextBlock Text="{Binding ActiveCandidate.DepSecondaryMetric}" FontSize="10.5" Foreground="#555555" Margin="0,2,0,0"/>
+                            <TextBlock Text="{Binding ActiveCandidate.DepSecondaryMetric}" FontSize="10.5" Foreground="#555555" Margin="0,2,0,6"/>
+
+                            <!-- Small Column for Children Age Groups -->
+                            <Border Background="White" CornerRadius="6" BorderBrush="#E5E7EB" BorderThickness="1" Padding="12,9" Margin="0,6,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding ActiveCandidate.Children7To22Text}" FontSize="11" FontWeight="SemiBold" Foreground="#1F2937" Margin="0,1,0,3"/>
+                                    <Border Height="1" Background="#F3F4F6" Margin="0,2,0,4"/>
+                                    <TextBlock Text="{Binding ActiveCandidate.Children0To6Text}" FontSize="11" FontWeight="SemiBold" Foreground="#1F2937" Margin="0,1,0,1"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- Small vertical list of children & ages -->
-                            <ItemsControl ItemsSource="{Binding ActiveCandidate.ChildrenDetails}" Margin="0,8,0,0"
+                            <ItemsControl ItemsSource="{Binding ActiveCandidate.ChildrenDetails}" Margin="0,10,0,0"
                                           Visibility="{Binding ActiveCandidate.HasChildrenDetails, Converter={StaticResource BoolToVis}}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="#FDF8FA" CornerRadius="4" BorderBrush="#F0E2E7" BorderThickness="1" Padding="6,3" Margin="0,0,0,3">
+                                        <Border Background="#FDF8FA" CornerRadius="5" BorderBrush="#F0E2E7" BorderThickness="1" Padding="8,5" Margin="0,0,0,4">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="10.5" FontWeight="SemiBold" Foreground="#222222" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                                                <Border Grid.Column="1" Background="{Binding BadgeBg}" CornerRadius="3" Padding="5,1" Margin="4,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="10.5" FontWeight="SemiBold" Foreground="#1F2937" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                <Border Grid.Column="1" Background="{Binding BadgeBg}" CornerRadius="3" Padding="6,2" Margin="6,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding AgeDisplay}" FontSize="9.5" FontWeight="SemiBold" Foreground="{Binding BadgeFg}"/>
                                                 </Border>
                                             </Grid>
@@ -132,31 +127,29 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Dimension 3: Care Burden -->
-                    <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#EEEEEE" BorderThickness="1" Padding="12,10" Margin="0,0,0,8">
+                    <!-- Dimension 3: Care Burden (Kept only if candidate only has children aged 0-6) -->
+                    <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#EEEEEE" BorderThickness="1" Padding="12,10" Margin="0,0,0,8"
+                            Visibility="{Binding ActiveCandidate.ShowCareBurden, Converter={StaticResource BoolToVis}}">
                         <StackPanel>
-                            <Grid Margin="0,0,0,4">
-                                <TextBlock Text="3. Care Burden" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
-                                <Border Background="#FFFBEB" CornerRadius="4" Padding="6,1" HorizontalAlignment="Right">
-                                    <TextBlock Text="{Binding ActiveCandidate.CareBurdenPercentLabel}" FontSize="11.5" FontWeight="Bold" Foreground="#B45309"/>
-                                </Border>
-                            </Grid>
+                            <TextBlock Text="3. Care Burden" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,4"/>
                             <TextBlock Text="{Binding ActiveCandidate.CarePrimaryMetric}" FontSize="13.5" FontWeight="Bold" Foreground="#111827"/>
                             <TextBlock Text="{Binding ActiveCandidate.CareSecondaryMetric}" FontSize="10.5" Foreground="#555555" Margin="0,2,0,0"/>
                         </StackPanel>
                     </Border>
 
-                    <!-- Dimension 4: Resource Adequacy -->
-                    <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#EEEEEE" BorderThickness="1" Padding="12,10" Margin="0,0,0,10">
+                    <!-- Needs & Other Income (Replaced Resource Adequacy) -->
+                    <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#EEEEEE" BorderThickness="1" Padding="12,12" Margin="0,0,0,10">
                         <StackPanel>
-                            <Grid Margin="0,0,0,4">
-                                <TextBlock Text="4. Resource Adequacy" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
-                                <Border Background="#FFFBEB" CornerRadius="4" Padding="6,1" HorizontalAlignment="Right">
-                                    <TextBlock Text="{Binding ActiveCandidate.ResourceAdequacyPercentLabel}" FontSize="11.5" FontWeight="Bold" Foreground="#B45309"/>
-                                </Border>
-                            </Grid>
-                            <TextBlock Text="{Binding ActiveCandidate.ResPrimaryMetric}" FontSize="13.5" FontWeight="Bold" Foreground="#111827"/>
-                            <TextBlock Text="{Binding ActiveCandidate.ResSecondaryMetric}" FontSize="10.5" Foreground="#555555" Margin="0,2,0,0"/>
+                            <TextBlock Text="Needs &amp; Other Income" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,8"/>
+
+                            <TextBlock Text="PROBLEM PRESENTED (SOLO PARENT)" FontSize="9.5" FontWeight="Bold" Foreground="#6B7280" Margin="0,0,0,3"/>
+                            <TextBlock Text="{Binding ActiveCandidate.CircumstanceDisplay}" FontSize="11.5" FontWeight="SemiBold" Foreground="#111827" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="NEEDS AND PROBLEMS" FontSize="9.5" FontWeight="Bold" Foreground="#6B7280" Margin="0,0,0,3"/>
+                            <TextBlock Text="{Binding ActiveCandidate.NeedsAndProblemsDisplay}" FontSize="11.5" FontWeight="SemiBold" Foreground="#111827" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="OTHER SOURCES OF INCOME" FontSize="9.5" FontWeight="Bold" Foreground="#6B7280" Margin="0,0,0,3"/>
+                            <TextBlock Text="{Binding ActiveCandidate.OtherIncomeDisplay}" FontSize="11.5" FontWeight="SemiBold" Foreground="#111827" TextWrapping="Wrap" Margin="0,0,0,2"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>

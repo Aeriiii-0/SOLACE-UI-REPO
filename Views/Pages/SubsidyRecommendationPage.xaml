@@ -44,9 +44,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Row 0: Page Title & Metrics Header -->
@@ -59,20 +57,82 @@
                 <TextBlock Text="Subsidy Recommendation" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
                 <TextBlock Text="ML vulnerability triage and quota allocation awaiting staff review." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,4,0,0"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <Border Background="#FFF0F5" CornerRadius="8" Padding="14,8" Margin="0,0,10,0">
-                    <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="8" Height="8" Fill="#702943" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding GranteeSlotsText}" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
+            <!-- Quota Status Section (Structured Section, No Emojis) -->
+            <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E5D5DC" BorderThickness="1" CornerRadius="10" Padding="14,8" VerticalAlignment="Center">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Progress Bar & Acceptance Label -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Width="180" Margin="0,0,14,0">
+                        <TextBlock Text="ACCEPTED RECIPIENTS" FontSize="9" FontWeight="Bold" Foreground="#888888" Margin="0,0,0,4"/>
+                        <Border Height="6" Background="#F5E8EC" CornerRadius="3" ClipToBounds="True">
+                            <ProgressBar Value="{Binding QuotaFillPercentage, Mode=OneWay}" Minimum="0" Maximum="100" Height="6" BorderThickness="0" Background="Transparent" Foreground="#27AE60"/>
+                        </Border>
+                        <TextBlock Text="{Binding QuotaProgressText}" FontSize="9.5" FontWeight="SemiBold" Foreground="#27AE60" Margin="0,3,0,0"/>
                     </StackPanel>
-                </Border>
-                <Border Background="#E8F5E9" CornerRadius="8" Padding="14,8">
-                    <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="8" Height="8" Fill="#27AE60" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding FinalSummaryText}" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#27AE60"/>
+
+                    <!-- Vertical Divider -->
+                    <Border Grid.Column="1" Width="1" Background="#EEDDE2" Margin="0,2,14,2"/>
+
+                    <!-- Slots Indicators & Details Action -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Total Slots -->
+                        <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
+                            <TextBlock Text="TOTAL SLOTS" FontSize="9.5" FontWeight="Bold" Foreground="#888888"/>
+                            <TextBlock Text="{Binding GranteeSlots}" FontSize="14" FontWeight="Bold" Foreground="#702943" Margin="0,1,0,0"/>
+                        </StackPanel>
+
+                        <!-- Remaining Slots -->
+                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                            <TextBlock Text="REMAINING" FontSize="9.5" FontWeight="Bold" Foreground="#888888"/>
+                            <TextBlock Text="{Binding RemainingSlots}" FontSize="14" FontWeight="Bold" Foreground="#B45309" Margin="0,1,0,0"/>
+                        </StackPanel>
+
+                        <!-- Details Flyout Button -->
+                        <Grid VerticalAlignment="Center">
+                            <Button x:Name="SlotBreakdownBtn" Height="28" Padding="10,0" Cursor="Hand" Click="SlotBreakdownBtn_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="#FBF5F7" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                            <TextBlock Text="Details ▾" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+
+                            <Popup x:Name="SlotPopup" PlacementTarget="{Binding ElementName=SlotBreakdownBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                                <Border Background="White" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1.5" Padding="14,10" MinWidth="220">
+                                    <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="14" ShadowDepth="3" Opacity="0.18"/></Border.Effect>
+                                    <StackPanel>
+                                        <TextBlock Text="Quota Slots Breakdown" FontSize="11.5" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,8"/>
+                                        <Grid Margin="0,2">
+                                            <TextBlock Text="Total Allocated Quota:" FontSize="11" Foreground="#555555"/>
+                                            <TextBlock Text="{Binding GranteeSlots}" FontSize="11" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <Grid Margin="0,2">
+                                            <TextBlock Text="Confirmed Grantees:" FontSize="11" Foreground="#555555"/>
+                                            <TextBlock Text="{Binding ConfirmedGranteesCount}" FontSize="11" FontWeight="Bold" Foreground="#27AE60" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <Grid Margin="0,2">
+                                            <TextBlock Text="Shortlisted in Review:" FontSize="11" Foreground="#555555"/>
+                                            <TextBlock Text="{Binding ShortlistRows.Count}" FontSize="11" FontWeight="Bold" Foreground="#B45309" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <Separator Margin="0,6" Background="#F0E2E7"/>
+                                        <Grid Margin="0,2">
+                                            <TextBlock Text="Remaining Open Slots:" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
+                                            <TextBlock Text="{Binding RemainingSlots}" FontSize="12" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </Popup>
+                        </Grid>
                     </StackPanel>
-                </Border>
-            </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
 
         <!-- Row 1: Tab Navigation Bar -->
@@ -126,11 +186,8 @@
             </StackPanel>
         </Border>
 
-        <!-- Row 2: Live Quota Allocator Bar (Visible on Tab 0) -->
-        <c:QuotaAllocatorBar Grid.Row="2" Visibility="{Binding TabRecommendationsVisible, Converter={StaticResource BoolToVis}}"/>
-
-        <!-- Row 3: Tab Content Area -->
-        <Grid Grid.Row="3" Margin="24,0,24,0">
+        <!-- Row 2: Tab Content Area -->
+        <Grid Grid.Row="2" Margin="24,10,24,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -148,28 +205,7 @@
                                     Visibility="{Binding IsDrawerOpen, Converter={StaticResource BoolToVis}}"/>
         </Grid>
 
-        <!-- Row 4: AI Model Status Footer Banner -->
-        <Border Grid.Row="4" Margin="24,8,24,14" Background="#702943" CornerRadius="12" Padding="14,12">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Width="34" Height="34" Background="#9B3060" CornerRadius="17" Margin="0,0,12,0">
-                    <TextBlock Text="🤖" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="ML Model ran 14 new subsidy recommendations" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
-                    <TextBlock Text="10 high-priority cases await staff approval · Last retrained 4 hours ago" FontFamily="Segoe UI" FontSize="10" Foreground="#E8C8D4" Margin="0,2,0,0"/>
-                </StackPanel>
-                <Border Grid.Column="2" Background="#9B3060" CornerRadius="8" Padding="12,6" VerticalAlignment="Center">
-                    <TextBlock Text="Model v2.4" FontFamily="Segoe UI" FontSize="10" FontWeight="SemiBold" Foreground="White"/>
-                </Border>
-            </Grid>
-        </Border>
-
         <!-- Outlier Rejection Modal Overlay (Spans all rows) -->
-        <c:ModalOutlierRejection Grid.RowSpan="5"/>
+        <c:ModalOutlierRejection Grid.RowSpan="3"/>
     </Grid>
 </Page>

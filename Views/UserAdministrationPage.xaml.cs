@@ -20,13 +20,13 @@ namespace SOLUM_UI
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        public string Role { get; set; } = "Encoder";
+        public string Role { get; set; } = "ENCODER";
         public string ContactNumber { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public string Password { get; set; }
         public string DateAdded { get; set; } = "—";
 
-        public string FullName => FirstName + " " + LastName;
+        public string FullName => $"{FirstName} {LastName}".Trim().ToUpper();
 
         public string Initials
         {
@@ -41,7 +41,7 @@ namespace SOLUM_UI
         public SolidColorBrush RoleBadgeColor => new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9));
         public SolidColorBrush RoleTextColor => new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
 
-        public string StatusText => IsActive ? "Active" : "Disabled";
+        public string StatusText => IsActive ? "ACTIVE" : "DISABLED";
         public SolidColorBrush StatusBadgeColor => IsActive
             ? new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9))
             : new SolidColorBrush(Color.FromRgb(0xFE, 0xEB, 0xEE)); // Soft red/pink for disabled
@@ -79,6 +79,8 @@ namespace SOLUM_UI
         private List<AppUser> _allUsers = new List<AppUser>(); 
         private List<AppUser> _filtered = new List<AppUser>();
         private AppUser _editTarget = null;
+        private string _generatedPassword = string.Empty;
+        private bool _isPasswordMasked = false;
 
         private const int PageSize = 10;         
         private int _currentPage = 1;                
@@ -202,12 +204,12 @@ namespace SOLUM_UI
                     var allCombined = userMap.Values.Select(pair => new AppUser
                     {
                         Id = pair.dto.Id,
-                        FirstName = pair.dto.FirstName,
-                        LastName = pair.dto.LastName,
+                        FirstName = pair.dto.FirstName?.ToUpper(),
+                        LastName = pair.dto.LastName?.ToUpper(),
                         Email = pair.dto.Email,
                         ContactNumber = pair.dto.ContactNumber ?? string.Empty,
                         IsActive = pair.isActive,
-                        Role = string.IsNullOrWhiteSpace(pair.dto.Role) ? "Encoder" : pair.dto.Role
+                        Role = (string.IsNullOrWhiteSpace(pair.dto.Role) ? "ENCODER" : pair.dto.Role).ToUpper()
                     }).ToList();
 
                     int totalCount = allCombined.Count;
@@ -236,12 +238,12 @@ namespace SOLUM_UI
             _allUsers = items.Select(dto => new AppUser
             {
                 Id = dto.Id,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
+                FirstName = dto.FirstName?.ToUpper(),
+                LastName = dto.LastName?.ToUpper(),
                 Email = dto.Email,
                 ContactNumber = dto.ContactNumber ?? string.Empty,
                 IsActive = dto.IsActive ?? defaultIsActive,
-                Role = string.IsNullOrWhiteSpace(dto.Role) ? "Encoder" : dto.Role
+                Role = (string.IsNullOrWhiteSpace(dto.Role) ? "ENCODER" : dto.Role).ToUpper()
             }).ToList();
 
             _totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
@@ -314,13 +316,11 @@ namespace SOLUM_UI
             if (user == null) return;
 
             _editTarget = user;
-            TxtFirstName.Text = user.FirstName;
-            TxtLastName.Text = user.LastName;
+            TxtFirstName.Text = user.FirstName?.ToUpper() ?? string.Empty;
+            TxtLastName.Text = user.LastName?.ToUpper() ?? string.Empty;
             TxtEmail.Text = user.Email;
             TxtEmail.IsReadOnly = true;
             TxtContactNumber.Text = user.ContactNumber ?? string.Empty;
-            PwdPassword.Password = string.Empty;
-            PwdConfirm.Password = string.Empty;
 
             if (CmbEditStatus != null)
             {
@@ -330,6 +330,61 @@ namespace SOLUM_UI
             SetPanelMode(true);
             ClearErrors(null, null);
             ColPanel.Width = new GridLength(324);
+        }
+
+        private async void ResetPassword_Click(object sender, RoutedEventArgs e)
+        {
+            string tagStr = (sender as Button)?.Tag?.ToString() ?? string.Empty;
+            if (!Guid.TryParse(tagStr, out var id)) return;
+
+            AppUser user = _allUsers.Find(u => u.Id == id);
+            if (user == null) return;
+
+            bool isConfirmed = ActionConfirmDialog.Show(
+                title: "Reset Password",
+                message: $"Are you sure you want to reset the password for {user.FullName}? A new temporary password will be generated and their existing password will be overwritten.",
+                confirmText: "Reset Password",
+                cancelText: "Cancel",
+                theme: ConfirmThemeType.Warning,
+                owner: Window.GetWindow(this),
+                customIconData: "M7,14A2,2 0 0,1 5,12A2,2 0 0,1 7,10A2,2 0 0,1 9,12A2,2 0 0,1 7,14M12.65,10C11.83,7.67 9.61,6 7,6A6,6 0 0,0 1,12A6,6 0 0,0 7,18C9.61,18 11.83,16.33 12.65,14H17V18H21V14H23V10H12.65Z");
+
+            if (!isConfirmed) return;
+
+            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
+            try
+            {
+                string tempPassword = PasswordGenerator.Generate(10);
+                var response = await UserApiService.Instance.ResetUserPasswordAsync(user.Id, tempPassword);
+
+                if (!response.Succeeded)
+                {
+                    string err = response.Errors != null && response.Errors.Count > 0
+                        ? string.Join("\n", response.Errors)
+                        : "Failed to reset password on server.";
+                    ToastNotification.Show("Reset Failed", err, ToastType.Error);
+                    return;
+                }
+
+                ToastNotification.Show("Password Reset", "Temporary password generated.", ToastType.Success);
+                AuditLogService.Instance.LogUserAdmin("password reset",
+                    $"{user.FullName} ({user.Email})",
+                    MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
+                    user.Id.ToString());
+
+                AccountCreatedDialog.Show(
+                    user.FullName,
+                    user.Email,
+                    tempPassword,
+                    user.Role,
+                    Window.GetWindow(this),
+                    heading: "Password Reset Successfully",
+                    subheading: "A new temporary password was generated. Provide it to the employee so they can log in.");
+            }
+            finally
+            {
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
+            }
         }
 
         private async void ToggleStatus_Click(object sender, RoutedEventArgs e)
@@ -438,12 +493,11 @@ namespace SOLUM_UI
         {
             ClearErrors(null, null);
 
-            string firstName = TxtFirstName.Text.Trim();
-            string lastName = TxtLastName.Text.Trim();
+            string firstName = TxtFirstName.Text.Trim().ToUpper();
+            string lastName = TxtLastName.Text.Trim().ToUpper();
             string email = TxtEmail.Text.Trim();
             string contactNumber = TxtContactNumber.Text.Trim();
-            string password = PwdPassword.Password;
-            string confirm = PwdConfirm.Password;
+            string password = _generatedPassword;
             bool ok = true;
 
             if (string.IsNullOrWhiteSpace(firstName))
@@ -501,16 +555,11 @@ namespace SOLUM_UI
                 else if (_allUsers.Exists(u => u.Email.ToLower() == email.ToLower()))
                 { ErrEmail.Text = "Email already registered."; ErrEmail.Visibility = Visibility.Visible; ok = false; }
 
-                // Password only required on create — there's no update-password path on this endpoint
                 if (string.IsNullOrWhiteSpace(password))
-                { ErrPassword.Text = "Required."; ErrPassword.Visibility = Visibility.Visible; ok = false; }
-                else if (password.Length < 6)
-                { ErrPassword.Text = "Min. 6 characters."; ErrPassword.Visibility = Visibility.Visible; ok = false; }
-
-                if (string.IsNullOrWhiteSpace(confirm))
-                { ErrConfirm.Text = "Required."; ErrConfirm.Visibility = Visibility.Visible; ok = false; }
-                else if (password != confirm)
-                { ErrConfirm.Text = "Passwords do not match."; ErrConfirm.Visibility = Visibility.Visible; ok = false; }
+                {
+                    GenerateNewPassword();
+                    password = _generatedPassword;
+                }
             }
 
             if (!ok)
@@ -613,13 +662,28 @@ namespace SOLUM_UI
                     return;
                 }
 
-                ToastNotification.Show("User Created", firstName + " " + lastName + " was added.", ToastType.Success);
                 AuditLogService.Instance.LogUserAdmin("created",
                     firstName + " " + lastName + " (" + email + ")",
                     MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
+
+                string createdName = firstName + " " + lastName;
+                string createdEmail = email;
+                string createdPassword = password;
+
                 ClosePanel_Click(null, null);
                 await LoadUsersAsync();
+
+                AccountCreatedDialog.Show(createdName, createdEmail, createdPassword, "ENCODER", Window.GetWindow(this));
             }
+        }
+
+        private void GenerateNewPassword()
+        {
+            _generatedPassword = PasswordGenerator.Generate(10);
+            if (TxtGeneratedPassword != null)
+                TxtGeneratedPassword.Text = _generatedPassword;
+            if (PwdGeneratedPasswordMasked != null)
+                PwdGeneratedPasswordMasked.Password = _generatedPassword;
         }
 
         private void SetPanelMode(bool editMode)
@@ -632,8 +696,6 @@ namespace SOLUM_UI
                 PnlAccountStatus.Visibility = editMode ? Visibility.Visible : Visibility.Collapsed;
             if (PnlPassword != null)
                 PnlPassword.Visibility = editMode ? Visibility.Collapsed : Visibility.Visible;
-            if (PnlConfirm != null)
-                PnlConfirm.Visibility = editMode ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void ResetForm()
@@ -641,13 +703,35 @@ namespace SOLUM_UI
             TxtFirstName.Text = string.Empty;
             TxtLastName.Text = string.Empty;
             TxtEmail.Text = string.Empty;
-            TxtEmail.IsReadOnly = false; // NEW — re-enable for the next "Add" flow
+            TxtEmail.IsReadOnly = false; // re-enable for the next "Add" flow
             TxtContactNumber.Text = string.Empty;
-            PwdPassword.Password = string.Empty;
-            PwdConfirm.Password = string.Empty;
+            GenerateNewPassword();
             if (CmbEditStatus != null) CmbEditStatus.SelectedIndex = 0;
             FormErrorBanner.Visibility = Visibility.Collapsed;
             SetPanelMode(false);
+        }
+
+        private void ToUpperBox(TextBox tb)
+        {
+            if (tb == null) return;
+            if (tb.Text != tb.Text.ToUpper())
+            {
+                int caret = tb.SelectionStart;
+                tb.Text = tb.Text.ToUpper();
+                tb.SelectionStart = Math.Min(caret + 1, tb.Text.Length);
+            }
+        }
+
+        private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ToUpperBox(TxtFirstName);
+            ClearErrors(null, null);
+        }
+
+        private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ToUpperBox(TxtLastName);
+            ClearErrors(null, null);
         }
 
         private void ClearErrors(object sender, object e)
@@ -656,9 +740,38 @@ namespace SOLUM_UI
             ErrLastName.Visibility = Visibility.Collapsed;
             ErrEmail.Visibility = Visibility.Collapsed;
             ErrContactNumber.Visibility = Visibility.Collapsed;
-            ErrPassword.Visibility = Visibility.Collapsed;
-            ErrConfirm.Visibility = Visibility.Collapsed;
             FormErrorBanner.Visibility = Visibility.Collapsed;
+        }
+
+        private void TogglePasswordMask_Click(object sender, RoutedEventArgs e)
+        {
+            _isPasswordMasked = !_isPasswordMasked;
+            if (TxtGeneratedPassword != null)
+                TxtGeneratedPassword.Visibility = _isPasswordMasked ? Visibility.Collapsed : Visibility.Visible;
+            if (PwdGeneratedPasswordMasked != null)
+                PwdGeneratedPasswordMasked.Visibility = _isPasswordMasked ? Visibility.Visible : Visibility.Collapsed;
+
+            if (IconPasswordMask != null)
+            {
+                IconPasswordMask.Data = Geometry.Parse(_isPasswordMasked
+                    ? "M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.09L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C20.87,15.39 21.89,13.78 22.46,12C20.73,7.61 16.47,4.5 12,4.5C10.5,4.5 9.09,4.75 7.79,5.2L9.64,7.05C10.37,6.69 11.16,7 12,7Z"
+                    : "M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z");
+            }
+        }
+
+        private void RegeneratePassword_Click(object sender, RoutedEventArgs e)
+        {
+            GenerateNewPassword();
+            ToastNotification.Show("Password Generated", "New temporary password generated.", ToastType.Info);
+        }
+
+        private void CopyGeneratedPassword_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(_generatedPassword))
+            {
+                Clipboard.SetText(_generatedPassword);
+                ToastNotification.Show("Copied", "Temporary password copied to clipboard.", ToastType.Success);
+            }
         }
 
         private void Name_PreviewTextInput(object sender, TextCompositionEventArgs e)

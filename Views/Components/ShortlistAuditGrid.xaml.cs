@@ -12,6 +12,7 @@ namespace SOLUM_UI.Views.Components
         public ShortlistAuditGrid()
         {
             InitializeComponent();
+            Loaded += (s, e) => AdjustColumnWidths();
         }
 
         private void ShortlistListView_SizeChanged(object sender, SizeChangedEventArgs e) => AdjustColumnWidths();
@@ -21,13 +22,37 @@ namespace SOLUM_UI.Views.Components
             double totalWidth = ShortlistListView.ActualWidth;
             if (totalWidth <= 0) return;
 
-            double fixedWidth = 36 + 46 + 76 + 64 + 110 + 95 + 90 + 170;
-            double flexibleWidth = totalWidth - fixedWidth - 25;
-            if (flexibleWidth > 200)
+            double scrollMargin = GetScrollMargin();
+            double fixedWidth = 36 + 46 + 76 + 110 + 95 + 90 + 170; // 623px
+            double flexibleWidth = Math.Max(300, totalWidth - fixedWidth - scrollMargin);
+
+            double wName = Math.Max(140, Math.Floor(flexibleWidth * 0.35));
+            double wCompliance = Math.Max(200, flexibleWidth - wName);
+
+            ColName.Width = wName;
+            ColCompliance.Width = wCompliance;
+        }
+
+        private double GetScrollMargin()
+        {
+            var sv = FindVisualChild<ScrollViewer>(ShortlistListView);
+            return (sv != null && sv.ComputedVerticalScrollBarVisibility == Visibility.Visible)
+                ? SystemParameters.VerticalScrollBarWidth
+                : 2.0;
+        }
+
+        private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+            int count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
             {
-                ColName.Width = Math.Max(130, flexibleWidth * 0.32);
-                ColCompliance.Width = Math.Max(240, flexibleWidth * 0.68);
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is T typed) return typed;
+                var sub = FindVisualChild<T>(child);
+                if (sub != null) return sub;
             }
+            return null;
         }
 
         private void Row_MouseDoubleClick(object sender, MouseButtonEventArgs e)

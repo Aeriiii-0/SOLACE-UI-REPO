@@ -212,6 +212,7 @@ namespace SOLUM_UI.ViewModels
                 RecentLogs.Clear();
                 if (logsResponse != null && logsResponse.Succeeded && logsResponse.Data?.Items != null)
                 {
+                    await AuditLogViewModel.EnsureUserCacheLoadedAsync();
                     foreach (var dto in logsResponse.Data.Items)
                         RecentLogs.Add(MapDtoToLog(dto));
                 }
@@ -284,19 +285,24 @@ namespace SOLUM_UI.ViewModels
             string status     = dto.Metadata?.Status    ?? string.Empty;
             string recordName = !string.IsNullOrWhiteSpace(targetName) ? targetName : (!string.IsNullOrWhiteSpace(targetId) ? targetId : targetType);
 
+            string resolvedName = AuditLogViewModel.ResolveUserName(userId);
+            string displayName = !string.IsNullOrWhiteSpace(resolvedName) ? resolvedName : userId;
+
             return new AuditLog
             {
-                RawActionType   = rawType,
-                Action          = MapAction(rawType),
-                Description     = BuildLogDescription(rawType, userId, recordName, status),
-                PerformedBy     = userId,
-                PerformedByRole = userRole,
-                Timestamp       = dto.Timestamp.LocalDateTime,
-                RecordId        = targetId,
-                RecordName      = recordName,
-                IpAddress       = dto.Metadata?.IpAddress ?? string.Empty,
-                Status          = status,
-                TargetType      = targetType,
+                RawActionType     = rawType,
+                Action            = MapAction(rawType),
+                Description       = BuildLogDescription(rawType, displayName, recordName, status),
+                PerformedBy       = displayName,
+                PerformedByName   = resolvedName,
+                PerformedByUserId = userId,
+                PerformedByRole   = userRole,
+                Timestamp         = dto.Timestamp.LocalDateTime,
+                RecordId          = targetId,
+                RecordName        = recordName,
+                IpAddress         = dto.Metadata?.IpAddress ?? string.Empty,
+                Status            = status,
+                TargetType        = targetType,
                 FieldChanged    = dto.Metadata?.FieldChanged ?? string.Empty,
                 OldValue        = dto.Metadata?.OldValue     ?? string.Empty,
                 NewValue        = dto.Metadata?.NewValue     ?? string.Empty,

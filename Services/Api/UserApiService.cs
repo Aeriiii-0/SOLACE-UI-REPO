@@ -51,5 +51,11 @@ namespace SOLUM_UI.Services.Api
         {
             return await ApiClient.Instance.DeleteAsync<bool>($"api/user/{id}");
         }
+
+        public async Task<BaseResponse<bool>> ResetUserPasswordAsync(Guid id, string newPassword)
+        {
+            var req = new AdminResetPasswordRequest { NewPassword = newPassword };
+            return await ApiClient.Instance.PostAsync<AdminResetPasswordRequest, bool>($"api/user/{id}/reset-password", req);
+        }
     }
 }

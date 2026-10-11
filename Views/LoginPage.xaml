@@ -182,7 +182,8 @@
                                    Foreground="#8B1A4A"
                                    TextDecorations="None"
                                    FontFamily="Segoe UI"
-                                   FontSize="12">
+                                   FontSize="12"
+                                   Click="LinkForgotPassword_Click">
                             Forgot Password?
                         </Hyperlink>
                     </TextBlock>

@@ -12,6 +12,7 @@ namespace SOLUM_UI.Views.Components
         {
             InitializeComponent();
             DataContextChanged += OnDataContextChanged;
+            Loaded += (s, e) => AdjustColumnWidths();
         }
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -53,15 +54,43 @@ namespace SOLUM_UI.Views.Components
             double totalWidth = QueueListView.ActualWidth;
             if (totalWidth <= 0) return;
 
-            double fixedWidth = ColSelect.Width + 48 + 80 + 68 + 130 + 118; // 444 + ColSelect
-            double flexibleWidth = totalWidth - fixedWidth - 25; // 25px scrollbar margin
-            if (flexibleWidth > 400)
+            double scrollMargin = GetScrollMargin();
+            double fixedWidth = ColSelect.Width + 48 + 76 + 120 + 118; // Rank(48) + Score(76) + CrossCheck(120) + Actions(118)
+            double flexibleWidth = Math.Max(500, totalWidth - fixedWidth - scrollMargin);
+
+            double wName = Math.Max(130, Math.Floor(flexibleWidth * 0.22));
+            double wIncome = Math.Max(110, Math.Floor(flexibleWidth * 0.18));
+            double wCare = Math.Max(115, Math.Floor(flexibleWidth * 0.18));
+            double wCirc = Math.Max(130, Math.Floor(flexibleWidth * 0.21));
+            double wNeeds = Math.Max(120, flexibleWidth - (wName + wIncome + wCare + wCirc));
+
+            ColName.Width = wName;
+            ColIncome.Width = wIncome;
+            ColCare.Width = wCare;
+            ColCircumstance.Width = wCirc;
+            ColNeeds.Width = wNeeds;
+        }
+
+        private double GetScrollMargin()
+        {
+            var sv = FindVisualChild<ScrollViewer>(QueueListView);
+            return (sv != null && sv.ComputedVerticalScrollBarVisibility == Visibility.Visible)
+                ? SystemParameters.VerticalScrollBarWidth
+                : 2.0;
+        }
+
+        private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+            int count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
             {
-                ColName.Width = Math.Max(140, flexibleWidth * 0.28);
-                ColIncome.Width = Math.Max(125, flexibleWidth * 0.24);
-                ColCare.Width = Math.Max(115, flexibleWidth * 0.22);
-                ColCircumstance.Width = Math.Max(135, flexibleWidth * 0.26);
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is T typed) return typed;
+                var sub = FindVisualChild<T>(child);
+                if (sub != null) return sub;
             }
+            return null;
         }
 
         private void Row_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)

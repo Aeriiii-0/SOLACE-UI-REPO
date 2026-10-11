@@ -24,9 +24,9 @@ namespace SOLUM_UI
         public static void SetIsNavActive(DependencyObject obj, bool value) => obj.SetValue(IsNavActiveProperty, value);
         public static bool GetIsNavActive(DependencyObject obj) => (bool)obj.GetValue(IsNavActiveProperty);
 
-        public static string CurrentUserName { get; set; } = "Admin User";
+        public static string CurrentUserName { get; set; } = "ADMIN USER";
         public static string CurrentUserId { get; set; } = string.Empty;
-        public static string CurrentUserRole { get; set; } = "Administrator";
+        public static string CurrentUserRole { get; set; } = "ADMINISTRATOR";
         public static string CurrentUserBarangay { get; set; } = string.Empty;
 
         public static string CurrentUserEmail { get; set; } = string.Empty;
@@ -37,22 +37,27 @@ namespace SOLUM_UI
 
         public static string ContactNumber { get; set; } = string.Empty;
 
-        public static string FullName => $"{FirstName} {LastName}".Trim();
+        public static string FullName => $"{FirstName} {LastName}".Trim().ToUpper();
 
         public static void SetCurrentUser(ApplicationUserDTO user)
         {
             if (user != null)
             {
                 CurrentUserId = user.Id != Guid.Empty ? user.Id.ToString() : (AuthApiService.Instance.CurrentUserId ?? string.Empty);
-                CurrentUserName = user.Email;
-                FirstName = user.FirstName;
-                LastName = user.LastName;
+                FirstName = user.FirstName?.ToUpper() ?? string.Empty;
+                LastName = user.LastName?.ToUpper() ?? string.Empty;
+                CurrentUserName = string.IsNullOrWhiteSpace(FullName) ? user.Email : FullName.ToUpper();
                 // Barangay is set elsewhere (e.g., during login or profile setup) - default to "ALL" for safety
                 if (string.IsNullOrWhiteSpace(CurrentUserBarangay))
                 {
                     CurrentUserBarangay = "ALL";
                 }
+                else
+                {
+                    CurrentUserBarangay = CurrentUserBarangay.ToUpper();
+                }
                 CurrentUserEmail = user.Email;
+                CurrentUserRole = (!string.IsNullOrWhiteSpace(user.Role) ? user.Role : (CurrentUserRole ?? "ADMINISTRATOR")).ToUpper();
                 ContactNumber = user.ContactNumber ?? string.Empty;
             }
             else
