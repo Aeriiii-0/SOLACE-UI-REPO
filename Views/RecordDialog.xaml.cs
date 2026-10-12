@@ -13,6 +13,7 @@ using System.Windows.Media;
 using SOLUM_UI.Models;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services.Api;
+using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
 {
@@ -483,13 +484,15 @@ namespace SOLUM_UI
             if (_savedSuccessfully) return;
             if (!HasAnyInput()) return;
 
-            var result = MessageBox.Show(
-                "You have unsaved information in this form.\n\nDiscard changes and close?",
-                "Unsaved Changes",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
+            bool discard = ActionConfirmDialog.Show(
+                title: "Unsaved Changes",
+                message: "You have unsaved information in this form. Are you sure you want to discard your changes and close?",
+                confirmText: "Discard Changes",
+                cancelText: "Keep Editing",
+                theme: ConfirmThemeType.Warning,
+                owner: this);
 
-            if (result == MessageBoxResult.No)
+            if (!discard)
             {
                 e.Cancel = true;
                 DialogShell.Visibility = Visibility.Visible;

@@ -118,14 +118,15 @@ namespace SOLUM_UI
             if (_savedSuccessfully) return;
             if (!HasAnyInput()) return;
 
-            var result = MessageBox.Show(
-                "You have unsaved information in this OCR session.\n\nDiscard and close?",
-                "Unsaved Changes",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question,
-                MessageBoxResult.No);
+            bool discard = SOLUM_UI.Views.Dialogs.ActionConfirmDialog.Show(
+                title: "Unsaved Changes",
+                message: "You have unsaved information in this OCR session. Are you sure you want to discard changes and close?",
+                confirmText: "Discard & Close",
+                cancelText: "Continue Editing",
+                theme: SOLUM_UI.Views.Dialogs.ConfirmThemeType.Warning,
+                owner: this);
 
-            if (result == MessageBoxResult.No)
+            if (!discard)
                 e.Cancel = true;
         }
 

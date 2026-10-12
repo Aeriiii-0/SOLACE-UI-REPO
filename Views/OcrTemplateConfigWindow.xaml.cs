@@ -706,8 +706,15 @@ namespace SOLUM_UI
 
         private void ResetToDefault_Click(object sender, RoutedEventArgs e)
         {
-            var res = MessageBox.Show("Are you sure you want to revert all field bounding boxes to the factory default positions?", "Revert to Default", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (res == MessageBoxResult.Yes)
+            bool isConfirmed = SOLUM_UI.Views.Dialogs.ActionConfirmDialog.Show(
+                title: "Revert to Factory Defaults",
+                message: "Are you sure you want to revert all field bounding boxes to the factory default positions?",
+                confirmText: "Revert Layout",
+                cancelText: "Cancel",
+                theme: SOLUM_UI.Views.Dialogs.ConfirmThemeType.Warning,
+                owner: this);
+
+            if (isConfirmed)
             {
                 PushUndoState();
                 LoadFactoryDefaults();
