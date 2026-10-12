@@ -753,6 +753,43 @@
                                        FontFamily="Segoe UI" FontSize="11" Foreground="#777777" TextWrapping="Wrap" Margin="0,5,0,0"/>
                         </StackPanel>
 
+                        <!-- Edit Mode: Admin Password Reset Quick Action -->
+                        <Border x:Name="PnlEditPasswordReset" Visibility="Collapsed"
+                                Background="#FFF8FA" BorderBrush="#EBD3DC" BorderThickness="1.5"
+                                CornerRadius="8" Padding="12,10" Margin="0,0,0,14">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Text="PASSWORD RESET" FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
+                                               Foreground="#702943" VerticalAlignment="Center"/>
+                                    <Path Data="M7,14A2,2 0 0,1 5,12A2,2 0 0,1 7,10A2,2 0 0,1 9,12A2,2 0 0,1 7,14M12.65,10C11.83,7.67 9.61,6 7,6A6,6 0 0,0 1,12A6,6 0 0,0 7,18C9.61,18 11.83,16.33 12.65,14H17V18H21V14H23V10H12.65Z"
+                                          Fill="#702943" Stretch="Uniform" Width="12" Height="12"
+                                          HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </Grid>
+                                <TextBlock Text="Admin password overwrite: generate and assign a new temporary password for this user without requiring their current password."
+                                           FontFamily="Segoe UI" FontSize="11" Foreground="#666666" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                <Button x:Name="BtnEditResetPassword" Content="Reset User Password" Height="32"
+                                        Cursor="Hand" Background="White" BorderBrush="#702943" BorderThickness="1.5"
+                                        Foreground="#702943" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold"
+                                        Click="EditPanelResetPassword_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="6">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#F8EBF0"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
                         <Border x:Name="FormErrorBanner" Visibility="Collapsed"
                                 Background="#FFF3F3" CornerRadius="8"
                                 BorderBrush="#FFCCCC" BorderThickness="1"

@@ -852,7 +852,7 @@
                                                         <!-- Field name -->
                                                         <Border Grid.Column="0" Background="White"
                                                                 CornerRadius="6" Padding="8,6" Margin="0,0,3,0">
-                                                            <TextBlock Text="{Binding FieldName}"
+                                                            <TextBlock Text="{Binding DisplayFieldName}"
                                                                        FontFamily="Segoe UI" FontSize="12"
                                                                        FontWeight="SemiBold" Foreground="#1A1A1A"
                                                                        TextWrapping="Wrap" VerticalAlignment="Center"/>
@@ -860,7 +860,7 @@
                                                         <!-- Previous value -->
                                                         <Border Grid.Column="1" Background="#FFE8E8"
                                                                 CornerRadius="6" Padding="8,6" Margin="3,0,3,0">
-                                                            <TextBlock Text="{Binding OldValue, TargetNullValue='—', FallbackValue='—'}"
+                                                            <TextBlock Text="{Binding DisplayOldValue, TargetNullValue='—', FallbackValue='—'}"
                                                                        FontFamily="Segoe UI" FontSize="12"
                                                                        Foreground="#DC3545" TextWrapping="Wrap"
                                                                        VerticalAlignment="Center"/>
@@ -868,7 +868,7 @@
                                                         <!-- New value -->
                                                         <Border Grid.Column="2" Background="#E8F5E9"
                                                                 CornerRadius="6" Padding="8,6" Margin="3,0,0,0">
-                                                            <TextBlock Text="{Binding NewValue, TargetNullValue='—', FallbackValue='—'}"
+                                                            <TextBlock Text="{Binding DisplayNewValue, TargetNullValue='—', FallbackValue='—'}"
                                                                        FontFamily="Segoe UI" FontSize="12"
                                                                        FontWeight="SemiBold" Foreground="#27AE60"
                                                                        TextWrapping="Wrap" VerticalAlignment="Center"/>
@@ -889,21 +889,21 @@
                                             </Grid.ColumnDefinitions>
                                             <Border Grid.Column="0" Background="White"
                                                     CornerRadius="6" Padding="8,6" Margin="0,0,3,0">
-                                                <TextBlock Text="{Binding SelectedLog.FieldChanged, TargetNullValue='—'}"
+                                                <TextBlock Text="{Binding SelectedLog.DisplayFieldChanged, TargetNullValue='—'}"
                                                            FontFamily="Segoe UI" FontSize="12"
                                                            FontWeight="SemiBold" Foreground="#1A1A1A"
                                                            TextWrapping="Wrap" VerticalAlignment="Center"/>
                                             </Border>
                                             <Border Grid.Column="1" Background="#FFE8E8"
                                                     CornerRadius="6" Padding="8,6" Margin="3,0,3,0">
-                                                <TextBlock Text="{Binding SelectedLog.OldValue, TargetNullValue='—'}"
+                                                <TextBlock Text="{Binding SelectedLog.DisplayOldValue, TargetNullValue='—'}"
                                                            FontFamily="Segoe UI" FontSize="12"
                                                            Foreground="#DC3545" TextWrapping="Wrap"
                                                            VerticalAlignment="Center"/>
                                             </Border>
                                             <Border Grid.Column="2" Background="#E8F5E9"
                                                     CornerRadius="6" Padding="8,6" Margin="3,0,0,0">
-                                                <TextBlock Text="{Binding SelectedLog.NewValue, TargetNullValue='—'}"
+                                                <TextBlock Text="{Binding SelectedLog.DisplayNewValue, TargetNullValue='—'}"
                                                            FontFamily="Segoe UI" FontSize="12"
                                                            FontWeight="SemiBold" Foreground="#27AE60"
                                                            TextWrapping="Wrap" VerticalAlignment="Center"/>

@@ -276,20 +276,35 @@ namespace SOLUM_UI.ViewModels
 
         private static AuditLog MapDtoToLog(SOLUM_UI.Models.Api.AuditLogDto dto)
         {
+            string logId      = !string.IsNullOrWhiteSpace(dto.Id) ? dto.Id : string.Empty;
             string rawType    = dto.ActionType  ?? string.Empty;
-            string userId     = dto.PerformedBy?.UserId ?? string.Empty;
-            string userRole   = dto.PerformedBy?.Role   ?? string.Empty;
-            string targetId   = dto.Target?.TargetId    ?? string.Empty;
-            string targetType = dto.Target?.TargetType  ?? string.Empty;
-            string targetName = dto.Target?.TargetName  ?? string.Empty;
-            string status     = dto.Metadata?.Status    ?? string.Empty;
+            string userId     = !string.IsNullOrWhiteSpace(dto.UserId) ? dto.UserId : (dto.PerformedBy?.UserId ?? string.Empty);
+            string userRole   = !string.IsNullOrWhiteSpace(dto.Role) ? dto.Role : (dto.PerformedBy?.Role ?? string.Empty);
+            string targetId   = !string.IsNullOrWhiteSpace(dto.TargetId) ? dto.TargetId : (dto.Target?.TargetId ?? string.Empty);
+            string targetType = !string.IsNullOrWhiteSpace(dto.TargetType) ? dto.TargetType : (dto.Target?.TargetType ?? string.Empty);
+            string targetName = !string.IsNullOrWhiteSpace(dto.TargetName) ? dto.TargetName : (dto.Target?.TargetName ?? string.Empty);
+            string ipAddress  = !string.IsNullOrWhiteSpace(dto.IpAddress) ? dto.IpAddress : (dto.Metadata?.IpAddress ?? string.Empty);
+            string status     = !string.IsNullOrWhiteSpace(dto.Status) ? dto.Status : (dto.Metadata?.Status ?? string.Empty);
             string recordName = !string.IsNullOrWhiteSpace(targetName) ? targetName : (!string.IsNullOrWhiteSpace(targetId) ? targetId : targetType);
 
             string resolvedName = AuditLogViewModel.ResolveUserName(userId);
             string displayName = !string.IsNullOrWhiteSpace(resolvedName) ? resolvedName : userId;
 
+            var changesSource = (dto.Changes != null && dto.Changes.Count > 0)
+                ? dto.Changes
+                : (dto.Metadata?.Changes ?? new List<ChangeItemDto>());
+
+            var changesList = changesSource
+                .Select(c => new ChangeDetail(
+                    c.FieldName ?? c.Field ?? string.Empty,
+                    c.OldValue,
+                    c.NewValue))
+                .ToList();
+
             return new AuditLog
             {
+                Id                = 0,
+                AuditLogId        = logId,
                 RawActionType     = rawType,
                 Action            = MapAction(rawType),
                 Description       = BuildLogDescription(rawType, displayName, recordName, status),
@@ -300,20 +315,13 @@ namespace SOLUM_UI.ViewModels
                 Timestamp         = dto.Timestamp.LocalDateTime,
                 RecordId          = targetId,
                 RecordName        = recordName,
-                IpAddress         = dto.Metadata?.IpAddress ?? string.Empty,
+                IpAddress         = ipAddress,
                 Status            = status,
                 TargetType        = targetType,
-                FieldChanged    = dto.Metadata?.FieldChanged ?? string.Empty,
-                OldValue        = dto.Metadata?.OldValue     ?? string.Empty,
-                NewValue        = dto.Metadata?.NewValue     ?? string.Empty,
-                Changes         = dto.Metadata?.Changes != null && dto.Metadata.Changes.Count > 0
-                    ? dto.Metadata.Changes
-                          .Select(c => new ChangeDetail(
-                              c.FieldName ?? string.Empty,
-                              c.OldValue,
-                              c.NewValue))
-                          .ToList()
-                    : new List<ChangeDetail>(),
+                FieldChanged      = dto.Metadata?.FieldChanged ?? string.Empty,
+                OldValue          = dto.Metadata?.OldValue     ?? string.Empty,
+                NewValue          = dto.Metadata?.NewValue     ?? string.Empty,
+                Changes           = changesList,
             };
         }
 

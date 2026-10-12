@@ -439,24 +439,37 @@ namespace SOLUM_UI.ViewModels
         // ── DTO → model ────────────────────────────────────────────────────────
         private static AuditLog MapToAuditLog(AuditLogDto dto)
         {
-            string userId     = dto.PerformedBy?.UserId ?? string.Empty;
-            string userRole   = dto.PerformedBy?.Role   ?? string.Empty;
-            string targetId   = dto.Target?.TargetId    ?? string.Empty;
-            string targetType = dto.Target?.TargetType  ?? string.Empty;
-            string targetName = dto.Target?.TargetName  ?? string.Empty;
-            string ipAddress  = dto.Metadata?.IpAddress ?? string.Empty;
-            string status     = dto.Metadata?.Status    ?? string.Empty;
-            string rawType    = dto.ActionType           ?? string.Empty;
+            string logId      = !string.IsNullOrWhiteSpace(dto.Id) ? dto.Id : string.Empty;
+            string userId     = !string.IsNullOrWhiteSpace(dto.UserId) ? dto.UserId : (dto.PerformedBy?.UserId ?? string.Empty);
+            string userRole   = !string.IsNullOrWhiteSpace(dto.Role) ? dto.Role : (dto.PerformedBy?.Role ?? string.Empty);
+            string targetId   = !string.IsNullOrWhiteSpace(dto.TargetId) ? dto.TargetId : (dto.Target?.TargetId ?? string.Empty);
+            string targetType = !string.IsNullOrWhiteSpace(dto.TargetType) ? dto.TargetType : (dto.Target?.TargetType ?? string.Empty);
+            string targetName = !string.IsNullOrWhiteSpace(dto.TargetName) ? dto.TargetName : (dto.Target?.TargetName ?? string.Empty);
+            string ipAddress  = !string.IsNullOrWhiteSpace(dto.IpAddress) ? dto.IpAddress : (dto.Metadata?.IpAddress ?? string.Empty);
+            string status     = !string.IsNullOrWhiteSpace(dto.Status) ? dto.Status : (dto.Metadata?.Status ?? string.Empty);
+            string rawType    = dto.ActionType ?? string.Empty;
 
             string resolvedName = ResolveUserName(userId);
             string displayName = !string.IsNullOrWhiteSpace(resolvedName) ? resolvedName : userId;
 
-            string recordName = !string.IsNullOrWhiteSpace(targetName) ? targetName : targetType;
+            string recordName = !string.IsNullOrWhiteSpace(targetName) ? targetName : (!string.IsNullOrWhiteSpace(targetId) ? targetId : targetType);
             string description = BuildDescription(rawType, displayName, recordName, status);
+
+            var changesSource = (dto.Changes != null && dto.Changes.Count > 0)
+                ? dto.Changes
+                : (dto.Metadata?.Changes ?? new List<ChangeItemDto>());
+
+            var changesList = changesSource
+                .Select(c => new ChangeDetail(
+                    c.FieldName ?? c.Field ?? string.Empty,
+                    c.OldValue,
+                    c.NewValue))
+                .ToList();
 
             return new AuditLog
             {
                 Id                = 0,
+                AuditLogId        = logId,
                 RawActionType     = rawType,
                 Action            = MapAction(rawType),
                 Description       = description,
@@ -473,15 +486,7 @@ namespace SOLUM_UI.ViewModels
                 FieldChanged      = dto.Metadata?.FieldChanged ?? string.Empty,
                 OldValue          = dto.Metadata?.OldValue     ?? string.Empty,
                 NewValue          = dto.Metadata?.NewValue     ?? string.Empty,
-                // Map the multi-field changes list from the API (for UPDATE actions)
-                Changes           = dto.Metadata?.Changes != null && dto.Metadata.Changes.Count > 0
-                    ? dto.Metadata.Changes
-                          .Select(c => new ChangeDetail(
-                              c.FieldName ?? string.Empty,
-                              c.OldValue,
-                              c.NewValue))
-                          .ToList()
-                    : new List<ChangeDetail>(),
+                Changes           = changesList,
             };
         }
 

@@ -340,6 +340,19 @@ namespace SOLUM_UI
             AppUser user = _allUsers.Find(u => u.Id == id);
             if (user == null) return;
 
+            await ExecutePasswordResetAsync(user);
+        }
+
+        private async void EditPanelResetPassword_Click(object sender, RoutedEventArgs e)
+        {
+            if (_editTarget == null) return;
+            await ExecutePasswordResetAsync(_editTarget);
+        }
+
+        private async Task ExecutePasswordResetAsync(AppUser user)
+        {
+            if (user == null) return;
+
             bool isConfirmed = ActionConfirmDialog.Show(
                 title: "Reset Password",
                 message: $"Are you sure you want to reset the password for {user.FullName}? A new temporary password will be generated and their existing password will be overwritten.",
@@ -694,6 +707,8 @@ namespace SOLUM_UI
 
             if (PnlAccountStatus != null)
                 PnlAccountStatus.Visibility = editMode ? Visibility.Visible : Visibility.Collapsed;
+            if (PnlEditPasswordReset != null)
+                PnlEditPasswordReset.Visibility = editMode ? Visibility.Visible : Visibility.Collapsed;
             if (PnlPassword != null)
                 PnlPassword.Visibility = editMode ? Visibility.Collapsed : Visibility.Visible;
         }

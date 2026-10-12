@@ -13,6 +13,7 @@ namespace SOLUM_UI.Models
     public class AuditLog
     {
         public int         Id              { get; set; }
+        public string      AuditLogId      { get; set; }
         public AuditAction Action          { get; set; }
 
         /// <summary>
@@ -32,6 +33,19 @@ namespace SOLUM_UI.Models
         public string      FieldChanged    { get; set; }
         public string      OldValue        { get; set; }
         public string      NewValue        { get; set; }
+
+        public string      DisplayFieldChanged => !string.IsNullOrWhiteSpace(FieldChanged)
+            ? ChangeDetail.FormatFieldNameStatic(FieldChanged)
+            : "—";
+
+        public string      DisplayOldValue => !string.IsNullOrWhiteSpace(OldValue)
+            ? ChangeDetail.FormatValueStatic(OldValue)
+            : "—";
+
+        public string      DisplayNewValue => !string.IsNullOrWhiteSpace(NewValue)
+            ? ChangeDetail.FormatValueStatic(NewValue)
+            : "—";
+
         // Metadata from the API
         public string      IpAddress       { get; set; }
         public string      Status          { get; set; }

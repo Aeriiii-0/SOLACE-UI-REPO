@@ -1,53 +1,132 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace SOLUM_UI.Models.Api
 {
     /// <summary>
-    /// Mirrors the actual API audit log document structure.
+    /// Mirrors the API audit log document structure.
+    /// Supports both root-level properties (from recent API specs)
+    /// and nested Metadata/PerformedBy/Target structures for backward compatibility.
     /// </summary>
     public class AuditLogDto
     {
-        public string          ActionType  { get; set; }
-        public AuditLogMetadata  Metadata  { get; set; }
-        public AuditLogActor   PerformedBy { get; set; }
-        public AuditLogTarget  Target      { get; set; }
-        public DateTimeOffset  Timestamp   { get; set; }
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("actionType")]
+        public string ActionType { get; set; }
+
+        [JsonProperty("timestamp")]
+        public DateTimeOffset Timestamp { get; set; }
+
+        // Root-level properties (API contract)
+        [JsonProperty("userId")]
+        public string UserId { get; set; }
+
+        [JsonProperty("role")]
+        public string Role { get; set; }
+
+        [JsonProperty("targetType")]
+        public string TargetType { get; set; }
+
+        [JsonProperty("targetId")]
+        public string TargetId { get; set; }
+
+        [JsonProperty("targetName")]
+        public string TargetName { get; set; }
+
+        [JsonProperty("ipAddress")]
+        public string IpAddress { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("changes")]
+        public List<ChangeItemDto> Changes { get; set; } = new List<ChangeItemDto>();
+
+        // Nested objects (backward compatibility)
+        [JsonProperty("metadata")]
+        public AuditLogMetadata Metadata { get; set; }
+
+        [JsonProperty("performedBy")]
+        public AuditLogActor PerformedBy { get; set; }
+
+        [JsonProperty("target")]
+        public AuditLogTarget Target { get; set; }
     }
 
     /// <summary>
-    /// A single field-level change as returned by the API in metadata.changes[].
+    /// A single field-level change as returned by the API.
+    /// Supports both "field" and "fieldName" JSON keys.
     /// </summary>
     public class ChangeItemDto
     {
-        public string FieldName { get; set; }
-        public string OldValue  { get; set; }
-        public string NewValue  { get; set; }
+        private string _fieldName;
+
+        [JsonProperty("field")]
+        public string Field
+        {
+            get => _fieldName;
+            set => _fieldName = value;
+        }
+
+        [JsonProperty("fieldName")]
+        public string FieldName
+        {
+            get => _fieldName;
+            set => _fieldName = value;
+        }
+
+        [JsonProperty("oldValue")]
+        public string OldValue { get; set; }
+
+        [JsonProperty("newValue")]
+        public string NewValue { get; set; }
     }
 
     public class AuditLogMetadata
     {
-        public string IpAddress    { get; set; }
-        public string Status       { get; set; }
-        // Legacy single-field change data (kept for backward compatibility)
+        [JsonProperty("ipAddress")]
+        public string IpAddress { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        // Legacy single-field change data
+        [JsonProperty("fieldChanged")]
         public string FieldChanged { get; set; }
-        public string OldValue     { get; set; }
-        public string NewValue     { get; set; }
-        // Multi-field change list returned by the API for UPDATE actions
+
+        [JsonProperty("oldValue")]
+        public string OldValue { get; set; }
+
+        [JsonProperty("newValue")]
+        public string NewValue { get; set; }
+
+        // Multi-field change list
+        [JsonProperty("changes")]
         public List<ChangeItemDto> Changes { get; set; } = new List<ChangeItemDto>();
     }
 
     public class AuditLogActor
     {
+        [JsonProperty("userId")]
         public string UserId { get; set; }
-        public string Role   { get; set; }
+
+        [JsonProperty("role")]
+        public string Role { get; set; }
     }
 
     public class AuditLogTarget
     {
-        public string TargetId   { get; set; }
+        [JsonProperty("targetId")]
+        public string TargetId { get; set; }
+
+        [JsonProperty("targetType")]
         public string TargetType { get; set; }
-        public string TargetName { get; set; }   // may be present
+
+        [JsonProperty("targetName")]
+        public string TargetName { get; set; }
     }
 
     /// <summary>
@@ -55,9 +134,9 @@ namespace SOLUM_UI.Models.Api
     /// </summary>
     public class PagedAuditLogsResponse
     {
-        public List<AuditLogDto> Items               { get; set; } = new List<AuditLogDto>();
-        public DateTimeOffset?   NextCursorTimestamp  { get; set; }
-        public string            NextCursorId         { get; set; }
-        public bool              HasMore              { get; set; }
+        public List<AuditLogDto> Items { get; set; } = new List<AuditLogDto>();
+        public DateTimeOffset? NextCursorTimestamp { get; set; }
+        public string NextCursorId { get; set; }
+        public bool HasMore { get; set; }
     }
 }
