@@ -535,27 +535,8 @@ namespace SOLUM_UI
                 return;
             }
 
-            // Manual entry — run identity pre-check first
-            var preCheck = new PreCheckDialog { Owner = Window.GetWindow(this) };
-            bool? preResult = preCheck.ShowDialog();
-
-            if (preResult != true)
-            {
-                if (mainWindow != null) mainWindow.MainContent.Effect = null;
-                return;
-            }
-
-            // User clicked "View Existing Record" from the duplicate banner
-            if (preCheck.ExistingRecordToView != null)
-            {
-                var viewer = new RecordViewDialog(preCheck.ExistingRecordToView) { Owner = Window.GetWindow(this) };
-                viewer.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
-                viewer.ShowDialog();
-                return;
-            }
-
-            // No duplicate — open full form pre-filled with the primary data
-            RecordDialog dialog = new RecordDialog(preCheck.PrimaryData) { Owner = Window.GetWindow(this) };
+            // Manual entry — open 3-step wizard (Step 1 performs validation & duplicate check)
+            RecordDialog dialog = new RecordDialog { Owner = Window.GetWindow(this) };
             dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)

@@ -30,12 +30,12 @@ namespace SOLUM_UI.Models.Api
             }
         }
 
-        public string Role { get; set; } = "Encoder";
+        public string Role { get; set; } = string.Empty;
     }
     public class GetApplicationUserRequest
     {
         public Guid Id { get; set; }
-        public string Role { get; set; } = "Encoder";
+        public string Role { get; set; } = string.Empty;
         public string SearchTerm { get; set; } = string.Empty;
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;

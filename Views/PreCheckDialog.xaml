@@ -485,7 +485,8 @@
                                         PhilSys Card Number (Optional)
                                     </TextBlock>
                                     <TextBox x:Name="TxtPhilSys" Style="{StaticResource FormBox}"
-                                             PreviewTextInput="NumberOnly_PreviewTextInput"
+                                             PreviewTextInput="PhilSys_PreviewTextInput"
+                                             PreviewKeyDown="PhilSys_PreviewKeyDown"
                                              TextChanged="PhilSys_TextChanged"/>
                                     <TextBlock x:Name="ErrPhilSys" Text="PhilSys number must contain digits only." Style="{StaticResource ErrorText}"/>
                                 </StackPanel>

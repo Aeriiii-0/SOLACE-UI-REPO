@@ -90,6 +90,11 @@ namespace SOLUM_UI
             e.Handled = !Regex.IsMatch(e.Text, @"^\d+$");
         }
 
+        private void PhilSys_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            e.Handled = !Regex.IsMatch(e.Text, @"^[\d\-]+$");
+        }
+
         private void Name_TextChanged(object sender, TextChangedEventArgs e)
         {
             var tb = sender as TextBox;
@@ -105,9 +110,63 @@ namespace SOLUM_UI
             HideBanner();
         }
 
+        private bool _isFormattingPhilSys = false;
+
+        private void FormatPhilSysBox(TextBox tb)
+        {
+            if (tb == null || _isFormattingPhilSys) return;
+            _isFormattingPhilSys = true;
+            try
+            {
+                string raw = tb.Text ?? "";
+                string digits = Regex.Replace(raw, @"\D", "");
+                if (digits.Length > 16) digits = digits.Substring(0, 16);
+
+                string formatted;
+                if (digits.Length > 12)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4, 4)}-{digits.Substring(8, 4)}-{digits.Substring(12)}";
+                else if (digits.Length > 8)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4, 4)}-{digits.Substring(8)}";
+                else if (digits.Length > 4)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4)}";
+                else
+                    formatted = digits;
+
+                if (raw != formatted)
+                {
+                    int caret = tb.SelectionStart;
+                    int diff = formatted.Length - raw.Length;
+                    tb.Text = formatted;
+                    tb.SelectionStart = Math.Max(0, Math.Min(formatted.Length, caret + diff));
+                }
+            }
+            finally
+            {
+                _isFormattingPhilSys = false;
+            }
+        }
+
+        private void PhilSys_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Back && sender is TextBox tb)
+            {
+                int sel = tb.SelectionStart;
+                if (sel > 0 && tb.SelectionLength == 0 && sel <= tb.Text.Length && tb.Text[sel - 1] == '-')
+                {
+                    int rem = sel - 2;
+                    if (rem >= 0)
+                    {
+                        tb.Text = tb.Text.Remove(rem, 2);
+                        tb.SelectionStart = rem;
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+
         private void PhilSys_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ToUpperBox(TxtPhilSys);
+            FormatPhilSysBox(TxtPhilSys);
             _foundRecord = null;
             HideBanner();
             if (ErrPhilSys != null) ErrPhilSys.Visibility = Visibility.Collapsed;
@@ -137,6 +196,13 @@ namespace SOLUM_UI
             if (_searching) return;
 
             if (!Validate()) return;
+
+            // If a duplicate was already found and the user clicked "Add as New Anyway", proceed
+            if (_foundRecord != null && BannerPanel.Visibility == Visibility.Visible)
+            {
+                ProceedWithForm();
+                return;
+            }
 
             await RunDuplicateCheck();
         }
@@ -199,11 +265,15 @@ namespace SOLUM_UI
                 ok = false;
             }
 
-            // PhilSys is now optional, but if provided, must contain digits only
-            if (!string.IsNullOrWhiteSpace(TxtPhilSys.Text) && !Regex.IsMatch(TxtPhilSys.Text.Trim(), @"^\d+$"))
+            // PhilSys is now optional, but if provided, must contain valid digits
+            if (!string.IsNullOrWhiteSpace(TxtPhilSys.Text))
             {
-                MarkError(TxtPhilSys, ErrPhilSys, "PhilSys number must contain digits only.");
-                ok = false;
+                string digits = Regex.Replace(TxtPhilSys.Text.Trim(), @"\D", "");
+                if (digits.Length == 0)
+                {
+                    MarkError(TxtPhilSys, ErrPhilSys, "PhilSys number must contain digits.");
+                    ok = false;
+                }
             }
 
             // Enforce barangay validation - user must have a valid barangay assigned
@@ -233,6 +303,7 @@ namespace SOLUM_UI
 
                 BaseResponse<PagedResult<SoloParentSummaryDto>> response = null;
 
+                // 1. Check PhilSys ID if provided
                 if (!string.IsNullOrWhiteSpace(philsys))
                 {
                     var philsysReq = new GetSoloParentRequest
@@ -242,13 +313,54 @@ namespace SOLUM_UI
                         PageSize  = 5
                     };
                     response = await SoloParentApiService.Instance.GetSoloParentsAsync(philsysReq);
+
+                    // If not found with raw input, try with stripped digits
+                    string philsysDigits = Regex.Replace(philsys, @"\D", "");
+                    if ((response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
+                        && philsysDigits != philsys && !string.IsNullOrWhiteSpace(philsysDigits))
+                    {
+                        var philsysDigitsReq = new GetSoloParentRequest
+                        {
+                            PhilsysId = philsysDigits,
+                            Page      = 1,
+                            PageSize  = 5
+                        };
+                        response = await SoloParentApiService.Instance.GetSoloParentsAsync(philsysDigitsReq);
+                    }
+                }
+
+                // 2. Search by First Name AND Last Name (GET /api/soloparent?firstName=Juana&lastName=Dela Cruz)
+                if (response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
+                {
+                    var nameReq = new GetSoloParentRequest
+                    {
+                        FirstName = firstName,
+                        LastName  = lastName,
+                        Page      = 1,
+                        PageSize  = 5
+                    };
+                    response = await SoloParentApiService.Instance.GetSoloParentsAsync(nameReq);
+                }
+
+                // 3. Fallback: Search by Fullname ("FirstName LastName" and "LastName FirstName")
+                if (response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
+                {
+                    string standardFullName = $"{firstName} {lastName}".Trim();
+                    var request = new GetSoloParentRequest
+                    {
+                        Fullname = standardFullName,
+                        Page     = 1,
+                        PageSize = 5
+                    };
+                    response = await SoloParentApiService.Instance.GetSoloParentsAsync(request);
                 }
 
                 if (response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
                 {
+                    string reversedFullName = $"{lastName} {firstName}".Trim();
                     var request = new GetSoloParentRequest
                     {
-                        Fullname = fullName,
+                        Fullname = reversedFullName,
                         Page     = 1,
                         PageSize = 5
                     };

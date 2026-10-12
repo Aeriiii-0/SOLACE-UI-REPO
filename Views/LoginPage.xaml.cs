@@ -102,13 +102,26 @@ namespace SOLUM_UI
                     : email;
 
                 Guid id = AuthApiService.ExtractUserIdFromToken(loginResponse.Data.Token) ?? Guid.Empty;
-                MainWindow.CurrentUserRole = AuthApiService.Instance.IsAdmin ? "Administrator" : "Encoder";
+                string assignedRole = AuthApiService.Instance.IsAdmin ? "Administrator" : "Encoder";
+                MainWindow.CurrentUserRole = assignedRole;
 
                 var userDTO = await UserApiService.Instance.GetApplicationUsersAsync(
-                        new GetApplicationUserRequest { Id = id, Page = 1, PageSize = 1 }
+                        new GetApplicationUserRequest { Id = id, Role = string.Empty, Page = 1, PageSize = 1 }
                     );
 
-                var mainWindow = new MainWindow(userDTO.Data.Items.ElementAt(0));
+                ApplicationUserDTO loggedInUser = userDTO?.Data?.Items?.FirstOrDefault() ?? new ApplicationUserDTO
+                {
+                    Id = id,
+                    Email = MainWindow.CurrentUserName,
+                    Role = assignedRole
+                };
+
+                if (string.IsNullOrWhiteSpace(loggedInUser.Role) || AuthApiService.Instance.IsAdmin)
+                {
+                    loggedInUser.Role = assignedRole;
+                }
+
+                var mainWindow = new MainWindow(loggedInUser);
                 mainWindow.Show();
                 AuditLogService.Instance.LogLogin(MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
                 ToastNotification.Show("Welcome", "Logged in as " + MainWindow.CurrentUserName + ".", ToastType.Success);

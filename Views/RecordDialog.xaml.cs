@@ -11,6 +11,8 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using SOLUM_UI.Models;
+using SOLUM_UI.Models.Api;
+using SOLUM_UI.Services.Api;
 
 namespace SOLUM_UI
 {
@@ -339,6 +341,7 @@ namespace SOLUM_UI
 
             // Identity
             LockBox(TxtLastName); LockBox(TxtFirstName); LockBox(TxtMiddleName);
+            LockCombo(CmbExtension);
             LockDate(DpBirthdate); LockBox(TxtPlaceOfBirth); LockCombo(CmbSex); LockBox(TxtPhilSys);
 
             // Background (fixed for renewal)
@@ -546,6 +549,7 @@ namespace SOLUM_UI
             TxtLastName.Text     = r.Surname       ?? string.Empty;
             TxtFirstName.Text    = r.FirstName     ?? string.Empty;
             TxtMiddleName.Text   = r.MiddleName    ?? string.Empty;
+            SetComboByContent(CmbExtension, r.ExtensionName);
             TxtPlaceOfBirth.Text = r.PlaceOfBirth  ?? string.Empty;
             TxtAddress.Text      = r.Address       ?? string.Empty;
             TxtContact.Text      = SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber ?? string.Empty);
@@ -557,6 +561,10 @@ namespace SOLUM_UI
             SetComboByContent(CmbCivilStatus, r.CivilStatus);
             SetComboByContent(CmbEducation,   r.EducationalAttainment);
             SetComboByContent(CmbBarangay,    r.Barangay);
+            if (!string.IsNullOrWhiteSpace(r.Barangay))
+            {
+                CmbBarangay.Text = r.Barangay;
+            }
 
             TxtPhilSys.Text        = r.PhilSysNumber   ?? string.Empty;
             TxtReligion.Text       = r.Religion         ?? string.Empty;
@@ -849,6 +857,89 @@ namespace SOLUM_UI
         private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)      { ToUpperBox(TxtFirstName); ClearFieldError(TxtFirstName,    ErrFirstName); }
         private void TxtMiddleName_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtMiddleName); }
 
+        private SoloParentRecord _foundRecord;
+        private bool _isFormattingPhilSys = false;
+        private bool _duplicateCheckPassed = false;
+
+        private void CmbExtension_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+        }
+
+        private void ClearBorderError(Border bdr, TextBlock lbl)
+        {
+            if (bdr != null)
+            {
+                bdr.BorderBrush     = DefaultBrush;
+                bdr.BorderThickness = DefaultThickness;
+            }
+            if (lbl != null)
+            {
+                lbl.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void CmbBarangay_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ClearBorderError(BorderBarangay, ErrBarangay);
+        }
+
+        private void CmbBarangay_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ClearBorderError(BorderBarangay, ErrBarangay);
+        }
+
+        private void PhilSys_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Back && sender is TextBox tb)
+            {
+                int sel = tb.SelectionStart;
+                if (sel > 0 && tb.SelectionLength == 0 && sel <= tb.Text.Length && tb.Text[sel - 1] == '-')
+                {
+                    int rem = sel - 2;
+                    if (rem >= 0)
+                    {
+                        tb.Text = tb.Text.Remove(rem, 2);
+                        tb.SelectionStart = rem;
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+
+        private void FormatPhilSysBox(TextBox tb)
+        {
+            if (tb == null || _isFormattingPhilSys) return;
+            _isFormattingPhilSys = true;
+            try
+            {
+                string raw = tb.Text ?? "";
+                string digits = Regex.Replace(raw, @"\D", "");
+                if (digits.Length > 16) digits = digits.Substring(0, 16);
+
+                string formatted;
+                if (digits.Length > 12)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4, 4)}-{digits.Substring(8, 4)}-{digits.Substring(12)}";
+                else if (digits.Length > 8)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4, 4)}-{digits.Substring(8)}";
+                else if (digits.Length > 4)
+                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4)}";
+                else
+                    formatted = digits;
+
+                if (raw != formatted)
+                {
+                    int caret = tb.SelectionStart;
+                    int diff = formatted.Length - raw.Length;
+                    tb.Text = formatted;
+                    tb.SelectionStart = Math.Max(0, Math.Min(formatted.Length, caret + diff));
+                }
+            }
+            finally
+            {
+                _isFormattingPhilSys = false;
+            }
+        }
+
         private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)        { ToUpperBox(TxtAddress); ClearFieldError(TxtAddress,      ErrAddress); }
         private void TxtContact_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -861,7 +952,13 @@ namespace SOLUM_UI
             FormatPhoneBox(TxtEmergencyNumber);
         }
         private void TxtPlaceOfBirth_TextChanged(object sender, TextChangedEventArgs e)   { ToUpperBox(TxtPlaceOfBirth); ClearFieldError(TxtPlaceOfBirth, ErrPlaceOfBirth); }
-        private void TxtPhilSys_TextChanged(object sender, TextChangedEventArgs e)        { ToUpperBox(TxtPhilSys); }
+        private void TxtPhilSys_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FormatPhilSysBox(TxtPhilSys);
+            ClearFieldError(TxtPhilSys, ErrPhilSys);
+            _duplicateCheckPassed = false;
+            if (DuplicateBannerPanel != null) DuplicateBannerPanel.Visibility = Visibility.Collapsed;
+        }
         private void TxtReligion_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtReligion); }
         private void TxtOccupation_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtOccupation); }
         private void TxtEmergencyContact_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyContact); }
@@ -940,15 +1037,6 @@ namespace SOLUM_UI
             if (string.IsNullOrWhiteSpace(TxtFirstName.Text))
             { MarkError(TxtFirstName, ErrFirstName, "Required."); missing.Add("First Name"); ok = false; }
 
-            if (string.IsNullOrWhiteSpace(TxtPlaceOfBirth.Text))
-            { MarkError(TxtPlaceOfBirth, ErrPlaceOfBirth, "Required."); missing.Add("Birthplace"); ok = false; }
-
-            if (CmbSex.SelectedItem == null)
-            { MarkError(CmbSex, ErrSex, "Required."); missing.Add("Sex"); ok = false; }
-
-            if (CmbCivilStatus.SelectedItem == null)
-            { MarkError(CmbCivilStatus, ErrCivilStatus, "Required."); missing.Add("Civil Status"); ok = false; }
-
             if (!DpBirthdate.SelectedDate.HasValue)
             { MarkDateError(DpBirthdate, ErrBirthdate, "Required."); missing.Add("Birthdate"); ok = false; }
             else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today)
@@ -956,18 +1044,59 @@ namespace SOLUM_UI
             else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today.AddYears(-15))
             { MarkDateError(DpBirthdate, ErrBirthdate, "Must be at least 15 years old."); missing.Add("Birthdate (must be 15+)"); ok = false; }
 
+            string philsysRaw = Regex.Replace(TxtPhilSys.Text ?? "", @"\D", "");
+            if (!string.IsNullOrWhiteSpace(philsysRaw) && philsysRaw.Length != 16)
+            {
+                MarkError(TxtPhilSys, ErrPhilSys, "PhilSys must be 16 digits (XXXX-XXXX-XXXX-XXXX).");
+                missing.Add("PhilSys Card Number (16 digits)");
+                ok = false;
+            }
+
+            if (!ok)
+                SetValidationMessage(missing);
+
+            return ok;
+        }
+
+        private bool ValidateStep2()
+        {
+            bool ok = true;
+            var missing = new List<string>();
+
+            if (CmbCivilStatus.SelectedItem == null)
+            { MarkError(CmbCivilStatus, ErrCivilStatus, "Required."); missing.Add("Civil Status"); ok = false; }
+
+            if (CmbSex.SelectedItem == null)
+            { MarkError(CmbSex, ErrSex, "Required."); missing.Add("Sex"); ok = false; }
+
+            if (string.IsNullOrWhiteSpace(TxtPlaceOfBirth.Text))
+            { MarkError(TxtPlaceOfBirth, ErrPlaceOfBirth, "Required."); missing.Add("Birthplace"); ok = false; }
+
             if (string.IsNullOrWhiteSpace(TxtAddress.Text))
             { MarkError(TxtAddress, ErrAddress, "Required."); missing.Add("Address"); ok = false; }
+
+            string brgy = (CmbBarangay.Text ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(brgy))
+            {
+                if (BorderBarangay != null)
+                {
+                    BorderBarangay.BorderBrush = ErrorBrush;
+                    BorderBarangay.BorderThickness = new Thickness(1.5);
+                }
+                if (ErrBarangay != null)
+                {
+                    ErrBarangay.Text = "Required.";
+                    ErrBarangay.Visibility = Visibility.Visible;
+                }
+                missing.Add("Barangay");
+                ok = false;
+            }
 
             string contactDigits = Regex.Replace(TxtContact.Text ?? "", @"\D", "");
             if (string.IsNullOrWhiteSpace(contactDigits))
             { MarkError(TxtContact, ErrContact, "Required."); missing.Add("Contact Number"); ok = false; }
             else if (contactDigits.Length != 11)
             { MarkError(TxtContact, ErrContact, "Must be 11 digits."); missing.Add("Contact Number (11 digits)"); ok = false; }
-
-            string barangayValue = GetComboValue(CmbBarangay);
-            if (string.IsNullOrWhiteSpace(barangayValue))
-            { MarkError(CmbBarangay, ErrBarangay, "Required."); missing.Add("Barangay"); ok = false; }
 
             if (!ok)
                 SetValidationMessage(missing);
@@ -977,9 +1106,8 @@ namespace SOLUM_UI
 
         private bool ValidateFields()
         {
-            bool ok = ValidateStep1();
+            bool ok = ValidateStep1() && ValidateStep2();
             var missing = new List<string>();
-
 
             // Family composition: every named row must be fully filled
             int rowNum = 0;
@@ -1013,56 +1141,192 @@ namespace SOLUM_UI
         private void SetValidationMessage(List<string> missing)
         {
             if (missing.Count == 0) return;
-            var sb = new StringBuilder("Missing required fields: ");
+            var sb = new StringBuilder("Missing or invalid required fields: ");
             sb.Append(string.Join(", ", missing));
             sb.Append(".");
             ValidationMessage.Text       = sb.ToString();
             ValidationMessage.Visibility = Visibility.Visible;
         }
 
-        private void Next_Click(object sender, RoutedEventArgs e)
+        private async void Next_Click(object sender, RoutedEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
-            if (!ValidateStep1()) return;
-            GoToStep(2);
+
+            if (_currentStep == 1)
+            {
+                if (!ValidateStep1()) return;
+
+                // If editing an existing record or duplicate already confirmed, continue to Step 2
+                if (_existing != null || _duplicateCheckPassed)
+                {
+                    GoToStep(2);
+                    return;
+                }
+
+                // Run Duplicate Pre-Check on Step 1
+                BtnNext.IsEnabled = false;
+                try
+                {
+                    string fName = TxtFirstName.Text.Trim();
+                    string lName = TxtLastName.Text.Trim();
+                    string philsys = TxtPhilSys.Text.Trim();
+
+                    var matches = new List<SoloParentRecord>();
+
+                    // 1. Check PhilSys if provided
+                    if (!string.IsNullOrWhiteSpace(philsys))
+                    {
+                        var philsysResp = await SoloParentApiService.Instance.GetSoloParentsAsync(new GetSoloParentRequest { PhilsysId = philsys, PageSize = 5 });
+                        if (philsysResp.Succeeded && philsysResp.Data?.Items != null)
+                        {
+                            foreach (var item in philsysResp.Data.Items)
+                            {
+                                if (!matches.Any(m => m.Id == item.Id.ToString()))
+                                {
+                                    var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
+                                    if (detailResp.Succeeded && detailResp.Data != null)
+                                    {
+                                        matches.Add(SoloParentApiService.Instance.MapToRecord(detailResp.Data));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 2. Check First Name and Last Name
+                    if (!string.IsNullOrWhiteSpace(fName) && !string.IsNullOrWhiteSpace(lName))
+                    {
+                        var nameResp = await SoloParentApiService.Instance.GetSoloParentsAsync(new GetSoloParentRequest { FirstName = fName, LastName = lName, PageSize = 5 });
+                        if (nameResp.Succeeded && nameResp.Data?.Items != null)
+                        {
+                            foreach (var item in nameResp.Data.Items)
+                            {
+                                if (!matches.Any(m => m.Id == item.Id.ToString()))
+                                {
+                                    var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
+                                    if (detailResp.Succeeded && detailResp.Data != null)
+                                    {
+                                        matches.Add(SoloParentApiService.Instance.MapToRecord(detailResp.Data));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (matches.Count > 0)
+                    {
+                        _foundRecord = matches[0];
+                        DuplicateBannerTitle.Text = $"Duplicate Found ({matches.Count} matching record{(matches.Count > 1 ? "s" : "")})";
+                        DuplicateBannerText.Text = $"An existing record exists for '{_foundRecord.Name}'" +
+                            (!string.IsNullOrWhiteSpace(_foundRecord.PhilSysNumber) ? $" with PhilSys ID {_foundRecord.PhilSysNumber}." : ".") +
+                            " You can view the existing record or continue adding this record.";
+                        DuplicateBannerPanel.Visibility = Visibility.Visible;
+                        return;
+                    }
+                }
+                catch
+                {
+                    // If network/API check fails, allow user to proceed
+                }
+                finally
+                {
+                    BtnNext.IsEnabled = true;
+                }
+
+                GoToStep(2);
+            }
+            else if (_currentStep == 2)
+            {
+                if (!ValidateStep2()) return;
+                GoToStep(3);
+            }
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
-            GoToStep(1);
+            if (_currentStep == 3)
+            {
+                GoToStep(2);
+            }
+            else if (_currentStep == 2)
+            {
+                GoToStep(1);
+            }
+        }
+
+        private void ViewExistingRecord_Click(object sender, RoutedEventArgs e)
+        {
+            if (_foundRecord != null)
+            {
+                var viewer = new SOLUM_UI.Views.Dialogs.RecordViewDialog(_foundRecord) { Owner = this };
+                viewer.ShowDialog();
+            }
+        }
+
+        private void ContinueAnyway_Click(object sender, RoutedEventArgs e)
+        {
+            _duplicateCheckPassed = true;
+            DuplicateBannerPanel.Visibility = Visibility.Collapsed;
+            GoToStep(2);
         }
 
         private void GoToStep(int step)
         {
             _currentStep = step;
-            bool onStep1 = step == 1;
 
-            ScrollStep1.Visibility = onStep1 ? Visibility.Visible  : Visibility.Collapsed;
-            ScrollStep2.Visibility = onStep1 ? Visibility.Collapsed : Visibility.Visible;
-            BtnNext.Visibility     = onStep1 ? Visibility.Visible  : Visibility.Collapsed;
-            BtnSave.Visibility     = onStep1 ? Visibility.Collapsed : Visibility.Visible;
-            BtnBack.Visibility     = onStep1 ? Visibility.Collapsed : Visibility.Visible;
+            ScrollStep1.Visibility = step == 1 ? Visibility.Visible : Visibility.Collapsed;
+            ScrollStep2.Visibility = step == 2 ? Visibility.Visible : Visibility.Collapsed;
+            ScrollStep3.Visibility = step == 3 ? Visibility.Visible : Visibility.Collapsed;
 
-            FormStepHint.Text = onStep1
-                ? "Step 1 of 2 — Personal Information"
-                : "Step 2 of 2 — Circumstances & Status";
+            BtnBack.Visibility = step > 1 ? Visibility.Visible : Visibility.Collapsed;
+            BtnNext.Visibility = step < 3 ? Visibility.Visible : Visibility.Collapsed;
+            BtnSave.Visibility = step == 3 ? Visibility.Visible : Visibility.Collapsed;
 
-            Step1Dot.Background = onStep1
-                ? new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43))
-                : new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
-
-            if (!onStep1)
+            if (step == 1)
             {
-                Step2Dot.Background      = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
+                FormStepHint.Text = "Step 1 of 3 — Primary Information";
+                Step1Dot.Background = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
+                Step1DotLabel.Foreground = new SolidColorBrush(Colors.White);
+                Step1Title.Foreground = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
+
+                Step2Dot.Background = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
+                Step2DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
+                Step2Title.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
+
+                Step3Dot.Background = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
+                Step3DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
+                Step3Title.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
+            }
+            else if (step == 2)
+            {
+                FormStepHint.Text = "Step 2 of 3 — Secondary Information";
+                Step1Dot.Background = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
+                Step1DotLabel.Foreground = new SolidColorBrush(Colors.White);
+                Step1Title.Foreground = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
+
+                Step2Dot.Background = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
                 Step2DotLabel.Foreground = new SolidColorBrush(Colors.White);
-                Step2Title.Foreground    = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
+                Step2Title.Foreground = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
+
+                Step3Dot.Background = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
+                Step3DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
+                Step3Title.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
             }
             else
             {
-                Step2Dot.Background      = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
-                Step2DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
-                Step2Title.Foreground    = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
+                FormStepHint.Text = "Step 3 of 3 — Circumstances & Family Composition";
+                Step1Dot.Background = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
+                Step1DotLabel.Foreground = new SolidColorBrush(Colors.White);
+                Step1Title.Foreground = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
+
+                Step2Dot.Background = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
+                Step2DotLabel.Foreground = new SolidColorBrush(Colors.White);
+                Step2Title.Foreground = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
+
+                Step3Dot.Background = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
+                Step3DotLabel.Foreground = new SolidColorBrush(Colors.White);
+                Step3Title.Foreground = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
             }
         }
 
@@ -1121,6 +1385,8 @@ namespace SOLUM_UI
             string surname = TxtLastName.Text.Trim();
             string first   = TxtFirstName.Text.Trim();
             string middle  = TxtMiddleName.Text.Trim();
+            string ext     = GetComboValue(CmbExtension);
+            string brgy    = !string.IsNullOrWhiteSpace(CmbBarangay.Text) ? CmbBarangay.Text.Trim() : GetComboValue(CmbBarangay);
 
             var members = new System.Collections.Generic.List<FamilyMember>();
             foreach (var item in _familyRowData)
@@ -1161,8 +1427,8 @@ namespace SOLUM_UI
                 Surname       = surname,
                 FirstName     = first,
                 MiddleName    = middle,
-                ExtensionName = string.Empty,
-                Name          = surname + ", " + first + (string.IsNullOrEmpty(middle) ? "" : " " + middle),
+                ExtensionName = ext,
+                Name          = surname + ", " + first + (string.IsNullOrEmpty(middle) ? "" : " " + middle) + (string.IsNullOrEmpty(ext) ? "" : " " + ext),
                 DateOfBirth   = DpBirthdate.SelectedDate.Value,
                 PlaceOfBirth  = TxtPlaceOfBirth.Text.Trim(),
                 Sex           = GetComboValue(CmbSex),
@@ -1173,7 +1439,7 @@ namespace SOLUM_UI
                 Weight        = string.Empty,
                 Address       = TxtAddress.Text.Trim(),
                 ContactNumber = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtContact.Text.Trim()),
-                Barangay      = GetComboValue(CmbBarangay),
+                Barangay      = brgy,
                 LastUpdated   = DateTime.Today,
 
                 IsNewApplicant      = !_isRenewal,

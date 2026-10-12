@@ -57,7 +57,14 @@ namespace SOLUM_UI
                     CurrentUserBarangay = CurrentUserBarangay.ToUpper();
                 }
                 CurrentUserEmail = user.Email;
-                CurrentUserRole = (!string.IsNullOrWhiteSpace(user.Role) ? user.Role : (CurrentUserRole ?? "ADMINISTRATOR")).ToUpper();
+                if (AuthApiService.Instance.IsAdmin)
+                {
+                    CurrentUserRole = "ADMINISTRATOR";
+                }
+                else
+                {
+                    CurrentUserRole = (!string.IsNullOrWhiteSpace(user.Role) ? user.Role : (CurrentUserRole ?? "ENCODER")).ToUpper();
+                }
                 ContactNumber = user.ContactNumber ?? string.Empty;
             }
             else

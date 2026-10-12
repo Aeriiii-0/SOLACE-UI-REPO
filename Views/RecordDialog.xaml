@@ -508,23 +508,27 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="48"/>
+                                <ColumnDefinition Width="32"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="32"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
+                            <!-- Step 1 -->
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                 <Border x:Name="Step1Dot" Width="30" Height="30" CornerRadius="15"
                                         Background="#702943">
-                                    <TextBlock Text="1" Foreground="White" FontSize="13" FontWeight="Bold"
+                                    <TextBlock x:Name="Step1DotLabel" Text="1" Foreground="White" FontSize="13" FontWeight="Bold"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="Personal Info" FontSize="13" FontWeight="Bold"
+                                    <TextBlock x:Name="Step1Title" Text="Primary Info" FontSize="13" FontWeight="Bold"
                                                Foreground="#702943"/>
-                                    <TextBlock Text="Identity, contact &amp; family" FontSize="11" Foreground="#888888"/>
+                                    <TextBlock Text="Identity &amp; verification" FontSize="11" Foreground="#888888"/>
                                 </StackPanel>
                             </StackPanel>
                             <Border Grid.Column="1" Height="2" Background="#E0E0E0"
                                     VerticalAlignment="Center" Margin="4,0"/>
+                            <!-- Step 2 -->
                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                 <Border x:Name="Step2Dot" Width="30" Height="30" CornerRadius="15"
                                         Background="#E0E0E0">
@@ -533,9 +537,25 @@
                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock x:Name="Step2Title" Text="Circumstances &amp; Status"
+                                    <TextBlock x:Name="Step2Title" Text="Secondary Info"
                                                FontSize="13" FontWeight="Bold" Foreground="#AAAAAA"/>
-                                    <TextBlock Text="Referral, needs &amp; status" FontSize="11" Foreground="#AAAAAA"/>
+                                    <TextBlock Text="Address &amp; background" FontSize="11" Foreground="#AAAAAA"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <Border Grid.Column="3" Height="2" Background="#E0E0E0"
+                                    VerticalAlignment="Center" Margin="4,0"/>
+                            <!-- Step 3 -->
+                            <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border x:Name="Step3Dot" Width="30" Height="30" CornerRadius="15"
+                                        Background="#E0E0E0">
+                                    <TextBlock x:Name="Step3DotLabel" Text="3" Foreground="#AAAAAA"
+                                               FontSize="13" FontWeight="Bold"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="Step3Title" Text="Circumstances"
+                                               FontSize="13" FontWeight="Bold" Foreground="#AAAAAA"/>
+                                    <TextBlock Text="Family &amp; circumstance" FontSize="11" Foreground="#AAAAAA"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
@@ -566,39 +586,158 @@
                                             </Grid>
                                         </Border>
 
-                                        <!-- name row (identity fields hidden - pre-filled from Phase 1) -->
+                                        <!-- Name Row -->
                                         <Grid Margin="0,0,0,12">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="10"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="1.2*"/>
                                                 <ColumnDefinition Width="10"/>
                                                 <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="110"/>
                                             </Grid.ColumnDefinitions>
-                                            <!-- Hidden: Last Name (pre-filled from Phase 1) -->
-                                            <StackPanel Grid.Column="0" Visibility="Collapsed">
-                                                <TextBlock Text="Last Name *" Style="{StaticResource FieldLabel}"/>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Last Name <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
                                                 <TextBox x:Name="TxtLastName" Style="{StaticResource FormBox}"
                                                          PreviewTextInput="NameOnly_PreviewTextInput"
                                                          TextChanged="TxtLastName_TextChanged"/>
                                                 <TextBlock x:Name="ErrLastName" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
-                                            <!-- Hidden: First Name (pre-filled from Phase 1) -->
-                                            <StackPanel Grid.Column="2" Visibility="Collapsed">
-                                                <TextBlock Text="First Name *" Style="{StaticResource FieldLabel}"/>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    First Name <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
                                                 <TextBox x:Name="TxtFirstName" Style="{StaticResource FormBox}"
                                                          PreviewTextInput="NameOnly_PreviewTextInput"
                                                          TextChanged="TxtFirstName_TextChanged"/>
                                                 <TextBlock x:Name="ErrFirstName" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
-                                            <!-- Hidden: Middle Name (pre-filled from Phase 1) -->
-                                            <StackPanel Grid.Column="4" Visibility="Collapsed">
+                                            <StackPanel Grid.Column="4">
                                                 <TextBlock Text="Middle Name" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtMiddleName" Style="{StaticResource FormBox}"
                                                          PreviewTextInput="NameOnly_PreviewTextInput"
                                                          TextChanged="TxtMiddleName_TextChanged"/>
                                             </StackPanel>
+                                            <StackPanel Grid.Column="6">
+                                                <TextBlock Text="Extension" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox x:Name="CmbExtension" Style="{StaticResource FormCombo}"
+                                                          SelectionChanged="CmbExtension_SelectionChanged">
+                                                    <ComboBoxItem Content=""/>
+                                                    <ComboBoxItem Content="Jr."/>
+                                                    <ComboBoxItem Content="Sr."/>
+                                                    <ComboBoxItem Content="II"/>
+                                                    <ComboBoxItem Content="III"/>
+                                                    <ComboBoxItem Content="IV"/>
+                                                    <ComboBoxItem Content="V"/>
+                                                </ComboBox>
+                                            </StackPanel>
                                         </Grid>
+
+                                        <!-- Birthdate, Age, PhilSys Row -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="1.4*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Birthdate <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
+                                                <Border x:Name="BorderBirthdate" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                    <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
+                                                                SelectedDateChanged="DpBirthdate_SelectedDateChanged"/>
+                                                </Border>
+                                                <TextBlock x:Name="ErrBirthdate" Text="Required." Style="{StaticResource ErrorText}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Age" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="TxtAge" Style="{StaticResource FormBox}"
+                                                         IsReadOnly="True" Background="#F0F0F0"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Text="PhilSys Card Number (Optional)" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox x:Name="TxtPhilSys" Style="{StaticResource FormBox}"
+                                                         PreviewKeyDown="PhilSys_PreviewKeyDown"
+                                                         TextChanged="TxtPhilSys_TextChanged"/>
+                                                <TextBlock x:Name="ErrPhilSys" Text="Invalid format." Style="{StaticResource ErrorText}"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Duplicate Banner in Step 1 -->
+                                        <Border x:Name="DuplicateBannerPanel" Visibility="Collapsed" CornerRadius="10"
+                                                Background="#B71C1C" Padding="16,12" Margin="0,8,0,4">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17"
+                                                        Background="#22FFFFFF" Margin="0,0,12,0" VerticalAlignment="Top">
+                                                    <TextBlock Text="&#x26A0;" FontSize="16" Foreground="White"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock x:Name="DuplicateBannerTitle" FontSize="13" FontWeight="Bold"
+                                                               Foreground="White" Text="Existing Record Found" Margin="0,0,0,3"/>
+                                                    <TextBlock x:Name="DuplicateBannerText" Foreground="White" FontSize="12"
+                                                               TextWrapping="Wrap" Opacity="0.95"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                        <Button x:Name="BtnViewExistingRecord" Content="View Existing Record"
+                                                                Height="32" Padding="14,0" Background="White" Foreground="#702943"
+                                                                FontSize="12" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand"
+                                                                Click="ViewExistingRecord_Click" Margin="0,0,10,0">
+                                                            <Button.Template>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                                                                            Padding="{TemplateBinding Padding}">
+                                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Button.Template>
+                                                        </Button>
+                                                        <Button x:Name="BtnContinueAnyway" Content="Continue to Step 2 &#x2192;"
+                                                                Height="32" Padding="14,0" Background="#33FFFFFF" Foreground="White"
+                                                                FontSize="12" FontWeight="SemiBold" BorderBrush="White" BorderThickness="1"
+                                                                Cursor="Hand" Click="ContinueAnyway_Click">
+                                                            <Button.Template>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                                                                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                                                                            Padding="{TemplateBinding Padding}">
+                                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Button.Template>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                    </StackPanel>
+                                </Border>
+
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <!-- STEP 2: Secondary Information -->
+                        <ScrollViewer x:Name="ScrollStep2" VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Background="#F4F6F9" Visibility="Collapsed">
+                            <StackPanel Margin="32,12,32,16">
+
+                                <!-- CARD: SECONDARY DEMOGRAPHIC & BACKGROUND -->
+                                <Border Style="{StaticResource CardSection}">
+                                    <StackPanel>
+                                        <Border Style="{StaticResource CardSectionHeader}">
+                                            <TextBlock Text="II. SECONDARY &amp; BACKGROUND INFORMATION" Style="{StaticResource SectionLabel}"/>
+                                        </Border>
 
                                         <!-- civil status & sex row -->
                                         <Grid Margin="0,0,0,12">
@@ -606,9 +745,13 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="10"/>
                                                 <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="1.5*"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Civil Status *" Style="{StaticResource FieldLabel}"/>
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Civil Status <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
                                                 <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
                                                           SelectionChanged="CmbCivilStatus_SelectionChanged">
                                                     <ComboBoxItem Content="Single"/>
@@ -621,7 +764,9 @@
                                                 <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
-                                                <TextBlock Text="Sex *" Style="{StaticResource FieldLabel}"/>
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Sex <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
                                                 <ComboBox x:Name="CmbSex" Style="{StaticResource FormCombo}"
                                                           SelectionChanged="CmbSex_SelectionChanged">
                                                     <ComboBoxItem Content="Male"/>
@@ -629,37 +774,84 @@
                                                 </ComboBox>
                                                 <TextBlock x:Name="ErrSex" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
-                                        </Grid>
-
-                                        <!-- birthplace & age row -->
-                                        <Grid Margin="0,0,0,12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="10"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Birthplace *" Style="{StaticResource FieldLabel}"/>
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Birthplace <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
                                                 <TextBox x:Name="TxtPlaceOfBirth" Style="{StaticResource FormBox}"
                                                          TextChanged="TxtPlaceOfBirth_TextChanged"/>
                                                 <TextBlock x:Name="ErrPlaceOfBirth" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="2">
-                                                <TextBlock Text="Age" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtAge" Style="{StaticResource FormBox}"
-                                                         IsReadOnly="True" Background="#F0F0F0"/>
-                                            </StackPanel>
                                         </Grid>
 
-                                        <!-- Hidden: Birthdate (pre-filled from Phase 1) -->
-                                        <StackPanel Visibility="Collapsed" Margin="0,0,0,0">
-                                            <TextBlock Text="Birthdate *" Style="{StaticResource FieldLabel}"/>
-                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
-                                                            SelectedDateChanged="DpBirthdate_SelectedDateChanged"/>
-                                            </Border>
-                                            <TextBlock x:Name="ErrBirthdate" Text="Required." Style="{StaticResource ErrorText}"/>
-                                        </StackPanel>
+                                        <!-- address row -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="3*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Address (House No. / Street / Subdivision / Zone or Purok) <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
+                                                <TextBox x:Name="TxtAddress" Style="{StaticResource FormBox}"
+                                                         TextChanged="TxtAddress_TextChanged"/>
+                                                <TextBlock x:Name="ErrAddress" Text="Required." Style="{StaticResource ErrorText}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Barangay <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
+                                                <Border x:Name="BorderBarangay" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                    <ComboBox x:Name="CmbBarangay"
+                                                              IsEditable="True"
+                                                              IsTextSearchEnabled="True"
+                                                              Height="44" FontSize="14"
+                                                              BorderThickness="0" Background="Transparent"
+                                                              SelectionChanged="CmbBarangay_SelectionChanged"
+                                                              TextBoxBase.TextChanged="CmbBarangay_TextChanged">
+                                                        <ComboBoxItem Content=""/>
+                                                        <ComboBoxItem Content="Biñan"/>
+                                                        <ComboBoxItem Content="Bungahan"/>
+                                                        <ComboBoxItem Content="Canlalay"/>
+                                                        <ComboBoxItem Content="Casile"/>
+                                                        <ComboBoxItem Content="De La Paz"/>
+                                                        <ComboBoxItem Content="Ganado"/>
+                                                        <ComboBoxItem Content="Langkiwa"/>
+                                                        <ComboBoxItem Content="Loma"/>
+                                                        <ComboBoxItem Content="Malaban"/>
+                                                        <ComboBoxItem Content="Malamig"/>
+                                                        <ComboBoxItem Content="Mampalasan"/>
+                                                        <ComboBoxItem Content="Platero"/>
+                                                        <ComboBoxItem Content="Poblacion"/>
+                                                        <ComboBoxItem Content="San Antonio"/>
+                                                        <ComboBoxItem Content="San Francisco"/>
+                                                        <ComboBoxItem Content="San Jose"/>
+                                                        <ComboBoxItem Content="San Vicente"/>
+                                                        <ComboBoxItem Content="Santo Domingo"/>
+                                                        <ComboBoxItem Content="Santo Niño"/>
+                                                        <ComboBoxItem Content="Santo Tomas"/>
+                                                        <ComboBoxItem Content="Soro-Soro"/>
+                                                        <ComboBoxItem Content="Timbao"/>
+                                                        <ComboBoxItem Content="Tubigan"/>
+                                                        <ComboBoxItem Content="Zapote"/>
+                                                    </ComboBox>
+                                                </Border>
+                                                <TextBlock x:Name="ErrBarangay" Text="Required." Style="{StaticResource ErrorText}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Applicant's Contact Number <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
+                                                <TextBox x:Name="TxtContact" Style="{StaticResource FormBox}"
+                                                         MaxLength="13"
+                                                         PreviewTextInput="Phone_PreviewTextInput"
+                                                         PreviewKeyDown="Phone_PreviewKeyDown"
+                                                         TextChanged="TxtContact_TextChanged"/>
+                                                <TextBlock x:Name="ErrContact" Text="Required." Style="{StaticResource ErrorText}"/>
+                                            </StackPanel>
+                                        </Grid>
 
                                         <!-- education & religion row -->
                                         <Grid Margin="0,0,0,12">
@@ -718,80 +910,14 @@
                                             </StackPanel>
                                         </Grid>
 
-                                        <!-- Hidden: PhilSys Card Number (pre-filled from Phase 1) -->
-                                        <StackPanel Visibility="Collapsed" Margin="0,0,0,0">
-                                            <TextBlock Text="PhilSys Card Number" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox x:Name="TxtPhilSys" Style="{StaticResource FormBox}"
-                                                     TextChanged="TxtPhilSys_TextChanged"/>
-                                        </StackPanel>
-
-                                        <!-- address row -->
-                                        <Grid Margin="0,0,0,12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="3*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                                <TextBlock Text="Address (House No. / Street / Subdivision / Zone or Purok) *"
-                                                           Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtAddress" Style="{StaticResource FormBox}"
-                                                         TextChanged="TxtAddress_TextChanged"/>
-                                                <TextBlock x:Name="ErrAddress" Text="Required." Style="{StaticResource ErrorText}"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="1" Margin="0,0,10,0">
-                                                <TextBlock Text="Barangay *" Style="{StaticResource FieldLabel}"/>
-                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                    <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
-                                                              BorderThickness="0" Background="Transparent">
-                                                        <ComboBoxItem Content=""/>
-                                                        <ComboBoxItem Content="Biñan"/>
-                                                        <ComboBoxItem Content="Bungahan"/>
-                                                        <ComboBoxItem Content="Canlalay"/>
-                                                        <ComboBoxItem Content="Casile"/>
-                                                        <ComboBoxItem Content="De La Paz"/>
-                                                        <ComboBoxItem Content="Ganado"/>
-                                                        <ComboBoxItem Content="Langkiwa"/>
-                                                        <ComboBoxItem Content="Loma"/>
-                                                        <ComboBoxItem Content="Malaban"/>
-                                                        <ComboBoxItem Content="Malamig"/>
-                                                        <ComboBoxItem Content="Mampalasan"/>
-                                                        <ComboBoxItem Content="Platero"/>
-                                                        <ComboBoxItem Content="Poblacion"/>
-                                                        <ComboBoxItem Content="San Antonio"/>
-                                                        <ComboBoxItem Content="San Francisco"/>
-                                                        <ComboBoxItem Content="San Jose"/>
-                                                        <ComboBoxItem Content="San Vicente"/>
-                                                        <ComboBoxItem Content="Santo Domingo"/>
-                                                        <ComboBoxItem Content="Santo Niño"/>
-                                                        <ComboBoxItem Content="Santo Tomas"/>
-                                                        <ComboBoxItem Content="Soro-Soro"/>
-                                                        <ComboBoxItem Content="Timbao"/>
-                                                        <ComboBoxItem Content="Tubigan"/>
-                                                        <ComboBoxItem Content="Zapote"/>
-                                                    </ComboBox>
-                                                </Border>
-                                                <TextBlock x:Name="ErrBarangay" Text="Required." Style="{StaticResource ErrorText}"/>
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="2">
-                                                <TextBlock Text="Applicant's Contact Number *" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtContact" Style="{StaticResource FormBox}"
-                                                         MaxLength="13"
-                                                         PreviewTextInput="Phone_PreviewTextInput"
-                                                         PreviewKeyDown="Phone_PreviewKeyDown"
-                                                         TextChanged="TxtContact_TextChanged"/>
-                                                <TextBlock x:Name="ErrContact" Text="Required." Style="{StaticResource ErrorText}"/>
-                                            </StackPanel>
-                                        </Grid>
-
                                     </StackPanel>
                                 </Border>
 
-                                <!-- CARD: II. PERSON IN CASE OF EMERGENCY -->
+                                <!-- CARD: PERSON IN CASE OF EMERGENCY -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
                                         <Border Style="{StaticResource CardSectionHeader}">
-                                            <TextBlock Text="II. PERSON IN CASE OF EMERGENCY" Style="{StaticResource SectionLabel}"/>
+                                            <TextBlock Text="III. PERSON IN CASE OF EMERGENCY" Style="{StaticResource SectionLabel}"/>
                                         </Border>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -859,8 +985,8 @@
                             </StackPanel>
                         </ScrollViewer>
 
-                        <!-- STEP 2 -->
-                        <ScrollViewer x:Name="ScrollStep2" VerticalScrollBarVisibility="Auto"
+                        <!-- STEP 3: Circumstances & Family Composition -->
+                        <ScrollViewer x:Name="ScrollStep3" VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled"
                                       Background="#F4F6F9" Visibility="Collapsed">
                             <StackPanel Margin="32,12,32,16">
