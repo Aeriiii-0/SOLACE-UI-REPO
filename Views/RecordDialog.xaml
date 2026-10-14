@@ -803,41 +803,34 @@
                                                 <TextBlock Style="{StaticResource FieldLabel}">
                                                     Barangay <Run Text="*" Foreground="#E53935"/>
                                                 </TextBlock>
-                                                <Border x:Name="BorderBarangay" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                    <ComboBox x:Name="CmbBarangay"
-                                                              IsEditable="True"
-                                                              IsTextSearchEnabled="True"
-                                                              Height="44" FontSize="14"
-                                                              BorderThickness="0" Background="Transparent"
-                                                              SelectionChanged="CmbBarangay_SelectionChanged"
-                                                              TextBoxBase.TextChanged="CmbBarangay_TextChanged">
-                                                        <ComboBoxItem Content=""/>
-                                                        <ComboBoxItem Content="Biñan"/>
-                                                        <ComboBoxItem Content="Bungahan"/>
-                                                        <ComboBoxItem Content="Canlalay"/>
-                                                        <ComboBoxItem Content="Casile"/>
-                                                        <ComboBoxItem Content="De La Paz"/>
-                                                        <ComboBoxItem Content="Ganado"/>
-                                                        <ComboBoxItem Content="Langkiwa"/>
-                                                        <ComboBoxItem Content="Loma"/>
-                                                        <ComboBoxItem Content="Malaban"/>
-                                                        <ComboBoxItem Content="Malamig"/>
-                                                        <ComboBoxItem Content="Mampalasan"/>
-                                                        <ComboBoxItem Content="Platero"/>
-                                                        <ComboBoxItem Content="Poblacion"/>
-                                                        <ComboBoxItem Content="San Antonio"/>
-                                                        <ComboBoxItem Content="San Francisco"/>
-                                                        <ComboBoxItem Content="San Jose"/>
-                                                        <ComboBoxItem Content="San Vicente"/>
-                                                        <ComboBoxItem Content="Santo Domingo"/>
-                                                        <ComboBoxItem Content="Santo Niño"/>
-                                                        <ComboBoxItem Content="Santo Tomas"/>
-                                                        <ComboBoxItem Content="Soro-Soro"/>
-                                                        <ComboBoxItem Content="Timbao"/>
-                                                        <ComboBoxItem Content="Tubigan"/>
-                                                        <ComboBoxItem Content="Zapote"/>
-                                                    </ComboBox>
-                                                </Border>
+                                                <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
+                                                          SelectionChanged="CmbBarangay_SelectionChanged">
+                                                    <ComboBoxItem Content=""/>
+                                                    <ComboBoxItem Content="Biñan"/>
+                                                    <ComboBoxItem Content="Bungahan"/>
+                                                    <ComboBoxItem Content="Canlalay"/>
+                                                    <ComboBoxItem Content="Casile"/>
+                                                    <ComboBoxItem Content="De La Paz"/>
+                                                    <ComboBoxItem Content="Ganado"/>
+                                                    <ComboBoxItem Content="Langkiwa"/>
+                                                    <ComboBoxItem Content="Loma"/>
+                                                    <ComboBoxItem Content="Malaban"/>
+                                                    <ComboBoxItem Content="Malamig"/>
+                                                    <ComboBoxItem Content="Mampalasan"/>
+                                                    <ComboBoxItem Content="Platero"/>
+                                                    <ComboBoxItem Content="Poblacion"/>
+                                                    <ComboBoxItem Content="San Antonio"/>
+                                                    <ComboBoxItem Content="San Francisco"/>
+                                                    <ComboBoxItem Content="San Jose"/>
+                                                    <ComboBoxItem Content="San Vicente"/>
+                                                    <ComboBoxItem Content="Santo Domingo"/>
+                                                    <ComboBoxItem Content="Santo Niño"/>
+                                                    <ComboBoxItem Content="Santo Tomas"/>
+                                                    <ComboBoxItem Content="Soro-Soro"/>
+                                                    <ComboBoxItem Content="Timbao"/>
+                                                    <ComboBoxItem Content="Tubigan"/>
+                                                    <ComboBoxItem Content="Zapote"/>
+                                                </ComboBox>
                                                 <TextBlock x:Name="ErrBarangay" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">

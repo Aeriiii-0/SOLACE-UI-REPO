@@ -189,6 +189,7 @@ namespace SOLUM_UI
         private readonly bool _isRenewal;
         private int _currentStep = 1;
         private bool _savedSuccessfully = false;
+        private bool _isPopulating = false;
         private readonly ObservableCollection<FamilyMemberRow> _familyRowData = new ObservableCollection<FamilyMemberRow>();
         private readonly List<Guid> _removedFamilyMemberIds = new List<Guid>();
 
@@ -549,7 +550,10 @@ namespace SOLUM_UI
 
         private void PopulateFields(SoloParentRecord r)
         {
-            TxtLastName.Text     = r.Surname       ?? string.Empty;
+            try
+            {
+                _isPopulating = true;
+                TxtLastName.Text     = r.Surname       ?? string.Empty;
             TxtFirstName.Text    = r.FirstName     ?? string.Empty;
             TxtMiddleName.Text   = r.MiddleName    ?? string.Empty;
             SetComboByContent(CmbExtension, r.ExtensionName);
@@ -564,10 +568,6 @@ namespace SOLUM_UI
             SetComboByContent(CmbCivilStatus, r.CivilStatus);
             SetComboByContent(CmbEducation,   r.EducationalAttainment);
             SetComboByContent(CmbBarangay,    r.Barangay);
-            if (!string.IsNullOrWhiteSpace(r.Barangay))
-            {
-                CmbBarangay.Text = r.Barangay;
-            }
 
             TxtPhilSys.Text        = r.PhilSysNumber   ?? string.Empty;
             TxtReligion.Text       = r.Religion         ?? string.Empty;
@@ -619,6 +619,8 @@ namespace SOLUM_UI
             else if (r.CircumstanceA6Annulment) SetComboByContent(CmbA6Declaration, "Annulment of marriage");
             else                                CmbA6Declaration.SelectedIndex = 0;
 
+            TxtBStayAbroad.Text = r.CircumstanceBStayAbroad ?? string.Empty;
+
             TxtNeeds.Text       = r.NeedsAndProblems  ?? string.Empty;
             TxtOtherIncome.Text = r.OtherIncomeSource ?? string.Empty;
 
@@ -664,6 +666,11 @@ namespace SOLUM_UI
             Circumstance_Changed(null, null);
             UpdateAge(r.DateOfBirth);
         }
+        finally
+        {
+            _isPopulating = false;
+        }
+    }
 
         private void SetComboByContent(ComboBox combo, string value)
         {
@@ -691,6 +698,10 @@ namespace SOLUM_UI
                     return;
                 }
             }
+
+            var fallbackItem = new ComboBoxItem { Content = val };
+            combo.Items.Add(fallbackItem);
+            combo.SelectedItem = fallbackItem;
         }
 
         private string GetComboValue(ComboBox combo)
@@ -819,7 +830,7 @@ namespace SOLUM_UI
 
         private void ToUpperBox(TextBox tb)
         {
-            if (tb == null) return;
+            if (_isPopulating || tb == null) return;
             if (tb.Text != tb.Text.ToUpper())
             {
                 int caret = tb.SelectionStart;
@@ -868,27 +879,9 @@ namespace SOLUM_UI
         {
         }
 
-        private void ClearBorderError(Border bdr, TextBlock lbl)
-        {
-            if (bdr != null)
-            {
-                bdr.BorderBrush     = DefaultBrush;
-                bdr.BorderThickness = DefaultThickness;
-            }
-            if (lbl != null)
-            {
-                lbl.Visibility = Visibility.Collapsed;
-            }
-        }
-
         private void CmbBarangay_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ClearBorderError(BorderBarangay, ErrBarangay);
-        }
-
-        private void CmbBarangay_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ClearBorderError(BorderBarangay, ErrBarangay);
+            ClearFieldError(CmbBarangay, ErrBarangay);
         }
 
         private void PhilSys_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -909,6 +902,22 @@ namespace SOLUM_UI
             }
         }
 
+        public static string FormatPhilSysNumber(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return "—";
+            string digits = Regex.Replace(raw, @"\D", "");
+            if (string.IsNullOrEmpty(digits)) return "—";
+            if (digits.Length > 16) digits = digits.Substring(0, 16);
+
+            if (digits.Length > 12)
+                return $"{digits.Substring(0, 4)}-{digits.Substring(4, 4)}-{digits.Substring(8, 4)}-{digits.Substring(12)}";
+            if (digits.Length > 8)
+                return $"{digits.Substring(0, 4)}-{digits.Substring(4, 4)}-{digits.Substring(8)}";
+            if (digits.Length > 4)
+                return $"{digits.Substring(0, 4)}-{digits.Substring(4)}";
+            return digits;
+        }
+
         private void FormatPhilSysBox(TextBox tb)
         {
             if (tb == null || _isFormattingPhilSys) return;
@@ -916,18 +925,8 @@ namespace SOLUM_UI
             try
             {
                 string raw = tb.Text ?? "";
-                string digits = Regex.Replace(raw, @"\D", "");
-                if (digits.Length > 16) digits = digits.Substring(0, 16);
-
-                string formatted;
-                if (digits.Length > 12)
-                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4, 4)}-{digits.Substring(8, 4)}-{digits.Substring(12)}";
-                else if (digits.Length > 8)
-                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4, 4)}-{digits.Substring(8)}";
-                else if (digits.Length > 4)
-                    formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4)}";
-                else
-                    formatted = digits;
+                string formatted = FormatPhilSysNumber(raw);
+                if (formatted == "—") formatted = "";
 
                 if (raw != formatted)
                 {
@@ -966,12 +965,12 @@ namespace SOLUM_UI
         private void TxtOccupation_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtOccupation); }
         private void TxtEmergencyContact_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyContact); }
         private void TxtEmergencyAddress_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyAddress); }
-        private void TxtA2Cause_TextChanged(object sender, TextChangedEventArgs e)        { ToUpperBox(TxtA2Cause); }
-        private void TxtA4Disability_TextChanged(object sender, TextChangedEventArgs e)   { ToUpperBox(TxtA4Disability); }
-        private void TxtA5Period_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtA5Period); }
-        private void TxtBStayAbroad_TextChanged(object sender, TextChangedEventArgs e)    { ToUpperBox(TxtBStayAbroad); }
-        private void TxtNeeds_TextChanged(object sender, TextChangedEventArgs e)          { ToUpperBox(TxtNeeds); }
-        private void TxtOtherIncome_TextChanged(object sender, TextChangedEventArgs e)    { ToUpperBox(TxtOtherIncome); }
+        private void TxtA2Cause_TextChanged(object sender, TextChangedEventArgs e)        { }
+        private void TxtA4Disability_TextChanged(object sender, TextChangedEventArgs e)   { }
+        private void TxtA5Period_TextChanged(object sender, TextChangedEventArgs e)       { }
+        private void TxtBStayAbroad_TextChanged(object sender, TextChangedEventArgs e)    { }
+        private void TxtNeeds_TextChanged(object sender, TextChangedEventArgs e)          { }
+        private void TxtOtherIncome_TextChanged(object sender, TextChangedEventArgs e)    { }
         private void CmbSex_SelectionChanged(object sender, SelectionChangedEventArgs e)         => ClearFieldError(CmbSex,         ErrSex);
         private void CmbCivilStatus_SelectionChanged(object sender, SelectionChangedEventArgs e) => ClearFieldError(CmbCivilStatus, ErrCivilStatus);
 
@@ -1078,19 +1077,10 @@ namespace SOLUM_UI
             if (string.IsNullOrWhiteSpace(TxtAddress.Text))
             { MarkError(TxtAddress, ErrAddress, "Required."); missing.Add("Address"); ok = false; }
 
-            string brgy = (CmbBarangay.Text ?? string.Empty).Trim();
+            string brgy = GetComboValue(CmbBarangay);
             if (string.IsNullOrWhiteSpace(brgy))
             {
-                if (BorderBarangay != null)
-                {
-                    BorderBarangay.BorderBrush = ErrorBrush;
-                    BorderBarangay.BorderThickness = new Thickness(1.5);
-                }
-                if (ErrBarangay != null)
-                {
-                    ErrBarangay.Text = "Required.";
-                    ErrBarangay.Visibility = Visibility.Visible;
-                }
+                MarkError(CmbBarangay, ErrBarangay, "Required.");
                 missing.Add("Barangay");
                 ok = false;
             }
@@ -1389,7 +1379,7 @@ namespace SOLUM_UI
             string first   = TxtFirstName.Text.Trim();
             string middle  = TxtMiddleName.Text.Trim();
             string ext     = GetComboValue(CmbExtension);
-            string brgy    = !string.IsNullOrWhiteSpace(CmbBarangay.Text) ? CmbBarangay.Text.Trim() : GetComboValue(CmbBarangay);
+            string brgy    = GetComboValue(CmbBarangay);
 
             var members = new System.Collections.Generic.List<FamilyMember>();
             foreach (var item in _familyRowData)
@@ -1497,136 +1487,275 @@ namespace SOLUM_UI
 
         private List<ConfirmField> BuildConfirmFields(SoloParentRecord r)
         {
-            bool isEdit = _existing != null;
-            string F(string v) => string.IsNullOrWhiteSpace(v) ? "—" : v;
+            bool isEdit = _existing != null && !string.IsNullOrEmpty(_existing.Id);
+            string F(string v) => string.IsNullOrWhiteSpace(v) ? "—" : v.Trim();
             var list = new List<ConfirmField>();
 
-            void Add(string section, string label, string newVal, string oldVal = null)
+            void AddText(string section, string label, string newVal, string oldVal)
             {
-                bool changed = isEdit && oldVal != null && oldVal != newVal;
+                string sNew = (newVal ?? "").Trim();
+                string sOld = (oldVal ?? "").Trim();
+                bool changed = isEdit && !string.Equals(sOld, sNew, StringComparison.OrdinalIgnoreCase);
+
                 list.Add(new ConfirmField
                 {
                     Section   = section,
                     Label     = label,
-                    NewValue  = F(newVal),
-                    OldValue  = oldVal != null ? F(oldVal) : null,
+                    NewValue  = F(sNew),
+                    OldValue  = isEdit ? F(sOld) : null,
                     IsChanged = changed
                 });
             }
 
+            void AddPhone(string section, string label, string newVal, string oldVal)
+            {
+                string dNew = Regex.Replace(newVal ?? "", @"\D", "");
+                string dOld = Regex.Replace(oldVal ?? "", @"\D", "");
+                bool changed = isEdit && !string.Equals(dOld, dNew, StringComparison.Ordinal);
+
+                string formattedNew = string.IsNullOrWhiteSpace(dNew) ? "—" : SOLUM_UI.Services.OcrService.FormatPhoneNumber(dNew);
+                string formattedOld = string.IsNullOrWhiteSpace(dOld) ? "—" : SOLUM_UI.Services.OcrService.FormatPhoneNumber(dOld);
+
+                list.Add(new ConfirmField
+                {
+                    Section   = section,
+                    Label     = label,
+                    NewValue  = formattedNew,
+                    OldValue  = isEdit ? formattedOld : null,
+                    IsChanged = changed
+                });
+            }
+
+            void AddPhilSys(string section, string label, string newVal, string oldVal)
+            {
+                string dNew = Regex.Replace(newVal ?? "", @"\D", "");
+                string dOld = Regex.Replace(oldVal ?? "", @"\D", "");
+                bool changed = isEdit && !string.Equals(dOld, dNew, StringComparison.Ordinal);
+
+                string formattedNew = FormatPhilSysNumber(dNew);
+                string formattedOld = FormatPhilSysNumber(dOld);
+
+                list.Add(new ConfirmField
+                {
+                    Section   = section,
+                    Label     = label,
+                    NewValue  = formattedNew,
+                    OldValue  = isEdit ? formattedOld : null,
+                    IsChanged = changed
+                });
+            }
+
+            void AddCurrency(string section, string label, string newVal, string oldVal)
+            {
+                string cNew = Regex.Replace(newVal ?? "", @"[^\d.]", "");
+                string cOld = Regex.Replace(oldVal ?? "", @"[^\d.]", "");
+
+                bool changed = false;
+                if (isEdit)
+                {
+                    if (decimal.TryParse(cNew, out var dNew) && decimal.TryParse(cOld, out var dOld))
+                        changed = dNew != dOld;
+                    else
+                        changed = !string.Equals(cNew, cOld, StringComparison.OrdinalIgnoreCase);
+                }
+
+                string formattedNew = string.IsNullOrWhiteSpace(cNew) ? "—" : "₱ " + cNew;
+                string formattedOld = string.IsNullOrWhiteSpace(cOld) ? "—" : "₱ " + cOld;
+
+                list.Add(new ConfirmField
+                {
+                    Section   = section,
+                    Label     = label,
+                    NewValue  = formattedNew,
+                    OldValue  = isEdit ? formattedOld : null,
+                    IsChanged = changed
+                });
+            }
+
+            void AddDate(string section, string label, DateTime newDt, DateTime oldDt)
+            {
+                bool hasNew = newDt != DateTime.MinValue;
+                bool hasOld = oldDt != DateTime.MinValue;
+
+                bool changed = isEdit && (hasNew != hasOld || (hasNew && hasOld && newDt.Date != oldDt.Date));
+
+                string formattedNew = hasNew ? newDt.ToString("MMMM d, yyyy") : "—";
+                string formattedOld = hasOld ? oldDt.ToString("MMMM d, yyyy") : "—";
+
+                list.Add(new ConfirmField
+                {
+                    Section   = section,
+                    Label     = label,
+                    NewValue  = formattedNew,
+                    OldValue  = isEdit ? formattedOld : null,
+                    IsChanged = changed
+                });
+            }
+
+            void AddBool(string section, string label, bool newBool, bool oldBool)
+            {
+                bool changed = isEdit && (newBool != oldBool);
+                string displayNew = newBool ? "✓ Yes" : "No";
+                string displayOld = oldBool ? "✓ Yes" : "No";
+
+                list.Add(new ConfirmField
+                {
+                    Section   = section,
+                    Label     = label,
+                    NewValue  = displayNew,
+                    OldValue  = isEdit ? displayOld : null,
+                    IsChanged = changed
+                });
+            }
+
+            // 1. Applicant Type
             string sec = "Applicant Type";
-            string appType = r.IsNewApplicant ? "New Applicant" : r.IsRenewal ? "For Renewal" : "—";
-            Add(sec, "Application Type",    appType, null);
-            Add(sec, "Date of Application", r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("MMMM d, yyyy") : "—", null);
+            string appTypeNew = r.IsNewApplicant ? "New Applicant" : r.IsRenewal ? "For Renewal" : "—";
+            string appTypeOld = _existing != null ? (_existing.IsNewApplicant ? "New Applicant" : _existing.IsRenewal ? "For Renewal" : "—") : "—";
+            AddText(sec, "Application Type", appTypeNew, appTypeOld);
+            AddDate(sec, "Date of Application", r.DateOfApplication, _existing != null ? _existing.DateOfApplication : DateTime.MinValue);
 
+            // 2. Personal Information
             sec = "Personal Information";
-            Add(sec, "Last Name",    r.Surname,       _existing?.Surname);
-            Add(sec, "First Name",   r.FirstName,     _existing?.FirstName);
-            Add(sec, "Middle Name",  r.MiddleName,    _existing?.MiddleName);
-            Add(sec, "Extension",    r.ExtensionName, _existing?.ExtensionName);
-            Add(sec, "Sex",          r.Sex,           _existing?.Sex);
-            Add(sec, "Civil Status", r.CivilStatus,   _existing?.CivilStatus);
-            Add(sec, "Date of Birth", r.DateOfBirth.ToString("MMMM d, yyyy"), _existing?.DateOfBirth.ToString("MMMM d, yyyy"));
-            Add(sec, "Age",           TxtAge.Text,     null);
-            Add(sec, "Birthplace",    r.PlaceOfBirth,  _existing?.PlaceOfBirth);
-            Add(sec, "Educational Attainment", r.EducationalAttainment, _existing?.EducationalAttainment);
-            Add(sec, "PhilSys Card No.", r.PhilSysNumber, _existing?.PhilSysNumber);
-            Add(sec, "Religion",     r.Religion,   _existing?.Religion);
-            Add(sec, "Occupation",   r.Occupation, _existing?.Occupation);
-            Add(sec, "Monthly Income", string.IsNullOrWhiteSpace(r.MonthlyIncome) ? "—" : "₱ " + r.MonthlyIncome, null);
-            Add(sec, "Employment Status", r.EmploymentStatusDisplay, null);
+            AddText(sec, "Last Name",              r.Surname,                 _existing?.Surname);
+            AddText(sec, "First Name",             r.FirstName,               _existing?.FirstName);
+            AddText(sec, "Middle Name",            r.MiddleName,              _existing?.MiddleName);
+            AddText(sec, "Extension",              r.ExtensionName,           _existing?.ExtensionName);
+            AddText(sec, "Sex",                    r.Sex,                     _existing?.Sex);
+            AddText(sec, "Civil Status",           r.CivilStatus,             _existing?.CivilStatus);
+            AddDate(sec, "Date of Birth",          r.DateOfBirth,             _existing != null ? _existing.DateOfBirth : DateTime.MinValue);
 
+            string newAge = string.IsNullOrWhiteSpace(TxtAge.Text) ? "—" : TxtAge.Text.Trim();
+            string oldAge = (_existing != null && _existing.DateOfBirth != DateTime.MinValue)
+                ? SOLUM_UI.Services.OcrService.CalculateAge(_existing.DateOfBirth).ToString()
+                : "—";
+            AddText(sec, "Age",                    newAge,                    oldAge);
+
+            AddText(sec, "Birthplace",             r.PlaceOfBirth,            _existing?.PlaceOfBirth);
+            AddText(sec, "Educational Attainment", r.EducationalAttainment,   _existing?.EducationalAttainment);
+            AddPhilSys(sec, "PhilSys Card No.",    r.PhilSysNumber,           _existing?.PhilSysNumber);
+            AddText(sec, "Religion",               r.Religion,                _existing?.Religion);
+            AddText(sec, "Occupation",             r.Occupation,              _existing?.Occupation);
+            AddCurrency(sec, "Monthly Income",     r.MonthlyIncome,           _existing?.MonthlyIncome);
+            AddText(sec, "Employment Status",      r.EmploymentStatusDisplay, _existing?.EmploymentStatusDisplay);
+
+            // 3. Address & Contact
             sec = "Address & Contact";
-            Add(sec, "Address",     r.Address,       _existing?.Address);
-            Add(sec, "Barangay",    r.Barangay,      _existing?.Barangay);
-            Add(sec, "Contact No.", r.ContactNumber, _existing?.ContactNumber);
+            AddText(sec, "Address",                r.Address,                 _existing?.Address);
+            AddText(sec, "Barangay",               r.Barangay,                _existing?.Barangay);
+            AddPhone(sec, "Contact No.",           r.ContactNumber,           _existing?.ContactNumber);
 
+            // 4. Emergency Contact
             sec = "Emergency Contact";
-            Add(sec, "Contact Person", r.EmergencyContactName,   _existing?.EmergencyContactName);
-            Add(sec, "Relationship",   r.EmergencyRelationship,  _existing?.EmergencyRelationship);
-            Add(sec, "Address",        r.EmergencyAddress,       _existing?.EmergencyAddress);
-            Add(sec, "Contact No.",    r.EmergencyContactNumber, _existing?.EmergencyContactNumber);
+            AddText(sec, "Contact Person",         r.EmergencyContactName,    _existing?.EmergencyContactName);
+            AddText(sec, "Relationship",           r.EmergencyRelationship,   _existing?.EmergencyRelationship);
+            AddText(sec, "Address",                r.EmergencyAddress,        _existing?.EmergencyAddress);
+            AddPhone(sec, "Contact No.",           r.EmergencyContactNumber,  _existing?.EmergencyContactNumber);
 
+            // 5. Circumstances
             sec = "Circumstances";
+            string oldCirc = _existing != null ? _existing.CircumstancesDisplay : "—";
+            string newCirc = r.CircumstancesDisplay;
+            bool circChanged = isEdit && !string.Equals((oldCirc ?? "").Trim(), (newCirc ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
 
-            if (r.CircumstanceA1)
-                Add(sec, "Problem Presented", "A1. Gives birth as a result of rape", null);
-
-            if (r.CircumstanceA2)
+            list.Add(new ConfirmField
             {
-                Add(sec, "Problem Presented", "A2. Death of Spouse", null);
-                Add(sec, "   Cause of death",
-                    F(r.CircumstanceA2Cause), null);
-                Add(sec, "   Date of death",
-                    r.CircumstanceA2Date != DateTime.MinValue
-                        ? r.CircumstanceA2Date.ToString("MMMM d, yyyy") : "—", null);
+                Section   = sec,
+                Label     = "Problem Presented",
+                NewValue  = string.IsNullOrWhiteSpace(newCirc) ? "None selected" : newCirc,
+                OldValue  = isEdit ? (string.IsNullOrWhiteSpace(oldCirc) ? "None selected" : oldCirc) : null,
+                IsChanged = circChanged
+            });
+
+            // 6. Family Composition
+            sec = "Family Composition";
+            string FormatMember(FamilyMember m)
+            {
+                if (m == null) return "—";
+                string name = !string.IsNullOrWhiteSpace(m.MemberName) ? m.MemberName.Trim() : "Unnamed";
+                string rel  = !string.IsNullOrWhiteSpace(m.Relationship) ? $" ({m.Relationship.Trim()})" : "";
+                string age  = !string.IsNullOrWhiteSpace(m.Age) ? $", Age {m.Age.Trim()}" : "";
+                string sex  = !string.IsNullOrWhiteSpace(m.Sex) ? $", {m.Sex.Trim()}" : "";
+                return $"{name}{rel}{age}{sex}";
             }
 
-            if (r.CircumstanceA3)
-                Add(sec, "Problem Presented", "A3. Detention of Spouse", null);
+            int newCount = r.FamilyMembers != null ? r.FamilyMembers.Count : 0;
+            int oldCount = (_existing != null && _existing.FamilyMembers != null) ? _existing.FamilyMembers.Count : 0;
 
-            if (r.CircumstanceA4)
+            if (newCount == 0 && oldCount == 0)
             {
-                Add(sec, "Problem Presented", "A4. Physical & Mental Incapacity of Spouse", null);
-                Add(sec, "   Type of disability", F(r.CircumstanceA4Disability), null);
+                list.Add(new ConfirmField
+                {
+                    Section   = sec,
+                    Label     = "Dependents",
+                    NewValue  = "None registered",
+                    OldValue  = isEdit ? "None registered" : null,
+                    IsChanged = false
+                });
             }
-
-            if (r.CircumstanceA5)
+            else
             {
-                Add(sec, "Problem Presented", "A5. Legal or de facto Separation", null);
-                Add(sec, "   Period of separation", F(r.CircumstanceA5Period), null);
-            }
-
-            if (r.CircumstanceA6)
-            {
-                string a6sub = r.CircumstanceA6Nullity ? "Nullity of marriage"
-                             : r.CircumstanceA6Annulment ? "Annulment of marriage"
-                             : "—";
-                Add(sec, "Problem Presented", "A6. Declaration of: " + a6sub, null);
-            }
-
-            if (r.CircumstanceA7)
-                Add(sec, "Problem Presented", "A7. Abandonment of spouse for at least 6 months", null);
-
-            if (r.CircumstanceB)
-            {
-                Add(sec, "Problem Presented", "B. Spouse or any family member of an OFW", null);
-                Add(sec, "   Length of stay abroad", F(r.CircumstanceBStayAbroad), null);
-            }
-
-            if (r.CircumstanceC) Add(sec, "Problem Presented", "C. Unmarried Mother or Father", null);
-            if (r.CircumstanceD) Add(sec, "Problem Presented", "D. Legal Guardian / Adoptive / Foster Parent", null);
-            if (r.CircumstanceE) Add(sec, "Problem Presented", "E. Relative within the 4th civil degree", null);
-            if (r.CircumstanceF) Add(sec, "Problem Presented", "F. Pregnant Woman", null);
-
-            if (!r.CircumstanceA1 && !r.CircumstanceA2 && !r.CircumstanceA3 && !r.CircumstanceA4 &&
-                !r.CircumstanceA5 && !r.CircumstanceA6 && !r.CircumstanceA7 && !r.CircumstanceB  &&
-                !r.CircumstanceC  && !r.CircumstanceD  && !r.CircumstanceE  && !r.CircumstanceF)
-                Add(sec, "Problem Presented", "None selected", null);
-
-            if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
-            {
-                sec = "Family Composition";
-                for (int i = 0; i < r.FamilyMembers.Count; i++)
+                for (int i = 0; i < newCount; i++)
                 {
                     var m = r.FamilyMembers[i];
                     string memberLabel = "Member " + (i + 1);
-                    string memberSummary = m.MemberName
-                        + (string.IsNullOrWhiteSpace(m.Relationship) ? "" : " (" + m.Relationship + ")")
-                        + (string.IsNullOrWhiteSpace(m.Age) ? "" : ", Age " + m.Age)
-                        + (string.IsNullOrWhiteSpace(m.Sex) ? "" : ", " + m.Sex);
-                    Add(sec, memberLabel, memberSummary, null);
+
+                    FamilyMember oldM = null;
+                    if (_existing?.FamilyMembers != null)
+                    {
+                        if (m.Id.HasValue && m.Id.Value != Guid.Empty)
+                            oldM = _existing.FamilyMembers.Find(x => x.Id == m.Id);
+                        else if (i < oldCount)
+                            oldM = _existing.FamilyMembers[i];
+                    }
+
+                    string newSummary = FormatMember(m);
+                    string oldSummary = oldM != null ? FormatMember(oldM) : null;
+                    bool memberChanged = isEdit && (oldM == null || !string.Equals(oldSummary, newSummary, StringComparison.OrdinalIgnoreCase));
+
+                    list.Add(new ConfirmField
+                    {
+                        Section   = sec,
+                        Label     = memberLabel + (isEdit && oldM == null ? " (New)" : ""),
+                        NewValue  = newSummary,
+                        OldValue  = isEdit ? (oldSummary ?? "— (Not previously recorded)") : null,
+                        IsChanged = memberChanged
+                    });
+                }
+
+                if (isEdit && _existing?.FamilyMembers != null)
+                {
+                    foreach (var oldM in _existing.FamilyMembers)
+                    {
+                        bool stillExists = r.FamilyMembers != null && r.FamilyMembers.Exists(m =>
+                            (m.Id.HasValue && oldM.Id.HasValue && m.Id.Value == oldM.Id.Value) ||
+                            string.Equals(m.MemberName, oldM.MemberName, StringComparison.OrdinalIgnoreCase));
+
+                        if (!stillExists)
+                        {
+                            list.Add(new ConfirmField
+                            {
+                                Section   = sec,
+                                Label     = "Member (Removed)",
+                                NewValue  = "— (Removed from record)",
+                                OldValue  = FormatMember(oldM),
+                                IsChanged = true
+                            });
+                        }
+                    }
                 }
             }
 
+            // 7. Needs & Income
             sec = "Needs & Income";
-            Add(sec, "Needs and Problems",      r.NeedsAndProblems,  _existing?.NeedsAndProblems);
-            Add(sec, "Other Sources of Income", r.OtherIncomeSource, _existing?.OtherIncomeSource);
+            AddText(sec, "Needs and Problems",      r.NeedsAndProblems,  _existing?.NeedsAndProblems);
+            AddText(sec, "Other Sources of Income", r.OtherIncomeSource, _existing?.OtherIncomeSource);
 
+            // 8. Additional Classifications
             sec = "Additional Classifications";
-            Add(sec, "Pantawid Beneficiary", r.IsPantawidBeneficiary ? "✓ Yes" : "No", _existing != null ? (_existing.IsPantawidBeneficiary ? "✓ Yes" : "No") : null);
-            Add(sec, "Indigenous Person",    r.IsIndigenous ? "✓ Yes" : "No",    _existing != null ? (_existing.IsIndigenous ? "✓ Yes" : "No") : null);
-            Add(sec, "LGBTQ+",               r.IsLGBT ? "✓ Yes" : "No",               _existing != null ? (_existing.IsLGBT ? "✓ Yes" : "No") : null);
+            AddBool(sec, "Pantawid Beneficiary", r.IsPantawidBeneficiary, _existing != null && _existing.IsPantawidBeneficiary);
+            AddBool(sec, "Indigenous Person",    r.IsIndigenous,          _existing != null && _existing.IsIndigenous);
+            AddBool(sec, "LGBTQ+",               r.IsLGBT,                _existing != null && _existing.IsLGBT);
 
             return list;
         }

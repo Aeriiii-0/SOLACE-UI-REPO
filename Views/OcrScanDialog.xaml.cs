@@ -1147,8 +1147,8 @@ namespace SOLUM_UI
         private void TxtOccupation_TextChanged(object sender, TextChangedEventArgs e)   { ToUpperBox(TxtOccupation); }
         private void TxtEmergencyContact_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyContact); MarkBadgeEdited(Badge_EmergencyContact, TxtConf_EmergencyContact); }
         private void TxtEmergencyAddress_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyAddress); }
-        private void TxtA2Cause_TextChanged(object sender, TextChangedEventArgs e)      { ToUpperBox(TxtA2Cause); }
-        private void TxtA4Disability_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtA4Disability); }
+        private void TxtA2Cause_TextChanged(object sender, TextChangedEventArgs e)      { }
+        private void TxtA4Disability_TextChanged(object sender, TextChangedEventArgs e) { }
 
         private void CmbSex_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

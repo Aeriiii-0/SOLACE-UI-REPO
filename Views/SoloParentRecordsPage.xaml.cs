@@ -55,6 +55,9 @@ namespace SOLUM_UI
         public SoloParentRecordsPage()
         {
             InitializeComponent();
+            if (PageLoadingOverlay != null)
+                PageLoadingOverlay.IsLoading = true;
+
             Loaded += (s, e) =>
             {
                 ApplyRoleView();

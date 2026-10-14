@@ -1377,8 +1377,11 @@
             </Button>
         </Grid>
 
-        <components:LoadingOverlay Grid.RowSpan="4" Grid.ColumnSpan="99"
+        <components:LoadingOverlay Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="99"
                                    x:Name="PageLoadingOverlay"
+                                   IsLoading="True"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Stretch"
                                    Panel.ZIndex="9999"/>
 
     </Grid>
