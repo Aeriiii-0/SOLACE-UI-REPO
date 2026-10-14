@@ -537,9 +537,9 @@ namespace SOLUM_UI.ViewModels
 
         private async Task DeleteRecordAsync(string id)
         {
-            if (IsBasicUser)
+            if (!IsAdmin)
             {
-                ToastNotification.Show("Access Denied", "Basic users cannot delete records.", ToastType.Warning);
+                ToastNotification.Show("Access Denied", "Encoders cannot delete records. Only administrators have permission to delete records.", ToastType.Warning);
                 return;
             }
             if (!Guid.TryParse(id, out var guid))

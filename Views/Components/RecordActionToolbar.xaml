@@ -147,7 +147,6 @@
             <Button x:Name="BtnDelete"
                     Width="44" Height="44" Margin="7,0,7,0"
                     Cursor="Hand" Click="Delete_Click"
-                    Visibility="{Binding IsToolbarCollapsed, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                     ToolTipService.InitialShowDelay="200"
                     ToolTipService.Placement="Right">
                 <Button.ToolTip>

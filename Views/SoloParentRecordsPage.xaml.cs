@@ -701,9 +701,9 @@ namespace SOLUM_UI
 
         private async void Delete_Click(object sender, RoutedEventArgs e)
         {
-            if (IsBasicUser)
+            if (!IsAdmin)
             {
-                ToastNotification.Show("Access Denied", "Basic users cannot delete records.", ToastType.Warning);
+                ToastNotification.Show("Access Denied", "Encoders cannot delete records. Only administrators have permission to delete records.", ToastType.Warning);
                 return;
             }
 
@@ -715,9 +715,9 @@ namespace SOLUM_UI
 
         private async Task DeleteRecordAsync(string id, string recordName)
         {
-            if (IsBasicUser)
+            if (!IsAdmin)
             {
-                ToastNotification.Show("Access Denied", "Basic users cannot delete records.", ToastType.Warning);
+                ToastNotification.Show("Access Denied", "Encoders cannot delete records. Only administrators have permission to delete records.", ToastType.Warning);
                 return;
             }
 

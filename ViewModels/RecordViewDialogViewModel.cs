@@ -76,6 +76,11 @@ namespace SOLUM_UI.ViewModels
             }
         }
 
+        /// <summary>True if the current user has permission to delete records (Admins only).</summary>
+        public bool CanDelete => MainWindow.CurrentUserRole != null &&
+                                 (MainWindow.CurrentUserRole.Equals("Administrator", StringComparison.OrdinalIgnoreCase) ||
+                                  MainWindow.CurrentUserRole.Equals("Admin", StringComparison.OrdinalIgnoreCase));
+
         /// <summary>True while the in-dialog delete-confirmation overlay is visible.</summary>
         public bool IsDeleteOverlayVisible
         {

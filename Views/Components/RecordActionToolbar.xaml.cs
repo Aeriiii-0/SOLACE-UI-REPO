@@ -16,15 +16,31 @@ namespace SOLUM_UI.Views.Components
         public RecordActionToolbar()
         {
             InitializeComponent();
+            Loaded += (s, e) => UpdateDeleteButtonVisibility();
+        }
+
+        private void UpdateDeleteButtonVisibility()
+        {
+            if (BtnDelete == null) return;
+            bool isAdmin = MainWindow.CurrentUserRole != null &&
+                           (MainWindow.CurrentUserRole.Equals("Administrator", System.StringComparison.OrdinalIgnoreCase) ||
+                            MainWindow.CurrentUserRole.Equals("Admin", System.StringComparison.OrdinalIgnoreCase));
+
+            if (!isAdmin)
+            {
+                BtnDelete.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                BtnDelete.Visibility = (Vm != null && Vm.IsToolbarCollapsed) ? Visibility.Collapsed : Visibility.Visible;
+            }
         }
 
         // ── Toolbar toggle ────────────────────────────────────────────────────
         private void BtnToolbarToggle_Click(object sender, RoutedEventArgs e)
         {
             Vm?.HandleToolbarToggle();
-            // Button visibility (BtnRenew / BtnEdit / BtnDelete) is driven by
-            // XAML bindings to IsToolbarCollapsed — no manual Visibility
-            // assignments are needed here.
+            UpdateDeleteButtonVisibility();
             // ActionToolbar.Width stays fixed at 58 (both states) per original.
             if (ActionToolbar == null) return;
             ActionToolbar.Width = 58;
@@ -70,6 +86,11 @@ namespace SOLUM_UI.Views.Components
         // ── Delete (shows overlay) ────────────────────────────────────────────
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
+            bool isAdmin = MainWindow.CurrentUserRole != null &&
+                           (MainWindow.CurrentUserRole.Equals("Administrator", System.StringComparison.OrdinalIgnoreCase) ||
+                            MainWindow.CurrentUserRole.Equals("Admin", System.StringComparison.OrdinalIgnoreCase));
+            if (!isAdmin) return;
+
             // VM sets IsDeleteOverlayVisible = true.
             // The overlay's Visibility is bound to that property in the parent XAML.
             Vm?.HandleDeleteRequest();
