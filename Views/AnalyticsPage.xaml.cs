@@ -49,6 +49,7 @@ namespace SOLUM_UI
                 Loaded += async (s, e) => 
                 {
                     System.Diagnostics.Debug.WriteLine("→ Page Loaded event firing, calling LoadDataAsync...");
+                    InitFilterControls();
                     await LoadDataAsync();
                     SuppressDatePickerWatermarks();
                 };
@@ -64,48 +65,271 @@ namespace SOLUM_UI
             }
         }
 
-        private async System.Threading.Tasks.Task LoadDataAsync()
+        private void InitFilterControls()
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("→ LoadDataAsync started");
-                
-                // Use ViewModel's current date range (defaults to current month)
-                int year = _vm.StartDate.HasValue ? _vm.StartDate.Value.Year : DateTime.Today.Year;
-                int month = _vm.StartDate.HasValue ? _vm.StartDate.Value.Month : DateTime.Today.Month;
-                string barangay = _vm?.SelectedBarangay ?? "ALL";
+                var cmbYearlyYear = this.FindName("CmbYearlyYear") as ComboBox;
+                var cmbMonthlyYear = this.FindName("CmbMonthlyYear") as ComboBox;
+                var cmbQuarterlyYear = this.FindName("CmbQuarterlyYear") as ComboBox;
+                var cmbMonthlyMonth = this.FindName("CmbMonthlyMonth") as ComboBox;
+                var cmbQuarterlyQuarter = this.FindName("CmbQuarterlyQuarter") as ComboBox;
+                var cmbPeriodType = this.FindName("CmbPeriodType") as ComboBox;
 
-                System.Diagnostics.Debug.WriteLine($"  Calling API: year={year}, month={month}, barangay={barangay}");
-                
-                var response = await AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(
-                    year, month, barangay,
-                    _vm?.StartDate, _vm?.EndDate);
+                int currentYear = DateTime.Today.Year;
+                int currentMonth = DateTime.Today.Month;
+                int currentQuarter = (currentMonth - 1) / 3;
 
-                System.Diagnostics.Debug.WriteLine($"  API Response succeeded: {response.Succeeded}");
-                
-                if (response.Succeeded && response.Data != null)
+                if (cmbYearlyYear != null && cmbYearlyYear.Items.Count == 0)
                 {
-                    System.Diagnostics.Debug.WriteLine($"  Loading data into ViewModel...");
-                    _vm.LoadFromAnalyticsDto(response.Data);
-                    System.Diagnostics.Debug.WriteLine($"✓ Data loaded. BarangayData count: {_vm.BarangayData.Count}, AllBarangayData count: {_vm.AllBarangayData.Count}");
+                    for (int y = currentYear + 1; y >= 2020; y--)
+                    {
+                        cmbYearlyYear.Items.Add(y);
+                    }
+                    cmbYearlyYear.SelectedItem = currentYear;
                 }
-                else if (!response.Succeeded)
+
+                if (cmbMonthlyYear != null && cmbMonthlyYear.Items.Count == 0)
                 {
-                    string errorMsg = response.Errors != null && response.Errors.Count > 0
-                        ? string.Join("\n", response.Errors)
-                        : "Unable to load analytics data.";
-                    System.Diagnostics.Debug.WriteLine($"✗ API Error: {errorMsg}");
-                    MessageBox.Show(errorMsg, "Load Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    for (int y = currentYear + 1; y >= 2020; y--)
+                    {
+                        cmbMonthlyYear.Items.Add(y);
+                    }
+                    cmbMonthlyYear.SelectedItem = currentYear;
                 }
-                else
+
+                if (cmbQuarterlyYear != null && cmbQuarterlyYear.Items.Count == 0)
                 {
-                    System.Diagnostics.Debug.WriteLine($"✗ API returned null data");
+                    for (int y = currentYear + 1; y >= 2020; y--)
+                    {
+                        cmbQuarterlyYear.Items.Add(y);
+                    }
+                    cmbQuarterlyYear.SelectedItem = currentYear;
+                }
+
+                if (cmbMonthlyMonth != null && cmbMonthlyMonth.SelectedIndex < 0)
+                {
+                    cmbMonthlyMonth.SelectedIndex = currentMonth - 1;
+                }
+
+                if (cmbQuarterlyQuarter != null && cmbQuarterlyQuarter.SelectedIndex < 0)
+                {
+                    cmbQuarterlyQuarter.SelectedIndex = currentQuarter;
+                }
+
+                if (cmbPeriodType != null && cmbPeriodType.SelectedIndex < 0)
+                {
+                    cmbPeriodType.SelectedIndex = 0; // Default: By Monthly
                 }
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"InitFilterControls error: {ex.Message}");
+            }
+        }
+
+        private async System.Threading.Tasks.Task LoadDataAsync()
+        {
+            await FetchAndPopulateAnalyticsAsync(showErrors: false);
+        }
+
+        private async System.Threading.Tasks.Task ApplyFiltersAsync()
+        {
+            await FetchAndPopulateAnalyticsAsync(showErrors: true);
+        }
+
+        private void SyncFilterValuesFromUi()
+        {
+            try
+            {
+                var cmbPeriodType = this.FindName("CmbPeriodType") as ComboBox;
+                if (cmbPeriodType?.SelectedItem is ComboBoxItem periodItem && periodItem.Tag is string tag)
+                {
+                    _vm.FilterType = tag;
+                }
+
+                var cmbYearlyYear = this.FindName("CmbYearlyYear") as ComboBox;
+                if (cmbYearlyYear?.SelectedItem is int yYear)
+                {
+                    if (_vm.FilterType == "Yearly")
+                        _vm.SelectedYear = yYear;
+                }
+
+                var cmbMonthlyYear = this.FindName("CmbMonthlyYear") as ComboBox;
+                if (cmbMonthlyYear?.SelectedItem is int mYear)
+                {
+                    if (_vm.FilterType == "Monthly")
+                        _vm.SelectedYear = mYear;
+                }
+
+                var cmbMonthlyMonth = this.FindName("CmbMonthlyMonth") as ComboBox;
+                if (cmbMonthlyMonth != null && cmbMonthlyMonth.SelectedIndex >= 0)
+                {
+                    _vm.SelectedMonth = cmbMonthlyMonth.SelectedIndex + 1;
+                }
+
+                var cmbQuarterlyYear = this.FindName("CmbQuarterlyYear") as ComboBox;
+                if (cmbQuarterlyYear?.SelectedItem is int qYear)
+                {
+                    if (_vm.FilterType == "Quarterly")
+                        _vm.SelectedYear = qYear;
+                }
+
+                var cmbQuarterlyQuarter = this.FindName("CmbQuarterlyQuarter") as ComboBox;
+                if (cmbQuarterlyQuarter != null && cmbQuarterlyQuarter.SelectedIndex >= 0)
+                {
+                    _vm.SelectedQuarter = cmbQuarterlyQuarter.SelectedIndex + 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SyncFilterValuesFromUi error: {ex.Message}");
+            }
+        }
+
+        private async System.Threading.Tasks.Task FetchAndPopulateAnalyticsAsync(bool showErrors)
+        {
+            try
+            {
+                if (_vm == null) return;
+                _vm.IsLoading = true;
+
+                // Sync current UI selections into _vm
+                SyncFilterValuesFromUi();
+                _vm.UpdateActiveFilterSummary();
+
+                string barangay = _vm.SelectedBarangay ?? "ALL";
+                if (string.IsNullOrWhiteSpace(barangay) || barangay.Equals("All", StringComparison.OrdinalIgnoreCase))
+                    barangay = "ALL";
+
+                string filterType = _vm.FilterType ?? "Monthly";
+                int targetYear = _vm.SelectedYear;
+                int targetMonth = _vm.SelectedMonth;
+                int? queryQuarter = null;
+                int? queryMonth = null;
+                string queryBreakdownType = null;
+                DateTime? start = _vm.StartDate;
+                DateTime? end = _vm.EndDate;
+                int? startYear = null;
+                int? startMonth = null;
+                int? endYear = null;
+                int? endMonth = null;
+
+                switch (filterType)
+                {
+                    case "Yearly":
+                        queryBreakdownType = "1";
+                        targetYear = _vm.SelectedYear;
+                        targetMonth = (_vm.SelectedYear == DateTime.Today.Year) ? DateTime.Today.Month : 12;
+                        start = new DateTime(targetYear, 1, 1);
+                        end = new DateTime(targetYear, 12, 31);
+                        _vm.StartDate = start;
+                        _vm.EndDate = end;
+                        break;
+
+                    case "Quarterly":
+                        queryBreakdownType = "2";
+                        queryQuarter = _vm.SelectedQuarter;
+                        targetYear = _vm.SelectedYear;
+                        int sMonth = (_vm.SelectedQuarter - 1) * 3 + 1;
+                        int eMonth = _vm.SelectedQuarter * 3;
+                        targetMonth = eMonth;
+                        start = new DateTime(targetYear, sMonth, 1);
+                        end = new DateTime(targetYear, eMonth, DateTime.DaysInMonth(targetYear, eMonth));
+                        _vm.StartDate = start;
+                        _vm.EndDate = end;
+                        break;
+
+                    case "CustomRange":
+                        queryBreakdownType = "4";
+                        if (!start.HasValue) start = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                        if (!end.HasValue) end = DateTime.Today;
+                        if (end < start) end = start;
+
+                        _vm.StartDate = start;
+                        _vm.EndDate = end;
+                        startYear = start.Value.Year;
+                        startMonth = start.Value.Month;
+                        endYear = end.Value.Year;
+                        endMonth = end.Value.Month;
+                        targetYear = endYear.Value;
+                        targetMonth = endMonth.Value;
+                        break;
+
+                    case "Monthly":
+                    default:
+                        queryBreakdownType = "3";
+                        targetYear = _vm.SelectedYear;
+                        targetMonth = _vm.SelectedMonth;
+                        queryMonth = targetMonth;
+                        start = new DateTime(targetYear, targetMonth, 1);
+                        end = new DateTime(targetYear, targetMonth, DateTime.DaysInMonth(targetYear, targetMonth));
+                        _vm.StartDate = start;
+                        _vm.EndDate = end;
+                        break;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"→ FetchAndPopulateAnalyticsAsync: type={queryBreakdownType}, year={targetYear}, month={targetMonth}, quarter={queryQuarter}, barangay={barangay}");
+
+                // Concurrently fetch all 3 endpoints
+                var dashboardTask = AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
+                var monthlyTask = AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(targetYear, targetMonth, barangay, start, end);
+                var breakdownTask = AnalyticsApiService.Instance.GetBarangayBreakdownAsync(
+                    quarter: queryQuarter,
+                    year: targetYear,
+                    month: queryMonth,
+                    barangay: barangay,
+                    type: queryBreakdownType,
+                    startYear: startYear,
+                    startMonth: startMonth,
+                    endYear: endYear,
+                    endMonth: endMonth,
+                    startDate: start,
+                    endDate: end);
+
+                await System.Threading.Tasks.Task.WhenAll(dashboardTask, monthlyTask, breakdownTask);
+
+                var dashRes = await dashboardTask;
+                if (dashRes != null && dashRes.Succeeded && dashRes.Data != null)
+                {
+                    _vm.LoadDashboardDto(dashRes.Data);
+                    System.Diagnostics.Debug.WriteLine($"✓ Dashboard KPIs loaded: TotalRegistered={dashRes.Data.TotalRegistered}, Active={dashRes.Data.ActiveRecords}");
+                }
+
+                var monthRes = await monthlyTask;
+                if (monthRes != null && monthRes.Succeeded && monthRes.Data != null)
+                {
+                    _vm.LoadFromAnalyticsDto(monthRes.Data);
+                    System.Diagnostics.Debug.WriteLine($"✓ Monthly data loaded: TotalSoloParents={monthRes.Data.TotalSoloParents}");
+                }
+                else if (showErrors && monthRes != null && !monthRes.Succeeded)
+                {
+                    string errorMsg = monthRes.Errors != null && monthRes.Errors.Count > 0
+                        ? string.Join("\n", monthRes.Errors)
+                        : "Unable to load analytics data.";
+                    MessageBox.Show(errorMsg, "Filter Result", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
+                var breakdownRes = await breakdownTask;
+                if (breakdownRes != null && breakdownRes.Succeeded && breakdownRes.Data != null)
+                {
+                    _vm.LoadBarangayBreakdownDto(breakdownRes.Data);
+                    System.Diagnostics.Debug.WriteLine($"✓ Barangay breakdown loaded: {breakdownRes.Data.Barangays?.Count ?? 0} barangays");
+                }
+
+                _vm.UpdateActiveFilterSummary();
+            }
+            catch (Exception ex)
+            {
                 System.Diagnostics.Debug.WriteLine($"✗ Analytics load error: {ex.Message}\n{ex.StackTrace}");
-                MessageBox.Show($"Analytics load error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (showErrors)
+                {
+                    MessageBox.Show($"Analytics load error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            finally
+            {
+                if (_vm != null) _vm.IsLoading = false;
             }
         }
 
@@ -159,16 +383,38 @@ namespace SOLUM_UI
         {
             try
             {
-                var popup = this.FindName("FilterPopup") as Popup;
-                if (popup != null)
+                var overlay = this.FindName("FilterModalOverlay") as Grid;
+                if (overlay != null)
                 {
-                    popup.IsOpen = !popup.IsOpen;
+                    overlay.Visibility = (overlay.Visibility == Visibility.Visible) ? Visibility.Collapsed : Visibility.Visible;
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"FilterDrop_Click error: {ex.Message}");
             }
+        }
+
+        private void FilterModalOverlay_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource == sender)
+            {
+                var overlay = this.FindName("FilterModalOverlay") as Grid;
+                if (overlay != null)
+                    overlay.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void FilterModalCard_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void FilterModalClose_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var overlay = this.FindName("FilterModalOverlay") as Grid;
+            if (overlay != null)
+                overlay.Visibility = Visibility.Collapsed;
         }
 
         private void FilterCombo_Changed(object sender, SelectionChangedEventArgs e)
@@ -200,22 +446,90 @@ namespace SOLUM_UI
             }
         }
 
+        private void CmbPeriodType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                var cmb = this.FindName("CmbPeriodType") as ComboBox;
+                var pnlYearly = this.FindName("PnlYearly") as StackPanel;
+                var pnlMonthly = this.FindName("PnlMonthly") as StackPanel;
+                var pnlQuarterly = this.FindName("PnlQuarterly") as StackPanel;
+                var pnlCustomRange = this.FindName("PnlCustomRange") as StackPanel;
+
+                if (cmb == null || pnlYearly == null || pnlMonthly == null || pnlQuarterly == null || pnlCustomRange == null)
+                    return;
+
+                string tag = "Monthly";
+                if (cmb.SelectedItem is ComboBoxItem item && item.Tag is string sTag)
+                    tag = sTag;
+
+                pnlYearly.Visibility = (tag == "Yearly") ? Visibility.Visible : Visibility.Collapsed;
+                pnlMonthly.Visibility = (tag == "Monthly") ? Visibility.Visible : Visibility.Collapsed;
+                pnlQuarterly.Visibility = (tag == "Quarterly") ? Visibility.Visible : Visibility.Collapsed;
+                pnlCustomRange.Visibility = (tag == "CustomRange") ? Visibility.Visible : Visibility.Collapsed;
+
+                if (_vm != null)
+                {
+                    _vm.FilterType = tag;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CmbPeriodType_SelectionChanged error: {ex.Message}");
+            }
+        }
+
         private void FilterReset_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             try
             {
+                var cmbPeriodType = this.FindName("CmbPeriodType") as ComboBox;
+                if (cmbPeriodType != null)
+                    cmbPeriodType.SelectedIndex = 0; // By Monthly
+
+                var cmbYearlyYear = this.FindName("CmbYearlyYear") as ComboBox;
+                if (cmbYearlyYear != null)
+                    cmbYearlyYear.SelectedItem = DateTime.Today.Year;
+
+                var cmbMonthlyYear = this.FindName("CmbMonthlyYear") as ComboBox;
+                if (cmbMonthlyYear != null)
+                    cmbMonthlyYear.SelectedItem = DateTime.Today.Year;
+
+                var cmbMonthlyMonth = this.FindName("CmbMonthlyMonth") as ComboBox;
+                if (cmbMonthlyMonth != null)
+                    cmbMonthlyMonth.SelectedIndex = DateTime.Today.Month - 1;
+
+                var cmbQuarterlyYear = this.FindName("CmbQuarterlyYear") as ComboBox;
+                if (cmbQuarterlyYear != null)
+                    cmbQuarterlyYear.SelectedItem = DateTime.Today.Year;
+
+                var cmbQuarterlyQuarter = this.FindName("CmbQuarterlyQuarter") as ComboBox;
+                if (cmbQuarterlyQuarter != null)
+                    cmbQuarterlyQuarter.SelectedIndex = (DateTime.Today.Month - 1) / 3;
+
                 // Reset barangay combo
                 var cmbFilterBarangay = this.FindName("CmbFilterBarangay") as ComboBox;
                 if (cmbFilterBarangay != null)
                     cmbFilterBarangay.SelectedIndex = 0;
 
-                // Reset ViewModel dates to current month
+                // Reset ViewModel
                 if (_vm != null)
                 {
+                    _vm.FilterType = "Monthly";
+                    _vm.SelectedYear = DateTime.Today.Year;
+                    _vm.SelectedMonth = DateTime.Today.Month;
+                    _vm.SelectedQuarter = (DateTime.Today.Month - 1) / 3 + 1;
                     _vm.StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
                     _vm.EndDate = DateTime.Now;
                     _vm.SelectedBarangay = "ALL";
+                    _vm.UpdateActiveFilterSummary();
                 }
+
+                var overlay = this.FindName("FilterModalOverlay") as Grid;
+                if (overlay != null)
+                    overlay.Visibility = Visibility.Collapsed;
+
+                _ = LoadDataAsync();
             }
             catch (Exception ex)
             {
@@ -227,68 +541,18 @@ namespace SOLUM_UI
         {
             try
             {
-                var popup = this.FindName("FilterPopup") as Popup;
-                if (popup != null)
+                var overlay = this.FindName("FilterModalOverlay") as Grid;
+                if (overlay != null)
                 {
-                    popup.IsOpen = false;
-                    
-                    // Apply filters - reload data with selected filters
-                    _ = ApplyFiltersAsync();
+                    overlay.Visibility = Visibility.Collapsed;
                 }
+
+                // Apply filters - reload data with selected filters
+                _ = ApplyFiltersAsync();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"FilterApply_Click error: {ex.Message}");
-            }
-        }
-
-        private async System.Threading.Tasks.Task ApplyFiltersAsync()
-        {
-            try
-            {
-                // Get selected barangay from filter dropdown with null safety
-                string barangay = _vm?.SelectedBarangay ?? "ALL";
-                
-                // Validate barangay is not empty or only whitespace
-                if (string.IsNullOrWhiteSpace(barangay))
-                    barangay = "ALL";
-                
-                // Normalize "All" variants to "ALL"
-                if (barangay.Equals("All", StringComparison.OrdinalIgnoreCase))
-                    barangay = "ALL";
-
-                // Resolve year/month from StartDate (fall back to current month)
-                DateTime start = _vm?.StartDate ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-                DateTime end   = _vm?.EndDate   ?? DateTime.Now;
-
-                // Clamp: end must not be before start
-                if (end < start) end = start;
-
-                int year  = start.Year;
-                int month = start.Month;
-
-                // Get analytics data for selected period and barangay
-                var response = await AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(
-                    year, month, barangay, start, end);
-
-                if (response.Succeeded && response.Data != null)
-                {
-                    _vm.LoadFromAnalyticsDto(response.Data);
-                    System.Diagnostics.Debug.WriteLine(
-                        $"[Analytics] Filters applied — Barangay: {barangay}, Period: {start:yyyy-MM-dd} → {end:yyyy-MM-dd}");
-                }
-                else
-                {
-                    string errorMsg = response.Errors != null && response.Errors.Count > 0
-                        ? string.Join("\n", response.Errors)
-                        : "Failed to load filtered data.";
-                    MessageBox.Show(errorMsg, "Filter Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Filter application failed: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                System.Diagnostics.Debug.WriteLine($"Filter error: {ex}");
             }
         }
 

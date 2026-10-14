@@ -38,8 +38,19 @@ namespace SOLUM_UI
             }
         }
 
-        public SolidColorBrush RoleBadgeColor => new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9));
-        public SolidColorBrush RoleTextColor => new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
+        public string DisplayContact => string.IsNullOrWhiteSpace(ContactNumber) ? "—" : ContactNumber;
+
+        public SolidColorBrush RoleBadgeColor => Role == "ADMIN"
+            ? new SolidColorBrush(Color.FromRgb(0xF3, 0xE5, 0xF5))
+            : new SolidColorBrush(Color.FromRgb(0xEE, 0xF2, 0xF6));
+
+        public SolidColorBrush RoleBadgeBorder => Role == "ADMIN"
+            ? new SolidColorBrush(Color.FromRgb(0xCE, 0x93, 0xD8))
+            : new SolidColorBrush(Color.FromRgb(0xCF, 0xD8, 0xDC));
+
+        public SolidColorBrush RoleTextColor => Role == "ADMIN"
+            ? new SolidColorBrush(Color.FromRgb(0x6A, 0x1B, 0x9A))
+            : new SolidColorBrush(Color.FromRgb(0x37, 0x41, 0x51));
 
         public string StatusText => IsActive ? "ACTIVE" : "DISABLED";
         public SolidColorBrush StatusBadgeColor => IsActive
@@ -290,6 +301,16 @@ namespace SOLUM_UI
             UserList.ItemsSource = null;
             UserList.ItemsSource = _filtered;
             TxtUserCount.Text = " " + _filtered.Count;
+            if (EmptyStatePanel != null)
+            {
+                EmptyStatePanel.Visibility = (_filtered == null || _filtered.Count == 0) ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        private void ClearFilters_Click(object sender, RoutedEventArgs e)
+        {
+            if (SearchBox != null) SearchBox.Text = string.Empty;
+            if (CmbUserStatus != null) CmbUserStatus.SelectedIndex = 0;
         }
 
         
@@ -332,12 +353,28 @@ namespace SOLUM_UI
             ColPanel.Width = new GridLength(324);
         }
 
+        private void MoreActions_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.ContextMenu != null)
+            {
+                btn.ContextMenu.PlacementTarget = btn;
+                btn.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                btn.ContextMenu.DataContext = btn.DataContext;
+                btn.ContextMenu.IsOpen = true;
+            }
+        }
+
         private async void ResetPassword_Click(object sender, RoutedEventArgs e)
         {
-            string tagStr = (sender as Button)?.Tag?.ToString() ?? string.Empty;
-            if (!Guid.TryParse(tagStr, out var id)) return;
-
-            AppUser user = _allUsers.Find(u => u.Id == id);
+            AppUser user = (sender as FrameworkElement)?.DataContext as AppUser;
+            if (user == null)
+            {
+                string tagStr = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
+                if (Guid.TryParse(tagStr, out var id))
+                {
+                    user = _allUsers.Find(u => u.Id == id);
+                }
+            }
             if (user == null) return;
 
             await ExecutePasswordResetAsync(user);
@@ -402,10 +439,15 @@ namespace SOLUM_UI
 
         private async void ToggleStatus_Click(object sender, RoutedEventArgs e)
         {
-            string tagStr = (sender as Button)?.Tag?.ToString() ?? string.Empty;
-            if (!Guid.TryParse(tagStr, out var id)) return;
-
-            AppUser user = _allUsers.Find(u => u.Id == id);
+            AppUser user = (sender as FrameworkElement)?.DataContext as AppUser;
+            if (user == null)
+            {
+                string tagStr = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
+                if (Guid.TryParse(tagStr, out var id))
+                {
+                    user = _allUsers.Find(u => u.Id == id);
+                }
+            }
             if (user == null) return;
 
             bool newStatus = !user.IsActive;
@@ -427,7 +469,7 @@ namespace SOLUM_UI
             if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
             try
             {
-                var response = await UserApiService.Instance.UpdateUserStatusAsync(id, newStatus);
+                var response = await UserApiService.Instance.UpdateUserStatusAsync(user.Id, newStatus);
 
                 if (!response.Succeeded)
                 {
@@ -458,10 +500,15 @@ namespace SOLUM_UI
         // CHANGED — Id-based lookup, calls real delete endpoint
         private async void DeleteUser_Click(object sender, RoutedEventArgs e)
         {
-            string tagStr = (sender as Button)?.Tag?.ToString() ?? string.Empty;
-            if (!Guid.TryParse(tagStr, out var id)) return;
-
-            AppUser user = _allUsers.Find(u => u.Id == id);
+            AppUser user = (sender as FrameworkElement)?.DataContext as AppUser;
+            if (user == null)
+            {
+                string tagStr = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
+                if (Guid.TryParse(tagStr, out var id))
+                {
+                    user = _allUsers.Find(u => u.Id == id);
+                }
+            }
             if (user == null) return;
 
             bool isConfirmed = ActionConfirmDialog.Show(
@@ -474,7 +521,7 @@ namespace SOLUM_UI
 
             if (!isConfirmed) return;
 
-            var response = await UserApiService.Instance.DeleteApplicationUserAsync(id);
+            var response = await UserApiService.Instance.DeleteApplicationUserAsync(user.Id);
 
             if (!response.Succeeded)
             {

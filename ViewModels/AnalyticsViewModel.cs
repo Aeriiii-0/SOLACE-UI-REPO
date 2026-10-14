@@ -15,21 +15,35 @@ namespace SOLUM_UI.ViewModels
         public int TotalSoloParents
         {
             get => _totalSoloParents;
-            set => SetProperty(ref _totalSoloParents, value);
+            set
+            {
+                SetProperty(ref _totalSoloParents, value);
+                OnPropertyChanged(nameof(DisplayTotalEnrolled));
+            }
         }
 
         private int _femaleCount;
         public int FemaleCount
         {
             get => _femaleCount;
-            set => SetProperty(ref _femaleCount, value);
+            set
+            {
+                SetProperty(ref _femaleCount, value);
+                OnPropertyChanged(nameof(FemaleGridLength));
+                OnPropertyChanged(nameof(MaleGridLength));
+            }
         }
 
         private int _maleCount;
         public int MaleCount
         {
             get => _maleCount;
-            set => SetProperty(ref _maleCount, value);
+            set
+            {
+                SetProperty(ref _maleCount, value);
+                OnPropertyChanged(nameof(FemaleGridLength));
+                OnPropertyChanged(nameof(MaleGridLength));
+            }
         }
 
         private int _totalDependents;
@@ -52,6 +66,362 @@ namespace SOLUM_UI.ViewModels
             get => _pantawidBeneficiaryCount;
             set => SetProperty(ref _pantawidBeneficiaryCount, value);
         }
+
+        private int _indigenousCount;
+        public int IndigenousCount
+        {
+            get => _indigenousCount;
+            set => SetProperty(ref _indigenousCount, value);
+        }
+
+        // Dashboard Operational KPI Properties (from GET /api/Analytics/dashboard)
+        private int _totalRegistered;
+        public int TotalRegistered
+        {
+            get => _totalRegistered;
+            set
+            {
+                SetProperty(ref _totalRegistered, value);
+                OnPropertyChanged(nameof(DisplayTotalEnrolled));
+            }
+        }
+
+        public int DisplayTotalEnrolled
+        {
+            get => IsFilterActive ? _totalSoloParents : (_totalRegistered > 0 ? _totalRegistered : _totalSoloParents);
+            set { }
+        }
+
+        private int _activeRecords;
+        public int ActiveRecords
+        {
+            get => _activeRecords;
+            set
+            {
+                SetProperty(ref _activeRecords, value);
+                OnPropertyChanged(nameof(DisplayActiveRecords));
+            }
+        }
+
+        private int _inactiveRecords;
+        public int InactiveRecords
+        {
+            get => _inactiveRecords;
+            set
+            {
+                SetProperty(ref _inactiveRecords, value);
+                OnPropertyChanged(nameof(DisplayInactiveRecords));
+            }
+        }
+
+        private int _filteredActiveRecords;
+        public int FilteredActiveRecords
+        {
+            get => _filteredActiveRecords;
+            set
+            {
+                SetProperty(ref _filteredActiveRecords, value);
+                OnPropertyChanged(nameof(DisplayActiveRecords));
+            }
+        }
+
+        public int DisplayActiveRecords
+        {
+            get => IsFilterActive ? _filteredActiveRecords : (_activeRecords > 0 ? _activeRecords : _filteredActiveRecords);
+            set { }
+        }
+
+        private int _filteredInactiveRecords;
+        public int FilteredInactiveRecords
+        {
+            get => _filteredInactiveRecords;
+            set
+            {
+                SetProperty(ref _filteredInactiveRecords, value);
+                OnPropertyChanged(nameof(DisplayInactiveRecords));
+            }
+        }
+
+        public int DisplayInactiveRecords
+        {
+            get => IsFilterActive ? _filteredInactiveRecords : (_inactiveRecords > 0 ? _inactiveRecords : _filteredInactiveRecords);
+            set { }
+        }
+
+        private int _activeChangeFromLastMonth;
+        public int ActiveChangeFromLastMonth
+        {
+            get => _activeChangeFromLastMonth;
+            set
+            {
+                SetProperty(ref _activeChangeFromLastMonth, value);
+                OnPropertyChanged(nameof(ActiveChangeText));
+                OnPropertyChanged(nameof(ActiveChangeIsPositive));
+            }
+        }
+
+        public string ActiveChangeText
+        {
+            get
+            {
+                if (_activeChangeFromLastMonth > 0)
+                    return $"+{_activeChangeFromLastMonth} this month";
+                else if (_activeChangeFromLastMonth < 0)
+                    return $"{_activeChangeFromLastMonth} this month";
+                return "0 change";
+            }
+        }
+
+        public bool ActiveChangeIsPositive => _activeChangeFromLastMonth >= 0;
+
+        private int _renewalsDueThisMonth;
+        public int RenewalsDueThisMonth
+        {
+            get => _renewalsDueThisMonth;
+            set => SetProperty(ref _renewalsDueThisMonth, value);
+        }
+
+        private int _renewalsCompletedToday;
+        public int RenewalsCompletedToday
+        {
+            get => _renewalsCompletedToday;
+            set => SetProperty(ref _renewalsCompletedToday, value);
+        }
+
+        private int _renewalsThisMonth;
+        public int RenewalsThisMonth
+        {
+            get => _renewalsThisMonth;
+            set => SetProperty(ref _renewalsThisMonth, value);
+        }
+
+        private int _registeredThisMonth;
+        public int RegisteredThisMonth
+        {
+            get => _registeredThisMonth;
+            set
+            {
+                SetProperty(ref _registeredThisMonth, value);
+                OnPropertyChanged(nameof(DisplayRegisteredCount));
+            }
+        }
+
+        private int _filteredNewRegistrations;
+        public int FilteredNewRegistrations
+        {
+            get => _filteredNewRegistrations;
+            set
+            {
+                SetProperty(ref _filteredNewRegistrations, value);
+                OnPropertyChanged(nameof(DisplayRegisteredCount));
+            }
+        }
+
+        public int DisplayRegisteredCount
+        {
+            get
+            {
+                if (IsFilterActive)
+                    return _filteredNewRegistrations;
+                return _registeredThisMonth > 0 ? _registeredThisMonth : _filteredNewRegistrations;
+            }
+            set { }
+        }
+
+        public string DisplayRegisteredLabel
+        {
+            get
+            {
+                if (!IsFilterActive)
+                    return "Enrolled This Month";
+
+                switch (FilterType)
+                {
+                    case "Yearly":
+                        return "Enrolled This Year";
+                    case "Quarterly":
+                        return "Enrolled This Quarter";
+                    case "CustomRange":
+                        return "Enrolled in Period";
+                    case "Monthly":
+                    default:
+                        return "Enrolled in Month";
+                }
+            }
+            set { }
+        }
+
+        private int _filteredRenewals;
+        public int FilteredRenewals
+        {
+            get => _filteredRenewals;
+            set => SetProperty(ref _filteredRenewals, value);
+        }
+
+        // Active Filter Summary Indicator
+        private string _activeFilterSummary = "Citywide (All Barangays) • Current Month";
+        public string ActiveFilterSummary
+        {
+            get => _activeFilterSummary;
+            set => SetProperty(ref _activeFilterSummary, value);
+        }
+
+        private bool _isFilterActive;
+        public bool IsFilterActive
+        {
+            get => _isFilterActive;
+            set
+            {
+                SetProperty(ref _isFilterActive, value);
+                OnPropertyChanged(nameof(DisplayTotalEnrolled));
+                OnPropertyChanged(nameof(DisplayActiveRecords));
+                OnPropertyChanged(nameof(DisplayInactiveRecords));
+                OnPropertyChanged(nameof(DisplayRegisteredCount));
+                OnPropertyChanged(nameof(DisplayRegisteredLabel));
+            }
+        }
+
+        // Hierarchical Period Filter Properties
+        private string _filterType = "Monthly";
+        public string FilterType
+        {
+            get => _filterType;
+            set
+            {
+                SetProperty(ref _filterType, value);
+                OnPropertyChanged(nameof(DisplayRegisteredLabel));
+            }
+        }
+
+        private int _selectedYear = DateTime.Today.Year;
+        public int SelectedYear
+        {
+            get => _selectedYear;
+            set => SetProperty(ref _selectedYear, value);
+        }
+
+        private int _selectedMonth = DateTime.Today.Month;
+        public int SelectedMonth
+        {
+            get => _selectedMonth;
+            set => SetProperty(ref _selectedMonth, value);
+        }
+
+        private int _selectedQuarter = (DateTime.Today.Month - 1) / 3 + 1;
+        public int SelectedQuarter
+        {
+            get => _selectedQuarter;
+            set => SetProperty(ref _selectedQuarter, value);
+        }
+
+        // Solo Parent Statutory Age Brackets (from MonthlyAnalyticsDto.AgeBrackets)
+        private int _parentAge19Below;
+        public int ParentAge19Below { get => _parentAge19Below; set => SetProperty(ref _parentAge19Below, value); }
+
+        private int _parentAge20_39;
+        public int ParentAge20_39 { get => _parentAge20_39; set => SetProperty(ref _parentAge20_39, value); }
+
+        private int _parentAge40_59;
+        public int ParentAge40_59 { get => _parentAge40_59; set => SetProperty(ref _parentAge40_59, value); }
+
+        private int _parentAge60Above;
+        public int ParentAge60Above { get => _parentAge60Above; set => SetProperty(ref _parentAge60Above, value); }
+
+        private double _parentAge19BelowPercent;
+        public double ParentAge19BelowPercent
+        {
+            get => _parentAge19BelowPercent;
+            set
+            {
+                SetProperty(ref _parentAge19BelowPercent, value);
+                OnPropertyChanged(nameof(ParentAge19BelowGridLength));
+                OnPropertyChanged(nameof(ParentAge19BelowRemainingGridLength));
+            }
+        }
+
+        private double _parentAge20_39Percent;
+        public double ParentAge20_39Percent
+        {
+            get => _parentAge20_39Percent;
+            set
+            {
+                SetProperty(ref _parentAge20_39Percent, value);
+                OnPropertyChanged(nameof(ParentAge20_39GridLength));
+                OnPropertyChanged(nameof(ParentAge20_39RemainingGridLength));
+            }
+        }
+
+        private double _parentAge40_59Percent;
+        public double ParentAge40_59Percent
+        {
+            get => _parentAge40_59Percent;
+            set
+            {
+                SetProperty(ref _parentAge40_59Percent, value);
+                OnPropertyChanged(nameof(ParentAge40_59GridLength));
+                OnPropertyChanged(nameof(ParentAge40_59RemainingGridLength));
+            }
+        }
+
+        private double _parentAge60AbovePercent;
+        public double ParentAge60AbovePercent
+        {
+            get => _parentAge60AbovePercent;
+            set
+            {
+                SetProperty(ref _parentAge60AbovePercent, value);
+                OnPropertyChanged(nameof(ParentAge60AboveGridLength));
+                OnPropertyChanged(nameof(ParentAge60AboveRemainingGridLength));
+            }
+        }
+
+        // Proportional GridLengths for accurate bar widths
+        public System.Windows.GridLength FemaleGridLength =>
+            new System.Windows.GridLength(FemaleCount > 0 ? FemaleCount : (MaleCount > 0 ? 0 : 1), System.Windows.GridUnitType.Star);
+
+        public System.Windows.GridLength MaleGridLength =>
+            new System.Windows.GridLength(MaleCount > 0 ? MaleCount : (FemaleCount > 0 ? 0 : 1), System.Windows.GridUnitType.Star);
+
+        public System.Windows.GridLength ParentAge19BelowGridLength =>
+            new System.Windows.GridLength(Math.Max(ParentAge19BelowPercent, 0), System.Windows.GridUnitType.Star);
+        public System.Windows.GridLength ParentAge19BelowRemainingGridLength =>
+            new System.Windows.GridLength(Math.Max(100.0 - ParentAge19BelowPercent, 0.001), System.Windows.GridUnitType.Star);
+
+        public System.Windows.GridLength ParentAge20_39GridLength =>
+            new System.Windows.GridLength(Math.Max(ParentAge20_39Percent, 0), System.Windows.GridUnitType.Star);
+        public System.Windows.GridLength ParentAge20_39RemainingGridLength =>
+            new System.Windows.GridLength(Math.Max(100.0 - ParentAge20_39Percent, 0.001), System.Windows.GridUnitType.Star);
+
+        public System.Windows.GridLength ParentAge40_59GridLength =>
+            new System.Windows.GridLength(Math.Max(ParentAge40_59Percent, 0), System.Windows.GridUnitType.Star);
+        public System.Windows.GridLength ParentAge40_59RemainingGridLength =>
+            new System.Windows.GridLength(Math.Max(100.0 - ParentAge40_59Percent, 0.001), System.Windows.GridUnitType.Star);
+
+        public System.Windows.GridLength ParentAge60AboveGridLength =>
+            new System.Windows.GridLength(Math.Max(ParentAge60AbovePercent, 0), System.Windows.GridUnitType.Star);
+        public System.Windows.GridLength ParentAge60AboveRemainingGridLength =>
+            new System.Windows.GridLength(Math.Max(100.0 - ParentAge60AbovePercent, 0.001), System.Windows.GridUnitType.Star);
+
+        public System.Windows.GridLength IncomeBelowMinGridLength =>
+            new System.Windows.GridLength(IncomeBelowMinCount > 0 ? IncomeBelowMinCount : (IncomeBelowMinCount + IncomeMinWageCount + IncomeAboveMinCount > 0 ? 0 : 1), System.Windows.GridUnitType.Star);
+
+        public System.Windows.GridLength IncomeMinWageGridLength =>
+            new System.Windows.GridLength(IncomeMinWageCount > 0 ? IncomeMinWageCount : (IncomeBelowMinCount + IncomeMinWageCount + IncomeAboveMinCount > 0 ? 0 : 1), System.Windows.GridUnitType.Star);
+
+        public System.Windows.GridLength IncomeAboveMinGridLength =>
+            new System.Windows.GridLength(IncomeAboveMinCount > 0 ? IncomeAboveMinCount : (IncomeBelowMinCount + IncomeMinWageCount + IncomeAboveMinCount > 0 ? 0 : 1), System.Windows.GridUnitType.Star);
+
+        private double _parentAge19BelowBarWidth;
+        public double ParentAge19BelowBarWidth { get => _parentAge19BelowBarWidth; set => SetProperty(ref _parentAge19BelowBarWidth, value); }
+
+        private double _parentAge20_39BarWidth;
+        public double ParentAge20_39BarWidth { get => _parentAge20_39BarWidth; set => SetProperty(ref _parentAge20_39BarWidth, value); }
+
+        private double _parentAge40_59BarWidth;
+        public double ParentAge40_59BarWidth { get => _parentAge40_59BarWidth; set => SetProperty(ref _parentAge40_59BarWidth, value); }
+
+        private double _parentAge60AboveBarWidth;
+        public double ParentAge60AboveBarWidth { get => _parentAge60AboveBarWidth; set => SetProperty(ref _parentAge60AboveBarWidth, value); }
 
         // Age Group Data (for Donut Chart)
         private ObservableCollection<DonutSegment> _ageGroupData;
@@ -375,21 +745,39 @@ namespace SOLUM_UI.ViewModels
         public int IncomeBelowMinCount
         {
             get => _incomeBelowMinCount;
-            set => SetProperty(ref _incomeBelowMinCount, value);
+            set
+            {
+                SetProperty(ref _incomeBelowMinCount, value);
+                OnPropertyChanged(nameof(IncomeBelowMinGridLength));
+                OnPropertyChanged(nameof(IncomeMinWageGridLength));
+                OnPropertyChanged(nameof(IncomeAboveMinGridLength));
+            }
         }
 
         private int _incomeMinWageCount;
         public int IncomeMinWageCount
         {
             get => _incomeMinWageCount;
-            set => SetProperty(ref _incomeMinWageCount, value);
+            set
+            {
+                SetProperty(ref _incomeMinWageCount, value);
+                OnPropertyChanged(nameof(IncomeBelowMinGridLength));
+                OnPropertyChanged(nameof(IncomeMinWageGridLength));
+                OnPropertyChanged(nameof(IncomeAboveMinGridLength));
+            }
         }
 
         private int _incomeAboveMinCount;
         public int IncomeAboveMinCount
         {
             get => _incomeAboveMinCount;
-            set => SetProperty(ref _incomeAboveMinCount, value);
+            set
+            {
+                SetProperty(ref _incomeAboveMinCount, value);
+                OnPropertyChanged(nameof(IncomeBelowMinGridLength));
+                OnPropertyChanged(nameof(IncomeMinWageGridLength));
+                OnPropertyChanged(nameof(IncomeAboveMinGridLength));
+            }
         }
 
         private double _incomeBelowMinPercent;
@@ -489,6 +877,128 @@ namespace SOLUM_UI.ViewModels
             StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             EndDate = DateTime.Now;
             SelectedBarangay = "ALL";
+            UpdateActiveFilterSummary();
+        }
+
+        /// <summary>
+        /// Updates the active filter indicator summary string and filter active flag
+        /// </summary>
+        public void UpdateActiveFilterSummary()
+        {
+            string bName = string.IsNullOrWhiteSpace(SelectedBarangay) || SelectedBarangay.Equals("ALL", StringComparison.OrdinalIgnoreCase)
+                ? "Citywide (All Barangays)"
+                : $"Barangay {SelectedBarangay}";
+
+            string periodStr;
+            bool isCustomDate = false;
+
+            switch (FilterType)
+            {
+                case "Yearly":
+                    periodStr = $"Year {SelectedYear}";
+                    isCustomDate = (SelectedYear != DateTime.Today.Year);
+                    break;
+
+                case "Quarterly":
+                    periodStr = $"Q{SelectedQuarter} {SelectedYear}";
+                    int currentQuarter = (DateTime.Today.Month - 1) / 3 + 1;
+                    isCustomDate = (SelectedYear != DateTime.Today.Year || SelectedQuarter != currentQuarter);
+                    break;
+
+                case "CustomRange":
+                    if (StartDate.HasValue && EndDate.HasValue)
+                        periodStr = $"{StartDate.Value:MMM dd, yyyy} – {EndDate.Value:MMM dd, yyyy}";
+                    else if (StartDate.HasValue)
+                        periodStr = $"From {StartDate.Value:MMM dd, yyyy}";
+                    else
+                        periodStr = "Custom Range";
+                    isCustomDate = true;
+                    break;
+
+                case "Monthly":
+                default:
+                    int y = SelectedYear > 0 ? SelectedYear : DateTime.Today.Year;
+                    int m = (SelectedMonth >= 1 && SelectedMonth <= 12) ? SelectedMonth : DateTime.Today.Month;
+                    string monthName = new DateTime(y, m, 1).ToString("MMMM yyyy");
+                    periodStr = monthName;
+                    isCustomDate = (SelectedYear != DateTime.Today.Year || SelectedMonth != DateTime.Today.Month);
+                    break;
+            }
+
+            ActiveFilterSummary = $"{bName}  •  {periodStr}";
+
+            bool isCustomBarangay = !string.IsNullOrWhiteSpace(SelectedBarangay) && !SelectedBarangay.Equals("ALL", StringComparison.OrdinalIgnoreCase);
+            bool isNotDefaultType = !string.Equals(FilterType, "Monthly", StringComparison.OrdinalIgnoreCase);
+
+            IsFilterActive = isCustomBarangay || isCustomDate || isNotDefaultType;
+        }
+
+        /// <summary>
+        /// Populate ViewModel from DashboardAnalyticsDto (operational metrics)
+        /// </summary>
+        public void LoadDashboardDto(DashboardAnalyticsDto dto)
+        {
+            if (dto == null) return;
+            TotalRegistered = dto.TotalRegistered;
+            ActiveRecords = dto.ActiveRecords;
+            InactiveRecords = dto.InactiveRecords;
+            ActiveChangeFromLastMonth = dto.ActiveChangeFromLastMonth;
+            RenewalsDueThisMonth = dto.RenewalsDueThisMonth;
+            RenewalsCompletedToday = dto.RenewalsCompletedToday;
+            RenewalsThisMonth = dto.RenewalsThisMonth;
+            RegisteredThisMonth = dto.RegisteredThisMonth;
+        }
+
+        /// <summary>
+        /// Populate Barangay breakdown from BarangayAnalyticsResponseDto (24 canonical Biñan barangays)
+        /// </summary>
+        public void LoadBarangayBreakdownDto(BarangayAnalyticsResponseDto dto)
+        {
+            if (dto == null || dto.Barangays == null) return;
+
+            if (IsFilterActive)
+            {
+                if (dto.TotalNewRegistrations > 0)
+                    FilteredNewRegistrations = dto.TotalNewRegistrations;
+                if (dto.TotalActive > 0)
+                    FilteredActiveRecords = dto.TotalActive;
+                if (dto.TotalInactive > 0)
+                    FilteredInactiveRecords = dto.TotalInactive;
+                if (dto.TotalRenewals > 0)
+                    FilteredRenewals = dto.TotalRenewals;
+            }
+
+            AllBarangayData.Clear();
+
+            int maxVal = dto.Barangays.Count > 0 ? System.Linq.Enumerable.Max(dto.Barangays, b => b.TotalSoloParents) : 1;
+            if (maxVal <= 0) maxVal = 1;
+
+            int rank = 1;
+            foreach (var b in dto.Barangays)
+            {
+                double barWidth = (b.TotalSoloParents * 1.0 / maxVal) * 280;
+
+                AllBarangayData.Add(new AreaChartData
+                {
+                    Label = b.BarangayName,
+                    Value = b.TotalSoloParents,
+                    XPosition = rank - 1,
+                    Rank = rank++,
+                    Color = "#B03058",
+                    BarWidth = Math.Max(barWidth, b.TotalSoloParents > 0 ? 8 : 0),
+                    MaxBarangayValue = maxVal,
+                    PercentageShare = b.PercentageShare,
+                    ActiveCount = b.ActiveCount,
+                    InactiveCount = b.InactiveCount,
+                    NewRegistrationsCount = b.NewRegistrationsCount,
+                    RenewalsCount = b.RenewalsCount
+                });
+            }
+
+            const int barangaysPerPage = 10;
+            TotalBarangayPages = Math.Max(1, (int)Math.Ceiling(AllBarangayData.Count / (double)barangaysPerPage));
+            CurrentBarangayPage = 1;
+            UpdateBarangayPage();
         }
 
 
@@ -537,6 +1047,24 @@ namespace SOLUM_UI.ViewModels
         }
 
         /// <summary>
+        /// Safely retrieves an integer value from a dictionary using case-insensitive matching across multiple key aliases.
+        /// </summary>
+        public static int GetDictValue(System.Collections.Generic.IDictionary<string, int> dict, params string[] keys)
+        {
+            if (dict == null) return 0;
+            foreach (var key in keys)
+            {
+                if (dict.TryGetValue(key, out int val)) return val;
+                foreach (var kvp in dict)
+                {
+                    if (string.Equals(kvp.Key, key, StringComparison.OrdinalIgnoreCase))
+                        return kvp.Value;
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>
         /// Populate ViewModel from MonthlyAnalyticsDto
         /// </summary>
         public void LoadFromAnalyticsDto(MonthlyAnalyticsDto dto)
@@ -554,27 +1082,45 @@ namespace SOLUM_UI.ViewModels
 
             // Calculate KPIs
             TotalSoloParents = dto.TotalSoloParents;
-            System.Diagnostics.Debug.WriteLine($"  TotalSoloParents: {TotalSoloParents}");
+            FilteredActiveRecords = dto.ActiveSoloParents;
+            FilteredInactiveRecords = dto.InactiveSoloParents;
+            FilteredNewRegistrations = dto.NewRegistrations;
+            FilteredRenewals = dto.Renewals;
+
+            // If not in a custom filter, synchronize the real-time card numbers
+            if (!IsFilterActive)
+            {
+                if (dto.NewRegistrations > 0 || RegisteredThisMonth == 0)
+                    RegisteredThisMonth = dto.NewRegistrations;
+                if (dto.ActiveSoloParents > 0)
+                    ActiveRecords = dto.ActiveSoloParents;
+                if (dto.InactiveSoloParents > 0)
+                    InactiveRecords = dto.InactiveSoloParents;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"  TotalSoloParents: {TotalSoloParents}, Active: {dto.ActiveSoloParents}, Inactive: {dto.InactiveSoloParents}, New: {dto.NewRegistrations}");
             
-            // Female/Male from Sex dictionary (null-safe)
+            // Female/Male from Sex dictionary (null-safe & case-insensitive)
             var sex = dto.Sex ?? new System.Collections.Generic.Dictionary<string, int>();
-            int female = sex.ContainsKey("Female") ? sex["Female"] : 0;
-            int male = sex.ContainsKey("Male") ? sex["Male"] : 0;
+            int female = GetDictValue(sex, "Female", "female", "F");
+            int male = GetDictValue(sex, "Male", "male", "M");
             FemaleCount = female;
             MaleCount = male;
             System.Diagnostics.Debug.WriteLine($"  Female: {female}, Male: {male}");
 
-            // Calculate female/male percentages for progress bar
-            if (TotalSoloParents > 0)
+            // Calculate female/male percentages for progress bar and summary label
+            int totalGender = female + male;
+            int genderBase = TotalSoloParents > 0 ? TotalSoloParents : totalGender;
+            if (genderBase > 0)
             {
-                double femalePercent = (female * 100.0 / TotalSoloParents);
-                double malePercent = (male * 100.0 / TotalSoloParents);
-                FemalePercentText = $"{femalePercent:F1}% Female";
-                FemalePercentWidth = femalePercent * 2.5; // Assuming max width of ~250 for progress bar
+                double femalePercent = (female * 100.0 / genderBase);
+                double malePercent = (male * 100.0 / genderBase);
+                FemalePercentText = $"{femalePercent:F1}% Female  ·  {malePercent:F1}% Male";
+                FemalePercentWidth = femalePercent * 2.5;
             }
             else
             {
-                FemalePercentText = "0% Female";
+                FemalePercentText = "0% Female  ·  0% Male";
                 FemalePercentWidth = 0;
             }
 
@@ -586,56 +1132,62 @@ namespace SOLUM_UI.ViewModels
                 TotalDependents += kvp.Value;
             }
 
-            // LGBT count - sum from Lgbt dictionary (null-safe)
-            var lgbt = dto.Lgbt ?? new System.Collections.Generic.Dictionary<string, int>();
-            LgbtCount = 0;
-            foreach (var kvp in lgbt)
+            // Special Sectors (null-safe, case-insensitive, with sub-breakdown fallback)
+            int lgbt = GetDictValue(dto.Sectors, "isLGBT", "lgbt", "LGBT");
+            if (lgbt <= 0 && dto.Lgbt != null)
             {
-                LgbtCount += kvp.Value;
+                lgbt = GetDictValue(dto.Lgbt, "LGBT", "Yes", "true");
             }
+            LgbtCount = lgbt;
 
-            // Pantawid Beneficiary - sum from PantawidBeneficiary dictionary (null-safe)
-            var pantawid = dto.PantawidBeneficiary ?? new System.Collections.Generic.Dictionary<string, int>();
-            PantawidBeneficiaryCount = 0;
-            foreach (var kvp in pantawid)
+            int pantawid = GetDictValue(dto.Sectors, "isPantawidBeneficiary", "pantawidBeneficiary", "pantawid");
+            if (pantawid <= 0 && dto.PantawidBeneficiary != null)
             {
-                PantawidBeneficiaryCount += kvp.Value;
+                pantawid = GetDictValue(dto.PantawidBeneficiary, "Beneficiary", "Yes", "true");
             }
+            PantawidBeneficiaryCount = pantawid;
 
-            // Load civil status simple counts (null-safe)
+            int indigenous = GetDictValue(dto.Sectors, "isIndigenous", "indigenous", "IP");
+            if (indigenous <= 0 && dto.Indigenous != null)
+            {
+                indigenous = GetDictValue(dto.Indigenous, "Indigenous", "Yes", "true");
+            }
+            IndigenousCount = indigenous;
+
+            // Load civil status simple counts (null-safe & case-insensitive)
             var civilStatus = dto.CivilStatus ?? new System.Collections.Generic.Dictionary<string, int>();
-            SingleCount = civilStatus.ContainsKey("Single") ? civilStatus["Single"] : 0;
-            MarriedCount = civilStatus.ContainsKey("Married") ? civilStatus["Married"] : 0;
-            WidowedCount = civilStatus.ContainsKey("Widowed") ? civilStatus["Widowed"] : 0;
-            SeparatedCount = civilStatus.ContainsKey("Separated") ? civilStatus["Separated"] : 0;
-            AnnulledCount = civilStatus.ContainsKey("Annulled") ? civilStatus["Annulled"] : 0;
+            SingleCount = GetDictValue(civilStatus, "Single", "single");
+            MarriedCount = GetDictValue(civilStatus, "Married", "married");
+            WidowedCount = GetDictValue(civilStatus, "Widowed", "widowed", "Widow");
+            SeparatedCount = GetDictValue(civilStatus, "Separated", "separated");
+            AnnulledCount = GetDictValue(civilStatus, "Annulled", "annulled", "Divorced", "divorced");
 
-            // Load employment status simple text counts (null-safe)
+            // Load employment status simple text counts (null-safe & case-insensitive)
             var employment = dto.EmploymentStatus ?? new System.Collections.Generic.Dictionary<string, int>();
-            int employed = employment.ContainsKey("employed") ? employment["employed"] : 0;
-            int selfEmployed = employment.ContainsKey("self_employed") ? employment["self_employed"] : 0;
-            int notEmployed = employment.ContainsKey("not_employed") ? employment["not_employed"] : 0;
-            
-            EmployedText = $"{employed} ({(TotalSoloParents > 0 ? (employed * 100.0 / TotalSoloParents) : 0):F1}%)";
-            SelfEmployedText = $"{selfEmployed} ({(TotalSoloParents > 0 ? (selfEmployed * 100.0 / TotalSoloParents) : 0):F1}%)";
-            NotEmployedText = $"{notEmployed} ({(TotalSoloParents > 0 ? (notEmployed * 100.0 / TotalSoloParents) : 0):F1}%)";
+            int employed = GetDictValue(employment, "Employed", "employed");
+            int selfEmployed = GetDictValue(employment, "Self-Employed", "Self-employed", "self_employed", "Self Employed", "selfemployed");
+            int notEmployed = GetDictValue(employment, "Unemployed", "unemployed", "Not Employed", "not_employed", "Not-Employed", "not employed");
 
-            // Calculate employment percentages for ring charts
-            EmployedPercent = TotalSoloParents > 0 ? (employed * 100.0 / TotalSoloParents) : 0;
-            SelfEmployedPercent = TotalSoloParents > 0 ? (selfEmployed * 100.0 / TotalSoloParents) : 0;
-            NotEmployedPercent = TotalSoloParents > 0 ? (notEmployed * 100.0 / TotalSoloParents) : 0;
+            int totalEmpBase = (employed + selfEmployed + notEmployed > 0) ? (employed + selfEmployed + notEmployed) : TotalSoloParents;
 
-            // Generate arc paths for employment ring charts (64x64 canvas, radius 28, center at 32,32)
+            EmployedPercent = totalEmpBase > 0 ? (employed * 100.0 / totalEmpBase) : 0;
+            SelfEmployedPercent = totalEmpBase > 0 ? (selfEmployed * 100.0 / totalEmpBase) : 0;
+            NotEmployedPercent = totalEmpBase > 0 ? (notEmployed * 100.0 / totalEmpBase) : 0;
+
+            EmployedText = $"{employed} ({EmployedPercent:F1}%)";
+            SelfEmployedText = $"{selfEmployed} ({SelfEmployedPercent:F1}%)";
+            NotEmployedText = $"{notEmployed} ({NotEmployedPercent:F1}%)";
+
+            // Generate SVG arc paths for employment ring charts (64x64 canvas, radius 28, center at 32,32)
             EmployedArcPath = GenerateArcPath(EmployedPercent);
             SelfEmployedArcPath = GenerateArcPath(SelfEmployedPercent);
             NotEmployedArcPath = GenerateArcPath(NotEmployedPercent);
 
-            // Load dependents age brackets (reuse null-safe local)
-            AgeGroup0_5 = dependentsAge.ContainsKey("6_AND_BELOW") ? dependentsAge["6_AND_BELOW"] : 0;
-            AgeGroup6_12 = dependentsAge.ContainsKey("7_TO_22") ? dependentsAge["7_TO_22"] : 0;
-            AgeGroup13_17 = dependentsAge.ContainsKey("22_AND_ABOVE") ? dependentsAge["22_AND_ABOVE"] : 0;
+            // Load dependents age brackets (null-safe & case-insensitive)
+            AgeGroup0_5 = GetDictValue(dependentsAge, "6_AND_BELOW", "0_6", "0-6", "6 and below");
+            AgeGroup6_12 = GetDictValue(dependentsAge, "7_TO_22", "7_22", "7-22", "7_TO_21");
+            AgeGroup13_17 = GetDictValue(dependentsAge, "22_AND_ABOVE", "22_ABOVE", "22 and above", "22+");
 
-            // Calculate age group percentages
             int totalDependentsByAge = AgeGroup0_5 + AgeGroup6_12 + AgeGroup13_17;
             if (totalDependentsByAge > 0)
             {
@@ -650,29 +1202,39 @@ namespace SOLUM_UI.ViewModels
                 AgeGroup13_17Percent = 0;
             }
 
-            // Load income brackets with detailed calculations (null-safe)
+            // Calculate age group bar heights relative to the max bracket (scale to 0-115px for visual display)
+            int maxDepCount = Math.Max(AgeGroup0_5, Math.Max(AgeGroup6_12, AgeGroup13_17));
+            const double maxBarHeight = 115.0;
+            if (maxDepCount > 0)
+            {
+                AgeGroup0_5BarHeight = AgeGroup0_5 > 0 ? Math.Max(8.0, (AgeGroup0_5 * 1.0 / maxDepCount) * maxBarHeight) : 0;
+                AgeGroup6_12BarHeight = AgeGroup6_12 > 0 ? Math.Max(8.0, (AgeGroup6_12 * 1.0 / maxDepCount) * maxBarHeight) : 0;
+                AgeGroup13_17BarHeight = AgeGroup13_17 > 0 ? Math.Max(8.0, (AgeGroup13_17 * 1.0 / maxDepCount) * maxBarHeight) : 0;
+            }
+            else
+            {
+                AgeGroup0_5BarHeight = 0;
+                AgeGroup6_12BarHeight = 0;
+                AgeGroup13_17BarHeight = 0;
+            }
+
+            // Load income brackets with detailed calculations (null-safe & case-insensitive)
             var incomeBrackets = dto.MonthlyIncomeBrackets ?? new System.Collections.Generic.Dictionary<string, int>();
-            int incomeBelowMin = incomeBrackets.ContainsKey("BELOW_MINIMUM_WAGE") 
-                ? incomeBrackets["BELOW_MINIMUM_WAGE"] : 0;
-            int incomeMinWagePlus = incomeBrackets.ContainsKey("MIN_WAGE_PLUS1_TO_20833") 
-                ? incomeBrackets["MIN_WAGE_PLUS1_TO_20833"] : 0;
-            int incomeAboveMin = incomeBrackets.ContainsKey("20834_AND_ABOVE")
-                ? incomeBrackets["20834_AND_ABOVE"] : 0;
-            
+            int incomeBelowMin = GetDictValue(incomeBrackets, "BELOW_MINIMUM_WAGE", "below_minimum_wage");
+            int incomeMinWagePlus = GetDictValue(incomeBrackets, "MIN_WAGE_PLUS1_TO_20833", "min_wage_plus1_to_20833");
+            int incomeAboveMin = GetDictValue(incomeBrackets, "20834_AND_ABOVE", "20834_and_above");
+
             int totalWithIncome = incomeBelowMin + incomeMinWagePlus + incomeAboveMin;
-            
-            // Store individual counts
             IncomeBelowMinCount = incomeBelowMin;
             IncomeMinWageCount = incomeMinWagePlus;
             IncomeAboveMinCount = incomeAboveMin;
-            
-            // Calculate percentages
+
             if (totalWithIncome > 0)
             {
                 IncomeBelowMinPercent = (incomeBelowMin * 100.0 / totalWithIncome);
                 IncomeMinWagePercent = (incomeMinWagePlus * 100.0 / totalWithIncome);
                 IncomeAboveMinPercent = (incomeAboveMin * 100.0 / totalWithIncome);
-                
+
                 IncomeBelowMinText = $"{incomeBelowMin} · {IncomeBelowMinPercent:F1}%";
                 IncomeMinWageText = $"{incomeMinWagePlus} · {IncomeMinWagePercent:F1}%";
             }
@@ -684,191 +1246,107 @@ namespace SOLUM_UI.ViewModels
                 IncomeBelowMinText = "0 · 0%";
                 IncomeMinWageText = "0 · 0%";
             }
-            
-            // Calculate income bar widths (pixel-based, assuming 300px total width)
+
             double totalBarWidth = 300;
             IncomeBelowMinPercentWidth = (IncomeBelowMinPercent / 100.0) * totalBarWidth;
             IncomeMinWagePercentWidth = (IncomeMinWagePercent / 100.0) * totalBarWidth;
             IncomeAboveMinPercentWidth = (IncomeAboveMinPercent / 100.0) * totalBarWidth;
 
-            // Calculate age group bar heights (scale to 0-160px for visual display)
-            int totalDependentsByAgeForBars = AgeGroup0_5 + AgeGroup6_12 + AgeGroup13_17;
-            if (totalDependentsByAgeForBars > 0)
+            // Load Solo Parent Statutory Age Brackets (null-safe & case-insensitive)
+            var ageBrackets = dto.AgeBrackets ?? new System.Collections.Generic.Dictionary<string, int>();
+            ParentAge19Below = GetDictValue(ageBrackets, "19_AND_BELOW", "19_and_below", "19_below");
+            ParentAge20_39 = GetDictValue(ageBrackets, "20_39", "20-39");
+            ParentAge40_59 = GetDictValue(ageBrackets, "40_59", "40-59");
+            ParentAge60Above = GetDictValue(ageBrackets, "60_AND_ABOVE", "60_and_above", "60_above");
+
+            int totalParentAge = ParentAge19Below + ParentAge20_39 + ParentAge40_59 + ParentAge60Above;
+            if (totalParentAge > 0)
             {
-                double maxBarHeight = 160; // Maximum height in pixels
-                AgeGroup0_5BarHeight = (AgeGroup0_5 * maxBarHeight) / totalDependentsByAgeForBars;
-                AgeGroup6_12BarHeight = (AgeGroup6_12 * maxBarHeight) / totalDependentsByAgeForBars;
-                AgeGroup13_17BarHeight = (AgeGroup13_17 * maxBarHeight) / totalDependentsByAgeForBars;
+                ParentAge19BelowPercent = (ParentAge19Below * 100.0 / totalParentAge);
+                ParentAge20_39Percent = (ParentAge20_39 * 100.0 / totalParentAge);
+                ParentAge40_59Percent = (ParentAge40_59 * 100.0 / totalParentAge);
+                ParentAge60AbovePercent = (ParentAge60Above * 100.0 / totalParentAge);
             }
             else
             {
-                AgeGroup0_5BarHeight = 0;
-                AgeGroup6_12BarHeight = 0;
-                AgeGroup13_17BarHeight = 0;
+                ParentAge19BelowPercent = 0;
+                ParentAge20_39Percent = 0;
+                ParentAge40_59Percent = 0;
+                ParentAge60AbovePercent = 0;
             }
 
-            // Load Age Group Data for Donut Chart (null-safe)
-            var ageBrackets = dto.AgeBrackets ?? new System.Collections.Generic.Dictionary<string, int>();
+            ParentAge19BelowBarWidth = Math.Max(0, (ParentAge19BelowPercent / 100.0) * 240.0);
+            ParentAge20_39BarWidth = Math.Max(0, (ParentAge20_39Percent / 100.0) * 240.0);
+            ParentAge40_59BarWidth = Math.Max(0, (ParentAge40_59Percent / 100.0) * 240.0);
+            ParentAge60AboveBarWidth = Math.Max(0, (ParentAge60AbovePercent / 100.0) * 240.0);
+
+            // Update Donut Chart Data
             AgeGroupData.Clear();
             var ageColors = new[] { "#7B1426", "#A14452", "#D9A3AB", "#EAD9DB" };
             var ageLabels = new[] { "19 & Below", "20-39", "40-59", "60 & Above" };
-            var ageKeys = new[] { "19_AND_BELOW", "20_39", "40_59", "60_AND_ABOVE" };
-            
-            for (int i = 0; i < ageKeys.Length; i++)
+            var ageCounts = new[] { ParentAge19Below, ParentAge20_39, ParentAge40_59, ParentAge60Above };
+            for (int i = 0; i < ageCounts.Length; i++)
             {
-                int count = ageBrackets.ContainsKey(ageKeys[i]) ? ageBrackets[ageKeys[i]] : 0;
                 AgeGroupData.Add(new DonutSegment 
                 { 
                     Label = ageLabels[i], 
-                    Value = count, 
+                    Value = ageCounts[i], 
                     Color = ageColors[i] 
                 });
             }
 
-            // Load Civil Status Data (reuse null-safe local)
+            // Load Civil Status Collection
             CivilStatusData.Clear();
             var civilStatusOrder = new[] { "Single", "Married", "Widowed", "Separated", "Annulled" };
-            foreach (var status in civilStatusOrder)
+            var civilStatusCounts = new[] { SingleCount, MarriedCount, WidowedCount, SeparatedCount, AnnulledCount };
+            for (int i = 0; i < civilStatusOrder.Length; i++)
             {
-                int count = civilStatus.ContainsKey(status) ? civilStatus[status] : 0;
-                CivilStatusData.Add(new ListItem { Label = status, Value = count });
+                CivilStatusData.Add(new ListItem { Label = civilStatusOrder[i], Value = civilStatusCounts[i] });
             }
 
-            // Load Employment Status Data (reuse null-safe local)
+            // Load Employment Status Collection
             EmploymentStatusData.Clear();
             var empLabels = new[] { "Employed", "Self-Employed", "Not Employed" };
-            var empKeys = new[] { "employed", "self_employed", "not_employed" };
-            for (int i = 0; i < empKeys.Length; i++)
+            var empCounts = new[] { employed, selfEmployed, notEmployed };
+            var empPercentages = new[] { EmployedPercent, SelfEmployedPercent, NotEmployedPercent };
+            for (int i = 0; i < empLabels.Length; i++)
             {
-                int count = employment.ContainsKey(empKeys[i]) ? employment[empKeys[i]] : 0;
-                double percentage = TotalSoloParents > 0 ? (count * 100.0 / TotalSoloParents) : 0;
                 EmploymentStatusData.Add(new ProgressItem 
                 { 
                     Label = empLabels[i], 
-                    Value = count, 
-                    Percentage = percentage 
+                    Value = empCounts[i], 
+                    Percentage = empPercentages[i] 
                 });
             }
 
-            // Load Income Bracket Data (reuse null-safe local)
+            // Load Income Bracket Collection
             IncomeBracketData.Clear();
             var incomeLabels = new[] { "Below Minimum Wage", "Min Wage + ₱1-₱20,833", "₱20,834 & Above" };
-            var incomeKeys = new[] { "BELOW_MINIMUM_WAGE", "MIN_WAGE_PLUS1_TO_20833", "20834_AND_ABOVE" };
-            for (int i = 0; i < incomeKeys.Length; i++)
+            var incomeCounts = new[] { incomeBelowMin, incomeMinWagePlus, incomeAboveMin };
+            var incomePercentages = new[] { IncomeBelowMinPercent, IncomeMinWagePercent, IncomeAboveMinPercent };
+            for (int i = 0; i < incomeLabels.Length; i++)
             {
-                int count = incomeBrackets.ContainsKey(incomeKeys[i]) 
-                    ? incomeBrackets[incomeKeys[i]] : 0;
-                double percentage = TotalSoloParents > 0 ? (count * 100.0 / TotalSoloParents) : 0;
                 IncomeBracketData.Add(new ProgressItem 
                 { 
                     Label = incomeLabels[i], 
-                    Value = count, 
-                    Percentage = percentage 
+                    Value = incomeCounts[i], 
+                    Percentage = incomePercentages[i] 
                 });
             }
 
-            // Load Dependents Age Data for Column Chart (reuse null-safe local)
+            // Load Dependents Age Column Chart Data
             DependentsAgeData.Clear();
             var depLabels = new[] { "6 & Below", "7-22", "22 & Above" };
-            var depKeys = new[] { "6_AND_BELOW", "7_TO_22", "22_AND_ABOVE" };
-            for (int i = 0; i < depKeys.Length; i++)
+            var depCounts = new[] { AgeGroup0_5, AgeGroup6_12, AgeGroup13_17 };
+            var depColors = new[] { "#7B1426", "#A14452", "#D9A3AB" };
+            for (int i = 0; i < depLabels.Length; i++)
             {
-                int count = dependentsAge.ContainsKey(depKeys[i]) 
-                    ? dependentsAge[depKeys[i]] : 0;
                 DependentsAgeData.Add(new ColumnChartData 
                 { 
                     Label = depLabels[i], 
-                    Value = count,
-                    Color = new[] { "#7B1426", "#A14452", "#D9A3AB" }[i]
+                    Value = depCounts[i],
+                    Color = depColors[i]
                 });
-            }
-
-            // Load Barangay Data (ALL barangays - for pagination) (null-safe)
-            var categories = dto.Categories ?? new System.Collections.Generic.Dictionary<string, int>();
-            AllBarangayData.Clear();
-            var barangayList = new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, int>>();
-            
-            System.Diagnostics.Debug.WriteLine($"  Categories count: {categories.Count}");
-            
-            foreach (var kvp in categories)
-            {
-                if (string.IsNullOrEmpty(kvp.Key) || kvp.Key.Equals("null", StringComparison.OrdinalIgnoreCase) || 
-                    kvp.Key.Equals("No Barangay", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-                barangayList.Add(kvp);
-            }
-
-            barangayList.Sort((a, b) => b.Value.CompareTo(a.Value));
-            System.Diagnostics.Debug.WriteLine($"  Barangay list count after filtering: {barangayList.Count}");
-            
-            // Find max value for bar width calculation
-            int maxBarangayValue = barangayList.Count > 0 ? barangayList[0].Value : 1;
-            
-            int barangayIndex = 0;
-            foreach (var kvp in barangayList)
-            {
-                string displayLabel = kvp.Key.Length > 20 ? kvp.Key.Substring(0, 17) + "..." : kvp.Key;
-                double barWidth = (kvp.Value * 1.0 / maxBarangayValue) * 300;
-                
-                AllBarangayData.Add(new AreaChartData 
-                { 
-                    Label = displayLabel,
-                    Value = kvp.Value,
-                    XPosition = barangayIndex,
-                    Rank = barangayIndex + 1,
-                    Color = "#B03058", // Burgundy
-                    BarWidth = barWidth
-                });
-                barangayIndex++;
-            }
-
-            // Calculate pagination
-            const int barangaysPerPage = 10;
-            TotalBarangayPages = (int)Math.Ceiling(AllBarangayData.Count / (double)barangaysPerPage);
-            CurrentBarangayPage = 1;
-            System.Diagnostics.Debug.WriteLine($"  AllBarangayData loaded: {AllBarangayData.Count} items, {TotalBarangayPages} pages");
-            
-            UpdateBarangayPage();
-            System.Diagnostics.Debug.WriteLine($"✓ BarangayData after UpdateBarangayPage: {BarangayData.Count} items");
-
-            // Load Top Cases Presented Data (from Categories/ClassificationCircumstance) (reuse null-safe local)
-            TopCasesData.Clear();
-            var casesList = new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, int>>();
-            foreach (var kvp in categories)
-            {
-                // Skip empty/null entries
-                if (string.IsNullOrEmpty(kvp.Key) || kvp.Key.Equals("null", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-                casesList.Add(kvp);
-            }
-
-            casesList.Sort((a, b) => b.Value.CompareTo(a.Value));
-
-            // Find max value for bar width calculation
-            int maxCasesValue = casesList.Count > 0 ? casesList[0].Value : 1;
-
-            int caseIndex = 0;
-            foreach (var kvp in casesList)
-            {
-                if (caseIndex >= 10) break;
-                // Truncate long case names for better display
-                string displayCaseLabel = kvp.Key.Length > 20 ? kvp.Key.Substring(0, 17) + "..." : kvp.Key;
-                double casesBarWidth = (kvp.Value * 1.0 / maxCasesValue) * 300; // Max width ~300px
-
-                TopCasesData.Add(new AreaChartData
-                {
-                    Label = displayCaseLabel,
-                    Value = kvp.Value,
-                    XPosition = caseIndex,
-                    Rank = caseIndex + 1,
-                    Color = "#4ECDC4", // Teal color for cases
-                    BarWidth = casesBarWidth
-                });
-                caseIndex++;
             }
 
             LastRefreshTime = DateTime.Now;
@@ -877,17 +1355,15 @@ namespace SOLUM_UI.ViewModels
             HasData = TotalSoloParents > 0;
         }
 
-
         /// <summary>
         /// Generate SVG arc path for employment ring charts.
         /// Canvas: 64x64, Radius: 28, Center: (32, 32)
         /// Arc starts at top (0°) and sweeps clockwise based on percentage.
-        /// Percentage of 25% = 90° arc, 50% = 180° arc, 100% = 360° (full circle).
         /// </summary>
         private string GenerateArcPath(double percentage)
         {
-            if (percentage < 0.5) percentage = 0.5; // Minimum visible arc
-            if (percentage > 99.5) percentage = 99.5; // Prevent full circle which breaks arc
+            if (percentage <= 0.001) return string.Empty;
+            if (percentage >= 100.0) percentage = 99.99;
 
             const double centerX = 32.0;
             const double centerY = 32.0;
@@ -906,11 +1382,13 @@ namespace SOLUM_UI.ViewModels
             double endY = centerY - radius * Math.Cos(radians);
 
             // Determine if arc is large (> 180°)
-            bool isLargeArc = degrees > 180;
+            int isLargeArc = degrees > 180.0 ? 1 : 0;
 
-            // Build SVG arc path
-            string arcPath = $"M {startX},{startY} A {radius},{radius} 0 {(isLargeArc ? 1 : 0)},1 {endX},{endY}";
-            return arcPath;
+            // Build SVG arc path using InvariantCulture to avoid decimal localization bugs
+            return string.Format(
+                System.Globalization.CultureInfo.InvariantCulture,
+                "M {0:F2},{1:F2} A {2:F2},{2:F2} 0 {3},1 {4:F2},{5:F2}",
+                startX, startY, radius, isLargeArc, endX, endY);
         }
 
         protected void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
@@ -963,6 +1441,20 @@ namespace SOLUM_UI.ViewModels
         public int Rank { get; set; }
         public string Color { get; set; }
         public double BarWidth { get; set; }
+        public double MaxBarangayValue { get; set; } = 1;
+        public double PercentageShare { get; set; }
+        public int ActiveCount { get; set; }
+        public int InactiveCount { get; set; }
+        public int NewRegistrationsCount { get; set; }
+        public int RenewalsCount { get; set; }
+
+        public System.Windows.GridLength BarGridLength =>
+            new System.Windows.GridLength(Math.Max(Value, 0), System.Windows.GridUnitType.Star);
+
+        public System.Windows.GridLength RemainingGridLength =>
+            new System.Windows.GridLength(Math.Max(MaxBarangayValue - Value, 0.001), System.Windows.GridUnitType.Star);
+
+        public string PercentageShareText => $"{PercentageShare:F1}%";
 
         /// <summary>
         /// Returns Label in case-presented format (original casing preserved)
@@ -971,5 +1463,10 @@ namespace SOLUM_UI.ViewModels
         {
             get => Label;
         }
+
+        public string TooltipSummary => 
+            $"{Label}: {Value} Solo Parents ({PercentageShare:F1}%)\n" +
+            $"Active: {ActiveCount}  |  Inactive: {InactiveCount}\n" +
+            $"New: {NewRegistrationsCount}  |  Renewals: {RenewalsCount}";
     }
 }

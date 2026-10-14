@@ -249,12 +249,13 @@
         </Style>
 
         <Style x:Key="GvHeader" TargetType="GridViewColumnHeader">
-            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Background" Value="#FBF5F7"/>
             <Setter Property="Foreground" Value="#702943"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="10.5"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Height" Value="44"/>
-            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Padding" Value="8,0"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -263,12 +264,15 @@
                             <Border x:Name="HeaderBg"
                                     Background="#FBF5F7"
                                     BorderBrush="#702943"
-                                    BorderThickness="0,0,0,2">
-                                <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0"
+                                    BorderThickness="0,0,0,1.5">
+                                <Border BorderBrush="#E8D4DC" BorderThickness="0,0,1,0"
                                         Padding="{TemplateBinding Padding}">
                                     <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                       VerticalAlignment="Center"
-                                                      TextBlock.Foreground="#702943"/>
+                                                      TextBlock.Foreground="#702943"
+                                                      TextBlock.FontFamily="Segoe UI"
+                                                      TextBlock.FontSize="10.5"
+                                                      TextBlock.FontWeight="Bold"/>
                                 </Border>
                             </Border>
                             <Thumb x:Name="PART_HeaderGripper"
@@ -381,12 +385,21 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- Row 0: Page Title & Header -->
+        <Grid Grid.Row="0" Margin="24,16,24,8">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Record Management" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
+                <TextBlock Text="Registry database of registered solo parents and validity term statuses." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Grid>
+
         <!-- Admin Toolbar (search + filter + sort + add + share) -->
-        <Grid x:Name="AdminToolbar" Grid.Row="0" Margin="20,16,20,12">
+        <Grid x:Name="AdminToolbar" Grid.Row="1" Margin="24,6,24,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -757,8 +770,8 @@
             </Button>
         </Grid>
 
-        <Border Grid.Row="2"
-                Margin="20,5,20,5"
+        <Border Grid.Row="3"
+                Margin="24,4,24,6"
                 CornerRadius="0"
                 BorderBrush="#702943"
                 BorderThickness="1.5"
@@ -910,7 +923,7 @@
             </Grid>
         </Border>
 
-        <Border x:Name="BasicUserToolbar" Grid.Row="0" Visibility="Collapsed" Margin="20,16,20,12">
+        <Border x:Name="BasicUserToolbar" Grid.Row="1" Visibility="Collapsed" Margin="24,6,24,10">
             <Grid Height="44">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -1009,9 +1022,9 @@
             </Grid>
         </Border>
 
-        <Border x:Name="EncoderSearchPanel" Grid.Row="1"
+        <Border x:Name="EncoderSearchPanel" Grid.Row="2"
                 Visibility="Collapsed"
-                Margin="20,0,20,12"
+                Margin="24,0,24,10"
                 Background="White" CornerRadius="14"
                 BorderBrush="#E0D0D5" BorderThickness="1.5">
             <Border.Effect>
@@ -1300,8 +1313,8 @@
             </StackPanel>
         </Border>
 
-        <!-- Paging row (Row 3, hidden for Encoder) -->
-        <Grid x:Name="PagingRow" Grid.Row="3" Margin="20,8,20,16">
+        <!-- Paging row (Row 4, hidden for Encoder) -->
+        <Grid x:Name="PagingRow" Grid.Row="4" Margin="24,8,24,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -1377,7 +1390,7 @@
             </Button>
         </Grid>
 
-        <components:LoadingOverlay Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="99"
+        <components:LoadingOverlay Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="99"
                                    x:Name="PageLoadingOverlay"
                                    IsLoading="True"
                                    HorizontalAlignment="Stretch"

@@ -55,16 +55,21 @@ namespace SOLUM_UI.Services.Api
         public async Task<BaseResponse<BarangayAnalyticsResponseDto>> GetBarangayBreakdownAsync(
             int? quarter = null,
             int? year = null,
+            int? month = null,
             string barangay = null,
             string type = null,
+            int? startYear = null,
+            int? startMonth = null,
+            int? endYear = null,
+            int? endMonth = null,
             DateTime? startDate = null,
             DateTime? endDate = null)
         {
             var queryParams = new List<string>();
 
-            if (quarter.HasValue)
+            if (!string.IsNullOrWhiteSpace(type))
             {
-                queryParams.Add($"quarter={quarter.Value}");
+                queryParams.Add($"type={Uri.EscapeDataString(type.Trim())}");
             }
 
             if (year.HasValue)
@@ -72,9 +77,34 @@ namespace SOLUM_UI.Services.Api
                 queryParams.Add($"year={year.Value}");
             }
 
-            if (!string.IsNullOrWhiteSpace(type))
+            if (quarter.HasValue)
             {
-                queryParams.Add($"type={Uri.EscapeDataString(type.Trim())}");
+                queryParams.Add($"quarter={quarter.Value}");
+            }
+
+            if (month.HasValue)
+            {
+                queryParams.Add($"month={month.Value}");
+            }
+
+            if (startYear.HasValue)
+            {
+                queryParams.Add($"startYear={startYear.Value}");
+            }
+
+            if (startMonth.HasValue)
+            {
+                queryParams.Add($"startMonth={startMonth.Value}");
+            }
+
+            if (endYear.HasValue)
+            {
+                queryParams.Add($"endYear={endYear.Value}");
+            }
+
+            if (endMonth.HasValue)
+            {
+                queryParams.Add($"endMonth={endMonth.Value}");
             }
 
             if (startDate.HasValue)

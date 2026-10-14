@@ -311,39 +311,18 @@
     <Grid Background="#F9FAFB">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="24">
-                <!-- Analytics Toolbar Header (reusing components from ViewAllLogsOverlay) -->
-                <Border Margin="0,0,0,24" Background="White" CornerRadius="12" BorderBrush="#F3F4F6" BorderThickness="1" Padding="22,12">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                <!-- Page Title Header (matching Solum page header style) -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                        <!-- Left: Date Range Pickers (reused from ViewAllLogsOverlay) -->
-                        <Grid Grid.Column="0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="160"/>
-                                <ColumnDefinition Width="10"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="10"/>
-                                <ColumnDefinition Width="160"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- From Date Picker -->
-                            <DatePicker Grid.Column="0"
-                                        SelectedDate="{Binding StartDate, Mode=TwoWay}"
-                                        Style="{StaticResource BrandDatePicker}"/>
-
-                            <!-- Arrow separator -->
-                            <TextBlock Grid.Column="2" Text="→" FontSize="14"
-                                       Foreground="#C0A0AA" VerticalAlignment="Center"
-                                       HorizontalAlignment="Center"/>
-
-                            <!-- To Date Picker -->
-                            <DatePicker Grid.Column="4"
-                                        SelectedDate="{Binding EndDate, Mode=TwoWay}"
-                                        Style="{StaticResource BrandDatePicker}"/>
-                        </Grid>
+                    <!-- Left: Section Title -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Analytics &amp; Demographics" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
+                        <TextBlock Text="Comprehensive demographic breakdowns, statutory categories, and barangay distributions." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,4,0,0"/>
+                    </StackPanel>
 
                         <!-- Right: Action Buttons -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -374,11 +353,10 @@
 
                             <!-- Export Button (Download) -->
                             <Border Background="White" BorderBrush="#D4A0B0" BorderThickness="1.5" 
-                                    CornerRadius="20" Width="40" Height="40" Margin="0,0,8,0"
-                                    Padding="0">
+                                    CornerRadius="20" Width="40" Height="40" Margin="0,0,8,0">
                                 <Button x:Name="ExportBtn" Background="Transparent" BorderThickness="0" Cursor="Hand"
                                         ToolTip="Export to Excel"
-                                        Click="ExportBtn_Click" Margin="0,4,-2,4">
+                                        Click="ExportBtn_Click">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Border Background="Transparent" CornerRadius="20">
@@ -393,9 +371,9 @@
                                     </Button.Template>
                                     <!-- Download Icon (File with Down Arrow) -->
                                     <Path Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,19L8,15H11V12H13V15H16L12,19Z"
-                                          Fill="#10B981" Stretch="UniformToFill"
-                                          Width="18" Height="22"
-                                          HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                          Fill="#10B981" Stretch="Uniform"
+                                          Width="16" Height="16"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                             </Border>
 
@@ -423,8 +401,8 @@
                                         <!-- Normal Refresh Icon -->
                                         <Path x:Name="RefreshIcon" 
                                               Data="M7,7H4V4M4,4C5.85,2.75 8.45,2 11,2C16.52,2 21,6.48 21,12C21,17.52 16.52,22 11,22C5.48,22 2,17.52 2,12H0C0,18.63 5.37,24 12,24C18.63,24 24,18.63 24,12C24,5.37 18.63,0 12,0C8.81,0 5.87,1.17 3.67,3.17L2,1.5V7Z"
-                                              Fill="#702943" Stretch="UniformToFill"
-                                              Width="18" Height="18"
+                                              Fill="#702943" Stretch="Uniform"
+                                              Width="16" Height="16"
                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
                                         <!-- Loading Spinner (hidden by default) -->
@@ -438,120 +416,50 @@
                             </Border>
                         </StackPanel>
                     </Grid>
-                </Border>
 
-                <!-- Filter Dropdown Popup -->
-                <Popup x:Name="FilterPopup"
-                       PlacementTarget="{Binding ElementName=FilterDropBtn}"
-                       Placement="Bottom" StaysOpen="False"
-                       HorizontalOffset="-80"
-                       AllowsTransparency="True" PopupAnimation="Fade">
-                    <Border Background="White" CornerRadius="16"
-                            BorderBrush="#E8D4DA" BorderThickness="1.5" Padding="22,20,22,20"
-                            MinWidth="300">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#702943" BlurRadius="20" ShadowDepth="4" Opacity="0.12"/>
-                        </Border.Effect>
-                        <StackPanel>
-                            <TextBlock Text="FILTER ANALYTICS" FontFamily="Segoe UI" FontSize="10"
-                                       FontWeight="Bold" Foreground="#702943"
-                                       Margin="0,0,0,16"/>
 
-                            <TextBlock Text="Barangay" FontFamily="Segoe UI" FontSize="12"
-                                       FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
-                            <ComboBox x:Name="CmbFilterBarangay"
-                                      Template="{StaticResource StyledComboTemplate}"
-                                      ItemContainerStyle="{StaticResource StyledComboItem}"
-                                      Height="40"
-                                      FontFamily="Segoe UI" FontSize="13"
-                                      Margin="0,0,0,14"
-                                      SelectionChanged="FilterCombo_Changed">
-                                <ComboBoxItem Content="All" IsSelected="True"/>
-                                <ComboBoxItem Content="Biñan Poblacion"/>
-                                <ComboBoxItem Content="Bungahan"/>
-                                <ComboBoxItem Content="Canlalay"/>
-                                <ComboBoxItem Content="Casile"/>
-                                <ComboBoxItem Content="De La Paz"/>
-                                <ComboBoxItem Content="Langkiwa"/>
-                                <ComboBoxItem Content="Loma"/>
-                                <ComboBoxItem Content="Malaban"/>
-                                <ComboBoxItem Content="Malamig"/>
-                                <ComboBoxItem Content="Mamplasan"/>
-                                <ComboBoxItem Content="Platero"/>
-                                <ComboBoxItem Content="San Antonio"/>
-                                <ComboBoxItem Content="San Francisco"/>
-                                <ComboBoxItem Content="San Jose"/>
-                                <ComboBoxItem Content="San Vicente"/>
-                                <ComboBoxItem Content="Santo Tomas"/>
-                                <ComboBoxItem Content="Soro-Soro"/>
-                                <ComboBoxItem Content="Timbao"/>
-                                <ComboBoxItem Content="Tubigan"/>
-                            </ComboBox>
+                <!-- Active Filter & Date Range Status Indicator Bar -->
+                <Border Margin="0,0,0,18" Background="White" CornerRadius="12" 
+                        BorderBrush="#E5E7EB" BorderThickness="1.5" Padding="18,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="Date Range" FontFamily="Segoe UI" FontSize="12"
-                                       FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
-                            <Grid Margin="0,0,0,18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <DatePicker Grid.Column="0"
-                                            SelectedDate="{Binding StartDate, Mode=TwoWay}"
-                                            Style="{StaticResource BrandDatePicker}"/>
-                                <DatePicker Grid.Column="2"
-                                            SelectedDate="{Binding EndDate, Mode=TwoWay}"
-                                            Style="{StaticResource BrandDatePicker}"/>
-                            </Grid>
+                        <!-- Left: Status Badge -->
+                        <Border Grid.Column="0" Background="#FDF0F3" CornerRadius="8" Padding="10,5" Margin="0,0,14,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <!-- Filter Pin / Lens Icon -->
+                                <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"
+                                      Fill="#702943" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="ACTIVE FILTER" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
 
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0" Height="42" Cursor="Hand"
-                                        Click="FilterReset_Click">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Bg" Background="#F5EEF1" CornerRadius="10"
-                                                    BorderBrush="#DCC8CE" BorderThickness="1.5">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Bg" Property="Background" Value="#EDD8DE"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                    <TextBlock Text="Reset" FontFamily="Segoe UI" FontSize="13"
-                                               FontWeight="SemiBold" Foreground="#702943"/>
-                                </Button>
-                                <Button Grid.Column="2" Height="42" Cursor="Hand"
-                                        Click="FilterApply_Click">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Bg" Background="#702943" CornerRadius="10">
-                                                <Border.Effect>
-                                                    <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="2" Opacity="0.25"/>
-                                                </Border.Effect>
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                    <TextBlock Text="Apply" FontFamily="Segoe UI" FontSize="13"
-                                               FontWeight="SemiBold" Foreground="White"/>
-                                </Button>
-                            </Grid>
+                        <!-- Middle: Active Filter Text Summary -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Viewing:" FontFamily="Segoe UI" FontSize="13" Foreground="#6B7280" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding ActiveFilterSummary}" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold" Foreground="#1F2937" VerticalAlignment="Center"/>
                         </StackPanel>
-                    </Border>
-                </Popup>
+
+                        <!-- Right: Reset Button (shown when custom filters applied) -->
+                        <Button Grid.Column="2" 
+                                Visibility="{Binding IsFilterActive, Converter={StaticResource BoolToVisibilityConverter}}"
+                                Style="{StaticResource TextOnlyButtonStyle}"
+                                Click="FilterReset_Click"
+                                Cursor="Hand"
+                                ToolTip="Reset filter to Citywide &amp; Current Month">
+                            <Border Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="12,6">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="✕" FontSize="11" FontWeight="Bold" Foreground="#6B7280" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Reset Filter" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Button>
+                    </Grid>
+                </Border>
 
                 <!-- No-Data Empty State Banner (shown when filter returns 0 records) -->
                 <Border Margin="0,0,0,18"
@@ -581,116 +489,195 @@
                     </Grid>
                 </Border>
 
-                <!-- Row 1: KPI Cards (Featured + 3 Standard) -->
-                <Grid Margin="0,0,0,24" Height="160">
+                <!-- Row 1: KPI Cards (Executive Operational KPIs) -->
+                <Grid Margin="0,0,0,24" Height="165">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="24"/>
+                        <ColumnDefinition Width="1.6*"/>
+                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="24"/>
+                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="24"/>
+                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Featured Card 1: Total Solo Parents (Wider - 2x proportion) -->
-                    <Border Grid.Column="0" Style="{StaticResource CardStyle}" Background="{StaticResource BurundyPrimary}" Padding="32" Margin="0,0,11,0">
-                        <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <!-- Featured Card 1: Total Solo Parents & MoM Health Trend -->
+                    <Border Grid.Column="0" Style="{StaticResource CardStyle}" Background="{StaticResource BurundyPrimary}" Padding="22,18">
+                        <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <!-- Top-Left Icon Slot -->
-                            <StackPanel Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,8">
-                                <!-- Icon placeholder (32x32) -->
-                                <Viewbox Width="32" Height="32">
-                                    <TextBlock Text="👥" FontSize="24" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <!-- Top: Icon & Trend Badge -->
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Viewbox Grid.Column="0" Width="26" Height="26">
+                                    <TextBlock Text="👥" FontSize="20" Foreground="White" VerticalAlignment="Center"/>
                                 </Viewbox>
+
+                                <!-- MoM Health Trend Badge -->
+                                <Border Grid.Column="2" Background="#33FFFFFF" CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="● " FontSize="10" Foreground="#A7F3D0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding ActiveChangeText}" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- Middle: Big Stat & Label -->
+                            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
+                                <TextBlock Text="{Binding DisplayTotalEnrolled}" FontSize="36" FontWeight="Bold" 
+                                           Foreground="White" TextAlignment="Left" LineHeight="38"/>
+                                <TextBlock Text="Total Enrolled Solo Parents" FontSize="13" FontWeight="SemiBold" 
+                                           Foreground="White" Opacity="0.95" Margin="0,2,0,0"/>
                             </StackPanel>
 
-                            <!-- Bottom-Left Content (Left-aligned) -->
-                            <StackPanel Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Left">
-                                <TextBlock Text="{Binding TotalSoloParents}" FontSize="35" FontWeight="Bold" 
-                                           Foreground="White" TextAlignment="Left" LineHeight="48" Margin="0,0,0,4" Height="70"/>
-                                <TextBlock Text="Total solo parents" FontSize="18" Foreground="White" Opacity="0.9" 
-                                           TextAlignment="Left" LineHeight="18" Height="20"/>
-                            </StackPanel>
+                            <!-- Bottom: Active vs Inactive ratio -->
+                            <Border Grid.Row="2" Background="#26FFFFFF" CornerRadius="8" Padding="10,4">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" TextAlignment="Left" FontSize="11" Foreground="White">
+                                        Active: <Bold><Run Text="{Binding DisplayActiveRecords, Mode=OneWay}"/></Bold>
+                                    </TextBlock>
+                                    <TextBlock Grid.Column="1" Text="|" Foreground="White" Opacity="0.5" Margin="4,0"/>
+                                    <TextBlock Grid.Column="2" TextAlignment="Right" FontSize="11" Foreground="White">
+                                        Inactive: <Bold><Run Text="{Binding DisplayInactiveRecords, Mode=OneWay}"/></Bold>
+                                    </TextBlock>
+                                </Grid>
+                            </Border>
                         </Grid>
                     </Border>
 
-                    <!-- Standard Card 2: Pantawid (Equal width) -->
-                    <Border Grid.Column="1" Style="{StaticResource CardStyle}" Background="{StaticResource OrangePrimary}" Padding="20" Grid.ColumnSpan="2" Margin="16,0,0,0">
-                        <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <!-- Card 2: Renewals Due & Monthly Activity -->
+                    <Border Grid.Column="2" Style="{StaticResource CardStyle}" Background="{StaticResource OrangePrimary}" Padding="18,16">
+                        <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <!-- Top-Left Icon Slot -->
-                            <StackPanel Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,8">
-                                <Viewbox Width="28" Height="28">
-                                    <TextBlock Text="🎁" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <!-- Top: Icon & Alert Tag -->
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Viewbox Grid.Column="0" Width="24" Height="24">
+                                    <TextBlock Text="🔄" FontSize="18" Foreground="White"/>
                                 </Viewbox>
+                                <Border Grid.Column="2" Background="#33FFFFFF" CornerRadius="10" Padding="8,3">
+                                    <TextBlock Text="Due This Month" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                            </Grid>
+
+                            <!-- Middle: Big Stat & Label -->
+                            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
+                                <TextBlock Text="{Binding RenewalsDueThisMonth}" FontSize="32" FontWeight="Bold" 
+                                           Foreground="White" TextAlignment="Left" LineHeight="34"/>
+                                <TextBlock Text="Renewals Due" FontSize="12" FontWeight="SemiBold" 
+                                           Foreground="White" Opacity="0.95" Margin="0,2,0,0"/>
                             </StackPanel>
 
-                            <!-- Bottom-Right Content (Right-aligned) -->
-                            <StackPanel Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                                <TextBlock Text="{Binding PantawidBeneficiaryCount}" FontSize="29" FontWeight="Bold" 
-                                           Foreground="White" TextAlignment="Right" LineHeight="29" Margin="0,0,0,4"/>
-                                <TextBlock Text="Pantawid" FontSize="18" Foreground="White" Opacity="0.9" 
-                                           TextAlignment="Right" LineHeight="18"/>
-                            </StackPanel>
+                            <!-- Bottom: Desk Transactions -->
+                            <Border Grid.Row="2" Background="#26FFFFFF" CornerRadius="6" Padding="8,4">
+                                <TextBlock FontSize="11" Foreground="White" TextTrimming="CharacterEllipsis">
+                                    <Run Text="{Binding RenewalsThisMonth}"/> done · <Bold><Run Text="{Binding RenewalsCompletedToday}"/></Bold> today
+                                </TextBlock>
+                            </Border>
                         </Grid>
                     </Border>
 
-                    <!-- Standard Card 3: LGBT (Equal width) -->
-                    <Border Grid.Column="4" Style="{StaticResource CardStyle}" Background="{StaticResource TealPrimary}" Padding="20">
-                        <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <!-- Card 3: Registrations This Month (Desk Intake) -->
+                    <Border Grid.Column="4" Style="{StaticResource CardStyle}" Background="{StaticResource TealPrimary}" Padding="18,16">
+                        <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <!-- Top-Left Icon Slot -->
-                            <StackPanel Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,8">
-                                <Viewbox Width="28" Height="28">
-                                    <TextBlock Text="🏳️‍🌈" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <!-- Top: Icon & Badge -->
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Viewbox Grid.Column="0" Width="24" Height="24">
+                                    <TextBlock Text="📝" FontSize="18" Foreground="White"/>
                                 </Viewbox>
+                                <Border Grid.Column="2" Background="#33FFFFFF" CornerRadius="10" Padding="8,3">
+                                    <TextBlock Text="New Intake" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                            </Grid>
+
+                            <!-- Middle: Big Stat & Label -->
+                            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
+                                <TextBlock Text="{Binding DisplayRegisteredCount}" FontSize="32" FontWeight="Bold" 
+                                           Foreground="White" TextAlignment="Left" LineHeight="34"/>
+                                <TextBlock Text="{Binding DisplayRegisteredLabel}" FontSize="12" FontWeight="SemiBold" 
+                                           Foreground="White" Opacity="0.95" Margin="0,2,0,0"/>
                             </StackPanel>
 
-                            <!-- Bottom-Right Content (Right-aligned) -->
-                            <StackPanel Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                                <TextBlock Text="{Binding LgbtCount}" FontSize="29" FontWeight="Bold" 
-                                           Foreground="White" TextAlignment="Right" LineHeight="29" Margin="0,0,0,4"/>
-                                <TextBlock Text="LGBT" FontSize="18" Foreground="White" Opacity="0.9" 
-                                           TextAlignment="Right" LineHeight="18"/>
-                            </StackPanel>
+                            <!-- Bottom: Dependents Total -->
+                            <Border Grid.Row="2" Background="#26FFFFFF" CornerRadius="6" Padding="8,4">
+                                <TextBlock FontSize="11" Foreground="White" TextTrimming="CharacterEllipsis">
+                                    <Run Text="{Binding TotalDependents}"/> Total Dependents
+                                </TextBlock>
+                            </Border>
                         </Grid>
                     </Border>
 
-                    <!-- Standard Card 4: Total Dependents (Equal width) -->
-                    <Border Grid.Column="6" Style="{StaticResource CardStyle}" Background="{StaticResource PurpleDark}" Padding="20">
-                        <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <!-- Card 4: Special Sectors (Pantawid, LGBT, Indigenous) -->
+                    <Border Grid.Column="6" Style="{StaticResource CardStyle}" Background="{StaticResource PurpleDark}" Padding="18,16">
+                        <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <!-- Top-Left Icon Slot -->
-                            <StackPanel Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,8">
-                                <Viewbox Width="28" Height="28">
-                                    <TextBlock Text="👨‍👩‍👧‍👦" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <!-- Top: Icon & Badge -->
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Viewbox Grid.Column="0" Width="24" Height="24">
+                                    <TextBlock Text="🎁" FontSize="18" Foreground="White"/>
                                 </Viewbox>
+                                <Border Grid.Column="2" Background="#33FFFFFF" CornerRadius="10" Padding="8,3">
+                                    <TextBlock Text="Special Sectors" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                            </Grid>
+
+                            <!-- Middle: Big Stat & Label -->
+                            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
+                                <TextBlock Text="{Binding PantawidBeneficiaryCount}" FontSize="32" FontWeight="Bold" 
+                                           Foreground="White" TextAlignment="Left" LineHeight="34"/>
+                                <TextBlock Text="4Ps Pantawid" FontSize="12" FontWeight="SemiBold" 
+                                           Foreground="White" Opacity="0.95" Margin="0,2,0,0"/>
                             </StackPanel>
 
-                            <!-- Bottom-Right Content (Right-aligned) -->
-                            <StackPanel Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                                <TextBlock Text="{Binding TotalDependents}" FontSize="29" FontWeight="Bold" 
-                                           Foreground="White" TextAlignment="Right" LineHeight="29" Margin="0,0,0,4"/>
-                                <TextBlock Text="Total dependents" FontSize="18" Foreground="White" Opacity="0.9" 
-                                           TextAlignment="Right" LineHeight="18"/>
-                            </StackPanel>
+                            <!-- Bottom: LGBT & Indigenous sub-counts -->
+                            <Border Grid.Row="2" Background="#26FFFFFF" CornerRadius="6" Padding="8,4">
+                                <TextBlock FontSize="11" Foreground="White" TextTrimming="CharacterEllipsis">
+                                    <Run Text="{Binding LgbtCount}"/> LGBT · <Run Text="{Binding IndigenousCount}"/> IP
+                                </TextBlock>
+                            </Border>
                         </Grid>
                     </Border>
                 </Grid>
@@ -713,12 +700,12 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Case Presented" Style="{StaticResource CardTitleStyle}"/>
-                                    <TextBlock Text="Registered solo parents case presented tracker." Style="{StaticResource CardSubtitleStyle}"/>
+                                    <TextBlock Text="Barangay Distribution" Style="{StaticResource CardTitleStyle}"/>
+                                    <TextBlock Text="All 24 official Biñan barangays ranked by solo parent enrollment." Style="{StaticResource CardSubtitleStyle}"/>
                                 </StackPanel>
                                 <!-- Page Indicator -->
                                 <TextBlock Grid.Column="1" FontSize="11" Foreground="{StaticResource TextGray}" VerticalAlignment="Center">
-                                    <Run Text="Page "/><Run Text="{Binding CurrentBarangayPage}"/><Run Text=" of "/><Run Text="{Binding TotalBarangayPages}"/>
+                                    <Run Text="Page "/><Run Text="{Binding CurrentBarangayPage}"/><Run Text=" of "/><Run Text="{Binding TotalBarangayPages}"/><Run Text=" (24 Barangays)"/>
                                 </TextBlock>
                             </Grid>
 
@@ -726,53 +713,41 @@
                             <ItemsControl ItemsSource="{Binding BarangayData}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,0,0,10">
+                                        <Grid Margin="0,0,0,10" ToolTip="{Binding TooltipSummary}">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition Width="28"/>
+                                                <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="45"/>
+                                                <ColumnDefinition Width="48"/>
                                             </Grid.ColumnDefinitions>
 
-                                            <!-- Barangay Name (Title Case) -->
-                                            <TextBlock Grid.Column="0" Text="{Binding DisplayLabel}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
-                                                <TextBlock.ToolTip>
-                                                    <ToolTip Background="White" BorderBrush="#E5E7EB" BorderThickness="1" Padding="8">
-                                                        <StackPanel>
-                                                            <TextBlock FontWeight="SemiBold" Foreground="{StaticResource TextDark}" Text="{Binding DisplayLabel}"/>
-                                                            <TextBlock FontSize="11" Foreground="{StaticResource TextGray}" Margin="0,4,0,0">
-                                                                    <Run Text="{Binding Value}"/> solo parents
-                                                            </TextBlock>
-                                                        </StackPanel>
-                                                    </ToolTip>
-                                                </TextBlock.ToolTip>
-                                                </TextBlock>
+                                            <!-- Rank Badge -->
+                                            <Border Grid.Column="0" Background="#FDF0F3" CornerRadius="4" Width="22" Height="20" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Rank, StringFormat='#{0}'}" FontSize="10" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
 
-                                            <!-- Progress Bar (14px height, rounded-full) -->
-                                            <Border Grid.Column="1" Height="14" Background="#F3F4F6" CornerRadius="7" Margin="12,0">
-                                                <Border Background="{Binding Color}" CornerRadius="7" Width="{Binding BarWidth}" HorizontalAlignment="Left">
-                                                    <Border.ToolTip>
-                                                        <ToolTip Background="White" BorderBrush="#E5E7EB" BorderThickness="1" Padding="8">
-                                                            <StackPanel>
-                                                                <TextBlock FontWeight="SemiBold" Foreground="{StaticResource TextDark}" Text="{Binding Label}"/>
-                                                                <TextBlock FontSize="11" Foreground="{StaticResource TextGray}" Margin="0,4,0,0">
-                                                                        <Run Text="{Binding Value}"/> registered solo parents
-                                                                </TextBlock>
-                                                            </StackPanel>
-                                                        </ToolTip>
-                                                    </Border.ToolTip>
-                                                </Border>
+                                            <!-- Barangay Name -->
+                                            <TextBlock Grid.Column="1" Text="{Binding DisplayLabel}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+
+                                            <!-- Progress Bar (12px height, rounded) -->
+                                            <Border Grid.Column="2" Height="12" Background="#F3F4F6" CornerRadius="6" Margin="10,0">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="{Binding BarGridLength}"/>
+                                                        <ColumnDefinition Width="{Binding RemainingGridLength}"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Grid.Column="0" Background="{Binding Color}" CornerRadius="6"/>
+                                                </Grid>
                                             </Border>
 
                                             <!-- Count -->
-                                            <TextBlock Grid.Column="2" Text="{Binding Value}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" TextAlignment="Right" VerticalAlignment="Center">
-                                                <TextBlock.ToolTip>
-                                                    <ToolTip Background="White" BorderBrush="#E5E7EB" BorderThickness="1" Padding="8">
-                                                        <TextBlock Foreground="{StaticResource TextDark}">
-                                                                <Run Text="{Binding Value}"/> parents in <Run Text="{Binding Label}"/>
-                                                        </TextBlock>
-                                                    </ToolTip>
-                                                </TextBlock.ToolTip>
-                                                </TextBlock>
+                                            <TextBlock Grid.Column="3" Text="{Binding Value}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Right" VerticalAlignment="Center"/>
+
+                                            <!-- Percentage Share Badge -->
+                                            <Border Grid.Column="4" Background="#F5ECEE" CornerRadius="4" Padding="4,2" Margin="6,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                <TextBlock Text="{Binding PercentageShareText}" FontSize="10" FontWeight="SemiBold" Foreground="#702943" TextAlignment="Center"/>
+                                            </Border>
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -833,10 +808,14 @@
 
                             <!-- Progress Bar (shows Female % + Male %, no gray space) -->
                             <Border Height="14" Background="#F3F4F6" CornerRadius="7" Margin="0,0,0,0">
-                                <StackPanel Orientation="Horizontal" Height="14">
-                                    <Border Width="{Binding FemalePercentWidth}" Background="{StaticResource BurundyPrimary}" CornerRadius="7,0,0,7"/>
-                                    <Border Background="{StaticResource BluePrimary}" CornerRadius="0,7,7,0"/>
-                                </StackPanel>
+                                <Grid Height="14">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="{Binding FemaleGridLength}"/>
+                                        <ColumnDefinition Width="{Binding MaleGridLength}"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Background="{StaticResource BurundyPrimary}" CornerRadius="7,0,0,7"/>
+                                    <Border Grid.Column="1" Background="{StaticResource BluePrimary}" CornerRadius="0,7,7,0"/>
+                                </Grid>
                             </Border>
 
                             <!-- Summary Text (percentage breakdown) -->
@@ -856,116 +835,107 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Age Group Donut Chart -->
+                    <!-- Solo Parent Statutory Age Groups Card -->
                     <Border Grid.Column="0" Style="{StaticResource CardStyle}">
                         <StackPanel Margin="24">
-                            <TextBlock Text="Age group" Style="{StaticResource CardTitleStyle}"/>
-                            <TextBlock Text="Share by bracket" Style="{StaticResource CardSubtitleStyle}"/>
+                            <TextBlock Text="Solo Parent Age Groups" Style="{StaticResource CardTitleStyle}"/>
+                            <TextBlock Text="Distribution by statutory age bracket (RA 11861)" Style="{StaticResource CardSubtitleStyle}"/>
 
-                            <!-- Donut Chart Container (Thin ring, perfect circle - 150x150) -->
-                            <Viewbox Width="150" Height="150" HorizontalAlignment="Center" Margin="0,12,0,0" Stretch="Uniform">
-                                <!-- Canvas with perfect 1:1 aspect ratio -->
-                                <Canvas Width="150" Height="150">
-                                    <!-- Clipping: Perfect inner circle (hole) with 1:1 aspect ratio -->
-                                    <Canvas.Clip>
-                                        <EllipseGeometry Center="75,75" RadiusX="75" RadiusY="75"/>
-                                    </Canvas.Clip>
-
-                                    <!-- Background Circle Track (thin outline) -->
-                                    <Ellipse Canvas.Left="15" Canvas.Top="15" Width="120" Height="120" 
-                                             Fill="Transparent" Stroke="#F3F4F6" StrokeThickness="16" Opacity="0.3"/>
-
-                                    <!-- Segment 1: 0-5 yrs (Burgundy) - Arc with uniform thickness -->
-                                    <Path Canvas.Left="0" Canvas.Top="0" Stroke="{StaticResource BurundyDark}" StrokeThickness="16" Fill="Transparent">
-                                        <Path.Data>
-                                            <PathGeometry>
-                                                <PathFigure StartPoint="75,15" IsClosed="False">
-                                                    <ArcSegment Point="135,75" Size="60,60" IsLargeArc="False" SweepDirection="Clockwise"/>
-                                                </PathFigure>
-                                            </PathGeometry>
-                                        </Path.Data>
-                                    </Path>
-
-                                    <!-- Segment 2: 6-12 yrs (Orange) - Arc with uniform thickness -->
-                                    <Path Canvas.Left="0" Canvas.Top="0" Stroke="{StaticResource OrangePrimary}" StrokeThickness="16" Fill="Transparent">
-                                        <Path.Data>
-                                            <PathGeometry>
-                                                <PathFigure StartPoint="135,75" IsClosed="False">
-                                                    <ArcSegment Point="75,135" Size="60,60" IsLargeArc="False" SweepDirection="Clockwise"/>
-                                                </PathFigure>
-                                            </PathGeometry>
-                                        </Path.Data>
-                                    </Path>
-
-                                    <!-- Segment 3: 13-17 yrs (Gray) - Arc with uniform thickness -->
-                                    <Path Canvas.Left="0" Canvas.Top="0" Stroke="#D1D5DB" StrokeThickness="16" Fill="Transparent">
-                                        <Path.Data>
-                                            <PathGeometry>
-                                                <PathFigure StartPoint="75,135" IsClosed="False">
-                                                    <ArcSegment Point="15,75" Size="60,60" IsLargeArc="False" SweepDirection="Clockwise"/>
-                                                </PathFigure>
-                                            </PathGeometry>
-                                        </Path.Data>
-                                    </Path>
-
-                                    <!-- Segment 4: Remaining (completes the circle) - Thin outline -->
-                                    <Path Canvas.Left="0" Canvas.Top="0" Stroke="#E5E7EB" StrokeThickness="16" Fill="Transparent">
-                                        <Path.Data>
-                                            <PathGeometry>
-                                                <PathFigure StartPoint="15,75" IsClosed="False">
-                                                    <ArcSegment Point="75,15" Size="60,60" IsLargeArc="False" SweepDirection="Clockwise"/>
-                                                </PathFigure>
-                                            </PathGeometry>
-                                        </Path.Data>
-                                    </Path>
-
-                                    <!-- Center Text -->
-                                    <StackPanel Canvas.Left="45" Canvas.Top="55" Width="60">
-                                        <TextBlock Text="{Binding TotalDependents}" FontSize="28" FontWeight="Bold" 
-                                                   Foreground="{StaticResource TextDark}" TextAlignment="Center"/>
-                                        <TextBlock Text="children" FontSize="10" Foreground="{StaticResource TextGray}" 
-                                                   TextAlignment="Center"/>
-                                    </StackPanel>
-                                </Canvas>
-                            </Viewbox>
-
-                            <!-- Legend (16px margin-top for spacing, 12px gap between items) -->
-                            <StackPanel Margin="0,16,0,0" x:Name="AgeGroupLegend">
-                                <Grid Margin="0,0,0,12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Border Grid.Column="0" Width="12" Height="12" CornerRadius="2" Background="{StaticResource BurundyDark}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" Margin="8,0,0,0" VerticalAlignment="Center">
-                                        <Run Text="0-5 yrs: "/>
-                                        <Run Text="{Binding AgeGroup0_5Percent, Mode=OneWay, StringFormat=N1}"/>
-                                        <Run Text="%"/>
-                                    </TextBlock>
+                            <StackPanel Margin="0,10,0,0">
+                                <!-- 19 & Below -->
+                                <Grid Margin="0,0,0,14">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="6"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0">
+                                        <TextBlock Text="19 &amp; Below (Teen Parents)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Left"/>
+                                        <TextBlock FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Right">
+                                            <Run Text="{Binding ParentAge19Below}"/> · <Run Text="{Binding ParentAge19BelowPercent, StringFormat=N1}"/>%
+                                        </TextBlock>
+                                    </Grid>
+                                    <Border Grid.Row="2" Height="10" Background="#F3F4F6" CornerRadius="5">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="{Binding ParentAge19BelowGridLength}"/>
+                                                <ColumnDefinition Width="{Binding ParentAge19BelowRemainingGridLength}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Background="{StaticResource BurundyDark}" CornerRadius="5"/>
+                                        </Grid>
+                                    </Border>
                                 </Grid>
-                                <Grid Margin="0,0,0,12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Border Grid.Column="0" Width="12" Height="12" CornerRadius="2" Background="{StaticResource OrangePrimary}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" Margin="8,0,0,0" VerticalAlignment="Center">
-                                        <Run Text="6-12 yrs: "/>
-                                        <Run Text="{Binding AgeGroup6_12Percent, Mode=OneWay, StringFormat=N1}"/>
-                                        <Run Text="%"/>
-                                    </TextBlock>
+
+                                <!-- 20-39 -->
+                                <Grid Margin="0,0,0,14">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="6"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0">
+                                        <TextBlock Text="20 – 39 yrs (Young Adults)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Left"/>
+                                        <TextBlock FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Right">
+                                            <Run Text="{Binding ParentAge20_39}"/> · <Run Text="{Binding ParentAge20_39Percent, StringFormat=N1}"/>%
+                                        </TextBlock>
+                                    </Grid>
+                                    <Border Grid.Row="2" Height="10" Background="#F3F4F6" CornerRadius="5">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="{Binding ParentAge20_39GridLength}"/>
+                                                <ColumnDefinition Width="{Binding ParentAge20_39RemainingGridLength}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Background="{StaticResource BurundyPrimary}" CornerRadius="5"/>
+                                        </Grid>
+                                    </Border>
                                 </Grid>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Border Grid.Column="0" Width="12" Height="12" CornerRadius="2" Background="#D1D5DB" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" Margin="8,0,0,0" VerticalAlignment="Center">
-                                        <Run Text="13-17 yrs: "/>
-                                        <Run Text="{Binding AgeGroup13_17Percent, Mode=OneWay, StringFormat=N1}"/>
-                                        <Run Text="%"/>
-                                    </TextBlock>
+
+                                <!-- 40-59 -->
+                                <Grid Margin="0,0,0,14">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="6"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0">
+                                        <TextBlock Text="40 – 59 yrs (Middle-Aged)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Left"/>
+                                        <TextBlock FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Right">
+                                            <Run Text="{Binding ParentAge40_59}"/> · <Run Text="{Binding ParentAge40_59Percent, StringFormat=N1}"/>%
+                                        </TextBlock>
+                                    </Grid>
+                                    <Border Grid.Row="2" Height="10" Background="#F3F4F6" CornerRadius="5">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="{Binding ParentAge40_59GridLength}"/>
+                                                <ColumnDefinition Width="{Binding ParentAge40_59RemainingGridLength}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Background="{StaticResource OrangePrimary}" CornerRadius="5"/>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+
+                                <!-- 60 & Above -->
+                                <Grid Margin="0,0,0,4">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="6"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0">
+                                        <TextBlock Text="60 &amp; Above (Senior Parents)" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Left"/>
+                                        <TextBlock FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Right">
+                                            <Run Text="{Binding ParentAge60Above}"/> · <Run Text="{Binding ParentAge60AbovePercent, StringFormat=N1}"/>%
+                                        </TextBlock>
+                                    </Grid>
+                                    <Border Grid.Row="2" Height="10" Background="#F3F4F6" CornerRadius="5">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="{Binding ParentAge60AboveGridLength}"/>
+                                                <ColumnDefinition Width="{Binding ParentAge60AboveRemainingGridLength}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Background="{StaticResource TealPrimary}" CornerRadius="5"/>
+                                        </Grid>
+                                    </Border>
                                 </Grid>
                             </StackPanel>
                         </StackPanel>
@@ -1057,16 +1027,10 @@
 
                                             <!-- Filled arc (dynamic based on EmployedPercent) -->
                                             <Path Data="{Binding EmployedArcPath, Mode=OneWay}" Stroke="{StaticResource PurpleDark}" StrokeThickness="8" Fill="Transparent"/>
-
-                                            <!-- Center percentage text (centered) -->
-                                            <Grid Width="64" Height="64">
-                                                <TextBlock Text="{Binding EmployedPercent, Mode=OneWay, StringFormat=N0}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <TextBlock.Margin>
-                                                        <Thickness>0,0,0,2</Thickness>
-                                                    </TextBlock.Margin>
-                                                </TextBlock>
-                                            </Grid>
                                         </Canvas>
+
+                                        <!-- Center percentage text (centered) -->
+                                        <TextBlock Text="{Binding EmployedPercent, Mode=OneWay, StringFormat='{}{0:F0}%'}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Grid>
 
                                     <!-- Label (16px from chart) -->
@@ -1092,16 +1056,10 @@
 
                                             <!-- Filled arc (dynamic based on SelfEmployedPercent) -->
                                             <Path Data="{Binding SelfEmployedArcPath, Mode=OneWay}" Stroke="{StaticResource TealPrimary}" StrokeThickness="8" Fill="Transparent"/>
-
-                                            <!-- Center percentage text (centered) -->
-                                            <Grid Width="64" Height="64">
-                                                <TextBlock Text="{Binding SelfEmployedPercent, Mode=OneWay, StringFormat=N0}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <TextBlock.Margin>
-                                                        <Thickness>0,0,0,2</Thickness>
-                                                    </TextBlock.Margin>
-                                                </TextBlock>
-                                            </Grid>
                                         </Canvas>
+
+                                        <!-- Center percentage text (centered) -->
+                                        <TextBlock Text="{Binding SelfEmployedPercent, Mode=OneWay, StringFormat='{}{0:F0}%'}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Grid>
 
                                     <!-- Label (16px from chart) -->
@@ -1127,16 +1085,10 @@
 
                                             <!-- Filled arc (dynamic based on NotEmployedPercent) -->
                                             <Path Data="{Binding NotEmployedArcPath, Mode=OneWay}" Stroke="{StaticResource OrangePrimary}" StrokeThickness="8" Fill="Transparent"/>
-
-                                            <!-- Center percentage text (centered) -->
-                                            <Grid Width="64" Height="64">
-                                                <TextBlock Text="{Binding NotEmployedPercent, Mode=OneWay, StringFormat=N0}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <TextBlock.Margin>
-                                                        <Thickness>0,0,0,2</Thickness>
-                                                    </TextBlock.Margin>
-                                                </TextBlock>
-                                            </Grid>
                                         </Canvas>
+
+                                        <!-- Center percentage text (centered) -->
+                                        <TextBlock Text="{Binding NotEmployedPercent, Mode=OneWay, StringFormat='{}{0:F0}%'}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextDark}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Grid>
 
                                     <!-- Label (16px from chart) -->
@@ -1161,41 +1113,44 @@
                     <!-- Dependents Age Card -->
                     <Border Grid.Column="0" Style="{StaticResource CardStyle}">
                         <StackPanel Margin="24">
-                            <TextBlock Text="Dependents age" Style="{StaticResource CardTitleStyle}"/>
-                            <TextBlock Text="Children per age bracket" Style="{StaticResource CardSubtitleStyle}"/>
+                            <TextBlock Text="Child Dependents by Age" Style="{StaticResource CardTitleStyle}"/>
+                            <TextBlock Text="Developmental stages &amp; childcare resource planning" Style="{StaticResource CardSubtitleStyle}"/>
 
                             <!-- Bar Chart with Dynamic Heights (baseline aligned) -->
                             <Grid Height="180">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="20"/>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="20"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- 0-5 yrs -->
+                                <!-- 6 & Below -->
                                 <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
                                     <Border Background="{StaticResource BurundyPrimary}" CornerRadius="6,6,0,0" 
                                             Height="{Binding AgeGroup0_5BarHeight}"/>
-                                    <TextBlock Text="{Binding AgeGroup0_5}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
-                                    <TextBlock Text="0-5 yrs" FontSize="11" Foreground="{StaticResource TextGray}" TextAlignment="Center"/>
+                                    <TextBlock Text="{Binding AgeGroup0_5}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
+                                    <TextBlock Text="0–6 yrs" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" TextAlignment="Center"/>
+                                    <TextBlock Text="Daycare Age" FontSize="10" Foreground="{StaticResource TextGray}" TextAlignment="Center"/>
                                 </StackPanel>
 
-                                <!-- 6-12 yrs -->
+                                <!-- 7 to 22 -->
                                 <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
                                     <Border Background="{StaticResource OrangePrimary}" CornerRadius="6,6,0,0"
                                             Height="{Binding AgeGroup6_12BarHeight}"/>
-                                    <TextBlock Text="{Binding AgeGroup6_12}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
-                                    <TextBlock Text="6-12 yrs" FontSize="11" Foreground="{StaticResource TextGray}" TextAlignment="Center"/>
+                                    <TextBlock Text="{Binding AgeGroup6_12}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
+                                    <TextBlock Text="7–21 yrs" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" TextAlignment="Center"/>
+                                    <TextBlock Text="School &amp; Youth" FontSize="10" Foreground="{StaticResource TextGray}" TextAlignment="Center"/>
                                 </StackPanel>
 
-                                <!-- 13-17 yrs -->
+                                <!-- 22 & Above -->
                                 <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
-                                    <Border Background="#D1D5DB" CornerRadius="6,6,0,0"
+                                    <Border Background="#9CA3AF" CornerRadius="6,6,0,0"
                                             Height="{Binding AgeGroup13_17BarHeight}"/>
-                                    <TextBlock Text="{Binding AgeGroup13_17}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
-                                    <TextBlock Text="13-17 yrs" FontSize="11" Foreground="{StaticResource TextGray}" TextAlignment="Center"/>
+                                    <TextBlock Text="{Binding AgeGroup13_17}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
+                                    <TextBlock Text="22+ yrs" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" TextAlignment="Center"/>
+                                    <TextBlock Text="Adult / Special" FontSize="10" Foreground="{StaticResource TextGray}" TextAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -1204,19 +1159,24 @@
                     <!-- Income Card -->
                     <Border Grid.Column="2" Style="{StaticResource CardStyle}">
                         <StackPanel Margin="24">
-                            <TextBlock Text="Income" Style="{StaticResource CardTitleStyle}"/>
-                            <TextBlock Text="Monthly income brackets" Style="{StaticResource CardSubtitleStyle}"/>
+                            <TextBlock Text="Monthly Household Income" Style="{StaticResource CardTitleStyle}"/>
+                            <TextBlock Text="Poverty threshold &amp; subsidy classification (RA 11861)" Style="{StaticResource CardSubtitleStyle}"/>
 
                             <!-- Multi-segment Stacked Bar (3 segments, proportional widths) -->
                             <Border Height="14" Background="#F3F4F6" CornerRadius="7" Margin="0,12,0,0">
-                                <StackPanel Orientation="Horizontal" Height="14">
+                                <Grid Height="14">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="{Binding IncomeBelowMinGridLength}"/>
+                                        <ColumnDefinition Width="{Binding IncomeMinWageGridLength}"/>
+                                        <ColumnDefinition Width="{Binding IncomeAboveMinGridLength}"/>
+                                    </Grid.ColumnDefinitions>
                                     <!-- Below Minimum Wage (Orange) -->
-                                    <Border Width="{Binding IncomeBelowMinPercentWidth}" Background="{StaticResource OrangePrimary}" CornerRadius="7,0,0,7"/>
+                                    <Border Grid.Column="0" Background="{StaticResource OrangePrimary}" CornerRadius="7,0,0,7"/>
                                     <!-- Min Wage + Up to 20,833 (Burgundy) -->
-                                    <Border Width="{Binding IncomeMinWagePercentWidth}" Background="{StaticResource BurundyPrimary}"/>
+                                    <Border Grid.Column="1" Background="{StaticResource BurundyPrimary}"/>
                                     <!-- Above 20,833 (Teal) -->
-                                    <Border Background="{StaticResource TealPrimary}" CornerRadius="0,7,7,0"/>
-                                </StackPanel>
+                                    <Border Grid.Column="2" Background="{StaticResource TealPrimary}" CornerRadius="0,7,7,0"/>
+                                </Grid>
                             </Border>
 
                             <!-- Legend with Dynamic Values -->
@@ -1263,5 +1223,260 @@
                 </Grid>
             </StackPanel>
         </ScrollViewer>
+
+        <!-- Filter Modal Overlay (In-Window, Non-Floating) -->
+        <Grid x:Name="FilterModalOverlay"
+              Visibility="Collapsed"
+              Background="#66000000"
+              Panel.ZIndex="100"
+              MouseDown="FilterModalOverlay_MouseDown">
+
+            <!-- Modal Dialog Card -->
+            <Border Background="White" CornerRadius="16"
+                    BorderBrush="#E8D4DA" BorderThickness="1.5"
+                    Padding="26,22"
+                    Width="440" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    MouseDown="FilterModalCard_MouseDown">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="25" ShadowDepth="6" Opacity="0.25"/>
+                </Border.Effect>
+
+                <StackPanel>
+                    <!-- Header with Title & Close Button -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="FILTER ANALYTICS" FontFamily="Segoe UI" FontSize="11"
+                                       FontWeight="Bold" Foreground="#702943"/>
+                            <TextBlock Text="Select timeframe and geographic scope" FontFamily="Segoe UI"
+                                       FontSize="11" Foreground="#6B7280" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="1" Click="FilterModalClose_Click"
+                                Background="Transparent" BorderThickness="0"
+                                Cursor="Hand" Width="28" Height="28"
+                                ToolTip="Close">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="#F3F4F6" CornerRadius="14">
+                                        <TextBlock Text="✕" FontSize="12" FontWeight="Bold" Foreground="#6B7280"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+
+                    <!-- Filter Mode (Hierarchy) -->
+                    <TextBlock Text="Filter By" FontFamily="Segoe UI" FontSize="12"
+                               FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
+                    <ComboBox x:Name="CmbPeriodType"
+                              Template="{StaticResource StyledComboTemplate}"
+                              ItemContainerStyle="{StaticResource StyledComboItem}"
+                              Height="40"
+                              FontFamily="Segoe UI" FontSize="13"
+                              Margin="0,0,0,14"
+                              SelectionChanged="CmbPeriodType_SelectionChanged">
+                        <ComboBoxItem Content="By Monthly" Tag="Monthly" IsSelected="True"/>
+                        <ComboBoxItem Content="By Quarterly" Tag="Quarterly"/>
+                        <ComboBoxItem Content="By Yearly" Tag="Yearly"/>
+                        <ComboBoxItem Content="Custom Range" Tag="CustomRange"/>
+                    </ComboBox>
+
+                    <!-- Mode 1: Yearly Selection -->
+                    <StackPanel x:Name="PnlYearly" Visibility="Collapsed" Margin="0,0,0,14">
+                        <TextBlock Text="Select Year" FontFamily="Segoe UI" FontSize="12"
+                                   FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="CmbYearlyYear"
+                                  Template="{StaticResource StyledComboTemplate}"
+                                  ItemContainerStyle="{StaticResource StyledComboItem}"
+                                  Height="40"
+                                  FontFamily="Segoe UI" FontSize="13"/>
+                    </StackPanel>
+
+                    <!-- Mode 2: Monthly Selection -->
+                    <StackPanel x:Name="PnlMonthly" Visibility="Visible" Margin="0,0,0,14">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Year" FontFamily="Segoe UI" FontSize="12"
+                                           FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
+                                <ComboBox x:Name="CmbMonthlyYear"
+                                          Template="{StaticResource StyledComboTemplate}"
+                                          ItemContainerStyle="{StaticResource StyledComboItem}"
+                                          Height="40"
+                                          FontFamily="Segoe UI" FontSize="13"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Month" FontFamily="Segoe UI" FontSize="12"
+                                           FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
+                                <ComboBox x:Name="CmbMonthlyMonth"
+                                          Template="{StaticResource StyledComboTemplate}"
+                                          ItemContainerStyle="{StaticResource StyledComboItem}"
+                                          Height="40"
+                                          FontFamily="Segoe UI" FontSize="13">
+                                    <ComboBoxItem Content="January" Tag="1"/>
+                                    <ComboBoxItem Content="February" Tag="2"/>
+                                    <ComboBoxItem Content="March" Tag="3"/>
+                                    <ComboBoxItem Content="April" Tag="4"/>
+                                    <ComboBoxItem Content="May" Tag="5"/>
+                                    <ComboBoxItem Content="June" Tag="6"/>
+                                    <ComboBoxItem Content="July" Tag="7"/>
+                                    <ComboBoxItem Content="August" Tag="8"/>
+                                    <ComboBoxItem Content="September" Tag="9"/>
+                                    <ComboBoxItem Content="October" Tag="10"/>
+                                    <ComboBoxItem Content="November" Tag="11"/>
+                                    <ComboBoxItem Content="December" Tag="12"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Mode 3: Quarterly Selection -->
+                    <StackPanel x:Name="PnlQuarterly" Visibility="Collapsed" Margin="0,0,0,14">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Year" FontFamily="Segoe UI" FontSize="12"
+                                           FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
+                                <ComboBox x:Name="CmbQuarterlyYear"
+                                          Template="{StaticResource StyledComboTemplate}"
+                                          ItemContainerStyle="{StaticResource StyledComboItem}"
+                                          Height="40"
+                                          FontFamily="Segoe UI" FontSize="13"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Quarter" FontFamily="Segoe UI" FontSize="12"
+                                           FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
+                                <ComboBox x:Name="CmbQuarterlyQuarter"
+                                          Template="{StaticResource StyledComboTemplate}"
+                                          ItemContainerStyle="{StaticResource StyledComboItem}"
+                                          Height="40"
+                                          FontFamily="Segoe UI" FontSize="13">
+                                    <ComboBoxItem Content="Q1 (Jan–Mar)" Tag="1"/>
+                                    <ComboBoxItem Content="Q2 (Apr–Jun)" Tag="2"/>
+                                    <ComboBoxItem Content="Q3 (Jul–Sep)" Tag="3"/>
+                                    <ComboBoxItem Content="Q4 (Oct–Dec)" Tag="4"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Mode 4: Custom Range Selection -->
+                    <StackPanel x:Name="PnlCustomRange" Visibility="Collapsed" Margin="0,0,0,14">
+                        <TextBlock Text="Custom Date Range" FontFamily="Segoe UI" FontSize="12"
+                                   FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <DatePicker x:Name="DpStartDate" Grid.Column="0"
+                                        SelectedDate="{Binding StartDate, Mode=TwoWay}"
+                                        Style="{StaticResource BrandDatePicker}"/>
+                            <DatePicker x:Name="DpEndDate" Grid.Column="2"
+                                        SelectedDate="{Binding EndDate, Mode=TwoWay}"
+                                        Style="{StaticResource BrandDatePicker}"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Barangay Selection -->
+                    <TextBlock Text="Barangay" FontFamily="Segoe UI" FontSize="12"
+                               FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
+                    <ComboBox x:Name="CmbFilterBarangay"
+                              Template="{StaticResource StyledComboTemplate}"
+                              ItemContainerStyle="{StaticResource StyledComboItem}"
+                              Height="40"
+                              FontFamily="Segoe UI" FontSize="13"
+                              Margin="0,0,0,18"
+                              SelectionChanged="FilterCombo_Changed">
+                        <ComboBoxItem Content="All" IsSelected="True"/>
+                        <ComboBoxItem Content="Biñan"/>
+                        <ComboBoxItem Content="Bungahan"/>
+                        <ComboBoxItem Content="Canlalay"/>
+                        <ComboBoxItem Content="Casile"/>
+                        <ComboBoxItem Content="De La Paz"/>
+                        <ComboBoxItem Content="Ganado"/>
+                        <ComboBoxItem Content="Langkiwa"/>
+                        <ComboBoxItem Content="Loma"/>
+                        <ComboBoxItem Content="Malaban"/>
+                        <ComboBoxItem Content="Malamig"/>
+                        <ComboBoxItem Content="Mampalasan"/>
+                        <ComboBoxItem Content="Platero"/>
+                        <ComboBoxItem Content="Poblacion"/>
+                        <ComboBoxItem Content="San Antonio"/>
+                        <ComboBoxItem Content="San Francisco"/>
+                        <ComboBoxItem Content="San Jose"/>
+                        <ComboBoxItem Content="San Vicente"/>
+                        <ComboBoxItem Content="Santo Domingo"/>
+                        <ComboBoxItem Content="Santo Niño"/>
+                        <ComboBoxItem Content="Santo Tomas"/>
+                        <ComboBoxItem Content="Soro-Soro"/>
+                        <ComboBoxItem Content="Timbao"/>
+                        <ComboBoxItem Content="Tubigan"/>
+                        <ComboBoxItem Content="Zapote"/>
+                    </ComboBox>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Height="42" Cursor="Hand"
+                                Click="FilterReset_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#F5EEF1" CornerRadius="10"
+                                            BorderBrush="#DCC8CE" BorderThickness="1.5">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#EDD8DE"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="Reset" FontFamily="Segoe UI" FontSize="13"
+                                       FontWeight="SemiBold" Foreground="#702943"/>
+                        </Button>
+                        <Button Grid.Column="2" Height="42" Cursor="Hand"
+                                Click="FilterApply_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#702943" CornerRadius="10">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="2" Opacity="0.25"/>
+                                        </Border.Effect>
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="Apply" FontFamily="Segoe UI" FontSize="13"
+                                       FontWeight="SemiBold" Foreground="White"/>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Page>
