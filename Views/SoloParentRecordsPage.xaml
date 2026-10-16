@@ -219,28 +219,32 @@
         </Style>
 
         <Style x:Key="StatusBadge" TargetType="Border">
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Padding" Value="10,3"/>
-            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
         <Style x:Key="ActionBtn" TargetType="Button">
-            <Setter Property="Width" Value="26"/>
-            <Setter Property="Height" Value="26"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E8D4DA"/>
+            <Setter Property="Background" Value="#FAFAFA"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="6" Padding="4">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F0E4E4"/>
+                                <Setter TargetName="Bg" Property="Background" Value="#F0E4E8"/>
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -250,29 +254,29 @@
 
         <Style x:Key="GvHeader" TargetType="GridViewColumnHeader">
             <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="Background" Value="#FBF5F7"/>
+            <Setter Property="Background" Value="#FAF2F5"/>
             <Setter Property="Foreground" Value="#702943"/>
-            <Setter Property="FontSize" Value="10.5"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Height" Value="42"/>
-            <Setter Property="Padding" Value="8,0"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="46"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="GridViewColumnHeader">
                         <Grid>
                             <Border x:Name="HeaderBg"
-                                    Background="#FBF5F7"
-                                    BorderBrush="#702943"
-                                    BorderThickness="0,0,0,1.5">
-                                <Border BorderBrush="#E8D4DC" BorderThickness="0,0,1,0"
+                                    Background="#FAF2F5"
+                                    BorderBrush="#EBD8DE"
+                                    BorderThickness="0,0,0,1">
+                                <Border BorderBrush="#EBD8DE" BorderThickness="0,0,1,0"
                                         Padding="{TemplateBinding Padding}">
                                     <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                       VerticalAlignment="Center"
                                                       TextBlock.Foreground="#702943"
                                                       TextBlock.FontFamily="Segoe UI"
-                                                      TextBlock.FontSize="10.5"
-                                                      TextBlock.FontWeight="Bold"/>
+                                                      TextBlock.FontSize="11"
+                                                      TextBlock.FontWeight="SemiBold"/>
                                 </Border>
                             </Border>
                             <Thumb x:Name="PART_HeaderGripper"
@@ -293,7 +297,43 @@
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="HeaderBg" Property="Background" Value="#F0E4E8"/>
+                                <Setter TargetName="HeaderBg" Property="Background" Value="#F5ECEE"/>
+                            </Trigger>
+                            <Trigger Property="Column" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="GvHeaderCenter" TargetType="GridViewColumnHeader" BasedOn="{StaticResource GvHeader}">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="GvHeaderActions" TargetType="GridViewColumnHeader" BasedOn="{StaticResource GvHeaderCenter}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewColumnHeader">
+                        <Grid>
+                            <Border x:Name="HeaderBg"
+                                    Background="#FAF2F5"
+                                    BorderBrush="#EBD8DE"
+                                    BorderThickness="0,0,0,1">
+                                <Border BorderThickness="0" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment="Center"
+                                                      TextBlock.Foreground="#702943"
+                                                      TextBlock.FontFamily="Segoe UI"
+                                                      TextBlock.FontSize="11"
+                                                      TextBlock.FontWeight="SemiBold"/>
+                                </Border>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HeaderBg" Property="Background" Value="#F5ECEE"/>
                             </Trigger>
                             <Trigger Property="Column" Value="{x:Null}">
                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -335,10 +375,11 @@
         <Style x:Key="TableRow" TargetType="ListViewItem">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
-            <Setter Property="BorderBrush" Value="#D4A0B0"/>
+            <Setter Property="BorderBrush" Value="#F2EAEF"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
@@ -346,15 +387,11 @@
                                 Background="White"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}">
-                            <GridViewRowPresenter VerticalAlignment="Center" Margin="0,9"/>
+                            <GridViewRowPresenter VerticalAlignment="Stretch" Margin="2,0,2,0"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="RowBg" Property="Background" Value="#FDF0F3"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="RowBg" Property="Background" Value="#F5E2E8"/>
-                                <Setter TargetName="RowBg" Property="BorderBrush" Value="#C4788E"/>
+                                <Setter TargetName="RowBg" Property="Background" Value="#FDF6F8"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -363,11 +400,11 @@
         </Style>
 
         <Style x:Key="CellText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="#111111"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Foreground" Value="#4B5563"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="TextTrimming" Value="None"/>
-            <Setter Property="Margin" Value="10,0"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            <Setter Property="Margin" Value="12,0"/>
         </Style>
 
         <Style x:Key="IdText" TargetType="TextBlock">
@@ -771,14 +808,17 @@
         </Grid>
 
         <Border Grid.Row="3"
-                Margin="24,4,24,6"
-                CornerRadius="0"
-                BorderBrush="#702943"
+                Margin="24,6,24,14"
+                CornerRadius="14"
+                BorderBrush="#E8D4DA"
                 BorderThickness="1.5"
                 ClipToBounds="True"
                 Background="White"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
+            <Border.Effect>
+                <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="2" Opacity="0.06"/>
+            </Border.Effect>
             <Grid>
                 <ListView x:Name="RecordsList"
                           BorderThickness="0"
@@ -797,8 +837,8 @@
                             <GridViewColumn x:Name="ColName" Header="NAME" Width="200">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
-                                            <TextBlock Text="{Binding Name}" Style="{StaticResource CellText}" FontWeight="Medium"/>
+                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
+                                            <TextBlock Text="{Binding Name}" Style="{StaticResource CellText}" FontWeight="SemiBold" Foreground="#1F2937"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
@@ -807,17 +847,17 @@
                             <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="140">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding Barangay}" Style="{StaticResource CellText}"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColSex" Header="SEX" Width="80">
+                            <GridViewColumn x:Name="ColSex" Header="SEX" Width="80" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding Sex}" Style="{StaticResource CellText}" HorizontalAlignment="Center"/>
                                         </Border>
                                     </DataTemplate>
@@ -827,47 +867,47 @@
                             <GridViewColumn x:Name="ColCivilStatus" Header="CIVIL STATUS" Width="110">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding CivilStatus}" Style="{StaticResource CellText}"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="DATE OF BIRTH" Width="88">
+                            <GridViewColumn Header="DATE OF BIRTH" Width="108" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding DateOfBirthFormatted}" Style="{StaticResource CellText}" HorizontalAlignment="Center"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColLastUpdated" Header="LAST UPDATED" Width="100">
+                            <GridViewColumn x:Name="ColLastUpdated" Header="LAST UPDATED" Width="108" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding LastUpdatedFormatted}" Style="{StaticResource CellText}" HorizontalAlignment="Center"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColChildren" Header="VALID UNTIL" Width="88">
+                            <GridViewColumn x:Name="ColChildren" Header="VALID UNTIL" Width="108" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding ValidUntilFormatted}" Style="{StaticResource CellText}" HorizontalAlignment="Center"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="80">
+                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="90" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="#D4A0B0" BorderThickness="0,0,1,0">
+                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <Border Style="{StaticResource StatusBadge}"
                                                     Background="{Binding StatusBadgeColor}"
                                                     HorizontalAlignment="Center">
@@ -881,21 +921,23 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="225">
+                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="145" HeaderContainerStyle="{StaticResource GvHeaderActions}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel Orientation="Horizontal"
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"
-                                                    Margin="4,0">
-                                            <Button Style="{StaticResource ActionBtn}"
-                                                    Tag="{Binding Id}"
-                                                    Click="ExportRecord_Click"
-                                                    ToolTip="Export to PDF">
-                                                <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"
-                                                      Fill="#2196F3" Stretch="Uniform" Width="11" Height="11"/>
-                                            </Button>
-                                        </StackPanel>
+                                        <Border Margin="-6,0,-6,0" BorderThickness="0" Padding="0,11">
+                                            <StackPanel Orientation="Horizontal"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Margin="4,0">
+                                                <Button Style="{StaticResource ActionBtn}"
+                                                        Tag="{Binding Id}"
+                                                        Click="ExportRecord_Click"
+                                                        ToolTip="Export to PDF">
+                                                    <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"
+                                                          Fill="#702943" Stretch="Uniform" Width="12" Height="12"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -908,17 +950,24 @@
                             Visibility="Collapsed"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Margin="0,44,0,0">
-                    <TextBlock Text="No results found."
+                            Margin="0,48,0,48">
+                    <Border Width="64" Height="64" CornerRadius="32" Background="#FAF0F3"
+                            BorderBrush="#E8D4DA" BorderThickness="1.5"
+                            HorizontalAlignment="Center" Margin="0,0,0,16">
+                        <Path Data="M15.5,14H14.71L14.43,13.73C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 3,9.5A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.73,14.43L14,14.71V15.5L19,20.5L20.5,19L15.5,14M9.5,14C7,14 5,12 5,9.5C5,7 7,5 9.5,5C12,5 14,7 14,9.5C14,12 12,14 9.5,14Z"
+                              Fill="#A06080" Stretch="Uniform" Width="24" Height="24"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="No records found"
                                FontSize="15"
-                               FontWeight="SemiBold"
-                               Foreground="#C0A0AA"
-                               HorizontalAlignment="Center"/>
-                    <TextBlock Text="Try adjusting your search or filters."
-                               FontSize="12"
-                               Foreground="#D4B8C0"
+                               FontWeight="Bold"
+                               Foreground="#702943"
                                HorizontalAlignment="Center"
-                               Margin="0,4,0,0"/>
+                               Margin="0,0,0,6"/>
+                    <TextBlock Text="We couldn't find any solo parent records matching your search or filters."
+                               FontSize="12"
+                               Foreground="#888888"
+                               HorizontalAlignment="Center"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -1314,47 +1363,16 @@
         </Border>
 
         <!-- Paging row (Row 4, hidden for Encoder) -->
-        <Grid x:Name="PagingRow" Grid.Row="4" Margin="24,8,24,16">
+        <Grid x:Name="PagingRow" Grid.Row="4" Margin="24,4,24,18">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Button x:Name="BtnBack" Grid.Column="0"
-                    Visibility="Collapsed"
-                    Height="36" Padding="20,0" Cursor="Hand"
-                    Click="BtnBack_Click">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="BackBg" Background="White" CornerRadius="18"
-                                BorderBrush="#D0B8C0" BorderThickness="1.5"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="BackBg" Property="Background" Value="#F5ECEE"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
-                <StackPanel Orientation="Horizontal">
-                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
-                          Fill="#702943" Stretch="Uniform" Width="12" Height="12" Margin="0,0,6,0"/>
-                    <TextBlock Text="Back" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
-                </StackPanel>
-            </Button>
-
-            <TextBlock x:Name="PageInfoText" Grid.Column="1"
-                       Text="Page 1 of 1"
-                       FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold"
-                       Foreground="#702943"
-                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
-            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
-                <TextBlock Text="Page size:" FontFamily="Segoe UI" FontSize="12" Foreground="#888888" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <!-- Page Size Selector -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Rows per page:" FontFamily="Segoe UI" FontSize="12" Foreground="#888888" VerticalAlignment="Center" Margin="0,0,8,0"/>
                 <ComboBox x:Name="CmbPageSize" Width="80" Height="34" SelectedIndex="0"
                           SelectionChanged="CmbPageSize_SelectionChanged"
                           Style="{StaticResource FilterComboBox}">
@@ -1365,29 +1383,64 @@
                 </ComboBox>
             </StackPanel>
 
-            <Button x:Name="BtnNext" Grid.Column="3"
-                    Visibility="Collapsed"
-                    Height="36" Padding="20,0" Cursor="Hand"
-                    Click="BtnNext_Click">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="NextBg" Background="#702943" CornerRadius="18"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="NextBg" Property="Opacity" Value="0.88"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
-                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
-                          Fill="White" Stretch="Uniform" Width="12" Height="12" Margin="6,0,0,0"/>
-                </StackPanel>
-            </Button>
+            <!-- Centered Navigation Controls -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="BtnBack" Width="105" Height="34" Cursor="Hand"
+                        Click="BtnBack_Click" Margin="0,0,10,0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bg" Background="White" CornerRadius="17"
+                                    BorderBrush="#E0D0D5" BorderThickness="1.5">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
+                                          Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
+                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <Border Background="#FAF2F5" CornerRadius="14" Padding="14,6"
+                        BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
+                    <TextBlock x:Name="PageInfoText" Text="Page 1 of 1" FontFamily="Segoe UI" FontSize="12"
+                               FontWeight="SemiBold" Foreground="#702943"/>
+                </Border>
+
+                <Button x:Name="BtnNext" Width="105" Height="34" Cursor="Hand"
+                        Click="BtnNext_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bg" Background="White" CornerRadius="17"
+                                    BorderBrush="#E0D0D5" BorderThickness="1.5">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
+                                          Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
+                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <components:LoadingOverlay Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="99"

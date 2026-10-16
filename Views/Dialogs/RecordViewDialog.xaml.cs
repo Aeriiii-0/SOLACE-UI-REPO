@@ -95,20 +95,15 @@ namespace SOLUM_UI.Views.Dialogs
 
             CardPanel.Children.Clear();
 
-            // Use the model's computed ApplicationType ("New Record" / "Renewed" / "—")
-            // rather than a local re-derivation, so there is a single source of truth.
-            string appType    = string.IsNullOrWhiteSpace(r.ApplicationType) ? "—" : r.ApplicationType;
             string validUntil = r.CurrentTermExpiresAt.HasValue
                 ? r.CurrentTermExpiresAt.Value.ToString("MMMM d, yyyy")
                 : r.LastUpdated != DateTime.MinValue
                     ? r.LastUpdated.AddYears(1).ToString("MMMM d, yyyy")
                     : "—";
 
-            AddCard("Application", new[]
+            AddCard("Record Information", new[]
             {
-                ("Type",                appType),
-                ("Date of Application", r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("MMMM d, yyyy") : "—"),
-                ("Valid Until",         validUntil),
+                ("Validity Period", validUntil),
             });
 
             AddCard("Identity", new[]
@@ -168,7 +163,7 @@ namespace SOLUM_UI.Views.Dialogs
                 ("LGBTQ+",               r.IsLGBT ? "Yes" : "No"),
             });
 
-            AddCard("Record Info", new[]
+            AddCard("System Information", new[]
             {
                 ("Last Updated", r.LastUpdated != DateTime.MinValue ? r.LastUpdated.ToString("MMMM d, yyyy") : "—"),
                 ("Created By",   r.CreatedBy),
