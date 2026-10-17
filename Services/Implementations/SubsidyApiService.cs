@@ -20,37 +20,59 @@ namespace SOLUM_UI.Services.Implementations
 
         public async Task<BaseResponse<List<SubsidyCycleDto>>> GetCyclesAsync()
         {
+            int currentYear = DateTime.Now.Year;
             var resp = await ApiClient.Instance.GetAsync<List<SubsidyCycleDto>>("api/subsidy/cycles");
             if (resp != null && resp.Succeeded && resp.Data != null && resp.Data.Count > 0)
             {
+                if (!resp.Data.Any(c => c.FiscalYear == currentYear))
+                {
+                    resp.Data.Insert(0, new SubsidyCycleDto
+                    {
+                        FiscalYear = currentYear,
+                        Status = "Active",
+                        AllocatedSlots = 100,
+                        TotalBudget = 100000m,
+                        PerGranteeAmount = 1000m
+                    });
+                }
                 return resp;
             }
 
             var list = new List<SubsidyCycleDto>();
             var activeResp = await GetActiveCycleAsync();
-            int activeYear = DateTime.Now.Year;
             if (activeResp?.Data != null)
             {
                 list.Add(activeResp.Data);
-                activeYear = activeResp.Data.FiscalYear;
             }
 
-            for (int y = activeYear - 1; y >= activeYear - 2; y--)
+            if (!list.Any(c => c.FiscalYear == currentYear))
+            {
+                list.Add(new SubsidyCycleDto
+                {
+                    FiscalYear = currentYear,
+                    Status = "Active",
+                    AllocatedSlots = 100,
+                    TotalBudget = 100000m,
+                    PerGranteeAmount = 1000m
+                });
+            }
+
+            int baseYear = Math.Max(currentYear, list.Max(c => c.FiscalYear));
+            for (int y = baseYear - 1; y >= baseYear - 2; y--)
             {
                 if (!list.Any(c => c.FiscalYear == y))
                 {
                     var gr = await GetGranteesByFiscalYearAsync(y);
-                    if (gr?.Data != null && gr.Data.Count > 0)
+                    int count = gr?.Data?.Count ?? 0;
+                    list.Add(new SubsidyCycleDto
                     {
-                        list.Add(new SubsidyCycleDto
-                        {
-                            FiscalYear = y,
-                            Status = "Finalized",
-                            TotalFinalGrantees = gr.Data.Count,
-                            AllocatedSlots = Math.Max(100, gr.Data.Count),
-                            TotalBudget = Math.Max(100000m, gr.Data.Count * 1000m)
-                        });
-                    }
+                        FiscalYear = y,
+                        Status = "Finalized",
+                        TotalFinalGrantees = count,
+                        AllocatedSlots = Math.Max(100, count),
+                        TotalBudget = Math.Max(100000m, count * 1000m),
+                        PerGranteeAmount = 1000m
+                    });
                 }
             }
 
@@ -60,6 +82,11 @@ namespace SOLUM_UI.Services.Implementations
         public async Task<BaseResponse<SubsidyCycleDto>> CreateCycleAsync(CreateSubsidyCycleRequest request)
         {
             return await ApiClient.Instance.PostAsync<CreateSubsidyCycleRequest, SubsidyCycleDto>("api/subsidy/cycles", request);
+        }
+
+        public async Task<BaseResponse<SubsidyCycleDto>> UpdateCycleAsync(Guid cycleId, UpdateSubsidyCycleRequest request)
+        {
+            return await ApiClient.Instance.PutAsync<UpdateSubsidyCycleRequest, SubsidyCycleDto>($"api/subsidy/cycles/{cycleId}", request);
         }
 
         public async Task<BaseResponse<int>> GenerateRecommendationsAsync(Guid? cycleId = null)

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,7 +13,35 @@ namespace SOLUM_UI.Views.Components
         public ShortlistAuditGrid()
         {
             InitializeComponent();
-            Loaded += (s, e) => AdjustColumnWidths();
+            DataContextChanged += OnDataContextChanged;
+            Loaded += (s, e) => { UpdateBatchColumn(); AdjustColumnWidths(); };
+            IsVisibleChanged += (s, e) => { if (IsVisible) { UpdateBatchColumn(); AdjustColumnWidths(); } };
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is SubsidyRecommendationViewModel oldVm)
+                oldVm.PropertyChanged -= OnViewModelPropertyChanged;
+            if (e.NewValue is SubsidyRecommendationViewModel newVm)
+            {
+                newVm.PropertyChanged += OnViewModelPropertyChanged;
+                UpdateBatchColumn();
+            }
+        }
+
+        private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SubsidyRecommendationViewModel.IsShortlistBatchMode))
+                UpdateBatchColumn();
+        }
+
+        private void UpdateBatchColumn()
+        {
+            if (DataContext is SubsidyRecommendationViewModel vm)
+                ColSelect.Width = vm.IsShortlistBatchMode ? 38 : 0;
+            else
+                ColSelect.Width = 0;
+            AdjustColumnWidths();
         }
 
         private void ShortlistListView_SizeChanged(object sender, SizeChangedEventArgs e) => AdjustColumnWidths();
@@ -23,7 +52,7 @@ namespace SOLUM_UI.Views.Components
             if (totalWidth <= 0) return;
 
             double scrollMargin = GetScrollMargin();
-            double fixedWidth = 36 + 46 + 76 + 110 + 95 + 90 + 170; // 623px
+            double fixedWidth = ColSelect.Width + ColRank.Width + 76 + 110 + 95 + 90 + 150;
             double flexibleWidth = Math.Max(300, totalWidth - fixedWidth - scrollMargin);
 
             double wName = Math.Max(140, Math.Floor(flexibleWidth * 0.35));

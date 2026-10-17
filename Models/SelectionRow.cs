@@ -171,16 +171,16 @@ namespace SOLUM_UI.Models
             ? string.Join(", ", CollegeAgeDependents.Select(c => $"{c.Name} ({c.Age}y)"))
             : $"{CollegeAgeDependentsCount} College-Age Dependent(s) (17–24y)";
 
-        public string ConfirmButtonText => IsFinalGrantee ? "Confirmed" : "Confirm";
-        public string ConfirmButtonToolTip => IsFinalGrantee ? "Click to remove from final grantees" : "Confirm as final grantee";
+        public string ConfirmButtonText => IsFinalGrantee ? "Revert" : "Confirm";
+        public string ConfirmButtonToolTip => IsFinalGrantee ? "Revert candidate back to pending shortlist" : "Confirm candidate as final grantee for FY 2026";
         public SolidColorBrush ConfirmButtonBg => IsFinalGrantee
-            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9"))
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F8FAFC"))
             : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
         public SolidColorBrush ConfirmButtonFg => IsFinalGrantee
-            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#16A34A"))
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#475569"))
             : new SolidColorBrush(Colors.White);
         public SolidColorBrush ConfirmButtonBorder => IsFinalGrantee
-            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#86EFAC"))
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CBD5E1"))
             : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
 
         public SolidColorBrush RankBg =>

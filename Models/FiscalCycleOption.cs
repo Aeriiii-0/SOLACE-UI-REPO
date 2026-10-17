@@ -17,5 +17,21 @@ namespace SOLUM_UI.Models
         public string DisplayName => IsActive ? $"{FiscalYear} (Active Cycle)" : $"{FiscalYear} (Archived)";
 
         public override string ToString() => DisplayName;
+
+        public override bool Equals(object obj)
+        {
+            if (obj is FiscalCycleOption other)
+            {
+                return FiscalYear == other.FiscalYear &&
+                       ((CycleId == null && other.CycleId == null) ||
+                        (CycleId != null && other.CycleId != null && CycleId.Value == other.CycleId.Value));
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return FiscalYear.GetHashCode() ^ (CycleId?.GetHashCode() ?? 0);
+        }
     }
 }

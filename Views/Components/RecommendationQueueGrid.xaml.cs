@@ -55,14 +55,14 @@ namespace SOLUM_UI.Views.Components
             if (totalWidth <= 0) return;
 
             double scrollMargin = GetScrollMargin();
-            double fixedWidth = ColSelect.Width + 48 + 76 + 120 + 118; // Rank(48) + Score(76) + CrossCheck(120) + Actions(118)
+            double fixedWidth = ColSelect.Width + ColRank.Width + 76 + 145; // ColRank + Score(76) + Actions(145)
             double flexibleWidth = Math.Max(500, totalWidth - fixedWidth - scrollMargin);
 
-            double wName = Math.Max(130, Math.Floor(flexibleWidth * 0.22));
-            double wIncome = Math.Max(110, Math.Floor(flexibleWidth * 0.18));
-            double wCare = Math.Max(115, Math.Floor(flexibleWidth * 0.18));
-            double wCirc = Math.Max(130, Math.Floor(flexibleWidth * 0.21));
-            double wNeeds = Math.Max(120, flexibleWidth - (wName + wIncome + wCare + wCirc));
+            double wName = Math.Max(140, Math.Floor(flexibleWidth * 0.23));
+            double wIncome = Math.Max(115, Math.Floor(flexibleWidth * 0.17));
+            double wCare = Math.Max(120, Math.Floor(flexibleWidth * 0.18));
+            double wCirc = Math.Max(140, Math.Floor(flexibleWidth * 0.22));
+            double wNeeds = Math.Max(130, flexibleWidth - (wName + wIncome + wCare + wCirc));
 
             ColName.Width = wName;
             ColIncome.Width = wIncome;

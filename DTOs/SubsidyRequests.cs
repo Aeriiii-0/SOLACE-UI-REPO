@@ -31,6 +31,13 @@ namespace SOLUM_UI.DTOs
         public int? AllocatedSlots { get; set; }
     }
 
+    public class UpdateSubsidyCycleRequest
+    {
+        public int AllocatedSlots { get; set; }
+        public decimal PerGranteeAmount { get; set; }
+        public decimal TotalBudget { get; set; }
+    }
+
     public class RevokeGrantRequest
     {
         public string Reason { get; set; }

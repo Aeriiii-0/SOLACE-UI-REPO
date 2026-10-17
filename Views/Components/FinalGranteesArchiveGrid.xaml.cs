@@ -10,6 +10,7 @@ namespace SOLUM_UI.Views.Components
         {
             InitializeComponent();
             Loaded += (s, e) => AdjustColumnWidths();
+            IsVisibleChanged += (s, e) => { if (IsVisible) AdjustColumnWidths(); };
         }
 
         private void FinalGranteesListView_SizeChanged(object sender, SizeChangedEventArgs e) => AdjustColumnWidths();
@@ -20,8 +21,8 @@ namespace SOLUM_UI.Views.Components
             if (totalWidth <= 0) return;
 
             double scrollMargin = GetScrollMargin();
-            // Fixed columns: CONTACT(130) + EM_PHONE(130) + STATUS(85) + ACTIONS(90) = 435px
-            double fixedWidth = 130 + 130 + 85 + 90;
+            // Fixed columns: CONTACT(130) + EM_PHONE(130) + STATUS(90) = 350px
+            double fixedWidth = 130 + 130 + 90;
             double flexibleWidth = Math.Max(450, totalWidth - fixedWidth - scrollMargin);
 
             double wName = Math.Max(150, Math.Floor(flexibleWidth * 0.28));

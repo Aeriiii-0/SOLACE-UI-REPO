@@ -33,6 +33,10 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="TabBg" Property="Background" Value="#FDF5F7"/>
                             </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                                <Setter Property="Cursor" Value="No"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -44,6 +48,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -53,7 +58,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0">
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
                 <TextBlock Text="Subsidy Recommendation" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
                 <TextBlock Text="ML vulnerability triage and quota allocation awaiting staff review." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,4,0,0"/>
             </StackPanel>
@@ -135,10 +140,18 @@
             </Border>
         </Grid>
 
-        <!-- Row 1: Tab Navigation Bar -->
-        <Border Grid.Row="1" BorderBrush="#E8D8DE" BorderThickness="0,0,0,1" Margin="24,0,24,0">
+        <!-- Row 1: Cycle & Fiscal Year Management Control Bar -->
+        <c:SubsidyCycleControlBar Grid.Row="1" Margin="24,0,24,10"/>
+
+        <!-- Row 2: Tab Navigation Bar -->
+        <Border Grid.Row="2" BorderBrush="#E8D8DE" BorderThickness="0,0,0,1" Margin="24,0,24,0">
             <StackPanel Orientation="Horizontal">
-                <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="0">
+                <!-- Tab 0: Recommendations Queue (Active Cycle only) -->
+                <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="0"
+                        IsEnabled="{Binding IsActiveCycle}">
+                    <Button.ToolTip>
+                        <ToolTip Content="{Binding TabDisabledTooltipText}"/>
+                    </Button.ToolTip>
                     <TextBlock Text="Recommendations Queue" FontSize="13">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
@@ -153,7 +166,13 @@
                         </TextBlock.Style>
                     </TextBlock>
                 </Button>
-                <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="1">
+
+                <!-- Tab 1: Approved Selection & Audit (Active Cycle only) -->
+                <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="1"
+                        IsEnabled="{Binding IsActiveCycle}">
+                    <Button.ToolTip>
+                        <ToolTip Content="{Binding TabDisabledTooltipText}"/>
+                    </Button.ToolTip>
                     <TextBlock Text="Approved Selection &amp; Audit" FontSize="13">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
@@ -168,6 +187,8 @@
                         </TextBlock.Style>
                     </TextBlock>
                 </Button>
+
+                <!-- Tab 2: Final Grantees & Archive (Always Accessible) -->
                 <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="2">
                     <TextBlock Text="Final Grantees &amp; Archive" FontSize="13">
                         <TextBlock.Style>
@@ -186,8 +207,8 @@
             </StackPanel>
         </Border>
 
-        <!-- Row 2: Tab Content Area -->
-        <Grid Grid.Row="2" Margin="24,10,24,14">
+        <!-- Row 3: Tab Content Area -->
+        <Grid Grid.Row="3" Margin="24,10,24,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -206,6 +227,9 @@
         </Grid>
 
         <!-- Outlier Rejection Modal Overlay (Spans all rows) -->
-        <c:ModalOutlierRejection Grid.RowSpan="3"/>
+        <c:ModalOutlierRejection Grid.RowSpan="4"/>
+
+        <!-- Loading Overlay (Spans all rows when gathering data) -->
+        <c:LoadingOverlay Grid.RowSpan="4" IsLoading="{Binding IsLoading}" Panel.ZIndex="9999"/>
     </Grid>
 </Page>

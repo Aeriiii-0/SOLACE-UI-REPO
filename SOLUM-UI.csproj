@@ -288,6 +288,9 @@
     <Compile Include="Views\Components\ModalOutlierRejection.xaml.cs">
       <DependentUpon>ModalOutlierRejection.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Components\SubsidyCycleControlBar.xaml.cs">
+      <DependentUpon>SubsidyCycleControlBar.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Core\ObservableObject.cs" />
     <Compile Include="Core\RelayCommand.cs" />
     <Compile Include="DTOs\SubsidyRecommendationDto.cs" />
@@ -305,6 +308,7 @@
     <Compile Include="Services\SubsidyModelMapper.cs" />
     <Compile Include="ViewModels\SubsidyRecommendationViewModel.cs" />
     <Compile Include="ViewModels\SubsidyRecommendationViewModel.Commands.cs" />
+    <Compile Include="ViewModels\SubsidyRecommendationViewModel.Actions.cs" />
     <Compile Include="ViewModels\SubsidyRecommendationViewModel.Lifecycle.cs" />
     <Compile Include="ViewModels\SubsidyRecommendationViewModel.Pagination.cs" />
     <Compile Include="Views\ToastNotification.xaml.cs">
@@ -353,6 +357,10 @@
     <Compile Include="ViewModels\SoloParentRecordViewModel.cs" />
     <Compile Include="ViewModels\RecordViewDialogViewModel.cs" />
     <Page Include="Views\Components\LoadingOverlay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\SubsidyCycleControlBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -812,14 +812,22 @@
                 CornerRadius="14"
                 BorderBrush="#E8D4DA"
                 BorderThickness="1.5"
-                ClipToBounds="True"
                 Background="White"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
             <Border.Effect>
                 <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="2" Opacity="0.06"/>
             </Border.Effect>
-            <Grid>
+            <Grid x:Name="RecordsClipGrid">
+                <Grid.OpacityMask>
+                    <VisualBrush Stretch="None" AlignmentX="Left" AlignmentY="Top">
+                        <VisualBrush.Visual>
+                            <Border Background="Black" CornerRadius="12.5"
+                                    Width="{Binding ActualWidth, ElementName=RecordsClipGrid}"
+                                    Height="{Binding ActualHeight, ElementName=RecordsClipGrid}"/>
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                </Grid.OpacityMask>
                 <ListView x:Name="RecordsList"
                           BorderThickness="0"
                           Background="Transparent"
@@ -837,7 +845,7 @@
                             <GridViewColumn x:Name="ColName" Header="NAME" Width="200">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
+                                        <Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding Name}" Style="{StaticResource CellText}" FontWeight="SemiBold" Foreground="#1F2937"/>
                                         </Border>
                                     </DataTemplate>
@@ -847,7 +855,7 @@
                             <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="140">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
+                                        <Border Width="{Binding ActualWidth, ElementName=ColBarangay}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding Barangay}" Style="{StaticResource CellText}"/>
                                         </Border>
                                     </DataTemplate>
@@ -857,7 +865,7 @@
                             <GridViewColumn x:Name="ColSex" Header="SEX" Width="80" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
+                                        <Border Width="{Binding ActualWidth, ElementName=ColSex}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding Sex}" Style="{StaticResource CellText}" HorizontalAlignment="Center"/>
                                         </Border>
                                     </DataTemplate>
@@ -867,17 +875,17 @@
                             <GridViewColumn x:Name="ColCivilStatus" Header="CIVIL STATUS" Width="110">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
+                                        <Border Width="{Binding ActualWidth, ElementName=ColCivilStatus}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding CivilStatus}" Style="{StaticResource CellText}"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="DATE OF BIRTH" Width="108" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
+                            <GridViewColumn x:Name="ColDob" Header="DATE OF BIRTH" Width="108" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
+                                        <Border Width="{Binding ActualWidth, ElementName=ColDob}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding DateOfBirthFormatted}" Style="{StaticResource CellText}" HorizontalAlignment="Center"/>
                                         </Border>
                                     </DataTemplate>
@@ -887,7 +895,7 @@
                             <GridViewColumn x:Name="ColLastUpdated" Header="LAST UPDATED" Width="108" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
+                                        <Border Width="{Binding ActualWidth, ElementName=ColLastUpdated}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding LastUpdatedFormatted}" Style="{StaticResource CellText}" HorizontalAlignment="Center"/>
                                         </Border>
                                     </DataTemplate>
@@ -897,7 +905,7 @@
                             <GridViewColumn x:Name="ColChildren" Header="VALID UNTIL" Width="108" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
+                                        <Border Width="{Binding ActualWidth, ElementName=ColChildren}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <TextBlock Text="{Binding ValidUntilFormatted}" Style="{StaticResource CellText}" HorizontalAlignment="Center"/>
                                         </Border>
                                     </DataTemplate>
@@ -907,7 +915,7 @@
                             <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="90" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
+                                        <Border Width="{Binding ActualWidth, ElementName=ColStatus}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
                                             <Border Style="{StaticResource StatusBadge}"
                                                     Background="{Binding StatusBadgeColor}"
                                                     HorizontalAlignment="Center">
@@ -924,7 +932,7 @@
                             <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="145" HeaderContainerStyle="{StaticResource GvHeaderActions}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Margin="-6,0,-6,0" BorderThickness="0" Padding="0,11">
+                                        <Border Width="{Binding ActualWidth, ElementName=ColActions}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,11">
                                             <StackPanel Orientation="Horizontal"
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"

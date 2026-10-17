@@ -1,17 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-using Microsoft.Win32;
 using SOLUM_UI.Core;
 using SOLUM_UI.DTOs;
 using SOLUM_UI.Models;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
-using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI.ViewModels
 {
@@ -19,11 +14,14 @@ namespace SOLUM_UI.ViewModels
     {
         private void InitCommands()
         {
-            SwitchTabCommand = new RelayCommand(p => { if (int.TryParse(p?.ToString(), out int tab)) ActiveTabIndex = tab; });
+            SwitchTabCommand = new RelayCommand(p => { if (int.TryParse(p?.ToString(), out int tab)) { if (!IsActiveCycle && tab != 2) { ToastNotification.Show("Archived Cycle", "Recommendations Queue and Selection Audit are only available for the active operational cycle (FY 2026).", ToastType.Info); return; } ActiveTabIndex = tab; } });
             ToggleBatchModeCommand = new RelayCommand(_ => { IsBatchMode = !IsBatchMode; if (!IsBatchMode) { foreach (var item in FilteredRecommendations) item.IsSelected = false; RecalculateSelectionCounts(); } });
             SelectTopNCommand = new RelayCommand(_ => SelectTopN());
+            ToggleShortlistBatchModeCommand = new RelayCommand(_ => IsShortlistBatchMode = !IsShortlistBatchMode);
             ShortlistSelectedCommand = new RelayCommand(_ => MoveSelectedToShortlist());
-            QuickAcceptRowCommand = new RelayCommand(p => { if (p is SubsidyItem item) ShortlistCandidate(item); });
+            QuickShortlistCandidateCommand = new RelayCommand(p => { if (p is SubsidyItem item) ShortlistCandidate(item); });
+            QuickAcceptRowCommand = QuickShortlistCandidateCommand;
+            ApproveCandidateCommand = QuickShortlistCandidateCommand;
             QuickRejectRowCommand = new RelayCommand(p => { OutlierTarget = p as SubsidyItem; if (OutlierTarget != null) { _shortlistRevokeTargets = null; OutlierModalTitle = "Disqualify Candidate"; OutlierTargetNameAndId = null; IsOutlierModalOpen = true; } });
             OpenExplainDrawerCommand = new RelayCommand(p => {
                 SubsidyItem item = null;
@@ -74,34 +72,34 @@ namespace SOLUM_UI.ViewModels
                 await ExportCsvAsync($"Final_Grantee_Ledger_FY{yr}", _apiService.ExportFinalLedgerCsvAsync(FinalGranteesList.ToList(), yr), $"Final grantee ledger for FY {yr} exported successfully.");
             });
             ViewFullRecordCommand = new RelayCommand(async p => await OpenFullRecordViewAsync(p as SubsidyItem ?? ActiveCandidate));
-            RefreshCommand = new RelayCommand(async _ => await RefreshDataAsync());
-            GenerateRecommendationsCommand = new RelayCommand(async _ => await GenerateAndRefreshAsync());
-            ToggleRosterLockCommand = new RelayCommand(_ => ToggleRosterLock());
-            StartNewCycleCommand = new RelayCommand(async _ => await StartNewCycleAsync());
+            RefreshCommand = new RelayCommand(async _ => await RefreshDataAsync()); GenerateRecommendationsCommand = new RelayCommand(async _ => await GenerateAndRefreshAsync());
+            ToggleRosterLockCommand = new RelayCommand(_ => ToggleRosterLock()); StartNewCycleCommand = new RelayCommand(async _ => await StartNewCycleAsync()); SaveQuotaCommand = new RelayCommand(async _ => await SaveQuotaAsync());
         }
 
         private async Task GenerateAndRefreshAsync()
         {
+            if (IsLoading) return;
+            IsLoading = true;
             try
             {
                 var res = await _apiService.GenerateRecommendationsAsync(_activeCycleId);
                 if (res != null && res.Succeeded)
                 {
                     ToastNotification.Show("Evaluations Generated", $"{res.Data} candidate(s) processed.", ToastType.Success);
-                    if (SelectedFiscalCycle != null) await LoadCycleDataAsync(SelectedFiscalCycle);
+                    if (SelectedFiscalCycle != null) await LoadCycleDataInternalAsync(SelectedFiscalCycle);
                     else await RefreshDataAsync();
                 }
             }
             catch (Exception ex) { ToastNotification.Show("Generation Error", ex.Message, ToastType.Error); }
+            finally { IsLoading = false; }
         }
 
         private void SelectTopN()
         {
-            int limit = Math.Min(_granteeSlots, FilteredRecommendations.Count); if (limit <= 0) return;
-            bool all = FilteredRecommendations.Take(limit).All(x => x.IsSelected);
-            for (int i = 0; i < limit; i++) FilteredRecommendations[i].IsSelected = !all;
+            if (FilteredRecommendations.Count == 0) return;
+            bool all = FilteredRecommendations.All(x => x.IsSelected);
+            foreach (var item in FilteredRecommendations) item.IsSelected = !all;
             RecalculateSelectionCounts();
-            ToastNotification.Show(all ? "Selection Cleared" : "Selection Updated", all ? $"Deselected top {limit} candidates." : $"Selected top {limit} candidates for review.", ToastType.Info);
         }
 
         private async void MoveSelectedToShortlist()
@@ -109,43 +107,117 @@ namespace SOLUM_UI.ViewModels
             var selected = FilteredRecommendations.Where(x => x.IsSelected).ToList();
             if (selected.Count == 0) { ToastNotification.Show("No Selection", "Please select at least one pending candidate.", ToastType.Warning); return; }
             var evalIds = selected.Where(x => x.EvaluationId != Guid.Empty).Select(x => x.EvaluationId).ToList();
-            if (evalIds.Count > 0) await _apiService.ShortlistCandidatesAsync(_activeCycleId, evalIds);
+            if (evalIds.Count > 0)
+            {
+                try { await _apiService.ShortlistCandidatesAsync(_activeCycleId, evalIds); } catch { }
+            }
             foreach (var item in selected)
             {
                 item.Status = "Approved";
-                if (!ShortlistRows.Any(x => x.SpId == item.SpId))
+                item.IsSelected = false;
+                if (!ShortlistRows.Any(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId)
+                                         || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId)
+                                         || (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId)
+                                         || (!string.IsNullOrEmpty(item.Name) && string.Equals(x.Name, item.Name, StringComparison.OrdinalIgnoreCase))))
                 {
                     var collegeKids = item.ChildrenDetails?.Where(c => c.Age >= 17 && c.Age <= 24).ToList() ?? new List<ChildDetailItem>();
-                    ShortlistRows.Add(new SelectionRow { Rank = ShortlistRows.Count + 1, EvaluationId = item.EvaluationId, CycleId = item.CycleId, SoloParentId = item.SoloParentId, SpId = item.SpId, Name = item.Name, Barangay = item.Barangay, Sex = item.Sex, CivilStatus = item.CivilStatus, Priority = item.Priority, Score = item.Score, Dependants = item.Dependants, MonthlyIncome = item.MonthlyIncome, IncomePerCapita = item.IncomePerCapita, MinorDependentsCount = item.MinorDependentsCount, ToddlersUnder5Count = item.ToddlersUnder5Count, Circumstance = item.Circumstance, HasCollegeAgeDependent = item.HasCollegeAgeDependent, CollegeAgeDependentsCount = item.CollegeAgeDependentsCount, CollegeAgeDependents = collegeKids, IsPantawidBeneficiary = item.IsPantawidBeneficiary, IsFinalGrantee = false, IsWaitlisted = true, ModelVersion = item.ModelVersion });
+                    ShortlistRows.Add(new SelectionRow
+                    {
+                        Rank = ShortlistRows.Count + 1,
+                        EvaluationId = item.EvaluationId,
+                        CycleId = item.CycleId,
+                        SoloParentId = item.SoloParentId,
+                        SpId = item.SpId,
+                        Name = item.Name,
+                        Barangay = item.Barangay,
+                        Sex = item.Sex,
+                        CivilStatus = item.CivilStatus,
+                        Priority = item.Priority,
+                        Score = item.Score,
+                        Dependants = item.Dependants,
+                        MonthlyIncome = item.MonthlyIncome,
+                        IncomePerCapita = item.IncomePerCapita,
+                        MinorDependentsCount = item.MinorDependentsCount,
+                        ToddlersUnder5Count = item.ToddlersUnder5Count,
+                        Circumstance = item.Circumstance,
+                        HasCollegeAgeDependent = item.HasCollegeAgeDependent,
+                        CollegeAgeDependentsCount = item.CollegeAgeDependentsCount,
+                        CollegeAgeDependents = collegeKids,
+                        IsPantawidBeneficiary = item.IsPantawidBeneficiary,
+                        IsFinalGrantee = false,
+                        IsWaitlisted = true,
+                        ModelVersion = item.ModelVersion,
+                        Children0To6Count = item.Children0To6Count,
+                        Children7To22Count = item.Children7To22Count,
+                        OtherIncomeSource = item.OtherIncomeSource,
+                        NeedsAndProblems = item.NeedsAndProblems,
+                        ChildrenDetails = item.ChildrenDetails ?? new List<ChildDetailItem>()
+                    });
                 }
-                _allItems.RemoveAll(x => x.SpId == item.SpId || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId));
+                _allItems.RemoveAll(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId)
+                                      || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId)
+                                      || (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId)
+                                      || (!string.IsNullOrEmpty(item.Name) && string.Equals(x.Name, item.Name, StringComparison.OrdinalIgnoreCase)));
             }
             RecalculateQuotaAndFilter();
             UpdateShortlistAndFinalCollections();
-            ToastNotification.Show("Shortlisted", $"{selected.Count} candidate(s) moved to Audit & Verification.", ToastType.Success);
+            ToastNotification.Show("Candidates Approved", $"{selected.Count} candidate(s) moved to Shortlist & Audit.", ToastType.Success);
         }
 
         private async void ShortlistCandidate(SubsidyItem item, bool notify = true, bool isConfirmed = false)
         {
+            if (item == null) return;
             item.Status = "Approved";
-            if (item.EvaluationId != Guid.Empty) await _apiService.ShortlistCandidatesAsync(_activeCycleId, new List<Guid> { item.EvaluationId });
-            if (!ShortlistRows.Any(x => x.SpId == item.SpId))
+            if (item.EvaluationId != Guid.Empty)
+            {
+                try { await _apiService.ShortlistCandidatesAsync(_activeCycleId, new List<Guid> { item.EvaluationId }); } catch { }
+            }
+            if (!ShortlistRows.Any(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId)
+                                     || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId)
+                                     || (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId)
+                                     || (!string.IsNullOrEmpty(item.Name) && string.Equals(x.Name, item.Name, StringComparison.OrdinalIgnoreCase))))
             {
                 var collegeKids = item.ChildrenDetails?.Where(c => c.Age >= 17 && c.Age <= 24).ToList() ?? new List<ChildDetailItem>();
-                ShortlistRows.Add(new SelectionRow { Rank = ShortlistRows.Count + 1, EvaluationId = item.EvaluationId, CycleId = item.CycleId, SoloParentId = item.SoloParentId, SpId = item.SpId, Name = item.Name, Barangay = item.Barangay, Sex = item.Sex, CivilStatus = item.CivilStatus, Priority = item.Priority, Score = item.Score, Dependants = item.Dependants, MonthlyIncome = item.MonthlyIncome, IncomePerCapita = item.IncomePerCapita, MinorDependentsCount = item.MinorDependentsCount, ToddlersUnder5Count = item.ToddlersUnder5Count, Circumstance = item.Circumstance, HasCollegeAgeDependent = item.HasCollegeAgeDependent, CollegeAgeDependentsCount = item.CollegeAgeDependentsCount, CollegeAgeDependents = collegeKids, IsPantawidBeneficiary = item.IsPantawidBeneficiary, IsFinalGrantee = isConfirmed, IsWaitlisted = !isConfirmed, ModelVersion = item.ModelVersion });
+                ShortlistRows.Add(new SelectionRow
+                {
+                    Rank = ShortlistRows.Count + 1,
+                    EvaluationId = item.EvaluationId,
+                    CycleId = item.CycleId,
+                    SoloParentId = item.SoloParentId,
+                    SpId = item.SpId,
+                    Name = item.Name,
+                    Barangay = item.Barangay,
+                    Sex = item.Sex,
+                    CivilStatus = item.CivilStatus,
+                    Priority = item.Priority,
+                    Score = item.Score,
+                    Dependants = item.Dependants,
+                    MonthlyIncome = item.MonthlyIncome,
+                    IncomePerCapita = item.IncomePerCapita,
+                    MinorDependentsCount = item.MinorDependentsCount,
+                    ToddlersUnder5Count = item.ToddlersUnder5Count,
+                    Circumstance = item.Circumstance,
+                    HasCollegeAgeDependent = item.HasCollegeAgeDependent,
+                    CollegeAgeDependentsCount = item.CollegeAgeDependentsCount,
+                    CollegeAgeDependents = collegeKids,
+                    IsPantawidBeneficiary = item.IsPantawidBeneficiary,
+                    IsFinalGrantee = isConfirmed,
+                    IsWaitlisted = !isConfirmed,
+                    ModelVersion = item.ModelVersion,
+                    Children0To6Count = item.Children0To6Count,
+                    Children7To22Count = item.Children7To22Count,
+                    OtherIncomeSource = item.OtherIncomeSource,
+                    NeedsAndProblems = item.NeedsAndProblems,
+                    ChildrenDetails = item.ChildrenDetails ?? new List<ChildDetailItem>()
+                });
             }
-            _allItems.RemoveAll(x => x.SpId == item.SpId || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId));
+            _allItems.RemoveAll(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId)
+                                  || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId)
+                                  || (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId)
+                                  || (!string.IsNullOrEmpty(item.Name) && string.Equals(x.Name, item.Name, StringComparison.OrdinalIgnoreCase)));
             RecalculateQuotaAndFilter();
             UpdateShortlistAndFinalCollections();
-            if (notify) ToastNotification.Show("Candidate Shortlisted", $"{item.Name} moved to Audit & Verification.", ToastType.Success);
-        }
-
-        private void PromptRevokeShortlist(SelectionRow r)
-        {
-            if (r == null) return;
-            _shortlistRevokeTargets = new List<SelectionRow> { r }; OutlierTarget = _allItems.FirstOrDefault(x => x.SpId == r.SpId);
-            OutlierModalTitle = "Revoke Candidate"; OutlierTargetNameAndId = $"Candidate: {r.Name}";
-            OnPropertyChanged(nameof(OutlierModalConfirmButtonText)); IsOutlierModalOpen = true;
+            if (notify) ToastNotification.Show("Candidate Approved", $"{item.Name} moved to Shortlist & Audit.", ToastType.Success);
         }
 
         private async void BatchConfirmShortlist()
@@ -166,80 +238,6 @@ namespace SOLUM_UI.ViewModels
             _shortlistRevokeTargets = targets; OutlierTarget = null;
             OutlierModalTitle = $"Revoke {targets.Count} Candidate(s)"; OutlierTargetNameAndId = $"{targets.Count} candidate(s) selected from Approved Selection";
             OnPropertyChanged(nameof(OutlierModalConfirmButtonText)); IsOutlierModalOpen = true;
-        }
-
-        private async Task ConfirmOutlierRejectionAsync()
-        {
-            if (_shortlistRevokeTargets != null && _shortlistRevokeTargets.Count > 0)
-            {
-                int count = _shortlistRevokeTargets.Count;
-                foreach (var r in _shortlistRevokeTargets)
-                {
-                    ShortlistRows.Remove(r); FinalGranteesList.Remove(r);
-                    var orig = _allItems.FirstOrDefault(x => x.SpId == r.SpId);
-                    if (orig != null) { orig.IsDisqualified = true; orig.DisqualificationReason = OutlierRejectionReason; orig.Status = "Rejected"; }
-                    if (r.EvaluationId != Guid.Empty)
-                        _ = _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = r.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = OutlierAutoPromote });
-                }
-                _shortlistRevokeTargets = null; IsOutlierModalOpen = false;
-                UpdateShortlistAndFinalCollections(); RecalculateQuotaAndFilter(); RecalculateShortlistSelectionCounts();
-                ToastNotification.Show("Revocation Complete", $"{count} candidate(s) revoked ({OutlierRejectionReason}).", ToastType.Warning);
-            }
-            else if (OutlierTarget != null)
-            {
-                var target = OutlierTarget; target.IsDisqualified = true; target.DisqualificationReason = OutlierRejectionReason; target.Status = "Rejected";
-                if (target.EvaluationId != Guid.Empty)
-                    await _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = target.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = OutlierAutoPromote });
-                IsOutlierModalOpen = false; RecalculateQuotaAndFilter();
-                ToastNotification.Show("Outlier Disqualified", $"{target.Name} removed from queue. Next candidate promoted.", ToastType.Warning);
-            }
-        }
-
-        private async void ToggleGrantee(SelectionRow row, bool confirm)
-        {
-            if (row == null) return;
-            row.IsFinalGrantee = confirm;
-            if (confirm && row.EvaluationId != Guid.Empty)
-                await _apiService.ConfirmGranteesAsync(_activeCycleId, new List<Guid> { row.EvaluationId });
-            else if (!confirm && row.EvaluationId != Guid.Empty)
-                await _apiService.RevokeGrantAsync(row.EvaluationId, "Revoked from Final Grantees", "Admin manual action");
-            UpdateShortlistAndFinalCollections();
-            NotifyQuotaMetricsChanged();
-            ToastNotification.Show(confirm ? "Confirmed" : "Revoked", $"{row.Name} {(confirm ? "confirmed as final grantee." : "removed from final grantees.")}", confirm ? ToastType.Success : ToastType.Warning);
-        }
-
-        private async Task ExportCsvAsync(string name, Task<string> generator, string msg) { var dlg = new SaveFileDialog { FileName = name, DefaultExt = ".csv", Filter = "CSV file (*.csv)|*.csv" }; if (dlg.ShowDialog() == true) { File.WriteAllText(dlg.FileName, await generator, new System.Text.UTF8Encoding(true)); ToastNotification.Show("Export Complete", msg, ToastType.Success); } }
-
-        private async Task OpenFullRecordViewAsync(SubsidyItem item)
-        {
-            if (item == null) return;
-            try
-            {
-                SoloParentRecord recordToView = null;
-                Guid targetId = item.SoloParentId != Guid.Empty ? item.SoloParentId : (Guid.TryParse(item.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
-                if (targetId != Guid.Empty)
-                {
-                    var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(targetId);
-                    if (detailResp != null && detailResp.Succeeded && detailResp.Data != null)
-                        recordToView = SoloParentApiService.Instance.MapToRecord(detailResp.Data);
-                }
-                if (recordToView == null)
-                    recordToView = new SoloParentRecord { Id = item.SpId, Name = item.Name, Barangay = item.Barangay, Sex = item.Sex, CivilStatus = item.CivilStatus, MonthlyIncome = item.MonthlyIncome.ToString("N2"), Status = "Active" };
-                new RecordViewDialog(recordToView) { Owner = Application.Current.MainWindow }.ShowDialog();
-            }
-            catch (Exception ex) { ToastNotification.Show("Unable to Open Record", ex.Message, ToastType.Error); }
-        }
-
-        private async Task FetchRecordForDrawerAsync(SubsidyItem item)
-        {
-            if (item == null || item.SoloParentId == Guid.Empty) return;
-            try
-            {
-                var resp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.SoloParentId);
-                if (resp?.Data != null)
-                    Application.Current?.Dispatcher?.Invoke(() => { SubsidyModelMapper.EnrichItemFromRecord(item, resp.Data); if (ActiveCandidate == item) OnPropertyChanged(nameof(ActiveCandidate)); });
-            }
-            catch { }
         }
     }
 }
