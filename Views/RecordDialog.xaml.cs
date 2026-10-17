@@ -965,6 +965,26 @@ namespace SOLUM_UI
         private void TxtOccupation_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtOccupation); }
         private void TxtEmergencyContact_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyContact); }
         private void TxtEmergencyAddress_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyAddress); }
+
+        private void ChkSameAsApplicant_Checked(object sender, RoutedEventArgs e)
+        {
+            // Copy applicant address to emergency contact address
+            if (TxtAddress != null && TxtEmergencyAddress != null)
+            {
+                TxtEmergencyAddress.Text = TxtAddress.Text;
+                TxtEmergencyAddress.IsEnabled = false;
+            }
+        }
+
+        private void ChkSameAsApplicant_Unchecked(object sender, RoutedEventArgs e)
+        {
+            // Enable the emergency contact address field for editing
+            if (TxtEmergencyAddress != null)
+            {
+                TxtEmergencyAddress.IsEnabled = true;
+            }
+        }
+
         private void TxtA2Cause_TextChanged(object sender, TextChangedEventArgs e)        { }
         private void TxtA4Disability_TextChanged(object sender, TextChangedEventArgs e)   { }
         private void TxtA5Period_TextChanged(object sender, TextChangedEventArgs e)       { }
