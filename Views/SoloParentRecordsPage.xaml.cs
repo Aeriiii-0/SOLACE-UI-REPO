@@ -550,29 +550,42 @@ namespace SOLUM_UI
 
         private async Task SaveNewRecordAsync(SoloParentRecord record)
         {
-            record.CreatedBy = CurrentUserName;
-            // Use safe barangay: if record doesn't have one, use user's barangay or fallback to "ALL"
-            record.Barangay = string.IsNullOrWhiteSpace(record.Barangay) 
-                ? (!string.IsNullOrWhiteSpace(CurrentUserBarangay) ? CurrentUserBarangay : "ALL")
-                : record.Barangay;
+            // Show loading indicator
+            PageLoadingOverlay.Visibility = Visibility.Visible;
 
-            var createReq = SoloParentApiService.Instance.MapToCreateRequest(record);
-            var createResp = await SoloParentApiService.Instance.CreateSoloParentAsync(createReq);
-
-            if (!createResp.Succeeded)
+            try
             {
-                string err = createResp.Errors != null && createResp.Errors.Count > 0
-                    ? string.Join("\n", createResp.Errors)
-                    : "Failed to create record on the server.";
-                MessageBox.Show(err, "Creation Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+                record.CreatedBy = CurrentUserName;
+                // Use safe barangay: if record doesn't have one, use user's barangay or fallback to "ALL"
+                record.Barangay = string.IsNullOrWhiteSpace(record.Barangay) 
+                    ? (!string.IsNullOrWhiteSpace(CurrentUserBarangay) ? CurrentUserBarangay : "ALL")
+                    : record.Barangay;
 
-            record.Id = createResp.Data.ToString();
-            ToastNotification.Show("Record Added", record.Name + " was added successfully.", ToastType.Success);
-            AuditLogService.Instance.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
-            (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
-            await LoadRecordsAsync();
+                var createReq = SoloParentApiService.Instance.MapToCreateRequest(record);
+                var createResp = await SoloParentApiService.Instance.CreateSoloParentAsync(createReq);
+
+                if (!createResp.Succeeded)
+                {
+                    string err = createResp.Errors != null && createResp.Errors.Count > 0
+                        ? string.Join("\n", createResp.Errors)
+                        : "Failed to create record on the server.";
+                    Views.Dialogs.ActionConfirmDialog.Error(
+                        "Creation Failed",
+                        err);
+                    return;
+                }
+
+                record.Id = createResp.Data.ToString();
+                ToastNotification.Show("Record Added", record.Name + " was added successfully.", ToastType.Success);
+                AuditLogService.Instance.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
+                await LoadRecordsAsync();
+            }
+            finally
+            {
+                // Hide loading indicator
+                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+            }
         }
 
         private async void Edit_Click(object sender, RoutedEventArgs e)
@@ -594,7 +607,9 @@ namespace SOLUM_UI
         {
             if (!Guid.TryParse(original.Id, out var guid))
             {
-                MessageBox.Show("Cannot renew: invalid record ID.", "Renew", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Views.Dialogs.ActionConfirmDialog.Warning(
+                    "Renew",
+                    "Cannot renew: invalid record ID.");
                 return;
             }
 
@@ -604,7 +619,9 @@ namespace SOLUM_UI
             {
                 string err = renewResp.Errors != null && renewResp.Errors.Count > 0
                     ? string.Join("\n", renewResp.Errors) : "Failed to renew record.";
-                MessageBox.Show(err, "Renew Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Views.Dialogs.ActionConfirmDialog.Error(
+                    "Renew Failed",
+                    err);
                 return;
             }
 
@@ -615,7 +632,9 @@ namespace SOLUM_UI
             {
                 string err = updateResp.Errors != null && updateResp.Errors.Count > 0
                     ? string.Join("\n", updateResp.Errors) : "Failed to save updated fields.";
-                MessageBox.Show(err, "Update Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Views.Dialogs.ActionConfirmDialog.Error(
+                    "Update Failed",
+                    err);
                 return;
             }
 
@@ -649,25 +668,38 @@ namespace SOLUM_UI
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                if (Guid.TryParse(rawRecord.Id, out var guid))
-                {
-                    var updateReq = SoloParentApiService.Instance.MapToUpdateRequest(guid, dialog.Result, existingDto);
-                    var updateResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(guid, updateReq);
-                    if (!updateResp.Succeeded)
-                    {
-                        string err = updateResp.Errors != null && updateResp.Errors.Count > 0
-                            ? string.Join("\n", updateResp.Errors)
-                            : "Failed to update record on the server.";
-                        MessageBox.Show(err, "Update Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-                }
+                // Show loading indicator
+                PageLoadingOverlay.Visibility = Visibility.Visible;
 
-                ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
-                var changeList = BuildChangeList(rawRecord, dialog.Result);
-                AuditLogService.Instance.LogUpdateWithChanges(dialog.Result.Id, dialog.Result.Name,
-                    GetCurrentUser(), CurrentUserRole, changeList);
-                await LoadRecordsAsync();
+                try
+                {
+                    if (Guid.TryParse(rawRecord.Id, out var guid))
+                    {
+                        var updateReq = SoloParentApiService.Instance.MapToUpdateRequest(guid, dialog.Result, existingDto);
+                        var updateResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(guid, updateReq);
+                        if (!updateResp.Succeeded)
+                        {
+                            string err = updateResp.Errors != null && updateResp.Errors.Count > 0
+                                ? string.Join("\n", updateResp.Errors)
+                                : "Failed to update record on the server.";
+                            Views.Dialogs.ActionConfirmDialog.Error(
+                                "Update Failed",
+                                err);
+                            return;
+                        }
+                    }
+
+                    ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
+                    var changeList = BuildChangeList(rawRecord, dialog.Result);
+                    AuditLogService.Instance.LogUpdateWithChanges(dialog.Result.Id, dialog.Result.Name,
+                        GetCurrentUser(), CurrentUserRole, changeList);
+                    await LoadRecordsAsync();
+                }
+                finally
+                {
+                    // Hide loading indicator
+                    PageLoadingOverlay.Visibility = Visibility.Collapsed;
+                }
             }
         }
 
@@ -676,26 +708,41 @@ namespace SOLUM_UI
             string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
             if (!Guid.TryParse(id, out var guid))
             {
-                MessageBox.Show("Cannot renew record without a valid backend ID.", "Renew", MessageBoxButton.OK, MessageBoxImage.Information);
+                Views.Dialogs.ActionConfirmDialog.Info(
+                    "Renew",
+                    "Cannot renew record without a valid backend ID.");
                 return;
             }
 
             SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
             string recordName = vm != null ? vm.Name : id;
 
-            var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid);
-            if (resp.Succeeded)
+            // Show loading indicator
+            PageLoadingOverlay.Visibility = Visibility.Visible;
+
+            try
             {
-                ToastNotification.Show("Record Renewed", recordName + " validity extended for 1 year.", ToastType.Success);
-                AuditLogService.Instance.LogUpdate(id, recordName, GetCurrentUser(), CurrentUserRole, "Validity extended for 1 year");
-                await LoadRecordsAsync();
+                var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid);
+                if (resp.Succeeded)
+                {
+                    ToastNotification.Show("Record Renewed", recordName + " validity extended for 1 year.", ToastType.Success);
+                    AuditLogService.Instance.LogUpdate(id, recordName, GetCurrentUser(), CurrentUserRole, "Validity extended for 1 year");
+                    await LoadRecordsAsync();
+                }
+                else
+                {
+                    string err = resp.Errors != null && resp.Errors.Count > 0
+                        ? string.Join("\n", resp.Errors)
+                        : "Failed to renew record.";
+                    Views.Dialogs.ActionConfirmDialog.Error(
+                        "Renew Failed",
+                        err);
+                }
             }
-            else
+            finally
             {
-                string err = resp.Errors != null && resp.Errors.Count > 0
-                    ? string.Join("\n", resp.Errors)
-                    : "Failed to renew record.";
-                MessageBox.Show(err, "Renew Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                // Hide loading indicator
+                PageLoadingOverlay.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -737,19 +784,32 @@ namespace SOLUM_UI
 
             if (!isConfirmed) return;
 
-            var deleteResp = await SoloParentApiService.Instance.DeleteSoloParentAsync(guid);
-            if (!deleteResp.Succeeded)
-            {
-                string err = deleteResp.Errors != null && deleteResp.Errors.Count > 0
-                    ? string.Join("\n", deleteResp.Errors)
-                    : "Failed to delete record from server.";
-                MessageBox.Show(err, "Delete Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            // Show loading indicator
+            PageLoadingOverlay.Visibility = Visibility.Visible;
 
-            ToastNotification.Show("Record Deleted", "The record was removed.", ToastType.Warning);
-            AuditLogService.Instance.LogDelete(id, recordName, GetCurrentUser(), CurrentUserRole);
-            await LoadRecordsAsync();
+            try
+            {
+                var deleteResp = await SoloParentApiService.Instance.DeleteSoloParentAsync(guid);
+                if (!deleteResp.Succeeded)
+                {
+                    string err = deleteResp.Errors != null && deleteResp.Errors.Count > 0
+                        ? string.Join("\n", deleteResp.Errors)
+                        : "Failed to delete record from server.";
+                    Views.Dialogs.ActionConfirmDialog.Error(
+                        "Delete Failed",
+                        err);
+                    return;
+                }
+
+                ToastNotification.Show("Record Deleted", "The record was removed.", ToastType.Warning);
+                AuditLogService.Instance.LogDelete(id, recordName, GetCurrentUser(), CurrentUserRole);
+                await LoadRecordsAsync();
+            }
+            finally
+            {
+                // Hide loading indicator
+                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void ExportRecord_Click(object sender, RoutedEventArgs e)
@@ -770,13 +830,15 @@ namespace SOLUM_UI
             try
             {
                 SOLUM_UI.Services.SoloParentExportService.ExportToPdf(dlg.FileName, vm.RawModel);
-                MessageBox.Show("Record exported to:\n" + dlg.FileName, "Export Complete",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                Views.Dialogs.ActionConfirmDialog.Success(
+                    "Export Complete",
+                    "Record exported to:\n" + dlg.FileName);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Export failed:\n" + ex.Message, "Export Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                Views.Dialogs.ActionConfirmDialog.Error(
+                    "Export Error",
+                    "Export failed:\n" + ex.Message);
             }
         }
 

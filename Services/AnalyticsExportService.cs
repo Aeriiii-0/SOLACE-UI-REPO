@@ -18,7 +18,8 @@ namespace SOLUM_UI.Services
 
         public static void Export(string filePath, List<SoloParentRecord> records, string period, string password = null)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            // EPPlus 8.7.1: Set license for non-commercial use
+            ExcelPackage.License.SetNonCommercialOrganization("DSWD Solo Parents Program");
             using (var pkg = string.IsNullOrEmpty(password)
                 ? new ExcelPackage()
                 : new ExcelPackage())
@@ -44,7 +45,8 @@ namespace SOLUM_UI.Services
             string region = "IV-A",
             string password = null)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            // EPPlus 8.7.1: Set license for non-commercial use
+            ExcelPackage.License.SetNonCommercialOrganization("DSWD Solo Parents Program");
             using (var pkg = new ExcelPackage())
             {
                 buildMonthlyAnalyticsSheet(pkg, analytics, submittedByName, cityProvince, region);
@@ -480,7 +482,8 @@ namespace SOLUM_UI.Services
             string region = "IV-A",
             string password = null)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            // EPPlus 8.7.1: Set license for non-commercial use
+            ExcelPackage.License.SetNonCommercialOrganization("DSWD Solo Parents Program");
             using (var pkg = new ExcelPackage())
             {
                 buildQuarterlySummarySheet(pkg, m1, m2, m3, periodLabel, submittedByName, cityProvince, region);

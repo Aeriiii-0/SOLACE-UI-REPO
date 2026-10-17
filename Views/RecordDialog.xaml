@@ -944,9 +944,15 @@
                                                 </Border>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2" Margin="0,0,10,0">
-                                                <TextBlock Text="Emergency Contact Address" Style="{StaticResource FieldLabel}"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                    <TextBlock Text="Emergency Contact Address" Style="{StaticResource FieldLabel}"/>
+                                                </StackPanel>
                                                 <TextBox x:Name="TxtEmergencyAddress" Style="{StaticResource FormBox}"
                                                          TextChanged="TxtEmergencyAddress_TextChanged"/>
+                                                <CheckBox x:Name="ChkSameAsApplicant" Content="Same as Applicant"
+                                                          FontSize="12" Foreground="#666666" Margin="0,4,0,0"
+                                                          Checked="ChkSameAsApplicant_Checked"
+                                                          Unchecked="ChkSameAsApplicant_Unchecked"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="3">
                                                 <TextBlock Text="Contact Number" Style="{StaticResource FieldLabel}"/>
@@ -1152,7 +1158,7 @@
                                         </Border>
 
                                         <!-- family composition -->
-                                        <StackPanel Grid.IsSharedSizeScope="True">
+                                        <StackPanel Grid.IsSharedSizeScope="True" Margin="0,0,0,0">
 
                                             <!-- table header -->
                                             <Grid Margin="0,0,0,4">

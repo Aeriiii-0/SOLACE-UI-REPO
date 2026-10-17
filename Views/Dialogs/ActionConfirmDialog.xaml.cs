@@ -21,6 +21,17 @@ namespace SOLUM_UI.Views.Dialogs
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Show a confirmation modal dialog with customizable theme and options.
+        /// </summary>
+        /// <param name="title">Dialog title</param>
+        /// <param name="message">Message body text</param>
+        /// <param name="confirmText">Confirm button label (default: "Confirm")</param>
+        /// <param name="cancelText">Cancel button label (default: "Cancel")</param>
+        /// <param name="theme">Color theme based on action type (default: Primary/Maroon)</param>
+        /// <param name="owner">Parent window for modal centering (auto-detects MainWindow if null)</param>
+        /// <param name="customIconData">Optional custom SVG path data for icon (default: theme-based icon)</param>
+        /// <returns>true if user confirmed, false if cancelled</returns>
         public static bool Show(
             string title,
             string message,
@@ -54,6 +65,71 @@ namespace SOLUM_UI.Views.Dialogs
 
             dialog.ShowDialog();
             return dialog.Confirmed;
+        }
+
+        /// <summary>
+        /// Show an alert/notification dialog (OK-only button).
+        /// </summary>
+        /// <param name="title">Dialog title</param>
+        /// <param name="message">Message body text</param>
+        /// <param name="theme">Color theme (default: Primary)</param>
+        /// <param name="owner">Parent window</param>
+        public static void Alert(
+            string title,
+            string message,
+            ConfirmThemeType theme = ConfirmThemeType.Primary,
+            Window owner = null)
+        {
+            var dialog = new ActionConfirmDialog();
+            if (owner != null)
+            {
+                dialog.Owner = owner;
+            }
+            else if (Application.Current?.MainWindow != null && Application.Current.MainWindow.IsVisible)
+            {
+                dialog.Owner = Application.Current.MainWindow;
+            }
+
+            dialog.TxtTitle.Text = title;
+            dialog.TxtMessage.Text = message;
+            dialog.TxtConfirmBtn.Text = "OK";
+            dialog.TxtCancelBtn.Text = "";
+            dialog.BtnCancel.Visibility = Visibility.Collapsed;
+
+            dialog.ApplyTheme(theme);
+            dialog.ShowDialog();
+        }
+
+        /// <summary>
+        /// Show a success notification.
+        /// </summary>
+        public static void Success(string title, string message, Window owner = null)
+        {
+            Alert(title, message, ConfirmThemeType.Success, owner);
+        }
+
+        /// <summary>
+        /// Show an error notification.
+        /// </summary>
+        public static void Error(string title, string message, Window owner = null)
+        {
+            Alert(title, message, ConfirmThemeType.Danger, owner);
+        }
+
+        /// <summary>
+        /// Show a warning notification.
+        /// </summary>
+        public static void Warning(string title, string message, Window owner = null)
+        {
+            Alert(title, message, ConfirmThemeType.Warning, owner);
+        }
+
+        /// <summary>
+        /// Show an info notification.
+        /// </summary>
+        public static void Info(string title, string message, Window owner = null)
+        {
+            Alert(title, message, ConfirmThemeType.Primary, owner);
         }
 
         private void ApplyTheme(ConfirmThemeType theme)

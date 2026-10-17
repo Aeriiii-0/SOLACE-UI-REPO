@@ -10,18 +10,29 @@ namespace SOLUM_UI.Services
 {
     /// <summary>
     /// Comprehensive analytics export service that generates professional Excel reports
-    /// with soft maroon-pink theme styling and dynamic data from backend API.
+    /// matching DSWD LGU Summary format with pastel colors, maroon accents, and signature section.
     /// </summary>
     public static class AnalyticsExcelExportService
     {
-        // Color Palette - Soft Maroon-Pink Theme
+        // Color Palette - DSWD Professional Theme with Pastels
         private static class ColorPalette
         {
-            public static Color HeaderBackground = Color.FromArgb(0x6B, 0x1D, 0x2F);  // Deep Soft Maroon
-            public static Color SectionHeader = Color.FromArgb(0xD8, 0xA7, 0xB1);     // Muted Rose
-            public static Color AlternateRowLight = Color.FromArgb(0xFD, 0xF5, 0xF7); // Light Pink Tint
-            public static Color BorderColor = Color.FromArgb(0xE0, 0xD0, 0xD5);       // Soft Rose Border
-            public static Color TextDark = Color.FromArgb(0x22, 0x22, 0x22);          // Dark Gray
+            // Header & Accents - Maroon
+            public static Color HeaderBackground = Color.FromArgb(0x8B, 0x2E, 0x44);  // Maroon Accent
+            public static Color TitleBackground = Color.FromArgb(0x8B, 0x2E, 0x44);   // Title Maroon
+            
+            // Section Headers - Light Neutral
+            public static Color SectionHeader = Color.FromArgb(0xE8, 0xE8, 0xE8);     // Light Gray
+            
+            // Data Rows - Very Light Pastels
+            public static Color AlternateRowLight = Color.FromArgb(0xF5, 0xF0, 0xED); // Very light warm beige
+            public static Color AlternateRowAlt = Color.FromArgb(0xFF, 0xFF, 0xFF);   // Pure white
+            
+            // Borders - Subtle but visible
+            public static Color BorderColor = Color.FromArgb(0xC0, 0xC0, 0xC0);       // Medium gray border
+            
+            // Text
+            public static Color TextDark = Color.FromArgb(0x1F, 0x1F, 0x1F);          // Near black
             public static Color TextWhite = Color.White;
         }
 
@@ -42,7 +53,10 @@ namespace SOLUM_UI.Services
             string focalPersonName = "",
             string password = null)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            // EPPlus 8.7.1: Set license for non-commercial use
+            // Using organization license for DSWD Solo Parents Program
+            ExcelPackage.License.SetNonCommercialOrganization("DSWD Solo Parents Program");
+            
             using (var pkg = new ExcelPackage())
             {
                 BuildAnalyticsSheet(pkg, analyticsData, municipality, region, focalPersonName);
@@ -125,6 +139,10 @@ namespace SOLUM_UI.Services
             // Summary Statistics
             row += 1;
             BuildSummaryStatistics(ws, ref row, data);
+
+            // Signature Section
+            row += 2;
+            BuildSignatureSection(ws, ref row, focalPersonName);
 
             // Adjust column widths dynamically
             AutoFitColumns(ws, 3);
@@ -276,7 +294,59 @@ namespace SOLUM_UI.Services
         }
 
         /// <summary>
-        /// Apply styling to a data row with alternating background colors.
+        /// Build signature section for report submission.
+        /// </summary>
+        private static void BuildSignatureSection(ExcelWorksheet ws, ref int row, string focalPersonName)
+        {
+            // "Submitted by:" label
+            var submittedLabel = ws.Cells[row, 1];
+            submittedLabel.Value = "Submitted by:";
+            submittedLabel.Style.Font.Bold = true;
+            submittedLabel.Style.Font.Color.SetColor(ColorPalette.TextDark);
+            ws.Row(row).Height = 14;
+            row++;
+
+            // Empty row for spacing
+            row++;
+
+            // Focal Person Name signature line
+            var nameCell = ws.Cells[row, 1, row, 3];
+            nameCell.Merge = true;
+            nameCell.Value = string.IsNullOrWhiteSpace(focalPersonName) ? "________________________________" : $"  {focalPersonName}  ";
+            nameCell.Style.Font.Bold = true;
+            nameCell.Style.Font.Color.SetColor(ColorPalette.TextDark);
+            nameCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            nameCell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+            nameCell.Style.Border.Bottom.Color.SetColor(ColorPalette.BorderColor);
+            ws.Row(row).Height = 16;
+            row++;
+
+            // Name label
+            var nameLabelCell = ws.Cells[row, 1, row, 3];
+            nameLabelCell.Merge = true;
+            nameLabelCell.Value = "Name of Solo Parent Focal Person";
+            nameLabelCell.Style.Font.Italic = true;
+            nameLabelCell.Style.Font.Size = 9f;
+            nameLabelCell.Style.Font.Color.SetColor(ColorPalette.TextDark);
+            nameLabelCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Row(row).Height = 12;
+            row++;
+
+            // Empty row
+            row++;
+
+            // Date of Submission
+            var dateCell = ws.Cells[row, 1, row, 3];
+            dateCell.Merge = true;
+            dateCell.Value = $"Date of Submission: {DateTime.Today:MMMM d, yyyy}";
+            dateCell.Style.Font.Color.SetColor(ColorPalette.TextDark);
+            dateCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Row(row).Height = 14;
+            row++;
+        }
+
+        /// <summary>
+        /// Apply styling to a data row with alternating background colors (very light pastels).
         /// </summary>
         private static void ApplyDataRow(
             ExcelWorksheet ws,
@@ -286,7 +356,7 @@ namespace SOLUM_UI.Services
             int count,
             bool isAlternate)
         {
-            var bgColor = isAlternate ? ColorPalette.AlternateRowLight : Color.White;
+            var bgColor = isAlternate ? ColorPalette.AlternateRowLight : ColorPalette.AlternateRowAlt;
 
             // Category cell
             var categoryCell = ws.Cells[row, 1];
@@ -307,7 +377,7 @@ namespace SOLUM_UI.Services
         }
 
         /// <summary>
-        /// Apply styling to a subtotal row.
+        /// Apply styling to a subtotal row with light header background.
         /// </summary>
         private static void ApplySubtotalRow(ExcelWorksheet ws, int row, string label, int total)
         {
@@ -414,7 +484,7 @@ namespace SOLUM_UI.Services
         }
 
         /// <summary>
-        /// Apply border styling.
+        /// Apply clear, visible borders for better section separation.
         /// </summary>
         private static void ApplyBorder(ExcelRange cells)
         {
