@@ -636,15 +636,15 @@ namespace SOLUM_UI
             }
         }
 
-        private void DrawCategoryBars(Canvas c, List<(string Label, double Value)> categories)
+        private void DrawCategoryBars(Canvas canvas, List<(string Label, double Value)> categories)
         {
-            if (c == null)
+            if (canvas == null)
                 return;
 
-            c.Children.Clear();
+            canvas.Children.Clear();
 
-            double w = c.ActualWidth;
-            double h = c.ActualHeight;
+            double w = canvas.ActualWidth;
+            double h = canvas.ActualHeight;
             if (w <= 0 || h <= 0 || categories.Count == 0)
                 return;
 
@@ -654,7 +654,7 @@ namespace SOLUM_UI
             if (pw <= 0 || ph <= 0)
                 return;
 
-            double max = categories.Max(c => c.Value);
+            double max = categories.Max(item => item.Value);
             if (max <= 0)
                 max = 1;
 
@@ -675,7 +675,7 @@ namespace SOLUM_UI
                 var lbl = MakeText(categories[i].Label.Length > 20 ? categories[i].Label.Substring(0, 19) + "…" : categories[i].Label, 10, darkBrush, FontWeights.Normal);
                 Canvas.SetLeft(lbl, 8);
                 Canvas.SetTop(lbl, y + (barH - lbl.DesiredSize.Height) / 2);
-                c.Children.Add(lbl);
+                canvas.Children.Add(lbl);
 
                 // Bar
                 var bar = new Border
@@ -689,13 +689,13 @@ namespace SOLUM_UI
                 };
                 Canvas.SetLeft(bar, x);
                 Canvas.SetTop(bar, y);
-                c.Children.Add(bar);
+                canvas.Children.Add(bar);
 
                 // Value (right)
                 var val = MakeText(categories[i].Value.ToString("N0"), 10, darkBrush, FontWeights.Bold);
                 Canvas.SetLeft(val, left + pw + 8);
                 Canvas.SetTop(val, y + (barH - val.DesiredSize.Height) / 2);
-                c.Children.Add(val);
+                canvas.Children.Add(val);
             }
         }
 
