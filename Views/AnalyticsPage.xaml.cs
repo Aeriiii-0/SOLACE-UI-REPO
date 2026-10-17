@@ -740,6 +740,16 @@ namespace SOLUM_UI
                 };
                 Canvas.SetLeft(bar, left);
                 Canvas.SetTop(bar, y);
+                canvas.Children.Add(bar);ew Border
+                {
+                    Width = barW,
+                    Height = barH,
+                    Background = i == 0 ? topBar : otherBar,
+                    CornerRadius = new CornerRadius(5),
+                    ToolTip = $"{categories[i].Label}: {categories[i].Value:N0} cases"
+                };
+                Canvas.SetLeft(bar, left);
+                Canvas.SetTop(bar, y);
                 canvas.Children.Add(bar);
             }
         }
