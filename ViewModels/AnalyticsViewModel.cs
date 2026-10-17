@@ -1058,6 +1058,10 @@ namespace SOLUM_UI.ViewModels
             }
 
             UpdateTopBarangay();
+            
+            // Update navigation buttons
+            HasPreviousBarangayPage = CurrentBarangayPage > 1;
+            HasNextBarangayPage = CurrentBarangayPage < TotalBarangayPages;
         }
 
         /// <summary>
@@ -1076,10 +1080,6 @@ namespace SOLUM_UI.ViewModels
                 TopBarangayName = "No Data";
                 TopBarangayCount = 0;
             }
-        }
-            // Update navigation buttons
-            HasPreviousBarangayPage = CurrentBarangayPage > 1;
-            HasNextBarangayPage = CurrentBarangayPage < TotalBarangayPages;
         }
 
         /// <summary>
