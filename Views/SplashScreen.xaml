@@ -10,7 +10,7 @@
         Topmost="True">
     <Grid Background="Transparent">
         <!-- Main Container -->
-        <Border Background="White" CornerRadius="16" Padding="40,60" Effect="{StaticResource ShadowEffect}">
+        <Border Background="White" CornerRadius="16" Padding="40,60">
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="5" Opacity="0.3"/>
             </Border.Effect>
