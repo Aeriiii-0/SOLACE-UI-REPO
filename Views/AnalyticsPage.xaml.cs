@@ -1,11 +1,14 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Windows.Shapes;
+using System.Windows.Threading;
 using SOLUM_UI.Models;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
@@ -14,55 +17,108 @@ using SOLUM_UI.ViewModels;
 
 namespace SOLUM_UI
 {
-    /// <summary>
-    /// Interaction logic for AnalyticsPage.xaml
-    /// </summary>
     public partial class AnalyticsPage : Page
     {
         private AnalyticsViewModel _vm;
+        private bool _redrawPending;
+        private INotifyCollectionChanged _hookedBarangay;
+
+        private static readonly string[] AgeLabels = { "19 & below", "20-39", "40-59", "60 & above" };
+        private static readonly string[] AgeProps = { "ParentAge19Below", "ParentAge20_39", "ParentAge40_59", "ParentAge60Above" };
+        private static readonly string[] AgeColors = { "#7D2245", "#A14452", "#D9A3AB", "#EAD9DB" };
 
         public AnalyticsPage()
         {
-            // Load XAML content manually since code-behind isn't generated
             try
             {
                 var resourceUri = new Uri("/Views/AnalyticsPage.xaml", UriKind.Relative);
                 System.Windows.Application.LoadComponent(this, resourceUri);
-                System.Diagnostics.Debug.WriteLine("✓ AnalyticsPage XAML loaded successfully");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ XAML load error: {ex.Message}\n{ex.StackTrace}");
+                System.Diagnostics.Debug.WriteLine($"XAML load error: {ex.Message}\n{ex.StackTrace}");
                 MessageBox.Show($"Failed to load Analytics page XAML: {ex.Message}", "XAML Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            
+
             try
             {
                 _vm = new AnalyticsViewModel();
-                System.Diagnostics.Debug.WriteLine("✓ AnalyticsViewModel created");
-                
                 DataContext = _vm;
-                System.Diagnostics.Debug.WriteLine($"✓ DataContext set. BarangayData count: {_vm.BarangayData.Count}");
-                
-                // Add Loaded handler - this should trigger when page is fully loaded
-                Loaded += async (s, e) => 
-                {
-                    System.Diagnostics.Debug.WriteLine("→ Page Loaded event firing, calling LoadDataAsync...");
-                    InitFilterControls();
-                    await LoadDataAsync();
-                    SuppressDatePickerWatermarks();
-                };
+                _vm.PropertyChanged += OnVmPropertyChanged;
+                HookBarangayCollection();
 
-                // Also try loading data immediately as a fallback
-                System.Diagnostics.Debug.WriteLine("→ Attempting immediate data load (may load before UI is ready)...");
-                _ = LoadDataAsync();
+                Loaded += async (s, e) =>
+                {
+                    InitFilterControls();
+                    HookChartCanvases();
+                    await LoadDataAsync();
+                    ScheduleRedraw();
+                };
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Constructor error: {ex.Message}\n{ex.StackTrace}");
+                System.Diagnostics.Debug.WriteLine($"Constructor error: {ex.Message}\n{ex.StackTrace}");
                 MessageBox.Show($"Failed to initialize Analytics page: {ex.Message}", "Init Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void OnVmPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(AnalyticsViewModel.BarangayData))
+                HookBarangayCollection();
+
+            ScheduleRedraw();
+        }
+
+        private void HookBarangayCollection()
+        {
+            var current = (object)_vm.BarangayData as INotifyCollectionChanged;
+            if (ReferenceEquals(current, _hookedBarangay))
+                return;
+
+            if (_hookedBarangay != null)
+                _hookedBarangay.CollectionChanged -= OnBarangayCollectionChanged;
+
+            _hookedBarangay = current;
+
+            if (_hookedBarangay != null)
+                _hookedBarangay.CollectionChanged += OnBarangayCollectionChanged;
+        }
+
+        private void OnBarangayCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            ScheduleRedraw();
+        }
+
+        private void HookChartCanvases()
+        {
+            foreach (var name in new[] { "CvBarangay", "CvSexDonut", "CvAgeBars", "CvEmployDonut", "CvCivilBars" })
+            {
+                if (FindName(name) is Canvas canvas)
+                {
+                    canvas.SizeChanged -= Canvas_SizeChanged;
+                    canvas.SizeChanged += Canvas_SizeChanged;
+                }
+            }
+        }
+
+        private void Canvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            ScheduleRedraw();
+        }
+
+        private void ScheduleRedraw()
+        {
+            if (_redrawPending)
+                return;
+
+            _redrawPending = true;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                _redrawPending = false;
+                RedrawCharts();
+            }), DispatcherPriority.Background);
         }
 
         private void InitFilterControls()
@@ -83,44 +139,32 @@ namespace SOLUM_UI
                 if (cmbYearlyYear != null && cmbYearlyYear.Items.Count == 0)
                 {
                     for (int y = currentYear + 1; y >= 2020; y--)
-                    {
                         cmbYearlyYear.Items.Add(y);
-                    }
                     cmbYearlyYear.SelectedItem = currentYear;
                 }
 
                 if (cmbMonthlyYear != null && cmbMonthlyYear.Items.Count == 0)
                 {
                     for (int y = currentYear + 1; y >= 2020; y--)
-                    {
                         cmbMonthlyYear.Items.Add(y);
-                    }
                     cmbMonthlyYear.SelectedItem = currentYear;
                 }
 
                 if (cmbQuarterlyYear != null && cmbQuarterlyYear.Items.Count == 0)
                 {
                     for (int y = currentYear + 1; y >= 2020; y--)
-                    {
                         cmbQuarterlyYear.Items.Add(y);
-                    }
                     cmbQuarterlyYear.SelectedItem = currentYear;
                 }
 
                 if (cmbMonthlyMonth != null && cmbMonthlyMonth.SelectedIndex < 0)
-                {
                     cmbMonthlyMonth.SelectedIndex = currentMonth - 1;
-                }
 
                 if (cmbQuarterlyQuarter != null && cmbQuarterlyQuarter.SelectedIndex < 0)
-                {
                     cmbQuarterlyQuarter.SelectedIndex = currentQuarter;
-                }
 
                 if (cmbPeriodType != null && cmbPeriodType.SelectedIndex < 0)
-                {
-                    cmbPeriodType.SelectedIndex = 0; // Default: By Monthly
-                }
+                    cmbPeriodType.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -144,42 +188,27 @@ namespace SOLUM_UI
             {
                 var cmbPeriodType = this.FindName("CmbPeriodType") as ComboBox;
                 if (cmbPeriodType?.SelectedItem is ComboBoxItem periodItem && periodItem.Tag is string tag)
-                {
                     _vm.FilterType = tag;
-                }
 
                 var cmbYearlyYear = this.FindName("CmbYearlyYear") as ComboBox;
-                if (cmbYearlyYear?.SelectedItem is int yYear)
-                {
-                    if (_vm.FilterType == "Yearly")
-                        _vm.SelectedYear = yYear;
-                }
+                if (cmbYearlyYear?.SelectedItem is int yYear && _vm.FilterType == "Yearly")
+                    _vm.SelectedYear = yYear;
 
                 var cmbMonthlyYear = this.FindName("CmbMonthlyYear") as ComboBox;
-                if (cmbMonthlyYear?.SelectedItem is int mYear)
-                {
-                    if (_vm.FilterType == "Monthly")
-                        _vm.SelectedYear = mYear;
-                }
+                if (cmbMonthlyYear?.SelectedItem is int mYear && _vm.FilterType == "Monthly")
+                    _vm.SelectedYear = mYear;
 
                 var cmbMonthlyMonth = this.FindName("CmbMonthlyMonth") as ComboBox;
                 if (cmbMonthlyMonth != null && cmbMonthlyMonth.SelectedIndex >= 0)
-                {
                     _vm.SelectedMonth = cmbMonthlyMonth.SelectedIndex + 1;
-                }
 
                 var cmbQuarterlyYear = this.FindName("CmbQuarterlyYear") as ComboBox;
-                if (cmbQuarterlyYear?.SelectedItem is int qYear)
-                {
-                    if (_vm.FilterType == "Quarterly")
-                        _vm.SelectedYear = qYear;
-                }
+                if (cmbQuarterlyYear?.SelectedItem is int qYear && _vm.FilterType == "Quarterly")
+                    _vm.SelectedYear = qYear;
 
                 var cmbQuarterlyQuarter = this.FindName("CmbQuarterlyQuarter") as ComboBox;
                 if (cmbQuarterlyQuarter != null && cmbQuarterlyQuarter.SelectedIndex >= 0)
-                {
                     _vm.SelectedQuarter = cmbQuarterlyQuarter.SelectedIndex + 1;
-                }
             }
             catch (Exception ex)
             {
@@ -194,7 +223,6 @@ namespace SOLUM_UI
                 if (_vm == null) return;
                 _vm.IsLoading = true;
 
-                // Sync current UI selections into _vm
                 SyncFilterValuesFromUi();
                 _vm.UpdateActiveFilterSummary();
 
@@ -269,9 +297,6 @@ namespace SOLUM_UI
                         break;
                 }
 
-                System.Diagnostics.Debug.WriteLine($"→ FetchAndPopulateAnalyticsAsync: type={queryBreakdownType}, year={targetYear}, month={targetMonth}, quarter={queryQuarter}, barangay={barangay}");
-
-                // Concurrently fetch all 3 endpoints
                 var dashboardTask = AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
                 var monthlyTask = AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(targetYear, targetMonth, barangay, start, end);
                 var breakdownTask = AnalyticsApiService.Instance.GetBarangayBreakdownAsync(
@@ -291,16 +316,12 @@ namespace SOLUM_UI
 
                 var dashRes = await dashboardTask;
                 if (dashRes != null && dashRes.Succeeded && dashRes.Data != null)
-                {
                     _vm.LoadDashboardDto(dashRes.Data);
-                    System.Diagnostics.Debug.WriteLine($"✓ Dashboard KPIs loaded: TotalRegistered={dashRes.Data.TotalRegistered}, Active={dashRes.Data.ActiveRecords}");
-                }
 
                 var monthRes = await monthlyTask;
                 if (monthRes != null && monthRes.Succeeded && monthRes.Data != null)
                 {
                     _vm.LoadFromAnalyticsDto(monthRes.Data);
-                    System.Diagnostics.Debug.WriteLine($"✓ Monthly data loaded: TotalSoloParents={monthRes.Data.TotalSoloParents}");
                 }
                 else if (showErrors && monthRes != null && !monthRes.Succeeded)
                 {
@@ -312,20 +333,17 @@ namespace SOLUM_UI
 
                 var breakdownRes = await breakdownTask;
                 if (breakdownRes != null && breakdownRes.Succeeded && breakdownRes.Data != null)
-                {
                     _vm.LoadBarangayBreakdownDto(breakdownRes.Data);
-                    System.Diagnostics.Debug.WriteLine($"✓ Barangay breakdown loaded: {breakdownRes.Data.Barangays?.Count ?? 0} barangays");
-                }
 
                 _vm.UpdateActiveFilterSummary();
+                HookBarangayCollection();
+                ScheduleRedraw();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Analytics load error: {ex.Message}\n{ex.StackTrace}");
+                System.Diagnostics.Debug.WriteLine($"Analytics load error: {ex.Message}\n{ex.StackTrace}");
                 if (showErrors)
-                {
                     MessageBox.Show($"Analytics load error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
             }
             finally
             {
@@ -333,61 +351,385 @@ namespace SOLUM_UI
             }
         }
 
-        /// <summary>
-        /// Suppresses the default "Select a date" watermark in all DatePickerTextBox controls
-        /// to avoid overlapping with our custom MM/DD/YYYY placeholder.
-        /// </summary>
-        /// <summary>
-        /// Watermark suppression is now handled via XAML ControlTemplate in BrandDatePicker style.
-        /// This method is kept for compatibility but no longer needed.
-        /// </summary>
-        private void SuppressDatePickerWatermarks()
+        private double N(string propertyName)
         {
-            // XAML template now properly suppresses native watermark by wrapping ScrollViewer in Grid
-            // This prevents rendering of PART_Watermark element, so no code-behind suppression needed
-        }
-
-        /// <summary>
-        /// Helper method to find all visual children of a given type.
-        /// </summary>
-        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject obj) where T : DependencyObject
-        {
-            if (obj != null)
+            try
             {
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
-                {
-                    DependencyObject child = VisualTreeHelper.GetChild(obj, i);
-                    if (child is T typed)
-                    {
-                        yield return typed;
-                    }
-                    foreach (T childOfChild in FindVisualChildren<T>(child))
-                    {
-                        yield return childOfChild;
-                    }
-                }
+                var prop = _vm?.GetType().GetProperty(propertyName);
+                if (prop == null)
+                    return 0;
+                return Convert.ToDouble(prop.GetValue(_vm));
+            }
+            catch
+            {
+                return 0;
             }
         }
 
-        private void PreviousBarangayButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        private static Brush B(string hex)
+        {
+            return (Brush)new BrushConverter().ConvertFromString(hex);
+        }
+
+        private static List<(string Label, double Value)> ReadSeries(IEnumerable source)
+        {
+            var list = new List<(string Label, double Value)>();
+            if (source == null)
+                return list;
+
+            foreach (var item in source)
+            {
+                if (item == null)
+                    continue;
+
+                var type = item.GetType();
+                object labelObj = type.GetProperty("DisplayLabel")?.GetValue(item) ?? type.GetProperty("Label")?.GetValue(item);
+                string label = Convert.ToString(labelObj) ?? string.Empty;
+
+                double value = 0;
+                var valueProp = type.GetProperty("Value");
+                if (valueProp != null)
+                {
+                    try { value = Convert.ToDouble(valueProp.GetValue(item)); }
+                    catch { value = 0; }
+                }
+
+                list.Add((label, value));
+            }
+
+            return list;
+        }
+
+        private static TextBlock MakeText(string text, double size, Brush brush, FontWeight weight)
+        {
+            var tb = new TextBlock
+            {
+                Text = text,
+                FontSize = size,
+                Foreground = brush,
+                FontWeight = weight,
+                FontFamily = new FontFamily("Segoe UI")
+            };
+            tb.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            return tb;
+        }
+
+        private void RedrawCharts()
+        {
+            if (_vm == null)
+                return;
+
+            try
+            {
+                DrawLineChart(FindName("CvBarangay") as Canvas, ReadSeries((object)_vm.BarangayData as IEnumerable));
+
+                double female = N("FemaleCount");
+                double male = N("MaleCount");
+                DrawDonut(FindName("CvSexDonut") as Canvas, 26, female + male, new List<(double, Brush)>
+                {
+                    (female, B("#7D2245")),
+                    (male, B("#E9B9C8"))
+                });
+
+                var ageBars = new List<(string, double, Brush)>();
+                for (int i = 0; i < AgeLabels.Length; i++)
+                    ageBars.Add((AgeLabels[i], N(AgeProps[i]), B(AgeColors[i])));
+                DrawBars(FindName("CvAgeBars") as Canvas, ageBars);
+
+                double employed = N("EmployedPercent");
+                double selfEmployed = N("SelfEmployedPercent");
+                double notEmployed = N("NotEmployedPercent");
+                DrawDonut(FindName("CvEmployDonut") as Canvas, 24, Math.Max(100, employed + selfEmployed + notEmployed), new List<(double, Brush)>
+                {
+                    (employed, B("#7D2245")),
+                    (selfEmployed, B("#E3BF2E")),
+                    (notEmployed, B("#A89AA0"))
+                });
+
+                DrawBars(FindName("CvCivilBars") as Canvas, new List<(string, double, Brush)>
+                {
+                    ("Single", N("SingleCount"), B("#7D2245")),
+                    ("Married", N("MarriedCount"), B("#E3BF2E")),
+                    ("Widowed", N("WidowedCount"), B("#7DBB57")),
+                    ("Separated", N("SeparatedCount"), B("#4FB0C6")),
+                    ("Annulled", N("AnnulledCount"), B("#A89AA0"))
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Redraw error: {ex}");
+            }
+        }
+
+        private void DrawLineChart(Canvas c, List<(string Label, double Value)> data)
+        {
+            if (c == null)
+                return;
+
+            c.Children.Clear();
+
+            double w = c.ActualWidth;
+            double h = c.ActualHeight;
+            if (w <= 0 || h <= 0)
+                return;
+
+            if (data.Count == 0)
+            {
+                var empty = MakeText("No barangay data for the selected filter", 12, B("#8A6A75"), FontWeights.Normal);
+                Canvas.SetLeft(empty, (w - empty.DesiredSize.Width) / 2);
+                Canvas.SetTop(empty, (h - empty.DesiredSize.Height) / 2);
+                c.Children.Add(empty);
+                return;
+            }
+
+            const double left = 44, right = 20, top = 14, bottom = 78;
+            double pw = w - left - right;
+            double ph = h - top - bottom;
+            if (pw <= 0 || ph <= 0)
+                return;
+
+            const int ticks = 4;
+            double max = data.Max(d => d.Value);
+            double niceMax = Math.Max(ticks, Math.Ceiling(max / ticks) * ticks);
+
+            var gridBrush = B("#EEE3E7");
+            var textBrush = B("#8A6A75");
+            var maroon = B("#7D2245");
+
+            for (int i = 0; i <= ticks; i++)
+            {
+                double y = top + ph - ph * i / ticks;
+                c.Children.Add(new Line { X1 = left, X2 = left + pw, Y1 = y, Y2 = y, Stroke = gridBrush, StrokeThickness = 1 });
+
+                var lbl = MakeText(((int)Math.Round(niceMax * i / ticks)).ToString(), 10, textBrush, FontWeights.Normal);
+                Canvas.SetLeft(lbl, left - 8 - lbl.DesiredSize.Width);
+                Canvas.SetTop(lbl, y - lbl.DesiredSize.Height / 2);
+                c.Children.Add(lbl);
+            }
+
+            int n = data.Count;
+            var positions = new List<Point>();
+            for (int i = 0; i < n; i++)
+            {
+                double x = n == 1 ? left + pw / 2 : left + pw * i / (n - 1);
+                double y = top + ph - ph * (data[i].Value / niceMax);
+                positions.Add(new Point(x, y));
+            }
+
+            var area = new PointCollection { new Point(positions[0].X, top + ph) };
+            foreach (var p in positions)
+                area.Add(p);
+            area.Add(new Point(positions[n - 1].X, top + ph));
+
+            c.Children.Add(new Polygon
+            {
+                Points = area,
+                Fill = new SolidColorBrush(Color.FromArgb(40, 0x7D, 0x22, 0x45))
+            });
+
+            c.Children.Add(new Polyline
+            {
+                Points = new PointCollection(positions),
+                Stroke = maroon,
+                StrokeThickness = 2.5,
+                StrokeLineJoin = PenLineJoin.Round
+            });
+
+            for (int i = 0; i < n; i++)
+            {
+                var dot = new Ellipse
+                {
+                    Width = 10,
+                    Height = 10,
+                    Fill = Brushes.White,
+                    Stroke = maroon,
+                    StrokeThickness = 2,
+                    Cursor = System.Windows.Input.Cursors.Hand,
+                    ToolTip = $"{data[i].Label}: {data[i].Value:N0} solo parents"
+                };
+                Canvas.SetLeft(dot, positions[i].X - 5);
+                Canvas.SetTop(dot, positions[i].Y - 5);
+                c.Children.Add(dot);
+
+                var valueLabel = MakeText(data[i].Value.ToString("N0"), 10, maroon, FontWeights.SemiBold);
+                Canvas.SetLeft(valueLabel, positions[i].X - valueLabel.DesiredSize.Width / 2);
+                Canvas.SetTop(valueLabel, positions[i].Y - valueLabel.DesiredSize.Height - 8);
+                c.Children.Add(valueLabel);
+
+                string text = data[i].Label.Length > 18 ? data[i].Label.Substring(0, 17) + "…" : data[i].Label;
+                var axis = MakeText(text, 10, textBrush, FontWeights.Normal);
+                axis.RenderTransformOrigin = new Point(1, 0);
+                axis.RenderTransform = new RotateTransform(-40);
+                Canvas.SetLeft(axis, positions[i].X - axis.DesiredSize.Width + 4);
+                Canvas.SetTop(axis, top + ph + 12);
+                c.Children.Add(axis);
+            }
+        }
+
+        private void DrawBars(Canvas c, List<(string Label, double Value, Brush Fill)> items)
+        {
+            if (c == null)
+                return;
+
+            c.Children.Clear();
+
+            double w = c.ActualWidth;
+            double h = c.ActualHeight;
+            if (w <= 0 || h <= 0 || items.Count == 0)
+                return;
+
+            const double top = 26, bottom = 30, side = 8;
+            double pw = w - side * 2;
+            double ph = h - top - bottom;
+            if (pw <= 0 || ph <= 0)
+                return;
+
+            double max = items.Max(i => i.Value);
+            if (max <= 0)
+                max = 1;
+
+            double slot = pw / items.Count;
+            double barW = Math.Min(64, slot * 0.6);
+            var textBrush = B("#8A6A75");
+            var darkBrush = B("#111827");
+
+            c.Children.Add(new Line
+            {
+                X1 = side,
+                X2 = side + pw,
+                Y1 = top + ph,
+                Y2 = top + ph,
+                Stroke = B("#EEE3E7"),
+                StrokeThickness = 1
+            });
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                double barH = items[i].Value > 0 ? Math.Max(3, ph * items[i].Value / max) : 2;
+                double x = side + slot * i + (slot - barW) / 2;
+                double y = top + ph - barH;
+
+                var bar = new Border
+                {
+                    Width = barW,
+                    Height = barH,
+                    Background = items[i].Fill,
+                    CornerRadius = new CornerRadius(6, 6, 0, 0),
+                    ToolTip = $"{items[i].Label}: {items[i].Value:N0}"
+                };
+                Canvas.SetLeft(bar, x);
+                Canvas.SetTop(bar, y);
+                c.Children.Add(bar);
+
+                var val = MakeText(items[i].Value.ToString("N0"), 12, darkBrush, FontWeights.Bold);
+                Canvas.SetLeft(val, x + (barW - val.DesiredSize.Width) / 2);
+                Canvas.SetTop(val, y - val.DesiredSize.Height - 3);
+                c.Children.Add(val);
+
+                var lbl = MakeText(items[i].Label, 10, textBrush, FontWeights.Normal);
+                Canvas.SetLeft(lbl, side + slot * i + (slot - lbl.DesiredSize.Width) / 2);
+                Canvas.SetTop(lbl, top + ph + 8);
+                c.Children.Add(lbl);
+            }
+        }
+
+        private void DrawDonut(Canvas c, double thickness, double total, List<(double Value, Brush Fill)> parts)
+        {
+            if (c == null)
+                return;
+
+            c.Children.Clear();
+
+            double size = Math.Min(c.ActualWidth, c.ActualHeight);
+            if (size <= 0)
+                return;
+
+            double radius = (size - thickness) / 2;
+            double cx = c.ActualWidth / 2;
+            double cy = c.ActualHeight / 2;
+
+            var track = new Ellipse
+            {
+                Width = radius * 2,
+                Height = radius * 2,
+                Stroke = B("#F5ECF0"),
+                StrokeThickness = thickness,
+                Fill = Brushes.Transparent
+            };
+            Canvas.SetLeft(track, cx - radius);
+            Canvas.SetTop(track, cy - radius);
+            c.Children.Add(track);
+
+            if (total <= 0)
+                return;
+
+            double angle = -90;
+            foreach (var part in parts)
+            {
+                double value = Math.Max(0, part.Value);
+                if (value <= 0)
+                    continue;
+
+                double sweep = Math.Min(360, value / total * 360);
+
+                if (sweep >= 359.9)
+                {
+                    var ring = new Ellipse
+                    {
+                        Width = radius * 2,
+                        Height = radius * 2,
+                        Stroke = part.Fill,
+                        StrokeThickness = thickness,
+                        Fill = Brushes.Transparent
+                    };
+                    Canvas.SetLeft(ring, cx - radius);
+                    Canvas.SetTop(ring, cy - radius);
+                    c.Children.Add(ring);
+                    return;
+                }
+
+                double a0 = angle * Math.PI / 180;
+                double a1 = (angle + sweep) * Math.PI / 180;
+                var startPoint = new Point(cx + radius * Math.Cos(a0), cy + radius * Math.Sin(a0));
+                var endPoint = new Point(cx + radius * Math.Cos(a1), cy + radius * Math.Sin(a1));
+
+                var figure = new PathFigure { StartPoint = startPoint, IsClosed = false };
+                figure.Segments.Add(new ArcSegment(endPoint, new Size(radius, radius), 0, sweep > 180, SweepDirection.Clockwise, true));
+                var geometry = new PathGeometry();
+                geometry.Figures.Add(figure);
+
+                c.Children.Add(new System.Windows.Shapes.Path
+                {
+                    Data = geometry,
+                    Stroke = part.Fill,
+                    StrokeThickness = thickness,
+                    StrokeStartLineCap = PenLineCap.Flat,
+                    StrokeEndLineCap = PenLineCap.Flat
+                });
+
+                angle += sweep;
+            }
+        }
+
+        private void PreviousBarangayButton_Click(object sender, RoutedEventArgs e)
         {
             _vm.PreviousBarangayPage();
+            ScheduleRedraw();
         }
 
-        private void NextBarangayButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void NextBarangayButton_Click(object sender, RoutedEventArgs e)
         {
             _vm.NextBarangayPage();
+            ScheduleRedraw();
         }
 
-        private void FilterDrop_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void FilterDrop_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 var overlay = this.FindName("FilterModalOverlay") as Grid;
                 if (overlay != null)
-                {
                     overlay.Visibility = (overlay.Visibility == Visibility.Visible) ? Visibility.Collapsed : Visibility.Visible;
-                }
             }
             catch (Exception ex)
             {
@@ -410,7 +752,7 @@ namespace SOLUM_UI
             e.Handled = true;
         }
 
-        private void FilterModalClose_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void FilterModalClose_Click(object sender, RoutedEventArgs e)
         {
             var overlay = this.FindName("FilterModalOverlay") as Grid;
             if (overlay != null)
@@ -419,14 +761,12 @@ namespace SOLUM_UI
 
         private void FilterCombo_Changed(object sender, SelectionChangedEventArgs e)
         {
-            // Guard: event can fire during InitializeComponent() before _vm is assigned
             try
             {
                 var cmbFilterBarangay = this.FindName("CmbFilterBarangay") as ComboBox;
                 if (_vm == null || cmbFilterBarangay == null || cmbFilterBarangay.SelectedItem == null)
                     return;
 
-                // Extract Content property from ComboBoxItem instead of calling ToString()
                 string barangay = "ALL";
 
                 if (cmbFilterBarangay.SelectedItem is ComboBoxItem comboItem && comboItem.Content is string content)
@@ -434,7 +774,6 @@ namespace SOLUM_UI
                 else if (cmbFilterBarangay.SelectedItem is string strItem)
                     barangay = strItem;
 
-                // Normalize "All" → "ALL"
                 if (barangay.Equals("All", StringComparison.OrdinalIgnoreCase))
                     barangay = "ALL";
 
@@ -469,9 +808,7 @@ namespace SOLUM_UI
                 pnlCustomRange.Visibility = (tag == "CustomRange") ? Visibility.Visible : Visibility.Collapsed;
 
                 if (_vm != null)
-                {
                     _vm.FilterType = tag;
-                }
             }
             catch (Exception ex)
             {
@@ -479,13 +816,13 @@ namespace SOLUM_UI
             }
         }
 
-        private void FilterReset_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void FilterReset_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 var cmbPeriodType = this.FindName("CmbPeriodType") as ComboBox;
                 if (cmbPeriodType != null)
-                    cmbPeriodType.SelectedIndex = 0; // By Monthly
+                    cmbPeriodType.SelectedIndex = 0;
 
                 var cmbYearlyYear = this.FindName("CmbYearlyYear") as ComboBox;
                 if (cmbYearlyYear != null)
@@ -507,12 +844,10 @@ namespace SOLUM_UI
                 if (cmbQuarterlyQuarter != null)
                     cmbQuarterlyQuarter.SelectedIndex = (DateTime.Today.Month - 1) / 3;
 
-                // Reset barangay combo
                 var cmbFilterBarangay = this.FindName("CmbFilterBarangay") as ComboBox;
                 if (cmbFilterBarangay != null)
                     cmbFilterBarangay.SelectedIndex = 0;
 
-                // Reset ViewModel
                 if (_vm != null)
                 {
                     _vm.FilterType = "Monthly";
@@ -537,17 +872,14 @@ namespace SOLUM_UI
             }
         }
 
-        private void FilterApply_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void FilterApply_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 var overlay = this.FindName("FilterModalOverlay") as Grid;
                 if (overlay != null)
-                {
                     overlay.Visibility = Visibility.Collapsed;
-                }
 
-                // Apply filters - reload data with selected filters
                 _ = ApplyFiltersAsync();
             }
             catch (Exception ex)
@@ -556,19 +888,17 @@ namespace SOLUM_UI
             }
         }
 
-        private void ExportBtn_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void ExportBtn_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Get current filter values
                 string selectedBarangay = _vm?.SelectedBarangay ?? "ALL";
                 if (string.IsNullOrWhiteSpace(selectedBarangay))
                     selectedBarangay = "ALL";
 
-                // Get analytics data from the view model
                 if (_vm == null || _vm.AnalyticsData == null)
                 {
-                    System.Windows.MessageBox.Show(
+                    MessageBox.Show(
                         "No analytics data loaded. Please refresh the data first.",
                         "No Data",
                         MessageBoxButton.OK,
@@ -576,22 +906,19 @@ namespace SOLUM_UI
                     return;
                 }
 
-                // Open file save dialog
                 var saveDialog = new System.Windows.Forms.SaveFileDialog
                 {
                     Filter = "Excel Files (*.xlsx)|*.xlsx|All Files (*.*)|*.*",
                     FileName = $"Solo_Parents_Analytics_{DateTime.Today:yyyyMMdd}.xlsx",
-                    InitialDirectory = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop)
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
                 };
 
                 if (saveDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    // Get municipality and region (can be enhanced to be dynamic)
                     string municipality = selectedBarangay != "ALL" ? selectedBarangay : "Biñan City";
                     string region = "CALABARZON (IV-A)";
                     string focalPersonName = MainWindow.FullName;
 
-                    // Export using the new service
                     AnalyticsExcelExportService.ExportAnalyticsReport(
                         saveDialog.FileName,
                         _vm.AnalyticsData,
@@ -604,14 +931,13 @@ namespace SOLUM_UI
                         $"Analytics report exported to:\n{System.IO.Path.GetFileName(saveDialog.FileName)}",
                         ToastType.Success);
 
-                    // Log the export action
                     Services.AuditLogService.Instance.LogSystem(
                         $"Analytics report exported for {municipality} by {focalPersonName}");
                 }
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(
+                MessageBox.Show(
                     $"Export failed: {ex.Message}",
                     "Export Error",
                     MessageBoxButton.OK,
@@ -621,127 +947,7 @@ namespace SOLUM_UI
             }
         }
 
-        private MonthlyAnalyticsDto BuildMonthlyAnalyticsFromViewModel()
-        {
-            // Create analytics DTO from current ViewModel data
-            var dto = new MonthlyAnalyticsDto
-            {
-                Year = DateTime.Now.Year,
-                Month = DateTime.Now.Month,
-                Barangay = "ALL",
-                TotalSoloParents = _vm.TotalSoloParents,
-                NewRegistrations = 0,  // TODO: Get from ViewModel if available
-                Renewals = 0,           // TODO: Get from ViewModel if available
-                Sex = new System.Collections.Generic.Dictionary<string, int>
-                {
-                    { "Female", _vm.FemaleCount },
-                    { "Male", _vm.MaleCount }
-                },
-                CivilStatus = new System.Collections.Generic.Dictionary<string, int>
-                {
-                    { "Single", _vm.SingleCount },
-                    { "Married", _vm.MarriedCount },
-                    { "Widowed", _vm.WidowedCount },
-                    { "Separated", _vm.SeparatedCount },
-                    { "Annulled", _vm.AnnulledCount }
-                },
-                EmploymentStatus = new System.Collections.Generic.Dictionary<string, int>(),
-                AgeBrackets = new System.Collections.Generic.Dictionary<string, int>(),
-                MonthlyIncomeBrackets = new System.Collections.Generic.Dictionary<string, int>(),
-                DependentsAgeBrackets = new System.Collections.Generic.Dictionary<string, int>
-                {
-                    { "6_AND_BELOW", _vm.AgeGroup0_5 },
-                    { "7_TO_22", _vm.AgeGroup6_12 },
-                    { "22_AND_ABOVE", _vm.AgeGroup13_17 }
-                },
-                Categories = new System.Collections.Generic.Dictionary<string, int>(),
-                Lgbt = new System.Collections.Generic.Dictionary<string, int>
-                {
-                    { "Yes", _vm.LgbtCount },
-                    { "No", _vm.TotalSoloParents - _vm.LgbtCount }
-                },
-                PantawidBeneficiary = new System.Collections.Generic.Dictionary<string, int>
-                {
-                    { "Yes", _vm.PantawidBeneficiaryCount },
-                    { "No", _vm.TotalSoloParents - _vm.PantawidBeneficiaryCount }
-                },
-                Indigenous = new System.Collections.Generic.Dictionary<string, int>()
-            };
-
-            // Populate employment from ViewModel text values
-            if (!string.IsNullOrEmpty(_vm.EmployedText))
-            {
-                var parts = _vm.EmployedText.Split('(');
-                if (parts.Length > 0 && int.TryParse(parts[0].Trim(), out int employed))
-                    dto.EmploymentStatus["employed"] = employed;
-            }
-            if (!string.IsNullOrEmpty(_vm.SelfEmployedText))
-            {
-                var parts = _vm.SelfEmployedText.Split('(');
-                if (parts.Length > 0 && int.TryParse(parts[0].Trim(), out int selfEmp))
-                    dto.EmploymentStatus["self_employed"] = selfEmp;
-            }
-            if (!string.IsNullOrEmpty(_vm.NotEmployedText))
-            {
-                var parts = _vm.NotEmployedText.Split('(');
-                if (parts.Length > 0 && int.TryParse(parts[0].Trim(), out int notEmp))
-                    dto.EmploymentStatus["not_employed"] = notEmp;
-            }
-
-            // Populate from observable collections if available
-            if (_vm.EmploymentStatusData != null && _vm.EmploymentStatusData.Count > 0)
-            {
-                var empLabels = new[] { "employed", "self_employed", "not_employed" };
-                int i = 0;
-                foreach (var item in _vm.EmploymentStatusData)
-                {
-                    if (i < empLabels.Length)
-                        dto.EmploymentStatus[empLabels[i]] = item.Value;
-                    i++;
-                }
-            }
-
-            if (_vm.AgeGroupData != null && _vm.AgeGroupData.Count > 0)
-            {
-                var ageKeys = new[] { "19_AND_BELOW", "20_39", "40_59", "60_AND_ABOVE" };
-                int i = 0;
-                foreach (var item in _vm.AgeGroupData)
-                {
-                    if (i < ageKeys.Length)
-                        dto.AgeBrackets[ageKeys[i]] = item.Value;
-                    i++;
-                }
-            }
-
-            if (_vm.IncomeBracketData != null && _vm.IncomeBracketData.Count > 0)
-            {
-                var incomeKeys = new[] { "BELOW_MINIMUM_WAGE", "MIN_WAGE_PLUS1_TO_20833", "20834_AND_ABOVE" };
-                int i = 0;
-                foreach (var item in _vm.IncomeBracketData)
-                {
-                    if (i < incomeKeys.Length)
-                        dto.MonthlyIncomeBrackets[incomeKeys[i]] = item.Value;
-                    i++;
-                }
-            }
-
-            // Populate categories from BarangayData or TopCasesData if representing categories
-            if (_vm.TopCasesData != null && _vm.TopCasesData.Count > 0)
-            {
-                int i = 0;
-                var categoryKeys = new[] { "A1", "A2", "A3", "A4", "A5", "A6", "A7", "B", "C", "D", "E", "F" };
-                foreach (var item in _vm.TopCasesData)
-                {
-                    if (i < categoryKeys.Length)
-                        dto.Categories[categoryKeys[i]] = item.Value;
-                    i++;
-                }
-            }
-
-            return dto;
-        }
-
-        private async void RefreshBtn_Click(object sender, System.Windows.RoutedEventArgs e)
+        private async void RefreshBtn_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -749,38 +955,32 @@ namespace SOLUM_UI
                 if (refreshBtn == null)
                     return;
 
-                // Disable button and show loader
                 refreshBtn.IsEnabled = false;
-                
-                // Find the loader and icon elements in the button content
+
                 if (refreshBtn.Content is Grid contentGrid)
                 {
                     var refreshIcon = contentGrid.Children.OfType<System.Windows.Shapes.Path>().FirstOrDefault();
                     var loadingSpinner = contentGrid.Children.OfType<StackPanel>().FirstOrDefault();
-                    
+
                     if (refreshIcon != null)
-                        refreshIcon.Visibility = System.Windows.Visibility.Collapsed;
+                        refreshIcon.Visibility = Visibility.Collapsed;
                     if (loadingSpinner != null)
-                        loadingSpinner.Visibility = System.Windows.Visibility.Visible;
+                        loadingSpinner.Visibility = Visibility.Visible;
                 }
-                
-                // Refresh analytics data
+
                 await LoadDataAsync();
-                
-                // Show success notification (only if no error message was already shown)
+
                 MessageBox.Show("Analytics data refreshed successfully.", "Refresh Complete",
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                // Show error notification
                 MessageBox.Show($"Refresh failed: {ex.Message}", "Refresh Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 System.Diagnostics.Debug.WriteLine($"Refresh error: {ex}");
             }
             finally
             {
-                // Restore icon and hide loader
                 try
                 {
                     var refreshBtn = this.FindName("RefreshBtn") as Button;
@@ -788,12 +988,12 @@ namespace SOLUM_UI
                     {
                         var refreshIcon = contentGrid.Children.OfType<System.Windows.Shapes.Path>().FirstOrDefault();
                         var loadingSpinner = contentGrid.Children.OfType<StackPanel>().FirstOrDefault();
-                        
+
                         if (refreshIcon != null)
-                            refreshIcon.Visibility = System.Windows.Visibility.Visible;
+                            refreshIcon.Visibility = Visibility.Visible;
                         if (loadingSpinner != null)
-                            loadingSpinner.Visibility = System.Windows.Visibility.Collapsed;
-                        
+                            loadingSpinner.Visibility = Visibility.Collapsed;
+
                         refreshBtn.IsEnabled = true;
                     }
                 }

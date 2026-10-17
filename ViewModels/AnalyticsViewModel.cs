@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using SOLUM_UI.Models.Api;
 
@@ -72,6 +73,21 @@ namespace SOLUM_UI.ViewModels
         {
             get => _indigenousCount;
             set => SetProperty(ref _indigenousCount, value);
+        }
+
+        // Top Barangay Properties
+        private string _topBarangayName = string.Empty;
+        public string TopBarangayName
+        {
+            get => _topBarangayName;
+            set => SetProperty(ref _topBarangayName, value);
+        }
+
+        private int _topBarangayCount;
+        public int TopBarangayCount
+        {
+            get => _topBarangayCount;
+            set => SetProperty(ref _topBarangayCount, value);
         }
 
         // Dashboard Operational KPI Properties (from GET /api/Analytics/dashboard)
@@ -1041,6 +1057,26 @@ namespace SOLUM_UI.ViewModels
                 BarangayData.Add(AllBarangayData[i]);
             }
 
+            UpdateTopBarangay();
+        }
+
+        /// <summary>
+        /// Update top barangay name and count from AllBarangayData
+        /// </summary>
+        private void UpdateTopBarangay()
+        {
+            if (AllBarangayData.Count > 0)
+            {
+                var topBarangay = AllBarangayData[0];
+                TopBarangayName = topBarangay.Label;
+                TopBarangayCount = topBarangay.Value;
+            }
+            else
+            {
+                TopBarangayName = "No Data";
+                TopBarangayCount = 0;
+            }
+        }
             // Update navigation buttons
             HasPreviousBarangayPage = CurrentBarangayPage > 1;
             HasNextBarangayPage = CurrentBarangayPage < TotalBarangayPages;
@@ -1348,6 +1384,35 @@ namespace SOLUM_UI.ViewModels
                     Color = depColors[i]
                 });
             }
+
+            // Load Top Cases (Classification/Circumstance) with horizontal bar data
+            TopCasesData.Clear();
+            var categories = dto.Categories ?? new System.Collections.Generic.Dictionary<string, int>();
+            if (categories.Count > 0)
+            {
+                var sortedCases = categories.OrderByDescending(kvp => kvp.Value).ToList();
+                int maxCaseCount = sortedCases.Count > 0 ? sortedCases[0].Value : 1;
+                if (maxCaseCount <= 0) maxCaseCount = 1;
+
+                int rank = 1;
+                foreach (var kvp in sortedCases.Take(10))  // Limit to top 10 categories
+                {
+                    double barWidth = (kvp.Value * 1.0 / maxCaseCount) * 280;
+                    TopCasesData.Add(new AreaChartData
+                    {
+                        Label = kvp.Key,
+                        Value = kvp.Value,
+                        BarWidth = barWidth,
+                        Rank = rank,
+                        Color = rank == 1 ? "#7D2245" : "#E58BA3"  // Top is maroon, rest are rose
+                    });
+                    rank++;
+                }
+            }
+
+            // Get Top Barangay from AllBarangayData (set by LoadBarangayBreakdownDto)
+            // This will be populated when barangay data loads
+            UpdateTopBarangay();
 
             LastRefreshTime = DateTime.Now;
 
