@@ -336,68 +336,43 @@
 
         <Grid x:Name="LogoutLoadingOverlay" Visibility="Collapsed" Panel.ZIndex="60">
             <Rectangle Fill="#AA1A0A14"/>
-            <!-- Animated Hourglass with Sand Effect -->
+            <!-- Progress Bar with Percentage Indicator -->
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Canvas Width="48" Height="48" HorizontalAlignment="Center" Margin="0,0,0,12">
-                    <!-- Hourglass background -->
-                    <TextBlock Canvas.Left="0" Canvas.Top="0" Text="&#xE88E;" FontFamily="Segoe MDL2 Assets" FontSize="48"
-                               Foreground="#F4A0BC" HorizontalAlignment="Center"/>
+                <Grid Width="240" Margin="0,0,0,20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="8"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     
-                    <!-- Sand particles animation (top chamber) -->
-                    <Ellipse Canvas.Left="8" Canvas.Top="6" Width="3" Height="3" Fill="#FFD700" Opacity="0.8">
-                        <Ellipse.RenderTransform>
-                            <TranslateTransform x:Name="LogoutSand1"/>
-                        </Ellipse.RenderTransform>
-                        <Ellipse.Triggers>
-                            <EventTrigger RoutedEvent="Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard RepeatBehavior="Forever">
-                                        <DoubleAnimation Storyboard.TargetName="LogoutSand1" Storyboard.TargetProperty="(TranslateTransform.Y)"
-                                            From="0" To="28" Duration="0:0:1.5" BeginTime="0:0:0"/>
-                                        <DoubleAnimation Storyboard.TargetName="LogoutSand1" Storyboard.TargetProperty="(TranslateTransform.X)"
-                                            From="0" To="2" Duration="0:0:1.5" BeginTime="0:0:0"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Ellipse.Triggers>
-                    </Ellipse>
+                    <!-- Progress Bar Background -->
+                    <Border Grid.Row="0" Background="#E0E0E0" CornerRadius="8" Height="12">
+                        <!-- Progress Bar Fill -->
+                        <Border x:Name="LogoutProgressBarFill" Background="#702943" CornerRadius="8" 
+                                HorizontalAlignment="Left" Width="0" Height="12">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1"/>
+                            </Border.RenderTransform>
+                            <Border.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetName="LogoutProgressBarFill" 
+                                                           Storyboard.TargetProperty="(Border.Width)"
+                                                           From="0" To="240" Duration="0:0:3"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Border.Triggers>
+                        </Border>
+                    </Border>
                     
-                    <Ellipse Canvas.Left="14" Canvas.Top="8" Width="3" Height="3" Fill="#FFD700" Opacity="0.7">
-                        <Ellipse.RenderTransform>
-                            <TranslateTransform x:Name="LogoutSand2"/>
-                        </Ellipse.RenderTransform>
-                        <Ellipse.Triggers>
-                            <EventTrigger RoutedEvent="Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard RepeatBehavior="Forever">
-                                        <DoubleAnimation Storyboard.TargetName="LogoutSand2" Storyboard.TargetProperty="(TranslateTransform.Y)"
-                                            From="0" To="28" Duration="0:0:1.5" BeginTime="0:0:0.2"/>
-                                        <DoubleAnimation Storyboard.TargetName="LogoutSand2" Storyboard.TargetProperty="(TranslateTransform.X)"
-                                            From="0" To="-2" Duration="0:0:1.5" BeginTime="0:0:0.2"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Ellipse.Triggers>
-                    </Ellipse>
-                    
-                    <Ellipse Canvas.Left="20" Canvas.Top="10" Width="3" Height="3" Fill="#FFD700" Opacity="0.6">
-                        <Ellipse.RenderTransform>
-                            <TranslateTransform x:Name="LogoutSand3"/>
-                        </Ellipse.RenderTransform>
-                        <Ellipse.Triggers>
-                            <EventTrigger RoutedEvent="Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard RepeatBehavior="Forever">
-                                        <DoubleAnimation Storyboard.TargetName="LogoutSand3" Storyboard.TargetProperty="(TranslateTransform.Y)"
-                                            From="0" To="28" Duration="0:0:1.5" BeginTime="0:0:0.4"/>
-                                        <DoubleAnimation Storyboard.TargetName="LogoutSand3" Storyboard.TargetProperty="(TranslateTransform.X)"
-                                            From="0" To="1" Duration="0:0:1.5" BeginTime="0:0:0.4"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Ellipse.Triggers>
-                    </Ellipse>
-                </Canvas>
+                    <!-- Percentage Text -->
+                    <TextBlock Grid.Row="2" x:Name="LogoutProgressPercentage" Text="0%" 
+                              FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
+                              Foreground="#702943" HorizontalAlignment="Center"/>
+                </Grid>
+                
                 <TextBlock Text="Signing out..." FontFamily="Segoe UI" FontSize="12"
                            Foreground="White" HorizontalAlignment="Center"/>
             </StackPanel>
