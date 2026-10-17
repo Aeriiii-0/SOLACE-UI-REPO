@@ -647,6 +647,7 @@
                     </Border>
                 </Grid>
 
+                <!-- Solo parents per barangay -->
                 <Border Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}" Margin="0,0,0,20">
                     <StackPanel>
                         <Grid>
@@ -690,11 +691,95 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Top categories (left, tall) | Age group + Child dependents (right, stacked) -->
                 <Grid Margin="0,0,0,20">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="5*"/>
+                        <ColumnDefinition Width="6*"/>
                         <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="7*"/>
+                        <ColumnDefinition Width="5*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Top categories" Style="{StaticResource PanelTitle}"/>
+                            <TextBlock Grid.Row="1" Text="Leading classification and circumstance reasons" Style="{StaticResource PanelSubtitle}"/>
+                            <Canvas Grid.Row="2" x:Name="CvTopCategories" MinHeight="320" Background="Transparent"
+                                    VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Grid.Column="2">
+                        <Border Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}" Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock Text="Age group" Style="{StaticResource PanelTitle}"/>
+                                <TextBlock Text="Solo parents by statutory age bracket (RA 11861)" Style="{StaticResource PanelSubtitle}"/>
+                                <Canvas x:Name="CvAgeBars" Height="250" Background="Transparent"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
+                            <StackPanel>
+                                <TextBlock Text="Child dependents by age" Style="{StaticResource PanelTitle}"/>
+                                <TextBlock Text="Developmental stages and childcare resource planning" Style="{StaticResource PanelSubtitle}"/>
+
+                                <Grid Height="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
+                                        <Border Background="{StaticResource MaroonPrimary}" CornerRadius="8,8,0,0"
+                                                Height="{Binding AgeGroup0_5BarHeight}" MinHeight="3"/>
+                                        <TextBlock Text="{Binding AgeGroup0_5}" FontSize="15" FontWeight="Bold" FontFamily="Segoe UI"
+                                                   Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
+                                        <TextBlock Text="0–6 yrs" FontSize="11" FontWeight="SemiBold" FontFamily="Segoe UI"
+                                                   Foreground="{StaticResource TextDark}" TextAlignment="Center"/>
+                                        <TextBlock Text="Daycare age" FontSize="10" FontFamily="Segoe UI"
+                                                   Foreground="{StaticResource SecondaryText}" TextAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                                        <Border Background="{StaticResource RosePrimary}" CornerRadius="8,8,0,0"
+                                                Height="{Binding AgeGroup6_12BarHeight}" MinHeight="3"/>
+                                        <TextBlock Text="{Binding AgeGroup6_12}" FontSize="15" FontWeight="Bold" FontFamily="Segoe UI"
+                                                   Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
+                                        <TextBlock Text="7–21 yrs" FontSize="11" FontWeight="SemiBold" FontFamily="Segoe UI"
+                                                   Foreground="{StaticResource TextDark}" TextAlignment="Center"/>
+                                        <TextBlock Text="School and youth" FontSize="10" FontFamily="Segoe UI"
+                                                   Foreground="{StaticResource SecondaryText}" TextAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
+                                        <Border Background="{StaticResource GrayPrimary}" CornerRadius="8,8,0,0"
+                                                Height="{Binding AgeGroup13_17BarHeight}" MinHeight="3"/>
+                                        <TextBlock Text="{Binding AgeGroup13_17}" FontSize="15" FontWeight="Bold" FontFamily="Segoe UI"
+                                                   Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
+                                        <TextBlock Text="22+ yrs" FontSize="11" FontWeight="SemiBold" FontFamily="Segoe UI"
+                                                   Foreground="{StaticResource TextDark}" TextAlignment="Center"/>
+                                        <TextBlock Text="Adult / special" FontSize="10" FontFamily="Segoe UI"
+                                                   Foreground="{StaticResource SecondaryText}" TextAlignment="Center"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Sex | Employment status -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
@@ -702,68 +787,41 @@
                             <TextBlock Text="Sex" Style="{StaticResource PanelTitle}"/>
                             <TextBlock Text="Distribution of solo parents" Style="{StaticResource PanelSubtitle}"/>
 
-                            <Grid Width="170" Height="170" HorizontalAlignment="Center" Margin="0,4,0,16">
+                            <!-- Donut with total in center -->
+                            <Grid Width="170" Height="170" HorizontalAlignment="Center" Margin="0,4,0,18">
                                 <Canvas x:Name="CvSexDonut" Width="170" Height="170"/>
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock FontSize="26" FontWeight="Bold" FontFamily="Segoe UI"
-                                               Foreground="{StaticResource MaroonPrimary}" TextAlignment="Center">
-                                        <Run Text="{Binding FemaleCount, Mode=OneWay}"/>
-                                    </TextBlock>
-                                    <TextBlock FontSize="11" FontFamily="Segoe UI"
-                                               Foreground="{StaticResource SecondaryText}" TextAlignment="Center">
-                                        <Run Text="Female ("/><Run Text="{Binding FemalePercent, StringFormat=F1, Mode=OneWay}"/><Run Text="%)"/>
-                                    </TextBlock>
+                                    <TextBlock Text="{Binding TotalSoloParents}" FontSize="28" FontWeight="Bold" FontFamily="Segoe UI"
+                                               Foreground="{StaticResource TextDark}" TextAlignment="Center"/>
+                                    <TextBlock Text="total" FontSize="10" FontFamily="Segoe UI"
+                                               Foreground="{StaticResource SecondaryText}" TextAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
 
-                            <StackPanel HorizontalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                    <Border Width="10" Height="10" CornerRadius="2" Background="#7D2245" VerticalAlignment="Center"/>
-                                    <TextBlock FontSize="11" FontFamily="Segoe UI" Foreground="{StaticResource TextDark}" Margin="8,0,0,0">
-                                        <Run Text="Female ("/><Run Text="{Binding FemaleCount, Mode=OneWay}"/><Run Text=")"/>
-                                    </TextBlock>
+                            <!-- Female / Male counts -->
+                            <Grid Margin="24,0,24,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding FemaleCount, Mode=OneWay}" FontSize="40" FontWeight="Bold"
+                                               FontFamily="Segoe UI" Foreground="#E58BA3" LineHeight="44"/>
+                                    <TextBlock Text="Female" FontSize="13" FontFamily="Segoe UI"
+                                               Foreground="{StaticResource SecondaryText}"/>
                                 </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Border Width="10" Height="10" CornerRadius="2" Background="#E9B9C8" VerticalAlignment="Center"/>
-                                    <TextBlock FontSize="11" FontFamily="Segoe UI" Foreground="{StaticResource TextDark}" Margin="8,0,0,0">
-                                        <Run Text="Male ("/><Run Text="{Binding MaleCount, Mode=OneWay}"/><Run Text=")"/>
-                                    </TextBlock>
+
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                                    <TextBlock Text="{Binding MaleCount, Mode=OneWay}" FontSize="40" FontWeight="Bold"
+                                               FontFamily="Segoe UI" Foreground="#4FB0C6" TextAlignment="Right" LineHeight="44"/>
+                                    <TextBlock Text="Male" FontSize="13" FontFamily="Segoe UI"
+                                               Foreground="{StaticResource SecondaryText}" TextAlignment="Right"/>
                                 </StackPanel>
-                            </StackPanel>
+                            </Grid>
 
                             <TextBlock Text="{Binding FemalePercentText}" FontSize="11" FontWeight="SemiBold" FontFamily="Segoe UI"
-                                       Foreground="{StaticResource SecondaryText}" TextAlignment="Center" Margin="0,12,0,0"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Column="2" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
-                        <StackPanel>
-                            <TextBlock Text="Age group" Style="{StaticResource PanelTitle}"/>
-                            <TextBlock Text="Solo parents by statutory age bracket (RA 11861)" Style="{StaticResource PanelSubtitle}"/>
-                            <Canvas x:Name="CvAgeBars" Height="270" Background="Transparent"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <Grid Margin="0,0,0,20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="7*"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="5*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Column="0" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
-                        <StackPanel>
-                            <TextBlock Text="Top categories" Style="{StaticResource PanelTitle}"/>
-                            <TextBlock Text="Leading classification and circumstance reasons" Style="{StaticResource PanelSubtitle}"/>
-
-                            <Canvas x:Name="CvTopCategories" Height="400" Background="Transparent"/>
-
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0">
-                                <Border Width="10" Height="10" CornerRadius="2" Background="{StaticResource MaroonPrimary}" VerticalAlignment="Center"/>
-                                <TextBlock Text="Cases per category" FontSize="10" FontFamily="Segoe UI"
-                                           Foreground="{StaticResource SecondaryText}" Margin="6,0,0,0" VerticalAlignment="Center"/>
-                            </StackPanel>
+                                       Foreground="{StaticResource SecondaryText}" TextAlignment="Center" Margin="0,14,0,0"/>
                         </StackPanel>
                     </Border>
 
@@ -782,7 +840,7 @@
                                 </StackPanel>
                             </Grid>
 
-                            <StackPanel>
+                            <StackPanel HorizontalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,6" ToolTip="{Binding EmployedText}">
                                     <Border Width="10" Height="10" CornerRadius="2" Background="#7D2245" VerticalAlignment="Center"/>
                                     <TextBlock FontSize="11" FontFamily="Segoe UI" Foreground="{StaticResource TextDark}" Margin="8,0,0,0">
@@ -806,6 +864,7 @@
                     </Border>
                 </Grid>
 
+                <!-- Civil status | Monthly income -->
                 <Grid Margin="0,0,0,20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="5*"/>
@@ -897,56 +956,6 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-
-                <Border Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
-                    <StackPanel>
-                        <TextBlock Text="Child dependents by age" Style="{StaticResource PanelTitle}"/>
-                        <TextBlock Text="Developmental stages and childcare resource planning" Style="{StaticResource PanelSubtitle}"/>
-
-                        <Grid Height="250" MaxWidth="640">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="24"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="24"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
-                                <Border Background="{StaticResource MaroonPrimary}" CornerRadius="8,8,0,0"
-                                        Height="{Binding AgeGroup0_5BarHeight}" MinHeight="3"/>
-                                <TextBlock Text="{Binding AgeGroup0_5}" FontSize="15" FontWeight="Bold" FontFamily="Segoe UI"
-                                           Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
-                                <TextBlock Text="0–6 yrs" FontSize="11" FontWeight="SemiBold" FontFamily="Segoe UI"
-                                           Foreground="{StaticResource TextDark}" TextAlignment="Center"/>
-                                <TextBlock Text="Daycare age" FontSize="10" FontFamily="Segoe UI"
-                                           Foreground="{StaticResource SecondaryText}" TextAlignment="Center"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
-                                <Border Background="{StaticResource RosePrimary}" CornerRadius="8,8,0,0"
-                                        Height="{Binding AgeGroup6_12BarHeight}" MinHeight="3"/>
-                                <TextBlock Text="{Binding AgeGroup6_12}" FontSize="15" FontWeight="Bold" FontFamily="Segoe UI"
-                                           Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
-                                <TextBlock Text="7–21 yrs" FontSize="11" FontWeight="SemiBold" FontFamily="Segoe UI"
-                                           Foreground="{StaticResource TextDark}" TextAlignment="Center"/>
-                                <TextBlock Text="School and youth" FontSize="10" FontFamily="Segoe UI"
-                                           Foreground="{StaticResource SecondaryText}" TextAlignment="Center"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
-                                <Border Background="{StaticResource GrayPrimary}" CornerRadius="8,8,0,0"
-                                        Height="{Binding AgeGroup13_17BarHeight}" MinHeight="3"/>
-                                <TextBlock Text="{Binding AgeGroup13_17}" FontSize="15" FontWeight="Bold" FontFamily="Segoe UI"
-                                           Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
-                                <TextBlock Text="22+ yrs" FontSize="11" FontWeight="SemiBold" FontFamily="Segoe UI"
-                                           Foreground="{StaticResource TextDark}" TextAlignment="Center"/>
-                                <TextBlock Text="Adult / special" FontSize="10" FontFamily="Segoe UI"
-                                           Foreground="{StaticResource SecondaryText}" TextAlignment="Center"/>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </Border>
             </StackPanel>
         </ScrollViewer>
 

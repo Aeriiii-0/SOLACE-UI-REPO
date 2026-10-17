@@ -93,7 +93,7 @@ namespace SOLUM_UI
 
         private void HookChartCanvases()
         {
-            foreach (var name in new[] { "CvBarangay", "CvSexDonut", "CvAgeBars", "CvEmployDonut", "CvCivilBars" })
+            foreach (var name in new[] { "CvBarangay", "CvSexDonut", "CvAgeBars", "CvTopCategories", "CvEmployDonut", "CvCivilBars" })
             {
                 if (FindName(name) is Canvas canvas)
                 {
@@ -427,8 +427,8 @@ namespace SOLUM_UI
                 double male = N("MaleCount");
                 DrawDonut(FindName("CvSexDonut") as Canvas, 26, female + male, new List<(double, Brush)>
                 {
-                    (female, B("#7D2245")),
-                    (male, B("#E9B9C8"))
+                    (female, B("#E58BA3")),  // Pink for female
+                    (male, B("#4FB0C6"))     // Blue for male
                 });
 
                 var ageBars = new List<(string, double, Brush)>();
@@ -436,7 +436,7 @@ namespace SOLUM_UI
                     ageBars.Add((AgeLabels[i], N(AgeProps[i]), B(AgeColors[i])));
                 DrawBars(FindName("CvAgeBars") as Canvas, ageBars);
 
-                // Draw Top Categories horizontal bars
+                // Top Categories horizontal bars (with x-axis grid)
                 DrawCategoryBars(FindName("CvTopCategories") as Canvas, ReadSeries((object)_vm.TopCasesData as IEnumerable));
 
                 double employed = N("EmployedPercent");
@@ -636,6 +636,10 @@ namespace SOLUM_UI
             }
         }
 
+        /// <summary>
+        /// Horizontal bar chart with vertical gridlines and an x-axis scale (0, 50, 100, ...).
+        /// Top category is dark maroon, the rest are a lighter mauve.
+        /// </summary>
         private void DrawCategoryBars(Canvas canvas, List<(string Label, double Value)> categories)
         {
             if (canvas == null)
@@ -645,57 +649,98 @@ namespace SOLUM_UI
 
             double w = canvas.ActualWidth;
             double h = canvas.ActualHeight;
-            if (w <= 0 || h <= 0 || categories.Count == 0)
+            if (w <= 0 || h <= 0)
                 return;
 
-            const double left = 150, right = 40, top = 10, bottom = 10;
+            var textBrush = B("#8A6A75");
+            var gridBrush = B("#EEE3E7");
+            var topBar = B("#7D2245");
+            var otherBar = B("#CFA3B4");
+
+            if (categories.Count == 0)
+            {
+                var empty = MakeText("No category data for the selected filter", 12, textBrush, FontWeights.Normal);
+                Canvas.SetLeft(empty, (w - empty.DesiredSize.Width) / 2);
+                Canvas.SetTop(empty, (h - empty.DesiredSize.Height) / 2);
+                canvas.Children.Add(empty);
+                return;
+            }
+
+            // Category labels (right-aligned next to the axis)
+            var labels = new List<TextBlock>();
+            foreach (var cat in categories)
+            {
+                string text = cat.Label.Length > 26 ? cat.Label.Substring(0, 25) + "…" : cat.Label;
+                labels.Add(MakeText(text, 11, textBrush, FontWeights.Normal));
+            }
+
+            double maxLabelW = labels.Max(l => l.DesiredSize.Width);
+            double left = Math.Min(200, maxLabelW + 18);
+            const double right = 24, top = 8, bottom = 28;
+
             double pw = w - left - right;
             double ph = h - top - bottom;
             if (pw <= 0 || ph <= 0)
                 return;
 
+            // Nice x-axis scale
             double max = categories.Max(item => item.Value);
             if (max <= 0)
                 max = 1;
 
+            double rawStep = max / 4.0;
+            double mag = Math.Pow(10, Math.Floor(Math.Log10(rawStep)));
+            double norm = rawStep / mag;
+            double step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag;
+            if (step < 1) step = 1;
+            double niceMax = Math.Ceiling(max / step) * step;
+            int tickCount = (int)Math.Round(niceMax / step);
+
+            // Vertical gridlines + x-axis tick labels
+            for (int t = 0; t <= tickCount; t++)
+            {
+                double x = left + pw * t / tickCount;
+                canvas.Children.Add(new Line
+                {
+                    X1 = x,
+                    X2 = x,
+                    Y1 = top,
+                    Y2 = top + ph,
+                    Stroke = gridBrush,
+                    StrokeThickness = 1
+                });
+
+                var tick = MakeText(((int)Math.Round(step * t)).ToString(), 10, textBrush, FontWeights.Normal);
+                Canvas.SetLeft(tick, x - tick.DesiredSize.Width / 2);
+                Canvas.SetTop(tick, top + ph + 6);
+                canvas.Children.Add(tick);
+            }
+
+            // Bars
             double slot = ph / categories.Count;
-            double barH = Math.Min(20, slot * 0.7);
-            var textBrush = B("#8A6A75");
-            var darkBrush = B("#111827");
-            var maroon = B("#7D2245");
-            var rose = B("#E58BA3");
+            double barH = Math.Min(34, slot * 0.7);
 
             for (int i = 0; i < categories.Count; i++)
             {
-                double barW = categories[i].Value > 0 ? Math.Max(3, pw * categories[i].Value / max) : 2;
-                double x = left;
                 double y = top + slot * i + (slot - barH) / 2;
+                double barW = categories[i].Value > 0 ? Math.Max(3, pw * categories[i].Value / niceMax) : 2;
 
-                // Category label (left)
-                var lbl = MakeText(categories[i].Label.Length > 20 ? categories[i].Label.Substring(0, 19) + "…" : categories[i].Label, 10, darkBrush, FontWeights.Normal);
-                Canvas.SetLeft(lbl, 8);
+                var lbl = labels[i];
+                Canvas.SetLeft(lbl, left - 10 - lbl.DesiredSize.Width);
                 Canvas.SetTop(lbl, y + (barH - lbl.DesiredSize.Height) / 2);
                 canvas.Children.Add(lbl);
 
-                // Bar
                 var bar = new Border
                 {
                     Width = barW,
                     Height = barH,
-                    Background = i == 0 ? maroon : rose,
-                    CornerRadius = new CornerRadius(4, 4, 4, 4),
-                    Opacity = i == 0 ? 1.0 : 0.85,
+                    Background = i == 0 ? topBar : otherBar,
+                    CornerRadius = new CornerRadius(5),
                     ToolTip = $"{categories[i].Label}: {categories[i].Value:N0} cases"
                 };
-                Canvas.SetLeft(bar, x);
+                Canvas.SetLeft(bar, left);
                 Canvas.SetTop(bar, y);
                 canvas.Children.Add(bar);
-
-                // Value (right)
-                var val = MakeText(categories[i].Value.ToString("N0"), 10, darkBrush, FontWeights.Bold);
-                Canvas.SetLeft(val, left + pw + 8);
-                Canvas.SetTop(val, y + (barH - val.DesiredSize.Height) / 2);
-                canvas.Children.Add(val);
             }
         }
 
