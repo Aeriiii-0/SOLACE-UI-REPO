@@ -84,130 +84,92 @@ namespace SOLUM_UI
             BtnLogin.IsEnabled = false;
             LoadingOverlay.Visibility = Visibility.Visible;
             
+            // Show splash screen
+            SplashScreen splash = new SplashScreen();
+            splash.Show();
+            
             // Start progress animation
             var progressPercentage = FindName("ProgressPercentage") as TextBlock;
             var progressBarFill = FindName("ProgressBarFill") as Border;
-            if (progressPercentage != null && progressBarFill != null)
+            
+            var progressTimer = new System.Timers.Timer(100);
+            int progress = 0;
+            
+            try
             {
-                var progressTimer = new System.Timers.Timer(100);
-                int progress = 0;
-                progressTimer.Elapsed += (s, e) =>
+                if (progressPercentage != null && progressBarFill != null)
                 {
-                    Dispatcher.Invoke(() =>
+                    progressTimer.Elapsed += (s, e) =>
                     {
-                        progress = Math.Min(progress + 5, 95);  // Cap at 95% until complete
-                        progressPercentage.Text = $"{progress}%";
-                        progressBarFill.Width = (progress / 100.0) * 240;
-                    });
-                };
-                progressTimer.Start();
-
-                try
-                {
-                    var loginResponse = await AuthApiService.Instance.LoginAsync(email, password);
-
-                    if (!loginResponse.Succeeded || loginResponse.Data == null || string.IsNullOrWhiteSpace(loginResponse.Data.Token))
-                    {
-                        string err = loginResponse.Errors != null && loginResponse.Errors.Count > 0
-                            ? string.Join("\n", loginResponse.Errors)
-                            : "Invalid email or password. Please check your credentials and try again.";
-                        ShowError(err);
-                        progressTimer.Stop();
-                        progressTimer.Dispose();
-                        return;
-                    }
-
-                    MainWindow.CurrentUserName = !string.IsNullOrWhiteSpace(loginResponse.Data.Email)
-                        ? loginResponse.Data.Email
-                        : email;
-
-                    Guid id = AuthApiService.ExtractUserIdFromToken(loginResponse.Data.Token) ?? Guid.Empty;
-                    string assignedRole = AuthApiService.Instance.IsAdmin ? "Administrator" : "Encoder";
-                    MainWindow.CurrentUserRole = assignedRole;
-
-                    var userDTO = await UserApiService.Instance.GetApplicationUsersAsync(
-                            new GetApplicationUserRequest { Id = id, Role = string.Empty, Page = 1, PageSize = 1 }
-                        );
-
-                    ApplicationUserDTO loggedInUser = userDTO?.Data?.Items?.FirstOrDefault() ?? new ApplicationUserDTO
-                    {
-                        Id = id,
-                        Email = MainWindow.CurrentUserName,
-                        Role = assignedRole
+                        Dispatcher.Invoke(() =>
+                        {
+                            progress = Math.Min(progress + 5, 95);  // Cap at 95% until complete
+                            progressPercentage.Text = $"{progress}%";
+                            progressBarFill.Width = (progress / 100.0) * 240;
+                        });
                     };
+                    progressTimer.Start();
+                }
 
-                    if (string.IsNullOrWhiteSpace(loggedInUser.Role) || AuthApiService.Instance.IsAdmin)
-                    {
-                        loggedInUser.Role = assignedRole;
-                    }
+                var loginResponse = await AuthApiService.Instance.LoginAsync(email, password);
 
-                    // Complete the progress bar
+                if (!loginResponse.Succeeded || loginResponse.Data == null || string.IsNullOrWhiteSpace(loginResponse.Data.Token))
+                {
+                    string err = loginResponse.Errors != null && loginResponse.Errors.Count > 0
+                        ? string.Join("\n", loginResponse.Errors)
+                        : "Invalid email or password. Please check your credentials and try again.";
+                    ShowError(err);
+                    return;
+                }
+
+                MainWindow.CurrentUserName = !string.IsNullOrWhiteSpace(loginResponse.Data.Email)
+                    ? loginResponse.Data.Email
+                    : email;
+
+                Guid id = AuthApiService.ExtractUserIdFromToken(loginResponse.Data.Token) ?? Guid.Empty;
+                string assignedRole = AuthApiService.Instance.IsAdmin ? "Administrator" : "Encoder";
+                MainWindow.CurrentUserRole = assignedRole;
+
+                var userDTO = await UserApiService.Instance.GetApplicationUsersAsync(
+                        new GetApplicationUserRequest { Id = id, Role = string.Empty, Page = 1, PageSize = 1 }
+                    );
+
+                ApplicationUserDTO loggedInUser = userDTO?.Data?.Items?.FirstOrDefault() ?? new ApplicationUserDTO
+                {
+                    Id = id,
+                    Email = MainWindow.CurrentUserName,
+                    Role = assignedRole
+                };
+
+                if (string.IsNullOrWhiteSpace(loggedInUser.Role) || AuthApiService.Instance.IsAdmin)
+                {
+                    loggedInUser.Role = assignedRole;
+                }
+
+                // Complete the progress bar
+                if (progressPercentage != null && progressBarFill != null)
+                {
                     progressPercentage.Text = "100%";
                     progressBarFill.Width = 240;
-                    progressTimer.Stop();
-                    progressTimer.Dispose();
+                }
 
-                    var mainWindow = new MainWindow(loggedInUser);
-                    mainWindow.Show();
-                    AuditLogService.Instance.LogLogin(MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
-                    ToastNotification.Show("Welcome", "Logged in as " + MainWindow.CurrentUserName + ".", ToastType.Success);
-                    this.Close();
-                }
-                catch
-                {
-                    progressTimer.Stop();
-                    progressTimer.Dispose();
-                    throw;
-                }
+                var mainWindow = new MainWindow(loggedInUser);
+                mainWindow.Show();
+                AuditLogService.Instance.LogLogin(MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
+                ToastNotification.Show("Welcome", "Logged in as " + MainWindow.CurrentUserName + ".", ToastType.Success);
+                splash.Close();
+                this.Close();
             }
-            else
+            catch (Exception ex)
             {
-                try
-                {
-                    var loginResponse = await AuthApiService.Instance.LoginAsync(email, password);
-
-                    if (!loginResponse.Succeeded || loginResponse.Data == null || string.IsNullOrWhiteSpace(loginResponse.Data.Token))
-                    {
-                        string err = loginResponse.Errors != null && loginResponse.Errors.Count > 0
-                            ? string.Join("\n", loginResponse.Errors)
-                            : "Invalid email or password. Please check your credentials and try again.";
-                        ShowError(err);
-                        return;
-                    }
-
-                    MainWindow.CurrentUserName = !string.IsNullOrWhiteSpace(loginResponse.Data.Email)
-                        ? loginResponse.Data.Email
-                        : email;
-
-                    Guid id = AuthApiService.ExtractUserIdFromToken(loginResponse.Data.Token) ?? Guid.Empty;
-                    string assignedRole = AuthApiService.Instance.IsAdmin ? "Administrator" : "Encoder";
-                    MainWindow.CurrentUserRole = assignedRole;
-
-                    var userDTO = await UserApiService.Instance.GetApplicationUsersAsync(
-                            new GetApplicationUserRequest { Id = id, Role = string.Empty, Page = 1, PageSize = 1 }
-                        );
-
-                    ApplicationUserDTO loggedInUser = userDTO?.Data?.Items?.FirstOrDefault() ?? new ApplicationUserDTO
-                    {
-                        Id = id,
-                        Email = MainWindow.CurrentUserName,
-                        Role = assignedRole
-                    };
-
-                    if (string.IsNullOrWhiteSpace(loggedInUser.Role) || AuthApiService.Instance.IsAdmin)
-                    {
-                        loggedInUser.Role = assignedRole;
-                    }
-
-                    var mainWindow = new MainWindow(loggedInUser);
-                    mainWindow.Show();
-                    AuditLogService.Instance.LogLogin(MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
-                    ToastNotification.Show("Welcome", "Logged in as " + MainWindow.CurrentUserName + ".", ToastType.Success);
-                    this.Close();
-                }
+                System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}\n{ex.StackTrace}");
+                ShowError($"Login failed: {ex.Message}");
+                splash.Close();
             }
             finally
             {
+                progressTimer.Stop();
+                progressTimer.Dispose();
                 _isLoggingIn = false;          // NEW
                 BtnLogin.IsEnabled = true;
                 LoadingOverlay.Visibility = Visibility.Collapsed;
