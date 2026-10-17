@@ -427,8 +427,8 @@ namespace SOLUM_UI
                 double male = N("MaleCount");
                 DrawDonut(FindName("CvSexDonut") as Canvas, 26, female + male, new List<(double, Brush)>
                 {
-                    (female, B("#E58BA3")),  // Pink for female
-                    (male, B("#4FB0C6"))     // Blue for male
+                    (female, B("#C9536E")),  // Brand pink - nice cool tone
+                    (male, B("#3B9FC9"))     // Brand blue - nice cool tone
                 });
 
                 var ageBars = new List<(string, double, Brush)>();

@@ -737,7 +737,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
-                                        <Border Background="{StaticResource MaroonPrimary}" CornerRadius="8,8,0,0"
+                                        <Border Background="#7D2245" CornerRadius="8,8,0,0"
                                                 Height="{Binding AgeGroup0_5BarHeight}" MinHeight="3"/>
                                         <TextBlock Text="{Binding AgeGroup0_5}" FontSize="15" FontWeight="Bold" FontFamily="Segoe UI"
                                                    Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
@@ -748,7 +748,7 @@
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
-                                        <Border Background="{StaticResource RosePrimary}" CornerRadius="8,8,0,0"
+                                        <Border Background="#A96B87" CornerRadius="8,8,0,0"
                                                 Height="{Binding AgeGroup6_12BarHeight}" MinHeight="3"/>
                                         <TextBlock Text="{Binding AgeGroup6_12}" FontSize="15" FontWeight="Bold" FontFamily="Segoe UI"
                                                    Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
@@ -759,7 +759,7 @@
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
-                                        <Border Background="{StaticResource GrayPrimary}" CornerRadius="8,8,0,0"
+                                        <Border Background="#D8A7C0" CornerRadius="8,8,0,0"
                                                 Height="{Binding AgeGroup13_17BarHeight}" MinHeight="3"/>
                                         <TextBlock Text="{Binding AgeGroup13_17}" FontSize="15" FontWeight="Bold" FontFamily="Segoe UI"
                                                    Foreground="{StaticResource TextDark}" TextAlignment="Center" Margin="0,8,0,0"/>
@@ -798,7 +798,7 @@
                                 </StackPanel>
                             </Grid>
 
-                            <!-- Female / Male counts -->
+                            <!-- Female / Male counts with percentages -->
                             <Grid Margin="24,0,24,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -807,16 +807,24 @@
 
                                 <StackPanel Grid.Column="0" HorizontalAlignment="Left">
                                     <TextBlock Text="{Binding FemaleCount, Mode=OneWay}" FontSize="40" FontWeight="Bold"
-                                               FontFamily="Segoe UI" Foreground="#E58BA3" LineHeight="44"/>
+                                               FontFamily="Segoe UI" Foreground="#C9536E" LineHeight="44"/>
                                     <TextBlock Text="Female" FontSize="13" FontFamily="Segoe UI"
                                                Foreground="{StaticResource SecondaryText}"/>
+                                    <TextBlock Text="{Binding FemalePercent, StringFormat=F1, Mode=OneWay}" FontSize="12" FontWeight="SemiBold"
+                                               FontFamily="Segoe UI" Foreground="#C9536E" Margin="0,4,0,0">
+                                        <Run Text="{Binding FemalePercent, StringFormat=F1, Mode=OneWay}"/><Run Text="%"/>
+                                    </TextBlock>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" HorizontalAlignment="Right">
                                     <TextBlock Text="{Binding MaleCount, Mode=OneWay}" FontSize="40" FontWeight="Bold"
-                                               FontFamily="Segoe UI" Foreground="#4FB0C6" TextAlignment="Right" LineHeight="44"/>
+                                               FontFamily="Segoe UI" Foreground="#3B9FC9" TextAlignment="Right" LineHeight="44"/>
                                     <TextBlock Text="Male" FontSize="13" FontFamily="Segoe UI"
                                                Foreground="{StaticResource SecondaryText}" TextAlignment="Right"/>
+                                    <TextBlock FontSize="12" FontWeight="SemiBold"
+                                               FontFamily="Segoe UI" Foreground="#3B9FC9" TextAlignment="Right" Margin="0,4,0,0">
+                                        <Run Text="{Binding MalePercent, StringFormat=F1, Mode=OneWay}"/><Run Text="%"/>
+                                    </TextBlock>
                                 </StackPanel>
                             </Grid>
 

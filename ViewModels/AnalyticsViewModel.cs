@@ -622,6 +622,20 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _femalePercentText, value);
         }
 
+        private double _femalePercent;
+        public double FemalePercent
+        {
+            get => _femalePercent;
+            set => SetProperty(ref _femalePercent, value);
+        }
+
+        private double _malePercent;
+        public double MalePercent
+        {
+            get => _malePercent;
+            set => SetProperty(ref _malePercent, value);
+        }
+
         private double _femalePercentWidth;
         public double FemalePercentWidth
         {
@@ -1151,11 +1165,15 @@ namespace SOLUM_UI.ViewModels
             {
                 double femalePercent = (female * 100.0 / genderBase);
                 double malePercent = (male * 100.0 / genderBase);
+                FemalePercent = femalePercent;
+                MalePercent = malePercent;
                 FemalePercentText = $"{femalePercent:F1}% Female  ·  {malePercent:F1}% Male";
                 FemalePercentWidth = femalePercent * 2.5;
             }
             else
             {
+                FemalePercent = 0;
+                MalePercent = 0;
                 FemalePercentText = "0% Female  ·  0% Male";
                 FemalePercentWidth = 0;
             }
