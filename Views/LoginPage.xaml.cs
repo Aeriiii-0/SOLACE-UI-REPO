@@ -85,7 +85,7 @@ namespace SOLUM_UI
             LoadingOverlay.Visibility = Visibility.Visible;
             
             // Show splash screen
-            SplashScreen splash = new SplashScreen();
+            SplashScreenWindow splash = new SplashScreenWindow();
             splash.Show();
             
             // Start progress animation

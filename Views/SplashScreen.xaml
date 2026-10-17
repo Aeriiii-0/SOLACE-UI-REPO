@@ -1,0 +1,94 @@
+<Window x:Class="SOLUM_UI.SplashScreenWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Width="400" Height="500"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False"
+        Topmost="True">
+    <Grid Background="Transparent">
+        <!-- Main Container -->
+        <Border Background="White" CornerRadius="16" Padding="40,60" Effect="{StaticResource ShadowEffect}">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="5" Opacity="0.3"/>
+            </Border.Effect>
+            
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <!-- Logo / Icon -->
+                <TextBlock Text="SOLACE" FontFamily="Segoe UI" FontSize="36" FontWeight="Bold"
+                          Foreground="#702943" TextAlignment="Center" Margin="0,0,0,20"/>
+                
+                <!-- Title -->
+                <TextBlock Text="Solo Parent Management System" FontFamily="Segoe UI" FontSize="16" FontWeight="SemiBold"
+                          Foreground="#333333" TextAlignment="Center" Margin="0,0,0,12"/>
+                
+                <!-- Subtitle -->
+                <TextBlock Text="Loading your application..." FontFamily="Segoe UI" FontSize="12"
+                          Foreground="#666666" TextAlignment="Center" Margin="0,0,0,30"/>
+                
+                <!-- Animated Dots -->
+                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Height="20">
+                    <Border Width="8" Height="8" CornerRadius="4" Background="#702943" Margin="2,0">
+                        <Border.RenderTransform>
+                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        </Border.RenderTransform>
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
+                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
+                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                    </Border>
+                    
+                    <Border Width="8" Height="8" CornerRadius="4" Background="#702943" Margin="2,0">
+                        <Border.RenderTransform>
+                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        </Border.RenderTransform>
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
+                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0.2"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
+                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                    </Border>
+                    
+                    <Border Width="8" Height="8" CornerRadius="4" Background="#702943" Margin="2,0">
+                        <Border.RenderTransform>
+                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        </Border.RenderTransform>
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
+                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0.4"/>
+                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
+                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0.4"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                    </Border>
+                </StackPanel>
+                
+                <!-- Version Info -->
+                <TextBlock Text="Version 1.0.0" FontFamily="Segoe UI" FontSize="10"
+                          Foreground="#999999" TextAlignment="Center" Margin="0,40,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
