@@ -1395,7 +1395,7 @@ namespace SOLUM_UI.ViewModels
                 if (maxCaseCount <= 0) maxCaseCount = 1;
 
                 int rank = 1;
-                foreach (var kvp in sortedCases.Take(10))  // Limit to top 10 categories
+                foreach (var kvp in sortedCases)  // All categories, not limited to top 10
                 {
                     double barWidth = (kvp.Value * 1.0 / maxCaseCount) * 280;
                     TopCasesData.Add(new AreaChartData

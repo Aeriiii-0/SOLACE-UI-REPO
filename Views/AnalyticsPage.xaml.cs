@@ -436,6 +436,9 @@ namespace SOLUM_UI
                     ageBars.Add((AgeLabels[i], N(AgeProps[i]), B(AgeColors[i])));
                 DrawBars(FindName("CvAgeBars") as Canvas, ageBars);
 
+                // Draw Top Categories horizontal bars
+                DrawCategoryBars(FindName("CvTopCategories") as Canvas, ReadSeries((object)_vm.TopCasesData as IEnumerable));
+
                 double employed = N("EmployedPercent");
                 double selfEmployed = N("SelfEmployedPercent");
                 double notEmployed = N("NotEmployedPercent");
@@ -630,6 +633,69 @@ namespace SOLUM_UI
                 Canvas.SetLeft(lbl, side + slot * i + (slot - lbl.DesiredSize.Width) / 2);
                 Canvas.SetTop(lbl, top + ph + 8);
                 c.Children.Add(lbl);
+            }
+        }
+
+        private void DrawCategoryBars(Canvas c, List<(string Label, double Value)> categories)
+        {
+            if (c == null)
+                return;
+
+            c.Children.Clear();
+
+            double w = c.ActualWidth;
+            double h = c.ActualHeight;
+            if (w <= 0 || h <= 0 || categories.Count == 0)
+                return;
+
+            const double left = 150, right = 40, top = 10, bottom = 10;
+            double pw = w - left - right;
+            double ph = h - top - bottom;
+            if (pw <= 0 || ph <= 0)
+                return;
+
+            double max = categories.Max(c => c.Value);
+            if (max <= 0)
+                max = 1;
+
+            double slot = ph / categories.Count;
+            double barH = Math.Min(20, slot * 0.7);
+            var textBrush = B("#8A6A75");
+            var darkBrush = B("#111827");
+            var maroon = B("#7D2245");
+            var rose = B("#E58BA3");
+
+            for (int i = 0; i < categories.Count; i++)
+            {
+                double barW = categories[i].Value > 0 ? Math.Max(3, pw * categories[i].Value / max) : 2;
+                double x = left;
+                double y = top + slot * i + (slot - barH) / 2;
+
+                // Category label (left)
+                var lbl = MakeText(categories[i].Label.Length > 20 ? categories[i].Label.Substring(0, 19) + "…" : categories[i].Label, 10, darkBrush, FontWeights.Normal);
+                Canvas.SetLeft(lbl, 8);
+                Canvas.SetTop(lbl, y + (barH - lbl.DesiredSize.Height) / 2);
+                c.Children.Add(lbl);
+
+                // Bar
+                var bar = new Border
+                {
+                    Width = barW,
+                    Height = barH,
+                    Background = i == 0 ? maroon : rose,
+                    CornerRadius = new CornerRadius(4, 4, 4, 4),
+                    Opacity = i == 0 ? 1.0 : 0.85,
+                    ToolTip = $"{categories[i].Label}: {categories[i].Value:N0} cases"
+                };
+                Canvas.SetLeft(bar, x);
+                Canvas.SetTop(bar, y);
+                c.Children.Add(bar);
+
+                // Value (right)
+                var val = MakeText(categories[i].Value.ToString("N0"), 10, darkBrush, FontWeights.Bold);
+                Canvas.SetLeft(val, left + pw + 8);
+                Canvas.SetTop(val, y + (barH - val.DesiredSize.Height) / 2);
+                c.Children.Add(val);
             }
         }
 

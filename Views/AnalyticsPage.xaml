@@ -697,7 +697,7 @@
                         <ColumnDefinition Width="7*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource RosePrimary}">
+                    <Border Grid.Column="0" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                         <StackPanel>
                             <TextBlock Text="Sex" Style="{StaticResource PanelTitle}"/>
                             <TextBlock Text="Distribution of solo parents" Style="{StaticResource PanelSubtitle}"/>
@@ -736,7 +736,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="2" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource GoldPrimary}">
+                    <Border Grid.Column="2" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                         <StackPanel>
                             <TextBlock Text="Age group" Style="{StaticResource PanelTitle}"/>
                             <TextBlock Text="Solo parents by statutory age bracket (RA 11861)" Style="{StaticResource PanelSubtitle}"/>
@@ -757,49 +757,17 @@
                             <TextBlock Text="Top categories" Style="{StaticResource PanelTitle}"/>
                             <TextBlock Text="Leading classification and circumstance reasons" Style="{StaticResource PanelSubtitle}"/>
 
-                            <ItemsControl ItemsSource="{Binding TopCasesData}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="0,0,0,10">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="140"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="44"/>
-                                            </Grid.ColumnDefinitions>
+                            <Canvas x:Name="CvTopCategories" Height="400" Background="Transparent"/>
 
-                                            <TextBlock Grid.Column="0" Text="{Binding DisplayLabel}" FontSize="11" FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextDark}" VerticalAlignment="Center"
-                                                       TextTrimming="CharacterEllipsis" FontFamily="Segoe UI"
-                                                       ToolTip="{Binding Label}"/>
-
-                                            <Border Grid.Column="1" Height="18" Background="#F5ECF0" CornerRadius="4" Margin="10,0,8,0">
-                                                <Border CornerRadius="4" HorizontalAlignment="Left" Width="{Binding BarWidth}">
-                                                    <Border.Style>
-                                                        <Style TargetType="Border">
-                                                            <Setter Property="Background" Value="{StaticResource RosePrimary}"/>
-                                                            <Setter Property="Opacity" Value="0.85"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Rank}" Value="1">
-                                                                    <Setter Property="Background" Value="{StaticResource MaroonPrimary}"/>
-                                                                    <Setter Property="Opacity" Value="1"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Border.Style>
-                                                </Border>
-                                            </Border>
-
-                                            <TextBlock Grid.Column="2" Text="{Binding Value}" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{StaticResource TextDark}" TextAlignment="Right"
-                                                       VerticalAlignment="Center" FontFamily="Segoe UI"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="{StaticResource MaroonPrimary}" VerticalAlignment="Center"/>
+                                <TextBlock Text="Cases per category" FontSize="10" FontFamily="Segoe UI"
+                                           Foreground="{StaticResource SecondaryText}" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="2" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource BluePrimary}">
+                    <Border Grid.Column="2" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                         <StackPanel>
                             <TextBlock Text="Employment status" Style="{StaticResource PanelTitle}"/>
                             <TextBlock Text="Work situation of parents" Style="{StaticResource PanelSubtitle}"/>
@@ -845,7 +813,7 @@
                         <ColumnDefinition Width="7*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource GreenPrimary}">
+                    <Border Grid.Column="0" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                         <StackPanel>
                             <TextBlock Text="Civil status" Style="{StaticResource PanelTitle}"/>
                             <TextBlock Text="Marital status distribution" Style="{StaticResource PanelSubtitle}"/>
@@ -853,7 +821,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="2" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource GoldPrimary}">
+                    <Border Grid.Column="2" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                         <StackPanel>
                             <TextBlock Text="Monthly income" Style="{StaticResource PanelTitle}"/>
                             <TextBlock Text="Poverty threshold and subsidy classification (RA 11861)" Style="{StaticResource PanelSubtitle}"/>
@@ -930,7 +898,7 @@
                     </Border>
                 </Grid>
 
-                <Border Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource RosePrimary}">
+                <Border Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                     <StackPanel>
                         <TextBlock Text="Child dependents by age" Style="{StaticResource PanelTitle}"/>
                         <TextBlock Text="Developmental stages and childcare resource planning" Style="{StaticResource PanelSubtitle}"/>
