@@ -977,7 +977,7 @@
                                                                           BorderThickness="0" Background="Transparent"
                                                                           Tag="barangay" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
                                                                     <ComboBoxItem Content=""/>
-                                                                    <ComboBoxItem Content="Biñan"/>
+                                                                    <ComboBoxItem Content="Biñan (Poblacion)"/>
                                                                     <ComboBoxItem Content="Bungahan"/>
                                                                     <ComboBoxItem Content="Canlalay"/>
                                                                     <ComboBoxItem Content="Casile"/>
@@ -987,16 +987,16 @@
                                                                     <ComboBoxItem Content="Loma"/>
                                                                     <ComboBoxItem Content="Malaban"/>
                                                                     <ComboBoxItem Content="Malamig"/>
-                                                                    <ComboBoxItem Content="Mampalasan"/>
+                                                                    <ComboBoxItem Content="Mambog"/>
                                                                     <ComboBoxItem Content="Platero"/>
                                                                     <ComboBoxItem Content="Poblacion"/>
                                                                     <ComboBoxItem Content="San Antonio"/>
-                                                                    <ComboBoxItem Content="San Francisco"/>
+                                                                    <ComboBoxItem Content="San Francisco (Halang)"/>
                                                                     <ComboBoxItem Content="San Jose"/>
                                                                     <ComboBoxItem Content="San Vicente"/>
                                                                     <ComboBoxItem Content="Santo Domingo"/>
                                                                     <ComboBoxItem Content="Santo Niño"/>
-                                                                    <ComboBoxItem Content="Santo Tomas"/>
+                                                                    <ComboBoxItem Content="Santo Tomas (Calabuso)"/>
                                                                     <ComboBoxItem Content="Soro-Soro"/>
                                                                     <ComboBoxItem Content="Timbao"/>
                                                                     <ComboBoxItem Content="Tubigan"/>

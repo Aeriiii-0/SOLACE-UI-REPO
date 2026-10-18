@@ -18,10 +18,10 @@ DBNET_CROP_PADDING_PX = 3
 
 # Official list of 24 Barangays of the City of Biñan
 BINAN_BARANGAYS = [
-    "Biñan Poblacion", "Bungahan", "Canlalay", "Casile", "De La Paz",
-    "Ganado", "Langkiwa", "Loma", "Malaban", "Malamig", "Mamplasan",
+    "Biñan (Poblacion)", "Bungahan", "Canlalay", "Casile", "De La Paz",
+    "Ganado", "Langkiwa", "Loma", "Malaban", "Malamig", "Mambog",
     "Platero", "Poblacion", "San Antonio", "San Francisco (Halang)",
-    "San Jose", "San Vicente", "Santo Niño", "Santo Tomas (Calabuso)",
+    "San Jose", "San Vicente", "Santo Domingo", "Santo Niño", "Santo Tomas (Calabuso)",
     "Soro-Soro", "Timbao", "Tubigan", "Zapote"
 ]
 
@@ -36,6 +36,9 @@ BARANGAY_ALIASES = {
     "sto tomas calabuso": "Santo Tomas (Calabuso)",
     "sto. tomas calabuso": "Santo Tomas (Calabuso)",
     "santo tomas": "Santo Tomas (Calabuso)",
+    "sto domingo": "Santo Domingo",
+    "sto. domingo": "Santo Domingo",
+    "santo domingo": "Santo Domingo",
     "sto nino": "Santo Niño",
     "sto. nino": "Santo Niño",
     "sto niño": "Santo Niño",
@@ -43,12 +46,15 @@ BARANGAY_ALIASES = {
     "santo nino": "Santo Niño",
     "delapaz": "De La Paz",
     "dela paz": "De La Paz",
-    "mampalasan": "Mamplasan",
-    "mamplasan": "Mamplasan",
+    "mambog": "Mambog",
+    "mampalasan": "Mambog",
+    "mamplasan": "Mambog",
     "sorosoro": "Soro-Soro",
     "soro soro": "Soro-Soro",
-    "binan poblacion": "Biñan Poblacion",
-    "binan": "Biñan Poblacion",
+    "binan poblacion": "Biñan (Poblacion)",
+    "binan (poblacion)": "Biñan (Poblacion)",
+    "biñan (poblacion)": "Biñan (Poblacion)",
+    "binan": "Biñan (Poblacion)",
     "poblacion": "Poblacion",
     "pob": "Poblacion",
 }

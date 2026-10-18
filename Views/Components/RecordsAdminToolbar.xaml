@@ -257,16 +257,18 @@
           <TextBlock Text="Barangay" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
           <ComboBox x:Name="CmbFilterBarangay" Style="{StaticResource FcbStyle}" Margin="0,0,0,14">
             <ComboBoxItem Content="All" IsSelected="True"/>
-            <ComboBoxItem Content="Bi&#241;an Poblacion"/><ComboBoxItem Content="Bungahan"/>
+            <ComboBoxItem Content="Bi&#241;an (Poblacion)"/><ComboBoxItem Content="Bungahan"/>
             <ComboBoxItem Content="Canlalay"/><ComboBoxItem Content="Casile"/>
-            <ComboBoxItem Content="De La Paz"/><ComboBoxItem Content="Langkiwa"/>
-            <ComboBoxItem Content="Loma"/><ComboBoxItem Content="Malaban"/>
-            <ComboBoxItem Content="Malamig"/><ComboBoxItem Content="Mamplasan"/>
-            <ComboBoxItem Content="Platero"/><ComboBoxItem Content="San Antonio"/>
-            <ComboBoxItem Content="San Francisco"/><ComboBoxItem Content="San Jose"/>
-            <ComboBoxItem Content="San Vicente"/><ComboBoxItem Content="Santo Tomas"/>
+            <ComboBoxItem Content="De La Paz"/><ComboBoxItem Content="Ganado"/>
+            <ComboBoxItem Content="Langkiwa"/><ComboBoxItem Content="Loma"/>
+            <ComboBoxItem Content="Malaban"/><ComboBoxItem Content="Malamig"/>
+            <ComboBoxItem Content="Mambog"/><ComboBoxItem Content="Platero"/>
+            <ComboBoxItem Content="Poblacion"/><ComboBoxItem Content="San Antonio"/>
+            <ComboBoxItem Content="San Francisco (Halang)"/><ComboBoxItem Content="San Jose"/>
+            <ComboBoxItem Content="San Vicente"/><ComboBoxItem Content="Santo Domingo"/>
+            <ComboBoxItem Content="Santo Ni&#241;o"/><ComboBoxItem Content="Santo Tomas (Calabuso)"/>
             <ComboBoxItem Content="Soro-Soro"/><ComboBoxItem Content="Timbao"/>
-            <ComboBoxItem Content="Tubigan"/>
+            <ComboBoxItem Content="Tubigan"/><ComboBoxItem Content="Zapote"/>
           </ComboBox>
           <TextBlock Text="Status" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
           <ComboBox x:Name="CmbFilterStatus" Style="{StaticResource FcbStyle}" Margin="0,0,0,18">
