@@ -485,7 +485,8 @@ namespace SOLUM_UI.ViewModels
                 return;
             }
 
-            var renewResp = await _api.RenewSoloParentRecordAsync(guid);
+            var renewReq = _api.MapToRenewRequest(guid, updated);
+            var renewResp = await _api.RenewSoloParentRecordAsync(guid, renewReq);
             if (!renewResp.Succeeded)
             {
                 string err = renewResp.Errors != null && renewResp.Errors.Count > 0
@@ -494,17 +495,9 @@ namespace SOLUM_UI.ViewModels
                 return;
             }
 
-            var updateReq  = _api.MapToUpdateRequest(guid, updated);
-            var updateResp = await _api.UpdateSoloParentAsync(guid, updateReq);
-            if (!updateResp.Succeeded)
-            {
-                string err = updateResp.Errors != null && updateResp.Errors.Count > 0
-                    ? string.Join("\n", updateResp.Errors) : "Failed to save updated fields.";
-                MessageBox.Show(err, "Update Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            string newExpiry = DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
+            string newExpiry = (renewResp.Data != null && DateTime.TryParse(renewResp.Data.ExpiresAt, out var expDt))
+                ? expDt.ToString("MMMM d, yyyy")
+                : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
             ToastNotification.Show("Record Renewed", original.Name + " — valid until " + newExpiry + ".", ToastType.Success);
             
             // Track changes made during renewal

@@ -15,6 +15,7 @@ namespace SOLUM_UI.Views.Dialogs
         public bool OpenedEdit    => _vm.OpenedEdit;
         public bool Renewed       => _vm.Renewed;        // kept for compat
         public bool OpenedRenew   => _vm.OpenedRenew;
+        public bool IsQuickRenew  => _vm.IsQuickRenew;
         public bool OpenedDelete  => _vm.OpenedDelete;
         public SoloParentRecord RenewalResult => _vm.RenewalResult;
 
@@ -146,15 +147,14 @@ namespace SOLUM_UI.Views.Dialogs
 
             AddCircumstancesCard(r.CircumstancesDisplay);
 
+            AddCard("Assessment / Needs & Income", new[]
+            {
+                ("Needs & Problems",        string.IsNullOrWhiteSpace(r.NeedsAndProblems) ? "None specified" : r.NeedsAndProblems),
+                ("Other Sources of Income", string.IsNullOrWhiteSpace(r.OtherIncomeSource) ? "None" : r.OtherIncomeSource),
+            });
+
             if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
                 AddFamilyCard(r.FamilyMembers);
-
-            if (!string.IsNullOrWhiteSpace(r.NeedsAndProblems) || !string.IsNullOrWhiteSpace(r.OtherIncomeSource))
-                AddCard("Notes", new[]
-                {
-                    ("Needs and Problems",      string.IsNullOrWhiteSpace(r.NeedsAndProblems) ? "—" : r.NeedsAndProblems),
-                    ("Other Sources of Income", string.IsNullOrWhiteSpace(r.OtherIncomeSource) ? "—" : r.OtherIncomeSource),
-                });
 
             AddCard("Additional Classifications", new[]
             {

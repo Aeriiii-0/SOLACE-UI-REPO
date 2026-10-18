@@ -266,6 +266,22 @@ namespace SOLUM_UI.ViewModels
             IsToolbarCollapsed = !IsToolbarCollapsed;
         }
 
+        public bool IsQuickRenew { get; private set; }
+
+        /// <summary>
+        /// Called when the user chooses Quick Renewal (Mode 1: No Changes).
+        /// Signals parent page to perform an immediate validity extension.
+        /// </summary>
+        public void HandleQuickRenew()
+        {
+            IsQuickRenew  = true;
+            OpenedRenew   = true;
+            Renewed       = true;
+            ShowThenClose("Quick Renewing",
+                "Extending record validity by 1 year.", true,
+                closeDelaySecs: 0.8, dialogResult: true);
+        }
+
         /// <summary>
         /// Called by the code-behind after a successful <see cref="RecordDialog"/>
         /// renewal. Sets result flags and fires <see cref="RequestClose"/> with

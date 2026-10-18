@@ -25,9 +25,9 @@ namespace SOLUM_UI
                 if (DataContext is DashboardViewModel vm)
                     await vm.LoadAsync();
 
-                // Pre-fetch first page of audit logs in the background
+                // Pre-fetch first page of audit logs in the background without blocking dashboard
                 if (!_logsVm.IsInitialized)
-                    await _logsVm.LoadAsync();
+                    _ = _logsVm.LoadAsync();
             };
         }
 

@@ -487,15 +487,22 @@ namespace SOLUM_UI
             view.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
             view.ShowDialog();
 
-            if (view.Renewed)
+            if (view.OpenedRenew)
             {
-                await LoadRecordsAsync();
+                if (view.IsQuickRenew || view.RenewalResult == null)
+                {
+                    await RenewRecordQuickAsync(recordToView, skipConfirmation: true);
+                }
+                else
+                {
+                    await RenewRecordAsync(recordToView, view.RenewalResult);
+                }
                 return;
             }
 
-            if (view.OpenedRenew)
+            if (view.Renewed)
             {
-                await RenewRecordAsync(recordToView, view.RenewalResult);
+                await LoadRecordsAsync();
                 return;
             }
 
@@ -603,7 +610,66 @@ namespace SOLUM_UI
             await EditRecordAsync(vm.RawModel);
         }
 
-        private async Task RenewRecordAsync(SoloParentRecord original, SoloParentRecord updated)
+        private async Task RenewRecordQuickAsync(SoloParentRecord record, bool skipConfirmation = false)
+        {
+            if (record == null || !Guid.TryParse(record.Id, out var guid))
+            {
+                Views.Dialogs.ActionConfirmDialog.Warning(
+                    "Renew",
+                    "Cannot renew: invalid record ID.");
+                return;
+            }
+
+            if (!skipConfirmation)
+            {
+                string personName = !string.IsNullOrWhiteSpace(record.Name) ? record.Name : "this solo parent";
+                string nextExpiry = DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
+                const string renewIcon = "M12,4V1L8,5L12,9V6C15.31,6 18,8.69 18,12C18,13.04 17.73,14.01 17.27,14.86L18.74,16.33C19.54,15.08 20,13.6 20,12C20,7.58 16.42,4 12,4M12,18C8.69,18 6,15.31 6,12C6,10.96 6.27,9.99 6.73,9.14L5.26,7.67C4.46,8.92 4,10.4 4,12C4,16.42 7.58,20 12,20V23L16,19L12,15V18Z";
+
+                bool isConfirmed = Views.Dialogs.ActionConfirmDialog.Show(
+                    title: "Confirm Quick Renewal",
+                    message: $"Are you sure you want to renew the solo parent ID card for {personName}?\n\nThis will automatically extend record validity for 1 year until {nextExpiry} with no changes reported.",
+                    confirmText: "Renew Record",
+                    cancelText: "Cancel",
+                    theme: Views.Dialogs.ConfirmThemeType.Success,
+                    owner: Window.GetWindow(this),
+                    customIconData: renewIcon);
+
+                if (!isConfirmed) return;
+            }
+
+            PageLoadingOverlay.Visibility = Visibility.Visible;
+            try
+            {
+                var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid, null);
+                if (resp.Succeeded)
+                {
+                    string newExpiry = (resp.Data != null && DateTime.TryParse(resp.Data.ExpiresAt, out var expDt))
+                        ? expDt.ToString("MMMM d, yyyy")
+                        : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
+
+                    ToastNotification.Show("Record Renewed", $"{record.Name} — valid until {newExpiry}.", ToastType.Success);
+                    AuditLogService.Instance.LogUpdate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole, $"Record quick renewed. Valid until {newExpiry}.");
+                    (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
+                    await LoadRecordsAsync();
+                }
+                else
+                {
+                    string err = resp.Errors != null && resp.Errors.Count > 0
+                        ? string.Join("\n", resp.Errors)
+                        : "Failed to renew record.";
+                    Views.Dialogs.ActionConfirmDialog.Error(
+                        "Renew Failed",
+                        err);
+                }
+            }
+            finally
+            {
+                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private async Task RenewRecordAsync(SoloParentRecord original, SoloParentRecord updated, SoloParentDto existingDto = null)
         {
             if (!Guid.TryParse(original.Id, out var guid))
             {
@@ -613,37 +679,57 @@ namespace SOLUM_UI
                 return;
             }
 
-            // 1. Extend the validity window on the server
-            var renewResp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid);
-            if (!renewResp.Succeeded)
+            PageLoadingOverlay.Visibility = Visibility.Visible;
+            try
             {
-                string err = renewResp.Errors != null && renewResp.Errors.Count > 0
-                    ? string.Join("\n", renewResp.Errors) : "Failed to renew record.";
-                Views.Dialogs.ActionConfirmDialog.Error(
-                    "Renew Failed",
-                    err);
-                return;
-            }
+                if (existingDto == null)
+                {
+                    var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
+                    if (fetch.Succeeded && fetch.Data != null)
+                    {
+                        existingDto = fetch.Data;
+                    }
+                }
 
-            // 2. Persist the edited mutable fields (civil status, income, employment)
-            var updateReq  = SoloParentApiService.Instance.MapToUpdateRequest(guid, updated);
-            var updateResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(guid, updateReq);
-            if (!updateResp.Succeeded)
+                var renewReq = SoloParentApiService.Instance.MapToRenewRequest(guid, updated, existingDto);
+                var renewResp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid, renewReq);
+
+                if (!renewResp.Succeeded)
+                {
+                    string err = renewResp.Errors != null && renewResp.Errors.Count > 0
+                        ? string.Join("\n", renewResp.Errors) : "Failed to renew record.";
+                    Views.Dialogs.ActionConfirmDialog.Error(
+                        "Renew Failed",
+                        err);
+                    return;
+                }
+
+                string newExpiry = (renewResp.Data != null && DateTime.TryParse(renewResp.Data.ExpiresAt, out var expDt))
+                    ? expDt.ToString("MMMM d, yyyy")
+                    : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
+
+                ToastNotification.Show("Record Renewed",
+                    $"{original.Name} — valid until {newExpiry}.", ToastType.Success);
+
+                var changeService = new ChangeTrackingService();
+                var changes = changeService.DetectChanges(original, updated);
+                if (changes.Count > 0)
+                {
+                    AuditLogService.Instance.LogUpdateWithChanges(original.Id, original.Name, GetCurrentUser(), CurrentUserRole, changes);
+                }
+                else
+                {
+                    AuditLogService.Instance.LogUpdate(original.Id, original.Name,
+                        GetCurrentUser(), CurrentUserRole, $"Record renewed. Valid until {newExpiry}.");
+                }
+
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
+                await LoadRecordsAsync();
+            }
+            finally
             {
-                string err = updateResp.Errors != null && updateResp.Errors.Count > 0
-                    ? string.Join("\n", updateResp.Errors) : "Failed to save updated fields.";
-                Views.Dialogs.ActionConfirmDialog.Error(
-                    "Update Failed",
-                    err);
-                return;
+                PageLoadingOverlay.Visibility = Visibility.Collapsed;
             }
-
-            string newExpiry = DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
-            ToastNotification.Show("Record Renewed",
-                $"{original.Name} — valid until {newExpiry}.", ToastType.Success);
-            AuditLogService.Instance.LogUpdate(original.Id, original.Name,
-                GetCurrentUser(), CurrentUserRole, $"Record renewed. Valid until {newExpiry}.");
-            await LoadRecordsAsync();
         }
 
         private async Task EditRecordAsync(SoloParentRecord rawRecord)
@@ -717,32 +803,39 @@ namespace SOLUM_UI
             SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
             string recordName = vm != null ? vm.Name : id;
 
-            // Show loading indicator
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            var methodDialog = new RenewalMethodDialog
+            {
+                Owner = Window.GetWindow(this)
+            };
+            if (methodDialog.ShowDialog() != true) return;
 
-            try
+            if (methodDialog.SelectedChoice == RenewalChoice.QuickRenew)
             {
-                var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid);
-                if (resp.Succeeded)
-                {
-                    ToastNotification.Show("Record Renewed", recordName + " validity extended for 1 year.", ToastType.Success);
-                    AuditLogService.Instance.LogUpdate(id, recordName, GetCurrentUser(), CurrentUserRole, "Validity extended for 1 year");
-                    await LoadRecordsAsync();
-                }
-                else
-                {
-                    string err = resp.Errors != null && resp.Errors.Count > 0
-                        ? string.Join("\n", resp.Errors)
-                        : "Failed to renew record.";
-                    Views.Dialogs.ActionConfirmDialog.Error(
-                        "Renew Failed",
-                        err);
-                }
+                await RenewRecordQuickAsync(vm?.RawModel ?? new SoloParentRecord { Id = id, Surname = recordName });
+                return;
             }
-            finally
+
+            if (methodDialog.SelectedChoice == RenewalChoice.ReassessAndRenew)
             {
-                // Hide loading indicator
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+                SoloParentRecord rawRecord = vm?.RawModel;
+                SoloParentDto existingDto = null;
+                var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
+                if (fetch.Succeeded && fetch.Data != null)
+                {
+                    existingDto = fetch.Data;
+                    rawRecord = SoloParentApiService.Instance.MapToRecord(existingDto);
+                }
+
+                if (rawRecord == null) rawRecord = new SoloParentRecord { Id = id, Surname = recordName };
+
+                var dialog = new RecordDialog(rawRecord, isRenewal: true)
+                {
+                    Owner = Window.GetWindow(this)
+                };
+                if (dialog.ShowDialog() == true && dialog.Result != null)
+                {
+                    await RenewRecordAsync(rawRecord, dialog.Result, existingDto);
+                }
             }
         }
 
@@ -972,10 +1065,12 @@ namespace SOLUM_UI
             Check("Occupation",         before.Occupation,           after.Occupation);
             Check("Religion",           before.Religion,             after.Religion);
             Check("Monthly Income",     before.MonthlyIncome,        after.MonthlyIncome);
-            Check("Occupation",         before.Occupation,           after.Occupation);
+            Check("Circumstances / Problem Presented", before.CircumstancesDisplay, after.CircumstancesDisplay);
             Check("PhilSys Number",     before.PhilSysNumber,        after.PhilSysNumber);
             Check("Emergency Contact",  before.EmergencyContactName, after.EmergencyContactName);
             Check("Emergency Number",   before.EmergencyContactNumber, after.EmergencyContactNumber);
+            Check("Needs & Problems",   before.NeedsAndProblems,     after.NeedsAndProblems);
+            Check("Other Sources of Income", before.OtherIncomeSource, after.OtherIncomeSource);
 
             if (before.DateOfBirth != after.DateOfBirth)
                 changes.Add(new SOLUM_UI.Models.ChangeDetail(

@@ -224,6 +224,9 @@
     <Compile Include="Views\EntryMethodDialog.xaml.cs">
       <DependentUpon>EntryMethodDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\RenewalMethodDialog.xaml.cs">
+      <DependentUpon>RenewalMethodDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PreCheckDialog.xaml.cs">
       <DependentUpon>PreCheckDialog.xaml</DependentUpon>
     </Compile>
@@ -417,6 +420,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\EntryMethodDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\RenewalMethodDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

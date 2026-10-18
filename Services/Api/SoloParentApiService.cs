@@ -113,9 +113,9 @@ namespace SOLUM_UI.Services.Api
             return await ApiClient.Instance.DeleteAsync<bool>($"api/soloparent/{id}");
         }
 
-        public async Task<BaseResponse<bool>> RenewSoloParentRecordAsync(Guid id)
+        public async Task<BaseResponse<RenewSoloParentResponse>> RenewSoloParentRecordAsync(Guid id, RenewSoloParentRequest request = null)
         {
-            return await ApiClient.Instance.PostAsync<object, bool>($"api/soloparent/{id}/renew", new { });
+            return await ApiClient.Instance.PostAsync<object, RenewSoloParentResponse>($"api/soloparent/{id}/renew", request ?? (object)new { });
         }
 
         // =========================================================================
@@ -134,7 +134,9 @@ namespace SOLUM_UI.Services.Api
                 ProblemPresented = MapProblemPresented(r),
                 IsLGBT = r.IsLGBT,
                 IsPantawidBeneficiary = r.IsPantawidBeneficiary,
-                IsIndigenous = r.IsIndigenous
+                IsIndigenous = r.IsIndigenous,
+                NeedsAndProblems = r.NeedsAndProblems,
+                OtherSourcesOfIncome = r.OtherIncomeSource
             };
 
             if (r.FamilyMembers != null)
@@ -165,7 +167,9 @@ namespace SOLUM_UI.Services.Api
 
                 IsIndigenous = r.IsIndigenous,
                 IsLGBT = r.IsLGBT,
-                IsPantawidBeneficiary = r.IsPantawidBeneficiary 
+                IsPantawidBeneficiary = r.IsPantawidBeneficiary,
+                NeedsAndProblems = r.NeedsAndProblems,
+                OtherSourcesOfIncome = r.OtherIncomeSource
             };
 
             var existingIds = existingEntity?.FamilyMembers != null
@@ -243,6 +247,96 @@ namespace SOLUM_UI.Services.Api
                 if (!processedExistingIds.Contains(existingId) && !req.RemovedFamilyMemberIds.Contains(existingId))
                 {
                     req.RemovedFamilyMemberIds.Add(existingId);
+                }
+            }
+
+            return req;
+        }
+
+        public RenewSoloParentRequest MapToRenewRequest(Guid id, SoloParentRecord r, SoloParentDto existingEntity = null)
+        {
+            var req = new RenewSoloParentRequest
+            {
+                CivilStatus = !string.IsNullOrWhiteSpace(r.CivilStatus) ? r.CivilStatus.Trim() : "Single",
+                Employment = MapEmploymentInfo(r),
+                ProblemPresented = MapProblemPresented(r),
+                NeedsAndProblems = r.NeedsAndProblems?.Trim(),
+                OtherSourcesOfIncome = r.OtherIncomeSource?.Trim(),
+                FamilyMembers = new RenewFamilyMembersRequest()
+            };
+
+            var existingIds = existingEntity?.FamilyMembers != null
+                ? new HashSet<Guid>(existingEntity.FamilyMembers.Select(f => f.Id))
+                : new HashSet<Guid>();
+
+            var processedExistingIds = new HashSet<Guid>();
+
+            if (r.FamilyMembers != null)
+            {
+                foreach (var fm in r.FamilyMembers)
+                {
+                    string mName = fm.MemberName?.Trim() ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(mName)) continue;
+
+                    // 1. Existing family member (has database GUID)
+                    if (fm.Id.HasValue && !fm.IsNew && existingIds.Contains(fm.Id.Value))
+                    {
+                        processedExistingIds.Add(fm.Id.Value);
+                        req.FamilyMembers.ExistingFamilyMembers.Add(new UpdateFamilyMemberRequest
+                        {
+                            Id = fm.Id.Value,
+                            Name = fm.MemberName,
+                            Sex = NormalizeSex(fm.Sex),
+                            Age = ParseAge(fm.Age, fm.Birthdate),
+                            Birthdate = ParseDate(fm.Birthdate, DateTime.UtcNow.AddYears(-10)),
+                            CivilStatus = string.IsNullOrWhiteSpace(fm.CivilStatus) ? "Single" : fm.CivilStatus,
+                            Relationship = string.IsNullOrWhiteSpace(fm.Relationship) ? "Child" : fm.Relationship,
+                            EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "Student" : fm.EducationEmployment,
+                            Income = ParseDecimal(fm.Income)
+                        });
+                    }
+                    // 2. Fallback: If Id was missing but matches an unclaimed existing member by Name
+                    else if (!fm.Id.HasValue && !fm.IsNew && existingEntity?.FamilyMembers != null &&
+                             existingEntity.FamilyMembers.FirstOrDefault(f => !processedExistingIds.Contains(f.Id) && string.Equals(f.Name?.Trim(), mName, StringComparison.OrdinalIgnoreCase)) is FamilyMemberDto matched)
+                    {
+                        processedExistingIds.Add(matched.Id);
+                        req.FamilyMembers.ExistingFamilyMembers.Add(new UpdateFamilyMemberRequest
+                        {
+                            Id = matched.Id,
+                            Name = fm.MemberName,
+                            Sex = NormalizeSex(fm.Sex),
+                            Age = ParseAge(fm.Age, fm.Birthdate),
+                            Birthdate = ParseDate(fm.Birthdate, DateTime.UtcNow.AddYears(-10)),
+                            CivilStatus = string.IsNullOrWhiteSpace(fm.CivilStatus) ? "Single" : fm.CivilStatus,
+                            Relationship = string.IsNullOrWhiteSpace(fm.Relationship) ? "Child" : fm.Relationship,
+                            EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "Student" : fm.EducationEmployment,
+                            Income = ParseDecimal(fm.Income)
+                        });
+                    }
+                    // 3. New family member
+                    else
+                    {
+                        req.FamilyMembers.NewFamilyMembers.Add(MapCreateFamilyMember(fm));
+                    }
+                }
+            }
+
+            if (r.RemovedFamilyMemberIds != null)
+            {
+                foreach (var removedId in r.RemovedFamilyMemberIds)
+                {
+                    if (existingIds.Contains(removedId) && !req.FamilyMembers.RemovedFamilyMemberIds.Contains(removedId))
+                    {
+                        req.FamilyMembers.RemovedFamilyMemberIds.Add(removedId);
+                    }
+                }
+            }
+
+            foreach (var existingId in existingIds)
+            {
+                if (!processedExistingIds.Contains(existingId) && !req.FamilyMembers.RemovedFamilyMemberIds.Contains(existingId))
+                {
+                    req.FamilyMembers.RemovedFamilyMemberIds.Add(existingId);
                 }
             }
 
@@ -349,7 +443,11 @@ namespace SOLUM_UI.Services.Api
                 EmergencyAddress = dto.EmergencyContact?.EmergencyPersonContactAddress ?? string.Empty,
                 EmergencyContactNumber = dto.EmergencyContact?.EmergencyPersonContactNumber ?? string.Empty,
 
-                NeedsAndProblems = dto.ProblemPresented?.Name ?? string.Empty,
+                ProblemPresented = dto.ProblemPresented?.Name ?? string.Empty,
+                NeedsAndProblems = !string.IsNullOrWhiteSpace(dto.NeedsAndProblems)
+                    ? dto.NeedsAndProblems
+                    : (!IsKnownClassification(dto.ProblemPresented?.Name) ? (dto.ProblemPresented?.Name ?? string.Empty) : string.Empty),
+                OtherIncomeSource = dto.OtherSourcesOfIncome ?? string.Empty,
                 CircumstanceA2Cause = dto.ProblemPresented?.CauseOfDeath ?? string.Empty,
                 CircumstanceA2Date = DateTime.TryParse(dto.ProblemPresented?.date, out var a2d) ? a2d : DateTime.MinValue,
                 CircumstanceA4Disability = dto.ProblemPresented?.TypeOfDisability ?? string.Empty,
@@ -364,20 +462,22 @@ namespace SOLUM_UI.Services.Api
 
             record.Name = $"{record.Surname}, {record.FirstName} {record.MiddleName}".Trim();
 
-            // Match circumstance checkboxes from ProblemPresentedNumber
+            // Match circumstance checkboxes from ProblemPresentedNumber and Name
             string probNum = dto.ProblemPresented?.ProblemPresentedNumber ?? string.Empty;
-            record.CircumstanceA1 = probNum.Contains("A1");
-            record.CircumstanceA2 = probNum.Contains("A2") || !string.IsNullOrWhiteSpace(record.CircumstanceA2Cause);
-            record.CircumstanceA3 = probNum.Contains("A3");
-            record.CircumstanceA4 = probNum.Contains("A4") || !string.IsNullOrWhiteSpace(record.CircumstanceA4Disability);
-            record.CircumstanceA5 = probNum.Contains("A5") || !string.IsNullOrWhiteSpace(record.CircumstanceA5Period);
-            record.CircumstanceA6 = probNum.Contains("A6") || record.CircumstanceA6Nullity || record.CircumstanceA6Annulment;
-            record.CircumstanceA7 = probNum.Contains("A7");
-            record.CircumstanceB = probNum.Contains("B") || !string.IsNullOrWhiteSpace(record.CircumstanceBStayAbroad);
-            record.CircumstanceC = probNum.Contains("C");
-            record.CircumstanceD = probNum.Contains("D");
-            record.CircumstanceE = probNum.Contains("E");
-            record.CircumstanceF = probNum.Contains("F");
+            string probName = dto.ProblemPresented?.Name ?? string.Empty;
+
+            record.CircumstanceA1 = probNum.Contains("A1") || probName.IndexOf("rape", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceA2 = probNum.Contains("A2") || probName.IndexOf("death", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceA2Cause);
+            record.CircumstanceA3 = probNum.Contains("A3") || probName.IndexOf("detention", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceA4 = probNum.Contains("A4") || probName.IndexOf("incapacity", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceA4Disability);
+            record.CircumstanceA5 = probNum.Contains("A5") || probName.IndexOf("separation", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceA5Period);
+            record.CircumstanceA6 = probNum.Contains("A6") || probName.IndexOf("nullity", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("annulment", StringComparison.OrdinalIgnoreCase) >= 0 || record.CircumstanceA6Nullity || record.CircumstanceA6Annulment;
+            record.CircumstanceA7 = probNum.Contains("A7") || probName.IndexOf("abandonment", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceB = probNum.Contains("B") || probName.IndexOf("ofw", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceBStayAbroad);
+            record.CircumstanceC = probNum.Contains("C") || probName.IndexOf("unmarried", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceD = probNum.Contains("D") || probName.IndexOf("guardian", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("adoptive", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceE = probNum.Contains("E") || probName.IndexOf("relative", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceF = probNum.Contains("F") || probName.IndexOf("pregnant", StringComparison.OrdinalIgnoreCase) >= 0;
 
             if (dto.FamilyMembers != null)
             {
@@ -446,6 +546,8 @@ namespace SOLUM_UI.Services.Api
                 AddressDetails        = dto.AddressDetails,
                 EmergencyContact      = dto.EmergencyContact,
                 ProblemPresented      = dto.ProblemPresented,
+                NeedsAndProblems      = dto.NeedsAndProblems,
+                OtherSourcesOfIncome  = dto.OtherSourcesOfIncome,
                 IsLGBT                = dto.IsLGBT,
                 IsPantawidBeneficiary = dto.IsPantawidBeneficiary,
                 IsIndigenous          = dto.IsIndigenous,
@@ -548,6 +650,21 @@ namespace SOLUM_UI.Services.Api
             };
         }
 
+        private static readonly HashSet<string> KnownClassifications = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "Birth from rape", "Death of Spouse", "Detention of Spouse", "Physical & Mental Incapacity of Spouse",
+            "Legal/de facto Separation", "Declaration of Nullity/Annulment", "Abandonment of Spouse",
+            "OFW-related Solo Parent", "Unmarried Mother/Father", "Legal Guardian / Adoptive Parent",
+            "Relative within 4th civil degree", "Pregnant Woman", "Solo Parent", "Adolescent Parent",
+            "Abandonment (A2)", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "B", "C", "D", "E", "F"
+        };
+
+        private static bool IsKnownClassification(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return false;
+            return KnownClassifications.Contains(name.Trim());
+        }
+
         private ProblemPresentedDetails MapProblemPresented(SoloParentRecord r)
         {
             var codes = new List<string>();
@@ -566,11 +683,13 @@ namespace SOLUM_UI.Services.Api
             if (r.CircumstanceE)  { codes.Add("E");  title = "Relative within 4th civil degree"; }
             if (r.CircumstanceF)  { codes.Add("F");  title = "Pregnant Woman"; }
 
-            string code = codes.Count > 0 ? string.Join(",", codes) : string.Empty;
-            if (!string.IsNullOrWhiteSpace(r.NeedsAndProblems))
+            // If no circumstance checkbox is checked, retain existing classification title if available
+            if (codes.Count == 0 && !string.IsNullOrWhiteSpace(r.ProblemPresented))
             {
-                title = r.NeedsAndProblems;
+                title = r.ProblemPresented.Trim();
             }
+
+            string code = codes.Count > 0 ? string.Join(",", codes) : string.Empty;
 
             decimal? lengthAbroad = null;
             if (decimal.TryParse(r.CircumstanceBStayAbroad, out var lab)) lengthAbroad = lab;

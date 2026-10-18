@@ -226,19 +226,31 @@ namespace SOLUM_UI.Models
         {
             switch (raw.ToUpperInvariant())
             {
-                case "LOGIN":                return "#3B82F6";   // Blue
-                case "LOGOUT":               return "#6B7280";   // Gray
-                case "REFRESH_TOKEN":        return "#60A5FA";   // Light Blue
-                case "CHANGE_PASSWORD":      return "#F59E0B";   // Amber
-                case "REGISTER_USER":        return "#10B981";   // Green
-                case "REGISTER_ADMIN":       return "#8B5CF6";   // Purple
-                case "UPDATE_USER":          return "#14B8A6";   // Teal
-                case "DISABLE_USER":         return "#F97316";   // Orange
-                case "CREATE_SOLO_PARENT":   return "#10B981";   // Green
-                case "UPDATE_SOLO_PARENT":   return "#14B8A6";   // Teal
-                case "DELETE_SOLO_PARENT":   return "#EF4444";   // Red
-                case "RENEW_SOLO_PARENT":    return "#059669";   // Emerald Green
-                default:                     return "#6B7280";   // Gray fallback
+                case "LOGIN":                            return "#3B82F6";   // Blue
+                case "LOGOUT":                           return "#6B7280";   // Gray
+                case "REFRESH_TOKEN":                    return "#60A5FA";   // Light Blue
+                case "REFRESH_TOKEN_FAILED":             return "#EF4444";   // Red
+                case "CHANGE_PASSWORD":                  return "#F59E0B";   // Amber
+                case "REGISTER_USER":                    return "#10B981";   // Green
+                case "REGISTER_ADMIN":                   return "#8B5CF6";   // Purple
+                case "UPDATE_USER":                      return "#14B8A6";   // Teal
+                case "ENABLE_USER":                      return "#10B981";   // Green
+                case "DISABLE_USER":                     return "#F97316";   // Orange
+                case "DELETE_USER":                      return "#EF4444";   // Red
+                case "ADMIN_RESET_PASSWORD":             return "#F59E0B";   // Amber
+                case "CREATE_SOLO_PARENT":               return "#10B981";   // Green
+                case "UPDATE_SOLO_PARENT":               return "#14B8A6";   // Teal
+                case "DELETE_SOLO_PARENT":               return "#EF4444";   // Red
+                case "RENEW_SOLO_PARENT":
+                case "RENEW_SOLO_PARENT_RECORD":         return "#059669";   // Emerald Green
+                case "REVOKE_SOLO_PARENT_RECORD":        return "#DC2626";   // Dark Red
+                case "CREATE_SUBSIDY_CYCLE":             return "#6366F1";   // Indigo
+                case "GENERATE_SUBSIDY_RECOMMENDATIONS": return "#8B5CF6";   // Violet
+                case "SHORTLIST_SUBSIDY_CANDIDATES":     return "#3B82F6";   // Blue
+                case "REJECT_SUBSIDY_OUTLIER":           return "#EF4444";   // Red
+                case "CONFIRM_SUBSIDY_GRANTEES":         return "#10B981";   // Green
+                case "REVOKE_SUBSIDY_GRANT":             return "#DC2626";   // Dark Red
+                default:                                 return "#6B7280";   // Gray fallback
             }
         }
 
@@ -246,19 +258,31 @@ namespace SOLUM_UI.Models
         {
             switch (raw.ToUpperInvariant())
             {
-                case "LOGIN":                return "→";
-                case "LOGOUT":               return "←";
-                case "REFRESH_TOKEN":        return "↻";
-                case "CHANGE_PASSWORD":      return "🔑";
-                case "REGISTER_USER":        return "+";
-                case "REGISTER_ADMIN":       return "★";
-                case "UPDATE_USER":          return "E";
-                case "DISABLE_USER":         return "⊘";
-                case "CREATE_SOLO_PARENT":   return "+";
-                case "UPDATE_SOLO_PARENT":   return "E";
-                case "DELETE_SOLO_PARENT":   return "X";
-                case "RENEW_SOLO_PARENT":    return "R";
-                default:                     return "?";
+                case "LOGIN":                            return "→";
+                case "LOGOUT":                           return "←";
+                case "REFRESH_TOKEN":                    return "↻";
+                case "REFRESH_TOKEN_FAILED":             return "⚠";
+                case "CHANGE_PASSWORD":                  return "🔑";
+                case "REGISTER_USER":                    return "+";
+                case "REGISTER_ADMIN":                   return "★";
+                case "UPDATE_USER":                      return "E";
+                case "ENABLE_USER":                      return "✓";
+                case "DISABLE_USER":                     return "⊘";
+                case "DELETE_USER":                      return "X";
+                case "ADMIN_RESET_PASSWORD":             return "🔑";
+                case "CREATE_SOLO_PARENT":               return "+";
+                case "UPDATE_SOLO_PARENT":               return "E";
+                case "DELETE_SOLO_PARENT":               return "X";
+                case "RENEW_SOLO_PARENT":
+                case "RENEW_SOLO_PARENT_RECORD":         return "R";
+                case "REVOKE_SOLO_PARENT_RECORD":        return "✕";
+                case "CREATE_SUBSIDY_CYCLE":             return "+";
+                case "GENERATE_SUBSIDY_RECOMMENDATIONS": return "⚙";
+                case "SHORTLIST_SUBSIDY_CANDIDATES":     return "📋";
+                case "REJECT_SUBSIDY_OUTLIER":           return "⊘";
+                case "CONFIRM_SUBSIDY_GRANTEES":         return "✓";
+                case "REVOKE_SUBSIDY_GRANT":             return "✕";
+                default:                                 return "?";
             }
         }
 
@@ -266,18 +290,30 @@ namespace SOLUM_UI.Models
         {
             switch (raw.ToUpperInvariant())
             {
-                case "LOGIN":                return "Login";
-                case "LOGOUT":               return "Logout";
-                case "REFRESH_TOKEN":        return "Refresh Token";
-                case "CHANGE_PASSWORD":      return "Change Password";
-                case "REGISTER_USER":        return "Register User";
-                case "REGISTER_ADMIN":       return "Register Admin";
-                case "UPDATE_USER":          return "Update User";
-                case "DISABLE_USER":         return "Disable User";
-                case "CREATE_SOLO_PARENT":   return "Create Solo Parent";
-                case "UPDATE_SOLO_PARENT":   return "Update Solo Parent";
-                case "DELETE_SOLO_PARENT":   return "Delete Solo Parent";
-                case "RENEW_SOLO_PARENT":    return "Renew Solo Parent";
+                case "LOGIN":                            return "Login";
+                case "LOGOUT":                           return "Logout";
+                case "REFRESH_TOKEN":                    return "Refresh Token";
+                case "REFRESH_TOKEN_FAILED":             return "Refresh Token Failed";
+                case "CHANGE_PASSWORD":                  return "Change Password";
+                case "REGISTER_USER":                    return "Register User";
+                case "REGISTER_ADMIN":                   return "Register Admin";
+                case "UPDATE_USER":                      return "Update User";
+                case "ENABLE_USER":                      return "Enable User";
+                case "DISABLE_USER":                     return "Disable User";
+                case "DELETE_USER":                      return "Delete User";
+                case "ADMIN_RESET_PASSWORD":             return "Admin Reset Password";
+                case "CREATE_SOLO_PARENT":               return "Create Solo Parent";
+                case "UPDATE_SOLO_PARENT":               return "Update Solo Parent";
+                case "DELETE_SOLO_PARENT":               return "Delete Solo Parent";
+                case "RENEW_SOLO_PARENT":
+                case "RENEW_SOLO_PARENT_RECORD":         return "Renew Solo Parent";
+                case "REVOKE_SOLO_PARENT_RECORD":        return "Revoke Solo Parent";
+                case "CREATE_SUBSIDY_CYCLE":             return "Create Subsidy Cycle";
+                case "GENERATE_SUBSIDY_RECOMMENDATIONS": return "Generate Recommendations";
+                case "SHORTLIST_SUBSIDY_CANDIDATES":     return "Shortlist Candidates";
+                case "REJECT_SUBSIDY_OUTLIER":           return "Reject Outlier";
+                case "CONFIRM_SUBSIDY_GRANTEES":         return "Confirm Grantees";
+                case "REVOKE_SUBSIDY_GRANT":             return "Revoke Grant";
                 default:
                     return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(
                         raw.Replace('_', ' ').ToLowerInvariant());
@@ -311,19 +347,31 @@ namespace SOLUM_UI.Models
         {
             switch (raw.ToUpperInvariant())
             {
-                case "LOGIN":               return _iconLogin;
-                case "LOGOUT":              return _iconLogout;
-                case "REFRESH_TOKEN":       return _iconRefresh;
-                case "CHANGE_PASSWORD":     return _iconPassword;
-                case "REGISTER_USER":       return _iconUserAdd;
-                case "REGISTER_ADMIN":      return _iconAdminAdd;
-                case "UPDATE_USER":         return _iconUserEdit;
-                case "DISABLE_USER":        return _iconUserOff;
-                case "CREATE_SOLO_PARENT":  return _iconAdd;
-                case "UPDATE_SOLO_PARENT":  return _iconEdit;
-                case "DELETE_SOLO_PARENT":  return _iconDelete;
-                case "RENEW_SOLO_PARENT":   return _iconRenew;
-                default:                    return _iconUnknown;
+                case "LOGIN":                            return _iconLogin;
+                case "LOGOUT":                           return _iconLogout;
+                case "REFRESH_TOKEN":                    return _iconRefresh;
+                case "REFRESH_TOKEN_FAILED":             return _iconRefresh;
+                case "CHANGE_PASSWORD":                  return _iconPassword;
+                case "ADMIN_RESET_PASSWORD":             return _iconPassword;
+                case "REGISTER_USER":                    return _iconUserAdd;
+                case "REGISTER_ADMIN":                   return _iconAdminAdd;
+                case "UPDATE_USER":                      return _iconUserEdit;
+                case "ENABLE_USER":                      return _iconUserEdit;
+                case "DISABLE_USER":                     return _iconUserOff;
+                case "DELETE_USER":                      return _iconDelete;
+                case "CREATE_SOLO_PARENT":               return _iconAdd;
+                case "UPDATE_SOLO_PARENT":               return _iconEdit;
+                case "DELETE_SOLO_PARENT":               return _iconDelete;
+                case "RENEW_SOLO_PARENT":
+                case "RENEW_SOLO_PARENT_RECORD":         return _iconRenew;
+                case "REVOKE_SOLO_PARENT_RECORD":        return _iconDelete;
+                case "CREATE_SUBSIDY_CYCLE":             return _iconAdd;
+                case "GENERATE_SUBSIDY_RECOMMENDATIONS": return _iconSystem;
+                case "SHORTLIST_SUBSIDY_CANDIDATES":     return _iconView;
+                case "REJECT_SUBSIDY_OUTLIER":           return _iconUserOff;
+                case "CONFIRM_SUBSIDY_GRANTEES":         return _iconRenew;
+                case "REVOKE_SUBSIDY_GRANT":             return _iconDelete;
+                default:                                 return _iconUnknown;
             }
         }
 

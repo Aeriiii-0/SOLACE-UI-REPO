@@ -346,8 +346,8 @@ namespace SOLUM_UI
             LockCombo(CmbExtension);
             LockDate(DpBirthdate); LockBox(TxtPlaceOfBirth); LockCombo(CmbSex); LockBox(TxtPhilSys);
 
-            // Background (fixed for renewal)
-            LockCombo(CmbEducation); LockBox(TxtReligion); LockBox(TxtOccupation);
+            // Background (Education and Religion are fixed for renewal; Occupation, Income, Employment remain editable)
+            LockCombo(CmbEducation); LockBox(TxtReligion);
 
             // Address & contact
             LockBox(TxtAddress); LockCombo(CmbBarangay); LockBox(TxtContact);
@@ -359,19 +359,17 @@ namespace SOLUM_UI
             // Date of application
             LockDate(DpDateOfApplication);
 
-            // Circumstances
-            foreach (var chk in new System.Windows.Controls.Primitives.ToggleButton[]
-                { ChkA1, ChkA2, ChkA3, ChkA4, ChkA5, ChkA6, ChkA7,
-                  ChkB, ChkC, ChkD, ChkE, ChkF })
-            { if (chk != null) { chk.IsEnabled = false; chk.Opacity = 0.50; } }
-
-            // Family composition, notes, and additional information
-            FamilyRows.IsEnabled = false; FamilyRows.Opacity = 0.55;
-            LockBox(TxtNeeds); LockBox(TxtOtherIncome);
+            // Additional classifications are fixed for renewal
             ChkPantawid.IsEnabled   = false; ChkPantawid.Opacity   = 0.55;
             ChkIndigenous.IsEnabled = false; ChkIndigenous.Opacity = 0.55;
             ChkLGBTQ.IsEnabled      = false; ChkLGBTQ.Opacity      = 0.55;
-            // CmbEmploymentStatus remains ENABLED for renewal updates
+
+            // Mutable fields remaining ENABLED for renewal re-assessment:
+            // - CmbCivilStatus
+            // - TxtOccupation, TxtMonthlyIncome, CmbEmploymentStatus
+            // - Circumstances (ChkA1..ChkF, details)
+            // - FamilyRows (+ Add Row, delete row, edit row)
+            // - TxtNeeds, TxtOtherIncome
         }
 
         /// <summary>
@@ -1473,31 +1471,31 @@ namespace SOLUM_UI
                 EmergencyAddress       = TxtEmergencyAddress.Text.Trim(),
                 EmergencyContactNumber = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtEmergencyNumber.Text.Trim()),
 
-                CircumstanceA1             = _isRenewal ? _existing.CircumstanceA1 : (ChkA1.IsChecked == true && ChkA1.IsEnabled),
-                CircumstanceA2             = _isRenewal ? _existing.CircumstanceA2 : (ChkA2.IsChecked == true && ChkA2.IsEnabled),
-                CircumstanceA2Cause        = _isRenewal ? _existing.CircumstanceA2Cause        : (ChkA2.IsChecked == true ? TxtA2Cause.Text.Trim() : string.Empty),
-                CircumstanceA2Date         = _isRenewal ? _existing.CircumstanceA2Date         : (ChkA2.IsChecked == true ? (DpA2Date.SelectedDate ?? DateTime.MinValue) : DateTime.MinValue),
-                CircumstanceA3             = _isRenewal ? _existing.CircumstanceA3 : (ChkA3.IsChecked == true && ChkA3.IsEnabled),
-                CircumstanceA4             = _isRenewal ? _existing.CircumstanceA4 : (ChkA4.IsChecked == true && ChkA4.IsEnabled),
-                CircumstanceA4Disability   = _isRenewal ? _existing.CircumstanceA4Disability   : (ChkA4.IsChecked == true ? TxtA4Disability.Text.Trim() : string.Empty),
-                CircumstanceA5             = _isRenewal ? _existing.CircumstanceA5 : (ChkA5.IsChecked == true && ChkA5.IsEnabled),
-                CircumstanceA5Period       = _isRenewal ? _existing.CircumstanceA5Period       : (ChkA5.IsChecked == true ? TxtA5Period.Text.Trim() : string.Empty),
-                CircumstanceA6             = _isRenewal ? _existing.CircumstanceA6 : (ChkA6.IsChecked == true && ChkA6.IsEnabled),
-                CircumstanceA6Nullity      = _isRenewal ? _existing.CircumstanceA6Nullity      : (ChkA6.IsChecked == true && GetComboValue(CmbA6Declaration) == "Nullity of marriage"),
-                CircumstanceA6Annulment    = _isRenewal ? _existing.CircumstanceA6Annulment    : (ChkA6.IsChecked == true && GetComboValue(CmbA6Declaration) == "Annulment of marriage"),
-                CircumstanceA7             = _isRenewal ? _existing.CircumstanceA7 : (ChkA7.IsChecked == true && ChkA7.IsEnabled),
-                CircumstanceB              = _isRenewal ? _existing.CircumstanceB  : (ChkB.IsChecked  == true && ChkB.IsEnabled),
-                CircumstanceBStayAbroad    = _isRenewal ? _existing.CircumstanceBStayAbroad    : (ChkB.IsChecked  == true ? TxtBStayAbroad.Text.Trim() : string.Empty),
-                CircumstanceC              = _isRenewal ? _existing.CircumstanceC  : (ChkC.IsChecked  == true && ChkC.IsEnabled),
-                CircumstanceD              = _isRenewal ? _existing.CircumstanceD  : (ChkD.IsChecked  == true && ChkD.IsEnabled),
-                CircumstanceE              = _isRenewal ? _existing.CircumstanceE  : (ChkE.IsChecked  == true && ChkE.IsEnabled),
-                CircumstanceF              = _isRenewal ? _existing.CircumstanceF  : (ChkF.IsChecked  == true && ChkF.IsEnabled),
-
+                CircumstanceA1             = ChkA1.IsChecked == true,
+                CircumstanceA2             = ChkA2.IsChecked == true,
+                CircumstanceA2Cause        = ChkA2.IsChecked == true ? TxtA2Cause.Text.Trim() : string.Empty,
+                CircumstanceA2Date         = ChkA2.IsChecked == true ? (DpA2Date.SelectedDate ?? DateTime.MinValue) : DateTime.MinValue,
+                CircumstanceA3             = ChkA3.IsChecked == true,
+                CircumstanceA4             = ChkA4.IsChecked == true,
+                CircumstanceA4Disability   = ChkA4.IsChecked == true ? TxtA4Disability.Text.Trim() : string.Empty,
+                CircumstanceA5             = ChkA5.IsChecked == true,
+                CircumstanceA5Period       = ChkA5.IsChecked == true ? TxtA5Period.Text.Trim() : string.Empty,
+                CircumstanceA6             = ChkA6.IsChecked == true,
+                CircumstanceA6Nullity      = ChkA6.IsChecked == true && GetComboValue(CmbA6Declaration) == "Nullity of marriage",
+                CircumstanceA6Annulment    = ChkA6.IsChecked == true && GetComboValue(CmbA6Declaration) == "Annulment of marriage",
+                CircumstanceA7             = ChkA7.IsChecked == true,
+                CircumstanceB              = ChkB.IsChecked == true,
+                CircumstanceBStayAbroad    = ChkB.IsChecked == true ? TxtBStayAbroad.Text.Trim() : string.Empty,
+                CircumstanceC              = ChkC.IsChecked == true,
+                CircumstanceD              = ChkD.IsChecked == true,
+                CircumstanceE              = ChkE.IsChecked == true,
+                CircumstanceF              = ChkF.IsChecked == true,
 
                 FamilyMembers          = members,
                 RemovedFamilyMemberIds = new List<Guid>(_removedFamilyMemberIds),
-                NeedsAndProblems       = _isRenewal ? (_existing?.NeedsAndProblems ?? string.Empty) : TxtNeeds.Text.Trim(),
-                OtherIncomeSource      = _isRenewal ? (_existing?.OtherIncomeSource ?? string.Empty) : TxtOtherIncome.Text.Trim(),
+                ProblemPresented       = _existing?.ProblemPresented ?? string.Empty,
+                NeedsAndProblems       = TxtNeeds.Text.Trim(),
+                OtherIncomeSource      = TxtOtherIncome.Text.Trim(),
                 IsPantawidBeneficiary  = _isRenewal ? _existing.IsPantawidBeneficiary : (ChkPantawid.IsChecked == true),
                 IsIndigenous           = _isRenewal ? _existing.IsIndigenous           : (ChkIndigenous.IsChecked == true),
                 IsLGBT                 = _isRenewal ? _existing.IsLGBT                 : (ChkLGBTQ.IsChecked == true),

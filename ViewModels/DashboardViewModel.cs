@@ -192,13 +192,27 @@ namespace SOLUM_UI.ViewModels
                 int currentYear = DateTime.Now.Year;
                 ChartSubtitle = $"New solo parents registered — Jan to Dec {currentYear}";
 
+                // 1. Fetch primary KPI stats and recent logs
                 var statsTask = AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
                 var logsTask  = AuditLogApiService.Instance.GetLogsAsync(pageSize: 10, userId: effectiveUserId);
+
+                // Start monthly chart tasks in parallel with safe individual error handling
                 var monthlyTasks = Enumerable.Range(1, 12)
-                    .Select(m => AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(currentYear, m))
+                    .Select(async m =>
+                    {
+                        try
+                        {
+                            return await AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(currentYear, m);
+                        }
+                        catch
+                        {
+                            return null;
+                        }
+                    })
                     .ToArray();
 
-                await Task.WhenAll(new Task[] { statsTask, logsTask }.Concat(monthlyTasks));
+                // Await primary stats and logs first so user sees KPI numbers and activity right away
+                await Task.WhenAll(statsTask, logsTask);
 
                 var statsResponse = statsTask.Result;
                 if (statsResponse != null && statsResponse.Succeeded && statsResponse.Data != null)
@@ -212,16 +226,20 @@ namespace SOLUM_UI.ViewModels
                 RecentLogs.Clear();
                 if (logsResponse != null && logsResponse.Succeeded && logsResponse.Data?.Items != null)
                 {
-                    await AuditLogViewModel.EnsureUserCacheLoadedAsync();
+                    _ = AuditLogViewModel.EnsureUserCacheLoadedAsync();
                     foreach (var dto in logsResponse.Data.Items)
                         RecentLogs.Add(MapDtoToLog(dto));
                 }
 
-                // Populate 12-month chart from API responses
+                // UNBLOCK THE UI IMMEDIATELY! KPI cards and Recent Activity are now rendered and interactive
+                IsLoading = false;
+
+                // 2. Await monthly chart data and populate the chart bars without holding up the loading overlay
+                var monthlyResponses = await Task.WhenAll(monthlyTasks);
                 var monthlyValues = new int[12];
                 for (int i = 0; i < 12; i++)
                 {
-                    var res = monthlyTasks[i].Result;
+                    var res = monthlyResponses[i];
                     if (res != null && res.Succeeded && res.Data != null)
                     {
                         monthlyValues[i] = res.Data.NewRegistrations;
@@ -332,17 +350,40 @@ namespace SOLUM_UI.ViewModels
             {
                 case "CREATE_SOLO_PARENT":
                 case "REGISTER_USER":
-                case "REGISTER_ADMIN":   return AuditAction.Create;
+                case "REGISTER_ADMIN":
+                case "CREATE_SUBSIDY_CYCLE":
+                    return AuditAction.Create;
+
                 case "UPDATE_SOLO_PARENT":
                 case "UPDATE_USER":
+                case "ENABLE_USER":
                 case "CHANGE_PASSWORD":
+                case "ADMIN_RESET_PASSWORD":
                 case "RENEW_SOLO_PARENT":
-                case "REFRESH_TOKEN":    return AuditAction.Update;
+                case "RENEW_SOLO_PARENT_RECORD":
+                case "REFRESH_TOKEN":
+                case "SHORTLIST_SUBSIDY_CANDIDATES":
+                case "CONFIRM_SUBSIDY_GRANTEES":
+                    return AuditAction.Update;
+
                 case "DELETE_SOLO_PARENT":
-                case "DISABLE_USER":     return AuditAction.Delete;
-                case "LOGIN":            return AuditAction.Login;
-                case "LOGOUT":           return AuditAction.Logout;
-                default:                 return AuditAction.System;
+                case "REVOKE_SOLO_PARENT_RECORD":
+                case "DISABLE_USER":
+                case "DELETE_USER":
+                case "REJECT_SUBSIDY_OUTLIER":
+                case "REVOKE_SUBSIDY_GRANT":
+                    return AuditAction.Delete;
+
+                case "LOGIN":
+                    return AuditAction.Login;
+
+                case "LOGOUT":
+                    return AuditAction.Logout;
+
+                case "REFRESH_TOKEN_FAILED":
+                case "GENERATE_SUBSIDY_RECOMMENDATIONS":
+                default:
+                    return AuditAction.System;
             }
         }
 
@@ -354,18 +395,30 @@ namespace SOLUM_UI.ViewModels
 
             switch (rawType.ToUpperInvariant())
             {
-                case "LOGIN":               return $"{who} logged in{suffix}";
-                case "LOGOUT":              return $"{who} logged out{suffix}";
-                case "REFRESH_TOKEN":       return $"{who} refreshed session token";
-                case "CHANGE_PASSWORD":     return $"{who} changed password{suffix}";
-                case "REGISTER_USER":       return $"New user registered{tgt}";
-                case "REGISTER_ADMIN":      return $"New admin registered{tgt}";
-                case "UPDATE_USER":         return $"User updated{tgt}";
-                case "DISABLE_USER":        return $"User disabled{tgt}";
-                case "CREATE_SOLO_PARENT":  return $"Record created{tgt}";
-                case "UPDATE_SOLO_PARENT":  return $"Record updated{tgt}";
-                case "DELETE_SOLO_PARENT":  return $"Record deleted{tgt}";
-                case "RENEW_SOLO_PARENT":   return $"Record renewed{tgt}";
+                case "LOGIN":                           return $"{who} logged in{suffix}";
+                case "LOGOUT":                          return $"{who} logged out{suffix}";
+                case "REFRESH_TOKEN":                   return $"{who} refreshed session token";
+                case "REFRESH_TOKEN_FAILED":            return $"Token refresh failed for {who}{suffix}";
+                case "CHANGE_PASSWORD":                 return $"{who} changed password{suffix}";
+                case "REGISTER_USER":                   return $"New user registered{tgt}";
+                case "REGISTER_ADMIN":                  return $"New admin registered{tgt}";
+                case "UPDATE_USER":                     return $"User updated{tgt}";
+                case "ENABLE_USER":                     return $"User enabled{tgt}";
+                case "DISABLE_USER":                    return $"User disabled{tgt}";
+                case "DELETE_USER":                     return $"User deleted{tgt}";
+                case "ADMIN_RESET_PASSWORD":            return $"Password reset by admin{tgt}";
+                case "CREATE_SOLO_PARENT":              return $"Record created{tgt}";
+                case "UPDATE_SOLO_PARENT":              return $"Record updated{tgt}";
+                case "DELETE_SOLO_PARENT":              return $"Record deleted{tgt}";
+                case "RENEW_SOLO_PARENT":
+                case "RENEW_SOLO_PARENT_RECORD":        return $"Record renewed{tgt}";
+                case "REVOKE_SOLO_PARENT_RECORD":       return $"Record revoked{tgt}";
+                case "CREATE_SUBSIDY_CYCLE":            return $"Subsidy cycle created{tgt}";
+                case "GENERATE_SUBSIDY_RECOMMENDATIONS":return $"Recommendations generated{tgt}";
+                case "SHORTLIST_SUBSIDY_CANDIDATES":    return $"Candidates shortlisted{tgt}";
+                case "REJECT_SUBSIDY_OUTLIER":          return $"Candidate rejected{tgt}";
+                case "CONFIRM_SUBSIDY_GRANTEES":        return $"Grantees confirmed{tgt}";
+                case "REVOKE_SUBSIDY_GRANT":            return $"Grant revoked{tgt}";
                 default:
                     return !string.IsNullOrWhiteSpace(rawType)
                         ? $"{rawType.Replace('_', ' ')}{tgt}{suffix}"

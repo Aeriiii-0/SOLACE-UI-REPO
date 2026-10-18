@@ -85,8 +85,7 @@ namespace SOLUM_UI
             LoadingOverlay.Visibility = Visibility.Visible;
             
             // Show splash screen
-            SplashScreenWindow splash = new SplashScreenWindow();
-            splash.Show();
+            SplashScreenWindow splash = null;
             
             // Start progress animation
             var progressPercentage = FindName("ProgressPercentage") as TextBlock;
@@ -97,6 +96,9 @@ namespace SOLUM_UI
             
             try
             {
+                splash = new SplashScreenWindow();
+                splash.Show();
+
                 if (progressPercentage != null && progressBarFill != null)
                 {
                     progressTimer.Elapsed += (s, e) =>
@@ -115,6 +117,9 @@ namespace SOLUM_UI
 
                 if (!loginResponse.Succeeded || loginResponse.Data == null || string.IsNullOrWhiteSpace(loginResponse.Data.Token))
                 {
+                    splash?.Close();
+                    splash = null;
+
                     string err = loginResponse.Errors != null && loginResponse.Errors.Count > 0
                         ? string.Join("\n", loginResponse.Errors)
                         : "Invalid email or password. Please check your credentials and try again.";
@@ -130,16 +135,29 @@ namespace SOLUM_UI
                 string assignedRole = AuthApiService.Instance.IsAdmin ? "Administrator" : "Encoder";
                 MainWindow.CurrentUserRole = assignedRole;
 
-                var userDTO = await UserApiService.Instance.GetApplicationUsersAsync(
-                        new GetApplicationUserRequest { Id = id, Role = string.Empty, Page = 1, PageSize = 1 }
-                    );
-
-                ApplicationUserDTO loggedInUser = userDTO?.Data?.Items?.FirstOrDefault() ?? new ApplicationUserDTO
+                ApplicationUserDTO loggedInUser = null;
+                // Only Admins have permission to query /api/user. Encoders manage solo parents only.
+                if (AuthApiService.Instance.IsAdmin)
                 {
-                    Id = id,
-                    Email = MainWindow.CurrentUserName,
-                    Role = assignedRole
-                };
+                    try
+                    {
+                        var userDTO = await UserApiService.Instance.GetApplicationUsersAsync(
+                            new GetApplicationUserRequest { Id = id, Role = string.Empty, Page = 1, PageSize = 1 }
+                        );
+                        loggedInUser = userDTO?.Data?.Items?.FirstOrDefault();
+                    }
+                    catch { }
+                }
+
+                if (loggedInUser == null)
+                {
+                    loggedInUser = new ApplicationUserDTO
+                    {
+                        Id = id,
+                        Email = MainWindow.CurrentUserName,
+                        Role = assignedRole
+                    };
+                }
 
                 if (string.IsNullOrWhiteSpace(loggedInUser.Role) || AuthApiService.Instance.IsAdmin)
                 {
@@ -157,17 +175,25 @@ namespace SOLUM_UI
                 mainWindow.Show();
                 AuditLogService.Instance.LogLogin(MainWindow.CurrentUserName, MainWindow.CurrentUserRole);
                 ToastNotification.Show("Welcome", "Logged in as " + MainWindow.CurrentUserName + ".", ToastType.Success);
-                splash.Close();
+                
+                splash?.Close();
+                splash = null;
                 this.Close();
             }
             catch (Exception ex)
             {
+                splash?.Close();
+                splash = null;
                 System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}\n{ex.StackTrace}");
                 ShowError($"Login failed: {ex.Message}");
-                splash.Close();
             }
             finally
             {
+                if (splash != null)
+                {
+                    try { splash.Close(); } catch { }
+                    splash = null;
+                }
                 progressTimer.Stop();
                 progressTimer.Dispose();
                 _isLoggingIn = false;          // NEW

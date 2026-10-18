@@ -151,6 +151,9 @@ namespace SOLUM_UI.Models.Api
          bool IsLGBT { get; set; }
          bool IsPantawidBeneficiary { get; set; }
          bool IsIndigenous { get; set; }
+
+         string NeedsAndProblems { get; set; }
+         string OtherSourcesOfIncome { get; set; }
     }
 
     public class CreateSoloParentRequest : ISoloParentRequest
@@ -166,6 +169,9 @@ namespace SOLUM_UI.Models.Api
         public bool IsLGBT { get; set; }
         public bool IsPantawidBeneficiary { get; set; }
         public bool IsIndigenous { get; set; }
+
+        public string NeedsAndProblems { get; set; }
+        public string OtherSourcesOfIncome { get; set; }
     }
 
     public class UpdateSoloParentRequest : ISoloParentRequest
@@ -184,6 +190,9 @@ namespace SOLUM_UI.Models.Api
         public bool IsLGBT { get; set; }
         public bool IsPantawidBeneficiary { get; set; }
         public bool IsIndigenous { get; set; }
+
+        public string NeedsAndProblems { get; set; }
+        public string OtherSourcesOfIncome { get; set; }
     }
 
     public class GetSoloParentRequest
@@ -232,6 +241,9 @@ namespace SOLUM_UI.Models.Api
         public bool IsPantawidBeneficiary { get; set; }
         public bool IsIndigenous { get; set; }
 
+        public string NeedsAndProblems { get; set; }
+        public string OtherSourcesOfIncome { get; set; }
+
         public DateTime DateCreated { get; set; }
         public bool IsActive { get; set; }
         public string Status { get; set; }
@@ -260,10 +272,48 @@ namespace SOLUM_UI.Models.Api
         public bool IsLGBT { get; set; }
         public bool IsPantawidBeneficiary { get; set; }
         public bool IsIndigenous { get; set; }
+
+        public string NeedsAndProblems { get; set; }
+        public string OtherSourcesOfIncome { get; set; }
     }
 
     // Kept as alias for compatibility
     public class SoloParentDto : SoloParentDetailDto
     {
+    }
+
+    /// <summary>
+    /// Nested family members payload for renewal re-assessment.
+    /// </summary>
+    public class RenewFamilyMembersRequest
+    {
+        public List<UpdateFamilyMemberRequest> ExistingFamilyMembers { get; set; } = new List<UpdateFamilyMemberRequest>();
+        public List<CreateFamilyMemberRequest> NewFamilyMembers { get; set; } = new List<CreateFamilyMemberRequest>();
+        public List<Guid> RemovedFamilyMemberIds { get; set; } = new List<Guid>();
+    }
+
+    /// <summary>
+    /// Request payload for POST /api/soloparent/{id}/renew (Mode 2: Annual Re-assessment Renewal).
+    /// </summary>
+    public class RenewSoloParentRequest
+    {
+        public string CivilStatus { get; set; }
+        public EmploymentInfo Employment { get; set; }
+        public RenewFamilyMembersRequest FamilyMembers { get; set; }
+        public ProblemPresentedDetails ProblemPresented { get; set; }
+        public string NeedsAndProblems { get; set; }
+        public string OtherSourcesOfIncome { get; set; }
+    }
+
+    /// <summary>
+    /// Response model returned by POST /api/soloparent/{id}/renew
+    /// </summary>
+    public class RenewSoloParentResponse
+    {
+        public Guid Id { get; set; }
+        public string StartsAt { get; set; }
+        public string ExpiresAt { get; set; }
+        public string Type { get; set; }
+        public DateTime? DateCreated { get; set; }
     }
 }

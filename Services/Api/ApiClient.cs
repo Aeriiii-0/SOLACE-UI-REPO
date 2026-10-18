@@ -32,6 +32,10 @@ namespace SOLUM_UI.Services.Api
                 configUrl += "/";
             }
 
+            System.Net.ServicePointManager.DefaultConnectionLimit = 64;
+            System.Net.ServicePointManager.SecurityProtocol |=
+                System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls13;
+
             BaseUrl = configUrl;
             _httpClient = new HttpClient
             {

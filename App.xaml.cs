@@ -8,6 +8,11 @@ namespace SOLUM_UI
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // Increase connection limit from default (2) to 64 for fast concurrent HTTP calls in .NET Framework
+            System.Net.ServicePointManager.DefaultConnectionLimit = 64;
+            System.Net.ServicePointManager.SecurityProtocol |=
+                System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls13;
             
             // Launch local background OCR engine if not already running
             _ = OcrService.EnsureServerRunningAsync();
