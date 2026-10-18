@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace SOLUM_UI.Views.Dialogs
@@ -56,6 +57,12 @@ namespace SOLUM_UI.Views.Dialogs
             dialog.TxtConfirmBtn.Text = confirmText;
             dialog.TxtCancelBtn.Text = cancelText;
 
+            dialog.BtnCancel.Visibility = Visibility.Visible;
+            Grid.SetColumn(dialog.BtnConfirm, 2);
+            Grid.SetColumnSpan(dialog.BtnConfirm, 1);
+            dialog.BtnConfirm.HorizontalAlignment = HorizontalAlignment.Stretch;
+            dialog.BtnConfirm.Width = double.NaN;
+
             dialog.ApplyTheme(theme);
 
             if (!string.IsNullOrWhiteSpace(customIconData))
@@ -95,6 +102,12 @@ namespace SOLUM_UI.Views.Dialogs
             dialog.TxtConfirmBtn.Text = "OK";
             dialog.TxtCancelBtn.Text = "";
             dialog.BtnCancel.Visibility = Visibility.Collapsed;
+
+            // Center the single confirmation/OK button across the footer
+            Grid.SetColumn(dialog.BtnConfirm, 0);
+            Grid.SetColumnSpan(dialog.BtnConfirm, 3);
+            dialog.BtnConfirm.HorizontalAlignment = HorizontalAlignment.Center;
+            dialog.BtnConfirm.Width = 180;
 
             dialog.ApplyTheme(theme);
             dialog.ShowDialog();

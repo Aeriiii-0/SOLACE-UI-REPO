@@ -14,6 +14,7 @@ using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
 using SOLUM_UI.ViewModels;
+using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
 {
@@ -138,21 +139,21 @@ namespace SOLUM_UI
 
                 if (cmbYearlyYear != null && cmbYearlyYear.Items.Count == 0)
                 {
-                    for (int y = currentYear + 1; y >= 2020; y--)
+                    for (int y = currentYear; y >= 2020; y--)
                         cmbYearlyYear.Items.Add(y);
                     cmbYearlyYear.SelectedItem = currentYear;
                 }
 
                 if (cmbMonthlyYear != null && cmbMonthlyYear.Items.Count == 0)
                 {
-                    for (int y = currentYear + 1; y >= 2020; y--)
+                    for (int y = currentYear; y >= 2020; y--)
                         cmbMonthlyYear.Items.Add(y);
                     cmbMonthlyYear.SelectedItem = currentYear;
                 }
 
                 if (cmbQuarterlyYear != null && cmbQuarterlyYear.Items.Count == 0)
                 {
-                    for (int y = currentYear + 1; y >= 2020; y--)
+                    for (int y = currentYear; y >= 2020; y--)
                         cmbQuarterlyYear.Items.Add(y);
                     cmbQuarterlyYear.SelectedItem = currentYear;
                 }
@@ -162,6 +163,22 @@ namespace SOLUM_UI
 
                 if (cmbQuarterlyQuarter != null && cmbQuarterlyQuarter.SelectedIndex < 0)
                     cmbQuarterlyQuarter.SelectedIndex = currentQuarter;
+
+                var dpStartDate = this.FindName("DpStartDate") as DatePicker;
+                if (dpStartDate != null)
+                {
+                    dpStartDate.DisplayDateEnd = DateTime.Today;
+                    if (!dpStartDate.SelectedDate.HasValue)
+                        dpStartDate.SelectedDate = _vm?.StartDate ?? new DateTime(currentYear, 1, 1);
+                }
+
+                var dpEndDate = this.FindName("DpEndDate") as DatePicker;
+                if (dpEndDate != null)
+                {
+                    dpEndDate.DisplayDateEnd = DateTime.Today;
+                    if (!dpEndDate.SelectedDate.HasValue)
+                        dpEndDate.SelectedDate = _vm?.EndDate ?? DateTime.Today;
+                }
 
                 if (cmbPeriodType != null && cmbPeriodType.SelectedIndex < 0)
                     cmbPeriodType.SelectedIndex = 0;
@@ -209,6 +226,24 @@ namespace SOLUM_UI
                 var cmbQuarterlyQuarter = this.FindName("CmbQuarterlyQuarter") as ComboBox;
                 if (cmbQuarterlyQuarter != null && cmbQuarterlyQuarter.SelectedIndex >= 0)
                     _vm.SelectedQuarter = cmbQuarterlyQuarter.SelectedIndex + 1;
+
+                var dpStartDate = this.FindName("DpStartDate") as DatePicker;
+                if (dpStartDate?.SelectedDate.HasValue == true)
+                    _vm.StartDate = dpStartDate.SelectedDate.Value;
+
+                var dpEndDate = this.FindName("DpEndDate") as DatePicker;
+                if (dpEndDate?.SelectedDate.HasValue == true)
+                    _vm.EndDate = dpEndDate.SelectedDate.Value;
+
+                var cmbFilterBarangay = this.FindName("CmbFilterBarangay") as ComboBox;
+                if (cmbFilterBarangay?.SelectedItem is ComboBoxItem bItem && bItem.Content is string bContent)
+                {
+                    _vm.SelectedBarangay = (string.IsNullOrWhiteSpace(bContent) || bContent.Equals("All", StringComparison.OrdinalIgnoreCase)) ? "ALL" : bContent;
+                }
+                else if (cmbFilterBarangay?.SelectedItem is string bStr)
+                {
+                    _vm.SelectedBarangay = (string.IsNullOrWhiteSpace(bStr) || bStr.Equals("All", StringComparison.OrdinalIgnoreCase)) ? "ALL" : bStr;
+                }
             }
             catch (Exception ex)
             {
@@ -248,9 +283,11 @@ namespace SOLUM_UI
                     case "Yearly":
                         queryBreakdownType = "1";
                         targetYear = _vm.SelectedYear;
-                        targetMonth = (_vm.SelectedYear == DateTime.Today.Year) ? DateTime.Today.Month : 12;
+                        targetMonth = (_vm.SelectedYear >= DateTime.Today.Year) ? DateTime.Today.Month : 12;
                         start = new DateTime(targetYear, 1, 1);
                         end = new DateTime(targetYear, 12, 31);
+                        if (targetYear >= DateTime.Today.Year && end > DateTime.Today)
+                            end = DateTime.Today;
                         _vm.StartDate = start;
                         _vm.EndDate = end;
                         break;
@@ -261,17 +298,22 @@ namespace SOLUM_UI
                         targetYear = _vm.SelectedYear;
                         int sMonth = (_vm.SelectedQuarter - 1) * 3 + 1;
                         int eMonth = _vm.SelectedQuarter * 3;
-                        targetMonth = eMonth;
+                        targetMonth = (targetYear >= DateTime.Today.Year && eMonth > DateTime.Today.Month)
+                            ? DateTime.Today.Month
+                            : eMonth;
                         start = new DateTime(targetYear, sMonth, 1);
                         end = new DateTime(targetYear, eMonth, DateTime.DaysInMonth(targetYear, eMonth));
+                        if (targetYear >= DateTime.Today.Year && end > DateTime.Today)
+                            end = DateTime.Today;
                         _vm.StartDate = start;
                         _vm.EndDate = end;
                         break;
 
                     case "CustomRange":
                         queryBreakdownType = "4";
-                        if (!start.HasValue) start = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                        if (!start.HasValue) start = new DateTime(DateTime.Today.Year, 1, 1);
                         if (!end.HasValue) end = DateTime.Today;
+                        if (end > DateTime.Today) end = DateTime.Today;
                         if (end < start) end = start;
 
                         _vm.StartDate = start;
@@ -281,7 +323,9 @@ namespace SOLUM_UI
                         endYear = end.Value.Year;
                         endMonth = end.Value.Month;
                         targetYear = endYear.Value;
-                        targetMonth = endMonth.Value;
+                        targetMonth = (targetYear >= DateTime.Today.Year && endMonth.Value > DateTime.Today.Month)
+                            ? DateTime.Today.Month
+                            : endMonth.Value;
                         break;
 
                     case "Monthly":
@@ -292,16 +336,20 @@ namespace SOLUM_UI
                         queryMonth = targetMonth;
                         start = new DateTime(targetYear, targetMonth, 1);
                         end = new DateTime(targetYear, targetMonth, DateTime.DaysInMonth(targetYear, targetMonth));
+                        if (targetYear >= DateTime.Today.Year && end > DateTime.Today)
+                            end = DateTime.Today;
                         _vm.StartDate = start;
                         _vm.EndDate = end;
                         break;
                 }
 
+                int? queryYear = (filterType == "CustomRange") ? (int?)null : targetYear;
+
                 var dashboardTask = AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
                 var monthlyTask = AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(targetYear, targetMonth, barangay, start, end);
                 var breakdownTask = AnalyticsApiService.Instance.GetBarangayBreakdownAsync(
                     quarter: queryQuarter,
-                    year: targetYear,
+                    year: queryYear,
                     month: queryMonth,
                     barangay: barangay,
                     type: queryBreakdownType,
@@ -318,22 +366,37 @@ namespace SOLUM_UI
                 if (dashRes != null && dashRes.Succeeded && dashRes.Data != null)
                     _vm.LoadDashboardDto(dashRes.Data);
 
+                var breakdownRes = await breakdownTask;
+                if (breakdownRes != null && breakdownRes.Succeeded && breakdownRes.Data != null)
+                    _vm.LoadBarangayBreakdownDto(breakdownRes.Data);
+
                 var monthRes = await monthlyTask;
                 if (monthRes != null && monthRes.Succeeded && monthRes.Data != null)
                 {
                     _vm.LoadFromAnalyticsDto(monthRes.Data);
                 }
-                else if (showErrors && monthRes != null && !monthRes.Succeeded)
+                else
                 {
-                    string errorMsg = monthRes.Errors != null && monthRes.Errors.Count > 0
-                        ? string.Join("\n", monthRes.Errors)
-                        : "Unable to load analytics data.";
-                    MessageBox.Show(errorMsg, "Filter Result", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    // Clear demographics gracefully if not returned for this custom/aggregated period
+                    _vm.ClearDemographicCharts();
                 }
 
-                var breakdownRes = await breakdownTask;
-                if (breakdownRes != null && breakdownRes.Succeeded && breakdownRes.Data != null)
-                    _vm.LoadBarangayBreakdownDto(breakdownRes.Data);
+                if (showErrors)
+                {
+                    bool breakdownOk = breakdownRes != null && breakdownRes.Succeeded;
+                    bool monthOk = monthRes != null && monthRes.Succeeded;
+
+                    if (!breakdownOk && !monthOk)
+                    {
+                        string errorMsg = "Unable to load analytics data for the selected period.";
+                        if (breakdownRes?.Errors != null && breakdownRes.Errors.Count > 0)
+                            errorMsg = string.Join("\n", breakdownRes.Errors);
+                        else if (monthRes?.Errors != null && monthRes.Errors.Count > 0)
+                            errorMsg = string.Join("\n", monthRes.Errors);
+
+                        ToastNotification.Show("Filter Result", errorMsg, ToastType.Warning);
+                    }
+                }
 
                 _vm.UpdateActiveFilterSummary();
                 HookBarangayCollection();
@@ -343,7 +406,7 @@ namespace SOLUM_UI
             {
                 System.Diagnostics.Debug.WriteLine($"Analytics load error: {ex.Message}\n{ex.StackTrace}");
                 if (showErrors)
-                    MessageBox.Show($"Analytics load error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ToastNotification.Show("Analytics Error", $"Analytics load error: {ex.Message}", ToastType.Error);
             }
             finally
             {
@@ -917,9 +980,6 @@ namespace SOLUM_UI
                 pnlMonthly.Visibility = (tag == "Monthly") ? Visibility.Visible : Visibility.Collapsed;
                 pnlQuarterly.Visibility = (tag == "Quarterly") ? Visibility.Visible : Visibility.Collapsed;
                 pnlCustomRange.Visibility = (tag == "CustomRange") ? Visibility.Visible : Visibility.Collapsed;
-
-                if (_vm != null)
-                    _vm.FilterType = tag;
             }
             catch (Exception ex)
             {
@@ -955,6 +1015,20 @@ namespace SOLUM_UI
                 if (cmbQuarterlyQuarter != null)
                     cmbQuarterlyQuarter.SelectedIndex = (DateTime.Today.Month - 1) / 3;
 
+                var dpStartDate = this.FindName("DpStartDate") as DatePicker;
+                if (dpStartDate != null)
+                {
+                    dpStartDate.DisplayDateEnd = DateTime.Today;
+                    dpStartDate.SelectedDate = new DateTime(DateTime.Today.Year, 1, 1);
+                }
+
+                var dpEndDate = this.FindName("DpEndDate") as DatePicker;
+                if (dpEndDate != null)
+                {
+                    dpEndDate.DisplayDateEnd = DateTime.Today;
+                    dpEndDate.SelectedDate = DateTime.Today;
+                }
+
                 var cmbFilterBarangay = this.FindName("CmbFilterBarangay") as ComboBox;
                 if (cmbFilterBarangay != null)
                     cmbFilterBarangay.SelectedIndex = 0;
@@ -987,6 +1061,101 @@ namespace SOLUM_UI
         {
             try
             {
+                var cmbPeriodType = this.FindName("CmbPeriodType") as ComboBox;
+                string periodType = "Monthly";
+                if (cmbPeriodType?.SelectedItem is ComboBoxItem item && item.Tag is string sTag)
+                    periodType = sTag;
+
+                // Validation against future dates or invalid combinations
+                if (periodType == "CustomRange")
+                {
+                    var dpStartDate = this.FindName("DpStartDate") as DatePicker;
+                    var dpEndDate = this.FindName("DpEndDate") as DatePicker;
+
+                    if (!dpStartDate?.SelectedDate.HasValue == true || !dpEndDate?.SelectedDate.HasValue == true)
+                    {
+                        ToastNotification.Show(
+                            "Invalid Date Range",
+                            "Please select both a start date and an end date for custom range.",
+                            ToastType.Warning);
+                        return;
+                    }
+
+                    DateTime startDate = dpStartDate.SelectedDate.Value.Date;
+                    DateTime endDate = dpEndDate.SelectedDate.Value.Date;
+                    DateTime today = DateTime.Today;
+
+                    if (startDate > today || endDate > today)
+                    {
+                        ToastNotification.Show(
+                            "Future Date Not Allowed",
+                            "Dates cannot be in the future. Please select dates on or before today.",
+                            ToastType.Warning);
+                        return;
+                    }
+
+                    if (startDate > endDate)
+                    {
+                        ToastNotification.Show(
+                            "Invalid Date Range",
+                            "The start date cannot be later than the end date.",
+                            ToastType.Warning);
+                        return;
+                    }
+                }
+                else if (periodType == "Quarterly")
+                {
+                    var cmbYear = this.FindName("CmbQuarterlyYear") as ComboBox;
+                    var cmbQuarter = this.FindName("CmbQuarterlyQuarter") as ComboBox;
+                    if (cmbYear?.SelectedItem is int qYear && cmbQuarter != null && cmbQuarter.SelectedIndex >= 0)
+                    {
+                        int quarter = cmbQuarter.SelectedIndex + 1;
+                        int quarterStartMonth = (quarter - 1) * 3 + 1;
+                        DateTime quarterStartDate = new DateTime(qYear, quarterStartMonth, 1);
+                        if (quarterStartDate > DateTime.Today)
+                        {
+                            ToastNotification.Show(
+                                "Future Quarter Not Allowed",
+                                "The selected quarter has not started yet. Please choose a current or past quarter.",
+                                ToastType.Warning);
+                            return;
+                        }
+                    }
+                }
+                else if (periodType == "Monthly")
+                {
+                    var cmbYear = this.FindName("CmbMonthlyYear") as ComboBox;
+                    var cmbMonth = this.FindName("CmbMonthlyMonth") as ComboBox;
+                    if (cmbYear?.SelectedItem is int mYear && cmbMonth != null && cmbMonth.SelectedIndex >= 0)
+                    {
+                        int month = cmbMonth.SelectedIndex + 1;
+                        DateTime monthStartDate = new DateTime(mYear, month, 1);
+                        if (monthStartDate > DateTime.Today)
+                        {
+                            ToastNotification.Show(
+                                "Future Month Not Allowed",
+                                "The selected month is in the future. Please choose a current or past month.",
+                                ToastType.Warning);
+                            return;
+                        }
+                    }
+                }
+                else if (periodType == "Yearly")
+                {
+                    var cmbYear = this.FindName("CmbYearlyYear") as ComboBox;
+                    if (cmbYear?.SelectedItem is int yYear)
+                    {
+                        if (yYear > DateTime.Today.Year)
+                        {
+                            ToastNotification.Show(
+                                "Future Year Not Allowed",
+                                "The selected year is in the future. Please choose a current or past year.",
+                                ToastType.Warning);
+                            return;
+                        }
+                    }
+                }
+
                 var overlay = this.FindName("FilterModalOverlay") as Grid;
                 if (overlay != null)
                     overlay.Visibility = Visibility.Collapsed;
@@ -1009,11 +1178,9 @@ namespace SOLUM_UI
 
                 if (_vm == null || _vm.AnalyticsData == null)
                 {
-                    MessageBox.Show(
-                        "No analytics data loaded. Please refresh the data first.",
+                    ActionConfirmDialog.Warning(
                         "No Data",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
+                        "No analytics data loaded. Please refresh the data first.");
                     return;
                 }
 
@@ -1048,11 +1215,9 @@ namespace SOLUM_UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Export failed: {ex.Message}",
+                ActionConfirmDialog.Error(
                     "Export Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                    $"Export failed: {ex.Message}");
 
                 System.Diagnostics.Debug.WriteLine($"Export error: {ex.StackTrace}");
             }
@@ -1081,13 +1246,11 @@ namespace SOLUM_UI
 
                 await LoadDataAsync();
 
-                MessageBox.Show("Analytics data refreshed successfully.", "Refresh Complete",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                ToastNotification.Show("Analytics Refreshed", "Analytics data refreshed successfully.", ToastType.Success);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Refresh failed: {ex.Message}", "Refresh Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                ToastNotification.Show("Refresh Error", $"Refresh failed: {ex.Message}", ToastType.Error);
                 System.Diagnostics.Debug.WriteLine($"Refresh error: {ex}");
             }
             finally

@@ -986,25 +986,44 @@ namespace SOLUM_UI.ViewModels
         {
             if (dto == null || dto.Barangays == null) return;
 
+            int calculatedTotal = dto.GrandTotalSoloParents;
+            if (calculatedTotal <= 0 && dto.Barangays.Count > 0)
+            {
+                calculatedTotal = dto.Barangays.Sum(b => b.TotalSoloParents);
+            }
+            if (calculatedTotal <= 0)
+            {
+                calculatedTotal = dto.TotalActive + dto.TotalInactive;
+            }
+
             if (IsFilterActive)
             {
-                if (dto.TotalNewRegistrations > 0)
-                    FilteredNewRegistrations = dto.TotalNewRegistrations;
-                if (dto.TotalActive > 0)
-                    FilteredActiveRecords = dto.TotalActive;
-                if (dto.TotalInactive > 0)
-                    FilteredInactiveRecords = dto.TotalInactive;
-                if (dto.TotalRenewals > 0)
-                    FilteredRenewals = dto.TotalRenewals;
+                FilteredNewRegistrations = dto.TotalNewRegistrations;
+                FilteredActiveRecords = dto.TotalActive;
+                FilteredInactiveRecords = dto.TotalInactive;
+                FilteredRenewals = dto.TotalRenewals;
+                TotalSoloParents = calculatedTotal;
+            }
+            else
+            {
+                if (TotalSoloParents <= 0 && calculatedTotal > 0)
+                    TotalSoloParents = calculatedTotal;
+                if (ActiveRecords <= 0 && dto.TotalActive > 0)
+                    ActiveRecords = dto.TotalActive;
+                if (InactiveRecords <= 0 && dto.TotalInactive > 0)
+                    InactiveRecords = dto.TotalInactive;
+                if (RegisteredThisMonth <= 0 && dto.TotalNewRegistrations > 0)
+                    RegisteredThisMonth = dto.TotalNewRegistrations;
             }
 
             AllBarangayData.Clear();
 
-            int maxVal = dto.Barangays.Count > 0 ? System.Linq.Enumerable.Max(dto.Barangays, b => b.TotalSoloParents) : 1;
+            var sortedBarangays = dto.Barangays.OrderByDescending(b => b.TotalSoloParents).ToList();
+            int maxVal = sortedBarangays.Count > 0 ? sortedBarangays[0].TotalSoloParents : 1;
             if (maxVal <= 0) maxVal = 1;
 
             int rank = 1;
-            foreach (var b in dto.Barangays)
+            foreach (var b in sortedBarangays)
             {
                 double barWidth = (b.TotalSoloParents * 1.0 / maxVal) * 280;
 
@@ -1029,6 +1048,8 @@ namespace SOLUM_UI.ViewModels
             TotalBarangayPages = Math.Max(1, (int)Math.Ceiling(AllBarangayData.Count / (double)barangaysPerPage));
             CurrentBarangayPage = 1;
             UpdateBarangayPage();
+
+            HasData = TotalSoloParents > 0 || AllBarangayData.Count > 0;
         }
 
 
@@ -1131,21 +1152,27 @@ namespace SOLUM_UI.ViewModels
             AnalyticsData = dto;
 
             // Calculate KPIs
-            TotalSoloParents = dto.TotalSoloParents;
-            FilteredActiveRecords = dto.ActiveSoloParents;
-            FilteredInactiveRecords = dto.InactiveSoloParents;
-            FilteredNewRegistrations = dto.NewRegistrations;
-            FilteredRenewals = dto.Renewals;
-
-            // If not in a custom filter, synchronize the real-time card numbers
+            // If not in a custom filter, synchronize the real-time card numbers and KPIs from monthly DTO
             if (!IsFilterActive)
             {
+                TotalSoloParents = dto.TotalSoloParents;
+                FilteredActiveRecords = dto.ActiveSoloParents;
+                FilteredInactiveRecords = dto.InactiveSoloParents;
+                FilteredNewRegistrations = dto.NewRegistrations;
+                FilteredRenewals = dto.Renewals;
+
                 if (dto.NewRegistrations > 0 || RegisteredThisMonth == 0)
                     RegisteredThisMonth = dto.NewRegistrations;
                 if (dto.ActiveSoloParents > 0)
                     ActiveRecords = dto.ActiveSoloParents;
                 if (dto.InactiveSoloParents > 0)
                     InactiveRecords = dto.InactiveSoloParents;
+            }
+            else
+            {
+                // When filter is active, only fallback to dto counts if breakdown didn't populate them
+                if (TotalSoloParents <= 0 && dto.TotalSoloParents > 0)
+                    TotalSoloParents = dto.TotalSoloParents;
             }
 
             System.Diagnostics.Debug.WriteLine($"  TotalSoloParents: {TotalSoloParents}, Active: {dto.ActiveSoloParents}, Inactive: {dto.InactiveSoloParents}, New: {dto.NewRegistrations}");
@@ -1436,6 +1463,57 @@ namespace SOLUM_UI.ViewModels
 
             // Update empty-state flag
             HasData = TotalSoloParents > 0;
+        }
+
+        /// <summary>
+        /// Clears demographic chart collections and stats when demographic details
+        /// are unavailable for a custom filtered period.
+        /// </summary>
+        public void ClearDemographicCharts()
+        {
+            IncomeBracketData.Clear();
+            DependentsAgeData.Clear();
+            TopCasesData.Clear();
+            CivilStatusData.Clear();
+            EmploymentStatusData.Clear();
+
+            FemaleCount = 0;
+            MaleCount = 0;
+            FemalePercent = 0;
+            MalePercent = 0;
+            FemalePercentText = "0% Female  ·  0% Male";
+            FemalePercentWidth = 0;
+
+            EmployedPercent = 0;
+            SelfEmployedPercent = 0;
+            NotEmployedPercent = 0;
+            EmployedText = "0 (0%)";
+            SelfEmployedText = "0 (0%)";
+            NotEmployedText = "0 (0%)";
+            EmployedArcPath = string.Empty;
+            SelfEmployedArcPath = string.Empty;
+            NotEmployedArcPath = string.Empty;
+
+            AgeGroup0_5 = 0;
+            AgeGroup6_12 = 0;
+            AgeGroup13_17 = 0;
+            AgeGroup0_5Percent = 0;
+            AgeGroup6_12Percent = 0;
+            AgeGroup13_17Percent = 0;
+
+            SingleCount = 0;
+            MarriedCount = 0;
+            WidowedCount = 0;
+            SeparatedCount = 0;
+            AnnulledCount = 0;
+
+            LgbtCount = 0;
+            PantawidBeneficiaryCount = 0;
+            IndigenousCount = 0;
+            TotalDependents = 0;
+
+            UpdateTopBarangay();
+            LastRefreshTime = DateTime.Now;
         }
 
         /// <summary>
