@@ -217,7 +217,7 @@ namespace SOLUM_UI
                 PopulateFields(_existing);
                 // Amber stripe for edit mode (only when editing an existing saved record)
                 if (!string.IsNullOrEmpty(_existing.Id))
-                    Loaded += (s, e) => ApplyEditStyle();
+                    Loaded += (s, e) => { ApplyEditStyle(); UpdateSaveButtonState(); };
             }
             else
             {
@@ -225,8 +225,16 @@ namespace SOLUM_UI
                 DpDateOfApplication.SelectedDate = DateTime.Today;
                 CmbEmploymentStatus.SelectedIndex = 0; // Default to empty selection
                 // Show add-mode stripe when Loaded
-                Loaded += (s, e) => ApplyModeStyle(isRenewal: false);
+                Loaded += (s, e) => { ApplyModeStyle(isRenewal: false); UpdateSaveButtonState(); };
             }
+
+            // Routed event handlers to react to any input change and update save button state
+            AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent, new TextChangedEventHandler((s, e) => UpdateSaveButtonState()));
+            AddHandler(System.Windows.Controls.Primitives.Selector.SelectionChangedEvent, new SelectionChangedEventHandler((s, e) => UpdateSaveButtonState()));
+            AddHandler(DatePicker.SelectedDateChangedEvent, new EventHandler<SelectionChangedEventArgs>((s, e) => UpdateSaveButtonState()));
+            AddHandler(System.Windows.Controls.Primitives.ToggleButton.CheckedEvent, new RoutedEventHandler((s, e) => UpdateSaveButtonState()));
+            AddHandler(System.Windows.Controls.Primitives.ToggleButton.UncheckedEvent, new RoutedEventHandler((s, e) => UpdateSaveButtonState()));
+            _familyRowData.CollectionChanged += (s, e) => UpdateSaveButtonState();
         }
 
         /// <summary>
@@ -533,6 +541,7 @@ namespace SOLUM_UI
                 Id = id,
                 IsNew = isNew
             };
+            row.PropertyChanged += (s, e) => UpdateSaveButtonState();
             row.DeleteCommand = new RelayCommand(() =>
             {
                 if (!row.IsNew && row.Id.HasValue)
@@ -1339,16 +1348,77 @@ namespace SOLUM_UI
                 Step3DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step3Title.Foreground = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
             }
+
+            UpdateSaveButtonState();
+        }
+
+        private void UpdateSaveButtonState()
+        {
+            if (_isPopulating || BtnSave == null) return;
+            bool isEdit = _existing != null && !string.IsNullOrEmpty(_existing.Id);
+            if (!isEdit)
+            {
+                BtnSave.IsEnabled = true;
+                BtnSave.Opacity = 1.0;
+                BtnSave.ToolTip = null;
+                return;
+            }
+
+            bool hasChanges = HasAnyChanges();
+            BtnSave.IsEnabled = hasChanges;
+            BtnSave.Opacity = hasChanges ? 1.0 : 0.45;
+            BtnSave.ToolTip = hasChanges ? null : "No changes have been made to this record.";
+
+            if (_currentStep == 3)
+            {
+                if (!hasChanges)
+                {
+                    ValidationMessage.Text = "No changes have been made to this record.";
+                    ValidationMessage.Visibility = Visibility.Visible;
+                }
+                else if (ValidationMessage.Text == "No changes have been made to this record.")
+                {
+                    ValidationMessage.Text = string.Empty;
+                    ValidationMessage.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+        private bool HasAnyChanges()
+        {
+            bool isEdit = _existing != null && !string.IsNullOrEmpty(_existing.Id);
+            if (!isEdit) return true;
+
+            if (_removedFamilyMemberIds != null && _removedFamilyMemberIds.Count > 0)
+                return true;
+
+            try
+            {
+                var preview = BuildRecord();
+                var fields  = BuildConfirmFields(preview);
+                return fields != null && fields.Any(f => f.IsChanged);
+            }
+            catch
+            {
+                return true;
+            }
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
+            bool isEdit = _existing != null && !string.IsNullOrEmpty(_existing.Id);
+            if (isEdit && !HasAnyChanges())
+            {
+                ValidationMessage.Text = "No changes have been made to this record.";
+                ValidationMessage.Visibility = Visibility.Visible;
+                return;
+            }
+
             if (!ValidateFields()) return;
 
             var preview = BuildRecord();
             var fields  = BuildConfirmFields(preview);
-            bool isEdit = _existing != null && !string.IsNullOrEmpty(_existing.Id);
 
             ConfirmMode mode = _isRenewal ? ConfirmMode.Renew
                              : isEdit     ? ConfirmMode.Edit
@@ -1398,6 +1468,7 @@ namespace SOLUM_UI
             string middle  = TxtMiddleName.Text.Trim();
             string ext     = GetComboValue(CmbExtension);
             string brgy    = GetComboValue(CmbBarangay);
+            bool isEdit    = _existing != null && !string.IsNullOrEmpty(_existing.Id);
 
             var members = new System.Collections.Generic.List<FamilyMember>();
             foreach (var item in _familyRowData)
@@ -1440,7 +1511,7 @@ namespace SOLUM_UI
                 MiddleName    = middle,
                 ExtensionName = ext,
                 Name          = surname + ", " + first + (string.IsNullOrEmpty(middle) ? "" : " " + middle) + (string.IsNullOrEmpty(ext) ? "" : " " + ext),
-                DateOfBirth   = DpBirthdate.SelectedDate.Value,
+                DateOfBirth   = DpBirthdate.SelectedDate ?? (_existing != null ? _existing.DateOfBirth : DateTime.MinValue),
                 PlaceOfBirth  = TxtPlaceOfBirth.Text.Trim(),
                 Sex           = GetComboValue(CmbSex),
                 CivilStatus   = GetComboValue(CmbCivilStatus),
@@ -1453,8 +1524,8 @@ namespace SOLUM_UI
                 Barangay      = brgy,
                 LastUpdated   = DateTime.Today,
 
-                IsNewApplicant      = !_isRenewal,
-                IsRenewal           = _isRenewal,
+                IsNewApplicant      = isEdit ? (_existing?.IsNewApplicant ?? true) : !_isRenewal,
+                IsRenewal           = isEdit ? (_existing?.IsRenewal ?? false) : _isRenewal,
                 DateOfApplication   = DpDateOfApplication.SelectedDate ?? DateTime.Today,
 
                 EducationalAttainment = GetComboValue(CmbEducation),
@@ -1626,15 +1697,22 @@ namespace SOLUM_UI
                 });
             }
 
-            // 1. Applicant Type
-            string sec = "Applicant Type";
-            string appTypeNew = r.IsNewApplicant ? "New Applicant" : r.IsRenewal ? "For Renewal" : "—";
-            string appTypeOld = _existing != null ? (_existing.IsNewApplicant ? "New Applicant" : _existing.IsRenewal ? "For Renewal" : "—") : "—";
-            AddText(sec, "Application Type", appTypeNew, appTypeOld);
-            AddDate(sec, "Date of Application", r.DateOfApplication, _existing != null ? _existing.DateOfApplication : DateTime.MinValue);
+            // 1. Applicant Type (Only for New Registrations)
+            if (!isEdit)
+            {
+                string secApp = "Applicant Type";
+                string appTypeNew = r.IsNewApplicant ? "New Applicant" : r.IsRenewal ? "For Renewal" : "—";
+                string appTypeOld = _existing != null ? (_existing.IsNewApplicant ? "New Applicant" : _existing.IsRenewal ? "For Renewal" : "—") : "—";
+                AddText(secApp, "Application Type", appTypeNew, appTypeOld);
+                AddDate(secApp, "Date of Application", r.DateOfApplication, _existing != null ? _existing.DateOfApplication : DateTime.MinValue);
+            }
 
             // 2. Personal Information
-            sec = "Personal Information";
+            string sec = "Personal Information";
+            if (isEdit)
+            {
+                AddDate(sec, "Date of Application", r.DateOfApplication, _existing != null ? _existing.DateOfApplication : DateTime.MinValue);
+            }
             AddText(sec, "Last Name",              r.Surname,                 _existing?.Surname);
             AddText(sec, "First Name",             r.FirstName,               _existing?.FirstName);
             AddText(sec, "Middle Name",            r.MiddleName,              _existing?.MiddleName);
@@ -1674,14 +1752,63 @@ namespace SOLUM_UI
             sec = "Circumstances";
             string oldCirc = _existing != null ? _existing.CircumstancesDisplay : "—";
             string newCirc = r.CircumstancesDisplay;
-            bool circChanged = isEdit && !string.Equals((oldCirc ?? "").Trim(), (newCirc ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+            bool circChanged = false;
+            if (isEdit && _existing != null)
+            {
+                bool sameFlags =
+                    r.CircumstanceA1 == _existing.CircumstanceA1 &&
+                    r.CircumstanceA2 == _existing.CircumstanceA2 &&
+                    r.CircumstanceA3 == _existing.CircumstanceA3 &&
+                    r.CircumstanceA4 == _existing.CircumstanceA4 &&
+                    r.CircumstanceA5 == _existing.CircumstanceA5 &&
+                    r.CircumstanceA6 == _existing.CircumstanceA6 &&
+                    r.CircumstanceA7 == _existing.CircumstanceA7 &&
+                    r.CircumstanceB  == _existing.CircumstanceB &&
+                    r.CircumstanceC  == _existing.CircumstanceC &&
+                    r.CircumstanceD  == _existing.CircumstanceD &&
+                    r.CircumstanceE  == _existing.CircumstanceE &&
+                    r.CircumstanceF  == _existing.CircumstanceF;
+
+                if (!sameFlags)
+                {
+                    circChanged = true;
+                }
+                else
+                {
+                    if (r.CircumstanceA2)
+                    {
+                        circChanged = !string.Equals((r.CircumstanceA2Cause ?? "").Trim(), (_existing.CircumstanceA2Cause ?? "").Trim(), StringComparison.OrdinalIgnoreCase) ||
+                                      (r.CircumstanceA2Date.Date != _existing.CircumstanceA2Date.Date);
+                    }
+                    else if (r.CircumstanceA4)
+                    {
+                        circChanged = !string.Equals((r.CircumstanceA4Disability ?? "").Trim(), (_existing.CircumstanceA4Disability ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+                    }
+                    else if (r.CircumstanceA5)
+                    {
+                        circChanged = !string.Equals((r.CircumstanceA5Period ?? "").Trim(), (_existing.CircumstanceA5Period ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+                    }
+                    else if (r.CircumstanceA6)
+                    {
+                        circChanged = (r.CircumstanceA6Nullity != _existing.CircumstanceA6Nullity) ||
+                                      (r.CircumstanceA6Annulment != _existing.CircumstanceA6Annulment);
+                    }
+                    else if (r.CircumstanceB)
+                    {
+                        circChanged = !string.Equals((r.CircumstanceBStayAbroad ?? "").Trim(), (_existing.CircumstanceBStayAbroad ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+                    }
+                }
+            }
+
+            string circDisplayOld = isEdit ? (!circChanged ? newCirc : (string.IsNullOrWhiteSpace(oldCirc) ? "None selected" : oldCirc)) : null;
+            string circDisplayNew = string.IsNullOrWhiteSpace(newCirc) ? "None selected" : newCirc;
 
             list.Add(new ConfirmField
             {
                 Section   = sec,
                 Label     = "Problem Presented",
-                NewValue  = string.IsNullOrWhiteSpace(newCirc) ? "None selected" : newCirc,
-                OldValue  = isEdit ? (string.IsNullOrWhiteSpace(oldCirc) ? "None selected" : oldCirc) : null,
+                NewValue  = circDisplayNew,
+                OldValue  = circDisplayOld,
                 IsChanged = circChanged
             });
 

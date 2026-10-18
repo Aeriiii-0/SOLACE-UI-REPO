@@ -64,19 +64,34 @@ namespace SOLUM_UI.Services
             // Circumstances
             CompareField(changes, "Circumstance A1 - Rape", FormatBool(before.CircumstanceA1), FormatBool(after.CircumstanceA1));
             CompareField(changes, "Circumstance A2 - Death of Spouse", FormatBool(before.CircumstanceA2), FormatBool(after.CircumstanceA2));
-            CompareField(changes, "Circumstance A2 Cause", before.CircumstanceA2Cause, after.CircumstanceA2Cause);
-            CompareField(changes, "Circumstance A2 Date", FormatDate(before.CircumstanceA2Date), FormatDate(after.CircumstanceA2Date));
+            if (before.CircumstanceA2 || after.CircumstanceA2)
+            {
+                CompareField(changes, "Circumstance A2 Cause", before.CircumstanceA2Cause, after.CircumstanceA2Cause);
+                CompareField(changes, "Circumstance A2 Date", FormatDate(before.CircumstanceA2Date), FormatDate(after.CircumstanceA2Date));
+            }
             CompareField(changes, "Circumstance A3 - Detention of Spouse", FormatBool(before.CircumstanceA3), FormatBool(after.CircumstanceA3));
             CompareField(changes, "Circumstance A4 - Physical & Mental Incapacity", FormatBool(before.CircumstanceA4), FormatBool(after.CircumstanceA4));
-            CompareField(changes, "Circumstance A4 Disability", before.CircumstanceA4Disability, after.CircumstanceA4Disability);
+            if (before.CircumstanceA4 || after.CircumstanceA4)
+            {
+                CompareField(changes, "Circumstance A4 Disability", before.CircumstanceA4Disability, after.CircumstanceA4Disability);
+            }
             CompareField(changes, "Circumstance A5 - Legal/De Facto Separation", FormatBool(before.CircumstanceA5), FormatBool(after.CircumstanceA5));
-            CompareField(changes, "Circumstance A5 Period", before.CircumstanceA5Period, after.CircumstanceA5Period);
+            if (before.CircumstanceA5 || after.CircumstanceA5)
+            {
+                CompareField(changes, "Circumstance A5 Period", before.CircumstanceA5Period, after.CircumstanceA5Period);
+            }
             CompareField(changes, "Circumstance A6 - Declaration", FormatBool(before.CircumstanceA6), FormatBool(after.CircumstanceA6));
-            CompareField(changes, "Circumstance A6 Nullity", FormatBool(before.CircumstanceA6Nullity), FormatBool(after.CircumstanceA6Nullity));
-            CompareField(changes, "Circumstance A6 Annulment", FormatBool(before.CircumstanceA6Annulment), FormatBool(after.CircumstanceA6Annulment));
+            if (before.CircumstanceA6 || after.CircumstanceA6)
+            {
+                CompareField(changes, "Circumstance A6 Nullity", FormatBool(before.CircumstanceA6Nullity), FormatBool(after.CircumstanceA6Nullity));
+                CompareField(changes, "Circumstance A6 Annulment", FormatBool(before.CircumstanceA6Annulment), FormatBool(after.CircumstanceA6Annulment));
+            }
             CompareField(changes, "Circumstance A7 - Abandonment", FormatBool(before.CircumstanceA7), FormatBool(after.CircumstanceA7));
             CompareField(changes, "Circumstance B - OFW Related", FormatBool(before.CircumstanceB), FormatBool(after.CircumstanceB));
-            CompareField(changes, "Circumstance B Stay Abroad", before.CircumstanceBStayAbroad, after.CircumstanceBStayAbroad);
+            if (before.CircumstanceB || after.CircumstanceB)
+            {
+                CompareField(changes, "Circumstance B Stay Abroad", before.CircumstanceBStayAbroad, after.CircumstanceBStayAbroad);
+            }
             CompareField(changes, "Circumstance C - Unmarried Parent", FormatBool(before.CircumstanceC), FormatBool(after.CircumstanceC));
             CompareField(changes, "Circumstance D - Legal Guardian", FormatBool(before.CircumstanceD), FormatBool(after.CircumstanceD));
             CompareField(changes, "Circumstance E - Relative 4th Degree", FormatBool(before.CircumstanceE), FormatBool(after.CircumstanceE));

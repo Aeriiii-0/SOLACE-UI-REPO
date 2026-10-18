@@ -155,6 +155,10 @@ namespace SOLUM_UI.Services.Api
 
         public UpdateSoloParentRequest MapToUpdateRequest(Guid id, SoloParentRecord r, SoloParentDto existingEntity = null)
         {
+            var problemPresented = (existingEntity?.ProblemPresented != null && !HasCircumstanceChanged(r, existingEntity.ProblemPresented))
+                ? existingEntity.ProblemPresented
+                : MapProblemPresented(r);
+
             var req = new UpdateSoloParentRequest
             {
                 Id = id,
@@ -163,7 +167,7 @@ namespace SOLUM_UI.Services.Api
                 ContactDetails = MapContactInfo(r),
                 AddressDetails = MapAddressInfo(r),
                 EmergencyContact = MapEmergencyContact(r),
-                ProblemPresented = MapProblemPresented(r),
+                ProblemPresented = problemPresented,
 
                 IsIndigenous = r.IsIndigenous,
                 IsLGBT = r.IsLGBT,
@@ -186,7 +190,7 @@ namespace SOLUM_UI.Services.Api
                     if (string.IsNullOrWhiteSpace(mName)) continue;
 
                     // 1. Existing family member (has database GUID)
-                    if (fm.Id.HasValue && !fm.IsNew && existingIds.Contains(fm.Id.Value))
+                    if (fm.Id.HasValue && !fm.IsNew && (existingIds.Count == 0 || existingIds.Contains(fm.Id.Value)))
                     {
                         processedExistingIds.Add(fm.Id.Value);
                         req.ExistingFamilyMembers.Add(new UpdateFamilyMemberRequest
@@ -234,7 +238,7 @@ namespace SOLUM_UI.Services.Api
             {
                 foreach (var removedId in r.RemovedFamilyMemberIds)
                 {
-                    if (existingIds.Contains(removedId) && !req.RemovedFamilyMemberIds.Contains(removedId))
+                    if ((existingIds.Count == 0 || existingIds.Contains(removedId)) && !req.RemovedFamilyMemberIds.Contains(removedId))
                     {
                         req.RemovedFamilyMemberIds.Add(removedId);
                     }
@@ -255,11 +259,15 @@ namespace SOLUM_UI.Services.Api
 
         public RenewSoloParentRequest MapToRenewRequest(Guid id, SoloParentRecord r, SoloParentDto existingEntity = null)
         {
+            var problemPresented = (existingEntity?.ProblemPresented != null && !HasCircumstanceChanged(r, existingEntity.ProblemPresented))
+                ? existingEntity.ProblemPresented
+                : MapProblemPresented(r);
+
             var req = new RenewSoloParentRequest
             {
                 CivilStatus = !string.IsNullOrWhiteSpace(r.CivilStatus) ? r.CivilStatus.Trim() : "Single",
                 Employment = MapEmploymentInfo(r),
-                ProblemPresented = MapProblemPresented(r),
+                ProblemPresented = problemPresented,
                 NeedsAndProblems = r.NeedsAndProblems?.Trim(),
                 OtherSourcesOfIncome = r.OtherIncomeSource?.Trim(),
                 FamilyMembers = new RenewFamilyMembersRequest()
@@ -279,7 +287,7 @@ namespace SOLUM_UI.Services.Api
                     if (string.IsNullOrWhiteSpace(mName)) continue;
 
                     // 1. Existing family member (has database GUID)
-                    if (fm.Id.HasValue && !fm.IsNew && existingIds.Contains(fm.Id.Value))
+                    if (fm.Id.HasValue && !fm.IsNew && (existingIds.Count == 0 || existingIds.Contains(fm.Id.Value)))
                     {
                         processedExistingIds.Add(fm.Id.Value);
                         req.FamilyMembers.ExistingFamilyMembers.Add(new UpdateFamilyMemberRequest
@@ -325,7 +333,7 @@ namespace SOLUM_UI.Services.Api
             {
                 foreach (var removedId in r.RemovedFamilyMemberIds)
                 {
-                    if (existingIds.Contains(removedId) && !req.FamilyMembers.RemovedFamilyMemberIds.Contains(removedId))
+                    if ((existingIds.Count == 0 || existingIds.Contains(removedId)) && !req.FamilyMembers.RemovedFamilyMemberIds.Contains(removedId))
                     {
                         req.FamilyMembers.RemovedFamilyMemberIds.Add(removedId);
                     }
@@ -466,18 +474,26 @@ namespace SOLUM_UI.Services.Api
             string probNum = dto.ProblemPresented?.ProblemPresentedNumber ?? string.Empty;
             string probName = dto.ProblemPresented?.Name ?? string.Empty;
 
-            record.CircumstanceA1 = probNum.Contains("A1") || probName.IndexOf("rape", StringComparison.OrdinalIgnoreCase) >= 0;
-            record.CircumstanceA2 = probNum.Contains("A2") || probName.IndexOf("death", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceA2Cause);
-            record.CircumstanceA3 = probNum.Contains("A3") || probName.IndexOf("detention", StringComparison.OrdinalIgnoreCase) >= 0;
-            record.CircumstanceA4 = probNum.Contains("A4") || probName.IndexOf("incapacity", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceA4Disability);
-            record.CircumstanceA5 = probNum.Contains("A5") || probName.IndexOf("separation", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceA5Period);
-            record.CircumstanceA6 = probNum.Contains("A6") || probName.IndexOf("nullity", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("annulment", StringComparison.OrdinalIgnoreCase) >= 0 || record.CircumstanceA6Nullity || record.CircumstanceA6Annulment;
-            record.CircumstanceA7 = probNum.Contains("A7") || probName.IndexOf("abandonment", StringComparison.OrdinalIgnoreCase) >= 0;
-            record.CircumstanceB = probNum.Contains("B") || probName.IndexOf("ofw", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceBStayAbroad);
-            record.CircumstanceC = probNum.Contains("C") || probName.IndexOf("unmarried", StringComparison.OrdinalIgnoreCase) >= 0;
-            record.CircumstanceD = probNum.Contains("D") || probName.IndexOf("guardian", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("adoptive", StringComparison.OrdinalIgnoreCase) >= 0;
-            record.CircumstanceE = probNum.Contains("E") || probName.IndexOf("relative", StringComparison.OrdinalIgnoreCase) >= 0;
-            record.CircumstanceF = probNum.Contains("F") || probName.IndexOf("pregnant", StringComparison.OrdinalIgnoreCase) >= 0;
+            var numTokens = new HashSet<string>(
+                Regex.Matches(probNum, @"\b([A-Fa-f][1-7]?|[1-7])\b")
+                     .Cast<Match>()
+                     .Select(m => m.Value.ToUpperInvariant()),
+                StringComparer.OrdinalIgnoreCase);
+            string trimmedNum = probNum.Trim().ToUpperInvariant();
+            bool HasCode(string code) => numTokens.Contains(code) || trimmedNum == code;
+
+            record.CircumstanceA1 = HasCode("A1") || probName.IndexOf("rape", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceA2 = HasCode("A2") || probName.IndexOf("death", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("deceased", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("widow", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceA2Cause);
+            record.CircumstanceA3 = HasCode("A3") || probName.IndexOf("detention", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("prison", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("detained", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceA4 = HasCode("A4") || probName.IndexOf("incapacity", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("disability", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceA4Disability);
+            record.CircumstanceA5 = HasCode("A5") || probName.IndexOf("separation", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("separated", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceA5Period);
+            record.CircumstanceA6 = HasCode("A6") || probName.IndexOf("nullity", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("annulment", StringComparison.OrdinalIgnoreCase) >= 0 || record.CircumstanceA6Nullity || record.CircumstanceA6Annulment;
+            record.CircumstanceA7 = HasCode("A7") || probName.IndexOf("abandonment", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("abandoned", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceB  = HasCode("B")  || probName.IndexOf("ofw", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("abroad", StringComparison.OrdinalIgnoreCase) >= 0 || !string.IsNullOrWhiteSpace(record.CircumstanceBStayAbroad);
+            record.CircumstanceC  = HasCode("C")  || probName.IndexOf("unmarried", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("single mother", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("single father", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceD  = HasCode("D")  || probName.IndexOf("guardian", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("adoptive", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("foster", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceE  = HasCode("E")  || probName.IndexOf("relative", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("4th civil", StringComparison.OrdinalIgnoreCase) >= 0;
+            record.CircumstanceF  = HasCode("F")  || probName.IndexOf("pregnant", StringComparison.OrdinalIgnoreCase) >= 0;
 
             if (dto.FamilyMembers != null)
             {
@@ -706,6 +722,100 @@ namespace SOLUM_UI.Services.Api
                 isNullity = r.CircumstanceA6 ? r.CircumstanceA6Nullity : (bool?)null,
                 isAnnulmentOfMarraige = r.CircumstanceA6 ? r.CircumstanceA6Annulment : (bool?)null
             };
+        }
+
+        public static string GetCircumstanceCode(SoloParentRecord r)
+        {
+            if (r == null) return string.Empty;
+            if (r.CircumstanceA1) return "A1";
+            if (r.CircumstanceA2) return "A2";
+            if (r.CircumstanceA3) return "A3";
+            if (r.CircumstanceA4) return "A4";
+            if (r.CircumstanceA5) return "A5";
+            if (r.CircumstanceA6) return "A6";
+            if (r.CircumstanceA7) return "A7";
+            if (r.CircumstanceB) return "B";
+            if (r.CircumstanceC) return "C";
+            if (r.CircumstanceD) return "D";
+            if (r.CircumstanceE) return "E";
+            if (r.CircumstanceF) return "F";
+            return ExtractCircumstanceCode(r.ProblemPresented);
+        }
+
+        public static string ExtractCircumstanceCode(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+            var match = Regex.Match(text, @"\b([A-Fa-f][1-7]?)\b");
+            if (match.Success) return match.Value.ToUpperInvariant();
+
+            string lower = text.ToLowerInvariant();
+            if (lower.Contains("rape")) return "A1";
+            if (lower.Contains("death") || lower.Contains("deceased") || lower.Contains("widow")) return "A2";
+            if (lower.Contains("detention") || lower.Contains("prison") || lower.Contains("detained")) return "A3";
+            if (lower.Contains("incapacity") || lower.Contains("disability")) return "A4";
+            if (lower.Contains("separation") || lower.Contains("separated")) return "A5";
+            if (lower.Contains("nullity") || lower.Contains("annulment")) return "A6";
+            if (lower.Contains("abandonment") || lower.Contains("abandoned")) return "A7";
+            if (lower.Contains("ofw") || lower.Contains("abroad") || lower.Contains("overseas")) return "B";
+            if (lower.Contains("unmarried") || lower.Contains("single mother") || lower.Contains("single father")) return "C";
+            if (lower.Contains("guardian") || lower.Contains("adoptive") || lower.Contains("foster")) return "D";
+            if (lower.Contains("relative") || lower.Contains("4th civil")) return "E";
+            if (lower.Contains("pregnant")) return "F";
+
+            return string.Empty;
+        }
+
+        public static bool HasCircumstanceChanged(SoloParentRecord r, ProblemPresentedDetails existing)
+        {
+            if (existing == null) return true;
+
+            string rCode = GetCircumstanceCode(r);
+            string existingCode = !string.IsNullOrWhiteSpace(existing.ProblemPresentedNumber)
+                ? ExtractCircumstanceCode(existing.ProblemPresentedNumber)
+                : ExtractCircumstanceCode(existing.Name);
+
+            // If neither has a detected code, check if raw name is equal
+            if (string.IsNullOrWhiteSpace(rCode) && string.IsNullOrWhiteSpace(existingCode))
+            {
+                return !string.Equals((r.ProblemPresented ?? "").Trim(), (existing.Name ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (!string.Equals(rCode, existingCode, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            // Same code — check subfields
+            if (rCode == "A2")
+            {
+                bool causeChanged = !string.Equals((r.CircumstanceA2Cause ?? "").Trim(), (existing.CauseOfDeath ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+                string existingDateStr = !string.IsNullOrWhiteSpace(existing.date) && DateTime.TryParse(existing.date, out var ed) ? ed.ToString("yyyy-MM-dd") : "";
+                string newDateStr = r.CircumstanceA2Date != DateTime.MinValue ? r.CircumstanceA2Date.ToString("yyyy-MM-dd") : "";
+                bool dateChanged = !string.Equals(existingDateStr, newDateStr, StringComparison.OrdinalIgnoreCase);
+                return causeChanged || dateChanged;
+            }
+            if (rCode == "A4")
+            {
+                return !string.Equals((r.CircumstanceA4Disability ?? "").Trim(), (existing.TypeOfDisability ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+            }
+            if (rCode == "A5")
+            {
+                return !string.Equals((r.CircumstanceA5Period ?? "").Trim(), (existing.PeriodOfSeparation ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+            }
+            if (rCode == "A6")
+            {
+                bool oldNullity = existing.isNullity == true;
+                bool oldAnnulment = existing.isAnnulmentOfMarraige == true;
+                return r.CircumstanceA6Nullity != oldNullity || r.CircumstanceA6Annulment != oldAnnulment;
+            }
+            if (rCode == "B")
+            {
+                decimal.TryParse(r.CircumstanceBStayAbroad, out var newAbroad);
+                decimal oldAbroad = existing.LengthOfAbroad ?? 0;
+                return newAbroad != oldAbroad;
+            }
+
+            return false;
         }
 
         private CreateFamilyMemberRequest MapCreateFamilyMember(FamilyMember fm)

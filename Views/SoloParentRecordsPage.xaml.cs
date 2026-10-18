@@ -828,13 +828,13 @@ namespace SOLUM_UI
 
                 if (rawRecord == null) rawRecord = new SoloParentRecord { Id = id, Surname = recordName };
 
-                var dialog = new RecordDialog(rawRecord, isRenewal: true)
+                var dialog = new RenewalReassessmentDialog(rawRecord, existingDto)
                 {
                     Owner = Window.GetWindow(this)
                 };
-                if (dialog.ShowDialog() == true && dialog.Result != null)
+                if (dialog.ShowDialog() == true && dialog.UpdatedRecord != null)
                 {
-                    await RenewRecordAsync(rawRecord, dialog.Result, existingDto);
+                    await RenewRecordAsync(rawRecord, dialog.UpdatedRecord, existingDto);
                 }
             }
         }
@@ -1065,7 +1065,39 @@ namespace SOLUM_UI
             Check("Occupation",         before.Occupation,           after.Occupation);
             Check("Religion",           before.Religion,             after.Religion);
             Check("Monthly Income",     before.MonthlyIncome,        after.MonthlyIncome);
-            Check("Circumstances / Problem Presented", before.CircumstancesDisplay, after.CircumstancesDisplay);
+            bool circChanged =
+                before.CircumstanceA1 != after.CircumstanceA1 ||
+                before.CircumstanceA2 != after.CircumstanceA2 ||
+                before.CircumstanceA3 != after.CircumstanceA3 ||
+                before.CircumstanceA4 != after.CircumstanceA4 ||
+                before.CircumstanceA5 != after.CircumstanceA5 ||
+                before.CircumstanceA6 != after.CircumstanceA6 ||
+                before.CircumstanceA7 != after.CircumstanceA7 ||
+                before.CircumstanceB  != after.CircumstanceB  ||
+                before.CircumstanceC  != after.CircumstanceC  ||
+                before.CircumstanceD  != after.CircumstanceD  ||
+                before.CircumstanceE  != after.CircumstanceE  ||
+                before.CircumstanceF  != after.CircumstanceF;
+
+            if (!circChanged)
+            {
+                if (after.CircumstanceA2)
+                    circChanged = !string.Equals((before.CircumstanceA2Cause ?? "").Trim(), (after.CircumstanceA2Cause ?? "").Trim(), StringComparison.OrdinalIgnoreCase) ||
+                                  before.CircumstanceA2Date.Date != after.CircumstanceA2Date.Date;
+                else if (after.CircumstanceA4)
+                    circChanged = !string.Equals((before.CircumstanceA4Disability ?? "").Trim(), (after.CircumstanceA4Disability ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+                else if (after.CircumstanceA5)
+                    circChanged = !string.Equals((before.CircumstanceA5Period ?? "").Trim(), (after.CircumstanceA5Period ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+                else if (after.CircumstanceA6)
+                    circChanged = before.CircumstanceA6Nullity != after.CircumstanceA6Nullity || before.CircumstanceA6Annulment != after.CircumstanceA6Annulment;
+                else if (after.CircumstanceB)
+                    circChanged = !string.Equals((before.CircumstanceBStayAbroad ?? "").Trim(), (after.CircumstanceBStayAbroad ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (circChanged)
+            {
+                changes.Add(new SOLUM_UI.Models.ChangeDetail("Circumstances / Problem Presented", before.CircumstancesDisplay, after.CircumstancesDisplay));
+            }
             Check("PhilSys Number",     before.PhilSysNumber,        after.PhilSysNumber);
             Check("Emergency Contact",  before.EmergencyContactName, after.EmergencyContactName);
             Check("Emergency Number",   before.EmergencyContactNumber, after.EmergencyContactNumber);

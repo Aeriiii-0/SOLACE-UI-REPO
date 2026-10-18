@@ -485,7 +485,10 @@ namespace SOLUM_UI.ViewModels
                 return;
             }
 
-            var renewReq = _api.MapToRenewRequest(guid, updated);
+            var fetch = await _api.GetSoloParentByIdAsync(guid);
+            var existingDto = fetch.Succeeded ? fetch.Data : null;
+
+            var renewReq = _api.MapToRenewRequest(guid, updated, existingDto);
             var renewResp = await _api.RenewSoloParentRecordAsync(guid, renewReq);
             if (!renewResp.Succeeded)
             {

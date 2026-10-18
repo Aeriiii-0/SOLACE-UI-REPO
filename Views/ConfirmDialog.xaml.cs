@@ -26,6 +26,8 @@ namespace SOLUM_UI
         private SolidColorBrush _iconBg;    // icon circle background
         private SolidColorBrush _btnColor;  // confirm button
         private SolidColorBrush _changed;   // "after" value color for changed fields
+        private readonly ConfirmMode _mode;
+        private readonly int _totalChanged;
 
         private static SolidColorBrush Clr(byte r, byte g, byte b) =>
             new SolidColorBrush(Color.FromRgb(r, g, b));
@@ -37,6 +39,9 @@ namespace SOLUM_UI
                              ConfirmMode mode = ConfirmMode.Add)
         {
             InitializeComponent();
+            _mode  = mode;
+            _totalChanged = fields != null ? fields.FindAll(f => f.IsChanged).Count : 0;
+
             Width  = screenW;
             Height = screenH;
             Left   = screenLeft;
@@ -67,14 +72,16 @@ namespace SOLUM_UI
                     SetIconCircle("#F5A623", "✎");
                     SetConfirmBtn("#D47D00");
 
-                    int totalChanged = fields != null ? fields.FindAll(f => f.IsChanged).Count : 0;
-                    if (totalChanged > 0)
+                    if (_totalChanged > 0)
                     {
-                        TxtSubtitle.Text = $"{totalChanged} field{(totalChanged == 1 ? "" : "s")} modified. Review your changes before saving.";
+                        TxtSubtitle.Text = $"{_totalChanged} field{(_totalChanged == 1 ? "" : "s")} modified. Review your changes before saving.";
                     }
                     else
                     {
-                        TxtSubtitle.Text = "Review your record details before saving.";
+                        TxtSubtitle.Text = "No changes were made to this record. Modify at least one field to save.";
+                        BtnConfirm.IsEnabled = false;
+                        BtnConfirm.Opacity = 0.45;
+                        BtnConfirm.ToolTip = "No changes to save.";
                     }
                     break;
 
@@ -488,6 +495,8 @@ namespace SOLUM_UI
 
         private void BtnConfirm_Click(object sender, RoutedEventArgs e)
         {
+            if (_mode == ConfirmMode.Edit && _totalChanged == 0) return;
+
             Confirmed = true;
             Close();
         }

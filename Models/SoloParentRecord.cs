@@ -200,7 +200,9 @@ namespace SOLUM_UI.Models
                 if (CircumstanceD) parts.Add("D. Legal Guardian / Adoptive / Foster Parent");
                 if (CircumstanceE) parts.Add("E. Relative within 4th civil degree");
                 if (CircumstanceF) parts.Add("F. Pregnant Woman");
-                return parts.Count > 0 ? string.Join("\n", parts) : "—";
+                if (parts.Count > 0) return string.Join("\n", parts);
+                if (!string.IsNullOrWhiteSpace(ProblemPresented)) return ProblemPresented;
+                return "—";
             }
         }
     }

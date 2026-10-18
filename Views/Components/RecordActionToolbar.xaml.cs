@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using SOLUM_UI.ViewModels;
+using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI.Views.Components
 {
@@ -91,13 +92,13 @@ namespace SOLUM_UI.Views.Components
 
             if (methodDialog.SelectedChoice == RenewalChoice.ReassessAndRenew)
             {
-                var dialog = new RecordDialog(Vm.Record, isRenewal: true)
+                var dialog = new RenewalReassessmentDialog(Vm.Record)
                 {
                     Owner = parentWindow?.Owner ?? parentWindow
                 };
-                if (dialog.ShowDialog() != true || dialog.Result == null) return;
+                if (dialog.ShowDialog() != true || dialog.UpdatedRecord == null) return;
 
-                Vm.HandleRenewResult(dialog.Result);
+                Vm.HandleRenewResult(dialog.UpdatedRecord);
             }
         }
 

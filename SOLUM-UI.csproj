@@ -260,6 +260,9 @@
     <Compile Include="Views\Dialogs\NewCycleDialog.xaml.cs">
       <DependentUpon>NewCycleDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\RenewalReassessmentDialog.xaml.cs">
+      <DependentUpon>RenewalReassessmentDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\RenewDialog.xaml.cs">
       <DependentUpon>RenewDialog.xaml</DependentUpon>
     </Compile>
@@ -468,6 +471,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\NewCycleDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\RenewalReassessmentDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

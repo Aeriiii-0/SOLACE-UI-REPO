@@ -79,6 +79,10 @@
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter TargetName="BtnConfirmBg" Property="Opacity" Value="0.88"/>
                                         </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="BtnConfirmBg" Property="Opacity" Value="0.45"/>
+                                            <Setter Property="Cursor" Value="Arrow"/>
+                                        </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
