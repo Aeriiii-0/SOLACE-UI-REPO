@@ -73,12 +73,12 @@
                                Margin="0,0,0,4"/>
 
                     <!-- Email field -->
-                    <Grid Margin="0,0,0,16">
+                    <Grid Margin="0,0,0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.ColumnSpan="2" BorderBrush="#CCCCCC" BorderThickness="0,0,0,1"/>
+                        <Border x:Name="BorderEmail" Grid.ColumnSpan="2" BorderBrush="#CCCCCC" BorderThickness="0,0,0,1"/>
                         <TextBlock Grid.Column="0"
                                    Text="&#xE77B;"
                                    FontFamily="Segoe MDL2 Assets"
@@ -88,7 +88,7 @@
                                    Margin="0,6,8,6"/>
                         <Grid Grid.Column="1">
                             <TextBlock x:Name="PlaceholderEmail"
-                                       Text="Email or Username"
+                                       Text="name@example.com"
                                        Foreground="#AAAAAA"
                                        FontFamily="Segoe UI"
                                        FontSize="13"
@@ -107,13 +107,22 @@
                         </Grid>
                     </Grid>
 
+                    <!-- Email inline validation error -->
+                    <TextBlock x:Name="ErrEmail"
+                               FontFamily="Segoe UI"
+                               FontSize="11"
+                               Foreground="#DC3545"
+                               Margin="0,2,0,8"
+                               TextWrapping="Wrap"
+                               Visibility="Collapsed"/>
+
                     <!-- Password label -->
                     <TextBlock Text="PASSWORD"
                                FontFamily="Segoe UI"
                                FontSize="10"
                                FontWeight="Bold"
                                Foreground="#222222"
-                               Margin="0,0,0,4"/>
+                               Margin="0,6,0,4"/>
 
                     <!-- Password field -->
                     <Grid Margin="0,0,0,4">
@@ -122,7 +131,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.ColumnSpan="3" BorderBrush="#CCCCCC" BorderThickness="0,0,0,1"/>
+                        <Border x:Name="BorderPassword" Grid.ColumnSpan="3" BorderBrush="#CCCCCC" BorderThickness="0,0,0,1"/>
                         <TextBlock Grid.Column="0"
                                    Text="&#xE72E;"
                                    FontFamily="Segoe MDL2 Assets"
@@ -174,6 +183,15 @@
                                        Foreground="#888888"/>
                         </Button>
                     </Grid>
+
+                    <!-- Password inline validation error -->
+                    <TextBlock x:Name="ErrPassword"
+                               FontFamily="Segoe UI"
+                               FontSize="11"
+                               Foreground="#DC3545"
+                               Margin="0,2,0,8"
+                               TextWrapping="Wrap"
+                               Visibility="Collapsed"/>
 
                     <!-- Forgot password -->
                     <TextBlock HorizontalAlignment="Right"
@@ -284,16 +302,24 @@
         <!-- Error Modal Overlay -->
         <Grid Grid.Column="1" x:Name="ErrorModalOverlay" Visibility="Collapsed" Panel.ZIndex="20">
             <Rectangle Fill="#66000000"/>
-            <Border Background="White" CornerRadius="12" Padding="28,24" Width="300"
+            <Border Background="White" CornerRadius="12" Padding="28,24" Width="320"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border.Effect>
                     <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="3" Opacity="0.22"/>
                 </Border.Effect>
                 <StackPanel>
-                    <TextBlock x:Name="TxtErrorModalTitle" Text="Sign In Failed" FontFamily="Segoe UI" FontSize="15"
-                               FontWeight="Bold" Foreground="#8B1A4A" Margin="0,0,0,10"/>
-                    <TextBlock x:Name="TxtErrorModal" Text="" FontFamily="Segoe UI" FontSize="12"
-                               Foreground="#444444" TextWrapping="Wrap" Margin="0,0,0,20"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <TextBlock Text="&#xE783;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="20"
+                                   Foreground="#C0392B"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,10,0"/>
+                        <TextBlock x:Name="TxtErrorModalTitle" Text="Sign In Failed" FontFamily="Segoe UI" FontSize="16"
+                                   FontWeight="Bold" Foreground="#8B1A4A" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock x:Name="TxtErrorModal" Text="" FontFamily="Segoe UI" FontSize="12.5"
+                               Foreground="#444444" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,20"/>
                     <Button Content="Close" Height="38" Cursor="Hand" Click="BtnErrorClose_Click">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
