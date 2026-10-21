@@ -17,22 +17,22 @@ namespace SOLUM_UI
 {
     public partial class SoloParentRecordsPage : Page
     {
-        public static string CurrentUserName    { get; set; } = string.Empty;
-        public static string CurrentUserRole    { get; set; } = string.Empty;
+        public static string CurrentUserName { get; set; } = string.Empty;
+        public static string CurrentUserRole { get; set; } = string.Empty;
         public static string CurrentUserBarangay { get; set; } = string.Empty;
 
         private List<SoloParentRecordViewModel> _allRecords;
         private List<SoloParentRecordViewModel> _filteredRecords;
 
-        private string _statusFilter   = "All";
-        private string _sexFilter      = "All";
+        private string _statusFilter = "All";
+        private string _sexFilter = "All";
         private string _barangayFilter = "All";
-        private string _sortOption     = "Name A-Z";
+        private string _sortOption = "Name A-Z";
 
-        private int _pageSize      = 10;
-        private int _currentPage   = 1;
-        private int _totalPages    = 1;
-        private bool _isLoading    = false;
+        private int _pageSize = 10;
+        private int _currentPage = 1;
+        private int _totalPages = 1;
+        private bool _isLoading = false;
 
         public static readonly DependencyProperty SearchPlaceholderProperty =
             DependencyProperty.Register(
@@ -47,10 +47,10 @@ namespace SOLUM_UI
             set => SetValue(SearchPlaceholderProperty, value);
         }
 
-        private bool IsAdmin     => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
+        private bool IsAdmin => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
                                     string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase);
         private bool IsBasicUser => string.Equals(CurrentUserRole, "BasicUser", StringComparison.OrdinalIgnoreCase);
-        private bool IsEncoder   => string.Equals(CurrentUserRole, "Encoder", StringComparison.OrdinalIgnoreCase);
+        private bool IsEncoder => string.Equals(CurrentUserRole, "Encoder", StringComparison.OrdinalIgnoreCase);
 
         public SoloParentRecordsPage()
         {
@@ -70,45 +70,66 @@ namespace SOLUM_UI
             SizeChanged += Page_SizeChanged;
             // Also recompute when the ListView itself changes size
             RecordsList.SizeChanged += (s, e) => ResizeNameColumn();
-            RecordsList.Loaded      += (s, e) => ResizeNameColumn();
+            RecordsList.Loaded += (s, e) => ResizeNameColumn();
         }
 
         private void ApplyRoleView()
         {
             if (IsBasicUser)
             {
-                AdminToolbar.Visibility       = Visibility.Collapsed;
-                BasicUserToolbar.Visibility   = Visibility.Visible;
+                AdminToolbar.Visibility = Visibility.Collapsed;
+                BasicUserToolbar.Visibility = Visibility.Visible;
                 EncoderSearchPanel.Visibility = Visibility.Collapsed;
-                RecordsClipGrid.Visibility    = Visibility.Visible;
-                PagingRow.Visibility          = Visibility.Visible;
-                _barangayFilter               = CurrentUserBarangay;
+                RecordsClipGrid.Visibility = Visibility.Visible;
+                PagingRow.Visibility = Visibility.Visible;
+                _barangayFilter = CurrentUserBarangay;
 
-                if (ColSex         != null) ColSex.Width         = 0;
+                if (ColSex != null) ColSex.Width = 0;
                 if (ColCivilStatus != null) ColCivilStatus.Width = 0;
-                if (ColChildren    != null) ColChildren.Width    = 0;
+                if (ColChildren != null) ColChildren.Width = 0;
                 if (ColLastUpdated != null) ColLastUpdated.Width = 0;
-                if (ColBarangay    != null) ColBarangay.Width    = 0;
-                if (ColActions     != null) ColActions.Width     = 300;
+                if (ColBarangay != null) ColBarangay.Width = 0;
+                if (ColActions != null) ColActions.Width = 300;
             }
             else if (IsEncoder)
             {
-                // Encoder users: Show search panel, HIDE record list
-                AdminToolbar.Visibility       = Visibility.Collapsed;
-                BasicUserToolbar.Visibility   = Visibility.Collapsed;
+                // Encoder users: search banner + tips first. The results table only appears after a search.
+                AdminToolbar.Visibility = Visibility.Collapsed;
+                BasicUserToolbar.Visibility = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Visible;
-                RecordsClipGrid.Visibility    = Visibility.Collapsed;
-                PagingRow.Visibility          = Visibility.Collapsed;
+                PagingRow.Visibility = Visibility.Collapsed;
+
+                // if (PageSubtitle != null)
+                //     PageSubtitle.Text = "Look up a registered solo parent, or register a new one.";
+                // if (NoResultsAddBtn != null)
+                //     NoResultsAddBtn.Visibility = Visibility.Visible;
+
+                SetEncoderResultsVisible(false);
             }
             else
             {
                 // Administrator: Show everything
-                AdminToolbar.Visibility       = Visibility.Visible;
-                BasicUserToolbar.Visibility   = Visibility.Collapsed;
+                AdminToolbar.Visibility = Visibility.Visible;
+                BasicUserToolbar.Visibility = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Collapsed;
-                RecordsClipGrid.Visibility    = Visibility.Visible;
-                PagingRow.Visibility          = Visibility.Visible;
+                RecordsClipGrid.Visibility = Visibility.Visible;
+                PagingRow.Visibility = Visibility.Visible;
             }
+        }
+
+        /// <summary>
+        /// Encoder only. false = landing view (banner + tips, no table).
+        /// true = results view (banner + results table, tips hidden).
+        /// </summary>
+        private void SetEncoderResultsVisible(bool showResults)
+        {
+            if (!IsEncoder) return;
+
+            if (RecordsClipGrid != null)
+                RecordsClipGrid.Visibility = showResults ? Visibility.Visible : Visibility.Collapsed;
+
+            // if (EncoderTipsPanel != null)
+            //     EncoderTipsPanel.Visibility = showResults ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private async Task LoadRecordsAsync()
@@ -118,12 +139,14 @@ namespace SOLUM_UI
             // For Encoder users: only load records if they have initiated a search
             if (IsEncoder && !HasSearchQuery())
             {
-                // Show empty state instead of loading records
                 _allRecords = new List<SoloParentRecordViewModel>();
                 _filteredRecords = new List<SoloParentRecordViewModel>();
                 if (RecordsList != null) RecordsList.ItemsSource = null;
-                if (NoResultsPanel != null) NoResultsPanel.Visibility = Visibility.Visible;
-                
+                if (NoResultsPanel != null) NoResultsPanel.Visibility = Visibility.Collapsed;
+
+                // Back to the landing view (banner + tips)
+                SetEncoderResultsVisible(false);
+
                 // Ensure loading overlay is turned off
                 if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
                 return;
@@ -133,10 +156,13 @@ namespace SOLUM_UI
             if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = false;
             if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
 
+            // Encoder with a search: show the results card (tips hide)
+            SetEncoderResultsVisible(true);
+
             try
             {
                 string effectiveBarangay = IsBasicUser ? CurrentUserBarangay : _barangayFilter;
-                
+
                 // Handle search query based on user role
                 string query = string.Empty;
                 Guid? searchGuid = null;
@@ -149,7 +175,7 @@ namespace SOLUM_UI
                 {
                     // Encoder users: parse the unified search query
                     query = EncSearchQuery?.Text?.Trim() ?? string.Empty;
-                    
+
                     if (!string.IsNullOrWhiteSpace(query))
                     {
                         // Get search mode from dropdown (if it exists)
@@ -189,6 +215,11 @@ namespace SOLUM_UI
                                         int firstSpace = query.IndexOf(' ');
                                         firstName = query.Substring(0, firstSpace).Trim();
                                         lastName = query.Substring(firstSpace + 1).Trim();
+                                    }
+                                    else
+                                    {
+                                        // Single word: treat as last name so the search never runs unfiltered
+                                        lastName = query;
                                     }
                                     break;
 
@@ -372,7 +403,7 @@ namespace SOLUM_UI
                 _allRecords = new List<SoloParentRecordViewModel>();
                 for (int i = 0; i < paged.Items.Count; i++)
                 {
-                    var summary    = paged.Items[i];
+                    var summary = paged.Items[i];
                     var detailResp = detailResponses[i];
 
                     SoloParentRecord rec;
@@ -385,10 +416,10 @@ namespace SOLUM_UI
                         // Detail call failed — build a minimal record from summary fields
                         rec = new SoloParentRecord
                         {
-                            Id          = summary.Id.ToString(),
-                            Barangay    = summary.Barangay,
-                            Sex         = summary.Sex,
-                            Status      = summary.IsActive ? "Valid" : "Inactive",
+                            Id = summary.Id.ToString(),
+                            Barangay = summary.Barangay,
+                            Sex = summary.Sex,
+                            Status = summary.IsActive ? "Valid" : "Inactive",
                             LastUpdated = summary.DateCreated,
                         };
                         rec.Name = rec.Surname = rec.FirstName = rec.MiddleName = string.Empty;
@@ -484,32 +515,51 @@ namespace SOLUM_UI
             if (e.Key == Key.Enter) ApplyFiltersAndPage();
         }
 
+        /// <summary>Updates the search box hint to match the selected search type.</summary>
+        private void UpdateSearchPlaceholder(string mode)
+        {
+            switch (mode)
+            {
+                case "FIRST_NAME":
+                    SearchPlaceholder = "Search by first name (e.g. Juana)...";
+                    break;
+                case "LAST_NAME":
+                    SearchPlaceholder = "Search by last name (e.g. Dela Cruz)...";
+                    break;
+                case "FULL_NAME":
+                    SearchPlaceholder = "Search by full name (e.g. Juana Dela Cruz)...";
+                    break;
+                case "PHILSYS_ID":
+                    SearchPlaceholder = "Search by PhilSys ID (e.g. 1234-5678-9012)...";
+                    break;
+                case "AUTO":
+                default:
+                    SearchPlaceholder = "Search records (name, PhilSys ID)...";
+                    break;
+            }
+        }
+
         private void CmbSearchMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (CmbSearchMode?.SelectedItem is ComboBoxItem item)
             {
-                string mode = item.Tag?.ToString() ?? "AUTO";
-                switch (mode)
-                {
-                    case "FIRST_NAME":
-                        SearchPlaceholder = "Search by first name (e.g. Juana)...";
-                        break;
-                    case "LAST_NAME":
-                        SearchPlaceholder = "Search by last name (e.g. Dela Cruz)...";
-                        break;
-                    case "FULL_NAME":
-                        SearchPlaceholder = "Search by full name (e.g. Juana Dela Cruz)...";
-                        break;
-                    case "PHILSYS_ID":
-                        SearchPlaceholder = "Search by PhilSys ID (e.g. 1234-5678-9012)...";
-                        break;
-                    case "AUTO":
-                    default:
-                        SearchPlaceholder = "Search records (name, PhilSys ID)...";
-                        break;
-                }
+                UpdateSearchPlaceholder(item.Tag?.ToString() ?? "AUTO");
 
                 if (!string.IsNullOrWhiteSpace(SearchName?.Text))
+                {
+                    ApplyFiltersAndPage();
+                }
+            }
+        }
+
+        private void EncSearchMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (EncSearchMode?.SelectedItem is ComboBoxItem item)
+            {
+                UpdateSearchPlaceholder(item.Tag?.ToString() ?? "AUTO");
+
+                // Re-run only if the encoder already typed something
+                if (IsLoaded && !string.IsNullOrWhiteSpace(EncSearchQuery?.Text))
                 {
                     ApplyFiltersAndPage();
                 }
@@ -527,7 +577,17 @@ namespace SOLUM_UI
                 ApplyFiltersAndPage();
         }
 
-        private void EncoderFields_TextChanged(object sender, TextChangedEventArgs e) { }
+        private void EncoderFields_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            bool hasText = !string.IsNullOrEmpty(EncSearchQuery?.Text);
+
+            // if (EncClearBtn != null)
+            //     EncClearBtn.Visibility = hasText ? Visibility.Visible : Visibility.Collapsed;
+
+            // Emptying the box returns the encoder to the landing view
+            if (!hasText && IsLoaded)
+                ApplyFiltersAndPage();
+        }
 
         private void ClearSearch_Click(object sender, RoutedEventArgs e)
         {
@@ -535,6 +595,7 @@ namespace SOLUM_UI
             {
                 // Clear Encoder search field (unified query)
                 if (EncSearchQuery != null) EncSearchQuery.Text = string.Empty;
+                // if (EncClearBtn != null) EncClearBtn.Visibility = Visibility.Collapsed;
             }
             else
             {
@@ -542,7 +603,7 @@ namespace SOLUM_UI
                 if (SearchName != null) SearchName.Text = string.Empty;
                 if (ClearSearchBtn != null) ClearSearchBtn.Visibility = Visibility.Collapsed;
             }
-            
+
             ApplyFiltersAndPage();
         }
 
@@ -553,24 +614,24 @@ namespace SOLUM_UI
 
         private void FilterApply_Click(object sender, RoutedEventArgs e)
         {
-            string sexVal      = (CmbFilterSex?.SelectedItem      as ComboBoxItem)?.Content?.ToString() ?? "All";
+            string sexVal = (CmbFilterSex?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "All";
             string barangayVal = (CmbFilterBarangay?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "All";
-            string statusVal   = (CmbFilterStatus?.SelectedItem   as ComboBoxItem)?.Content?.ToString() ?? "All";
-            _sexFilter      = sexVal;
+            string statusVal = (CmbFilterStatus?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "All";
+            _sexFilter = sexVal;
             _barangayFilter = barangayVal;
-            _statusFilter   = statusVal;
+            _statusFilter = statusVal;
             FilterPopup.IsOpen = false;
             ApplyFiltersAndPage();
         }
 
         private void FilterReset_Click(object sender, RoutedEventArgs e)
         {
-            if (CmbFilterSex      != null) CmbFilterSex.SelectedIndex      = 0;
+            if (CmbFilterSex != null) CmbFilterSex.SelectedIndex = 0;
             if (CmbFilterBarangay != null) CmbFilterBarangay.SelectedIndex = 0;
-            if (CmbFilterStatus   != null) CmbFilterStatus.SelectedIndex   = 0;
-            _sexFilter      = "All";
+            if (CmbFilterStatus != null) CmbFilterStatus.SelectedIndex = 0;
+            _sexFilter = "All";
             _barangayFilter = "All";
-            _statusFilter   = "All";
+            _statusFilter = "All";
             FilterPopup.IsOpen = false;
             ApplyFiltersAndPage();
         }
@@ -591,6 +652,17 @@ namespace SOLUM_UI
         private void RecordsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             SoloParentRecordViewModel vm = RecordsList.SelectedItem as SoloParentRecordViewModel;
+            if (vm == null) return;
+
+            AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
+            OpenViewDialog(vm);
+        }
+
+        /// <summary>Eye button in the Actions column: same as double-clicking the row.</summary>
+        private void ViewRecord_Click(object sender, RoutedEventArgs e)
+        {
+            string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
+            SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
             if (vm == null) return;
 
             AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
@@ -668,7 +740,7 @@ namespace SOLUM_UI
             {
                 var ocr = new OcrScanDialog { Owner = Window.GetWindow(this) };
                 ocr.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
-                
+
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
                     await SaveNewRecordAsync(ocr.Result);
@@ -695,7 +767,7 @@ namespace SOLUM_UI
             {
                 record.CreatedBy = CurrentUserName;
                 // Use safe barangay: if record doesn't have one, use user's barangay or fallback to "ALL"
-                record.Barangay = string.IsNullOrWhiteSpace(record.Barangay) 
+                record.Barangay = string.IsNullOrWhiteSpace(record.Barangay)
                     ? (!string.IsNullOrWhiteSpace(CurrentUserBarangay) ? CurrentUserBarangay : "ALL")
                     : record.Barangay;
 
@@ -1073,13 +1145,13 @@ namespace SOLUM_UI
             if (RecordsList.View is GridView gv && gv.Columns.Count >= 9)
             {
                 // Fixed columns (px)
-                const double sex        =  80;
-                const double civil      = 110;
-                const double dob        = 108;
-                const double lastUpd    = 108;
+                const double sex = 80;
+                const double civil = 110;
+                const double dob = 108;
+                const double lastUpd = 108;
                 const double validUntil = 108;
-                const double status     =  90;
-                const double actions    = 145;
+                const double status = 90;
+                const double actions = 145;
 
                 double available = RecordsList.ActualWidth - 2;
                 if (available <= 0) return;
@@ -1089,7 +1161,7 @@ namespace SOLUM_UI
 
                 // Col 0 = NAME  (wider), Col 1 = BARANGAY  (narrower)
                 gv.Columns[0].Width = Math.Max(140, flex * 0.58);
-                gv.Columns[1].Width = Math.Max(80,  flex * 0.42);
+                gv.Columns[1].Width = Math.Max(80, flex * 0.42);
                 gv.Columns[2].Width = sex;
                 gv.Columns[3].Width = civil;
                 gv.Columns[4].Width = dob;
@@ -1124,7 +1196,7 @@ namespace SOLUM_UI
             {
                 var ocr = new OcrScanDialog { Owner = Window.GetWindow(this) };
                 ocr.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
-                
+
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
                     await SaveNewRecordAsync(ocr.Result);
@@ -1206,21 +1278,21 @@ namespace SOLUM_UI
                     changes.Add(new SOLUM_UI.Models.ChangeDetail(label, oldVal, newVal));
             }
 
-            Check("Last Name",          before.Surname,              after.Surname);
-            Check("First Name",         before.FirstName,            after.FirstName);
-            Check("Middle Name",        before.MiddleName,           after.MiddleName);
-            Check("Extension",          before.ExtensionName,        after.ExtensionName);
-            Check("Sex",                before.Sex,                  after.Sex);
-            Check("Civil Status",       before.CivilStatus,          after.CivilStatus);
-            Check("Birthplace",         before.PlaceOfBirth,         after.PlaceOfBirth);
-            Check("Address",            before.Address,              after.Address);
-            Check("Barangay",           before.Barangay,             after.Barangay);
-            Check("Contact",            before.ContactNumber,        after.ContactNumber);
-            Check("Status",             before.Status,               after.Status);
-            Check("Education",          before.EducationalAttainment, after.EducationalAttainment);
-            Check("Occupation",         before.Occupation,           after.Occupation);
-            Check("Religion",           before.Religion,             after.Religion);
-            Check("Monthly Income",     before.MonthlyIncome,        after.MonthlyIncome);
+            Check("Last Name", before.Surname, after.Surname);
+            Check("First Name", before.FirstName, after.FirstName);
+            Check("Middle Name", before.MiddleName, after.MiddleName);
+            Check("Extension", before.ExtensionName, after.ExtensionName);
+            Check("Sex", before.Sex, after.Sex);
+            Check("Civil Status", before.CivilStatus, after.CivilStatus);
+            Check("Birthplace", before.PlaceOfBirth, after.PlaceOfBirth);
+            Check("Address", before.Address, after.Address);
+            Check("Barangay", before.Barangay, after.Barangay);
+            Check("Contact", before.ContactNumber, after.ContactNumber);
+            Check("Status", before.Status, after.Status);
+            Check("Education", before.EducationalAttainment, after.EducationalAttainment);
+            Check("Occupation", before.Occupation, after.Occupation);
+            Check("Religion", before.Religion, after.Religion);
+            Check("Monthly Income", before.MonthlyIncome, after.MonthlyIncome);
             bool circChanged =
                 before.CircumstanceA1 != after.CircumstanceA1 ||
                 before.CircumstanceA2 != after.CircumstanceA2 ||
@@ -1229,11 +1301,11 @@ namespace SOLUM_UI
                 before.CircumstanceA5 != after.CircumstanceA5 ||
                 before.CircumstanceA6 != after.CircumstanceA6 ||
                 before.CircumstanceA7 != after.CircumstanceA7 ||
-                before.CircumstanceB  != after.CircumstanceB  ||
-                before.CircumstanceC  != after.CircumstanceC  ||
-                before.CircumstanceD  != after.CircumstanceD  ||
-                before.CircumstanceE  != after.CircumstanceE  ||
-                before.CircumstanceF  != after.CircumstanceF;
+                before.CircumstanceB != after.CircumstanceB ||
+                before.CircumstanceC != after.CircumstanceC ||
+                before.CircumstanceD != after.CircumstanceD ||
+                before.CircumstanceE != after.CircumstanceE ||
+                before.CircumstanceF != after.CircumstanceF;
 
             if (!circChanged)
             {
@@ -1254,17 +1326,17 @@ namespace SOLUM_UI
             {
                 changes.Add(new SOLUM_UI.Models.ChangeDetail("Circumstances / Problem Presented", before.CircumstancesDisplay, after.CircumstancesDisplay));
             }
-            Check("PhilSys Number",     before.PhilSysNumber,        after.PhilSysNumber);
-            Check("Emergency Contact",  before.EmergencyContactName, after.EmergencyContactName);
-            Check("Emergency Number",   before.EmergencyContactNumber, after.EmergencyContactNumber);
-            Check("Needs & Problems",   before.NeedsAndProblems,     after.NeedsAndProblems);
+            Check("PhilSys Number", before.PhilSysNumber, after.PhilSysNumber);
+            Check("Emergency Contact", before.EmergencyContactName, after.EmergencyContactName);
+            Check("Emergency Number", before.EmergencyContactNumber, after.EmergencyContactNumber);
+            Check("Needs & Problems", before.NeedsAndProblems, after.NeedsAndProblems);
             Check("Other Sources of Income", before.OtherIncomeSource, after.OtherIncomeSource);
 
             if (before.DateOfBirth != after.DateOfBirth)
                 changes.Add(new SOLUM_UI.Models.ChangeDetail(
                     "Date of Birth",
                     before.DateOfBirth != DateTime.MinValue ? before.DateOfBirth.ToString("yyyy-MM-dd") : "—",
-                    after.DateOfBirth  != DateTime.MinValue ? after.DateOfBirth.ToString("yyyy-MM-dd")  : "—"));
+                    after.DateOfBirth != DateTime.MinValue ? after.DateOfBirth.ToString("yyyy-MM-dd") : "—"));
 
             return changes;
         }
