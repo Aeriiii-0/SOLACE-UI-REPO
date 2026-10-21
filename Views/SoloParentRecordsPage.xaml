@@ -1084,159 +1084,149 @@
             </Grid>
         </Border>
 
+        <!-- ENCODER/BASIC USER SEARCH PANEL - NEW DESIGN MATCHING IMAGE -->
         <Border x:Name="EncoderSearchPanel" Grid.Row="2"
-                Visibility="Collapsed"
-                Margin="24,10,24,10"
-                Background="White" CornerRadius="14"
-                BorderBrush="#E0D0D5" BorderThickness="1.5">
-            <Border.Effect>
-                <DropShadowEffect Color="#C0A0AA" BlurRadius="14" ShadowDepth="3" Opacity="0.07"/>
-            </Border.Effect>
-            
-            <StackPanel Margin="24,20,24,20">
-                <TextBlock Text="SEARCH FOR RECORD" FontSize="13" FontWeight="Bold"
-                           Foreground="#702943" Margin="0,0,0,18"/>
-
-                <!-- Row 1: ID and First Name -->
-                <Grid Margin="0,0,0,16">
+                Visibility="Collapsed" 
+                Margin="24,20,24,20" 
+                Background="Transparent">
+            <StackPanel>
+                <!-- Title Section -->
+                <TextBlock Text="Record management" FontSize="24" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,4"/>
+                <TextBlock Text="Look up a registered solo parent, or register a new one." FontSize="14" Foreground="#888888" Margin="0,0,0,20"/>
+                
+                <!-- Two-Column Layout: Search Card + Add New Card -->
+                <Grid Margin="0,0,0,28">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="320"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Solo Parent ID -->
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Solo Parent ID" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,6"/>
-                        <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
-                            <TextBox x:Name="EncSearchId"
-                                     BorderThickness="0" Background="Transparent" Padding="12,10"
-                                     FontSize="12" Foreground="#333333"
-                                     TextChanged="EncoderFields_TextChanged"
-                                     KeyDown="SearchBox_KeyDown"/>
-                        </Border>
-                    </StackPanel>
+                    <!-- LEFT: Search Card (Dark Purple) -->
+                    <Border Grid.Column="0" CornerRadius="20" Background="#704A5C" Padding="32,28">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="4" Opacity="0.15"/>
+                        </Border.Effect>
+                        <StackPanel>
+                            <!-- Header -->
+                            <TextBlock Text="Find a solo parent's record" FontSize="22" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
+                            <TextBlock Text="Search by name or PhilSys ID to open their record." FontSize="14" Foreground="#E8D0D8" Margin="0,0,0,18"/>
+                            
+                            <!-- Search Row -->
+                            <Grid Height="50" Margin="0,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="140"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
 
-                    <!-- First Name -->
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="First Name" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,6"/>
-                        <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
-                            <TextBox x:Name="EncSearchFirstName"
-                                     BorderThickness="0" Background="Transparent" Padding="12,10"
-                                     FontSize="12" Foreground="#333333"
-                                     TextChanged="EncoderFields_TextChanged"
-                                     KeyDown="SearchBox_KeyDown"/>
-                        </Border>
-                    </StackPanel>
-                </Grid>
-
-                <!-- Row 2: Last Name, Barangay, and Birthday -->
-                <Grid Margin="0,0,0,16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Last Name -->
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Last Name" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,6"/>
-                        <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
-                            <TextBox x:Name="EncSearchLastName"
-                                     BorderThickness="0" Background="Transparent" Padding="12,10"
-                                     FontSize="12" Foreground="#333333"
-                                     TextChanged="EncoderFields_TextChanged"
-                                     KeyDown="SearchBox_KeyDown"/>
-                        </Border>
-                    </StackPanel>
-
-                    <!-- Barangay -->
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="Barangay" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,6"/>
-                        <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
-                            <TextBox x:Name="EncSearchBarangay"
-                                     BorderThickness="0" Background="Transparent" Padding="12,10"
-                                     FontSize="12" Foreground="#333333"
-                                     TextChanged="EncoderFields_TextChanged"
-                                     KeyDown="SearchBox_KeyDown"/>
-                        </Border>
-                    </StackPanel>
-
-                    <!-- Date of Birth -->
-                    <StackPanel Grid.Column="4">
-                        <TextBlock Text="Date of Birth" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,6"/>
-                        <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
-                            <TextBox x:Name="EncSearchBirthday"
-                                     BorderThickness="0" Background="Transparent" Padding="12,10"
-                                     FontSize="12" Foreground="#333333"
-                                     TextChanged="EncoderFields_TextChanged"
-                                     KeyDown="SearchBox_KeyDown"/>
-                        </Border>
-                    </StackPanel>
-                </Grid>
-
-                <!-- Action Buttons -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-                    <Button x:Name="EncoderClearBtn" Height="40" Padding="16,0" Margin="0,0,8,0" Cursor="Hand" Click="ClearSearch_Click"
-                            FontSize="12" FontWeight="SemiBold" Foreground="#702943">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="BgBorder" CornerRadius="8" Background="White" BorderBrush="#D4A0B0" BorderThickness="1.5"
-                                        Padding="{TemplateBinding Padding}">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <!-- Mode Dropdown -->
+                                <Border Grid.Column="0" CornerRadius="10" Background="White" Margin="0,0,12,0">
+                                    <ComboBox x:Name="EncSearchMode" VerticalAlignment="Center" Padding="12,8"
+                                              FontSize="12" Background="Transparent" BorderThickness="0">
+                                        <ComboBoxItem Content="All / auto" Tag="AUTO" IsSelected="True"/>
+                                        <ComboBoxItem Content="First Name" Tag="FIRST_NAME"/>
+                                        <ComboBoxItem Content="Last Name" Tag="LAST_NAME"/>
+                                        <ComboBoxItem Content="PhilSys ID" Tag="PHILSYS_ID"/>
+                                    </ComboBox>
                                 </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="BgBorder" Property="Background" Value="#F5ECEE"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                        <TextBlock Text="Clear"/>
-                    </Button>
 
-                    <Button x:Name="EncoderAddBtn" Height="40" Padding="16,0" Margin="0,0,8,0" Cursor="Hand" Click="BasicUserAddRecord_Click"
-                            FontSize="12" FontWeight="SemiBold" Foreground="#702943">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="BgBorder" CornerRadius="8" Background="White" BorderBrush="#D4A0B0" BorderThickness="1.5"
-                                        Padding="{TemplateBinding Padding}">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <!-- Search TextBox -->
+                                <Border Grid.Column="1" CornerRadius="10" Background="White" Margin="0,0,12,0">
+                                    <TextBox x:Name="EncSearchQuery" 
+                                             Background="Transparent" BorderThickness="0" Padding="14,8"
+                                             FontSize="12" Foreground="#999999" VerticalAlignment="Center"
+                                             TextChanged="EncoderFields_TextChanged"
+                                             KeyDown="SearchBox_KeyDown"/>
                                 </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="BgBorder" Property="Background" Value="#F5ECEE"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                        <TextBlock Text="+ Add New Record"/>
-                    </Button>
 
-                    <Button x:Name="EncoderSearchBtn" Height="40" Padding="20,0" Cursor="Hand" Click="EncoderSearchBtn_Click"
-                            FontSize="12" FontWeight="SemiBold" Foreground="White">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border CornerRadius="8" Background="#702943" Padding="{TemplateBinding Padding}">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#702943" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
-                                    </Border.Effect>
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Opacity" Value="0.9"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🔍" Margin="0,0,6,0"/>
-                            <TextBlock Text="Search"/>
+                                <!-- Search Button -->
+                                <Button Grid.Column="2" Background="White" Foreground="#704A5C"
+                                        FontSize="12" FontWeight="SemiBold" Click="EncoderSearchBtn_Click" Cursor="Hand"
+                                        Padding="12,8">
+                                    Search
+                                </Button>
+                            </Grid>
                         </StackPanel>
-                    </Button>
+                    </Border>
+
+                    <!-- RIGHT: Add New Record Card (Yellow/Beige) -->
+                    <Border Grid.Column="2" CornerRadius="20" Background="#FFF8E7" Padding="24,28">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#E8D4B0" BlurRadius="12" ShadowDepth="3" Opacity="0.12"/>
+                        </Border.Effect>
+                        <StackPanel VerticalAlignment="Center">
+                            <!-- Icon placeholder -->
+                            <TextBlock Text="👤" FontSize="32" Margin="0,0,0,12" HorizontalAlignment="Center"/>
+                            
+                            <!-- Text -->
+                            <TextBlock Text="Not registered yet?" FontSize="16" FontWeight="Bold" Foreground="#704A5C" 
+                                       HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                            <TextBlock Text="Start a new solo parent record." FontSize="12" Foreground="#C8A882" 
+                                       HorizontalAlignment="Center" Margin="0,0,0,16" TextAlignment="Center"/>
+                            
+                            <!-- Add Button -->
+                            <Button Height="44" Background="#8B6F47" Foreground="White"
+                                    FontSize="12" FontWeight="SemiBold" Click="BasicUserAddRecord_Click" Cursor="Hand"
+                                    Padding="12,8">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="➕ " Margin="0,0,4,0"/>
+                                    <TextBlock Text="Add new record"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- SEARCH TIPS SECTION -->
+                <StackPanel Margin="0,0,0,0">
+                    <TextBlock Text="Search tips" FontSize="14" FontWeight="Bold" Foreground="#333333" Margin="0,0,0,14"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Tip 1: PhilSys ID -->
+                        <Border Grid.Column="0" CornerRadius="12" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Padding="20,16">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="2" Opacity="0.06"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="📋" FontSize="24" Margin="0,0,0,10"/>
+                                <TextBlock Text="Use the PhilSys ID" FontSize="13" FontWeight="SemiBold" Foreground="#333333" Margin="0,0,0,6"/>
+                                <TextBlock Text="The quickest way to land on exactly one record." FontSize="11" Foreground="#888888" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Tip 2: Full Name -->
+                        <Border Grid.Column="2" CornerRadius="12" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Padding="20,16">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="2" Opacity="0.06"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="👤" FontSize="24" Margin="0,0,0,10"/>
+                                <TextBlock Text="Try the full name" FontSize="13" FontWeight="SemiBold" Foreground="#333333" Margin="0,0,0,6"/>
+                                <TextBlock Text="Pick Full name in the dropdown to narrow common surnames." FontSize="11" Foreground="#888888" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Tip 3: Privacy -->
+                        <Border Grid.Column="4" CornerRadius="12" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Padding="20,16">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="2" Opacity="0.06"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="🔒" FontSize="24" Margin="0,0,0,10"/>
+                                <TextBlock Text="Records stay private" FontSize="13" FontWeight="SemiBold" Foreground="#333333" Margin="0,0,0,6"/>
+                                <TextBlock Text="Only records you search for are shown to encoders." FontSize="11" Foreground="#888888" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </StackPanel>
             </StackPanel>
         </Border>

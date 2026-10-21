@@ -144,33 +144,88 @@ namespace SOLUM_UI
                 string lastName = null;
                 string philsysId = null;
                 string barangay = null;
-                DateTime? dateOfBirth = null;
 
                 if (IsEncoder)
                 {
-                    // Encoder users: use specific search fields
-                    if (!string.IsNullOrWhiteSpace(EncSearchId?.Text))
+                    // Encoder users: parse the unified search query
+                    query = EncSearchQuery?.Text?.Trim() ?? string.Empty;
+                    
+                    if (!string.IsNullOrWhiteSpace(query))
                     {
-                        query = EncSearchId.Text.Trim();
+                        // Get search mode from dropdown (if it exists)
+                        string selectedMode = "AUTO";
+                        if (EncSearchMode?.SelectedItem is ComboBoxItem modeItem)
+                        {
+                            selectedMode = modeItem.Tag?.ToString() ?? "AUTO";
+                        }
+
+                        // Try to parse as GUID first
                         if (Guid.TryParse(query, out var parsedGuid))
+                        {
                             searchGuid = parsedGuid;
+                        }
                         else
-                            philsysId = query;
-                    }
-                    
-                    if (!string.IsNullOrWhiteSpace(EncSearchFirstName?.Text))
-                        firstName = EncSearchFirstName.Text.Trim();
-                    
-                    if (!string.IsNullOrWhiteSpace(EncSearchLastName?.Text))
-                        lastName = EncSearchLastName.Text.Trim();
-                    
-                    if (!string.IsNullOrWhiteSpace(EncSearchBarangay?.Text))
-                        barangay = EncSearchBarangay.Text.Trim();
-                    
-                    if (!string.IsNullOrWhiteSpace(EncSearchBirthday?.Text))
-                    {
-                        if (DateTime.TryParse(EncSearchBirthday.Text.Trim(), out var dob))
-                            dateOfBirth = dob;
+                        {
+                            switch (selectedMode)
+                            {
+                                case "FIRST_NAME":
+                                    firstName = query;
+                                    break;
+
+                                case "LAST_NAME":
+                                    lastName = query;
+                                    break;
+
+                                case "FULL_NAME":
+                                    // Parse as full name (last name, first name)
+                                    if (query.Contains(","))
+                                    {
+                                        var parts = query.Split(new[] { ',' }, 2);
+                                        lastName = parts[0].Trim();
+                                        firstName = parts.Length > 1 ? parts[1].Trim() : null;
+                                    }
+                                    else if (query.Contains(" "))
+                                    {
+                                        int firstSpace = query.IndexOf(' ');
+                                        firstName = query.Substring(0, firstSpace).Trim();
+                                        lastName = query.Substring(firstSpace + 1).Trim();
+                                    }
+                                    break;
+
+                                case "PHILSYS_ID":
+                                    philsysId = query;
+                                    break;
+
+                                case "AUTO":
+                                default:
+                                    // Auto-detect: if digits + spaces/hyphens with >= 4 digits -> PhilSys ID
+                                    string digitsOnly = System.Text.RegularExpressions.Regex.Replace(query, @"\D", "");
+                                    if (digitsOnly.Length >= 4 && System.Text.RegularExpressions.Regex.IsMatch(query, @"^[\d\s\-]+$"))
+                                    {
+                                        philsysId = query;
+                                    }
+                                    else if (query.Contains(","))
+                                    {
+                                        // Comma format: "Dela Cruz, Juana" -> Last Name = "Dela Cruz", First Name = "Juana"
+                                        var parts = query.Split(new[] { ',' }, 2);
+                                        lastName = parts[0].Trim();
+                                        firstName = parts.Length > 1 ? parts[1].Trim() : null;
+                                    }
+                                    else if (query.Contains(" "))
+                                    {
+                                        // Space format: "Juana Dela Cruz" -> First Name = "Juana", Last Name = "Dela Cruz"
+                                        int firstSpace = query.IndexOf(' ');
+                                        firstName = query.Substring(0, firstSpace).Trim();
+                                        lastName = query.Substring(firstSpace + 1).Trim();
+                                    }
+                                    else
+                                    {
+                                        // Single word: assume last name
+                                        lastName = query;
+                                    }
+                                    break;
+                            }
+                        }
                     }
                 }
                 else if (IsBasicUser)
@@ -478,12 +533,8 @@ namespace SOLUM_UI
         {
             if (IsEncoder)
             {
-                // Clear Encoder search fields
-                if (EncSearchId != null) EncSearchId.Text = string.Empty;
-                if (EncSearchFirstName != null) EncSearchFirstName.Text = string.Empty;
-                if (EncSearchLastName != null) EncSearchLastName.Text = string.Empty;
-                if (EncSearchBarangay != null) EncSearchBarangay.Text = string.Empty;
-                if (EncSearchBirthday != null) EncSearchBirthday.Text = string.Empty;
+                // Clear Encoder search field (unified query)
+                if (EncSearchQuery != null) EncSearchQuery.Text = string.Empty;
             }
             else
             {
@@ -1118,13 +1169,8 @@ namespace SOLUM_UI
             {
                 if (IsEncoder)
                 {
-                    // Check Encoder search fields - safely handle null controls
-                    bool hasId = EncSearchId != null && !string.IsNullOrEmpty(EncSearchId.Text?.Trim());
-                    bool hasFirstName = EncSearchFirstName != null && !string.IsNullOrEmpty(EncSearchFirstName.Text?.Trim());
-                    bool hasLastName = EncSearchLastName != null && !string.IsNullOrEmpty(EncSearchLastName.Text?.Trim());
-                    bool hasBarangay = EncSearchBarangay != null && !string.IsNullOrEmpty(EncSearchBarangay.Text?.Trim());
-                    bool hasBirthday = EncSearchBirthday != null && !string.IsNullOrEmpty(EncSearchBirthday.Text?.Trim());
-                    return hasId || hasFirstName || hasLastName || hasBarangay || hasBirthday;
+                    // Check Encoder search field (unified query)
+                    return EncSearchQuery != null && !string.IsNullOrEmpty(EncSearchQuery.Text?.Trim());
                 }
                 else if (IsBasicUser)
                 {
