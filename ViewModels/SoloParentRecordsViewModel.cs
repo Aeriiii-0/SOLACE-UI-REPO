@@ -229,6 +229,20 @@ namespace SOLUM_UI.ViewModels
             private set { if (_encoderPanelVisible == value) return; _encoderPanelVisible = value; OnPropertyChanged(nameof(EncoderPanelVisible)); }
         }
 
+        private Visibility _recordsListVisible = Visibility.Visible;
+        public Visibility RecordsListVisible
+        {
+            get => _recordsListVisible;
+            private set { if (_recordsListVisible == value) return; _recordsListVisible = value; OnPropertyChanged(nameof(RecordsListVisible)); }
+        }
+
+        private Visibility _pagingRowVisible = Visibility.Visible;
+        public Visibility PagingRowVisible
+        {
+            get => _pagingRowVisible;
+            private set { if (_pagingRowVisible == value) return; _pagingRowVisible = value; OnPropertyChanged(nameof(PagingRowVisible)); }
+        }
+
         // ── Commands ─────────────────────────────────────────────────────────
         public ICommand LoadRecordsCommand   { get; }
         public ICommand RefreshCommand       { get; }
@@ -286,6 +300,8 @@ namespace SOLUM_UI.ViewModels
                 AdminToolbarVisible  = Visibility.Collapsed;
                 BasicToolbarVisible  = Visibility.Visible;
                 EncoderPanelVisible  = Visibility.Collapsed;
+                RecordsListVisible   = Visibility.Visible;
+                PagingRowVisible     = Visibility.Visible;
                 _barangayFilter      = CurrentUserBarangay;
             }
             else if (IsEncoder)
@@ -293,12 +309,16 @@ namespace SOLUM_UI.ViewModels
                 AdminToolbarVisible  = Visibility.Collapsed;
                 BasicToolbarVisible  = Visibility.Collapsed;
                 EncoderPanelVisible  = Visibility.Visible;
+                RecordsListVisible   = Visibility.Collapsed;
+                PagingRowVisible     = Visibility.Collapsed;
             }
             else
             {
                 AdminToolbarVisible  = Visibility.Visible;
                 BasicToolbarVisible  = Visibility.Collapsed;
                 EncoderPanelVisible  = Visibility.Collapsed;
+                RecordsListVisible   = Visibility.Visible;
+                PagingRowVisible     = Visibility.Visible;
             }
         }
 

@@ -77,6 +77,7 @@ namespace SOLUM_UI
                 AdminToolbar.Visibility       = Visibility.Collapsed;
                 BasicUserToolbar.Visibility   = Visibility.Visible;
                 EncoderSearchPanel.Visibility = Visibility.Collapsed;
+                RecordsClipGrid.Visibility    = Visibility.Visible;
                 PagingRow.Visibility          = Visibility.Visible;
                 _barangayFilter               = CurrentUserBarangay;
 
@@ -87,11 +88,22 @@ namespace SOLUM_UI
                 if (ColBarangay    != null) ColBarangay.Width    = 0;
                 if (ColActions     != null) ColActions.Width     = 300;
             }
+            else if (IsEncoder)
+            {
+                // Encoder users: Show search panel, HIDE record list
+                AdminToolbar.Visibility       = Visibility.Collapsed;
+                BasicUserToolbar.Visibility   = Visibility.Collapsed;
+                EncoderSearchPanel.Visibility = Visibility.Visible;
+                RecordsClipGrid.Visibility    = Visibility.Collapsed;
+                PagingRow.Visibility          = Visibility.Collapsed;
+            }
             else
             {
+                // Administrator: Show everything
                 AdminToolbar.Visibility       = Visibility.Visible;
                 BasicUserToolbar.Visibility   = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Collapsed;
+                RecordsClipGrid.Visibility    = Visibility.Visible;
                 PagingRow.Visibility          = Visibility.Visible;
             }
         }
@@ -99,6 +111,17 @@ namespace SOLUM_UI
         private async Task LoadRecordsAsync()
         {
             if (_isLoading) return;
+
+            // For Encoder users: only load records if they have initiated a search
+            if (IsEncoder && !HasSearchQuery())
+            {
+                // Show empty state instead of loading records
+                Records.Clear();
+                if (NoResultsPanel != null) NoResultsPanel.Visibility = Visibility.Visible;
+                if (RecordsList != null) RecordsList.ItemsSource = null;
+                return;
+            }
+
             _isLoading = true;
             if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = false;
             if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
@@ -1031,6 +1054,28 @@ namespace SOLUM_UI
         }
 
         private string GetCurrentUser() => !string.IsNullOrEmpty(CurrentUserName) ? CurrentUserName : "Admin";
+
+        private bool HasSearchQuery()
+        {
+            if (IsEncoder)
+            {
+                // Check Encoder search fields
+                bool hasId = !string.IsNullOrEmpty(EncSearchId?.Text?.Trim());
+                bool hasFirstName = !string.IsNullOrEmpty(EncSearchFirstName?.Text?.Trim());
+                bool hasLastName = !string.IsNullOrEmpty(EncSearchLastName?.Text?.Trim());
+                bool hasBarangay = !string.IsNullOrEmpty(EncSearchBarangay?.Text?.Trim());
+                bool hasBirthday = !string.IsNullOrEmpty(EncSearchBirthday?.Text?.Trim());
+                return hasId || hasFirstName || hasLastName || hasBarangay || hasBirthday;
+            }
+            else if (IsBasicUser)
+            {
+                return !string.IsNullOrEmpty(BasicSearchName?.Text?.Trim());
+            }
+            else
+            {
+                return !string.IsNullOrEmpty(SearchName?.Text?.Trim());
+            }
+        }
 
         /// <summary>
         /// Compares two records field-by-field and returns a structured list of

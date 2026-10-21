@@ -1092,9 +1092,14 @@
             <Border.Effect>
                 <DropShadowEffect Color="#C0A0AA" BlurRadius="14" ShadowDepth="3" Opacity="0.07"/>
             </Border.Effect>
-            <StackPanel Margin="20,16,20,16">
+            <StackPanel Margin="24,20,24,20">
+                
+                <!-- Header -->
+                <TextBlock Text="SEARCH FOR RECORD" FontSize="11" FontWeight="Bold"
+                           Foreground="#702943" Margin="0,0,0,16"/>
 
-                <Grid Margin="0,0,0,12">
+                <!-- Search Fields Row 1 -->
+                <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="10"/>
@@ -1103,92 +1108,91 @@
 
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="SOLO PARENT ID" FontSize="10" FontWeight="Bold"
-                                   Foreground="#702943" Margin="2,0,0,5"/>
+                                   Foreground="#702943" Margin="0,0,0,6"/>
                         <Border Background="White" CornerRadius="10"
                                 BorderBrush="#D4A0B0" BorderThickness="1.5">
-                            <Grid Height="40">
-                                <TextBox x:Name="EncSearchId"
-                                         BorderThickness="0" Background="Transparent"
-                                         FontSize="13" Foreground="#111111" VerticalAlignment="Center"
-                                         Margin="12,0"
-                                         TextChanged="EncoderFields_TextChanged"
-                                         KeyDown="SearchBox_KeyDown">
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="TextBox">
-                                                        <Grid>
-                                                            <TextBlock Text="e.g. SP-001" Foreground="#C0A8B0" FontSize="13"
-                                                                       VerticalAlignment="Center" IsHitTestVisible="False">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
-                            </Grid>
+                            <TextBox x:Name="EncSearchId"
+                                     BorderThickness="0" Background="Transparent"
+                                     FontSize="13" Foreground="#111111" VerticalAlignment="Center"
+                                     Height="40" Padding="12,0"
+                                     TextChanged="EncoderFields_TextChanged"
+                                     KeyDown="SearchBox_KeyDown"
+                                     ToolTip="Search by Solo Parent ID (e.g. SP-001)">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TextBox">
+                                                    <Grid>
+                                                        <TextBlock Text="e.g. SP-001" Foreground="#C0A8B0" FontSize="13"
+                                                                   VerticalAlignment="Center" IsHitTestVisible="False">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
                         </Border>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="FIRST NAME" FontSize="10" FontWeight="Bold"
-                                   Foreground="#702943" Margin="2,0,0,5"/>
+                                   Foreground="#702943" Margin="0,0,0,6"/>
                         <Border Background="White" CornerRadius="10"
                                 BorderBrush="#D4A0B0" BorderThickness="1.5">
-                            <Grid Height="40">
-                                <TextBox x:Name="EncSearchFirstName"
-                                         BorderThickness="0" Background="Transparent"
-                                         FontSize="13" Foreground="#111111" VerticalAlignment="Center"
-                                         Margin="12,0"
-                                         TextChanged="EncoderFields_TextChanged"
-                                         KeyDown="SearchBox_KeyDown">
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="TextBox">
-                                                        <Grid>
-                                                            <TextBlock Text="Enter first name" Foreground="#C0A8B0" FontSize="13"
-                                                                       VerticalAlignment="Center" IsHitTestVisible="False">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
-                            </Grid>
+                            <TextBox x:Name="EncSearchFirstName"
+                                     BorderThickness="0" Background="Transparent"
+                                     FontSize="13" Foreground="#111111" VerticalAlignment="Center"
+                                     Height="40" Padding="12,0"
+                                     TextChanged="EncoderFields_TextChanged"
+                                     KeyDown="SearchBox_KeyDown"
+                                     ToolTip="Enter first name to search">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TextBox">
+                                                    <Grid>
+                                                        <TextBlock Text="e.g. Juana" Foreground="#C0A8B0" FontSize="13"
+                                                                   VerticalAlignment="Center" IsHitTestVisible="False">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
                         </Border>
                     </StackPanel>
                 </Grid>
 
-                <Grid Margin="0,0,0,16">
+                <!-- Search Fields Row 2 -->
+                <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="10"/>
@@ -1199,137 +1203,135 @@
 
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="LAST NAME" FontSize="10" FontWeight="Bold"
-                                   Foreground="#702943" Margin="2,0,0,5"/>
+                                   Foreground="#702943" Margin="0,0,0,6"/>
                         <Border Background="White" CornerRadius="10"
                                 BorderBrush="#D4A0B0" BorderThickness="1.5">
-                            <Grid Height="40">
-                                <TextBox x:Name="EncSearchLastName"
-                                         BorderThickness="0" Background="Transparent"
-                                         FontSize="13" Foreground="#111111" VerticalAlignment="Center"
-                                         Margin="12,0"
-                                         TextChanged="EncoderFields_TextChanged"
-                                         KeyDown="SearchBox_KeyDown">
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="TextBox">
-                                                        <Grid>
-                                                            <TextBlock Text="Enter last name" Foreground="#C0A8B0" FontSize="13"
-                                                                       VerticalAlignment="Center" IsHitTestVisible="False">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
-                            </Grid>
+                            <TextBox x:Name="EncSearchLastName"
+                                     BorderThickness="0" Background="Transparent"
+                                     FontSize="13" Foreground="#111111" VerticalAlignment="Center"
+                                     Height="40" Padding="12,0"
+                                     TextChanged="EncoderFields_TextChanged"
+                                     KeyDown="SearchBox_KeyDown"
+                                     ToolTip="Enter last name to search">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TextBox">
+                                                    <Grid>
+                                                        <TextBlock Text="e.g. Dela Cruz" Foreground="#C0A8B0" FontSize="13"
+                                                                   VerticalAlignment="Center" IsHitTestVisible="False">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
                         </Border>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="BARANGAY" FontSize="10" FontWeight="Bold"
-                                   Foreground="#702943" Margin="2,0,0,5"/>
+                                   Foreground="#702943" Margin="0,0,0,6"/>
                         <Border Background="White" CornerRadius="10"
                                 BorderBrush="#D4A0B0" BorderThickness="1.5">
-                            <Grid Height="40">
-                                <TextBox x:Name="EncSearchBarangay"
-                                         BorderThickness="0" Background="Transparent"
-                                         FontSize="13" Foreground="#111111" VerticalAlignment="Center"
-                                         Margin="12,0"
-                                         TextChanged="EncoderFields_TextChanged"
-                                         KeyDown="SearchBox_KeyDown">
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="TextBox">
-                                                        <Grid>
-                                                            <TextBlock Text="Enter barangay" Foreground="#C0A8B0" FontSize="13"
-                                                                       VerticalAlignment="Center" IsHitTestVisible="False">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
-                            </Grid>
+                            <TextBox x:Name="EncSearchBarangay"
+                                     BorderThickness="0" Background="Transparent"
+                                     FontSize="13" Foreground="#111111" VerticalAlignment="Center"
+                                     Height="40" Padding="12,0"
+                                     TextChanged="EncoderFields_TextChanged"
+                                     KeyDown="SearchBox_KeyDown"
+                                     ToolTip="Enter barangay name to filter">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TextBox">
+                                                    <Grid>
+                                                        <TextBlock Text="e.g. Loma" Foreground="#C0A8B0" FontSize="13"
+                                                                   VerticalAlignment="Center" IsHitTestVisible="False">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
                         </Border>
                     </StackPanel>
 
                     <StackPanel Grid.Column="4">
-                        <TextBlock Text="BIRTHDAY" FontSize="10" FontWeight="Bold"
-                                   Foreground="#702943" Margin="2,0,0,5"/>
+                        <TextBlock Text="DATE OF BIRTH" FontSize="10" FontWeight="Bold"
+                                   Foreground="#702943" Margin="0,0,0,6"/>
                         <Border Background="White" CornerRadius="10"
                                 BorderBrush="#D4A0B0" BorderThickness="1.5">
-                            <Grid Height="40">
-                                <TextBox x:Name="EncSearchBirthday"
-                                         BorderThickness="0" Background="Transparent"
-                                         FontSize="13" Foreground="#111111" VerticalAlignment="Center"
-                                         Margin="12,0"
-                                         TextChanged="EncoderFields_TextChanged"
-                                         KeyDown="SearchBox_KeyDown">
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="TextBox">
-                                                        <Grid>
-                                                            <TextBlock Text="yyyy-mm-dd" Foreground="#C0A8B0" FontSize="13"
-                                                                       VerticalAlignment="Center" IsHitTestVisible="False">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
-                            </Grid>
+                            <TextBox x:Name="EncSearchBirthday"
+                                     BorderThickness="0" Background="Transparent"
+                                     FontSize="13" Foreground="#111111" VerticalAlignment="Center"
+                                     Height="40" Padding="12,0"
+                                     TextChanged="EncoderFields_TextChanged"
+                                     KeyDown="SearchBox_KeyDown"
+                                     ToolTip="Enter date (yyyy-MM-dd format)">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TextBox">
+                                                    <Grid>
+                                                        <TextBlock Text="yyyy-MM-dd" Foreground="#C0A8B0" FontSize="13"
+                                                                   VerticalAlignment="Center" IsHitTestVisible="False">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
                         </Border>
                     </StackPanel>
                 </Grid>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button x:Name="EncoderAddBtn" Height="42" Padding="20,0" Margin="0,0,8,0"
-                            Cursor="Hand" Click="AddNewRecord_Click">
+                <!-- Action Buttons -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                    <Button x:Name="EncoderClearSearchBtn" Height="42" Padding="18,0" Cursor="Hand"
+                            Click="ClearSearch_Click">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="Bg" Background="White" CornerRadius="21"
@@ -1344,10 +1346,32 @@
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
                         </Button.Template>
-                        <TextBlock Text="+ Add New Record" FontSize="13" FontWeight="SemiBold" Foreground="#702943"/>
+                        <TextBlock Text="Clear" FontSize="13" FontWeight="SemiBold" Foreground="#702943"/>
                     </Button>
-                    <Button Height="42" Padding="26,0" Cursor="Hand"
-                            Click="EncoderSearchBtn_Click">
+
+                    <Button x:Name="EncoderAddBtn" Height="42" Padding="18,0" Cursor="Hand"
+                            Click="BasicUserAddRecord_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" Background="White" CornerRadius="21"
+                                        BorderBrush="#D4A0B0" BorderThickness="1.5"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="#F5ECEE"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="+ Add New Record" FontSize="13" FontWeight="SemiBold" Foreground="#702943"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Height="42" Padding="24,0" Cursor="Hand"
+                            Click="EncoderSearchBtn_Click" ToolTip="Search for records">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="#702943" CornerRadius="21"
@@ -1371,6 +1395,10 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
+
+            </StackPanel>
+        </Border>
+
 
             </StackPanel>
         </Border>
