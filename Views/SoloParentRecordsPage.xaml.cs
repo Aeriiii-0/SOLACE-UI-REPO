@@ -116,9 +116,10 @@ namespace SOLUM_UI
             if (IsEncoder && !HasSearchQuery())
             {
                 // Show empty state instead of loading records
-                Records.Clear();
-                if (NoResultsPanel != null) NoResultsPanel.Visibility = Visibility.Visible;
+                _allRecords = new List<SoloParentRecordViewModel>();
+                _filteredRecords = new List<SoloParentRecordViewModel>();
                 if (RecordsList != null) RecordsList.ItemsSource = null;
+                if (NoResultsPanel != null) NoResultsPanel.Visibility = Visibility.Visible;
                 return;
             }
 
