@@ -130,21 +130,54 @@ namespace SOLUM_UI
             try
             {
                 string effectiveBarangay = IsBasicUser ? CurrentUserBarangay : _barangayFilter;
-                string query = (IsBasicUser ? BasicSearchName?.Text : SearchName?.Text)?.Trim() ?? string.Empty;
-
-                string selectedMode = "AUTO";
-                if (!IsBasicUser && CmbSearchMode?.SelectedItem is ComboBoxItem modeItem)
-                {
-                    selectedMode = modeItem.Tag?.ToString() ?? "AUTO";
-                }
-
+                
+                // Handle search query based on user role
+                string query = string.Empty;
                 Guid? searchGuid = null;
                 string firstName = null;
                 string lastName = null;
-                string fullname = null;
                 string philsysId = null;
+                string barangay = null;
+                DateTime? dateOfBirth = null;
 
-                if (!string.IsNullOrWhiteSpace(query))
+                if (IsEncoder)
+                {
+                    // Encoder users: use specific search fields
+                    if (!string.IsNullOrWhiteSpace(EncSearchId?.Text))
+                    {
+                        query = EncSearchId.Text.Trim();
+                        if (Guid.TryParse(query, out var parsedGuid))
+                            searchGuid = parsedGuid;
+                        else
+                            philsysId = query;
+                    }
+                    
+                    if (!string.IsNullOrWhiteSpace(EncSearchFirstName?.Text))
+                        firstName = EncSearchFirstName.Text.Trim();
+                    
+                    if (!string.IsNullOrWhiteSpace(EncSearchLastName?.Text))
+                        lastName = EncSearchLastName.Text.Trim();
+                    
+                    if (!string.IsNullOrWhiteSpace(EncSearchBarangay?.Text))
+                        barangay = EncSearchBarangay.Text.Trim();
+                    
+                    if (!string.IsNullOrWhiteSpace(EncSearchBirthday?.Text))
+                    {
+                        if (DateTime.TryParse(EncSearchBirthday.Text.Trim(), out var dob))
+                            dateOfBirth = dob;
+                    }
+                }
+                else if (IsBasicUser)
+                {
+                    query = BasicSearchName?.Text?.Trim() ?? string.Empty;
+                }
+                else
+                {
+                    query = SearchName?.Text?.Trim() ?? string.Empty;
+                }
+
+                // Handle generic search query (for non-Encoder users)
+                if (!IsEncoder && !string.IsNullOrWhiteSpace(query))
                 {
                     if (Guid.TryParse(query, out var parsedGuid))
                     {
@@ -152,6 +185,12 @@ namespace SOLUM_UI
                     }
                     else
                     {
+                        string selectedMode = "AUTO";
+                        if (!IsBasicUser && CmbSearchMode?.SelectedItem is ComboBoxItem modeItem)
+                        {
+                            selectedMode = modeItem.Tag?.ToString() ?? "AUTO";
+                        }
+
                         switch (selectedMode)
                         {
                             case "FIRST_NAME":
@@ -163,7 +202,7 @@ namespace SOLUM_UI
                                 break;
 
                             case "FULL_NAME":
-                                fullname = query;
+                                // fullname handled separately below
                                 break;
 
                             case "PHILSYS_ID":
@@ -192,28 +231,26 @@ namespace SOLUM_UI
                                     firstName = query.Substring(0, firstSpace).Trim();
                                     lastName = query.Substring(firstSpace + 1).Trim();
                                 }
-                                else
-                                {
-                                    // Single word fallback to full name search
-                                    fullname = query;
-                                }
                                 break;
                         }
                     }
                 }
 
                 bool? isActive = null;
-                if (!IsBasicUser && _statusFilter != "All")
+                if (!IsEncoder && !IsBasicUser && _statusFilter != "All")
                 {
                     isActive = string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase);
                 }
 
-                string sex = (!IsBasicUser && _sexFilter != "All") ? _sexFilter : null;
+                string sex = (!IsEncoder && !IsBasicUser && _sexFilter != "All") ? _sexFilter : null;
 
-                string barangay = null;
-                if (!string.IsNullOrEmpty(effectiveBarangay) && effectiveBarangay != "All")
+                // For non-Encoder users, apply barangay filter
+                if (!IsEncoder && string.IsNullOrEmpty(barangay))
                 {
-                    barangay = effectiveBarangay;
+                    if (!string.IsNullOrEmpty(effectiveBarangay) && effectiveBarangay != "All")
+                    {
+                        barangay = effectiveBarangay;
+                    }
                 }
 
                 string sortBy = "LastName";
@@ -233,7 +270,6 @@ namespace SOLUM_UI
                     Id = searchGuid,
                     FirstName = firstName,
                     LastName = lastName,
-                    Fullname = fullname,
                     PhilsysId = philsysId,
                     Barangay = barangay,
                     Sex = sex,
@@ -434,7 +470,21 @@ namespace SOLUM_UI
 
         private void ClearSearch_Click(object sender, RoutedEventArgs e)
         {
-            if (SearchName != null) SearchName.Text = string.Empty;
+            if (IsEncoder)
+            {
+                // Clear Encoder search fields
+                if (EncSearchId != null) EncSearchId.Text = string.Empty;
+                if (EncSearchFirstName != null) EncSearchFirstName.Text = string.Empty;
+                if (EncSearchLastName != null) EncSearchLastName.Text = string.Empty;
+                if (EncSearchBarangay != null) EncSearchBarangay.Text = string.Empty;
+                if (EncSearchBirthday != null) EncSearchBirthday.Text = string.Empty;
+            }
+            else
+            {
+                // Clear admin/basic user search field
+                if (SearchName != null) SearchName.Text = string.Empty;
+            }
+            
             if (ClearSearchBtn != null) ClearSearchBtn.Visibility = Visibility.Collapsed;
             ApplyFiltersAndPage();
         }

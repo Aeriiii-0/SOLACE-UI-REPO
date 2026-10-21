@@ -1093,106 +1093,149 @@
                 <DropShadowEffect Color="#C0A0AA" BlurRadius="14" ShadowDepth="3" Opacity="0.07"/>
             </Border.Effect>
             
-            <StackPanel Margin="20,16,20,16">
-                <TextBlock Text="SEARCH FOR RECORD" FontSize="12" FontWeight="Bold"
-                           Foreground="#702943" Margin="0,0,0,14"/>
+            <StackPanel Margin="24,20,24,20">
+                <TextBlock Text="SEARCH FOR RECORD" FontSize="13" FontWeight="Bold"
+                           Foreground="#702943" Margin="0,0,0,18"/>
 
                 <!-- Row 1: ID and First Name -->
-                <Grid Margin="0,0,0,12">
+                <Grid Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="12"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Solo Parent ID -->
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Solo Parent ID" FontSize="10" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,5"/>
-                        <TextBox x:Name="EncSearchId"
-                                 BorderThickness="1" BorderBrush="#D4A0B0"
-                                 Background="White" Padding="10,8"
-                                 FontSize="12" Foreground="#333333"
-                                 TextChanged="EncoderFields_TextChanged"
-                                 KeyDown="SearchBox_KeyDown"/>
+                        <TextBlock Text="Solo Parent ID" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,6"/>
+                        <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
+                            <TextBox x:Name="EncSearchId"
+                                     BorderThickness="0" Background="Transparent" Padding="12,10"
+                                     FontSize="12" Foreground="#333333"
+                                     TextChanged="EncoderFields_TextChanged"
+                                     KeyDown="SearchBox_KeyDown"/>
+                        </Border>
                     </StackPanel>
 
                     <!-- First Name -->
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="First Name" FontSize="10" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,5"/>
-                        <TextBox x:Name="EncSearchFirstName"
-                                 BorderThickness="1" BorderBrush="#D4A0B0"
-                                 Background="White" Padding="10,8"
-                                 FontSize="12" Foreground="#333333"
-                                 TextChanged="EncoderFields_TextChanged"
-                                 KeyDown="SearchBox_KeyDown"/>
+                        <TextBlock Text="First Name" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,6"/>
+                        <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
+                            <TextBox x:Name="EncSearchFirstName"
+                                     BorderThickness="0" Background="Transparent" Padding="12,10"
+                                     FontSize="12" Foreground="#333333"
+                                     TextChanged="EncoderFields_TextChanged"
+                                     KeyDown="SearchBox_KeyDown"/>
+                        </Border>
                     </StackPanel>
                 </Grid>
 
                 <!-- Row 2: Last Name, Barangay, and Birthday -->
-                <Grid Margin="0,0,0,12">
+                <Grid Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="12"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="12"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Last Name -->
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Last Name" FontSize="10" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,5"/>
-                        <TextBox x:Name="EncSearchLastName"
-                                 BorderThickness="1" BorderBrush="#D4A0B0"
-                                 Background="White" Padding="10,8"
-                                 FontSize="12" Foreground="#333333"
-                                 TextChanged="EncoderFields_TextChanged"
-                                 KeyDown="SearchBox_KeyDown"/>
+                        <TextBlock Text="Last Name" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,6"/>
+                        <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
+                            <TextBox x:Name="EncSearchLastName"
+                                     BorderThickness="0" Background="Transparent" Padding="12,10"
+                                     FontSize="12" Foreground="#333333"
+                                     TextChanged="EncoderFields_TextChanged"
+                                     KeyDown="SearchBox_KeyDown"/>
+                        </Border>
                     </StackPanel>
 
                     <!-- Barangay -->
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Barangay" FontSize="10" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,5"/>
-                        <TextBox x:Name="EncSearchBarangay"
-                                 BorderThickness="1" BorderBrush="#D4A0B0"
-                                 Background="White" Padding="10,8"
-                                 FontSize="12" Foreground="#333333"
-                                 TextChanged="EncoderFields_TextChanged"
-                                 KeyDown="SearchBox_KeyDown"/>
+                        <TextBlock Text="Barangay" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,6"/>
+                        <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
+                            <TextBox x:Name="EncSearchBarangay"
+                                     BorderThickness="0" Background="Transparent" Padding="12,10"
+                                     FontSize="12" Foreground="#333333"
+                                     TextChanged="EncoderFields_TextChanged"
+                                     KeyDown="SearchBox_KeyDown"/>
+                        </Border>
                     </StackPanel>
 
                     <!-- Date of Birth -->
                     <StackPanel Grid.Column="4">
-                        <TextBlock Text="Date of Birth" FontSize="10" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,5"/>
-                        <TextBox x:Name="EncSearchBirthday"
-                                 BorderThickness="1" BorderBrush="#D4A0B0"
-                                 Background="White" Padding="10,8"
-                                 FontSize="12" Foreground="#333333"
-                                 TextChanged="EncoderFields_TextChanged"
-                                 KeyDown="SearchBox_KeyDown"/>
+                        <TextBlock Text="Date of Birth" FontSize="11" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,6"/>
+                        <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
+                            <TextBox x:Name="EncSearchBirthday"
+                                     BorderThickness="0" Background="Transparent" Padding="12,10"
+                                     FontSize="12" Foreground="#333333"
+                                     TextChanged="EncoderFields_TextChanged"
+                                     KeyDown="SearchBox_KeyDown"/>
+                        </Border>
                     </StackPanel>
                 </Grid>
 
                 <!-- Action Buttons -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
-                    <Button Height="36" Padding="14,0" Margin="0,0,8,0"
-                            Background="White" BorderBrush="#D4A0B0" BorderThickness="1"
-                            Cursor="Hand" Click="ClearSearch_Click"
-                            FontSize="11" FontWeight="SemiBold" Foreground="#702943">
-                        Clear
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                    <Button x:Name="EncoderClearBtn" Height="40" Padding="16,0" Margin="0,0,8,0" Cursor="Hand" Click="ClearSearch_Click"
+                            FontSize="12" FontWeight="SemiBold" Foreground="#702943">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="BgBorder" CornerRadius="8" Background="White" BorderBrush="#D4A0B0" BorderThickness="1.5"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="BgBorder" Property="Background" Value="#F5ECEE"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <TextBlock Text="Clear"/>
                     </Button>
 
-                    <Button Height="36" Padding="14,0" Margin="0,0,8,0"
-                            Background="White" BorderBrush="#D4A0B0" BorderThickness="1"
-                            Cursor="Hand" Click="BasicUserAddRecord_Click"
-                            FontSize="11" FontWeight="SemiBold" Foreground="#702943">
-                        + Add New
+                    <Button x:Name="EncoderAddBtn" Height="40" Padding="16,0" Margin="0,0,8,0" Cursor="Hand" Click="BasicUserAddRecord_Click"
+                            FontSize="12" FontWeight="SemiBold" Foreground="#702943">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="BgBorder" CornerRadius="8" Background="White" BorderBrush="#D4A0B0" BorderThickness="1.5"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="BgBorder" Property="Background" Value="#F5ECEE"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <TextBlock Text="+ Add New Record"/>
                     </Button>
 
-                    <Button Height="36" Padding="18,0"
-                            Background="#702943" Foreground="White"
-                            Cursor="Hand" Click="EncoderSearchBtn_Click"
-                            FontSize="11" FontWeight="SemiBold">
-                        🔍 Search
+                    <Button x:Name="EncoderSearchBtn" Height="40" Padding="20,0" Cursor="Hand" Click="EncoderSearchBtn_Click"
+                            FontSize="12" FontWeight="SemiBold" Foreground="White">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border CornerRadius="8" Background="#702943" Padding="{TemplateBinding Padding}">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#702943" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
+                                    </Border.Effect>
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.9"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔍" Margin="0,0,6,0"/>
+                            <TextBlock Text="Search"/>
+                        </StackPanel>
                     </Button>
                 </StackPanel>
             </StackPanel>
