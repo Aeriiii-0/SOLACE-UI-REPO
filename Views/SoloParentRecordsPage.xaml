@@ -1329,8 +1329,8 @@
                 </Grid>
 
                 <!-- Action Buttons -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                    <Button x:Name="EncoderClearSearchBtn" Height="42" Padding="18,0" Cursor="Hand"
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="EncoderClearSearchBtn" Height="42" Padding="18,0" Margin="0,0,8,0" Cursor="Hand"
                             Click="ClearSearch_Click">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
@@ -1349,7 +1349,7 @@
                         <TextBlock Text="Clear" FontSize="13" FontWeight="SemiBold" Foreground="#702943"/>
                     </Button>
 
-                    <Button x:Name="EncoderAddBtn" Height="42" Padding="18,0" Cursor="Hand"
+                    <Button x:Name="EncoderAddBtn" Height="42" Padding="18,0" Margin="0,0,8,0" Cursor="Hand"
                             Click="BasicUserAddRecord_Click">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
