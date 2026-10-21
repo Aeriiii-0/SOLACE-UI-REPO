@@ -55,13 +55,16 @@ namespace SOLUM_UI
         public SoloParentRecordsPage()
         {
             InitializeComponent();
-            if (PageLoadingOverlay != null)
-                PageLoadingOverlay.IsLoading = true;
 
             Loaded += (s, e) =>
             {
                 ApplyRoleView();
                 ResizeNameColumn();
+                // Turn on loading overlay for non-Encoder users, or for Encoder users who have search fields filled
+                if (!IsEncoder || HasSearchQuery())
+                {
+                    if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
+                }
                 _ = LoadRecordsAsync();
             };
             SizeChanged += Page_SizeChanged;
@@ -120,6 +123,9 @@ namespace SOLUM_UI
                 _filteredRecords = new List<SoloParentRecordViewModel>();
                 if (RecordsList != null) RecordsList.ItemsSource = null;
                 if (NoResultsPanel != null) NoResultsPanel.Visibility = Visibility.Visible;
+                
+                // Ensure loading overlay is turned off
+                if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
                 return;
             }
 
@@ -483,9 +489,9 @@ namespace SOLUM_UI
             {
                 // Clear admin/basic user search field
                 if (SearchName != null) SearchName.Text = string.Empty;
+                if (ClearSearchBtn != null) ClearSearchBtn.Visibility = Visibility.Collapsed;
             }
             
-            if (ClearSearchBtn != null) ClearSearchBtn.Visibility = Visibility.Collapsed;
             ApplyFiltersAndPage();
         }
 
@@ -1108,23 +1114,31 @@ namespace SOLUM_UI
 
         private bool HasSearchQuery()
         {
-            if (IsEncoder)
+            try
             {
-                // Check Encoder search fields
-                bool hasId = !string.IsNullOrEmpty(EncSearchId?.Text?.Trim());
-                bool hasFirstName = !string.IsNullOrEmpty(EncSearchFirstName?.Text?.Trim());
-                bool hasLastName = !string.IsNullOrEmpty(EncSearchLastName?.Text?.Trim());
-                bool hasBarangay = !string.IsNullOrEmpty(EncSearchBarangay?.Text?.Trim());
-                bool hasBirthday = !string.IsNullOrEmpty(EncSearchBirthday?.Text?.Trim());
-                return hasId || hasFirstName || hasLastName || hasBarangay || hasBirthday;
+                if (IsEncoder)
+                {
+                    // Check Encoder search fields - safely handle null controls
+                    bool hasId = EncSearchId != null && !string.IsNullOrEmpty(EncSearchId.Text?.Trim());
+                    bool hasFirstName = EncSearchFirstName != null && !string.IsNullOrEmpty(EncSearchFirstName.Text?.Trim());
+                    bool hasLastName = EncSearchLastName != null && !string.IsNullOrEmpty(EncSearchLastName.Text?.Trim());
+                    bool hasBarangay = EncSearchBarangay != null && !string.IsNullOrEmpty(EncSearchBarangay.Text?.Trim());
+                    bool hasBirthday = EncSearchBirthday != null && !string.IsNullOrEmpty(EncSearchBirthday.Text?.Trim());
+                    return hasId || hasFirstName || hasLastName || hasBarangay || hasBirthday;
+                }
+                else if (IsBasicUser)
+                {
+                    return BasicSearchName != null && !string.IsNullOrEmpty(BasicSearchName.Text?.Trim());
+                }
+                else
+                {
+                    return SearchName != null && !string.IsNullOrEmpty(SearchName.Text?.Trim());
+                }
             }
-            else if (IsBasicUser)
+            catch
             {
-                return !string.IsNullOrEmpty(BasicSearchName?.Text?.Trim());
-            }
-            else
-            {
-                return !string.IsNullOrEmpty(SearchName?.Text?.Trim());
+                // If there's any error checking search fields, assume no query
+                return false;
             }
         }
 
