@@ -1399,10 +1399,6 @@
             </StackPanel>
         </Border>
 
-
-            </StackPanel>
-        </Border>
-
         <!-- Paging row (Row 4, hidden for Encoder) -->
         <Grid x:Name="PagingRow" Grid.Row="4" Margin="24,4,24,18">
             <Grid.ColumnDefinitions>
