@@ -416,27 +416,6 @@
             <Setter Property="Margin" Value="12,0"/>
         </Style>
 
-        <Style x:Key="PagerBtn" TargetType="Button">
-            <Setter Property="Height" Value="26"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#702943"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#F1F5F9"/><Setter Property="Foreground" Value="#94A3B8"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
     </Page.Resources>
 
     <Grid Background="#FFFFFF">
@@ -1073,16 +1052,16 @@
 
                     <!-- Bold heading -->
                     <TextBlock Text="No data to display yet"
-                               FontFamily="Segoe UI" FontSize="28" FontWeight="Bold"
+                               FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
                                Foreground="#1F2937"
                                HorizontalAlignment="Center"
-                               Margin="0,0,0,16"/>
+                               Margin="0,0,0,12"/>
 
                     <!-- Helper text -->
-                    <TextBlock FontFamily="Segoe UI" FontSize="12" Foreground="#888888"
+                    <TextBlock FontFamily="Segoe UI" FontSize="13" Foreground="#888888"
                                HorizontalAlignment="Center" TextAlignment="Center"
                                TextWrapping="Wrap" MaxWidth="400"
-                               Text="To view, edit, renew a record, please use the search bar above to verify identity."/>
+                               Text="To view, edit, or renew a record, please use the search bar above to verify identity."/>
                 </StackPanel>
 
                 <!-- Search-first empty state — shown before any search is performed -->
@@ -1133,13 +1112,13 @@
 
                     <!-- Bold heading -->
                     <TextBlock Text="No data to display yet"
-                               FontFamily="Segoe UI" FontSize="28" FontWeight="Bold"
+                               FontFamily="Segoe UI" FontSize="24" FontWeight="Bold"
                                Foreground="#1F2937"
                                HorizontalAlignment="Center"
-                               Margin="0,0,0,16"/>
+                               Margin="0,0,0,12"/>
 
                     <!-- Helper text -->
-                    <TextBlock FontFamily="Segoe UI" FontSize="12" Foreground="#888888"
+                    <TextBlock FontFamily="Segoe UI" FontSize="13" Foreground="#888888"
                                HorizontalAlignment="Center" TextAlignment="Center"
                                TextWrapping="Wrap" MaxWidth="400"
                                Text="To view, edit, renew a record, please use the search bar above to verify identity."/>
@@ -1543,43 +1522,86 @@
         </ScrollViewer>
 
 
-        <!-- Paging row (Row 4, hidden for Encoder - Subsidy Recco Style) -->
-        <Border x:Name="PagingRow" Grid.Row="4" Margin="24,0,24,18" Background="#FAFAFA" BorderBrush="#EBD8DE" BorderThickness="1" CornerRadius="8" Height="42" Padding="14,0">
-            <Grid VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+        <!-- Paging row (Row 4, hidden for Encoder) -->
+        <Grid x:Name="PagingRow" Grid.Row="4" Margin="24,4,24,18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-                <!-- Left: Rows per page Selector -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Rows per page:" FontFamily="Segoe UI" FontSize="11" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                    <ComboBox x:Name="CmbPageSize" Width="60" Height="26" SelectedIndex="0"
-                              SelectionChanged="CmbPageSize_SelectionChanged"
-                              FontSize="11" Padding="6,2" VerticalContentAlignment="Center"
-                              Style="{StaticResource FilterComboBox}">
-                        <ComboBoxItem Content="10" IsSelected="True"/>
-                        <ComboBoxItem Content="25"/>
-                        <ComboBoxItem Content="50"/>
-                        <ComboBoxItem Content="100"/>
-                    </ComboBox>
-                </StackPanel>
+            <!-- Page Size Selector -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Rows per page:" FontFamily="Segoe UI" FontSize="12" Foreground="#888888" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <ComboBox x:Name="CmbPageSize" Width="80" Height="34" SelectedIndex="0"
+                          SelectionChanged="CmbPageSize_SelectionChanged"
+                          Style="{StaticResource FilterComboBox}">
+                    <ComboBoxItem Content="10" IsSelected="True"/>
+                    <ComboBoxItem Content="25"/>
+                    <ComboBoxItem Content="50"/>
+                    <ComboBoxItem Content="100"/>
+                </ComboBox>
+            </StackPanel>
 
-                <!-- Right: Compact Previous, Page Badge, Next -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="BtnBack" Style="{StaticResource PagerBtn}" Margin="0,0,6,0" Click="BtnBack_Click" ToolTip="Previous page">
-                        <TextBlock Text="‹ Previous" FontSize="10.5" FontWeight="SemiBold"/>
-                    </Button>
-                    <Border Background="#F1F5F9" CornerRadius="6" Padding="8,4" Margin="0,0,6,0" VerticalAlignment="Center">
-                        <TextBlock x:Name="PageInfoText" Text="1 of 1" FontSize="10.5" FontWeight="Bold" Foreground="#702943"/>
-                    </Border>
-                    <Button x:Name="BtnNext" Style="{StaticResource PagerBtn}" Click="BtnNext_Click" ToolTip="Next page">
-                        <TextBlock Text="Next ›" FontSize="10.5" FontWeight="SemiBold"/>
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
+            <!-- Centered Navigation Controls -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="BtnBack" Width="105" Height="34" Cursor="Hand"
+                        Click="BtnBack_Click" Margin="0,0,10,0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bg" Background="White" CornerRadius="17"
+                                    BorderBrush="#E0D0D5" BorderThickness="1.5">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
+                                          Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
+                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <Border Background="#FAF2F5" CornerRadius="14" Padding="14,6"
+                        BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
+                    <TextBlock x:Name="PageInfoText" Text="Page 1 of 1" FontFamily="Segoe UI" FontSize="12"
+                               FontWeight="SemiBold" Foreground="#702943"/>
+                </Border>
+
+                <Button x:Name="BtnNext" Width="105" Height="34" Cursor="Hand"
+                        Click="BtnNext_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bg" Background="White" CornerRadius="17"
+                                    BorderBrush="#E0D0D5" BorderThickness="1.5">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
+                                          Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
+                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </Grid>
 
         <components:LoadingOverlay Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="99"
                                    x:Name="PageLoadingOverlay"
