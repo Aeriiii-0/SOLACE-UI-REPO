@@ -79,58 +79,118 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" Background="White" CornerRadius="14" Padding="22,18">
+                        <Border Grid.Column="0" Background="White" CornerRadius="16" BorderBrush="#E5E7EB" BorderThickness="1" Padding="20,18">
                             <Border.Effect>
                                 <DropShadowEffect Color="#D4A0B0" BlurRadius="16" ShadowDepth="2" Opacity="0.16" Direction="270"/>
                             </Border.Effect>
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                    <Border Width="10" Height="10" CornerRadius="5" Background="#702943" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="REGISTERED" FontFamily="Segoe UI" FontSize="11" FontWeight="Bold" Foreground="#9B3060"/>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Status Indicator Bar -->
+                                <Border Grid.Row="0" Height="4" CornerRadius="2" Background="#722F37" Margin="0,0,0,12"/>
+
+                                <!-- Header Label -->
+                                <TextBlock Grid.Row="0" Text="TOTAL REGISTERED" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
+                                           Foreground="#6B7280" Margin="0,0,0,12"/>
+
+                                <!-- Primary Metric -->
+                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,8,0,8">
+                                    <TextBlock Text="{Binding RegisteredSoloParents, StringFormat={}{0:N0}}" FontSize="48" FontWeight="Bold"
+                                               Foreground="#722F37" TextAlignment="Left" LineHeight="52"/>
+                                    <TextBlock Text="Solo Parents" FontSize="12" FontWeight="Normal"
+                                               Foreground="#9CA3AF" Margin="0,4,0,0"/>
                                 </StackPanel>
-                                <TextBlock Text="{Binding RegisteredSoloParents, StringFormat={}{0:N0}}"
-                                           FontFamily="Segoe UI" FontSize="44" FontWeight="Bold" Foreground="#702943"/>
-                                <TextBlock Text="Solo Parents" FontFamily="Segoe UI" FontSize="14" Foreground="#888888" Margin="0,3,0,10"/>
-                                <Border Background="#F0E8EC" CornerRadius="7" Padding="10,5" HorizontalAlignment="Left">
-                                    <TextBlock Text="{Binding RegisteredDelta}" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+
+                                <!-- Subtext Badge -->
+                                <Border Grid.Row="2" Background="#FEF2F2" CornerRadius="6" Padding="10,6" BorderBrush="#FECACA" BorderThickness="1">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="↑ " FontSize="11" Foreground="#722F37" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock FontSize="11" Foreground="#722F37">
+                                            <Run Text="{Binding RegisteredDelta}"/>
+                                        </TextBlock>
+                                    </StackPanel>
                                 </Border>
-                            </StackPanel>
+                            </Grid>
                         </Border>
 
-                        <Border Grid.Column="2" Background="White" CornerRadius="14" Padding="22,18">
+                        <Border Grid.Column="2" Background="White" CornerRadius="16" BorderBrush="#E5E7EB" BorderThickness="1" Padding="20,18">
                             <Border.Effect>
                                 <DropShadowEffect Color="#D4A0B0" BlurRadius="16" ShadowDepth="2" Opacity="0.16" Direction="270"/>
                             </Border.Effect>
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                    <Border Width="10" Height="10" CornerRadius="5" Background="#27AE60" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="ACTIVE" FontFamily="Segoe UI" FontSize="11" FontWeight="Bold" Foreground="#27AE60"/>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Status Indicator Bar -->
+                                <Border Grid.Row="0" Height="4" CornerRadius="2" Background="#10B981" Margin="0,0,0,12"/>
+
+                                <!-- Header Label -->
+                                <TextBlock Grid.Row="0" Text="ACTIVE" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
+                                           Foreground="#6B7280" Margin="0,0,0,12"/>
+
+                                <!-- Primary Metric -->
+                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,8,0,8">
+                                    <TextBlock Text="{Binding ActiveSoloParents, StringFormat={}{0:N0}}" FontSize="48" FontWeight="Bold"
+                                               Foreground="#10B981" TextAlignment="Left" LineHeight="52"/>
+                                    <TextBlock Text="Valid Records" FontSize="12" FontWeight="Normal"
+                                               Foreground="#9CA3AF" Margin="0,4,0,0"/>
                                 </StackPanel>
-                                <TextBlock Text="{Binding ActiveSoloParents, StringFormat={}{0:N0}}"
-                                           FontFamily="Segoe UI" FontSize="44" FontWeight="Bold" Foreground="#27AE60"/>
-                                <TextBlock Text="Valid Records" FontFamily="Segoe UI" FontSize="14" Foreground="#888888" Margin="0,3,0,10"/>
-                                <Border Background="#E8F5E9" CornerRadius="7" Padding="10,5" HorizontalAlignment="Left">
-                                    <TextBlock Text="{Binding ActiveDelta}" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#27AE60"/>
+
+                                <!-- Subtext Badge -->
+                                <Border Grid.Row="2" Background="#ECFDF5" CornerRadius="6" Padding="10,6" BorderBrush="#A7F3D0" BorderThickness="1">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="→ " FontSize="11" Foreground="#10B981" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock FontSize="11" Foreground="#10B981">
+                                            <Run Text="{Binding ActiveDelta}"/>
+                                        </TextBlock>
+                                    </StackPanel>
                                 </Border>
-                            </StackPanel>
+                            </Grid>
                         </Border>
 
-                        <Border Grid.Column="4" Background="White" CornerRadius="14" Padding="22,18">
+                        <Border Grid.Column="4" Background="White" CornerRadius="16" BorderBrush="#E5E7EB" BorderThickness="1" Padding="20,18">
                             <Border.Effect>
                                 <DropShadowEffect Color="#D4A0B0" BlurRadius="16" ShadowDepth="2" Opacity="0.16" Direction="270"/>
                             </Border.Effect>
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                    <Border Width="10" Height="10" CornerRadius="5" Background="#F57F17" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="RENEWALS" FontFamily="Segoe UI" FontSize="11" FontWeight="Bold" Foreground="#C0762A"/>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Status Indicator Bar -->
+                                <Border Grid.Row="0" Height="4" CornerRadius="2" Background="#F59E0B" Margin="0,0,0,12"/>
+
+                                <!-- Header Label -->
+                                <TextBlock Grid.Row="0" Text="RENEWALS" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
+                                           Foreground="#6B7280" Margin="0,0,0,12"/>
+
+                                <!-- Primary Metric -->
+                                <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,8,0,8">
+                                    <TextBlock Text="{Binding RenewalsDueThisMonth, StringFormat={}{0:N0}}" FontSize="48" FontWeight="Bold"
+                                               Foreground="#F59E0B" TextAlignment="Left" LineHeight="52"/>
+                                    <TextBlock Text="Due this month" FontSize="12" FontWeight="Normal"
+                                               Foreground="#9CA3AF" Margin="0,4,0,0"/>
                                 </StackPanel>
-                                <TextBlock Text="{Binding RenewalsDueThisMonth, StringFormat={}{0:N0}}"
-                                           FontFamily="Segoe UI" FontSize="44" FontWeight="Bold" Foreground="#C0762A"/>
-                                <TextBlock Text="Due this month" FontFamily="Segoe UI" FontSize="14" Foreground="#888888" Margin="0,3,0,10"/>
-                                <Border Background="#FFF4E3" CornerRadius="7" Padding="10,5" HorizontalAlignment="Left">
-                                    <TextBlock Text="{Binding RenewalsDelta}" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#C0762A"/>
+
+                                <!-- Subtext Badge -->
+                                <Border Grid.Row="2" Background="#FFFBEB" CornerRadius="6" Padding="10,6" BorderBrush="#FED7AA" BorderThickness="1">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="⚠ " FontSize="11" Foreground="#F59E0B" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock FontSize="11" Foreground="#F59E0B">
+                                            <Run Text="{Binding RenewalsDelta}"/>
+                                        </TextBlock>
+                                    </StackPanel>
                                 </Border>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </Grid>
 
