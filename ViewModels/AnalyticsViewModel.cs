@@ -102,6 +102,44 @@ namespace SOLUM_UI.ViewModels
             }
         }
 
+        private int _addedThisMonthCount;
+        public int AddedThisMonthCount
+        {
+            get => _addedThisMonthCount;
+            set => SetProperty(ref _addedThisMonthCount, value);
+        }
+
+        private int _activeRecordsCount;
+        public int ActiveRecordsCount
+        {
+            get => _activeRecordsCount;
+            set => SetProperty(ref _activeRecordsCount, value);
+        }
+
+        private int _expiringThisMonthCount;
+        public int ExpiringThisMonthCount
+        {
+            get => _expiringThisMonthCount;
+            set => SetProperty(ref _expiringThisMonthCount, value);
+        }
+
+        private int _inactiveRecordsCount;
+        public int InactiveRecordsCount
+        {
+            get => _inactiveRecordsCount;
+            set => SetProperty(ref _inactiveRecordsCount, value);
+        }
+
+        private string _inactiveSubtext = "Requires review";
+        public string InactiveSubtext
+        {
+            get => _inactiveSubtext;
+            set => SetProperty(ref _inactiveSubtext, value);
+        }
+
+        // Convenience property for XAML binding
+        public int TotalRegisteredCount => TotalRegistered;
+
         public int DisplayTotalEnrolled
         {
             get => IsFilterActive ? _totalSoloParents : (_totalRegistered > 0 ? _totalRegistered : _totalSoloParents);
