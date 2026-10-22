@@ -76,9 +76,11 @@ def load_template() -> dict:
     return {"fields": {}}
 
 def clean_text(text: str) -> str:
-    """Removes stray OCR artifacts and trims whitespace."""
+    """Removes stray OCR artifacts, non-Latin/non-Filipino chars, and trims whitespace."""
     if not text:
         return ""
+    # Strip any stray Asian / non-Latin characters (U+0000 to U+007F plus ñ/Ñ and common symbols)
+    text = re.sub(r'[^\x00-\x7F\u00f1\u00d1\u20b1]+', ' ', text)
     cleaned = re.sub(r'[\r\n\t_]+', ' ', text)
     cleaned = re.sub(r'\s+', ' ', cleaned)
     return cleaned.strip()
@@ -176,29 +178,38 @@ def clean_income(raw_text: str) -> str:
         return num
 
 def clean_civil_status(raw_text: str) -> str:
-    """Fuzzy normalization of Civil Status, including single letters (S, M, W, D, A, etc.)."""
+    """Fuzzy normalization of Civil Status, including shortened letters (S, M, W, D, A, SEP)."""
     if not raw_text or is_ocr_na(raw_text):
         return ""
     t = raw_text.strip().lower()
     if globals().get("ENABLE_ROBUST_LABEL_FILTER", True):
         t = re.sub(r'^(civil\s*s?tatus|status|kasarian)\s*[:\-_.]*', '', t, flags=re.IGNORECASE).strip()
         t = re.sub(r'civil\s*s?tatus', '', t, flags=re.IGNORECASE).strip()
-    t_clean = re.sub(r'[^a-z]', '', t)
     
-    # 1. Single letter or exact abbreviations
-    if t in ["s", "s.", "s-", "sin", "sngl", "simgle", "simglt", "singl"] or t_clean in ["s", "sin", "sngl", "simgle", "simglt", "singl"]:
+    t_clean = re.sub(r'[^a-z0-9]', '', t)
+    t_alpha = re.sub(r'[^a-z]', '', t)
+    
+    # 1. Single letter or exact shortened abbreviations
+    # S = Single (also 5 if OCR misreads digit)
+    if t_alpha in ["s", "sin", "sngl", "sing", "simgle", "simglt", "singl"] or t_clean in ["s", "5", "s5", "5s"]:
         return "Single"
-    if t in ["m", "m.", "m-", "mar", "marr", "mared", "marrd"] or t_clean in ["m", "mar", "marr", "mared", "marrd"]:
+    # M = Married
+    if t_alpha in ["m", "mar", "marr", "mared", "marrd", "mrd"] or t_clean in ["m", "rn"]:
         return "Married"
-    if t in ["w", "w.", "w-", "wid", "wdw", "biyuda", "biyudo", "balo"] or t_clean in ["w", "wid", "wdw"]:
-        return "Widowed"
-    if t in ["d", "d.", "d-", "div"] or t_clean in ["d", "div"]:
+    # D = Divorced
+    if t_alpha in ["d", "div", "dv"] or t_clean in ["d"]:
         return "Divorced"
-    if t in ["a", "a.", "a-", "anul", "anulled", "annul"] or t_clean in ["a", "anul", "anulled", "annul"]:
+    # A = Annulled
+    if t_alpha in ["a", "ann", "anl", "anul", "anulled", "annul"] or t_clean in ["a", "4"]:
         return "Annulled"
-    if t in ["sep", "sep.", "hiwalay"] or t_clean == "sep":
+    # W = Widowed
+    if t_alpha in ["w", "wid", "wdw"] or t in ["biyuda", "biyudo", "balo"] or t_clean in ["w", "vv"]:
+        return "Widowed"
+    # Sep = Separated
+    if t_alpha in ["sep", "sp"] or "s/p" in t or t in ["hiwalay", "separated"] or t_clean in ["sep", "sp"]:
         return "Separated"
-    if t in ["c", "c.", "live", "livein", "kinakasama"] or t_clean in ["c", "live", "livein"]:
+    # C = Common-law
+    if t_alpha in ["c", "live", "livein", "kinakasama"]:
         return "Common-law / Live-in"
 
     # 2. Keyword containment
@@ -210,68 +221,93 @@ def clean_civil_status(raw_text: str) -> str:
         return "Widowed"
     if any(k in t for k in ["separat", "hiwalay"]):
         return "Separated"
-    if any(k in t for k in ["divorc"]):
+    if any(k in t for k in ["divorc", "diborsyo"]):
         return "Divorced"
-    if any(k in t for k in ["annul", "nullity"]):
+    if any(k in t for k in ["annul", "nullity", "pawalang"]):
         return "Annulled"
     if any(k in t for k in ["common", "live-in", "live in", "kinakasama"]):
         return "Common-law / Live-in"
 
     # 3. Fuzzy similarity
     for standard in ["Single", "Married", "Widowed", "Separated", "Divorced", "Annulled"]:
-        if difflib.SequenceMatcher(None, t_clean, standard.lower()).ratio() >= 0.65:
+        if difflib.SequenceMatcher(None, t_alpha, standard.lower()).ratio() >= 0.65:
             return standard
 
     val = clean_text(raw_text)
     return val if val else ""
 
 def clean_relationship(raw_text: str) -> str:
-    """Fuzzy normalization of Relationship (Emergency Contact & Dependents)."""
+    """
+    Fuzzy normalization of Relationship snapping to exact RecordDialog dropdown items:
+    Child, Spouse, Parent, Sibling, Grandchild, Grandparent, Relative, Ward, Other.
+    """
     if not raw_text or is_ocr_na(raw_text):
         return ""
     t = raw_text.strip().lower()
     t_clean = re.sub(r'[^a-z]', '', t)
     
-    # Direct / keyword containment
-    if any(k in t for k in ["sister", "sis", "ate", "kapatid na babae", "sstr", "sistr"]):
-        return "Sister"
-    if any(k in t for k in ["brother", "bro", "kuya", "kapatid na lalaki", "brthr", "brothr"]):
-        return "Brother"
-    if any(k in t for k in ["mother", "ina", "nanay", "mom", "mama", "mami", "nay", "mthr"]):
-        return "Mother"
-    if any(k in t for k in ["father", "ama", "tatay", "dad", "papa", "papi", "tay", "fthr"]):
-        return "Father"
-    if any(k in t for k in ["daughter", "dauglster", "dau", "dtr", "daugh", "anak na babae"]):
-        return "Daughter"
-    if any(k in t for k in ["son", "anak na lalaki"]):
-        return "Son"
-    if any(k in t for k in ["child", "anak", "bata"]):
+    # Direct / keyword containment mapped to exact dropdown values
+    if any(k in t for k in ["child", "anak", "son", "daughter", "bata"]):
         return "Child"
     if any(k in t for k in ["spouse", "asawa", "husband", "wife", "partner"]):
         return "Spouse"
-    if any(k in t for k in ["aunt", "auntie", "tita", "tiya"]):
-        return "Aunt"
-    if any(k in t for k in ["uncle", "tito", "tiyo"]):
-        return "Uncle"
-    if any(k in t for k in ["cousin", "pinsan", "cosin", "cous"]):
-        return "Cousin"
-    if any(k in t for k in ["grandmother", "lola", "grandma", "inang"]):
-        return "Grandmother"
-    if any(k in t for k in ["grandfather", "lolo", "grandpa", "amang"]):
-        return "Grandfather"
-    if any(k in t for k in ["in-law", "in law", "biyanan", "hipag", "bayaw", "manugang"]):
-        return "In-law"
-    if any(k in t for k in ["friend", "kaibigan"]):
-        return "Friend"
-    if any(k in t for k in ["neighbor", "kapitbahay"]):
-        return "Neighbor"
-    if any(k in t for k in ["guardian", "tagapangalaga"]):
-        return "Guardian"
+    if any(k in t for k in ["mother", "father", "nanay", "tatay", "ina", "ama", "mom", "dad", "parent", "mama", "papa"]):
+        return "Parent"
+    if any(k in t for k in ["sister", "brother", "ate", "kuya", "kapatid", "sibling", "bro", "sis"]):
+        return "Sibling"
+    if any(k in t for k in ["grandchild", "apo", "grandson", "granddaughter"]):
+        return "Grandchild"
+    if any(k in t for k in ["grandmother", "grandfather", "lolo", "lola", "grandparent"]):
+        return "Grandparent"
+    if any(k in t for k in ["relative", "aunt", "uncle", "tita", "tito", "cousin", "pinsan", "in-law", "in law", "hipag", "bayaw", "kamag"]):
+        return "Relative"
+    if any(k in t for k in ["ward", "alaga", "guardian", "tagapangalaga"]):
+        return "Ward"
+    if any(k in t for k in ["other", "friend", "kaibigan", "neighbor", "kapitbahay"]):
+        return "Other"
 
-    relationships = ["Mother", "Father", "Sister", "Brother", "Son", "Daughter", "Child", "Spouse", "Aunt", "Uncle", "Cousin", "Grandmother", "Grandfather", "Friend", "Neighbor", "Guardian"]
-    for rel in relationships:
+    # Fuzzy similarity across standard dropdown choices
+    std_relationships = ["Child", "Spouse", "Parent", "Sibling", "Grandchild", "Grandparent", "Relative", "Ward", "Other"]
+    for rel in std_relationships:
         if difflib.SequenceMatcher(None, t_clean, rel.lower()).ratio() >= 0.65:
             return rel
+
+    val = clean_text(raw_text)
+    return "" if is_ocr_na(val) else val
+
+def clean_education(raw_text: str) -> str:
+    """
+    Fuzzy normalization of Educational Attainment snapping to exact RecordDialog dropdown items:
+    Elementary, High School, Vocational, College, Post Graduate.
+    """
+    if not raw_text or is_ocr_na(raw_text):
+        return ""
+    t = raw_text.strip().lower()
+    t_clean = re.sub(r'[^a-z0-9]', '', t)
+
+    # 1. Keyword containment & Philippine education terminology
+    if any(k in t for k in ["elem", "primary", "grade", "elementaria"]):
+        return "Elementary"
+    if any(k in t for k in ["high", "hs", "h.s", "sec", "secondary", "junior high", "senior high", "highschool"]):
+        return "High School"
+    if any(k in t for k in ["voc", "tesda", "tech", "trade", "course", "vocational"]):
+        return "Vocational"
+    if any(k in t for k in ["post", "grad", "master", "doctor", "phd", "m.s", "m.a", "post graduate"]):
+        return "Post Graduate"
+    if any(k in t for k in ["col", "univ", "bach", "bs", "ba", "degree", "undergrad", "college", "tertiary"]):
+        return "College"
+
+    # 2. Fuzzy similarity across standard dropdown choices
+    options = ["Elementary", "High School", "Vocational", "College", "Post Graduate"]
+    best_opt = ""
+    best_score = 0.0
+    for opt in options:
+        score = difflib.SequenceMatcher(None, t_clean, opt.lower().replace(" ", "")).ratio()
+        if score > best_score:
+            best_score = score
+            best_opt = opt
+    if best_opt and best_score >= 0.55:
+        return best_opt
 
     val = clean_text(raw_text)
     return "" if is_ocr_na(val) else val
@@ -329,8 +365,15 @@ def clean_person_name(raw_name: str) -> str:
         t = re.sub(r'^\s*\(?\s*(m[i1lI]dd?[li1I]?e?\s+(a?m[eo]|name)|middle\b|last\s+(a?m[eo]|name)|last\b|first\s+(a?m[eo]|name)|first\b|gitnang\s+pangalan)\s*\)?\s*[:\-_.]*\s*', '', t, flags=re.IGNORECASE)
     t = re.sub(r'4', 'A', t)
     t = re.sub(r'0', 'O', t)
-    t = re.sub(r'[^a-zA-ZñÑ\s\.\-\']', '', t)
+    t = re.sub(r"[^a-zA-ZñÑ\s\.\-']", "", t)
     t = re.sub(r'\s+', ' ', t).strip()
+    placeholder_labels = {
+        'LAST NAME', 'FIRST NAME', 'MIDDLE NAME', 'MIDDLENAME', 'EXT NAME', 'EXTENSION NAME',
+        'NAME', 'MEMBER NAME', 'MEMBERNAME', 'MEMBERNAMEA', 'CONTACT', 'PERSON TO BE CONTACTED',
+        'EMERGENCY CONTACT', 'SURNAME', 'APELYIDO', 'PANGALAN', 'GITNANG PANGALAN'
+    }
+    if t.upper() in placeholder_labels:
+        return ''
     return t
 
 def clean_family_age(raw_age: str) -> str:
@@ -379,7 +422,36 @@ def clean_date(raw_text: str) -> str:
     if not raw or is_ocr_na(raw):
         return ""
 
-    # 1. Numeric with separators: MM/DD/YYYY, YYYY-MM-DD, DD/MM/YYYY, MM/DD/YY
+    # 1. Text month + day + year (e.g. 'June 19, 2004', 'May 2, 2002', '19 June 2004', '2-May-2002', 'Jum192004')
+    # If the string contains month letters, prioritize text month matching
+    if re.search(r'[a-zA-Z]{3,}', raw):
+        # Day followed by Month word and year (e.g. '19 June 2004', '2 May 2002', '2-May-2002', '19th June 2004')
+        m_day_first = re.search(r'\b(\d{1,2})(?:st|nd|rd|th)?[\s\-_,]+([a-zA-Z]{3,})[\s\-_,]+(\d{4}|\d{2})\b', raw)
+        if m_day_first:
+            day_str, m_word, yr_str = m_day_first.groups()
+            m_num = parse_month_word(m_word)
+            if m_num and 1 <= int(day_str) <= 31:
+                yr = yr_str if len(yr_str) == 4 else f"20{yr_str}" if int(yr_str) < 40 else f"19{yr_str}"
+                return f"{yr}-{m_num:02d}-{int(day_str):02d}"
+
+        # Month word followed by day and year (e.g. 'June 19, 2004', 'May 2, 2002', 'May 2 2002')
+        m_month_first = re.search(r'\b([a-zA-Z]{3,})[\s\-_,]*(\d{1,2})(?:st|nd|rd|th)?[\s\-_,]+(\d{4}|\d{2})\b', raw)
+        if m_month_first:
+            m_word, day_str, yr_str = m_month_first.groups()
+            m_num = parse_month_word(m_word)
+            if m_num and 1 <= int(day_str) <= 31:
+                yr = yr_str if len(yr_str) == 4 else f"20{yr_str}" if int(yr_str) < 40 else f"19{yr_str}"
+                return f"{yr}-{m_num:02d}-{int(day_str):02d}"
+
+        # Concatenated Month and digits (e.g. 'Jum192004', 'June192004')
+        m_concat = re.search(r'\b([a-zA-Z]{3,})(\d{1,2})(\d{4})\b', raw)
+        if m_concat:
+            m_word, day_str, yr_str = m_concat.groups()
+            m_num = parse_month_word(m_word)
+            if m_num and 1 <= int(day_str) <= 31:
+                return f"{yr_str}-{m_num:02d}-{int(day_str):02d}"
+
+    # 2. Numeric with separators: DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD
     m1 = re.search(r'(\d{1,4})[/\-.](\d{1,2})[/\-.](\d{2,4})', raw)
     if m1:
         p1, p2, p3 = m1.groups()
@@ -390,10 +462,15 @@ def clean_date(raw_text: str) -> str:
             yr = p3 if len(p3) == 4 else f"20{p3}" if int(p3) < 40 else f"19{p3}"
             if int(p1) > 12 and int(p2) <= 12 and int(p1) <= 31:
                 return f"{yr}-{int(p2):02d}-{int(p1):02d}"
+            elif int(p2) > 12 and int(p1) <= 12 and int(p2) <= 31:
+                return f"{yr}-{int(p1):02d}-{int(p2):02d}"
+            elif int(p1) <= 31 and int(p2) <= 12:
+                # Default to DD/MM/YYYY in Philippine context
+                return f"{yr}-{int(p2):02d}-{int(p1):02d}"
             elif int(p1) <= 12 and int(p2) <= 31:
                 return f"{yr}-{int(p1):02d}-{int(p2):02d}"
 
-    # 1b. Missing one separator: e.g. '1/252020', '01/252020', '0125/2020'
+    # 2b. Missing one separator: e.g. '1/252020', '01/252020', '0125/2020'
     m_missing1 = re.search(r'(\d{1,2})[/\-.](\d{1,2})(\d{4})', raw)
     if m_missing1:
         p1, p2, yr = m_missing1.groups()
@@ -409,27 +486,6 @@ def clean_date(raw_text: str) -> str:
             p1, p2 = p2, p1
         if 1 <= int(p1) <= 12 and 1 <= int(p2) <= 31 and 1920 <= int(yr) <= 2030:
             return f"{yr}-{int(p1):02d}-{int(p2):02d}"
-
-    # 2. Text month + day + year (e.g. 'June 19, 2004', 'Jun 19 2004', 'Jum192004', 'June192004')
-    clean = re.sub(r'[^a-zA-Z0-9\s]', ' ', raw)
-
-    # Month word followed by day and year (e.g. 'Jum192004' or 'June 19 2004')
-    m_concat = re.search(r'([a-zA-Z]{3,})\s*(\d{1,2})\s*(\d{4}|\d{2})', clean)
-    if m_concat:
-        m_word, day_str, yr_str = m_concat.groups()
-        m_num = parse_month_word(m_word)
-        if m_num and 1 <= int(day_str) <= 31:
-            yr = yr_str if len(yr_str) == 4 else f"20{yr_str}" if int(yr_str) < 40 else f"19{yr_str}"
-            return f"{yr}-{m_num:02d}-{int(day_str):02d}"
-
-    # Day followed by Month word and year (e.g. '19 June 2004')
-    m_day_first = re.search(r'(\d{1,2})\s*([a-zA-Z]{3,})\s*(\d{4}|\d{2})', clean)
-    if m_day_first:
-        day_str, m_word, yr_str = m_day_first.groups()
-        m_num = parse_month_word(m_word)
-        if m_num and 1 <= int(day_str) <= 31:
-            yr = yr_str if len(yr_str) == 4 else f"20{yr_str}" if int(yr_str) < 40 else f"19{yr_str}"
-            return f"{yr}-{m_num:02d}-{int(day_str):02d}"
 
     # 3. Pure 8-digit or 6-digit string
     digits_only = re.sub(r'\D', '', raw)
@@ -455,29 +511,58 @@ def clean_date(raw_text: str) -> str:
     return ""
 
 def clean_sex(raw_text: str) -> str:
-    """Fuzzy normalization of Sex field."""
+    """Fuzzy normalization of Sex field, robust to shortened F/M and surrounding punctuation."""
     if not raw_text or is_ocr_na(raw_text):
         return ""
     t = raw_text.strip().lower()
-    if t in ["m", "male", "lalaki", "m.", "boy", "son", "father", "brother", "l"]:
+    t = re.sub(r'^(sex|gender|kasarian)\s*[:\-_.]*', '', t, flags=re.IGNORECASE).strip()
+    t_alpha = re.sub(r'[^a-z]', '', t)
+    
+    if t_alpha in ["m", "male", "lalaki", "boy", "son", "father", "brother", "l", "masc", "mas", "man"]:
         return "Male"
-    if t in ["f", "female", "babae", "fem", "f.", "girl", "daughter", "mother", "sister"]:
+    if t_alpha in ["f", "female", "babae", "fem", "girl", "daughter", "mother", "sister", "b", "w", "woman"]:
         return "Female"
-    if re.search(r'\b(female|babae|fem)\b', t) or t.startswith('f'):
+    if t_alpha.startswith("fem") or re.search(r'\b(female|babae|fem)\b', t):
         return "Female"
-    if re.search(r'\b(male|lalaki)\b', t) or t.startswith('m'):
+    if t_alpha.startswith("mas") or re.search(r'\b(male|lalaki)\b', t):
+        return "Male"
+    if t_alpha == "f" or t_alpha.startswith("f"):
+        return "Female"
+    if t_alpha == "m" or (t_alpha.startswith("m") and t_alpha != "mother"):
         return "Male"
     val = clean_text(raw_text)
     return "" if is_ocr_na(val) else val
 
-def clean_phone_number(raw_text: str) -> str:
+def clean_philsys_number(raw_text: str) -> str:
     """
-    Normalizes Philippine mobile/contact numbers to visual hyphenated format (09XX-XXX-XXXX).
-    Handles +639..., 639..., 9XXXXXXXXX, spaces, and dashes.
+    Normalizes 16-digit PhilSys Card Number (XXXX-XXXX-XXXX-XXXX).
+    Autocorrects common OCR digit confusions (O->0, I->1, S->5, B->8, Z->2).
     """
     if not raw_text or is_ocr_na(raw_text):
         return ""
-    digits = re.sub(r'\D', '', raw_text)
+    t = raw_text.strip()
+    t = re.sub(r'^(philsys|card|no|number|philsys\s*card\s*number)[\s:\-_.]*', '', t, flags=re.IGNORECASE).strip()
+    trans = str.maketrans({"O": "0", "o": "0", "I": "1", "i": "1", "l": "1", "L": "1", "|": "1", "S": "5", "s": "5", "B": "8", "Z": "2", "z": "2"})
+    t = t.translate(trans)
+    digits = re.sub(r'\D', '', t)
+    if len(digits) == 16:
+        return f"{digits[0:4]}-{digits[4:8]}-{digits[8:12]}-{digits[12:16]}"
+    elif len(digits) >= 12:
+        parts = [digits[i:i+4] for i in range(0, len(digits), 4)]
+        return "-".join(parts)
+    return digits if digits else ""
+
+def clean_phone_number(raw_text: str) -> str:
+    """
+    Normalizes Philippine mobile/contact numbers to visual hyphenated format (09XX-XXX-XXXX).
+    Handles +639..., 639..., 9XXXXXXXXX, spaces, dashes, and OCR letter confusion.
+    """
+    if not raw_text or is_ocr_na(raw_text):
+        return ""
+    t = raw_text.strip()
+    trans = str.maketrans({"O": "0", "o": "0", "I": "1", "i": "1", "l": "1", "|": "1", "S": "5", "s": "5", "B": "8"})
+    t = t.translate(trans)
+    digits = re.sub(r'\D', '', t)
     if digits.startswith("63") and len(digits) == 12:
         digits = "0" + digits[2:]
     elif digits.startswith("9") and len(digits) == 10:
@@ -489,11 +574,9 @@ def clean_phone_number(raw_text: str) -> str:
         return f"{digits[0:4]}-{digits[4:7]}-{digits[7:]}"
     elif len(digits) > 4:
         return f"{digits[0:4]}-{digits[4:]}"
-    elif digits:
+    elif len(digits) >= 7:
         return digits
-
-    val = clean_text(raw_text)
-    return "" if is_ocr_na(val) else val
+    return ""
 
 def clean_extension(raw_text: str) -> str:
     """Fuzzy normalization of Extension Name to predetermined list (Jr., Sr., II, III, IV, V)."""
@@ -531,14 +614,14 @@ def clean_religion(raw_text: str) -> str:
     if is_ocr_na(t) or is_ocr_na(t_clean):
         return ""
     
-    # 1. Direct and fuzzy keyword matches for Roman Catholic (Ctolc, Catholic, Katoliko, RC, etc.)
+    # 1. Direct and fuzzy keyword matches for Catholic (Ctolc, Catholic, Katoliko, RC, etc.)
     cath_keywords = ["cath", "katol", "roman", "rc", "ctolc", "catol", "katlk", "cthlc", "cathl", "cato", "kato", "ctc"]
     if any(k in t_clean for k in cath_keywords) or any(k in t for k in ["catholic", "katoliko", "roman catholic", "r.c.", "r.c"]):
-        return "Roman Catholic"
+        return "Catholic"
         
     if difflib.SequenceMatcher(None, t_clean, "catholic").ratio() >= 0.45 or \
        difflib.SequenceMatcher(None, t_clean, "katoliko").ratio() >= 0.45:
-        return "Roman Catholic"
+        return "Catholic"
 
     # 2. Islam / Muslim
     if any(k in t_clean for k in ["islam", "muslim", "moslem", "mslm", "islaam"]):
@@ -695,15 +778,19 @@ GLOBAL_PRINTED_LABEL_PATTERNS = [
     re.compile(r"person\s*t?\s*o?\s*be\s*contact(ed|ea)?", re.IGNORECASE),
     re.compile(r"in\s*(c?ase)?\s*of\s*(emergency|cmergency|e?mergen[a-z]*)", re.IGNORECASE),
     re.compile(r"emergency\s*(contact|person|name|address|number|relationship)?", re.IGNORECASE),
+    re.compile(r"^\s*(last|first|middle|ext\.?)\s*(name|a?m[eo])?:?\s*$", re.IGNORECASE),
     re.compile(r"civil\s*(s?tatus)?", re.IGNORECASE),
     re.compile(r"date\s*of\s*(this\s*)?(application|birth)?", re.IGNORECASE),
     re.compile(r"place\s*of\s*birth", re.IGNORECASE),
-    re.compile(r"educational\s*(attainment)?", re.IGNORECASE),
+    re.compile(r"educational\s*(attainment|level)?", re.IGNORECASE),
     re.compile(r"source\s*o[rf]\s*income", re.IGNORECASE),
     re.compile(r"monthly\s*income", re.IGNORECASE),
     re.compile(r"employment\s*status", re.IGNORECASE),
     re.compile(r"philsys\s*(card)?\s*(no|number)?", re.IGNORECASE),
     re.compile(r"applicant'?s?\s*contact\s*(number|no)?", re.IGNORECASE),
+    re.compile(r"^\s*(identif[a-z]*\s*information|application\s*form\s*for\s*solo\s*parent)$", re.IGNORECASE),
+    re.compile(r"^\s*(needs\s*(and|&)\s*problems|other\s*sources?\s*of\s*income)$", re.IGNORECASE),
+    re.compile(r"^\s*(mm/dd/yy|dd/mm/yyyy|yyyy|member\s*name|kasarian|edad)$", re.IGNORECASE),
     re.compile(r"^\s*\(?\s*([iIvVxX]+|[0-9]+)\s*[\.\)]\s*$", re.IGNORECASE),
 ]
 
@@ -823,10 +910,25 @@ def measure_checkbox_ink(image: np.ndarray, bbox: list) -> float:
     if h < 5 or w < 5:
         return 0.0
 
-    # Isolate inner checkbox to ignore outer border frame lines
-    margin_y = max(1, int(round(h * 0.20)))
-    margin_x = max(1, int(round(w * 0.18)))
-    inner = gray[margin_y:h - margin_y, margin_x:w - margin_x]
+    # Auto-detect the checkbox square contour inside crop if present
+    thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)[1]
+    contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    box_rect = None
+    for c in contours:
+        bx, by, bw, bh = cv2.boundingRect(c)
+        aspect = float(bw) / float(max(1, bh))
+        if bw >= w * 0.30 and bh >= h * 0.30 and 0.7 <= aspect <= 1.4:
+            box_rect = (bx, by, bw, bh)
+            break
+
+    if box_rect:
+        bx, by, bw, bh = box_rect
+        pad_x = max(2, int(round(bw * 0.22)))
+        pad_y = max(2, int(round(bh * 0.22)))
+        inner = gray[by + pad_y : by + bh - pad_y, bx + pad_x : bx + bw - pad_x]
+    else:
+        inner = gray[int(h * 0.25) : int(h * 0.75), int(w * 0.25) : int(w * 0.75)]
+
     if inner.size == 0:
         return 0.0
 
@@ -834,70 +936,90 @@ def measure_checkbox_ink(image: np.ndarray, bbox: list) -> float:
     if paper_median < 40:
         return 0.0
 
-    # True pen ink is noticeably darker than surrounding white paper background
-    ink_mask = (inner < (paper_median - 28)) & (inner < 190)
+    ink_mask = (inner < (paper_median - 25)) & (inner < 185)
     return float(np.sum(ink_mask)) / float(inner.size)
 
-def detect_employment_status(enhanced_image: np.ndarray, ocr_engine, fields_config: dict) -> tuple:
+
+def detect_employment_status(enhanced_image: np.ndarray, ocr_engine, fields_config: dict, all_detections: list = None, raw_text: str = "") -> tuple:
     """
-    Detects which employment status checkbox is marked:
+    Detects which employment status checkbox or write-in text is marked:
     1. Checkbox: Employed (is_employed)
     2. Checkbox: Self-Employed (is_self_employed)
     3. Checkbox: Not Employed (is_not_employed)
-    Compares the actual ink density and OCR marks of the 3 calibrated boxes.
     Returns: (status_string, confidence)
     """
-    # 1. Retrieve the adjusted bounding boxes from template configuration
-    box_emp = fields_config.get("is_employed", {}).get("bbox")
-    box_self = fields_config.get("is_self_employed", {}).get("bbox")
-    box_not = fields_config.get("is_not_employed", {}).get("bbox")
+    # Step A: Direct write-in OCR detection in Employment Status zone
+    if raw_text and not raw_text.startswith("{{"):
+        low = raw_text.lower().strip()
+        if "self" in low:
+            return "Self-Employed", 0.95
+        if "not" in low or "unemploy" in low or "wala" in low or "none" in low:
+            return "Not Employed", 0.95
+        if "employ" in low:
+            return "Employed", 0.95
 
-    # 2. If child checkbox boxes are missing from template, dynamically derive from adjusted parent box
-    parent_emp = fields_config.get("employment_status", {}).get("bbox")
-    if parent_emp and len(parent_emp) == 4:
-        px, py, pw, ph = parent_emp
-        if not box_emp:
-            box_emp = [px + pw * 0.07, py + ph * 0.35, pw * 0.05, ph * 0.50]
-        if not box_self:
-            box_self = [px + pw * 0.33, py + ph * 0.35, pw * 0.05, ph * 0.50]
-        if not box_not:
-            box_not = [px + pw * 0.66, py + ph * 0.35, pw * 0.06, ph * 0.50]
+    # Check candidate text boxes inside the employment_status region
+    if all_detections:
+        p_bbox = fields_config.get("employment_status", {}).get("bbox", [0.605, 0.222, 0.370, 0.026])
+        px, py, pw, ph = p_bbox
+        for d in all_detections:
+            if (px - 0.012 <= d["cx"] <= px + pw + 0.012) and (py - 0.010 <= d["cy"] <= py + ph + 0.014):
+                txt = d["text"].lower().strip()
+                if txt.startswith("{{") or txt in ["employment", "status:", "employment status", "employment status:", "employed", "self-employed", "not employed", ": self-employed", ". not"]:
+                    continue
+                if "self" in txt:
+                    return "Self-Employed", 0.95
+                if "not" in txt or "unemploy" in txt or "none" in txt or "wala" in txt:
+                    return "Not Employed", 0.95
+                if "employ" in txt:
+                    return "Employed", 0.95
 
-    # 3. Fallback default coordinates only if template is completely empty
-    if not box_emp: box_emp = [0.620, 0.252, 0.017, 0.012]
-    if not box_self: box_self = [0.718, 0.252, 0.017, 0.012]
-    if not box_not: box_not = [0.845, 0.252, 0.019, 0.012]
+    # Step B: Calibrated Checkbox Ink & Checkmark Symbol Analysis
+    if enhanced_image is not None and enhanced_image.size > 0:
+        box_emp = fields_config.get("is_employed", {}).get("bbox") or [0.658, 0.233, 0.014, 0.012]
+        box_self = fields_config.get("is_self_employed", {}).get("bbox") or [0.776, 0.233, 0.014, 0.012]
+        box_not = fields_config.get("is_not_employed", {}).get("bbox") or [0.844, 0.233, 0.014, 0.012]
 
-    ink_emp = measure_checkbox_ink(enhanced_image, box_emp)
-    ink_self = measure_checkbox_ink(enhanced_image, box_self)
-    ink_not = measure_checkbox_ink(enhanced_image, box_not)
+        ink_emp = measure_checkbox_ink(enhanced_image, box_emp)
+        ink_self = measure_checkbox_ink(enhanced_image, box_self)
+        ink_not = measure_checkbox_ink(enhanced_image, box_not)
 
-    # Check if OCR recognized a checkmark symbol in any of the 3 boxes
-    rec_emp, _ = recognize_crop(ocr_engine, crop_roi(enhanced_image, box_emp))
-    rec_self, _ = recognize_crop(ocr_engine, crop_roi(enhanced_image, box_self))
-    rec_not, _ = recognize_crop(ocr_engine, crop_roi(enhanced_image, box_not))
+        rec_emp, _ = recognize_crop(ocr_engine, crop_roi(enhanced_image, box_emp)) if ocr_engine else ("", 0.0)
+        rec_self, _ = recognize_crop(ocr_engine, crop_roi(enhanced_image, box_self)) if ocr_engine else ("", 0.0)
+        rec_not, _ = recognize_crop(ocr_engine, crop_roi(enhanced_image, box_not)) if ocr_engine else ("", 0.0)
 
-    mark_chars = set("vx17✓/\\o*ckyes")
-    has_mark_emp = any(c in mark_chars for c in rec_emp.lower()) if rec_emp else False
-    has_mark_self = any(c in mark_chars for c in rec_self.lower()) if rec_self else False
-    has_mark_not = any(c in mark_chars for c in rec_not.lower()) if rec_not else False
+        mark_chars = set("vx17✓/\\o*ckyes")
+        has_mark_emp = any(c in mark_chars for c in rec_emp.lower()) if rec_emp else False
+        has_mark_self = any(c in mark_chars for c in rec_self.lower()) if rec_self else False
+        has_mark_not = any(c in mark_chars for c in rec_not.lower()) if rec_not else False
 
-    score_emp = ink_emp + (0.35 if has_mark_emp else 0.0)
-    score_self = ink_self + (0.35 if has_mark_self else 0.0)
-    score_not = ink_not + (0.35 if has_mark_not else 0.0)
+        score_emp = ink_emp + (0.35 if has_mark_emp else 0.0)
+        score_self = ink_self + (0.35 if has_mark_self else 0.0)
+        score_not = ink_not + (0.35 if has_mark_not else 0.0)
 
-    print(f"[Employment Ink Analysis] Employed: {score_emp:.3f} (ink:{ink_emp:.3f}, ocr:'{rec_emp}'), Self: {score_self:.3f} (ink:{ink_self:.3f}, ocr:'{rec_self}'), Not: {score_not:.3f} (ink:{ink_not:.3f}, ocr:'{rec_not}')")
+        print(f"[Employment Ink Analysis] Employed: {score_emp:.3f} (ink:{ink_emp:.3f}, ocr:'{rec_emp}'), Self: {score_self:.3f} (ink:{ink_self:.3f}, ocr:'{rec_self}'), Not: {score_not:.3f} (ink:{ink_not:.3f}, ocr:'{rec_not}')")
 
-    max_score = max(score_emp, score_self, score_not)
-    if max_score < 0.03:
-        return "Employed", 0.70
+        max_score = max(score_emp, score_self, score_not)
+        if max_score >= 0.05:
+            if score_not >= score_emp and score_not >= score_self:
+                return "Not Employed", 0.95
+            elif score_self >= score_emp and score_self >= score_not:
+                return "Self-Employed", 0.95
+            else:
+                return "Employed", 0.95
 
-    if score_not >= score_emp and score_not >= score_self:
-        return "Not Employed", 0.95
-    elif score_self >= score_emp and score_self >= score_not:
-        return "Self-Employed", 0.95
-    else:
-        return "Employed", 0.95
+    # Step C: Contextual deduction from Occupation / Income if available
+    occ_val = str(fields_config.get("occupation", {}).get("value", "")).lower().strip()
+    inc_val = str(fields_config.get("monthly_income", {}).get("value", "")).strip()
+    if occ_val in ["none", "wala", "n/a", "no work", "unemployed", "housewife", "homemaker"] or inc_val in ["0", "0.0", "none"]:
+        return "Not Employed", 0.75
+    if any(term in occ_val for term in ["vendor", "sari-sari", "freelance", "business", "driver", "online", "tindero", "tindera"]):
+        return "Self-Employed", 0.75
+    if len(occ_val) >= 3 and occ_val not in ["na", "n/a", "none", "wala"]:
+        return "Employed", 0.75
+
+    # If completely blank with no markings or context, return empty so UI does not default
+    return "", 0.0
 
 
 def strip_form_label(field_key: str, text: str) -> str:
@@ -1021,6 +1143,292 @@ def extract_detections_from_paddle(pred_results, img_w: int, img_h: int) -> list
 
     return detections
 
+
+# ==============================================================================
+# OPTION 1: LABEL-RELATIVE DYNAMIC EXTRACTION
+# Automatically anchors field reading zones to printed form labels on the page
+# ==============================================================================
+LABEL_ANCHOR_DEFINITIONS = {
+    # 1. Header Date
+    "application_date": {
+        "patterns": [r"date\s*of\s*application", r"petsa\s*ng\s*pag-aaplay", r"petsa"],
+        "relative": "right",
+        "max_dx": 0.25,
+        "max_dy": 0.015,
+        "fallback_bbox": [0.720, 0.106, 0.250, 0.022]
+    },
+    # 2. Section I Names
+    "last_name": {
+        "patterns": [r"last\s*name", r"apelyido", r"surname"],
+        "relative": "below",
+        "max_dx": 0.20,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.080, 0.178, 0.160, 0.024]
+    },
+    "first_name": {
+        "patterns": [r"first\s*name", r"pangalan", r"first"],
+        "relative": "below",
+        "max_dx": 0.20,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.320, 0.178, 0.160, 0.024]
+    },
+    "middle_name": {
+        "patterns": [r"middle\s*name", r"gitnang\s*pangalan"],
+        "relative": "below",
+        "max_dx": 0.18,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.520, 0.178, 0.160, 0.024]
+    },
+    "ext_name": {
+        "patterns": [r"ext\s*name", r"extension"],
+        "relative": "below",
+        "max_dx": 0.10,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.685, 0.178, 0.085, 0.024]
+    },
+    "civil_status": {
+        "patterns": [r"civil\s*status", r"status", r"civiltat"],
+        "relative": "below",
+        "max_dx": 0.10,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.785, 0.178, 0.090, 0.024]
+    },
+    "sex": {
+        "patterns": [r"^sex$", r"kasarian"],
+        "relative": "below",
+        "max_dx": 0.09,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.880, 0.178, 0.085, 0.024]
+    },
+    "birthdate": {
+        "patterns": [r"date\s*of\s*birth", r"petsa\s*ng\s*kapanganakan", r"birthdate", r"dob"],
+        "relative": "below",
+        "max_dx": 0.16,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.075, 0.205, 0.130, 0.024]
+    },
+    "birthplace": {
+        "patterns": [r"place\s*of\s*birth", r"lugar\s*ng\s*kapanganakan", r"birthae", r"birthplace"],
+        "relative": "below",
+        "max_dx": 0.18,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.260, 0.205, 0.145, 0.024]
+    },
+    "age": {
+        "patterns": [r"^age$", r"edad"],
+        "relative": "below",
+        "max_dx": 0.08,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.440, 0.205, 0.055, 0.024]
+    },
+    "educational_attainment": {
+        "patterns": [r"educational\s*attainment", r"pinag-aralan", r"education"],
+        "relative": "below",
+        "max_dx": 0.20,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.525, 0.205, 0.190, 0.024]
+    },
+    "philsys_number": {
+        "patterns": [r"philsys", r"national\s*id", r"card\s*number"],
+        "relative": "below",
+        "max_dx": 0.22,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.770, 0.205, 0.195, 0.024]
+    },
+    "religion": {
+        "patterns": [r"religion", r"relihiyon"],
+        "relative": "below",
+        "max_dx": 0.18,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.075, 0.233, 0.130, 0.020]
+    },
+    "occupation": {
+        "patterns": [r"occupation", r"source\s*of\s*income", r"hanapbuhay", r"trabaho"],
+        "relative": "below",
+        "max_dx": 0.22,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.260, 0.233, 0.180, 0.020]
+    },
+    "monthly_income": {
+        "patterns": [r"monthly\s*income", r"buwanang\s*kita", r"kita"],
+        "relative": "below",
+        "max_dx": 0.14,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.480, 0.233, 0.110, 0.020]
+    },
+    "address": {
+        "patterns": [r"address", r"house\s*no", r"street", r"tirahan", r"purok"],
+        "relative": "below",
+        "max_dx": 0.35,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.035, 0.263, 0.360, 0.020]
+    },
+    "barangay": {
+        "patterns": [r"barangay", r"bgy"],
+        "relative": "below",
+        "max_dx": 0.22,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.440, 0.263, 0.210, 0.020]
+    },
+    "contact_number": {
+        "patterns": [r"contact\s*number", r"cellphone", r"mobile", r"contact\s*no"],
+        "relative": "below",
+        "max_dx": 0.25,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.700, 0.263, 0.260, 0.020]
+    },
+    "emergency_name": {
+        "patterns": [r"case\s*of\s*emergency", r"emergency\s*contact"],
+        "relative": "below",
+        "max_dx": 0.28,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.035, 0.292, 0.280, 0.020]
+    },
+    "emergency_relationship": {
+        "patterns": [r"relationship", r"relasyon"],
+        "relative": "below",
+        "max_dx": 0.15,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.355, 0.292, 0.130, 0.020]
+    },
+    "emergency_address": {
+        "patterns": [r"emergency\s*contact\s*address", r"contact\s*address"],
+        "relative": "below",
+        "max_dx": 0.25,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.510, 0.292, 0.230, 0.020]
+    },
+    "emergency_number": {
+        "patterns": [r"contact\s*umber", r"emergency.*number", r"emergency.*contact.*no"],
+        "relative": "below",
+        "max_dx": 0.20,
+        "max_dy": 0.022,
+        "fallback_bbox": [0.770, 0.292, 0.190, 0.020]
+    },
+    # Section IV Needs
+    "needs": {
+        "patterns": [r"iv\.\s*needs", r"needs\s*and\s*problems", r"needs/problems"],
+        "relative": "below",
+        "max_dx": 0.90,
+        "max_dy": 0.035,
+        "fallback_bbox": [0.040, 0.555, 0.945, 0.035]
+    },
+    # Section V Other Income
+    "other_income": {
+        "patterns": [r"v\.\s*other\s*sources", r"other\s*sources\s*of\s*income", r"other\s*income"],
+        "relative": "below",
+        "max_dx": 0.90,
+        "max_dy": 0.035,
+        "fallback_bbox": [0.040, 0.605, 0.945, 0.030]
+    }
+}
+
+def extract_by_anchor_label(field_key: str, all_detections: list, fields_config: dict) -> tuple:
+    """
+    Attempts label-relative extraction:
+    1. Finds the printed form label in all_detections matching field_key patterns.
+    2. Constructs a dynamic search zone relative to that label (below or right-adjacent).
+    3. Gathers all surviving text detections in that zone (excluding other printed labels).
+    4. Returns (raw_text, confidence) if found, or ('', 0.0) to signal fallback to template bbox.
+    """
+    spec = LABEL_ANCHOR_DEFINITIONS.get(field_key)
+    if not spec:
+        return "", 0.0
+
+    patterns = spec["patterns"]
+    rel = spec.get("relative", "below")
+    max_dx = spec.get("max_dx", 0.25)
+    max_dy = spec.get("max_dy", 0.025)
+
+    # 1. Locate the printed label
+    label_det = None
+    cfg = fields_config.get(field_key, {})
+    fb_bbox = cfg.get("bbox", spec.get("fallback_bbox", [0, 0, 0, 0]))
+
+    for d in all_detections:
+        txt = d["text"].strip().lower()
+        # Skip template placeholder tags like {{FIRSTNAME}} or {AGE}
+        if txt.startswith("{") or "}}" in txt or txt.endswith("}"):
+            continue
+        for p in patterns:
+            if re.search(p, txt, flags=re.IGNORECASE):
+                # Label must sit at or slightly above the target field line, not below it
+                if -0.05 <= (fb_bbox[1] - d["cy"]) <= 0.035:
+                    label_det = d
+                    break
+        if label_det:
+            break
+
+    if not label_det:
+        return "", 0.0
+
+    # 2. Define the dynamic reading zone relative to label
+    l_cx, l_cy = label_det["cx"], label_det["cy"]
+    l_bbox = label_det.get("bbox", [l_cx - 0.05, l_cy - 0.01, 0.10, 0.02])
+    l_xmin, l_ymin, l_w, l_h = l_bbox
+    l_xmax = l_xmin + l_w
+    l_ymax = l_ymin + l_h
+
+    if rel == "right":
+        zone_min_x = l_xmax - 0.005
+        zone_max_x = zone_min_x + max_dx
+        zone_min_y = l_cy - max_dy
+        zone_max_y = l_cy + max_dy
+    else: # "below"
+        zone_min_x = l_xmin - 0.010
+        zone_max_x = zone_min_x + max_dx
+        zone_min_y = l_ymax - 0.003
+        # Ensure search zone stays within the row and doesn't bleed into next line
+        row_limit = fb_bbox[1] + fb_bbox[3] + 0.010
+        zone_max_y = min(row_limit, zone_min_y + max_dy)
+
+    # 3. Gather candidate detections within dynamic zone
+    matched = []
+    for d in all_detections:
+        if d is label_det:
+            continue
+        cx, cy = d["cx"], d["cy"]
+        if (zone_min_x <= cx <= zone_max_x) and (zone_min_y <= cy <= zone_max_y):
+            if globals().get("ENABLE_ROBUST_LABEL_FILTER", True) and is_printed_label_word(d["text"]):
+                continue
+            matched.append(d)
+
+    if not matched:
+        return "", 0.0
+
+    matched.sort(key=lambda d: d["cx"])
+    label_patterns = FORM_LABEL_PREFIXES.get(field_key, [])
+    cleaned_words = []
+    confs = []
+
+    for item in matched:
+        word = item["text"].strip()
+        if not word:
+            continue
+        is_lbl = False
+        for pat in label_patterns:
+            if re.fullmatch(pat, word, flags=re.IGNORECASE):
+                is_lbl = True
+                break
+            stripped = re.sub(pat, "", word, flags=re.IGNORECASE).strip()
+            if len(stripped) == 0 and len(word) > 0:
+                is_lbl = True
+                break
+        if is_lbl:
+            continue
+        for pat in label_patterns:
+            word = re.sub(pat, "", word, flags=re.IGNORECASE).strip()
+        if word:
+            cleaned_words.append(word)
+            confs.append(item["conf"])
+
+    if not cleaned_words:
+        return "", 0.0
+
+    result_text = " ".join(cleaned_words)
+    avg_conf = sum(confs) / float(len(confs))
+    return result_text, avg_conf
+
 def assign_detections_to_field(field_key: str, cfg: dict, all_detections: list) -> tuple:
     """
     Finds all text detections that spatially intersect this field's target bounding box,
@@ -1029,10 +1437,20 @@ def assign_detections_to_field(field_key: str, cfg: dict, all_detections: list) 
     """
     bbox = cfg.get("bbox", [0, 0, 0, 0])
     bx, by, bw, bh = bbox
-    pad_x = 0.000
-    pad_y = 0.000
+    if field_key.startswith("fam_row"):
+        pad_x = 0.008
+        pad_y_top = 0.004
+        pad_y_bot = 0.004
+    elif field_key.startswith("circ_") or field_key.startswith("is_"):
+        pad_x = 0.010
+        pad_y_top = 0.006
+        pad_y_bot = 0.006
+    else:
+        pad_x = 0.012
+        pad_y_top = 0.008
+        pad_y_bot = 0.008
     min_x, max_x = bx - pad_x, bx + bw + pad_x
-    min_y, max_y = by - pad_y, by + bh + pad_y
+    min_y, max_y = by - pad_y_top, by + bh + pad_y_bot
 
     matched = []
     for d in all_detections:
@@ -1088,8 +1506,11 @@ def assign_detections_to_field(field_key: str, cfg: dict, all_detections: list) 
     avg_conf = sum(confs) / float(len(confs))
     return joined_text, avg_conf
 
-def clean_field_value(f_key: str, f_type: str, raw_text: str, conf: float, enhanced_image: np.ndarray, ocr_engine, fields_config: dict) -> tuple:
+def clean_field_value(f_key: str, f_type: str, raw_text: str, conf: float, enhanced_image: np.ndarray, ocr_engine, fields_config: dict, all_detections: list = None) -> tuple:
     """Applies domain cleaners to the raw OCR text for a specific field."""
+    if f_key == "employment_status":
+        return detect_employment_status(enhanced_image, ocr_engine, fields_config, all_detections=all_detections, raw_text=raw_text)
+
     if not raw_text or is_ocr_na(raw_text):
         if f_key == "monthly_income":
             return "0", conf
@@ -1119,6 +1540,10 @@ def clean_field_value(f_key: str, f_type: str, raw_text: str, conf: float, enhan
         cleaned = clean_extension(cleaned)
     elif f_key in ["contact_number", "emergency_number"]:
         cleaned = clean_phone_number(cleaned)
+    elif f_key == "philsys_number":
+        cleaned = clean_philsys_number(cleaned)
+    elif f_key == "educational_attainment" or f_key.endswith("_edu"):
+        cleaned = clean_education(cleaned)
     elif f_key == "monthly_income":
         cleaned = clean_income(cleaned)
     elif f_key == "employment_status":
@@ -1131,9 +1556,25 @@ def clean_field_value(f_key: str, f_type: str, raw_text: str, conf: float, enhan
             if not cleaned or is_ocr_na(cleaned):
                 conf = 0.0
 
-    if cleaned and (cleaned.startswith("{{") or cleaned.endswith("}}") or "{{" in cleaned):
-        cleaned = ""
-        conf = 0.0
+    # Filter out template placeholders: {TAG}, (TAG), ((TAG)), or unwritten placeholder keywords
+    if cleaned:
+        c_stripped = re.sub(r'[^A-Za-z0-9]', '', cleaned).upper()
+        placeholder_keywords = {
+            "LASTNAME", "FIRSTNAME", "MIDDLENAME", "EXTNAME", "EXTENSIONNAME", "EXLNAME",
+            "CIVILSTATUS", "CIVLSTATUS", "CILSTAT", "SEX", "GENDER",
+            "BIRTHDATE", "DATEOFBIRTH", "BIRTHPLACE", "AGE", "TIAGEH",
+            "EDUCATIONALATTAINMENT", "EDUCAITAINMENT", "EDUCATTAINMENT", "EDNATTAINMENT",
+            "PHILSYSNO", "PHILSYS", "RELIGION", "OCCUPATION", "INCOME", "MONTHLYINCOME",
+            "EMPLOYMENTSTATUS", "ADDRESS", "DDRES", "BARANGAY", "APPLICANTSNO",
+            "EMERGENCYCONTACT", "CONAT", "CONTACT", "RELATIONSHIP", "RELATIONSHI",
+            "EMERGENCYADDRESS", "EMERGENCYNO", "NEEDSANDPROBLEMS", "OTHERSOURCESOFINCOME"
+        }
+        if c_stripped in placeholder_keywords or any(k in c_stripped for k in ["LASTNAME", "FIRSTNAME", "MIDDLENAME", "BIRTHDATE", "BIRTHPLACE", "CIVLSTAT", "EDUCAITAINMENT"]):
+            cleaned = ""
+            conf = 0.0
+        elif "{" in cleaned or "}" in cleaned or (cleaned.startswith("(") and cleaned.endswith(")")):
+            cleaned = ""
+            conf = 0.0
 
     if not cleaned or is_ocr_na(cleaned):
         if f_key != "monthly_income":
@@ -1149,11 +1590,11 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
         return family_members
 
     table_cfg = fields_config.get("family_composition_table", {})
-    t_bbox = table_cfg.get("bbox", [0.025, 0.485, 0.940, 0.150])
+    t_bbox = table_cfg.get("bbox", [0.025, 0.440, 0.940, 0.100])
     tb_x, tb_y, tb_w, tb_h = t_bbox
 
     row_count = 5
-    hdr_ratio = 0.16
+    hdr_ratio = 0.14
     avail_h = tb_h * (1.0 - hdr_ratio)
     r_step = avail_h / float(row_count)
 
@@ -1190,6 +1631,15 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
                 crop = crop_roi(enhanced_image, bbox)
                 if cell_has_ink(crop):
                     raw_text, conf = recognize_crop(ocr_engine, crop)
+
+            # 3. Two-Tier Hybrid Escalation for difficult handwriting in grid cells
+            enable_tier2 = os.environ.get("ENABLE_TIER2_SERVER", "0") in ("1", "true", "True")
+            cell_crop = crop_roi(enhanced_image, bbox)
+            if enable_tier2 and cell_has_ink(cell_crop, thresh_val=0.012) and (conf < 0.75 or not raw_text):
+                t2_raw, t2_score = recognize_with_server_model(cell_crop)
+                if t2_raw and (t2_score > conf or not raw_text):
+                    raw_text = t2_raw
+                    conf = t2_score
 
             return clean_text(raw_text), conf
 
@@ -1261,7 +1711,7 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
 
         # 7. Education / Employment
         raw_edu, edu_conf = get_cell_text("edu", 6)
-        clean_m_edu = "" if is_ocr_na(raw_edu) else raw_edu
+        clean_m_edu = "" if is_ocr_na(raw_edu) else clean_education(raw_edu)
         if is_ocr_na(clean_m_edu): clean_m_edu = ""
 
         # 8. Income
@@ -1399,6 +1849,102 @@ def prepare_static_bucket_canvas(crop_img: np.ndarray, target_w: int, target_h: 
     canvas[:, :new_w] = resized
     return canvas
 
+
+# ==============================================================================
+# TWO-TIER HYBRID CASCADE: Tier 2 Deep Server Recognizer Engine
+# ==============================================================================
+_GLOBAL_SERVER_MODEL = None
+
+def get_server_model():
+    """
+    Lazy singleton loader for the PP-OCRv4 Server recognition model.
+    Only instantiated if a difficult / ambiguous handwriting crop requires escalation.
+    """
+    global _GLOBAL_SERVER_MODEL
+    if _GLOBAL_SERVER_MODEL is None:
+        try:
+            from paddlex import create_model
+            _GLOBAL_SERVER_MODEL = create_model(model_name="PP-OCRv4_server_rec")
+            print("[Two-Tier Cascade] Tier 2 Server Expert model initialized and ready!")
+        except Exception as e:
+            print(f"[Two-Tier Cascade Warning] Could not load Server model: {e}")
+            _GLOBAL_SERVER_MODEL = False
+    return _GLOBAL_SERVER_MODEL if _GLOBAL_SERVER_MODEL else None
+
+def recognize_with_server_model(crop_image: np.ndarray) -> tuple:
+    """
+    Executes Tier 2 deep neural recognition on an isolated handwriting crop.
+    Returns: (recognized_text, confidence_score)
+    """
+    if crop_image is None or crop_image.size == 0:
+        return "", 0.0
+    model = get_server_model()
+    if not model:
+        return "", 0.0
+    try:
+        if len(crop_image.shape) == 2:
+            crop_bgr = cv2.cvtColor(crop_image, cv2.COLOR_GRAY2BGR)
+        else:
+            crop_bgr = crop_image
+        # Pad with 20px clean border to eliminate edge clipping in deep convolution
+        padded = cv2.copyMakeBorder(crop_bgr, 20, 20, 20, 20, cv2.BORDER_CONSTANT, value=[255, 255, 255])
+        res = list(model.predict([padded]))
+        if res and isinstance(res[0], dict):
+            text = str(res[0].get("rec_text", "")).strip()
+            score = float(res[0].get("rec_score", 0.0))
+            return text, score
+    except Exception as e:
+        print(f"[Tier 2 Server Inference Note]: {e}")
+    return "", 0.0
+
+
+# ==============================================================================
+# DYNAMIC ANCHOR ALIGNMENT
+# Automatically detects physical scanner margin offsets (dx, dy)
+# ==============================================================================
+ANCHOR_REGISTRATION_TARGETS = [
+    # (name, search_box [x, y, w, h], keywords, ref_y, ref_x)
+    ("header_office", [0.05, 0.050, 0.50, 0.060], ["binan", "social", "welfare", "dev", "office", "cswdo"], 0.083, 0.221),
+    ("sec1_identifying", [0.02, 0.130, 0.45, 0.060], ["identifying", "information", "personal", "parentorientation"], 0.166, 0.138),
+    ("sec3_composition", [0.02, 0.400, 0.55, 0.060], ["composition", "household", "family"], 0.429, 0.386),
+]
+
+def calculate_dynamic_page_offset(all_detections: list) -> tuple:
+    """
+    Measures vertical (dy) and horizontal (dx) translation shift of the scanned page
+    relative to reference ground-truth landmarks.
+    Returns: (dx, dy) clamped to valid range [-0.045, +0.045].
+    """
+    shifts_y = []
+    shifts_x = []
+
+    for name, s_box, keywords, ref_y, ref_x in ANCHOR_REGISTRATION_TARGETS:
+        bx, by, bw, bh = s_box
+        min_x, max_x = bx - 0.03, bx + bw + 0.03
+        min_y, max_y = by - 0.03, by + bh + 0.03
+
+        for d in all_detections:
+            if (min_x <= d["cx"] <= max_x) and (min_y <= d["cy"] <= max_y):
+                txt = d["text"].lower()
+                if any(kw in txt for kw in keywords):
+                    dy = d["cy"] - ref_y
+                    dx = d["cx"] - ref_x
+                    if abs(dy) <= 0.045:
+                        shifts_y.append(dy)
+                    if abs(dx) <= 0.045:
+                        shifts_x.append(dx)
+                    break
+
+    med_dx = float(np.median(shifts_x)) if len(shifts_x) >= 1 else 0.0
+    med_dy = float(np.median(shifts_y)) if len(shifts_y) >= 1 else 0.0
+
+    if abs(med_dx) < 0.002:
+        med_dx = 0.0
+    if abs(med_dy) < 0.002:
+        med_dy = 0.0
+
+    return med_dx, med_dy
+
 def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template: dict = None) -> dict:
     """
     High-Performance Full-Page Spatial Bucketed Extractor:
@@ -1450,11 +1996,20 @@ def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template:
 
                 # Check if center falls inside any template field bounding box
                 is_target = False
+                pad_x = 0.015
+                pad_y_top = 0.020
+                pad_y_bot = 0.025
                 for fk, cfg in fields_config.items():
                     bx, by, bw, bh = cfg.get("bbox", [0, 0, 0, 0])
-                    if (bx <= cx <= bx + bw) and (by <= cy <= by + bh):
+                    if (bx - pad_x <= cx <= bx + bw + pad_x) and (by - pad_y_top <= cy <= by + bh + pad_y_bot):
                         is_target = True
                         break
+                if not is_target:
+                    for _, s_box, _, _, _ in ANCHOR_REGISTRATION_TARGETS:
+                        abx, aby, abw, abh = s_box
+                        if (abx - 0.02 <= cx <= abx + abw + 0.02) and (aby - 0.02 <= cy <= aby + abh + 0.02):
+                            is_target = True
+                            break
 
                 if is_target:
                     x1 = max(0, int(np.min(pts[:, 0])) - DBNET_CROP_PADDING_PX)
@@ -1528,42 +2083,43 @@ def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template:
                             m = (short_meta + long_meta)[idx]
                             all_detections.append({"text": str(t).strip(), "conf": s, "cx": m["cx"], "cy": m["cy"], "bbox": m["bbox"]})
 
-            # Generate and save Visual Debug Detections image (debug_detections.jpg)
-            try:
-                debug_img = img_bgr.copy()
-                # 1. Draw yellow boxes for active template fields
-                for fk, cfg in fields_config.items():
-                    bx, by, bw, bh = cfg.get("bbox", [0, 0, 0, 0])
-                    px1, py1 = int(bx * full_w), int(by * full_h)
-                    px2, py2 = int((bx + bw) * full_w), int((by + bh) * full_h)
-                    cv2.rectangle(debug_img, (px1, py1), (px2, py2), (0, 220, 255), 1)
+            # Generate and save Visual Debug Detections image (only if explicitly enabled via SOLACE_OCR_DEBUG=1)
+            if True: # Always save visual debug detections for UI inspection
+                try:
+                    debug_img = img_bgr.copy()
+                    # 1. Draw yellow boxes for active template fields
+                    for fk, cfg in fields_config.items():
+                        bx, by, bw, bh = cfg.get("bbox", [0, 0, 0, 0])
+                        px1, py1 = int(bx * full_w), int(by * full_h)
+                        px2, py2 = int((bx + bw) * full_w), int((by + bh) * full_h)
+                        cv2.rectangle(debug_img, (px1, py1), (px2, py2), (0, 220, 255), 1)
 
-                # 2. Draw gray contours for discarded non-target text
-                for poly in polys:
-                    if poly is not None and len(poly) >= 4:
-                        pts_int = np.array(poly, dtype=np.int32)
-                        cv2.polylines(debug_img, [pts_int], True, (170, 170, 170), 1)
+                    # 2. Draw gray contours for discarded non-target text
+                    for poly in polys:
+                        if poly is not None and len(poly) >= 4:
+                            pts_int = np.array(poly, dtype=np.int32)
+                            cv2.polylines(debug_img, [pts_int], True, (170, 170, 170), 1)
 
-                # 3. Draw bright green bounding boxes around accepted target word crops (including the 3px padding)
-                for d in all_detections:
-                    cx, cy = d["cx"], d["cy"]
-                    bw, bh = d["bbox"][2], d["bbox"][3]
-                    gx1 = max(0, int((cx - bw / 2.0) * full_w) - DBNET_CROP_PADDING_PX)
-                    gy1 = max(0, int((cy - bh / 2.0) * full_h) - DBNET_CROP_PADDING_PX)
-                    gx2 = min(full_w, int((cx + bw / 2.0) * full_w) + DBNET_CROP_PADDING_PX)
-                    gy2 = min(full_h, int((cy + bh / 2.0) * full_h) + DBNET_CROP_PADDING_PX)
-                    cv2.rectangle(debug_img, (gx1, gy1), (gx2, gy2), (0, 255, 0), 2)
-                    cv2.putText(debug_img, d["text"][:15], (gx1, max(12, gy1 - 3)), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 180, 0), 1)
+                    # 3. Draw bright green bounding boxes around accepted target word crops (including the 3px padding)
+                    for d in all_detections:
+                        cx, cy = d["cx"], d["cy"]
+                        bw, bh = d["bbox"][2], d["bbox"][3]
+                        gx1 = max(0, int((cx - bw / 2.0) * full_w) - DBNET_CROP_PADDING_PX)
+                        gy1 = max(0, int((cy - bh / 2.0) * full_h) - DBNET_CROP_PADDING_PX)
+                        gx2 = min(full_w, int((cx + bw / 2.0) * full_w) + DBNET_CROP_PADDING_PX)
+                        gy2 = min(full_h, int((cy + bh / 2.0) * full_h) + DBNET_CROP_PADDING_PX)
+                        cv2.rectangle(debug_img, (gx1, gy1), (gx2, gy2), (0, 255, 0), 2)
+                        cv2.putText(debug_img, d["text"][:15], (gx1, max(12, gy1 - 3)), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 180, 0), 1)
 
-                debug_save_path = os.path.join(os.path.dirname(__file__), "debug_detections.jpg")
-                cv2.imwrite(debug_save_path, debug_img)
-                # Also save copy to bin/Debug folder if it exists
-                bin_debug_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "bin", "Debug"))
-                if os.path.exists(bin_debug_dir):
-                    cv2.imwrite(os.path.join(bin_debug_dir, "debug_detections.jpg"), debug_img)
-                print(f"[Debug Visualizer SUCCESS] Saved visual detections overlay to: {debug_save_path}")
-            except Exception as vis_err:
-                print(f"[Debug Visualizer Note]: {vis_err}")
+                    debug_save_path = os.path.join(os.path.dirname(__file__), "debug_detections.jpg")
+                    cv2.imwrite(debug_save_path, debug_img)
+                    # Also save copy to bin/Debug folder if it exists
+                    bin_debug_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "bin", "Debug"))
+                    if os.path.exists(bin_debug_dir):
+                        cv2.imwrite(os.path.join(bin_debug_dir, "debug_detections.jpg"), debug_img)
+                    print(f"[Debug Visualizer SUCCESS] Saved visual detections overlay to: {debug_save_path}")
+                except Exception as vis_err:
+                    print(f"[Debug Visualizer Note]: {vis_err}")
         else:
             # Fallback to standard predict
             pred_res = list(ocr_engine.predict(img_bgr))
@@ -1577,6 +2133,24 @@ def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template:
     total_conf = 0.0
     field_count = 0
 
+    # 1.5 Dynamic Anchor Alignment
+    dyn_dx, dyn_dy = calculate_dynamic_page_offset(all_detections)
+    if dyn_dx != 0.0 or dyn_dy != 0.0:
+        print(f"[Dynamic Alignment] Detected physical scanner shift: dx={dyn_dx:+.4f}, dy={dyn_dy:+.4f}. Auto-adjusting template query boxes!")
+        aligned_fields = {}
+        for fk, cfg in fields_config.items():
+            c_cfg = dict(cfg)
+            if "bbox" in c_cfg:
+                bx, by, bw, bh = c_cfg["bbox"]
+                c_cfg["bbox"] = [
+                    max(0.0, min(0.98, round(bx + dyn_dx, 4))),
+                    max(0.0, min(0.98, round(by + dyn_dy, 4))),
+                    bw,
+                    bh
+                ]
+            aligned_fields[fk] = c_cfg
+        fields_config = aligned_fields
+
     # 2. Spatial Bucketing into Template Fields
     for f_key, cfg in fields_config.items():
         f_type = cfg.get("type", "text")
@@ -1587,15 +2161,55 @@ def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template:
 
         if f_key == "employment_status":
             raw_text = ""
+            cleaned, conf = detect_employment_status(enhanced_image, ocr_engine, fields_config, all_detections=all_detections, raw_text=raw_text)
+        elif f_key in ["is_employed", "is_self_employed", "is_not_employed"]:
+            emp_val = extracted_fields.get("employment_status", {}).get("value", "")
+            if not emp_val:
+                emp_val, emp_conf = detect_employment_status(enhanced_image, ocr_engine, fields_config, all_detections=all_detections)
+                extracted_fields["employment_status"] = {
+                    "value": emp_val,
+                    "confidence": round(emp_conf, 2),
+                    "rating": get_confidence_rating(emp_conf) if emp_val else "Low",
+                    "bbox": fields_config.get("employment_status", {}).get("bbox", bbox),
+                    "category": "Section I"
+                }
+            if f_key == "is_employed":
+                cleaned = "True" if emp_val == "Employed" else "False"
+            elif f_key == "is_self_employed":
+                cleaned = "True" if emp_val == "Self-Employed" else "False"
+            elif f_key == "is_not_employed":
+                cleaned = "True" if emp_val == "Not Employed" else "False"
             conf = 0.95
         else:
-            raw_text, conf = assign_detections_to_field(f_key, cfg, all_detections)
+            # 1. Try Label-Relative Dynamic Extraction First (immune to margin/scale shifts)
+            raw_text, conf = extract_by_anchor_label(f_key, all_detections, fields_config)
+            if raw_text:
+                print(f'  [Label-Relative Match] [{f_key}]: "{raw_text}" (conf: {conf:.2f})')
+            else:
+                # 2. Fallback to calibrated template bbox
+                raw_text, conf = assign_detections_to_field(f_key, cfg, all_detections)
+
+            # 3. Fallback to crop OCR if still not captured
             if not raw_text:
                 crop = crop_roi(enhanced_image, bbox)
                 if cell_has_ink(crop):
                     raw_text, conf = recognize_crop(ocr_engine, crop)
 
-        cleaned, conf = clean_field_value(f_key, f_type, raw_text, conf, enhanced_image, ocr_engine, fields_config)
+        if f_key not in ["employment_status", "is_employed", "is_self_employed", "is_not_employed"]:
+            cleaned, conf = clean_field_value(f_key, f_type, raw_text, conf, enhanced_image, ocr_engine, fields_config, all_detections=all_detections)
+
+        # Two-Tier Hybrid Escalation: Disabled by default for < 2.0s real-time performance
+        enable_tier2 = os.environ.get("ENABLE_TIER2_SERVER", "0") in ("1", "true", "True")
+        if enable_tier2 and f_type == "text" and f_key not in ["employment_status", "is_employed", "is_self_employed", "is_not_employed"]:
+            cell_crop = crop_roi(enhanced_image, bbox)
+            if cell_has_ink(cell_crop, thresh_val=0.012) and (conf < 0.75 or not cleaned):
+                t2_raw, t2_score = recognize_with_server_model(cell_crop)
+                if t2_raw:
+                    t2_cleaned, t2_conf = clean_field_value(f_key, f_type, t2_raw, t2_score, enhanced_image, ocr_engine, fields_config)
+                    if t2_cleaned and (t2_conf > conf or not cleaned):
+                        safe_old = str(cleaned).encode('ascii', 'replace').decode('ascii'); safe_new = str(t2_cleaned).encode('ascii', 'replace').decode('ascii'); print(f"  [Tier 2 Upgrade] [{f_key}]: '{safe_old}' ({conf:.2f}) -> upgraded to '{safe_new}' ({t2_conf:.2f})")
+                        cleaned = t2_cleaned
+                        conf = t2_conf
 
         if cleaned:
             print(f"  -> Extracted [{f_key}]: \"{cleaned}\" (conf: {conf:.2f})")
@@ -1618,6 +2232,26 @@ def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template:
 
     # 4. Extract Section III/V Family Dependents Table
     family_members = parse_family_table_grid(ocr_engine, enhanced_image, fields_config, all_detections)
+
+    # 5. Cross-field consistency: Auto-calculate and verify Age from Birthdate
+    try:
+        from datetime import datetime
+        bdate_str = extracted_fields.get("birthdate", {}).get("value", "")
+        if bdate_str:
+            bparts = bdate_str.split("/")
+            if len(bparts) == 3:
+                b_day, b_mon, b_yr = int(bparts[0]), int(bparts[1]), int(bparts[2])
+                now_yr = datetime.now().year
+                calc_age = now_yr - b_yr
+                curr_age_dict = extracted_fields.get("age", {})
+                curr_age_val = curr_age_dict.get("value", "")
+                if not curr_age_val or not curr_age_val.isdigit() or abs(int(curr_age_val) - calc_age) > 2:
+                    if 0 <= calc_age <= 120:
+                        extracted_fields["age"]["value"] = str(calc_age)
+                        extracted_fields["age"]["confidence"] = 0.95
+                        extracted_fields["age"]["rating"] = "High"
+    except Exception:
+        pass
 
     overall_confidence = round(total_conf / field_count, 2) if field_count > 0 else 0.0
 
@@ -1656,6 +2290,19 @@ def parse_form_with_crop_ocr(ocr_engine, enhanced_image: np.ndarray, template: d
         raw_text, conf = recognize_crop(ocr_engine, crop)
         cleaned, conf = clean_field_value(f_key, f_type, raw_text, conf, enhanced_image, ocr_engine, fields_config)
 
+        # Two-Tier Hybrid Escalation: Disabled by default for < 2.0s real-time performance
+        enable_tier2 = os.environ.get("ENABLE_TIER2_SERVER", "0") in ("1", "true", "True")
+        if enable_tier2 and f_type == "text" and f_key not in ["employment_status", "is_employed", "is_self_employed", "is_not_employed"]:
+            cell_crop = crop_roi(enhanced_image, bbox)
+            if cell_has_ink(cell_crop, thresh_val=0.012) and (conf < 0.75 or not cleaned):
+                t2_raw, t2_score = recognize_with_server_model(cell_crop)
+                if t2_raw:
+                    t2_cleaned, t2_conf = clean_field_value(f_key, f_type, t2_raw, t2_score, enhanced_image, ocr_engine, fields_config)
+                    if t2_cleaned and (t2_conf > conf or not cleaned):
+                        safe_old = str(cleaned).encode('ascii', 'replace').decode('ascii'); safe_new = str(t2_cleaned).encode('ascii', 'replace').decode('ascii'); print(f"  [Tier 2 Upgrade] [{f_key}]: '{safe_old}' ({conf:.2f}) -> upgraded to '{safe_new}' ({t2_conf:.2f})")
+                        cleaned = t2_cleaned
+                        conf = t2_conf
+
         if cleaned:
             print(f"  -> Extracted [{f_key}]: \"{cleaned}\" (conf: {conf:.2f})")
 
@@ -1672,6 +2319,26 @@ def parse_form_with_crop_ocr(ocr_engine, enhanced_image: np.ndarray, template: d
 
     detected_circumstance = detect_encircled_circumstance(enhanced_image, ocr_engine, template)
     family_members = parse_family_table_grid(ocr_engine, enhanced_image, fields_config, None)
+
+    # 5. Cross-field consistency: Auto-calculate and verify Age from Birthdate
+    try:
+        from datetime import datetime
+        bdate_str = extracted_fields.get("birthdate", {}).get("value", "")
+        if bdate_str:
+            bparts = bdate_str.split("/")
+            if len(bparts) == 3:
+                b_day, b_mon, b_yr = int(bparts[0]), int(bparts[1]), int(bparts[2])
+                now_yr = datetime.now().year
+                calc_age = now_yr - b_yr
+                curr_age_dict = extracted_fields.get("age", {})
+                curr_age_val = curr_age_dict.get("value", "")
+                if not curr_age_val or not curr_age_val.isdigit() or abs(int(curr_age_val) - calc_age) > 2:
+                    if 0 <= calc_age <= 120:
+                        extracted_fields["age"]["value"] = str(calc_age)
+                        extracted_fields["age"]["confidence"] = 0.95
+                        extracted_fields["age"]["rating"] = "High"
+    except Exception:
+        pass
 
     overall_confidence = round(total_conf / field_count, 2) if field_count > 0 else 0.0
 

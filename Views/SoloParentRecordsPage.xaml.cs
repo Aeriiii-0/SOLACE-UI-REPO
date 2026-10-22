@@ -48,7 +48,9 @@ namespace SOLUM_UI
         }
 
         private bool IsAdmin => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
-                                    string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase);
+                                    string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase) ||
+                                    string.Equals(CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase) ||
+                                    AuthApiService.Instance.IsAdmin;
         private bool IsBasicUser => string.Equals(CurrentUserRole, "BasicUser", StringComparison.OrdinalIgnoreCase);
         private bool IsEncoder => string.Equals(CurrentUserRole, "Encoder", StringComparison.OrdinalIgnoreCase);
 
@@ -66,6 +68,7 @@ namespace SOLUM_UI
                     if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
                 }
                 _ = LoadRecordsAsync();
+                _ = Task.Run(() => OcrService.EnsureServerRunningAsync(25));
             };
             SizeChanged += Page_SizeChanged;
             // Also recompute when the ListView itself changes size

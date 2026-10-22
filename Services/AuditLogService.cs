@@ -116,7 +116,9 @@ namespace SOLUM_UI.Services
 
         public IEnumerable<AuditLog> GetForUser(string userName, string role)
         {
-            bool isAdmin = string.Equals(role, "Administrator", StringComparison.OrdinalIgnoreCase);
+            bool isAdmin = string.Equals(role, "Administrator", StringComparison.OrdinalIgnoreCase) ||
+                           string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) ||
+                           string.Equals(role, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
             return isAdmin
                 ? Logs.AsEnumerable()
                 : Logs.Where(l => string.Equals(l.PerformedBy, userName, StringComparison.OrdinalIgnoreCase));

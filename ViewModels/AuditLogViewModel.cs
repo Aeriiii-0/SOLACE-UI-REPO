@@ -460,7 +460,11 @@ namespace SOLUM_UI.ViewModels
             string userRole   = !string.IsNullOrWhiteSpace(dto.Role) ? dto.Role : (dto.PerformedBy?.Role ?? string.Empty);
             string targetId   = !string.IsNullOrWhiteSpace(dto.TargetId) ? dto.TargetId : (dto.Target?.TargetId ?? string.Empty);
             string targetType = !string.IsNullOrWhiteSpace(dto.TargetType) ? dto.TargetType : (dto.Target?.TargetType ?? string.Empty);
-            string targetName = !string.IsNullOrWhiteSpace(dto.TargetName) ? dto.TargetName : (dto.Target?.TargetName ?? string.Empty);
+            string targetName = !string.IsNullOrWhiteSpace(dto.Target?.TargetName)
+                ? dto.Target.TargetName
+                : (!string.IsNullOrWhiteSpace(dto.TargetName)
+                    ? dto.TargetName
+                    : (!string.IsNullOrWhiteSpace(targetId) ? targetId : "—"));
             string ipAddress  = !string.IsNullOrWhiteSpace(dto.IpAddress) ? dto.IpAddress : (dto.Metadata?.IpAddress ?? string.Empty);
             string status     = !string.IsNullOrWhiteSpace(dto.Status) ? dto.Status : (dto.Metadata?.Status ?? string.Empty);
             string rawType    = dto.ActionType ?? string.Empty;
@@ -468,7 +472,9 @@ namespace SOLUM_UI.ViewModels
             string resolvedName = ResolveUserName(userId);
             string displayName = !string.IsNullOrWhiteSpace(resolvedName) ? resolvedName : userId;
 
-            string recordName = !string.IsNullOrWhiteSpace(targetName) ? targetName : (!string.IsNullOrWhiteSpace(targetId) ? targetId : targetType);
+            string recordName = !string.IsNullOrWhiteSpace(targetName) && !string.Equals(targetName, "—")
+                ? targetName
+                : (!string.IsNullOrWhiteSpace(targetId) ? targetId : (!string.IsNullOrWhiteSpace(targetType) ? targetType : "—"));
             string description = BuildDescription(rawType, displayName, recordName, status);
 
             var changesSource = (dto.Changes != null && dto.Changes.Count > 0)

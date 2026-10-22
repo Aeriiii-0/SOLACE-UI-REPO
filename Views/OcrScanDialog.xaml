@@ -204,7 +204,7 @@
                                     </DatePickerTextBox.Style>
                                 </DatePickerTextBox>
                                 <!-- Custom clean placeholder - only visible when input is empty -->
-                                <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="13"
+                                <TextBlock Text="DD/MM/YYYY" Foreground="#999999" FontSize="13"
                                            Padding="8,0" VerticalAlignment="Center"
                                            IsHitTestVisible="False" Opacity="0.7">
                                     <TextBlock.Style>
@@ -354,64 +354,110 @@
     <Border Background="#44000000" Padding="0">
         <Border Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="0" Opacity="0.25"/>
+                <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="0" Opacity="0.22"/>
             </Border.Effect>
             <Border x:Name="DialogShell" Background="White" CornerRadius="16"
                     ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    BorderBrush="#7B1426" BorderThickness="2">
+                    BorderBrush="#C8E6C9" BorderThickness="2">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <!-- Top Header -->
-                        <RowDefinition Height="60"/>
-                        <!-- Main Body: Split Viewport (Left) vs 1:1 Record Form (Right) -->
+                        <!-- Row 0: Top Header -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Row 1: Mode Stripe -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Row 2: Main Body (Split Viewport + Form) -->
                         <RowDefinition Height="*"/>
-                        <!-- Footer Navigation -->
-                        <RowDefinition Height="56"/>
+                        <!-- Row 3: Footer Actions -->
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- TOP HEADER -->
-                    <Border Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="20,0">
+                    <!-- TOP HEADER (Clean White Theme matching RecordDialog) -->
+                    <Border x:Name="HeaderBorder" Grid.Row="0" Background="White" CornerRadius="16,16,0,0"
+                            BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="28,16">
                         <Grid VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Viewbox Width="20" Height="20" Margin="0,0,10,0" VerticalAlignment="Center">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Fill="White" Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                                    </Canvas>
-                                </Viewbox>
-                                <StackPanel>
-                                    <TextBlock Text="OCR Document Ingestion &amp; Verification" FontSize="15" FontWeight="Bold" Foreground="White"/>
-                                    <TextBlock Text="City of Biñan CSWDO Application Form for Solo Parent (CSWDO-066-2)" FontSize="11" Foreground="#E0B8C4"/>
-                                </StackPanel>
+                            <StackPanel VerticalAlignment="Center">
+                                <!-- Mode badge pill -->
+                                <Border CornerRadius="20" Padding="10,4" Background="#E8F5E9" HorizontalAlignment="Left" Margin="0,0,0,6">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+                                              Fill="#2E7D32" Stretch="Uniform" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Text="OCR Auto-Ingestion &amp; Verification" FontSize="11" FontWeight="Bold" Foreground="#2E7D32" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <TextBlock x:Name="FormSubtitle" Text="Solo Parent Application Form" FontSize="19" FontWeight="Bold" Foreground="#111111"/>
+                                <TextBlock x:Name="FormStepHint" Text="Step 1 of 3 — Primary Information" FontSize="13" Foreground="#666666" Margin="0,3,0,0"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border x:Name="ServerStatusBadge"
-                                        Width="24" Height="24" CornerRadius="12"
-                                        Background="#7B1426" BorderBrush="White" BorderThickness="2"
-                                        Margin="0,0,16,0" Cursor="Hand" VerticalAlignment="Center"
+                                <!-- Engine Status Badge Pill -->
+                                <Border x:Name="PillEngineStatus"
+                                        Background="#FBF5F7" BorderBrush="#EDE0E5" BorderThickness="1"
+                                        CornerRadius="14" Padding="10,5" Margin="0,0,14,0"
+                                        Cursor="Hand" VerticalAlignment="Center"
                                         MouseLeftButtonUp="ServerStatusBadge_MouseLeftButtonUp"
-                                        ToolTipService.InitialShowDelay="200"
-                                        ToolTipService.BetweenShowDelay="0"
-                                        ToolTipService.ShowDuration="10000">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#7B1426" BlurRadius="8" ShadowDepth="0" Opacity="0.8"/>
-                                    </Border.Effect>
+                                        ToolTipService.InitialShowDelay="150"
+                                        ToolTip="Click to check OCR engine status or restart server">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Border x:Name="ServerStatusBadge"
+                                                Width="9" Height="9" CornerRadius="4.5"
+                                                Background="#FFA500" Margin="0,0,8,0" VerticalAlignment="Center">
+                                            <Border.Effect>
+                                                <DropShadowEffect x:Name="BadgeGlow" Color="#FFA500" BlurRadius="6" ShadowDepth="0" Opacity="0.8"/>
+                                            </Border.Effect>
+                                        </Border>
+                                        <TextBlock x:Name="TxtHeaderEngineStatus" Text="AI Engine: Checking..."
+                                                   FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                                    </StackPanel>
                                 </Border>
 
-                                <Button Click="Close_Click" Background="Transparent" BorderThickness="0" Cursor="Hand" Width="30" Height="30">
-                                    <TextBlock Text="✕" FontSize="15" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <!-- Circular Close Button -->
+                                <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                                        Width="32" Height="32" Background="Transparent"
+                                        BorderThickness="0" Cursor="Hand" Click="Close_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="CloseBg" Background="Transparent" CornerRadius="16">
+                                                <TextBlock Text="✕" FontSize="14" Foreground="#888888" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="CloseBg" Property="Background" Value="#F0F0F0"/>
+                                                    <Setter Property="Foreground" Value="#222222"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
                                 </Button>
                             </StackPanel>
                         </Grid>
                     </Border>
 
+                    <!-- MODE STRIPE (Matching RecordDialog) -->
+                    <Border x:Name="ModeStripe" Grid.Row="1"
+                            Background="#F0FAF1" BorderBrush="#C8E6C9" BorderThickness="0,0,0,1"
+                            Padding="28,8,28,8">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path x:Name="ModeStripeIcon"
+                                      Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+                                      Fill="#2E7D32" Stretch="Uniform" Width="13" Height="13"
+                                      VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock x:Name="ModeStripeLabel" Text="New Registration"
+                                           FontSize="12" FontWeight="Bold" Foreground="#2E7D32" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="ModeStripeHint"
+                                           Text=" — Scanned CSWDO-066-2 form. Review fields on the right, synchronized with the scan preview."
+                                           FontSize="12" Foreground="#558B5A" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
                     <!-- MAIN WORKSPACE -->
-                    <Grid Grid.Row="1" Margin="16,12">
+                    <Grid Grid.Row="2" Margin="16,12">
                         <Grid.ColumnDefinitions>
                             <!-- Left: Document Viewport (~44% width) -->
                             <ColumnDefinition Width="520"/>
@@ -425,11 +471,96 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
+                                <!-- OCR ENGINE WARMUP / PROGRESS BANNER -->
+                                <Border x:Name="OcrWarmupBanner" Grid.Row="0"
+                                        Background="#FFF5F7" BorderBrush="#E0B8C4" BorderThickness="1" CornerRadius="8"
+                                        Padding="12,10" Margin="0,0,0,10" Visibility="Collapsed">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Header: Icon, Title, and Estimated Time / Controls -->
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Warmup Status Icon / Spinner Badge -->
+                                            <Border x:Name="IconWarmupBadge" Width="22" Height="22" CornerRadius="11"
+                                                    Background="#702943" VerticalAlignment="Center" Margin="0,0,8,0"
+                                                    RenderTransformOrigin="0.5,0.5">
+                                                <Border.RenderTransform>
+                                                    <RotateTransform x:Name="WarmupIconRotate" Angle="0"/>
+                                                </Border.RenderTransform>
+                                                <Viewbox Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Canvas Width="24" Height="24">
+                                                        <Path x:Name="IconWarmupPath" Fill="White"
+                                                              Data="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+                                                    </Canvas>
+                                                </Viewbox>
+                                            </Border>
+
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock x:Name="TxtWarmupTitle" Text="AI OCR Engine Warming Up..."
+                                                           FontSize="12" FontWeight="Bold" Foreground="#702943"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Border x:Name="BadgeWarmupTime" Background="#F3E5EB" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
+                                                    <TextBlock x:Name="TxtWarmupEstimatedTime" Text="~6s remaining"
+                                                               FontSize="10" FontWeight="SemiBold" Foreground="#702943"/>
+                                                </Border>
+                                                <Button x:Name="BtnWarmupRetry" Content="Retry" Click="WarmupRetry_Click" Visibility="Collapsed"
+                                                        Background="#702943" Foreground="White" FontSize="10" FontWeight="Bold"
+                                                        Padding="8,2" BorderThickness="0" Cursor="Hand">
+                                                    <Button.Resources>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="CornerRadius" Value="4"/>
+                                                        </Style>
+                                                    </Button.Resources>
+                                                </Button>
+                                                <Button x:Name="BtnDismissWarmup" Content="✕" Click="DismissWarmup_Click" Visibility="Collapsed"
+                                                        Background="Transparent" Foreground="#888888" FontSize="11" FontWeight="Bold"
+                                                        Width="20" Height="20" BorderThickness="0" Cursor="Hand"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Current Active Process Step Description -->
+                                        <Grid Grid.Row="1" Margin="0,6,0,6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock x:Name="TxtWarmupStepDetail"
+                                                       Text="Initializing local AI background service &amp; OpenVINO models..."
+                                                       FontSize="11" Foreground="#444444" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock x:Name="TxtWarmupElapsed" Grid.Column="1" Text="0.0s elapsed"
+                                                       FontSize="10" Foreground="#888888" Margin="8,0,0,0"/>
+                                        </Grid>
+
+                                        <!-- Warmup Progress Bar -->
+                                        <ProgressBar x:Name="WarmupProgressBar" Grid.Row="2" Height="5" Minimum="0" Maximum="100" Value="15"
+                                                     Foreground="#702943" Background="#EBD6DC" BorderThickness="0">
+                                            <ProgressBar.Resources>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="CornerRadius" Value="2.5"/>
+                                                </Style>
+                                            </ProgressBar.Resources>
+                                        </ProgressBar>
+                                    </Grid>
+                                </Border>
+
                                 <!-- Viewport Toolbar -->
-                                <Grid Grid.Row="0" Margin="0,0,0,6">
+                                <Grid Grid.Row="1" Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
@@ -438,66 +569,140 @@
 
                                     <StackPanel Orientation="Horizontal">
                                         <Button x:Name="BtnScanHardware" Content="Scan Document" Click="ScanHardware_Click"
-                                                Height="28" Padding="10,0" Background="#702943" Foreground="White" FontWeight="SemiBold"
+                                                Height="28" Padding="12,0" Background="#702943" Foreground="White" FontWeight="SemiBold"
                                                 FontSize="11" BorderThickness="0" Cursor="Hand">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="5"/>
-                                                </Style>
-                                            </Button.Resources>
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
                                         </Button>
 
                                         <Button x:Name="BtnScannerSettings" Content="Scanner Settings" Click="ScannerSettings_Click"
-                                                Height="28" Padding="8,0" Background="#541B2D" Foreground="White" FontWeight="SemiBold"
-                                                FontSize="11" BorderThickness="0" Cursor="Hand" Margin="4,0,0,0">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="5"/>
-                                                </Style>
-                                            </Button.Resources>
+                                                Height="28" Padding="10,0" Background="White" Foreground="#702943" FontWeight="SemiBold"
+                                                FontSize="11" BorderBrush="#D0B8C0" BorderThickness="1" Cursor="Hand" Margin="5,0,0,0">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
                                         </Button>
 
                                         <Button x:Name="BtnSelectImage" Content="Upload File" Click="SelectImage_Click"
-                                                Height="28" Padding="8,0" Background="#541B2D" Foreground="White" FontWeight="SemiBold"
-                                                FontSize="11" BorderThickness="0" Cursor="Hand" Margin="4,0,0,0">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="5"/>
-                                                </Style>
-                                            </Button.Resources>
+                                                Height="28" Padding="10,0" Background="White" Foreground="#702943" FontWeight="SemiBold"
+                                                FontSize="11" BorderBrush="#D0B8C0" BorderThickness="1" Cursor="Hand" Margin="5,0,0,0">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
                                         </Button>
 
                                         <Button x:Name="BtnAdjustTemplate" Content="Adjust Boxes" Click="AdjustTemplate_Click"
-                                                Height="28" Padding="8,0" Background="#4A1D2B" Foreground="White" FontWeight="SemiBold"
-                                                FontSize="11" BorderThickness="0" Cursor="Hand" Margin="4,0,0,0">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="5"/>
-                                                </Style>
-                                            </Button.Resources>
+                                                Height="28" Padding="10,0" Background="White" Foreground="#555555" FontWeight="SemiBold"
+                                                FontSize="11" BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" Margin="5,0,0,0">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
                                         </Button>
 
                                         <Button x:Name="BtnViewDetections" Content="View AI Boxes" Click="ViewDetections_Click"
-                                                Height="28" Padding="8,0" Background="#3D1723" Foreground="White" FontWeight="SemiBold"
-                                                FontSize="11" BorderThickness="0" Cursor="Hand" Margin="4,0,0,0" ToolTip="Open the visual detections overlay">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="5"/>
-                                                </Style>
-                                            </Button.Resources>
+                                                Height="28" Padding="10,0" Background="White" Foreground="#555555" FontWeight="SemiBold"
+                                                FontSize="11" BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" Margin="5,0,0,0" ToolTip="Open the visual detections overlay">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
                                         </Button>
                                     </StackPanel>
 
                                     <!-- Zoom Controls -->
                                     <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                        <Button Content="-" Click="ZoomOut_Click" Width="24" Height="24" Background="White" BorderBrush="#D0C0C6" BorderThickness="1" Margin="0,0,3,0" FontWeight="Bold" FontSize="11"/>
-                                        <Button Content="Fit" Click="ZoomFit_Click" Height="24" Padding="5,0" Background="White" BorderBrush="#D0C0C6" BorderThickness="1" Margin="0,0,3,0" FontSize="10"/>
-                                        <Button Content="+" Click="ZoomIn_Click" Width="24" Height="24" Background="White" BorderBrush="#D0C0C6" BorderThickness="1" FontWeight="Bold" FontSize="11"/>
+                                        <Button Content="-" Click="ZoomOut_Click" Width="26" Height="28" Background="White" Foreground="#555555" BorderBrush="#D0C0C6" BorderThickness="1" Margin="0,0,3,0" FontWeight="Bold" FontSize="11" Cursor="Hand">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                        <Button Content="Fit" Click="ZoomFit_Click" Height="28" Padding="6,0" Background="White" Foreground="#555555" BorderBrush="#D0C0C6" BorderThickness="1" Margin="0,0,3,0" FontSize="10" FontWeight="SemiBold" Cursor="Hand">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                        <Button Content="+" Click="ZoomIn_Click" Width="26" Height="28" Background="White" Foreground="#555555" BorderBrush="#D0C0C6" BorderThickness="1" FontWeight="Bold" FontSize="11" Cursor="Hand">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
                                     </StackPanel>
                                 </Grid>
 
                                 <!-- Scrollable Pan & Zoom Document Canvas -->
-                                <Border Grid.Row="1" Background="#E8E2E4" CornerRadius="8" ClipToBounds="True" BorderBrush="#D0C0C6" BorderThickness="1">
+                                <Border Grid.Row="2" Background="#E8E2E4" CornerRadius="8" ClipToBounds="True" BorderBrush="#D0C0C6" BorderThickness="1">
                                     <Grid>
                                         <ScrollViewer x:Name="DocScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                                                       PreviewMouseLeftButtonDown="DocScrollViewer_PreviewMouseLeftButtonDown"
@@ -569,31 +774,36 @@
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- STEP INDICATOR HEADER -->
+                                <!-- STEP INDICATOR HEADER (3-STEP WIZARD) -->
                                 <Border Grid.Row="0" Background="#FDFAFB" BorderBrush="#EDE0E5"
                                         BorderThickness="0,0,0,1" Padding="20,10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="36"/>
+                                            <ColumnDefinition Width="28"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="28"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
+
+                                        <!-- Step 1: Primary Info -->
                                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Cursor="Hand" MouseLeftButtonUp="Step1Header_Click">
                                             <Border x:Name="Step1Dot" Width="26" Height="26" CornerRadius="13"
                                                     Background="#702943">
-                                                <TextBlock Text="1" Foreground="White" FontSize="12" FontWeight="Bold"
+                                                <TextBlock x:Name="Step1DotLabel" Text="1" Foreground="White" FontSize="12" FontWeight="Bold"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
-                                                <TextBlock Text="Personal Info" FontSize="12" FontWeight="Bold"
+                                                <TextBlock x:Name="Step1Title" Text="Primary Info" FontSize="12" FontWeight="Bold"
                                                            Foreground="#702943"/>
-                                                <TextBlock Text="Identity, contact &amp; emergency" FontSize="10" Foreground="#888888"/>
+                                                <TextBlock Text="Identity &amp; verification" FontSize="10" Foreground="#888888"/>
                                             </StackPanel>
                                         </StackPanel>
 
                                         <Border Grid.Column="1" Height="2" Background="#E0E0E0"
                                                 VerticalAlignment="Center" Margin="4,0"/>
 
+                                        <!-- Step 2: Secondary Info -->
                                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Cursor="Hand" MouseLeftButtonUp="Step2Header_Click">
                                             <Border x:Name="Step2Dot" Width="26" Height="26" CornerRadius="13"
                                                     Background="#E0E0E0">
@@ -602,9 +812,27 @@
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
-                                                <TextBlock x:Name="Step2Title" Text="Circumstances &amp; Family"
+                                                <TextBlock x:Name="Step2Title" Text="Secondary Info"
                                                            FontSize="12" FontWeight="Bold" Foreground="#AAAAAA"/>
-                                                <TextBlock Text="Referral, dependents &amp; status" FontSize="10" Foreground="#AAAAAA"/>
+                                                <TextBlock Text="Address &amp; background" FontSize="10" Foreground="#AAAAAA"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <Border Grid.Column="3" Height="2" Background="#E0E0E0"
+                                                VerticalAlignment="Center" Margin="4,0"/>
+
+                                        <!-- Step 3: Circumstances & Family -->
+                                        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" Cursor="Hand" MouseLeftButtonUp="Step3Header_Click">
+                                            <Border x:Name="Step3Dot" Width="26" Height="26" CornerRadius="13"
+                                                    Background="#E0E0E0">
+                                                <TextBlock x:Name="Step3DotLabel" Text="3" Foreground="#AAAAAA"
+                                                           FontSize="12" FontWeight="Bold"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock x:Name="Step3Title" Text="Circumstances"
+                                                           FontSize="12" FontWeight="Bold" Foreground="#AAAAAA"/>
+                                                <TextBlock Text="Family &amp; circumstance" FontSize="10" Foreground="#AAAAAA"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Grid>
@@ -634,6 +862,8 @@
                                                                                 GotKeyboardFocus="Field_GotFocus"
                                                                                 PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
                                                                                 CalendarOpened="DatePicker_CalendarOpened"
+                                                                                DateValidationError="DatePicker_DateValidationError"
+                                                                                LostFocus="DatePicker_LostFocus"
                                                                                 BorderThickness="0" Background="Transparent"
                                                                                 Foreground="#222222" Cursor="Hand"/>
                                                                 </Border>
@@ -666,6 +896,7 @@
                                                             </Grid>
                                                             <TextBox x:Name="TxtLastName" Style="{StaticResource FormBox}"
                                                                      Tag="last_name" GotFocus="Field_GotFocus"
+                                                                     MaxLength="50"
                                                                      PreviewTextInput="NameOnly_PreviewTextInput"
                                                                      TextChanged="TxtLastName_TextChanged"/>
                                                             <TextBlock x:Name="ErrLastName" Text="Required." Style="{StaticResource ErrorText}"/>
@@ -684,6 +915,7 @@
                                                             </Grid>
                                                             <TextBox x:Name="TxtFirstName" Style="{StaticResource FormBox}"
                                                                      Tag="first_name" GotFocus="Field_GotFocus"
+                                                                     MaxLength="50"
                                                                      PreviewTextInput="NameOnly_PreviewTextInput"
                                                                      TextChanged="TxtFirstName_TextChanged"/>
                                                             <TextBlock x:Name="ErrFirstName" Text="Required." Style="{StaticResource ErrorText}"/>
@@ -702,6 +934,7 @@
                                                             </Grid>
                                                             <TextBox x:Name="TxtMiddleName" Style="{StaticResource FormBox}"
                                                                      Tag="middle_name" GotFocus="Field_GotFocus"
+                                                                     MaxLength="50"
                                                                      PreviewTextInput="NameOnly_PreviewTextInput"
                                                                      TextChanged="TxtMiddleName_TextChanged"/>
                                                         </StackPanel>
@@ -719,17 +952,152 @@
                                                             </Grid>
                                                             <TextBox x:Name="TxtExtension" Style="{StaticResource FormBox}"
                                                                      Tag="ext_name" GotFocus="Field_GotFocus"
+                                                                     MaxLength="10"
+                                                                     PreviewTextInput="NameOnly_PreviewTextInput"
                                                                      TextChanged="TxtExtension_TextChanged"/>
                                                         </StackPanel>
                                                     </Grid>
 
-                                                    <!-- ROW 2: Civil Status | Sex | Birthdate | Age -->
+                                                    <!-- ROW 2: Birthdate | Age | PhilSys Card Number -->
+                                                    <Grid Margin="0,0,0,14">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="1.2*"/>
+                                                            <ColumnDefinition Width="85"/>
+                                                            <ColumnDefinition Width="1.4*"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                            <Grid Margin="0,0,0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="Birthdate *" Style="{StaticResource FieldLabel}"/>
+                                                                <Border x:Name="Badge_Birthdate" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                                                    <TextBlock x:Name="TxtConf_Birthdate" Text="—" FontSize="9" FontWeight="Bold"/>
+                                                                </Border>
+                                                            </Grid>
+                                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                                <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
+                                                                            Tag="birthdate" GotFocus="Field_GotFocus"
+                                                                            GotKeyboardFocus="Field_GotFocus"
+                                                                            PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
+                                                                            CalendarOpened="DatePicker_CalendarOpened"
+                                                                            SelectedDateChanged="DpBirthdate_SelectedDateChanged"
+                                                                            DateValidationError="DatePicker_DateValidationError"
+                                                                            LostFocus="DatePicker_LostFocus"
+                                                                            BorderThickness="0" Background="Transparent"/>
+                                                            </Border>
+                                                            <TextBlock x:Name="ErrBirthdate" Text="Required." Style="{StaticResource ErrorText}"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                                                            <TextBlock Text="Age" Style="{StaticResource FieldLabel}"/>
+                                                            <TextBox x:Name="TxtAge" Style="{StaticResource FormBox}"
+                                                                     Tag="age" GotFocus="Field_GotFocus"
+                                                                     IsReadOnly="True" Background="#F0F0F0"
+                                                                     HorizontalContentAlignment="Center"
+                                                                     VerticalContentAlignment="Center"
+                                                                     FontWeight="SemiBold"
+                                                                     Foreground="#222222"
+                                                                     Padding="0"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="2">
+                                                            <Grid Margin="0,0,0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="PhilSys Card Number" Style="{StaticResource FieldLabel}"/>
+                                                                <Border x:Name="Badge_PhilSys" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                                                    <TextBlock x:Name="TxtConf_PhilSys" Text="—" FontSize="9" FontWeight="Bold"/>
+                                                                </Border>
+                                                            </Grid>
+                                                            <TextBox x:Name="TxtPhilSys" Style="{StaticResource FormBox}"
+                                                                     Tag="philsys_number" GotFocus="Field_GotFocus"
+                                                                     MaxLength="19"
+                                                                     PreviewKeyDown="PhilSys_PreviewKeyDown"
+                                                                     PreviewTextInput="NumberOnly_PreviewTextInput"
+                                                                     TextChanged="TxtPhilSys_TextChanged"/>
+                                                            <TextBlock x:Name="ErrPhilSys" Text="Required." Style="{StaticResource ErrorText}"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- Duplicate Banner in Step 1 -->
+                                            <Border x:Name="DuplicateBannerPanel" Visibility="Collapsed" CornerRadius="10"
+                                                    Background="#B71C1C" Padding="16,12" Margin="0,8,0,4">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17"
+                                                            Background="#22FFFFFF" Margin="0,0,12,0" VerticalAlignment="Top">
+                                                        <TextBlock Text="&#x26A0;" FontSize="16" Foreground="White"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1">
+                                                        <TextBlock x:Name="DuplicateBannerTitle" FontSize="13" FontWeight="Bold"
+                                                                   Foreground="White" Text="Existing Record Found" Margin="0,0,0,3"/>
+                                                        <TextBlock x:Name="DuplicateBannerText" Foreground="White" FontSize="12"
+                                                                   TextWrapping="Wrap" Opacity="0.95"/>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                            <Button x:Name="BtnViewExistingRecord" Content="View Existing Record"
+                                                                    Height="32" Padding="14,0" Background="White" Foreground="#702943"
+                                                                    FontSize="12" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand"
+                                                                    Click="ViewExistingRecord_Click" Margin="0,0,10,0">
+                                                                <Button.Template>
+                                                                    <ControlTemplate TargetType="Button">
+                                                                        <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                                                                                Padding="{TemplateBinding Padding}">
+                                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                        </Border>
+                                                                    </ControlTemplate>
+                                                                </Button.Template>
+                                                            </Button>
+                                                            <Button x:Name="BtnContinueAnyway" Content="Continue to Step 2 &#x2192;"
+                                                                    Height="32" Padding="14,0" Background="#33FFFFFF" Foreground="White"
+                                                                    FontSize="12" FontWeight="SemiBold" BorderBrush="White" BorderThickness="1"
+                                                                    Cursor="Hand" Click="ContinueAnyway_Click">
+                                                                <Button.Template>
+                                                                    <ControlTemplate TargetType="Button">
+                                                                        <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                                                                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                                                                                Padding="{TemplateBinding Padding}">
+                                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                        </Border>
+                                                                    </ControlTemplate>
+                                                                </Button.Template>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </StackPanel>
+                                    </ScrollViewer>
+
+                                    <!-- ======================== STEP 2: SECONDARY INFO ======================== -->
+                                    <ScrollViewer x:Name="ScrollStep2" VerticalScrollBarVisibility="Auto"
+                                                  HorizontalScrollBarVisibility="Disabled"
+                                                  Background="#F4F6F9" Visibility="Collapsed">
+                                        <StackPanel Margin="20,12,20,16">
+
+                                            <!-- CARD: II. DEMOGRAPHIC & RESIDENTIAL INFORMATION -->
+                                            <Border Style="{StaticResource CardSection}">
+                                                <StackPanel>
+                                                    <Border Style="{StaticResource CardSectionHeader}">
+                                                        <TextBlock Text="II. DEMOGRAPHIC &amp; RESIDENTIAL INFORMATION" Style="{StaticResource SectionLabel}"/>
+                                                    </Border>
+
+                                                    <!-- ROW 1: Civil Status | Sex | Place of Birth -->
                                                     <Grid Margin="0,0,0,14">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="1.2*"/>
                                                             <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="1.3*"/>
-                                                            <ColumnDefinition Width="70"/>
+                                                            <ColumnDefinition Width="1.4*"/>
                                                         </Grid.ColumnDefinitions>
 
                                                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
@@ -751,8 +1119,9 @@
                                                                     <ComboBoxItem Content="Single"/>
                                                                     <ComboBoxItem Content="Married"/>
                                                                     <ComboBoxItem Content="Widowed"/>
-                                                                    <ComboBoxItem Content="Legally Separated/ Divorced"/>
-                                                                    
+                                                                    <ComboBoxItem Content="Separated"/>
+                                                                    <ComboBoxItem Content="Divorced"/>
+                                                                    <ComboBoxItem Content="Annulled"/>
                                                                 </ComboBox>
                                                             </Border>
                                                             <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
@@ -781,46 +1150,7 @@
                                                             <TextBlock x:Name="ErrSex" Text="Required." Style="{StaticResource ErrorText}"/>
                                                         </StackPanel>
 
-                                                        <StackPanel Grid.Column="2" Margin="0,0,8,0">
-                                                            <Grid Margin="0,0,0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBlock Text="Birthdate *" Style="{StaticResource FieldLabel}"/>
-                                                                <Border x:Name="Badge_Birthdate" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
-                                                                    <TextBlock x:Name="TxtConf_Birthdate" Text="—" FontSize="9" FontWeight="Bold"/>
-                                                                </Border>
-                                                            </Grid>
-                                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                                <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
-                                                                            Tag="birthdate" GotFocus="Field_GotFocus"
-                                                                            GotKeyboardFocus="Field_GotFocus"
-                                                                            PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
-                                                                            CalendarOpened="DatePicker_CalendarOpened"
-                                                                            SelectedDateChanged="DpBirthdate_SelectedDateChanged"
-                                                                            BorderThickness="0" Background="Transparent"/>
-                                                            </Border>
-                                                            <TextBlock x:Name="ErrBirthdate" Text="Required." Style="{StaticResource ErrorText}"/>
-                                                        </StackPanel>
-
-                                                        <StackPanel Grid.Column="3">
-                                                            <TextBlock Text="Age" Style="{StaticResource FieldLabel}"/>
-                                                            <TextBox x:Name="TxtAge" Style="{StaticResource FormBox}"
-                                                                     Tag="age" GotFocus="Field_GotFocus"
-                                                                     IsReadOnly="True" Background="#F0F0F0"/>
-                                                        </StackPanel>
-                                                    </Grid>
-
-                                                    <!-- ROW 3: Place of Birth | Educational Attainment | PhilSys Card Number -->
-                                                    <Grid Margin="0,0,0,14">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="1.3*"/>
-                                                            <ColumnDefinition Width="1.3*"/>
-                                                            <ColumnDefinition Width="1.2*"/>
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                        <StackPanel Grid.Column="2">
                                                             <Grid Margin="0,0,0,2">
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="*"/>
@@ -833,114 +1163,17 @@
                                                             </Grid>
                                                             <TextBox x:Name="TxtPlaceOfBirth" Style="{StaticResource FormBox}"
                                                                      Tag="birthplace" GotFocus="Field_GotFocus"
+                                                                     MaxLength="100"
                                                                      TextChanged="TxtPlaceOfBirth_TextChanged"/>
                                                             <TextBlock x:Name="ErrPlaceOfBirth" Text="Required." Style="{StaticResource ErrorText}"/>
                                                         </StackPanel>
-
-                                                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
-                                                            <Grid Margin="0,0,0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBlock Text="Educational Attainment" Style="{StaticResource FieldLabel}"/>
-                                                                <Border x:Name="Badge_Education" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
-                                                                    <TextBlock x:Name="TxtConf_Education" Text="—" FontSize="9" FontWeight="Bold"/>
-                                                                </Border>
-                                                            </Grid>
-                                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                                <ComboBox x:Name="CmbEducation" Style="{StaticResource FormCombo}"
-                                                                          Tag="educational_attainment" GotFocus="Field_GotFocus"
-                                                                          BorderThickness="0" Background="Transparent">
-                                                                    <ComboBoxItem Content="Elementary"/>
-                                                                    <ComboBoxItem Content="High School"/>
-                                                                    <ComboBoxItem Content="Vocational"/>
-                                                                    <ComboBoxItem Content="College"/>
-                                                                    <ComboBoxItem Content="Post Graduate"/>
-                                                                </ComboBox>
-                                                            </Border>
-                                                        </StackPanel>
-
-                                                        <StackPanel Grid.Column="2">
-                                                            <Grid Margin="0,0,0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBlock Text="PhilSys Card Number" Style="{StaticResource FieldLabel}"/>
-                                                                <Border x:Name="Badge_PhilSys" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
-                                                                    <TextBlock x:Name="TxtConf_PhilSys" Text="—" FontSize="9" FontWeight="Bold"/>
-                                                                </Border>
-                                                            </Grid>
-                                                            <TextBox x:Name="TxtPhilSys" Style="{StaticResource FormBox}"
-                                                                     Tag="philsys_number" GotFocus="Field_GotFocus"
-                                                                     TextChanged="TxtPhilSys_TextChanged"/>
-                                                        </StackPanel>
                                                     </Grid>
 
-                                                    <!-- ROW 4: Religion | Occupation / Source | Monthly Income -->
-                                                    <Grid Margin="0,0,0,14">
+                                                    <!-- ROW 2: Address | Barangay | Contact Number -->
+                                                    <Grid Margin="0,0,0,8">
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="1.4*"/>
-                                                            <ColumnDefinition Width="1.1*"/>
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                                            <Grid Margin="0,0,0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBlock Text="Religion" Style="{StaticResource FieldLabel}"/>
-                                                                <Border x:Name="Badge_Religion" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
-                                                                    <TextBlock x:Name="TxtConf_Religion" Text="—" FontSize="9" FontWeight="Bold"/>
-                                                                </Border>
-                                                            </Grid>
-                                                            <TextBox x:Name="TxtReligion" Style="{StaticResource FormBox}"
-                                                                     Tag="religion" GotFocus="Field_GotFocus"
-                                                                     TextChanged="TxtReligion_TextChanged"/>
-                                                        </StackPanel>
-
-                                                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
-                                                            <Grid Margin="0,0,0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBlock Text="Occupation / Source" Style="{StaticResource FieldLabel}"/>
-                                                                <Border x:Name="Badge_Occupation" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
-                                                                    <TextBlock x:Name="TxtConf_Occupation" Text="—" FontSize="9" FontWeight="Bold"/>
-                                                                </Border>
-                                                            </Grid>
-                                                            <TextBox x:Name="TxtOccupation" Style="{StaticResource FormBox}"
-                                                                     Tag="occupation" GotFocus="Field_GotFocus"
-                                                                     TextChanged="TxtOccupation_TextChanged"/>
-                                                        </StackPanel>
-
-                                                        <StackPanel Grid.Column="2">
-                                                            <Grid Margin="0,0,0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBlock Text="Monthly Income (₱)" Style="{StaticResource FieldLabel}"/>
-                                                                <Border x:Name="Badge_MonthlyIncome" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
-                                                                    <TextBlock x:Name="TxtConf_MonthlyIncome" Text="—" FontSize="9" FontWeight="Bold"/>
-                                                                </Border>
-                                                            </Grid>
-                                                            <TextBox x:Name="TxtMonthlyIncome" Style="{StaticResource FormBox}"
-                                                                     Tag="monthly_income" GotFocus="Field_GotFocus"
-                                                                     PreviewTextInput="NumberOnly_PreviewTextInput"/>
-                                                        </StackPanel>
-                                                    </Grid>
-
-                                                    <!-- ROW 5: Address | Barangay | Employment Status | Contact Number -->
-                                                    <Grid Margin="0,0,0,14">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="1.8*"/>
-                                                            <ColumnDefinition Width="1.0*"/>
-                                                            <ColumnDefinition Width="1.1*"/>
+                                                            <ColumnDefinition Width="1.5*"/>
+                                                            <ColumnDefinition Width="1.2*"/>
                                                             <ColumnDefinition Width="1.1*"/>
                                                         </Grid.ColumnDefinitions>
 
@@ -957,6 +1190,7 @@
                                                             </Grid>
                                                             <TextBox x:Name="TxtAddress" Style="{StaticResource FormBox}"
                                                                      Tag="address" GotFocus="Field_GotFocus"
+                                                                     MaxLength="200"
                                                                      TextChanged="TxtAddress_TextChanged"/>
                                                             <TextBlock x:Name="ErrAddress" Text="Required." Style="{StaticResource ErrorText}"/>
                                                         </StackPanel>
@@ -975,7 +1209,8 @@
                                                             <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
                                                                 <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
                                                                           BorderThickness="0" Background="Transparent"
-                                                                          Tag="barangay" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
+                                                                          Tag="barangay" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
+                                                                          SelectionChanged="CmbBarangay_SelectionChanged">
                                                                     <ComboBoxItem Content=""/>
                                                                     <ComboBoxItem Content="Biñan (Poblacion)"/>
                                                                     <ComboBoxItem Content="Bungahan"/>
@@ -1006,30 +1241,7 @@
                                                             <TextBlock x:Name="ErrBarangay" Text="Required." Style="{StaticResource ErrorText}"/>
                                                         </StackPanel>
 
-                                                        <StackPanel Grid.Column="2" Margin="0,0,8,0">
-                                                            <Grid Margin="0,0,0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBlock Text="Employment Status" Style="{StaticResource FieldLabel}"/>
-                                                                <Border x:Name="Badge_EmploymentStatus" Grid.Column="1" Margin="8,0,0,0" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
-                                                                    <TextBlock x:Name="TxtConf_EmploymentStatus" Text="—" FontSize="9" FontWeight="Bold"/>
-                                                                </Border>
-                                                            </Grid>
-                                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                                <ComboBox x:Name="CmbEmploymentStatus" Style="{StaticResource FormCombo}"
-                                                                          BorderThickness="0" Background="Transparent"
-                                                                          Tag="is_employed" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
-                                                                    <ComboBoxItem Content=""/>
-                                                                    <ComboBoxItem Content="Employed"/>
-                                                                    <ComboBoxItem Content="Self-Employed"/>
-                                                                    <ComboBoxItem Content="Not Employed"/>
-                                                                </ComboBox>
-                                                            </Border>
-                                                        </StackPanel>
-
-                                                        <StackPanel Grid.Column="3">
+                                                        <StackPanel Grid.Column="2">
                                                             <Grid Margin="0,0,0,2">
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="*"/>
@@ -1049,7 +1261,130 @@
                                                             <TextBlock x:Name="ErrContact" Text="Required." Style="{StaticResource ErrorText}"/>
                                                         </StackPanel>
                                                     </Grid>
+                                                </StackPanel>
+                                            </Border>
 
+                                            <!-- CARD: III. SOCIOECONOMIC & EDUCATION -->
+                                            <Border Style="{StaticResource CardSection}">
+                                                <StackPanel>
+                                                    <Border Style="{StaticResource CardSectionHeader}">
+                                                        <TextBlock Text="III. SOCIOECONOMIC &amp; EDUCATION" Style="{StaticResource SectionLabel}"/>
+                                                    </Border>
+
+                                                    <!-- ROW 1: Educational Attainment | Religion -->
+                                                    <Grid Margin="0,0,0,14">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="1.3*"/>
+                                                            <ColumnDefinition Width="1.3*"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                            <Grid Margin="0,0,0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="Educational Attainment" Style="{StaticResource FieldLabel}"/>
+                                                                <Border x:Name="Badge_Education" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                                                    <TextBlock x:Name="TxtConf_Education" Text="—" FontSize="9" FontWeight="Bold"/>
+                                                                </Border>
+                                                            </Grid>
+                                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                                <ComboBox x:Name="CmbEducation" Style="{StaticResource FormCombo}"
+                                                                          Tag="educational_attainment" GotFocus="Field_GotFocus"
+                                                                          BorderThickness="0" Background="Transparent">
+                                                                    <ComboBoxItem Content="Elementary"/>
+                                                                    <ComboBoxItem Content="High School"/>
+                                                                    <ComboBoxItem Content="Vocational"/>
+                                                                    <ComboBoxItem Content="College"/>
+                                                                    <ComboBoxItem Content="Post Graduate"/>
+                                                                </ComboBox>
+                                                            </Border>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="1">
+                                                            <Grid Margin="0,0,0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="Religion" Style="{StaticResource FieldLabel}"/>
+                                                                <Border x:Name="Badge_Religion" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                                                    <TextBlock x:Name="TxtConf_Religion" Text="—" FontSize="9" FontWeight="Bold"/>
+                                                                </Border>
+                                                            </Grid>
+                                                            <TextBox x:Name="TxtReligion" Style="{StaticResource FormBox}"
+                                                                     Tag="religion" GotFocus="Field_GotFocus"
+                                                                     MaxLength="60"
+                                                                     TextChanged="TxtReligion_TextChanged"/>
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <!-- ROW 2: Occupation | Monthly Income | Employment Status -->
+                                                    <Grid Margin="0,0,0,8">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="1.3*"/>
+                                                            <ColumnDefinition Width="1.1*"/>
+                                                            <ColumnDefinition Width="1.2*"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                            <Grid Margin="0,0,0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="Occupation / Source" Style="{StaticResource FieldLabel}"/>
+                                                                <Border x:Name="Badge_Occupation" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                                                    <TextBlock x:Name="TxtConf_Occupation" Text="—" FontSize="9" FontWeight="Bold"/>
+                                                                </Border>
+                                                            </Grid>
+                                                            <TextBox x:Name="TxtOccupation" Style="{StaticResource FormBox}"
+                                                                     Tag="occupation" GotFocus="Field_GotFocus"
+                                                                     MaxLength="80"
+                                                                     TextChanged="TxtOccupation_TextChanged"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                                                            <Grid Margin="0,0,0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="Monthly Income (₱)" Style="{StaticResource FieldLabel}"/>
+                                                                <Border x:Name="Badge_MonthlyIncome" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                                                    <TextBlock x:Name="TxtConf_MonthlyIncome" Text="—" FontSize="9" FontWeight="Bold"/>
+                                                                </Border>
+                                                            </Grid>
+                                                            <TextBox x:Name="TxtMonthlyIncome" Style="{StaticResource FormBox}"
+                                                                     Tag="monthly_income" GotFocus="Field_GotFocus"
+                                                                     MaxLength="12"
+                                                                     PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="2">
+                                                            <Grid Margin="0,0,0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="Employment Status" Style="{StaticResource FieldLabel}"/>
+                                                                <Border x:Name="Badge_EmploymentStatus" Grid.Column="1" Margin="8,0,0,0" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                                                    <TextBlock x:Name="TxtConf_EmploymentStatus" Text="—" FontSize="9" FontWeight="Bold"/>
+                                                                </Border>
+                                                            </Grid>
+                                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                                                <ComboBox x:Name="CmbEmploymentStatus" Style="{StaticResource FormCombo}"
+                                                                          BorderThickness="0" Background="Transparent"
+                                                                          Tag="employment_status" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
+                                                                    <ComboBoxItem Content=""/>
+                                                                    <ComboBoxItem Content="Employed"/>
+                                                                    <ComboBoxItem Content="Self-Employed"/>
+                                                                    <ComboBoxItem Content="Not Employed"/>
+                                                                </ComboBox>
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </Grid>
                                                 </StackPanel>
                                             </Border>
 
@@ -1081,6 +1416,7 @@
                                                             </Grid>
                                                             <TextBox x:Name="TxtEmergencyContact" Style="{StaticResource FormBox}"
                                                                      Tag="emergency_name" GotFocus="Field_GotFocus"
+                                                                     MaxLength="50"
                                                                      PreviewTextInput="NameOnly_PreviewTextInput"
                                                                      TextChanged="TxtEmergencyContact_TextChanged"/>
                                                         </StackPanel>
@@ -1097,7 +1433,9 @@
                                                                 </Border>
                                                             </Grid>
                                                             <TextBox x:Name="TxtRelationship" Style="{StaticResource FormBox}"
-                                                                     Tag="emergency_relationship" GotFocus="Field_GotFocus"/>
+                                                                     Tag="emergency_relationship" GotFocus="Field_GotFocus"
+                                                                     MaxLength="50"
+                                                                     PreviewTextInput="NameOnly_PreviewTextInput"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="2">
@@ -1135,6 +1473,7 @@
                                                             </Grid>
                                                             <TextBox x:Name="TxtEmergencyAddress" Style="{StaticResource FormBox}"
                                                                      Tag="emergency_address" GotFocus="Field_GotFocus"
+                                                                     MaxLength="200"
                                                                      TextChanged="TxtEmergencyAddress_TextChanged"/>
                                                         </StackPanel>
                                                     </Grid>
@@ -1160,8 +1499,8 @@
                                         </StackPanel>
                                     </ScrollViewer>
 
-                                    <!-- ======================== STEP 2: CIRCUMSTANCES & FAMILY ======================== -->
-                                    <ScrollViewer x:Name="ScrollStep2" VerticalScrollBarVisibility="Auto"
+                                    <!-- ======================== STEP 3: CIRCUMSTANCES & FAMILY ======================== -->
+                                    <ScrollViewer x:Name="ScrollStep3" VerticalScrollBarVisibility="Auto"
                                                   HorizontalScrollBarVisibility="Disabled"
                                                   Background="#F4F6F9" Visibility="Collapsed">
                                         <StackPanel Margin="20,12,20,16">
@@ -1218,6 +1557,7 @@
                                                                     <StackPanel Grid.Column="0">
                                                                         <TextBlock Text="Cause of death" Style="{StaticResource FieldLabelSm}"/>
                                                                         <TextBox x:Name="TxtA2Cause" Style="{StaticResource FormBoxSm}" Tag="circ_a2_cause" GotFocus="Field_GotFocus"
+                                                                                 MaxLength="100"
                                                                                  TextChanged="TxtA2Cause_TextChanged"/>
                                                                     </StackPanel>
                                                                     <StackPanel Grid.Column="2">
@@ -1225,7 +1565,9 @@
                                                                         <DatePicker x:Name="DpA2Date" Style="{StaticResource FormDateSm}" Tag="circ_a2_date"
                                                                                     GotFocus="Field_GotFocus" GotKeyboardFocus="Field_GotFocus"
                                                                                     PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
-                                                                                    CalendarOpened="DatePicker_CalendarOpened"/>
+                                                                                    CalendarOpened="DatePicker_CalendarOpened"
+                                                                                    DateValidationError="DatePicker_DateValidationError"
+                                                                                    LostFocus="DatePicker_LostFocus"/>
                                                                     </StackPanel>
                                                                 </Grid>
                                                             </StackPanel>
@@ -1398,6 +1740,7 @@
                                                                                  Background="Transparent" Padding="6,0"
                                                                                  VerticalContentAlignment="Center"
                                                                                  Tag="fam_row1_name" GotFocus="Field_GotFocus"
+                                                                                 MaxLength="50"
                                                                                  PreviewTextInput="NameOnly_PreviewTextInput"
                                                                                  LostFocus="FamilyMemberName_LostFocus"
                                                                                  Text="{Binding MemberName, UpdateSourceTrigger=PropertyChanged}"/>
@@ -1407,6 +1750,7 @@
                                                                                   Style="{StaticResource FormCombo}"
                                                                                   BorderThickness="0" Background="Transparent"
                                                                                   Tag="fam_row1_sex" GotFocus="Field_GotFocus"
+                                                                                  SelectedValuePath="Content"
                                                                                   SelectedValue="{Binding Sex, UpdateSourceTrigger=PropertyChanged}">
                                                                             <ComboBoxItem Content=""/>
                                                                             <ComboBoxItem Content="Female"/>
@@ -1419,6 +1763,7 @@
                                                                                  Background="Transparent" Padding="2,0"
                                                                                  VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
                                                                                  Tag="fam_row1_age" GotFocus="Field_GotFocus"
+                                                                                 MaxLength="3"
                                                                                  IsReadOnly="True" Focusable="False" Cursor="Arrow"
                                                                                  ToolTip="Age is automatically calculated from Birthdate"
                                                                                  Text="{Binding Age, Mode=OneWay}"/>
@@ -1428,6 +1773,8 @@
                                                                                     Style="{StaticResource FormDate}"
                                                                                     BorderThickness="0" Background="Transparent"
                                                                                     Tag="fam_row1_dob" GotFocus="Field_GotFocus"
+                                                                                    DateValidationError="DatePicker_DateValidationError"
+                                                                                    LostFocus="DatePicker_LostFocus"
                                                                                     SelectedDate="{Binding BirthdateDate, UpdateSourceTrigger=PropertyChanged}"/>
                                                                     </Border>
                                                                     <Border Grid.Column="4" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,4,0">
@@ -1435,12 +1782,14 @@
                                                                                   Style="{StaticResource FormCombo}"
                                                                                   BorderThickness="0" Background="Transparent"
                                                                                   Tag="fam_row1_civ" GotFocus="Field_GotFocus"
+                                                                                  SelectedValuePath="Content"
                                                                                   SelectedValue="{Binding CivilStatus, UpdateSourceTrigger=PropertyChanged}">
                                                                             <ComboBoxItem Content=""/>
                                                                             <ComboBoxItem Content="Single"/>
                                                                             <ComboBoxItem Content="Married"/>
                                                                             <ComboBoxItem Content="Widowed"/>
                                                                             <ComboBoxItem Content="Separated"/>
+                                                                            <ComboBoxItem Content="Divorced"/>
                                                                             <ComboBoxItem Content="Annulled"/>
                                                                         </ComboBox>
                                                                     </Border>
@@ -1449,6 +1798,7 @@
                                                                                   Style="{StaticResource FormCombo}"
                                                                                   BorderThickness="0" Background="Transparent"
                                                                                   Tag="fam_row1_rel" GotFocus="Field_GotFocus"
+                                                                                  SelectedValuePath="Content"
                                                                                   SelectedValue="{Binding Relationship, UpdateSourceTrigger=PropertyChanged}">
                                                                             <ComboBoxItem Content=""/>
                                                                             <ComboBoxItem Content="Child"/>
@@ -1468,6 +1818,7 @@
                                                                                  Background="Transparent" Padding="6,0"
                                                                                  VerticalContentAlignment="Center"
                                                                                  Tag="fam_row1_edu" GotFocus="Field_GotFocus"
+                                                                                 MaxLength="80"
                                                                                  Text="{Binding EducationEmployment, UpdateSourceTrigger=PropertyChanged}"/>
                                                                     </Border>
                                                                     <Border Grid.Column="7" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,4,0">
@@ -1476,6 +1827,8 @@
                                                                                  Background="Transparent" Padding="6,0"
                                                                                  VerticalContentAlignment="Center"
                                                                                  Tag="fam_row1_inc" GotFocus="Field_GotFocus"
+                                                                                 MaxLength="12"
+                                                                                 PreviewTextInput="NumberOnly_PreviewTextInput"
                                                                                  Text="{Binding Income, UpdateSourceTrigger=PropertyChanged}"/>
                                                                     </Border>
                                                                     <Button Grid.Column="8" Height="44" Width="30" Cursor="Hand"
@@ -1544,6 +1897,7 @@
                                                     </Border>
                                                     <TextBox x:Name="TxtNeeds" Style="{StaticResource FormBox}"
                                                              Tag="needs" GotFocus="Field_GotFocus"
+                                                             MaxLength="500"
                                                              Height="60" TextWrapping="Wrap" AcceptsReturn="True"
                                                              VerticalScrollBarVisibility="Auto"
                                                              VerticalContentAlignment="Top" Padding="10,6"/>
@@ -1567,6 +1921,7 @@
                                                     </Border>
                                                     <TextBox x:Name="TxtOtherIncome" Style="{StaticResource FormBox}"
                                                              Tag="other_income" GotFocus="Field_GotFocus"
+                                                             MaxLength="500"
                                                              Height="50" TextWrapping="Wrap" AcceptsReturn="True"
                                                              VerticalScrollBarVisibility="Auto"
                                                              VerticalContentAlignment="Top" Padding="10,6"/>
@@ -1607,8 +1962,8 @@
                     </Grid>
 
                     <!-- FOOTER ACTIONS -->
-                    <Border Grid.Row="2" Background="White" BorderBrush="#EDE0E5"
-                            BorderThickness="0,1,0,0" Padding="20,10" CornerRadius="0,0,16,16">
+                    <Border Grid.Row="3" Background="White" BorderBrush="#EEEEEE"
+                            BorderThickness="0,1,0,0" Padding="28,12" CornerRadius="0,0,16,16">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -1618,13 +1973,19 @@
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock x:Name="ValidationMessage"
                                            Text=""
-                                           FontSize="11" Foreground="#E53935"
+                                           FontSize="12" Foreground="#E53935"
                                            TextWrapping="Wrap"
-                                           Visibility="Collapsed"/>
-                                <TextBlock x:Name="TxtOverallConfBadge"
-                                           Text="Overall AI Confidence: 0%"
-                                           FontSize="11" Foreground="#702943" FontWeight="SemiBold"
-                                           VerticalAlignment="Center"/>
+                                           Visibility="Collapsed" Margin="0,0,12,0"/>
+                                <Border Background="#F9F2F4" CornerRadius="12" Padding="10,4" BorderBrush="#EBD6DC" BorderThickness="1">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z"
+                                              Fill="#702943" Stretch="Uniform" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock x:Name="TxtOverallConfBadge"
+                                                   Text="Overall AI Confidence: 0%"
+                                                   FontSize="11" Foreground="#702943" FontWeight="SemiBold"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -1641,7 +2002,7 @@
                     </Border>
 
                     <!-- OCR PROCESSING MODAL OVERLAY -->
-                    <Grid x:Name="OverlayProcessing" Grid.RowSpan="3" Visibility="Collapsed" Background="#77000000">
+                    <Grid x:Name="OverlayProcessing" Grid.RowSpan="4" Visibility="Collapsed" Background="#77000000">
                         <Border Background="White" CornerRadius="16" Width="420" Padding="24,20" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <Border.Effect>
                                 <DropShadowEffect Color="#000000" BlurRadius="25" ShadowDepth="4" Opacity="0.3"/>

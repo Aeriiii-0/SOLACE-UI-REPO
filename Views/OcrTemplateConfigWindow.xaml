@@ -214,6 +214,78 @@
                                     </StackPanel>
                                 </Border>
 
+                                <!-- Quick Alignment & Nudge Controller -->
+                                <Border Background="#F4F1F2" BorderBrush="#E0D4D8" BorderThickness="1" CornerRadius="8" Padding="10" Margin="0,0,0,14">
+                                    <StackPanel>
+                                        <TextBlock Text="🎯 Quick Alignment &amp; Nudge" FontSize="12" FontWeight="Bold" Foreground="#333333" Margin="0,0,0,8"/>
+
+                                        <!-- Scope Selection -->
+                                        <TextBlock Text="Apply To:" FontSize="10" FontWeight="SemiBold" Foreground="#666666" Margin="0,0,0,4"/>
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <RadioButton x:Name="RbScopeActive" Content="This Box" IsChecked="True" FontSize="10" VerticalAlignment="Center"/>
+                                            <RadioButton x:Name="RbScopeSection" Grid.Column="1" Content="Section" FontSize="10" VerticalAlignment="Center"/>
+                                            <RadioButton x:Name="RbScopeAll" Grid.Column="2" Content="All Boxes" FontSize="10" VerticalAlignment="Center"/>
+                                        </Grid>
+
+                                        <!-- Step Size -->
+                                        <TextBlock Text="Step Size:" FontSize="10" FontWeight="SemiBold" Foreground="#666666" Margin="0,0,0,4"/>
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <RadioButton x:Name="RbStepMicro" Content="1px (fine)" IsChecked="True" FontSize="10" VerticalAlignment="Center"/>
+                                            <RadioButton x:Name="RbStepMedium" Grid.Column="1" Content="5px (mid)" FontSize="10" VerticalAlignment="Center"/>
+                                            <RadioButton x:Name="RbStepMacro" Grid.Column="2" Content="15px (large)" FontSize="10" VerticalAlignment="Center"/>
+                                        </Grid>
+
+                                        <!-- Directional D-Pad -->
+                                        <Grid HorizontalAlignment="Center" Margin="0,4,0,6">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="28"/>
+                                                <RowDefinition Height="28"/>
+                                                <RowDefinition Height="28"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="38"/>
+                                                <ColumnDefinition Width="38"/>
+                                                <ColumnDefinition Width="38"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Up -->
+                                            <Button x:Name="BtnNudgeUp" Grid.Row="0" Grid.Column="1" Content="▲" Click="Nudge_Click" Tag="Up"
+                                                    Background="White" BorderBrush="#C0B4B8" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Up"/>
+
+                                            <!-- Left -->
+                                            <Button x:Name="BtnNudgeLeft" Grid.Row="1" Grid.Column="0" Content="◄" Click="Nudge_Click" Tag="Left"
+                                                    Background="White" BorderBrush="#C0B4B8" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Left"/>
+
+                                            <!-- Center icon indicator -->
+                                            <Border Grid.Row="1" Grid.Column="1" Background="#E8DFE2" CornerRadius="4" Margin="2">
+                                                <TextBlock Text="✚" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#7B1426"/>
+                                            </Border>
+
+                                            <!-- Right -->
+                                            <Button x:Name="BtnNudgeRight" Grid.Row="1" Grid.Column="2" Content="►" Click="Nudge_Click" Tag="Right"
+                                                    Background="White" BorderBrush="#C0B4B8" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Right"/>
+
+                                            <!-- Down -->
+                                            <Button x:Name="BtnNudgeDown" Grid.Row="2" Grid.Column="1" Content="▼" Click="Nudge_Click" Tag="Down"
+                                                    Background="White" BorderBrush="#C0B4B8" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Down"/>
+                                        </Grid>
+
+                                        <!-- Keyboard Tip -->
+                                        <TextBlock Text="⌨ Arrow keys (↑ ↓ ← →) also micro-nudge! Hold Shift for 5x step."
+                                                   FontSize="10" Foreground="#777777" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Border>
+
                                 <!-- Coordinate Sliders / Inputs -->
                                 <TextBlock Text="Fine Position Adjustment" FontSize="13" FontWeight="Bold" Foreground="#333333" Margin="0,0,0,8"/>
 

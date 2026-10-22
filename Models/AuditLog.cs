@@ -70,6 +70,10 @@ namespace SOLUM_UI.Models
         }
 
         public bool HasTargetId => !string.IsNullOrWhiteSpace(RecordId);
+        public string TargetDisplay => !string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, "—")
+            ? RecordName
+            : (!string.IsNullOrWhiteSpace(RecordId) ? RecordId : "—");
+        public string TargetTooltip => !string.IsNullOrWhiteSpace(RecordId) ? $"Target ID: {RecordId}" : null;
         public string TargetIdDisplay
         {
             get => HasTargetId ? RecordId : "—";

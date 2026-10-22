@@ -237,7 +237,7 @@ namespace SOLUM_UI
                     : email;
 
                 Guid id = AuthApiService.ExtractUserIdFromToken(loginResponse.Data.Token) ?? Guid.Empty;
-                string assignedRole = AuthApiService.Instance.IsAdmin ? "Administrator" : "Encoder";
+                string assignedRole = AuthApiService.Instance.IsSuperAdmin ? "SuperAdmin" : (AuthApiService.Instance.IsAdmin ? "Administrator" : "Encoder");
                 MainWindow.CurrentUserRole = assignedRole;
 
                 ApplicationUserDTO loggedInUser = null;
@@ -369,7 +369,7 @@ namespace SOLUM_UI
             // 3. Deactivated / Inactive account
             if (lower.Contains("inactive") || lower.Contains("deactivated") || lower.Contains("disabled") || lower.Contains("not active"))
             {
-                return "Your account has been deactivated. Please contact your MSWDO administrator for assistance.";
+                return "Your account has been deactivated. Please contact your CSWDO administrator for assistance.";
             }
 
             // 4. Email confirmation required
@@ -482,7 +482,7 @@ namespace SOLUM_UI
         {
             ActionConfirmDialog.Show(
                 title: "Password Recovery",
-                message: "For internal security, passwords in SOLACE cannot be recovered online.\n\nPlease contact your System Administrator (MSWDO / IT Head) to issue a temporary password reset.",
+                message: "For internal security, passwords in SOLACE cannot be recovered online.\n\nPlease contact your System Administrator (CSWDO / IT Head) to issue a temporary password reset.",
                 confirmText: "Understood",
                 cancelText: "Close",
                 theme: ConfirmThemeType.Primary,

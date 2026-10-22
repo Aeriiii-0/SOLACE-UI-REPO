@@ -308,11 +308,11 @@
                                                         <Run Text="Action: " FontWeight="Bold" Foreground="#222222"/>
                                                         <Run Text="{Binding ActionTitle, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
                                                     </TextBlock>
-                                                    <TextBlock FontFamily="Segoe UI" FontSize="12" Margin="0,0,0,3" TextTrimming="CharacterEllipsis">
-                                                        <Run Text="Target ID: " FontWeight="Bold" Foreground="#222222"/>
-                                                        <Run Text="{Binding TargetIdDisplay, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
+                                                    <TextBlock FontFamily="Segoe UI" FontSize="12" Margin="0,0,0,3" TextTrimming="CharacterEllipsis" ToolTip="{Binding TargetTooltip}">
+                                                        <Run Text="Target: " FontWeight="Bold" Foreground="#222222"/>
+                                                        <Run Text="{Binding TargetDisplay, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
                                                     </TextBlock>
-                                                    <TextBlock FontFamily="Segoe UI" FontSize="12" Margin="0,0,0,3" TextTrimming="CharacterEllipsis">
+                                                    <TextBlock FontFamily="Segoe UI" FontSize="12" Margin="0,0,0,3" TextTrimming="CharacterEllipsis" ToolTip="{Binding TargetTooltip}">
                                                         <Run Text="Performed By: " FontWeight="Bold" Foreground="#222222"/>
                                                         <Run Text="{Binding PerformedByDisplay, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
                                                     </TextBlock>
@@ -462,7 +462,7 @@
                                        FontWeight="Bold" Foreground="#333333" VerticalAlignment="Center"/>
                             <StackPanel Grid.Column="1" Orientation="Vertical">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding TargetIdDisplay}"
+                                    <TextBlock Text="{Binding TargetDisplay}"
                                                FontFamily="Segoe UI" FontSize="13"
                                                FontWeight="Normal" Foreground="#1A1A1A"
                                                VerticalAlignment="Center"/>
@@ -474,9 +474,9 @@
                                                    FontWeight="SemiBold" Foreground="#4F46E5"/>
                                     </Border>
                                 </StackPanel>
-                                <TextBlock Text="{Binding RecordName, StringFormat='Name: {0}'}"
+                                <TextBlock Text="{Binding TargetIdDisplay, StringFormat='ID: {0}'}"
                                            FontFamily="Segoe UI" FontSize="12" Foreground="#666666" Margin="0,2,0,0"
-                                           Visibility="{Binding HasTargetName, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                           Visibility="{Binding HasTargetId, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             </StackPanel>
                         </Grid>
 
