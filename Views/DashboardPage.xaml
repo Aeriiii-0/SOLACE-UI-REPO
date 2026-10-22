@@ -79,7 +79,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" Background="White" CornerRadius="16" BorderBrush="#E5E7EB" BorderThickness="1" Padding="20,18">
+                        <Border Grid.Column="0" Background="White" CornerRadius="16" BorderBrush="#E5E7EB" BorderThickness="1" Padding="20,20">
                             <Border.Effect>
                                 <DropShadowEffect Color="#D4A0B0" BlurRadius="16" ShadowDepth="2" Opacity="0.16" Direction="270"/>
                             </Border.Effect>
@@ -90,12 +90,12 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- Status Indicator Bar -->
-                                <Border Grid.Row="0" Height="4" CornerRadius="2" Background="#722F37" Margin="0,0,0,12"/>
-
-                                <!-- Header Label -->
-                                <TextBlock Grid.Row="0" Text="TOTAL REGISTERED" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
-                                           Foreground="#6B7280" Margin="0,0,0,12"/>
+                                <!-- Header Label with Status Dot -->
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,16">
+                                    <Ellipse Width="8" Height="8" Fill="#722F37" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="TOTAL REGISTERED" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
+                                               Foreground="#722F37" VerticalAlignment="Center"/>
+                                </StackPanel>
 
                                 <!-- Primary Metric -->
                                 <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,8,0,8">
@@ -106,16 +106,16 @@
                                 </StackPanel>
 
                                 <!-- Subtext Badge -->
-                                <Border Grid.Row="2" Background="#FEF2F2" CornerRadius="6" Padding="10,6" BorderBrush="#FECACA" BorderThickness="1">
+                                <Border Grid.Row="2" Background="#FFF1F2" CornerRadius="20" Padding="12,8" BorderBrush="#FECDD3" BorderThickness="1">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="↑ " FontSize="11" Foreground="#722F37" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="↑" FontSize="11" Foreground="#722F37" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                         <TextBlock Text="{Binding RegisteredDelta}" FontSize="11" Foreground="#722F37" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>
                         </Border>
 
-                        <Border Grid.Column="2" Background="White" CornerRadius="16" BorderBrush="#E5E7EB" BorderThickness="1" Padding="20,18">
+                        <Border Grid.Column="2" Background="White" CornerRadius="16" BorderBrush="#E5E7EB" BorderThickness="1" Padding="20,20">
                             <Border.Effect>
                                 <DropShadowEffect Color="#D4A0B0" BlurRadius="16" ShadowDepth="2" Opacity="0.16" Direction="270"/>
                             </Border.Effect>
@@ -126,12 +126,12 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- Status Indicator Bar -->
-                                <Border Grid.Row="0" Height="4" CornerRadius="2" Background="#10B981" Margin="0,0,0,12"/>
-
-                                <!-- Header Label -->
-                                <TextBlock Grid.Row="0" Text="ACTIVE" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
-                                           Foreground="#6B7280" Margin="0,0,0,12"/>
+                                <!-- Header Label with Status Dot -->
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,16">
+                                    <Ellipse Width="8" Height="8" Fill="#10B981" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="ACTIVE" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
+                                               Foreground="#10B981" VerticalAlignment="Center"/>
+                                </StackPanel>
 
                                 <!-- Primary Metric -->
                                 <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,8,0,8">
@@ -142,16 +142,16 @@
                                 </StackPanel>
 
                                 <!-- Subtext Badge -->
-                                <Border Grid.Row="2" Background="#ECFDF5" CornerRadius="6" Padding="10,6" BorderBrush="#A7F3D0" BorderThickness="1">
+                                <Border Grid.Row="2" Background="#ECFDF5" CornerRadius="20" Padding="12,8" BorderBrush="#A7F3D0" BorderThickness="1">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="↓ " FontSize="11" Foreground="#10B981" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="⚠" FontSize="11" Foreground="#10B981" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                         <TextBlock Text="{Binding ExpiringThisMonthCount}" FontSize="11" Foreground="#10B981" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>
                         </Border>
 
-                        <Border Grid.Column="4" Background="White" CornerRadius="16" BorderBrush="#E5E7EB" BorderThickness="1" Padding="20,18">
+                        <Border Grid.Column="4" Background="White" CornerRadius="16" BorderBrush="#E5E7EB" BorderThickness="1" Padding="20,20">
                             <Border.Effect>
                                 <DropShadowEffect Color="#D4A0B0" BlurRadius="16" ShadowDepth="2" Opacity="0.16" Direction="270"/>
                             </Border.Effect>
@@ -162,12 +162,12 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- Status Indicator Bar -->
-                                <Border Grid.Row="0" Height="4" CornerRadius="2" Background="#F59E0B" Margin="0,0,0,12"/>
-
-                                <!-- Header Label -->
-                                <TextBlock Grid.Row="0" Text="INACTIVE RECORDS" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
-                                           Foreground="#6B7280" Margin="0,0,0,12"/>
+                                <!-- Header Label with Status Dot -->
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,16">
+                                    <Ellipse Width="8" Height="8" Fill="#F59E0B" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="INACTIVE RECORDS" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
+                                               Foreground="#F59E0B" VerticalAlignment="Center"/>
+                                </StackPanel>
 
                                 <!-- Primary Metric -->
                                 <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,8,0,8">
@@ -178,9 +178,9 @@
                                 </StackPanel>
 
                                 <!-- Subtext Badge -->
-                                <Border Grid.Row="2" Background="#FFFBEB" CornerRadius="6" Padding="10,6" BorderBrush="#FED7AA" BorderThickness="1">
+                                <Border Grid.Row="2" Background="#FFFBEB" CornerRadius="20" Padding="12,8" BorderBrush="#FDE68A" BorderThickness="1">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="⚠ " FontSize="11" Foreground="#F59E0B" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="⚠" FontSize="11" Foreground="#F59E0B" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                         <TextBlock Text="{Binding InactiveSubtext}" FontSize="11" Foreground="#F59E0B" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
