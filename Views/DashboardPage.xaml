@@ -109,9 +109,7 @@
                                 <Border Grid.Row="2" Background="#FEF2F2" CornerRadius="6" Padding="10,6" BorderBrush="#FECACA" BorderThickness="1">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="↑ " FontSize="11" Foreground="#722F37" FontWeight="Bold" VerticalAlignment="Center"/>
-                                        <TextBlock FontSize="11" Foreground="#722F37">
-                                            <Run Text="{Binding RegisteredDelta}"/>
-                                        </TextBlock>
+                                        <TextBlock Text="{Binding RegisteredDelta}" FontSize="11" Foreground="#722F37" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>
@@ -147,9 +145,7 @@
                                 <Border Grid.Row="2" Background="#ECFDF5" CornerRadius="6" Padding="10,6" BorderBrush="#A7F3D0" BorderThickness="1">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="→ " FontSize="11" Foreground="#10B981" FontWeight="Bold" VerticalAlignment="Center"/>
-                                        <TextBlock FontSize="11" Foreground="#10B981">
-                                            <Run Text="{Binding ActiveDelta}"/>
-                                        </TextBlock>
+                                        <TextBlock Text="{Binding ActiveDelta}" FontSize="11" Foreground="#10B981" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>
@@ -185,9 +181,7 @@
                                 <Border Grid.Row="2" Background="#FFFBEB" CornerRadius="6" Padding="10,6" BorderBrush="#FED7AA" BorderThickness="1">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="⚠ " FontSize="11" Foreground="#F59E0B" FontWeight="Bold" VerticalAlignment="Center"/>
-                                        <TextBlock FontSize="11" Foreground="#F59E0B">
-                                            <Run Text="{Binding RenewalsDelta}"/>
-                                        </TextBlock>
+                                        <TextBlock Text="{Binding RenewalsDelta}" FontSize="11" Foreground="#F59E0B" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>
