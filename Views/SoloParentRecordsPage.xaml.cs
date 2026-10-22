@@ -77,19 +77,24 @@ namespace SOLUM_UI
         {
             if (IsBasicUser)
             {
+                // BasicUser gets the same search-first panel as Encoder, but without tips and with a simpler subtitle
                 AdminToolbar.Visibility = Visibility.Collapsed;
-                BasicUserToolbar.Visibility = Visibility.Visible;
-                EncoderSearchPanel.Visibility = Visibility.Collapsed;
-                RecordsClipGrid.Visibility = Visibility.Visible;
-                PagingRow.Visibility = Visibility.Visible;
+                BasicUserToolbar.Visibility = Visibility.Collapsed;
+                EncoderSearchPanel.Visibility = Visibility.Visible;
+                if (PageTitleGrid != null) PageTitleGrid.Visibility = Visibility.Collapsed;
+                PagingRow.Visibility = Visibility.Collapsed;
                 _barangayFilter = CurrentUserBarangay;
+
+                if (EncoderSubtitle != null) EncoderSubtitle.Text = "Look up a registered solo parent record, or add a new one.";
+
+                // Start with the search-first state
+                SetEncoderResultsVisible(false);
 
                 if (ColSex != null) ColSex.Width = 0;
                 if (ColCivilStatus != null) ColCivilStatus.Width = 0;
                 if (ColChildren != null) ColChildren.Width = 0;
                 if (ColLastUpdated != null) ColLastUpdated.Width = 0;
                 if (ColBarangay != null) ColBarangay.Width = 0;
-                if (ColActions != null) ColActions.Width = 300;
             }
             else if (IsEncoder)
             {
@@ -97,12 +102,8 @@ namespace SOLUM_UI
                 AdminToolbar.Visibility = Visibility.Collapsed;
                 BasicUserToolbar.Visibility = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Visible;
+                if (PageTitleGrid != null) PageTitleGrid.Visibility = Visibility.Collapsed;
                 PagingRow.Visibility = Visibility.Collapsed;
-
-                // if (PageSubtitle != null)
-                //     PageSubtitle.Text = "Look up a registered solo parent, or register a new one.";
-                // if (NoResultsAddBtn != null)
-                //     NoResultsAddBtn.Visibility = Visibility.Visible;
 
                 SetEncoderResultsVisible(false);
             }
@@ -112,32 +113,47 @@ namespace SOLUM_UI
                 AdminToolbar.Visibility = Visibility.Visible;
                 BasicUserToolbar.Visibility = Visibility.Collapsed;
                 EncoderSearchPanel.Visibility = Visibility.Collapsed;
+                if (PageTitleGrid != null) PageTitleGrid.Visibility = Visibility.Visible;
                 RecordsClipGrid.Visibility = Visibility.Visible;
                 PagingRow.Visibility = Visibility.Visible;
             }
+
+            // Hide delete buttons for non-admin users
+            HideDeleteButtonsIfNotAdmin();
         }
 
         /// <summary>
-        /// Encoder only. false = landing view (banner + tips, no table).
-        /// true = results view (banner + results table, tips hidden).
+        /// Encoder/BasicUser only.
+        /// false = landing view: search card visible, results table hidden with empty-state placeholder.
+        /// true  = results view: results table visible, empty-state placeholder hidden.
+        /// The unified "How to use" banner is always visible and never toggled.
         /// </summary>
         private void SetEncoderResultsVisible(bool showResults)
         {
-            if (!IsEncoder) return;
+            if (!IsEncoder && !IsBasicUser) return;
 
+            var show = Visibility.Visible;
+            var hide = Visibility.Collapsed;
+
+            // Results table (Row 3)
             if (RecordsClipGrid != null)
-                RecordsClipGrid.Visibility = showResults ? Visibility.Visible : Visibility.Collapsed;
+                RecordsClipGrid.Visibility = showResults ? show : hide;
 
-            // if (EncoderTipsPanel != null)
-            //     EncoderTipsPanel.Visibility = showResults ? Visibility.Collapsed : Visibility.Visible;
+            // Empty-state placeholder — shown when table is visible but no search done yet
+            if (SearchFirstPanel != null)
+                SearchFirstPanel.Visibility = showResults ? hide : show;
+
+            // Paging row
+            if (PagingRow != null)
+                PagingRow.Visibility = showResults ? show : hide;
         }
 
         private async Task LoadRecordsAsync()
         {
             if (_isLoading) return;
 
-            // For Encoder users: only load records if they have initiated a search
-            if (IsEncoder && !HasSearchQuery())
+            // For Encoder/BasicUser: only load records if they have initiated a search
+            if ((IsEncoder || IsBasicUser) && !HasSearchQuery())
             {
                 _allRecords = new List<SoloParentRecordViewModel>();
                 _filteredRecords = new List<SoloParentRecordViewModel>();
@@ -156,8 +172,11 @@ namespace SOLUM_UI
             if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = false;
             if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
 
-            // Encoder with a search: show the results card (tips hide)
-            SetEncoderResultsVisible(true);
+            // Encoder/BasicUser with a search: show the results card
+            if (IsEncoder || IsBasicUser)
+                SetEncoderResultsVisible(true);
+            // Hide the SearchFirstPanel while loading
+            if (SearchFirstPanel != null) SearchFirstPanel.Visibility = Visibility.Collapsed;
 
             try
             {
@@ -261,15 +280,71 @@ namespace SOLUM_UI
                 }
                 else if (IsBasicUser)
                 {
-                    query = BasicSearchName?.Text?.Trim() ?? string.Empty;
+                    // BasicUser now uses the shared EncSearchQuery / EncSearchMode panel
+                    query = EncSearchQuery?.Text?.Trim() ?? string.Empty;
+
+                    if (!string.IsNullOrWhiteSpace(query))
+                    {
+                        string selectedMode = "AUTO";
+                        if (EncSearchMode?.SelectedItem is ComboBoxItem modeItemBu)
+                            selectedMode = modeItemBu.Tag?.ToString() ?? "AUTO";
+
+                        if (Guid.TryParse(query, out var parsedGuidBu))
+                        {
+                            searchGuid = parsedGuidBu;
+                        }
+                        else
+                        {
+                            switch (selectedMode)
+                            {
+                                case "FIRST_NAME": firstName = query; break;
+                                case "LAST_NAME":  lastName  = query; break;
+                                case "PHILSYS_ID": philsysId = query; break;
+                                case "FULL_NAME":
+                                    if (query.Contains(","))
+                                    {
+                                        var parts = query.Split(new[] { ',' }, 2);
+                                        lastName  = parts[0].Trim();
+                                        firstName = parts.Length > 1 ? parts[1].Trim() : null;
+                                    }
+                                    else if (query.Contains(" "))
+                                    {
+                                        int sp = query.IndexOf(' ');
+                                        firstName = query.Substring(0, sp).Trim();
+                                        lastName  = query.Substring(sp + 1).Trim();
+                                    }
+                                    else { lastName = query; }
+                                    break;
+                                case "AUTO":
+                                default:
+                                    string dOnly = System.Text.RegularExpressions.Regex.Replace(query, @"\D", "");
+                                    if (dOnly.Length >= 4 && System.Text.RegularExpressions.Regex.IsMatch(query, @"^[\d\s\-]+$"))
+                                        philsysId = query;
+                                    else if (query.Contains(","))
+                                    {
+                                        var parts = query.Split(new[] { ',' }, 2);
+                                        lastName  = parts[0].Trim();
+                                        firstName = parts.Length > 1 ? parts[1].Trim() : null;
+                                    }
+                                    else if (query.Contains(" "))
+                                    {
+                                        int sp = query.IndexOf(' ');
+                                        firstName = query.Substring(0, sp).Trim();
+                                        lastName  = query.Substring(sp + 1).Trim();
+                                    }
+                                    else { lastName = query; }
+                                    break;
+                            }
+                        }
+                    }
                 }
                 else
                 {
                     query = SearchName?.Text?.Trim() ?? string.Empty;
                 }
 
-                // Handle generic search query (for non-Encoder users)
-                if (!IsEncoder && !string.IsNullOrWhiteSpace(query))
+                // Handle generic search query (admin only; Encoder and BasicUser are handled above)
+                if (!IsEncoder && !IsBasicUser && !string.IsNullOrWhiteSpace(query))
                 {
                     if (Guid.TryParse(query, out var parsedGuid))
                     {
@@ -437,7 +512,17 @@ namespace SOLUM_UI
                 if (NoResultsPanel != null)
                     NoResultsPanel.Visibility = _filteredRecords.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
+                // After a search completes for Encoder/BasicUser, SearchFirstPanel should stay hidden
+                if (SearchFirstPanel != null) SearchFirstPanel.Visibility = Visibility.Collapsed;
+
+                // After a successful search for Encoder/BasicUser, ensure results table is visible
+                if ((IsEncoder || IsBasicUser) && _filteredRecords.Count > 0)
+                    SetEncoderResultsVisible(true);
+
                 UpdatePagingUI();
+
+                // Ensure delete is hidden for non-admin roles after every data load
+                HideDeleteButtonsIfNotAdmin();
             }
             catch (Exception ex)
             {
@@ -1145,13 +1230,13 @@ namespace SOLUM_UI
             if (RecordsList.View is GridView gv && gv.Columns.Count >= 9)
             {
                 // Fixed columns (px)
-                const double sex = 80;
-                const double civil = 110;
-                const double dob = 108;
-                const double lastUpd = 108;
+                const double sex      = 80;
+                const double civil    = 110;
+                const double dob      = 108;
+                const double lastUpd  = 108;
                 const double validUntil = 108;
-                const double status = 90;
-                const double actions = 145;
+                const double status   = 90;
+                const double actions  = 220;  // wider to fit view/edit/renew/export/delete
 
                 double available = RecordsList.ActualWidth - 2;
                 if (available <= 0) return;
@@ -1161,7 +1246,7 @@ namespace SOLUM_UI
 
                 // Col 0 = NAME  (wider), Col 1 = BARANGAY  (narrower)
                 gv.Columns[0].Width = Math.Max(140, flex * 0.58);
-                gv.Columns[1].Width = Math.Max(80, flex * 0.42);
+                gv.Columns[1].Width = Math.Max(80,  flex * 0.42);
                 gv.Columns[2].Width = sex;
                 gv.Columns[3].Width = civil;
                 gv.Columns[4].Width = dob;
@@ -1239,14 +1324,10 @@ namespace SOLUM_UI
         {
             try
             {
-                if (IsEncoder)
+                if (IsEncoder || IsBasicUser)
                 {
-                    // Check Encoder search field (unified query)
+                    // Both Encoder and BasicUser now use the shared EncSearchQuery panel
                     return EncSearchQuery != null && !string.IsNullOrEmpty(EncSearchQuery.Text?.Trim());
-                }
-                else if (IsBasicUser)
-                {
-                    return BasicSearchName != null && !string.IsNullOrEmpty(BasicSearchName.Text?.Trim());
                 }
                 else
                 {
@@ -1259,6 +1340,40 @@ namespace SOLUM_UI
                 return false;
             }
         }
+
+        /// <summary>
+        /// Hides the delete button in each row for non-admin users.
+        /// This is called after items are loaded and after ApplyRoleView.
+        /// </summary>
+        private void HideDeleteButtonsIfNotAdmin()
+        {
+            if (IsAdmin) return;
+
+            // Walk the visual tree after the ListView renders
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                HideDeleteInContainer(RecordsList);
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        private void HideDeleteInContainer(System.Windows.DependencyObject parent)
+        {
+            if (parent == null) return;
+            int count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is Button btn && btn.Name == "BtnDelete")
+                {
+                    btn.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    HideDeleteInContainer(child);
+                }
+            }
+        }
+
 
         /// <summary>
         /// Compares two records field-by-field and returns a structured list of
