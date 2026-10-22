@@ -297,13 +297,16 @@ namespace SOLUM_UI.ViewModels
             string logId      = !string.IsNullOrWhiteSpace(dto.Id) ? dto.Id : string.Empty;
             string rawType    = dto.ActionType  ?? string.Empty;
             string userId     = !string.IsNullOrWhiteSpace(dto.UserId) ? dto.UserId : (dto.PerformedBy?.UserId ?? string.Empty);
+            bool isAuthAction = string.Equals(rawType.Trim(), "LOGIN", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(rawType.Trim(), "LOGOUT", StringComparison.OrdinalIgnoreCase);
+
             string userRole   = !string.IsNullOrWhiteSpace(dto.Role) ? dto.Role : (dto.PerformedBy?.Role ?? string.Empty);
-            string targetId   = !string.IsNullOrWhiteSpace(dto.TargetId) ? dto.TargetId : (dto.Target?.TargetId ?? string.Empty);
-            string targetType = !string.IsNullOrWhiteSpace(dto.TargetType) ? dto.TargetType : (dto.Target?.TargetType ?? string.Empty);
-            string targetName = !string.IsNullOrWhiteSpace(dto.TargetName) ? dto.TargetName : (dto.Target?.TargetName ?? string.Empty);
+            string targetId   = isAuthAction ? string.Empty : (!string.IsNullOrWhiteSpace(dto.TargetId) ? dto.TargetId : (dto.Target?.TargetId ?? string.Empty));
+            string targetType = isAuthAction ? string.Empty : (!string.IsNullOrWhiteSpace(dto.TargetType) ? dto.TargetType : (dto.Target?.TargetType ?? string.Empty));
+            string targetName = isAuthAction ? string.Empty : (!string.IsNullOrWhiteSpace(dto.TargetName) ? dto.TargetName : (dto.Target?.TargetName ?? string.Empty));
             string ipAddress  = !string.IsNullOrWhiteSpace(dto.IpAddress) ? dto.IpAddress : (dto.Metadata?.IpAddress ?? string.Empty);
             string status     = !string.IsNullOrWhiteSpace(dto.Status) ? dto.Status : (dto.Metadata?.Status ?? string.Empty);
-            string recordName = !string.IsNullOrWhiteSpace(targetName) ? targetName : (!string.IsNullOrWhiteSpace(targetId) ? targetId : targetType);
+            string recordName = isAuthAction ? string.Empty : (!string.IsNullOrWhiteSpace(targetName) ? targetName : (!string.IsNullOrWhiteSpace(targetId) ? targetId : targetType));
 
             string resolvedName = AuditLogViewModel.ResolveUserName(userId);
             string displayName = !string.IsNullOrWhiteSpace(resolvedName) ? resolvedName : userId;

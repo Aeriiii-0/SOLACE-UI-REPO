@@ -308,7 +308,8 @@
                                                         <Run Text="Action: " FontWeight="Bold" Foreground="#222222"/>
                                                         <Run Text="{Binding ActionTitle, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
                                                     </TextBlock>
-                                                    <TextBlock FontFamily="Segoe UI" FontSize="12" Margin="0,0,0,3" TextTrimming="CharacterEllipsis" ToolTip="{Binding TargetTooltip}">
+                                                    <TextBlock FontFamily="Segoe UI" FontSize="12" Margin="0,0,0,3" TextTrimming="CharacterEllipsis" ToolTip="{Binding TargetTooltip}"
+                                                               Visibility="{Binding HasTarget, Converter={StaticResource BoolToVisibilityConverter}}">
                                                         <Run Text="Target: " FontWeight="Bold" Foreground="#222222"/>
                                                         <Run Text="{Binding TargetDisplay, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
                                                     </TextBlock>
@@ -452,7 +453,8 @@
                         </Grid>
 
                         <!-- Target -->
-                        <Grid Margin="0,0,0,10">
+                        <Grid Margin="0,0,0,10"
+                              Visibility="{Binding HasTarget, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="120"/>
                                 <ColumnDefinition Width="*"/>

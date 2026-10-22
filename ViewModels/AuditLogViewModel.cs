@@ -468,13 +468,17 @@ namespace SOLUM_UI.ViewModels
             string ipAddress  = !string.IsNullOrWhiteSpace(dto.IpAddress) ? dto.IpAddress : (dto.Metadata?.IpAddress ?? string.Empty);
             string status     = !string.IsNullOrWhiteSpace(dto.Status) ? dto.Status : (dto.Metadata?.Status ?? string.Empty);
             string rawType    = dto.ActionType ?? string.Empty;
+            bool isAuthAction = string.Equals(rawType.Trim(), "LOGIN", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(rawType.Trim(), "LOGOUT", StringComparison.OrdinalIgnoreCase);
 
             string resolvedName = ResolveUserName(userId);
             string displayName = !string.IsNullOrWhiteSpace(resolvedName) ? resolvedName : userId;
 
-            string recordName = !string.IsNullOrWhiteSpace(targetName) && !string.Equals(targetName, "—")
-                ? targetName
-                : (!string.IsNullOrWhiteSpace(targetId) ? targetId : (!string.IsNullOrWhiteSpace(targetType) ? targetType : "—"));
+            string recordName = isAuthAction
+                ? string.Empty
+                : (!string.IsNullOrWhiteSpace(targetName) && !string.Equals(targetName, "—")
+                    ? targetName
+                    : (!string.IsNullOrWhiteSpace(targetId) ? targetId : (!string.IsNullOrWhiteSpace(targetType) ? targetType : "—")));
             string description = BuildDescription(rawType, displayName, recordName, status);
 
             var changesSource = (dto.Changes != null && dto.Changes.Count > 0)

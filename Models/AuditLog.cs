@@ -69,22 +69,46 @@ namespace SOLUM_UI.Models
             set { }
         }
 
-        public bool HasTargetId => !string.IsNullOrWhiteSpace(RecordId);
-        public string TargetDisplay => !string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, "—")
-            ? RecordName
-            : (!string.IsNullOrWhiteSpace(RecordId) ? RecordId : "—");
-        public string TargetTooltip => !string.IsNullOrWhiteSpace(RecordId) ? $"Target ID: {RecordId}" : null;
+        public bool IsAuthAction
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(RawActionType))
+                {
+                    string raw = RawActionType.Trim().ToUpperInvariant();
+                    return raw == "LOGIN" || raw == "LOGOUT";
+                }
+                return Action == AuditAction.Login || Action == AuditAction.Logout;
+            }
+        }
+
+        public bool HasTargetId => !IsAuthAction && !string.IsNullOrWhiteSpace(RecordId);
+        public bool HasTarget => !IsAuthAction && ((!string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, "—")) || !string.IsNullOrWhiteSpace(RecordId));
+
+        public string TargetDisplay
+        {
+            get
+            {
+                if (IsAuthAction) return "—";
+                return !string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, "—")
+                    ? RecordName
+                    : (!string.IsNullOrWhiteSpace(RecordId) ? RecordId : "—");
+            }
+        }
+
+        public string TargetTooltip => !IsAuthAction && !string.IsNullOrWhiteSpace(RecordId) ? $"Target ID: {RecordId}" : null;
         public string TargetIdDisplay
         {
-            get => HasTargetId ? RecordId : "—";
+            get => (!IsAuthAction && HasTargetId) ? RecordId : "—";
             set { }
         }
 
-        public bool HasTargetName => !string.IsNullOrWhiteSpace(RecordName)
+        public bool HasTargetName => !IsAuthAction
+            && !string.IsNullOrWhiteSpace(RecordName)
             && !string.Equals(RecordName, RecordId, StringComparison.OrdinalIgnoreCase)
             && !string.Equals(RecordName, TargetType, StringComparison.OrdinalIgnoreCase);
 
-        public bool HasTargetType => !string.IsNullOrWhiteSpace(TargetType);
+        public bool HasTargetType => !IsAuthAction && !string.IsNullOrWhiteSpace(TargetType);
 
         public bool HasPerformedByUserId => !string.IsNullOrWhiteSpace(PerformedByUserId)
             && !string.Equals(PerformedByName, PerformedByUserId, StringComparison.OrdinalIgnoreCase);

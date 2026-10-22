@@ -577,7 +577,8 @@
                                                     </TextBlock>
 
                                                     <!-- Row 0, Col 1: Target ID -->
-                                                    <TextBlock Grid.Row="0" Grid.Column="1" FontFamily="Segoe UI" FontSize="13" TextTrimming="CharacterEllipsis" ToolTip="{Binding TargetTooltip}">
+                                                    <TextBlock Grid.Row="0" Grid.Column="1" FontFamily="Segoe UI" FontSize="13" TextTrimming="CharacterEllipsis" ToolTip="{Binding TargetTooltip}"
+                                                               Visibility="{Binding HasTarget, Converter={StaticResource BoolToVisibilityConverter}}">
                                                         <Run Text="Target: " FontWeight="Bold" Foreground="#222222"/>
                                                         <Run Text="{Binding TargetDisplay, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
                                                     </TextBlock>
@@ -717,7 +718,8 @@
                             </Grid>
 
                             <!-- ── Target ───────────────────────────────────────── -->
-                            <Grid Margin="0,0,0,10">
+                            <Grid Margin="0,0,0,10"
+                                  Visibility="{Binding SelectedLog.HasTarget, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="130"/>
                                     <ColumnDefinition Width="*"/>
