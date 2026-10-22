@@ -208,7 +208,8 @@ namespace SOLUM_UI
 
         private int _currentPage = 1;                
 
-        private int _totalPages = 1;               
+        private int _totalPages = 1;
+        private int _totalCount = 0;               
 
         public UserAdministrationPage()
 
@@ -448,9 +449,11 @@ namespace SOLUM_UI
 
                     }).ToList();
 
-                    int totalCount = allCombined.Count;
+                    int totalCount = allCombined.Count;
+                    _totalCount = totalCount;
 
-                    _totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
+                    _totalCount = totalCount;
+            _totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
 
                     if (_currentPage > _totalPages) _currentPage = _totalPages;
 
@@ -508,6 +511,7 @@ namespace SOLUM_UI
 
             }).ToList();
 
+            _totalCount = totalCount;
             _totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
 
         }
@@ -532,16 +536,26 @@ namespace SOLUM_UI
 
         }
 
-        private void UpdatePagingControls()
-
-        {
-
-            TxtPageInfo.Text = $"Page {_currentPage} of {_totalPages}";
-
-            BtnPrevPage.IsEnabled = _currentPage > 1;
-
-            BtnNextPage.IsEnabled = _currentPage < _totalPages;
-
+        private void UpdatePagingControls()
+        {
+            if (TxtPageInfo != null)
+                TxtPageInfo.Text = $"{_currentPage} of {_totalPages}";
+
+            if (TxtUsersSummary != null)
+                TxtUsersSummary.Text = $"{_totalCount:N0} total users registered";
+
+            if (TxtUsersPageSummary != null)
+            {
+                int start = _totalCount == 0 ? 0 : ((_currentPage - 1) * PageSize) + 1;
+                int end = Math.Min(_totalCount, _currentPage * PageSize);
+                TxtUsersPageSummary.Text = $"Showing {start}–{end} of {_totalCount}";
+            }
+
+            if (BtnPrevPage != null)
+                BtnPrevPage.IsEnabled = _currentPage > 1;
+
+            if (BtnNextPage != null)
+                BtnNextPage.IsEnabled = _currentPage < _totalPages;
         }
 
         // NEW

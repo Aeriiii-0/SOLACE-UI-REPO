@@ -32,6 +32,7 @@ namespace SOLUM_UI
         private int _pageSize = 10;
         private int _currentPage = 1;
         private int _totalPages = 1;
+        private int _totalCount = 0;
         private bool _isLoading = false;
 
         public static readonly DependencyProperty SearchPlaceholderProperty =
@@ -395,6 +396,7 @@ namespace SOLUM_UI
                 }
 
                 var paged = resp.Data;
+                _totalCount = paged.TotalCount;
                 _totalPages = Math.Max(1, paged.TotalPages);
 
                 // Fetch every record's full detail in parallel
@@ -472,13 +474,19 @@ namespace SOLUM_UI
         private void UpdatePagingUI()
         {
             if (PageInfoText != null)
-                PageInfoText.Text = "Page " + _currentPage + " of " + TotalPages;
+                PageInfoText.Text = $"{_currentPage} of {TotalPages}";
 
             if (BtnBack != null)
-                BtnBack.Visibility = _currentPage > 1 ? Visibility.Visible : Visibility.Collapsed;
+            {
+                BtnBack.Visibility = Visibility.Visible;
+                BtnBack.IsEnabled = _currentPage > 1;
+            }
 
             if (BtnNext != null)
-                BtnNext.Visibility = _currentPage < TotalPages ? Visibility.Visible : Visibility.Collapsed;
+            {
+                BtnNext.Visibility = Visibility.Visible;
+                BtnNext.IsEnabled = _currentPage < TotalPages;
+            }
         }
 
         private void BtnNext_Click(object sender, RoutedEventArgs e)
