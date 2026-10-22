@@ -144,8 +144,8 @@
                                 <!-- Subtext Badge -->
                                 <Border Grid.Row="2" Background="#ECFDF5" CornerRadius="6" Padding="10,6" BorderBrush="#A7F3D0" BorderThickness="1">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="→ " FontSize="11" Foreground="#10B981" FontWeight="Bold" VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding ActiveDelta}" FontSize="11" Foreground="#10B981" VerticalAlignment="Center"/>
+                                        <TextBlock Text="↓ " FontSize="11" Foreground="#10B981" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding ExpiringThisMonthCount}" FontSize="11" Foreground="#10B981" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>
@@ -166,14 +166,14 @@
                                 <Border Grid.Row="0" Height="4" CornerRadius="2" Background="#F59E0B" Margin="0,0,0,12"/>
 
                                 <!-- Header Label -->
-                                <TextBlock Grid.Row="0" Text="RENEWALS" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
+                                <TextBlock Grid.Row="0" Text="INACTIVE RECORDS" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
                                            Foreground="#6B7280" Margin="0,0,0,12"/>
 
                                 <!-- Primary Metric -->
                                 <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,8,0,8">
-                                    <TextBlock Text="{Binding RenewalsDueThisMonth, StringFormat={}{0:N0}}" FontSize="48" FontWeight="Bold"
+                                    <TextBlock Text="{Binding InactiveRecordsCount, StringFormat={}{0:N0}}" FontSize="48" FontWeight="Bold"
                                                Foreground="#F59E0B" TextAlignment="Left" LineHeight="52"/>
-                                    <TextBlock Text="Due this month" FontSize="12" FontWeight="Normal"
+                                    <TextBlock Text="Inactive Records" FontSize="12" FontWeight="Normal"
                                                Foreground="#9CA3AF" Margin="0,4,0,0"/>
                                 </StackPanel>
 
@@ -181,7 +181,7 @@
                                 <Border Grid.Row="2" Background="#FFFBEB" CornerRadius="6" Padding="10,6" BorderBrush="#FED7AA" BorderThickness="1">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="⚠ " FontSize="11" Foreground="#F59E0B" FontWeight="Bold" VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding RenewalsDelta}" FontSize="11" Foreground="#F59E0B" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding InactiveSubtext}" FontSize="11" Foreground="#F59E0B" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>

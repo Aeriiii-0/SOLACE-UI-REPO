@@ -68,6 +68,13 @@ namespace SOLUM_UI.ViewModels
             private set { _activeSoloParents = value; OnPropertyChanged(); }
         }
 
+        private int _inactiveRecordsCount;
+        public int InactiveRecordsCount
+        {
+            get => _inactiveRecordsCount;
+            private set { _inactiveRecordsCount = value; OnPropertyChanged(); }
+        }
+
         private int _renewalsDueThisMonth;
         public int RenewalsDueThisMonth
         {
@@ -94,6 +101,20 @@ namespace SOLUM_UI.ViewModels
         {
             get => _renewalsDelta;
             private set { _renewalsDelta = value; OnPropertyChanged(); }
+        }
+
+        private string _inactiveSubtext = "Requires review";
+        public string InactiveSubtext
+        {
+            get => _inactiveSubtext;
+            private set { _inactiveSubtext = value; OnPropertyChanged(); }
+        }
+
+        private string _expiringThisMonthCount = "0";
+        public string ExpiringThisMonthCount
+        {
+            get => _expiringThisMonthCount;
+            private set { _expiringThisMonthCount = value; OnPropertyChanged(); }
         }
 
         private bool _isActiveChangeNegative;
@@ -279,9 +300,18 @@ namespace SOLUM_UI.ViewModels
             RegisteredSoloParents = d.TotalRegistered;
             ActiveSoloParents     = d.ActiveRecords;
             RenewalsDueThisMonth  = d.RenewalsDueThisMonth;
+            InactiveRecordsCount  = d.InactiveRecords;
 
-            RegisteredDelta = $"↑ {d.RegisteredThisMonth:N0} this month";
+            // Card 1: Added this month
+            RegisteredDelta = $"↑ {d.RegisteredThisMonth:N0} added this month";
 
+            // Card 2: Expiring this month (using RenewalsDueThisMonth as proxy for expiring)
+            ExpiringThisMonthCount = $"⚠ {d.RenewalsDueThisMonth:N0} expiring this month";
+
+            // Card 3: Inactive subtext
+            InactiveSubtext = "Requires review";
+
+            // Original Active delta for backward compatibility
             IsActiveChangeNegative = d.ActiveChangeFromLastMonth < 0;
             ActiveDelta = d.ActiveChangeFromLastMonth > 0
                 ? $"↑ {d.ActiveChangeFromLastMonth:N0} from last month"
@@ -289,6 +319,7 @@ namespace SOLUM_UI.ViewModels
                     ? $"↓ {Math.Abs(d.ActiveChangeFromLastMonth):N0} from last month"
                     : "No change from last month";
 
+            // Original renewals delta for backward compatibility
             RenewalsDelta = $"↑ {d.RenewalsCompletedToday:N0} completed today";
         }
 
