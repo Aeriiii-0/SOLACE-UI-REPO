@@ -1003,7 +1003,67 @@
                     </ListView.View>
                 </ListView>
 
-                <!-- No results after a search -->
+                <!-- Empty state overlay — shown when no search is performed (default state) -->
+                <StackPanel x:Name="TableEmptyStateOverlay"
+                            Visibility="Visible"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            Margin="0,40,0,40">
+
+                    <!-- Pulsing illustration (opacity breathe animation) -->
+                    <Grid x:Name="TableEmptyStateIllustration"
+                          Width="114" Height="114"
+                          HorizontalAlignment="Center"
+                          Margin="0,0,0,26">
+                        <Grid.Triggers>
+                            <EventTrigger RoutedEvent="Grid.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="TableEmptyStateIllustration"
+                                            Storyboard.TargetProperty="Opacity"
+                                            From="1.0" To="0.35"
+                                            Duration="0:0:1.1"
+                                            AutoReverse="True"
+                                            RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Grid.Triggers>
+
+                        <!-- Soft pink circle -->
+                        <Ellipse Fill="#F5E8EE" Width="114" Height="114"/>
+
+                        <!-- Folder -->
+                        <Path Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"
+                              Fill="#E8C4D0" Stretch="Uniform"
+                              Width="58" Height="58"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                              Margin="0,8,0,0"/>
+
+                        <!-- Magnifying glass -->
+                        <Path Data="M15.5,14H14.71L14.43,13.73C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 3,9.5A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.73,14.43L14,14.71V15.5L19,20.5L20.5,19L15.5,14M9.5,14C7,14 5,12 5,9.5C5,7 7,5 9.5,5C12,5 14,7 14,9.5C14,12 12,14 9.5,14Z"
+                              Fill="#702943" Stretch="Uniform"
+                              Width="34" Height="34"
+                              HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                              Margin="0,0,5,3" Opacity="0.9"/>
+                    </Grid>
+
+                    <!-- Bold heading -->
+                    <TextBlock Text="No data to display yet"
+                               FontFamily="Segoe UI" FontSize="24" FontWeight="Bold"
+                               Foreground="#1F2937"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,12"/>
+
+                    <!-- Helper text -->
+                    <TextBlock FontFamily="Segoe UI" FontSize="13" Foreground="#888888"
+                               HorizontalAlignment="Center" TextAlignment="Center"
+                               TextWrapping="Wrap" MaxWidth="400"
+                               Text="To view, edit, renew a record, please use the search bar above to verify identity."/>
+                </StackPanel>
+
                 <!-- No results after a search -->
                 <StackPanel x:Name="NoResultsPanel"
                             Visibility="Collapsed"

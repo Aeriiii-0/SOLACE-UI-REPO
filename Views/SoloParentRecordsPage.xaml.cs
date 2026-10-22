@@ -147,6 +147,10 @@ namespace SOLUM_UI
             if (SearchFirstPanel != null)
                 SearchFirstPanel.Visibility = showResults ? hide : show;
 
+            // Table empty state overlay — shown inside table when no search done yet
+            if (TableEmptyStateOverlay != null)
+                TableEmptyStateOverlay.Visibility = showResults ? Visibility.Collapsed : Visibility.Visible;
+
             // Paging row
             if (PagingRow != null)
                 PagingRow.Visibility = showResults ? show : hide;
@@ -519,6 +523,8 @@ namespace SOLUM_UI
 
                 // After a search completes for Encoder/BasicUser, SearchFirstPanel should stay hidden
                 if (SearchFirstPanel != null) SearchFirstPanel.Visibility = Visibility.Collapsed;
+                // Hide the table empty state overlay when results are displayed
+                if (TableEmptyStateOverlay != null) TableEmptyStateOverlay.Visibility = Visibility.Collapsed;
 
                 // After a successful search for Encoder/BasicUser, ensure results table is visible
                 if ((IsEncoder || IsBasicUser) && _filteredRecords.Count > 0)
