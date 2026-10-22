@@ -26,7 +26,7 @@
         <SolidColorBrush x:Key="StatCard4Border" Color="#1F7A8C"/>
 
         <SolidColorBrush x:Key="BurundyPrimary" Color="#B03058"/>
-        <SolidColorBrush x:Key="BurundyDark" Color="#722F37"/>
+        <SolidColorBrush x:Key="BurundyDark" Color="#8B1E3F"/>
         <SolidColorBrush x:Key="OrangePrimary" Color="#E59836"/>
         <SolidColorBrush x:Key="TealPrimary" Color="#16A085"/>
         <SolidColorBrush x:Key="PurpleDark" Color="#4A1525"/>
@@ -34,11 +34,6 @@
         <SolidColorBrush x:Key="TextGray" Color="#6B7280"/>
         <SolidColorBrush x:Key="BorderLight" Color="#F3F4F6"/>
         <SolidColorBrush x:Key="BgLight" Color="#F9FAFB"/>
-        
-        <!-- Summary Card Colors -->
-        <SolidColorBrush x:Key="Card1BurgundiIndicator" Color="#722F37"/>
-        <SolidColorBrush x:Key="Card2GreenIndicator" Color="#10B981"/>
-        <SolidColorBrush x:Key="Card3AmberIndicator" Color="#F59E0B"/>
 
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
 
@@ -482,8 +477,8 @@
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0" Style="{StaticResource KpiCard}"
-                            Background="White" BorderBrush="#E5E7EB" BorderThickness="1"
-                            Padding="20,18" CornerRadius="16">
+                            Background="{StaticResource StatCard1Bg}" BorderBrush="{StaticResource StatCard1Border}"
+                            Padding="22,18">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -491,37 +486,43 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <!-- Status Indicator Bar -->
-                            <Border Grid.Row="0" Height="4" CornerRadius="2" Background="{StaticResource Card1BurgundiIndicator}" Margin="0,0,0,12"/>
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Viewbox Grid.Column="0" Width="26" Height="26">
+                                    <TextBlock Text="👥" FontSize="20" VerticalAlignment="Center" Foreground="{StaticResource StatCard1Border}"/>
+                                </Viewbox>
 
-                            <!-- Header Label -->
-                            <TextBlock Grid.Row="0" Text="TOTAL REGISTERED" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
-                                       Foreground="#6B7280" Margin="0,0,0,12"/>
+                                <Border Grid.Column="2" Background="#1F9C2F55" CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="● " FontSize="10" Foreground="{StaticResource StatCard1Border}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Total Count" FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource StatCard1Border}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
 
-                            <!-- Primary Metric -->
-                            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,8,0,8">
-                                <TextBlock Text="{Binding TotalRegisteredCount}" FontSize="48" FontWeight="Bold"
-                                           Foreground="{StaticResource Card1BurgundiIndicator}" TextAlignment="Left" LineHeight="52"/>
-                                <TextBlock Text="Solo Parents" FontSize="12" FontWeight="Normal"
-                                           Foreground="#9CA3AF" Margin="0,4,0,0"/>
+                            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
+                                <TextBlock Text="{Binding TotalRegisteredCount}" FontSize="36" FontWeight="Bold"
+                                           Foreground="{StaticResource StatCard1Border}" TextAlignment="Left" LineHeight="38"/>
+                                <TextBlock Text="Total registered" FontSize="13" FontWeight="SemiBold"
+                                           Foreground="{StaticResource StatCard1Border}" Opacity="0.95" Margin="0,2,0,0"/>
                             </StackPanel>
 
-                            <!-- Subtext Badge -->
-                            <Border Grid.Row="2" Background="#FEF2F2" CornerRadius="6" Padding="10,6" BorderBrush="#FECACA" BorderThickness="1">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="↑ " FontSize="11" Foreground="{StaticResource Card1BurgundiIndicator}" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    <TextBlock FontSize="11" Foreground="{StaticResource Card1BurgundiIndicator}">
-                                        <Run Text="Added this month: "/>
-                                        <Bold><Run Text="{Binding AddedThisMonthCount}"/></Bold>
-                                    </TextBlock>
-                                </StackPanel>
+                            <Border Grid.Row="2" Background="#1F9C2F55" CornerRadius="8" Padding="10,4">
+                                <TextBlock FontSize="11" Foreground="{StaticResource StatCard1Border}">
+                                    Added this month: <Bold><Run Text="{Binding AddedThisMonthCount}"/></Bold>
+                                </TextBlock>
                             </Border>
                         </Grid>
                     </Border>
 
                     <Border Grid.Column="2" Style="{StaticResource KpiCard}"
-                            Background="White" BorderBrush="#E5E7EB" BorderThickness="1"
-                            Padding="20,18" CornerRadius="16">
+                            Background="{StaticResource StatCard2Bg}" BorderBrush="{StaticResource StatCard2Border}"
+                            Padding="18,16">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -529,37 +530,38 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <!-- Status Indicator Bar -->
-                            <Border Grid.Row="0" Height="4" CornerRadius="2" Background="{StaticResource Card2GreenIndicator}" Margin="0,0,0,12"/>
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Viewbox Grid.Column="0" Width="24" Height="24">
+                                    <TextBlock Text="✓" FontSize="18" FontWeight="Bold" Foreground="{StaticResource StatCard2Border}"/>
+                                </Viewbox>
+                                <Border Grid.Column="2" Background="#1F8A6A00" CornerRadius="10" Padding="8,3">
+                                    <TextBlock Text="Active Status" FontSize="10" FontWeight="Bold" Foreground="{StaticResource StatCard2Border}"/>
+                                </Border>
+                            </Grid>
 
-                            <!-- Header Label -->
-                            <TextBlock Grid.Row="0" Text="ACTIVE" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
-                                       Foreground="#6B7280" Margin="0,0,0,12"/>
-
-                            <!-- Primary Metric -->
-                            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,8,0,8">
-                                <TextBlock Text="{Binding ActiveRecordsCount}" FontSize="48" FontWeight="Bold"
-                                           Foreground="{StaticResource Card2GreenIndicator}" TextAlignment="Left" LineHeight="52"/>
-                                <TextBlock Text="Valid Records" FontSize="12" FontWeight="Normal"
-                                           Foreground="#9CA3AF" Margin="0,4,0,0"/>
+                            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
+                                <TextBlock Text="{Binding ActiveRecordsCount}" FontSize="32" FontWeight="Bold"
+                                           Foreground="{StaticResource StatCard2Border}" TextAlignment="Left" LineHeight="34"/>
+                                <TextBlock Text="Active" FontSize="12" FontWeight="SemiBold"
+                                           Foreground="{StaticResource StatCard2Border}" Opacity="0.95" Margin="0,2,0,0"/>
                             </StackPanel>
 
-                            <!-- Subtext Badge -->
-                            <Border Grid.Row="2" Background="#ECFDF5" CornerRadius="6" Padding="10,6" BorderBrush="#A7F3D0" BorderThickness="1">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="↓ " FontSize="11" Foreground="{StaticResource Card2GreenIndicator}" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    <TextBlock FontSize="11" Foreground="{StaticResource Card2GreenIndicator}">
-                                        <Run Text="Expiring this month: "/>
-                                        <Bold><Run Text="{Binding ExpiringThisMonthCount}"/></Bold>
-                                    </TextBlock>
-                                </StackPanel>
+                            <Border Grid.Row="2" Background="#1F8A6A00" CornerRadius="6" Padding="8,4">
+                                <TextBlock FontSize="11" Foreground="{StaticResource StatCard2Border}" TextTrimming="CharacterEllipsis">
+                                    Expiring this month: <Bold><Run Text="{Binding ExpiringThisMonthCount}"/></Bold>
+                                </TextBlock>
                             </Border>
                         </Grid>
                     </Border>
 
                     <Border Grid.Column="4" Style="{StaticResource KpiCard}"
-                            Background="White" BorderBrush="#E5E7EB" BorderThickness="1"
-                            Padding="20,18" CornerRadius="16">
+                            Background="{StaticResource StatCard3Bg}" BorderBrush="{StaticResource StatCard3Border}"
+                            Padding="18,16">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -567,29 +569,31 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <!-- Status Indicator Bar -->
-                            <Border Grid.Row="0" Height="4" CornerRadius="2" Background="{StaticResource Card3AmberIndicator}" Margin="0,0,0,12"/>
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Viewbox Grid.Column="0" Width="24" Height="24">
+                                    <TextBlock Text="⏸" FontSize="18" Foreground="{StaticResource StatCard3Border}"/>
+                                </Viewbox>
+                                <Border Grid.Column="2" Background="#1F3F7A1F" CornerRadius="10" Padding="8,3">
+                                    <TextBlock Text="Inactive" FontSize="10" FontWeight="Bold" Foreground="{StaticResource StatCard3Border}"/>
+                                </Border>
+                            </Grid>
 
-                            <!-- Header Label -->
-                            <TextBlock Grid.Row="0" Text="INACTIVE RECORDS" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"
-                                       Foreground="#6B7280" Margin="0,0,0,12"/>
-
-                            <!-- Primary Metric -->
-                            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,8,0,8">
-                                <TextBlock Text="{Binding InactiveRecordsCount}" FontSize="48" FontWeight="Bold"
-                                           Foreground="{StaticResource Card3AmberIndicator}" TextAlignment="Left" LineHeight="52"/>
-                                <TextBlock Text="Inactive Records" FontSize="12" FontWeight="Normal"
-                                           Foreground="#9CA3AF" Margin="0,4,0,0"/>
+                            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
+                                <TextBlock Text="{Binding InactiveRecordsCount}" FontSize="32" FontWeight="Bold"
+                                           Foreground="{StaticResource StatCard3Border}" TextAlignment="Left" LineHeight="34"/>
+                                <TextBlock Text="Inactive records" FontSize="12" FontWeight="SemiBold"
+                                           Foreground="{StaticResource StatCard3Border}" Opacity="0.95" Margin="0,2,0,0"/>
                             </StackPanel>
 
-                            <!-- Subtext Badge -->
-                            <Border Grid.Row="2" Background="#FFFBEB" CornerRadius="6" Padding="10,6" BorderBrush="#FED7AA" BorderThickness="1">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="⚠ " FontSize="11" Foreground="{StaticResource Card3AmberIndicator}" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    <TextBlock FontSize="11" Foreground="{StaticResource Card3AmberIndicator}">
-                                        <Run Text="{Binding InactiveSubtext}"/>
-                                    </TextBlock>
-                                </StackPanel>
+                            <Border Grid.Row="2" Background="#1F3F7A1F" CornerRadius="6" Padding="8,4">
+                                <TextBlock FontSize="11" Foreground="{StaticResource StatCard3Border}" TextTrimming="CharacterEllipsis">
+                                    <Run Text="{Binding InactiveSubtext}"/>
+                                </TextBlock>
                             </Border>
                         </Grid>
                     </Border>
