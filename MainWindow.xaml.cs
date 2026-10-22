@@ -57,7 +57,11 @@ namespace SOLUM_UI
                     CurrentUserBarangay = CurrentUserBarangay.ToUpper();
                 }
                 CurrentUserEmail = user.Email;
-                if (AuthApiService.Instance.IsAdmin)
+                if (AuthApiService.Instance.IsSuperAdmin)
+                {
+                    CurrentUserRole = "SUPERADMIN";
+                }
+                else if (AuthApiService.Instance.IsAdmin)
                 {
                     CurrentUserRole = "ADMINISTRATOR";
                 }
@@ -123,6 +127,7 @@ namespace SOLUM_UI
         {
             bool isAdmin = string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
                            string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase) ||
+                           string.Equals(CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase) ||
                            SOLUM_UI.Services.Api.AuthApiService.Instance.IsAdmin;
             if (_navButtons.ContainsKey("UserAdministration"))
                 _navButtons["UserAdministration"].Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
@@ -311,6 +316,7 @@ namespace SOLUM_UI
                 case "SubsidyRecommendation":
                     bool isSubsidyAdmin = string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
                                          string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase) ||
+                           string.Equals(CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase) ||
                                          SOLUM_UI.Services.Api.AuthApiService.Instance.IsAdmin;
                     if (!isSubsidyAdmin)
                     {

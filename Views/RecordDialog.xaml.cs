@@ -47,10 +47,9 @@ namespace SOLUM_UI
             set
             {
                 string s = value?.Trim() ?? string.Empty;
-                if (s.Equals("Female", StringComparison.OrdinalIgnoreCase) || s.Equals("F", StringComparison.OrdinalIgnoreCase))
-                    _sex = "Female";
-                else if (s.Equals("Male", StringComparison.OrdinalIgnoreCase) || s.Equals("M", StringComparison.OrdinalIgnoreCase))
-                    _sex = "Male";
+                string matched = SOLUM_UI.Services.OcrService.FuzzyMatchSex(s);
+                if (!string.IsNullOrEmpty(matched))
+                    _sex = matched;
                 else
                     _sex = s;
                 N(nameof(Sex));
@@ -102,7 +101,7 @@ namespace SOLUM_UI
                 N(nameof(BirthdateDate));
                 if (value.HasValue && value.Value != DateTime.MinValue)
                 {
-                    _birthdate = value.Value.ToString("yyyy-MM-dd");
+                    _birthdate = value.Value.ToString("dd/MM/yyyy");
                     N(nameof(Birthdate));
                     int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(value.Value);
                     if (calcAge >= 0 && calcAge <= 120) { _age = calcAge.ToString(); N(nameof(Age)); }
@@ -123,13 +122,13 @@ namespace SOLUM_UI
             set
             {
                 string s = value?.Trim() ?? string.Empty;
-                if (s.Equals("Single", StringComparison.OrdinalIgnoreCase)) _civilStatus = "Single";
-                else if (s.Equals("Married", StringComparison.OrdinalIgnoreCase)) _civilStatus = "Married";
-                else if (s.Equals("Widowed", StringComparison.OrdinalIgnoreCase)) _civilStatus = "Widowed";
-                else if (s.Equals("Separated", StringComparison.OrdinalIgnoreCase) || s.Equals("Sep", StringComparison.OrdinalIgnoreCase) || s.Equals("Divorced", StringComparison.OrdinalIgnoreCase)) _civilStatus = "Separated";
-                else if (s.Equals("Annulled", StringComparison.OrdinalIgnoreCase)) _civilStatus = "Annulled";
-                else if (!string.IsNullOrWhiteSpace(s)) _civilStatus = char.ToUpper(s[0]) + (s.Length > 1 ? s.Substring(1) : "");
-                else _civilStatus = string.Empty;
+                string matched = SOLUM_UI.Services.OcrService.FuzzyMatchCivilStatus(s);
+                if (!string.IsNullOrEmpty(matched))
+                    _civilStatus = matched;
+                else if (!string.IsNullOrWhiteSpace(s))
+                    _civilStatus = char.ToUpper(s[0]) + (s.Length > 1 ? s.Substring(1) : "");
+                else
+                    _civilStatus = string.Empty;
                 N(nameof(CivilStatus));
             }
         }
@@ -692,6 +691,40 @@ namespace SOLUM_UI
                 }
             }
 
+            // Specific matching for Sex if combo is CmbSex
+            if (combo == CmbSex)
+            {
+                string matchedSex = SOLUM_UI.Services.OcrService.FuzzyMatchSex(val);
+                if (!string.IsNullOrEmpty(matchedSex))
+                {
+                    foreach (ComboBoxItem item in combo.Items)
+                    {
+                        if (string.Equals(item.Content?.ToString(), matchedSex, StringComparison.OrdinalIgnoreCase))
+                        {
+                            combo.SelectedItem = item;
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // Specific matching for Civil Status if combo is CmbCivilStatus
+            if (combo == CmbCivilStatus)
+            {
+                string matchedCiv = SOLUM_UI.Services.OcrService.FuzzyMatchCivilStatus(val);
+                if (!string.IsNullOrEmpty(matchedCiv))
+                {
+                    foreach (ComboBoxItem item in combo.Items)
+                    {
+                        if (string.Equals(item.Content?.ToString(), matchedCiv, StringComparison.OrdinalIgnoreCase))
+                        {
+                            combo.SelectedItem = item;
+                            return;
+                        }
+                    }
+                }
+            }
+
             string valNorm = System.Text.RegularExpressions.Regex.Replace(val.ToLowerInvariant(), @"[^a-z0-9]", "");
             foreach (ComboBoxItem item in combo.Items)
             {
@@ -753,6 +786,37 @@ namespace SOLUM_UI
         {
             UpdateAge(DpBirthdate.SelectedDate);
             ClearDateError(DpBirthdate, ErrBirthdate);
+        }
+
+        private void DatePicker_DateValidationError(object sender, DatePickerDateValidationErrorEventArgs e)
+        {
+            if (sender is DatePicker dp && !string.IsNullOrWhiteSpace(e.Text))
+            {
+                if (SOLUM_UI.Services.OcrService.TryParseOcrDate(e.Text, out DateTime dt))
+                {
+                    dp.SelectedDate = dt;
+                    e.ThrowException = false;
+                }
+            }
+        }
+
+        private void DatePicker_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is DatePicker dp)
+            {
+                var tb = dp.Template?.FindName("PART_TextBox", dp) as System.Windows.Controls.Primitives.DatePickerTextBox;
+                if (tb != null && !string.IsNullOrWhiteSpace(tb.Text))
+                {
+                    if (SOLUM_UI.Services.OcrService.TryParseOcrDate(tb.Text, out DateTime dt))
+                    {
+                        if (dp.SelectedDate != dt)
+                        {
+                            dp.SelectedDate = dt;
+                        }
+                        tb.Text = dt.ToString("dd/MM/yyyy");
+                    }
+                }
+            }
         }
 
         private void NameOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)

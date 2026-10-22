@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Windows;
+using System.Windows.Markup;
 using SOLUM_UI.Services;
 
 namespace SOLUM_UI
@@ -8,6 +10,19 @@ namespace SOLUM_UI
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // Configure en-PH culture so that all WPF controls (DatePicker, formatting) use standard dd/MM/yyyy
+            var culture = new CultureInfo("en-PH");
+            culture.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
+            culture.DateTimeFormat.DateSeparator = "/";
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+            System.Threading.Thread.CurrentThread.CurrentCulture = culture;
+            System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
+
+            FrameworkElement.LanguageProperty.OverrideMetadata(
+                typeof(FrameworkElement),
+                new FrameworkPropertyMetadata(XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
 
             // Increase connection limit from default (2) to 64 for fast concurrent HTTP calls in .NET Framework
             System.Net.ServicePointManager.DefaultConnectionLimit = 64;

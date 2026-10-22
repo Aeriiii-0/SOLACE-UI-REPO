@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using SOLUM_UI.ViewModels;
 using SOLUM_UI.Views.Dialogs;
+using SOLUM_UI.Services.Api;
 
 namespace SOLUM_UI.Views.Components
 {
@@ -26,7 +27,9 @@ namespace SOLUM_UI.Views.Components
             if (BtnDelete == null) return;
             bool isAdmin = MainWindow.CurrentUserRole != null &&
                            (MainWindow.CurrentUserRole.Equals("Administrator", System.StringComparison.OrdinalIgnoreCase) ||
-                            MainWindow.CurrentUserRole.Equals("Admin", System.StringComparison.OrdinalIgnoreCase));
+                            MainWindow.CurrentUserRole.Equals("Admin", System.StringComparison.OrdinalIgnoreCase) ||
+                            MainWindow.CurrentUserRole.Equals("SuperAdmin", System.StringComparison.OrdinalIgnoreCase) ||
+                            AuthApiService.Instance.IsAdmin);
 
             if (!isAdmin)
             {
@@ -114,7 +117,9 @@ namespace SOLUM_UI.Views.Components
         {
             bool isAdmin = MainWindow.CurrentUserRole != null &&
                            (MainWindow.CurrentUserRole.Equals("Administrator", System.StringComparison.OrdinalIgnoreCase) ||
-                            MainWindow.CurrentUserRole.Equals("Admin", System.StringComparison.OrdinalIgnoreCase));
+                            MainWindow.CurrentUserRole.Equals("Admin", System.StringComparison.OrdinalIgnoreCase) ||
+                            MainWindow.CurrentUserRole.Equals("SuperAdmin", System.StringComparison.OrdinalIgnoreCase) ||
+                            AuthApiService.Instance.IsAdmin);
             if (!isAdmin) return;
 
             // VM sets IsDeleteOverlayVisible = true.

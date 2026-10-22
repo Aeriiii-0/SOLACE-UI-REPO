@@ -195,7 +195,7 @@
                                     </DatePickerTextBox.Style>
                                 </DatePickerTextBox>
                                 <!-- Custom clean placeholder - only visible when input is empty -->
-                                <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="14"
+                                <TextBlock Text="DD/MM/YYYY" Foreground="#999999" FontSize="14"
                                            Padding="10,0" VerticalAlignment="Center"
                                            IsHitTestVisible="False" Opacity="0.7">
                                     <TextBlock.Style>
@@ -584,7 +584,9 @@
                                                     <TextBlock Text="Date of Application:" FontSize="12" FontWeight="SemiBold"
                                                                Foreground="#555555" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                     <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Width="180">
-                                                        <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDate}" Height="32"/>
+                                                        <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDate}" Height="32"
+                                                                    DateValidationError="DatePicker_DateValidationError"
+                                                                    LostFocus="DatePicker_LostFocus"/>
                                                     </Border>
                                                 </StackPanel>
                                             </Grid>
@@ -606,6 +608,7 @@
                                                     Last Name <Run Text="*" Foreground="#E53935"/>
                                                 </TextBlock>
                                                 <TextBox x:Name="TxtLastName" Style="{StaticResource FormBox}"
+                                                         MaxLength="50"
                                                          PreviewTextInput="NameOnly_PreviewTextInput"
                                                          TextChanged="TxtLastName_TextChanged"/>
                                                 <TextBlock x:Name="ErrLastName" Text="Required." Style="{StaticResource ErrorText}"/>
@@ -615,6 +618,7 @@
                                                     First Name <Run Text="*" Foreground="#E53935"/>
                                                 </TextBlock>
                                                 <TextBox x:Name="TxtFirstName" Style="{StaticResource FormBox}"
+                                                         MaxLength="50"
                                                          PreviewTextInput="NameOnly_PreviewTextInput"
                                                          TextChanged="TxtFirstName_TextChanged"/>
                                                 <TextBlock x:Name="ErrFirstName" Text="Required." Style="{StaticResource ErrorText}"/>
@@ -622,6 +626,7 @@
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="Middle Name" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtMiddleName" Style="{StaticResource FormBox}"
+                                                         MaxLength="50"
                                                          PreviewTextInput="NameOnly_PreviewTextInput"
                                                          TextChanged="TxtMiddleName_TextChanged"/>
                                             </StackPanel>
@@ -655,19 +660,28 @@
                                                 </TextBlock>
                                                 <Border x:Name="BorderBirthdate" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
                                                     <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
-                                                                SelectedDateChanged="DpBirthdate_SelectedDateChanged"/>
+                                                                SelectedDateChanged="DpBirthdate_SelectedDateChanged"
+                                                                DateValidationError="DatePicker_DateValidationError"
+                                                                LostFocus="DatePicker_LostFocus"/>
                                                 </Border>
                                                 <TextBlock x:Name="ErrBirthdate" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="Age" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtAge" Style="{StaticResource FormBox}"
-                                                         IsReadOnly="True" Background="#F0F0F0"/>
+                                                         IsReadOnly="True" Background="#F0F0F0"
+                                                         HorizontalContentAlignment="Center"
+                                                         VerticalContentAlignment="Center"
+                                                         FontWeight="SemiBold"
+                                                         Foreground="#222222"
+                                                         Padding="0"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="PhilSys Card Number (Optional)" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtPhilSys" Style="{StaticResource FormBox}"
+                                                         MaxLength="19"
                                                          PreviewKeyDown="PhilSys_PreviewKeyDown"
+                                                         PreviewTextInput="NumberOnly_PreviewTextInput"
                                                          TextChanged="TxtPhilSys_TextChanged"/>
                                                 <TextBlock x:Name="ErrPhilSys" Text="Invalid format." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
@@ -783,6 +797,7 @@
                                                     Birthplace <Run Text="*" Foreground="#E53935"/>
                                                 </TextBlock>
                                                 <TextBox x:Name="TxtPlaceOfBirth" Style="{StaticResource FormBox}"
+                                                         MaxLength="100"
                                                          TextChanged="TxtPlaceOfBirth_TextChanged"/>
                                                 <TextBlock x:Name="ErrPlaceOfBirth" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
@@ -800,6 +815,7 @@
                                                     Address (House No. / Street / Subdivision / Zone or Purok) <Run Text="*" Foreground="#E53935"/>
                                                 </TextBlock>
                                                 <TextBox x:Name="TxtAddress" Style="{StaticResource FormBox}"
+                                                         MaxLength="200"
                                                          TextChanged="TxtAddress_TextChanged"/>
                                                 <TextBlock x:Name="ErrAddress" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
@@ -808,7 +824,7 @@
                                                     Barangay <Run Text="*" Foreground="#E53935"/>
                                                 </TextBlock>
                                                 <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
-                                                          SelectionChanged="CmbBarangay_SelectionChanged">
+                                                           SelectionChanged="CmbBarangay_SelectionChanged">
                                                     <ComboBoxItem Content=""/>
                                                     <ComboBoxItem Content="Biñan (Poblacion)"/>
                                                     <ComboBoxItem Content="Bungahan"/>
@@ -870,6 +886,7 @@
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="Religion" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtReligion" Style="{StaticResource FormBox}"
+                                                         MaxLength="60"
                                                          TextChanged="TxtReligion_TextChanged"/>
                                             </StackPanel>
                                         </Grid>
@@ -886,11 +903,13 @@
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="Occupation / Source of Income" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtOccupation" Style="{StaticResource FormBox}"
+                                                         MaxLength="80"
                                                          TextChanged="TxtOccupation_TextChanged"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2" Margin="0,0,10,0">
                                                 <TextBlock Text="Monthly Income" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtMonthlyIncome" Style="{StaticResource FormBox}"
+                                                         MaxLength="12"
                                                          PreviewTextInput="NumberOnly_PreviewTextInput"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="4">
@@ -926,6 +945,7 @@
                                             <StackPanel Grid.Column="0" Margin="0,0,10,0">
                                                 <TextBlock Text="Person to Contact in Case of Emergency" Style="{StaticResource FieldLabel}"/>
                                                 <TextBox x:Name="TxtEmergencyContact" Style="{StaticResource FormBox}"
+                                                         MaxLength="50"
                                                          PreviewTextInput="NameOnly_PreviewTextInput"
                                                          TextChanged="TxtEmergencyContact_TextChanged"/>
                                             </StackPanel>
@@ -952,6 +972,7 @@
                                                     <TextBlock Text="Emergency Contact Address" Style="{StaticResource FieldLabel}"/>
                                                 </StackPanel>
                                                 <TextBox x:Name="TxtEmergencyAddress" Style="{StaticResource FormBox}"
+                                                         MaxLength="200"
                                                          TextChanged="TxtEmergencyAddress_TextChanged"/>
                                                 <CheckBox x:Name="ChkSameAsApplicant" Content="Same as Applicant"
                                                           FontSize="12" Foreground="#666666" Margin="0,4,0,0"
@@ -1037,11 +1058,14 @@
                                                         <StackPanel Grid.Column="0">
                                                             <TextBlock Text="Cause of death" Style="{StaticResource FieldLabelSm}"/>
                                                             <TextBox x:Name="TxtA2Cause" Style="{StaticResource FormBoxSm}"
+                                                                     MaxLength="100"
                                                                      TextChanged="TxtA2Cause_TextChanged"/>
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="2">
                                                             <TextBlock Text="Date" Style="{StaticResource FieldLabelSm}"/>
-                                                            <DatePicker x:Name="DpA2Date" Style="{StaticResource FormDateSm}"/>
+                                                            <DatePicker x:Name="DpA2Date" Style="{StaticResource FormDateSm}"
+                                                                        DateValidationError="DatePicker_DateValidationError"
+                                                                        LostFocus="DatePicker_LostFocus"/>
                                                         </StackPanel>
                                                     </Grid>
                                                 </StackPanel>
@@ -1210,6 +1234,7 @@
                                                                          BorderThickness="0"
                                                                          Background="Transparent" Padding="10,0"
                                                                          VerticalContentAlignment="Center"
+                                                                         MaxLength="50"
                                                                          PreviewTextInput="NameOnly_PreviewTextInput"
                                                                          LostFocus="FamilyMemberName_LostFocus"
                                                                          Text="{Binding MemberName, UpdateSourceTrigger=PropertyChanged}"/>
@@ -1230,6 +1255,7 @@
                                                                          BorderThickness="0"
                                                                          Background="Transparent" Padding="4,0"
                                                                          VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                                                                         MaxLength="3"
                                                                          IsReadOnly="True" Focusable="False" Cursor="Arrow"
                                                                          ToolTip="Auto-calculated from Birthdate"
                                                                          Text="{Binding Age, Mode=OneWay}"/>
@@ -1238,6 +1264,8 @@
                                                                 <DatePicker Height="38"
                                                                             Style="{StaticResource FormDate}"
                                                                             BorderThickness="0" Background="Transparent"
+                                                                            DateValidationError="DatePicker_DateValidationError"
+                                                                            LostFocus="DatePicker_LostFocus"
                                                                             SelectedDate="{Binding BirthdateDate, UpdateSourceTrigger=PropertyChanged}"/>
                                                             </Border>
                                                             <Border Grid.Column="4" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
@@ -1251,6 +1279,7 @@
                                                                     <ComboBoxItem Content="Married"/>
                                                                     <ComboBoxItem Content="Widowed"/>
                                                                     <ComboBoxItem Content="Separated"/>
+                                                                    <ComboBoxItem Content="Divorced"/>
                                                                     <ComboBoxItem Content="Annulled"/>
                                                                 </ComboBox>
                                                             </Border>
@@ -1277,6 +1306,7 @@
                                                                          BorderThickness="0"
                                                                          Background="Transparent" Padding="10,0"
                                                                          VerticalContentAlignment="Center"
+                                                                         MaxLength="80"
                                                                          Text="{Binding EducationEmployment, UpdateSourceTrigger=PropertyChanged}"/>
                                                             </Border>
                                                             <Border Grid.Column="7" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
@@ -1284,6 +1314,8 @@
                                                                          BorderThickness="0"
                                                                          Background="Transparent" Padding="10,0"
                                                                          VerticalContentAlignment="Center"
+                                                                         MaxLength="12"
+                                                                         PreviewTextInput="NumberOnly_PreviewTextInput"
                                                                          Text="{Binding Income, UpdateSourceTrigger=PropertyChanged}"/>
                                                             </Border>
                                                             <Button Grid.Column="8" Height="38" Width="32" Cursor="Hand"
@@ -1344,6 +1376,7 @@
                                             <TextBlock Text="V. NEEDS AND PROBLEMS" Style="{StaticResource SectionLabel}"/>
                                         </Border>
                                         <TextBox x:Name="TxtNeeds" Style="{StaticResource FormBox}"
+                                                 MaxLength="500"
                                                  Height="80" TextWrapping="Wrap" AcceptsReturn="True"
                                                  VerticalScrollBarVisibility="Auto"
                                                  VerticalContentAlignment="Top" Padding="14,10"
@@ -1358,6 +1391,7 @@
                                             <TextBlock Text="VI. OTHER SOURCES OF INCOME" Style="{StaticResource SectionLabel}"/>
                                         </Border>
                                         <TextBox x:Name="TxtOtherIncome" Style="{StaticResource FormBox}"
+                                                 MaxLength="500"
                                                  Height="70" TextWrapping="Wrap" AcceptsReturn="True"
                                                  VerticalScrollBarVisibility="Auto"
                                                  VerticalContentAlignment="Top" Padding="14,10"

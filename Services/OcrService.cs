@@ -3,19 +3,70 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using SOLUM_UI.Models;
 
 namespace SOLUM_UI.Services
 {
+    public class OcrWarmupProgress
+    {
+        public string Stage { get; set; } = "Checking Status";
+        public string Detail { get; set; } = "Checking AI OCR engine status...";
+        public int Percent { get; set; } = 5;
+        public double ElapsedSeconds { get; set; } = 0;
+        public double EstimatedSecondsRemaining { get; set; } = 6.0;
+        public bool IsReady { get; set; } = false;
+        public bool HasFailed { get; set; } = false;
+        public string ErrorMessage { get; set; } = null;
+    }
+
     public static class OcrService
     {
         public static string ServerUrl { get; set; } = "http://127.0.0.1:8000";
         private static readonly HttpClient _http = new HttpClient { Timeout = TimeSpan.FromMinutes(2) };
         private static Process _serverProcess;
+
+        public static event Action<OcrWarmupProgress> WarmupProgressChanged;
+        private static readonly SemaphoreSlim _warmupLock = new SemaphoreSlim(1, 1);
+        private static Task<bool> _ongoingWarmupTask = null;
+        private static OcrWarmupProgress _latestProgress = new OcrWarmupProgress
+        {
+            Stage = "Ready",
+            Detail = "AI Engine is ready.",
+            Percent = 100,
+            IsReady = true
+        };
+
+        public static OcrWarmupProgress LatestWarmupProgress => _latestProgress;
+
+        private static void ReportWarmup(string stage, string detail, int percent, double elapsed, double remaining, bool isReady = false, bool hasFailed = false, string error = null)
+        {
+            var p = new OcrWarmupProgress
+            {
+                Stage = stage,
+                Detail = detail,
+                Percent = Math.Max(0, Math.Min(100, percent)),
+                ElapsedSeconds = Math.Round(elapsed, 1),
+                EstimatedSecondsRemaining = Math.Max(0, Math.Round(remaining, 1)),
+                IsReady = isReady,
+                HasFailed = hasFailed,
+                ErrorMessage = error
+            };
+            _latestProgress = p;
+            try
+            {
+                WarmupProgressChanged?.Invoke(p);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("[OcrService] WarmupProgressChanged handler exception: " + ex.Message);
+            }
+        }
 
         public static async Task<bool> IsServerOnlineAsync()
         {
@@ -32,36 +83,226 @@ namespace SOLUM_UI.Services
             }
         }
 
+        public static void EnsureEngineProvisioned()
+        {
+            try
+            {
+                string localAppDataDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "SOLUM", "OcrEngine"
+                );
+
+                if (Directory.Exists(localAppDataDir) &&
+                    (File.Exists(Path.Combine(localAppDataDir, "ocr_server.exe")) || File.Exists(Path.Combine(localAppDataDir, "server.py"))))
+                {
+                    return; // Already set up!
+                }
+
+                // Check for bundled zip archives in the app folder
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string[] zipCandidates = new[]
+                {
+                    Path.Combine(baseDir, "OcrEngine.zip"),
+                    Path.Combine(baseDir, "OcrService.zip"),
+                    Path.Combine(baseDir, "ocr_runtime.zip"),
+                    Path.Combine(baseDir, "ocr_package.zip")
+                };
+
+                foreach (var zip in zipCandidates)
+                {
+                    if (File.Exists(zip))
+                    {
+                        Directory.CreateDirectory(localAppDataDir);
+                        ZipFile.ExtractToDirectory(zip, localAppDataDir);
+                        System.Diagnostics.Debug.WriteLine("[OcrService] Successfully unpacked bundled engine to " + localAppDataDir);
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[OcrService] Engine provisioning note: " + ex.Message);
+            }
+        }
+
         public static async Task<bool> EnsureServerRunningAsync(int timeoutSeconds = 25)
         {
-            if (await IsServerOnlineAsync()) return true;
+            if (await IsServerOnlineAsync())
+            {
+                ReportWarmup("OCR Engine Ready", "Local OpenVINO AI service is active and responsive.", 100, 0, 0, isReady: true);
+                return true;
+            }
+
+            await _warmupLock.WaitAsync();
+            try
+            {
+                if (await IsServerOnlineAsync())
+                {
+                    ReportWarmup("OCR Engine Ready", "Local OpenVINO AI service is active and responsive.", 100, 0, 0, isReady: true);
+                    return true;
+                }
+
+                if (_ongoingWarmupTask != null && !_ongoingWarmupTask.IsCompleted)
+                {
+                    return await _ongoingWarmupTask;
+                }
+
+                _ongoingWarmupTask = RunWarmupCoreAsync(timeoutSeconds);
+                return await _ongoingWarmupTask;
+            }
+            finally
+            {
+                _warmupLock.Release();
+            }
+        }
+
+        private static async Task<bool> RunWarmupCoreAsync(int timeoutSeconds)
+        {
+            var sw = Stopwatch.StartNew();
+            const double targetExpectedDuration = 7.0;
 
             try
             {
-                StartLocalServerProcess();
+                ReportWarmup(
+                    "Checking Engine Components",
+                    "Verifying local AI runtime and model files...",
+                    15,
+                    sw.Elapsed.TotalSeconds,
+                    targetExpectedDuration
+                );
 
-                // Poll for up to timeoutSeconds for the server to spin up
+                EnsureEngineProvisioned();
+
+                ReportWarmup(
+                    "Launching AI Service",
+                    "Starting background Python / OpenVINO process...",
+                    25,
+                    sw.Elapsed.TotalSeconds,
+                    8.0
+                );
+
+                var startResult = StartLocalServerProcess();
+                if (!startResult.Success)
+                {
+                    sw.Stop();
+                    ReportWarmup(
+                        "OCR Engine Not Found",
+                        startResult.ErrorMessage,
+                        0,
+                        sw.Elapsed.TotalSeconds,
+                        0,
+                        hasFailed: true,
+                        error: startResult.ErrorMessage
+                    );
+                    return false;
+                }
+
                 int iterations = Math.Max(10, timeoutSeconds * 2);
+                double totalTimeout = (double)timeoutSeconds;
+                double normalBootEstimate = 8.0;
+
                 for (int i = 0; i < iterations; i++)
                 {
                     await Task.Delay(500);
+
+                    double elapsed = sw.Elapsed.TotalSeconds;
+
+                    // 1. Check if process terminated prematurely
+                    if (_serverProcess != null && _serverProcess.HasExited)
+                    {
+                        sw.Stop();
+                        string err = "";
+                        try { err = _serverProcess.StandardError.ReadToEnd(); } catch { }
+                        if (string.IsNullOrWhiteSpace(err))
+                            err = $"Process terminated unexpectedly with exit code {_serverProcess.ExitCode}.";
+
+                        ReportWarmup(
+                            "OCR Engine Stopped",
+                            $"OCR server exited: {err.Trim()}",
+                            0,
+                            elapsed,
+                            0,
+                            hasFailed: true,
+                            error: err
+                        );
+                        return false;
+                    }
+
+                    // 2. Dynamic, accurate countdown
+                    double remaining;
+                    int pct;
+                    if (elapsed < normalBootEstimate)
+                    {
+                        remaining = Math.Max(1.0, Math.Round(normalBootEstimate - elapsed));
+                        pct = 30 + (int)((elapsed / normalBootEstimate) * 60);
+                    }
+                    else
+                    {
+                        remaining = Math.Max(1.0, Math.Round(totalTimeout - elapsed));
+                        pct = Math.Min(98, 90 + (int)(((elapsed - normalBootEstimate) / Math.Max(1.0, totalTimeout - normalBootEstimate)) * 8));
+                    }
+
+                    string stage = elapsed < 3.0
+                        ? "Starting AI Service"
+                        : "Warming Up Neural Models";
+
+                    string detail = elapsed < 3.0
+                        ? "Initializing server runtime environment..."
+                        : "Loading OpenVINO DBNet & PaddleOCR models into memory...";
+
+                    ReportWarmup(stage, detail, pct, elapsed, remaining);
+
                     if (await IsServerOnlineAsync())
                     {
+                        sw.Stop();
+                        ReportWarmup(
+                            "OCR Engine Ready",
+                            $"AI models loaded successfully ({sw.Elapsed.TotalSeconds:F1}s). Ready for instant scanning.",
+                            100,
+                            sw.Elapsed.TotalSeconds,
+                            0,
+                            isReady: true
+                        );
                         return true;
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Fallback
+                Debug.WriteLine("[OcrService] Warmup exception: " + ex.Message);
             }
 
-            return await IsServerOnlineAsync();
+            sw.Stop();
+            bool finalCheck = await IsServerOnlineAsync();
+            if (finalCheck)
+            {
+                ReportWarmup(
+                    "OCR Engine Ready",
+                    $"AI models loaded successfully ({sw.Elapsed.TotalSeconds:F1}s). Ready for scanning.",
+                    100,
+                    sw.Elapsed.TotalSeconds,
+                    0,
+                    isReady: true
+                );
+                return true;
+            }
+
+            ReportWarmup(
+                "OCR Engine Offline",
+                "The local engine could not be contacted after " + timeoutSeconds + "s. Click Retry or verify Python setup.",
+                0,
+                sw.Elapsed.TotalSeconds,
+                0,
+                hasFailed: true,
+                error: "Server did not respond on " + ServerUrl
+            );
+
+            return false;
         }
 
-        public static void StartLocalServerProcess()
+        public static (bool Success, string ErrorMessage) StartLocalServerProcess()
         {
-            if (_serverProcess != null && !_serverProcess.HasExited) return;
+            if (_serverProcess != null && !_serverProcess.HasExited) return (true, null);
 
             string ocrDir = FindOcrDirectory();
 
@@ -75,17 +316,32 @@ namespace SOLUM_UI.Services
                     WorkingDirectory = ocrDir,
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
-                    UseShellExecute = false
+                    UseShellExecute = false,
+                    RedirectStandardError = true
                 };
-                _serverProcess = Process.Start(psi);
-                return;
+                try
+                {
+                    _serverProcess = Process.Start(psi);
+                    return (true, null);
+                }
+                catch (Exception ex)
+                {
+                    return (false, $"Failed to launch ocr_server.exe: {ex.Message}");
+                }
             }
 
-            // 2. Check for local Python virtual environment or system Python
+            // 2. Check for local Python virtual environment, portable runtime, or system Python
             string serverPy = Path.Combine(ocrDir, "server.py");
-            if (!File.Exists(serverPy)) return;
+            if (!File.Exists(serverPy))
+            {
+                return (false, $"OCR server script 'server.py' was not found in: {ocrDir}");
+            }
 
             string pythonExe = FindPythonExecutable(ocrDir);
+            if (string.IsNullOrEmpty(pythonExe) || (!File.Exists(pythonExe) && !IsExecutableOnPath(pythonExe)))
+            {
+                return (false, "Local Python runtime not found on this machine. OCR requires Python 3.9 - 3.12 or a standalone engine.");
+            }
 
             var pyPsi = new ProcessStartInfo
             {
@@ -94,22 +350,54 @@ namespace SOLUM_UI.Services
                 WorkingDirectory = ocrDir,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = false
+                UseShellExecute = false,
+                RedirectStandardError = true
             };
 
             try
             {
                 _serverProcess = Process.Start(pyPsi);
+                return (true, null);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("[OcrService] Failed to start Python server process: " + ex.Message);
+                return (false, $"Could not start Python ({pythonExe}): {ex.Message}");
             }
+        }
+
+        private static bool IsExecutableOnPath(string exe)
+        {
+            if (string.IsNullOrEmpty(exe)) return false;
+            if (File.Exists(exe)) return true;
+            string pathEnv = Environment.GetEnvironmentVariable("PATH") ?? "";
+            foreach (var dir in pathEnv.Split(';'))
+            {
+                if (string.IsNullOrWhiteSpace(dir)) continue;
+                try
+                {
+                    string full = Path.Combine(dir.Trim(), exe);
+                    if (File.Exists(full)) return true;
+                    if (!exe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) && File.Exists(full + ".exe")) return true;
+                }
+                catch { }
+            }
+            return false;
         }
 
         public static string FindOcrDirectory()
         {
-            // 1. Check AppDomain BaseDirectory and search upwards up to 5 levels
+            // 1. Check user local app data directory (where auto-provisioning unpacks)
+            string localAppDataDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "SOLUM", "OcrEngine"
+            );
+            if (Directory.Exists(localAppDataDir) &&
+                (File.Exists(Path.Combine(localAppDataDir, "ocr_server.exe")) || File.Exists(Path.Combine(localAppDataDir, "server.py"))))
+            {
+                return localAppDataDir;
+            }
+
+            // 2. Check AppDomain BaseDirectory and search upwards up to 5 levels
             string current = AppDomain.CurrentDomain.BaseDirectory;
             for (int i = 0; i < 5; i++)
             {
@@ -124,7 +412,7 @@ namespace SOLUM_UI.Services
                 current = parent.FullName;
             }
 
-            // 2. Check current working directory and search upwards
+            // 3. Check current working directory and search upwards
             string cwd = Directory.GetCurrentDirectory();
             for (int i = 0; i < 5; i++)
             {
@@ -144,19 +432,38 @@ namespace SOLUM_UI.Services
 
         private static string FindPythonExecutable(string ocrDir)
         {
-            // 1. Check venv inside OcrService directory
+            // 1. Check embedded/portable python-runtime inside OcrService directory
+            string portablePython = Path.Combine(ocrDir, "python-runtime", "python.exe");
+            if (File.Exists(portablePython)) return portablePython;
+
+            // 2. Check venv inside OcrService directory
             string venvPython = Path.Combine(ocrDir, "venv", "Scripts", "python.exe");
             if (File.Exists(venvPython)) return venvPython;
 
-            // 2. Check common Python installation paths
+            // 3. Check direct python.exe in ocrDir
+            string directPython = Path.Combine(ocrDir, "python.exe");
+            if (File.Exists(directPython)) return directPython;
+
+            // 4. Check user local app data installations (default Windows python.org installer for non-admin users)
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string[] userPythonVersions = new[] { "Python313", "Python312", "Python311", "Python310", "Python39" };
+            foreach (var ver in userPythonVersions)
+            {
+                string p = Path.Combine(localAppData, "Programs", "Python", ver, "python.exe");
+                if (File.Exists(p)) return p;
+            }
+
+            // 5. Check common machine-wide Python installation paths
             string[] knownPaths = new[]
             {
+                @"C:\Python312\python.exe",
+                @"C:\Program Files\Python312\python.exe",
                 @"C:\Python311\python.exe",
                 @"C:\Program Files\Python311\python.exe",
                 @"C:\Python310\python.exe",
                 @"C:\Program Files\Python310\python.exe",
-                @"C:\Python312\python.exe",
-                @"C:\Program Files\Python312\python.exe"
+                @"C:\Python39\python.exe",
+                @"C:\Program Files\Python39\python.exe"
             };
 
             foreach (var p in knownPaths)
@@ -164,7 +471,14 @@ namespace SOLUM_UI.Services
                 if (File.Exists(p)) return p;
             }
 
-            return "python.exe";
+            // 6. Check Windows Python launcher
+            string pyLauncher = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "py.exe");
+            if (File.Exists(pyLauncher)) return pyLauncher;
+
+            if (IsExecutableOnPath("python.exe")) return "python.exe";
+            if (IsExecutableOnPath("python")) return "python";
+
+            return null;
         }
 
         public static void StopLocalServerProcess()
@@ -519,15 +833,33 @@ namespace SOLUM_UI.Services
         {
             if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
             string norm = raw.Trim().ToLowerInvariant();
-            if (norm.StartsWith("f") || norm.Contains("fem") || norm.Contains("babae") || norm == "w") return "Female";
-            if (norm.StartsWith("m") || norm.Contains("masc") || norm.Contains("lalaki") || norm == "man") return "Male";
-            if (norm.Contains("other") || norm.Contains("lgbt") || norm.Contains("x")) return "Others";
+            norm = Regex.Replace(norm, @"^(sex|gender|kasarian)\s*[:\-_.]*", "");
+            string clean = Regex.Replace(norm, @"[^a-z]", "");
+
+            if (clean == "f" || clean == "female" || clean == "fem" || clean == "b" || clean == "babae" || clean == "w" || clean == "woman")
+                return "Female";
+            if (clean == "m" || clean == "male" || clean == "mas" || clean == "masc" || clean == "l" || clean == "lalaki" || clean == "man")
+                return "Male";
+
+            if (clean.StartsWith("fem") || norm.Contains("female") || norm.Contains("babae"))
+                return "Female";
+            if (clean.StartsWith("mas") || (norm.Contains("male") && !norm.Contains("female")) || norm.Contains("lalaki"))
+                return "Male";
+
+            if (clean.StartsWith("f"))
+                return "Female";
+            if (clean.StartsWith("m") && clean != "mother")
+                return "Male";
+
+            if (clean.Contains("other") || clean.Contains("lgbt") || clean == "x")
+                return "Others";
+
             return string.Empty;
         }
 
         public static readonly string[] StandardReligions = new[]
         {
-            "Roman Catholic",
+            "Catholic",
             "Islam",
             "Iglesia ni Cristo",
             "Seventh-day Adventist",
@@ -544,13 +876,13 @@ namespace SOLUM_UI.Services
             string norm = raw.Trim().ToLowerInvariant();
             string clean = Regex.Replace(norm, @"[^a-z0-9]", "");
 
-            // 1. Direct & keyword matching for Roman Catholic
+            // 1. Direct & keyword matching for Catholic
             string[] cathKeywords = new[] { "cath", "katol", "roman", "rc", "ctolc", "catol", "katlk", "cthlc", "cathl", "cato", "kato", "ctc" };
             if (cathKeywords.Any(k => clean.Contains(k)) || norm.Contains("catholic") || norm.Contains("katoliko") || norm.Contains("r.c."))
-                return "Roman Catholic";
+                return "Catholic";
 
             if (ComputeSimilarity(clean, "catholic") >= 0.45 || ComputeSimilarity(clean, "katoliko") >= 0.45)
-                return "Roman Catholic";
+                return "Catholic";
 
             // 2. Other denominations
             if (clean.Contains("islam") || clean.Contains("muslim") || clean.Contains("moslem") || clean.Contains("mslm")) return "Islam";
@@ -613,43 +945,52 @@ namespace SOLUM_UI.Services
         {
             if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
             string norm = raw.Trim().ToLowerInvariant();
-            string clean = Regex.Replace(norm, @"[^a-z]", "");
+            norm = Regex.Replace(norm, @"^(civil\s*s?tatus|status|kasarian)\s*[:\-_.]*", "");
+            string clean = Regex.Replace(norm, @"[^a-z0-9]", "");
+            string alpha = Regex.Replace(norm, @"[^a-z]", "");
 
             // 1. Single letter or short abbreviation
-            if (clean == "s" || clean == "sin" || clean == "sngl" || clean == "simgle" || clean == "simglt" || clean == "singl")
+            // S = Single
+            if (alpha == "s" || alpha == "sin" || alpha == "sngl" || alpha == "sing" || alpha == "simgle" || alpha == "simglt" || alpha == "singl" || clean == "5")
                 return "Single";
-            if (clean == "m" || clean == "mar" || clean == "marr" || clean == "mared" || clean == "marrd")
+            // M = Married
+            if (alpha == "m" || alpha == "mar" || alpha == "marr" || alpha == "mared" || alpha == "marrd" || alpha == "mrd" || clean == "rn")
                 return "Married";
-            if (clean == "w" || clean == "wid" || clean == "wdw" || clean == "balo" || clean == "biyuda" || clean == "biyudo")
-                return "Widowed";
-            if (clean == "d" || clean == "div")
+            // D = Divorced
+            if (alpha == "d" || alpha == "div" || alpha == "dv")
                 return "Divorced";
-            if (clean == "a" || clean == "anul" || clean == "anulled" || clean == "annul")
+            // A = Annulled
+            if (alpha == "a" || alpha == "ann" || alpha == "anl" || alpha == "anul" || alpha == "anulled" || alpha == "annul" || clean == "4")
                 return "Annulled";
-            if (clean == "sep" || clean == "hiwalay")
+            // W = Widowed
+            if (alpha == "w" || alpha == "wid" || alpha == "wdw" || alpha == "balo" || alpha == "biyuda" || alpha == "biyudo")
+                return "Widowed";
+            // Sep = Separated
+            if (alpha == "sep" || alpha == "sp" || norm.Contains("s/p") || alpha == "hiwalay" || alpha == "separated")
                 return "Separated";
-            if (clean == "c" || clean == "live" || clean == "livein" || clean == "kinakasama")
+            // C = Common-law
+            if (alpha == "c" || alpha == "live" || alpha == "livein" || alpha == "kinakasama")
                 return "Common-law / Live-in";
 
             // 2. Keyword containment
-            if (clean.Contains("single") || clean.Contains("dalaga") || clean.Contains("binata") || clean.Contains("walang"))
+            if (alpha.Contains("single") || alpha.Contains("dalaga") || alpha.Contains("binata") || alpha.Contains("walang"))
                 return "Single";
-            if (clean.Contains("married") || clean.Contains("kasal"))
+            if (alpha.Contains("married") || alpha.Contains("kasal"))
                 return "Married";
-            if (clean.Contains("widow") || clean.Contains("biyud") || clean.Contains("balo"))
+            if (alpha.Contains("widow") || alpha.Contains("biyud") || alpha.Contains("balo"))
                 return "Widowed";
-            if (clean.Contains("sep") || clean.Contains("hiwalay") || clean.Contains("defacto"))
+            if (alpha.Contains("sep") || alpha.Contains("hiwalay") || alpha.Contains("defacto"))
                 return "Separated";
-            if (clean.Contains("divorc") || clean.Contains("diborsyo"))
+            if (alpha.Contains("divorc") || alpha.Contains("diborsyo"))
                 return "Divorced";
-            if (clean.Contains("annul") || clean.Contains("pawalang"))
+            if (alpha.Contains("annul") || alpha.Contains("pawalang"))
                 return "Annulled";
-            if (clean.Contains("live") || clean.Contains("common") || clean.Contains("kinakasama"))
+            if (alpha.Contains("live") || alpha.Contains("common") || alpha.Contains("kinakasama"))
                 return "Common-law / Live-in";
 
             foreach (var st in StandardCivilStatuses)
             {
-                if (ComputeSimilarity(clean, st.ToLowerInvariant()) >= 0.60)
+                if (ComputeSimilarity(alpha, st.ToLowerInvariant()) >= 0.60)
                     return st;
             }
 
@@ -658,24 +999,15 @@ namespace SOLUM_UI.Services
 
         public static readonly string[] StandardRelationships = new[]
         {
-            "Mother",
-            "Father",
-            "Sister",
-            "Brother",
-            "Son",
-            "Daughter",
             "Child",
             "Spouse",
-            "Aunt",
-            "Uncle",
-            "Cousin",
-            "Grandmother",
-            "Grandfather",
-            "In-law",
-            "Friend",
-            "Neighbor",
-            "Guardian",
-            "Others"
+            "Parent",
+            "Sibling",
+            "Grandchild",
+            "Grandparent",
+            "Relative",
+            "Ward",
+            "Other"
         };
 
         public static string FuzzyMatchRelationship(string raw)
@@ -684,23 +1016,15 @@ namespace SOLUM_UI.Services
             string norm = raw.Trim().ToLowerInvariant();
             string clean = Regex.Replace(norm, @"[^a-z]", "");
 
-            if (clean.Contains("sister") || clean.Contains("sis") || clean.Contains("ate") || clean.Contains("sstr")) return "Sister";
-            if (clean.Contains("brother") || clean.Contains("bro") || clean.Contains("kuya") || clean.Contains("brthr")) return "Brother";
-            if (clean.Contains("mother") || clean.Contains("ina") || clean.Contains("nanay") || clean.Contains("mom") || clean.Contains("mama") || clean.Contains("nay")) return "Mother";
-            if (clean.Contains("father") || clean.Contains("ama") || clean.Contains("tatay") || clean.Contains("dad") || clean.Contains("papa") || clean.Contains("tay")) return "Father";
-            if (clean.Contains("daughter") || clean.Contains("dauglster") || clean.Contains("dtr") || clean.Contains("daugh")) return "Daughter";
-            if (clean.Contains("son") || clean.Contains("anaknalalaki")) return "Son";
-            if (clean.Contains("child") || clean.Contains("anak") || clean.Contains("bata")) return "Child";
+            if (clean.Contains("child") || clean.Contains("anak") || clean.Contains("son") || clean.Contains("daughter") || clean.Contains("dtr") || clean.Contains("bata")) return "Child";
             if (clean.Contains("spouse") || clean.Contains("asawa") || clean.Contains("husband") || clean.Contains("wife") || clean.Contains("partner")) return "Spouse";
-            if (clean.Contains("aunt") || clean.Contains("tita") || clean.Contains("tiya")) return "Aunt";
-            if (clean.Contains("uncle") || clean.Contains("tito") || clean.Contains("tiyo")) return "Uncle";
-            if (clean.Contains("cousin") || clean.Contains("pinsan")) return "Cousin";
-            if (clean.Contains("grandmother") || clean.Contains("lola") || clean.Contains("grandma")) return "Grandmother";
-            if (clean.Contains("grandfather") || clean.Contains("lolo") || clean.Contains("grandpa")) return "Grandfather";
-            if (clean.Contains("inlaw") || clean.Contains("biyanan") || clean.Contains("hipag") || clean.Contains("bayaw")) return "In-law";
-            if (clean.Contains("friend") || clean.Contains("kaibigan")) return "Friend";
-            if (clean.Contains("neighbor") || clean.Contains("kapitbahay")) return "Neighbor";
-            if (clean.Contains("guardian") || clean.Contains("tagapangalaga")) return "Guardian";
+            if (clean.Contains("mother") || clean.Contains("father") || clean.Contains("nanay") || clean.Contains("tatay") || clean.Contains("ina") || clean.Contains("ama") || clean.Contains("mom") || clean.Contains("dad") || clean.Contains("parent") || clean.Contains("mama") || clean.Contains("papa")) return "Parent";
+            if (clean.Contains("sister") || clean.Contains("brother") || clean.Contains("ate") || clean.Contains("kuya") || clean.Contains("kapatid") || clean.Contains("sibling") || clean.Contains("bro") || clean.Contains("sis")) return "Sibling";
+            if (clean.Contains("grandchild") || clean.Contains("apo") || clean.Contains("grandson") || clean.Contains("granddaughter")) return "Grandchild";
+            if (clean.Contains("grandmother") || clean.Contains("grandfather") || clean.Contains("lolo") || clean.Contains("lola") || clean.Contains("grandparent")) return "Grandparent";
+            if (clean.Contains("aunt") || clean.Contains("uncle") || clean.Contains("tita") || clean.Contains("tito") || clean.Contains("cousin") || clean.Contains("pinsan") || clean.Contains("inlaw") || clean.Contains("hipag") || clean.Contains("bayaw") || clean.Contains("relative") || clean.Contains("kamag")) return "Relative";
+            if (clean.Contains("ward") || clean.Contains("alaga") || clean.Contains("guardian") || clean.Contains("tagapangalaga")) return "Ward";
+            if (clean.Contains("friend") || clean.Contains("kaibigan") || clean.Contains("neighbor") || clean.Contains("kapitbahay") || clean.Contains("other")) return "Other";
 
             foreach (var r in StandardRelationships)
             {
@@ -841,15 +1165,64 @@ namespace SOLUM_UI.Services
             if (string.IsNullOrWhiteSpace(raw)) return false;
 
             string s = raw.Trim();
-            s = Regex.Replace(s, @"^(date\s*of\s*birth|birthdate|dob|kaarawan|bday)\s*[:\-_.]*", "", RegexOptions.IgnoreCase).Trim();
+            s = Regex.Replace(s, @"^(date\s*of\s*(this\s*)?application|application\s*date|petsa(\s*ng\s*aplikasyon)?|date\s*of\s*birth|birthdate|dob|kaarawan|bday|date)\s*[:\-_.]*", "", RegexOptions.IgnoreCase).Trim();
             s = Regex.Replace(s, @"^\s*\(?\s*m+[/.]?d+[/.]?y+\s*\)?\s*", "", RegexOptions.IgnoreCase).Trim();
 
-            if (DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
-                return true;
-            if (DateTime.TryParse(s, out result))
-                return true;
+            // 1. Check written month names if text contains letters (e.g. 'May 2, 2002', '19 June 2004', '2-May-2002', 'Jum192004')
+            if (Regex.IsMatch(s, @"[a-zA-Z]{3,}"))
+            {
+                // Day first: e.g. 19 June 2004, 2 May 2002, 2-May-2002, 19th June 2004
+                var mDayFirst = Regex.Match(s, @"\b(\d{1,2})(?:st|nd|rd|th)?[\s\-_,]+([a-zA-Z]{3,})[\s\-_,]+(\d{4}|\d{2})\b");
+                if (mDayFirst.Success)
+                {
+                    int day = int.Parse(mDayFirst.Groups[1].Value);
+                    string mStr = mDayFirst.Groups[2].Value.ToLowerInvariant();
+                    string yStr = mDayFirst.Groups[3].Value;
+                    int yr = yStr.Length == 4 ? int.Parse(yStr) : (int.Parse(yStr) < 40 ? 2000 + int.Parse(yStr) : 1900 + int.Parse(yStr));
+                    int mNum = ParseMonthWordToNum(mStr);
+                    if (mNum >= 1 && mNum <= 12 && day >= 1 && day <= DateTime.DaysInMonth(yr, mNum))
+                    {
+                        try { result = new DateTime(yr, mNum, day); return true; } catch { }
+                    }
+                }
 
-            // Check ISO YYYY-MM-DD or YYYY/MM/DD
+                // Month first: e.g. June 19, 2004, May 2, 2002, May 2 2002
+                var mMonthFirst = Regex.Match(s, @"\b([a-zA-Z]{3,})[\s\-_,]*(\d{1,2})(?:st|nd|rd|th)?[\s\-_,]+(\d{4}|\d{2})\b");
+                if (mMonthFirst.Success)
+                {
+                    string mStr = mMonthFirst.Groups[1].Value.ToLowerInvariant();
+                    int day = int.Parse(mMonthFirst.Groups[2].Value);
+                    string yStr = mMonthFirst.Groups[3].Value;
+                    int yr = yStr.Length == 4 ? int.Parse(yStr) : (int.Parse(yStr) < 40 ? 2000 + int.Parse(yStr) : 1900 + int.Parse(yStr));
+                    int mNum = ParseMonthWordToNum(mStr);
+                    if (mNum >= 1 && mNum <= 12 && day >= 1 && day <= DateTime.DaysInMonth(yr, mNum))
+                    {
+                        try { result = new DateTime(yr, mNum, day); return true; } catch { }
+                    }
+                }
+
+                // Concat: e.g. Jum192004, June192004
+                var mConcat = Regex.Match(s, @"\b([a-zA-Z]{3,})(\d{1,2})(\d{4})\b");
+                if (mConcat.Success)
+                {
+                    string mStr = mConcat.Groups[1].Value.ToLowerInvariant();
+                    int day = int.Parse(mConcat.Groups[2].Value);
+                    int yr = int.Parse(mConcat.Groups[3].Value);
+                    int mNum = ParseMonthWordToNum(mStr);
+                    if (mNum >= 1 && mNum <= 12 && day >= 1 && day <= DateTime.DaysInMonth(yr, mNum))
+                    {
+                        try { result = new DateTime(yr, mNum, day); return true; } catch { }
+                    }
+                }
+
+                // Fallback standard DateTime.TryParse with invariant and US cultures
+                if (DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
+                    return true;
+                if (DateTime.TryParse(s, new CultureInfo("en-US"), DateTimeStyles.None, out result))
+                    return true;
+            }
+
+            // 2. Check ISO YYYY-MM-DD or YYYY/MM/DD
             var matchIso = Regex.Match(s, @"^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})");
             if (matchIso.Success)
             {
@@ -858,13 +1231,50 @@ namespace SOLUM_UI.Services
                 int d = int.Parse(matchIso.Groups[3].Value);
                 try
                 {
-                    result = new DateTime(y, m, d);
-                    return true;
+                    if (y >= 1900 && y <= 2099 && m >= 1 && m <= 12 && d >= 1 && d <= DateTime.DaysInMonth(y, m))
+                    {
+                        result = new DateTime(y, m, d);
+                        return true;
+                    }
                 }
                 catch { }
             }
 
-            // Check missing one slash: e.g. 1/252020 or 01/252020
+            // 3. Numeric with separators: DD/MM/YYYY or MM/DD/YYYY
+            var mSlash = Regex.Match(s, @"^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})$");
+            if (mSlash.Success)
+            {
+                int p1 = int.Parse(mSlash.Groups[1].Value);
+                int p2 = int.Parse(mSlash.Groups[2].Value);
+                string yStr = mSlash.Groups[3].Value;
+                int yr = yStr.Length == 4 ? int.Parse(yStr) : (int.Parse(yStr) < 40 ? 2000 + int.Parse(yStr) : 1900 + int.Parse(yStr));
+
+                // If p1 > 12: p1 is definitely Day, p2 is Month (DD/MM/YYYY)
+                if (p1 > 12 && p2 <= 12 && p1 <= DateTime.DaysInMonth(yr, p2))
+                {
+                    result = new DateTime(yr, p2, p1);
+                    return true;
+                }
+                // If p2 > 12: p1 is definitely Month, p2 is Day (MM/DD/YYYY)
+                if (p2 > 12 && p1 <= 12 && p2 <= DateTime.DaysInMonth(yr, p1))
+                {
+                    result = new DateTime(yr, p1, p2);
+                    return true;
+                }
+                // Both <= 12: In Philippine context, default to DD/MM/YYYY
+                if (p2 <= 12 && p1 <= DateTime.DaysInMonth(yr, p2))
+                {
+                    result = new DateTime(yr, p2, p1);
+                    return true;
+                }
+                if (p1 <= 12 && p2 <= DateTime.DaysInMonth(yr, p1))
+                {
+                    result = new DateTime(yr, p1, p2);
+                    return true;
+                }
+            }
+
+            // 4. Missing one separator: e.g. 1/252020 or 01/252020
             var mOneSlash1 = Regex.Match(s, @"^(\d{1,2})[/\-.](\d{1,2})(\d{4})$");
             if (mOneSlash1.Success)
             {
@@ -880,7 +1290,7 @@ namespace SOLUM_UI.Services
                 }
             }
 
-            // Check missing first slash: e.g. 0125/2020
+            // Missing first separator: e.g. 0125/2020
             var mOneSlash2 = Regex.Match(s, @"^(\d{1,2})(\d{2})[/\-.](\d{4})$");
             if (mOneSlash2.Success)
             {
@@ -896,46 +1306,7 @@ namespace SOLUM_UI.Services
                 }
             }
 
-            // Check written month: e.g. June 19 2004 or Jum192004 or 19 June 2004
-            var mWordMatch = Regex.Match(s, @"([a-zA-Z]{3,})\s*(\d{1,2})\s*(\d{4}|\d{2})");
-            if (mWordMatch.Success)
-            {
-                string mStr = mWordMatch.Groups[1].Value.ToLowerInvariant();
-                int day = int.Parse(mWordMatch.Groups[2].Value);
-                string yStr = mWordMatch.Groups[3].Value;
-                int yr = yStr.Length == 4 ? int.Parse(yStr) : (int.Parse(yStr) < 40 ? 2000 + int.Parse(yStr) : 1900 + int.Parse(yStr));
-                int mNum = ParseMonthWordToNum(mStr);
-                if (mNum > 0 && day >= 1 && day <= 31)
-                {
-                    try
-                    {
-                        result = new DateTime(yr, mNum, day);
-                        return true;
-                    }
-                    catch { }
-                }
-            }
-
-            var mDayFirst = Regex.Match(s, @"(\d{1,2})\s*([a-zA-Z]{3,})\s*(\d{4}|\d{2})");
-            if (mDayFirst.Success)
-            {
-                int day = int.Parse(mDayFirst.Groups[1].Value);
-                string mStr = mDayFirst.Groups[2].Value.ToLowerInvariant();
-                string yStr = mDayFirst.Groups[3].Value;
-                int yr = yStr.Length == 4 ? int.Parse(yStr) : (int.Parse(yStr) < 40 ? 2000 + int.Parse(yStr) : 1900 + int.Parse(yStr));
-                int mNum = ParseMonthWordToNum(mStr);
-                if (mNum > 0 && day >= 1 && day <= 31)
-                {
-                    try
-                    {
-                        result = new DateTime(yr, mNum, day);
-                        return true;
-                    }
-                    catch { }
-                }
-            }
-
-            // Check pure 8 digits: 06192004 or 20040619
+            // 5. Check pure 8 digits: 06192004 or 20040619
             var digitsOnly = Regex.Replace(s, @"\D", "");
             if (digitsOnly.Length == 8)
             {
@@ -947,10 +1318,11 @@ namespace SOLUM_UI.Services
                     try { result = new DateTime(y1, m1, d1); return true; } catch { }
                 }
 
-                int m2 = int.Parse(digitsOnly.Substring(0, 2));
-                int d2 = int.Parse(digitsOnly.Substring(2, 2));
+                // Try DDMMYYYY
+                int d2 = int.Parse(digitsOnly.Substring(0, 2));
+                int m2 = int.Parse(digitsOnly.Substring(2, 2));
                 int y2 = int.Parse(digitsOnly.Substring(4, 4));
-                if (y2 >= 1920 && y2 <= 2030 && m2 >= 1 && m2 <= 12 && d2 >= 1 && d2 <= 31)
+                if (y2 >= 1920 && y2 <= 2030 && m2 >= 1 && m2 <= 12 && d2 >= 1 && d2 <= DateTime.DaysInMonth(y2, m2))
                 {
                     try { result = new DateTime(y2, m2, d2); return true; } catch { }
                 }
@@ -958,8 +1330,8 @@ namespace SOLUM_UI.Services
 
             if (digitsOnly.Length == 7)
             {
-                int m = int.Parse(digitsOnly.Substring(0, 1));
-                int d = int.Parse(digitsOnly.Substring(1, 2));
+                int d = int.Parse(digitsOnly.Substring(0, 1));
+                int m = int.Parse(digitsOnly.Substring(1, 2));
                 int yr = int.Parse(digitsOnly.Substring(3, 4));
                 if (yr >= 1920 && yr <= 2030 && m >= 1 && m <= 12 && d >= 1 && d <= DateTime.DaysInMonth(yr, m))
                 {
@@ -969,8 +1341,8 @@ namespace SOLUM_UI.Services
 
             if (digitsOnly.Length == 6)
             {
-                int m = int.Parse(digitsOnly.Substring(0, 2));
-                int d = int.Parse(digitsOnly.Substring(2, 2));
+                int d = int.Parse(digitsOnly.Substring(0, 2));
+                int m = int.Parse(digitsOnly.Substring(2, 2));
                 int y2 = int.Parse(digitsOnly.Substring(4, 2));
                 int yr = y2 < 40 ? 2000 + y2 : 1900 + y2;
                 if (m >= 1 && m <= 12 && d >= 1 && d <= DateTime.DaysInMonth(yr, m))
@@ -978,6 +1350,9 @@ namespace SOLUM_UI.Services
                     try { result = new DateTime(yr, m, d); return true; } catch { }
                 }
             }
+
+            if (DateTime.TryParse(s, out result))
+                return true;
 
             return false;
         }
@@ -1048,44 +1423,13 @@ namespace SOLUM_UI.Services
             if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
 
             string s = raw.Trim();
-            s = Regex.Replace(s, @"^(date\s*of\s*birth|birthdate|dob|kaarawan|bday)\s*[:\-_.]*", "", RegexOptions.IgnoreCase).Trim();
+            s = Regex.Replace(s, @"^(date\s*of\s*(this\s*)?application|application\s*date|petsa(\s*ng\s*aplikasyon)?|date\s*of\s*birth|birthdate|dob|kaarawan|bday|date)\s*[:\-_.]*", "", RegexOptions.IgnoreCase).Trim();
             s = Regex.Replace(s, @"^\s*\(?\s*m+[/.]?d+[/.]?y+\s*\)?\s*", "", RegexOptions.IgnoreCase).Trim();
 
-            // 1. Try generic TryParseOcrDate
             if (TryParseOcrDate(s, out DateTime dt))
             {
                 parsedDate = dt;
-                return dt.ToString("MM/dd/yyyy");
-            }
-
-            // 2. Explicit MM/DD/YY or MM/DD/YYYY as specified on the CSWDO form
-            var m = Regex.Match(s, @"^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})$");
-            if (m.Success)
-            {
-                int p1 = int.Parse(m.Groups[1].Value);
-                int p2 = int.Parse(m.Groups[2].Value);
-                string yStr = m.Groups[3].Value;
-                int yr = yStr.Length == 4 
-                    ? int.Parse(yStr) 
-                    : (int.Parse(yStr) <= DateTime.Today.Year % 100 ? 2000 + int.Parse(yStr) : 1900 + int.Parse(yStr));
-
-                int month = p1;
-                int day = p2;
-                if (month > 12 && day <= 12)
-                {
-                    int tmp = month; month = day; day = tmp;
-                }
-
-                try
-                {
-                    if (month >= 1 && month <= 12 && day >= 1 && day <= DateTime.DaysInMonth(yr, month))
-                    {
-                        var d = new DateTime(yr, month, day);
-                        parsedDate = d;
-                        return d.ToString("MM/dd/yyyy");
-                    }
-                }
-                catch { }
+                return dt.ToString("dd/MM/yyyy");
             }
 
             return s;

@@ -1,6 +1,7 @@
 import os
 os.environ["PADDLE_PDX_ENABLE_MKLDNN_BYDEFAULT"] = "False"
 os.environ["PADDLE_PDX_USE_PIR_TRT"] = "False"
+os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
 os.environ["FLAGS_enable_pir_api"] = "0"
 os.environ["FLAGS_use_mkldnn"] = "0"
 os.environ["FLAGS_enable_pir_in_executor"] = "0"
@@ -89,11 +90,12 @@ async def save_template(template_data: dict):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/extract-form")
-def extract_form(file: UploadFile = File(...), mode: str = "global"):
+def extract_form(file: UploadFile = File(...), mode: str = "global", include_preview: bool = False):
     """
     Full document ingestion pipeline:
     mode='global': Single full-page detection + spatial bucketing (Default)
     mode='crop': Legacy field-by-field crop loop (Fallback)
+    include_preview: Whether to return Base64 image in JSON (default False to save ~150ms transfer time)
     """
     print(f"\n=======================================================")
     print(f"[Server] >>> New Document Ingestion Request Received: {file.filename} (mode: {mode})")
@@ -120,7 +122,12 @@ def extract_form(file: UploadFile = File(...), mode: str = "global"):
         result["execution_time_seconds"] = elapsed
         print(f"[Server] 3. OCR Extraction ({mode}) finished in {elapsed}s. Status: {result.get('status')}, Rating: {result.get('overall_rating')}")
         
-        result["preview_image"] = image_to_base64(deskewed_color)
+        # Only serialize heavy Base64 image payload if explicitly requested by client
+        if include_preview:
+            result["preview_image"] = image_to_base64(deskewed_color)
+        else:
+            result["preview_image"] = ""
+            
         print(f"[Server] 4. Returning JSON response to C# client.")
         print(f"=======================================================\n")
         return result

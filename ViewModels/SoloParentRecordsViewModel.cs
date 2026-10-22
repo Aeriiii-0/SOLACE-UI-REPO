@@ -31,7 +31,9 @@ namespace SOLUM_UI.ViewModels
         public static string CurrentUserBarangay { get; set; } = string.Empty;
 
         private bool IsAdmin     => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
-                                    string.Equals(CurrentUserRole, "Admin",          StringComparison.OrdinalIgnoreCase);
+                                    string.Equals(CurrentUserRole, "Admin",          StringComparison.OrdinalIgnoreCase) ||
+                                    string.Equals(CurrentUserRole, "SuperAdmin",     StringComparison.OrdinalIgnoreCase) ||
+                                    AuthApiService.Instance.IsAdmin;
         private bool IsBasicUser => string.Equals(CurrentUserRole, "BasicUser",    StringComparison.OrdinalIgnoreCase);
         private bool IsEncoder   => string.Equals(CurrentUserRole, "Encoder",      StringComparison.OrdinalIgnoreCase);
 

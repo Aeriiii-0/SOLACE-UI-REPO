@@ -274,6 +274,27 @@
             </Setter>
         </Style>
 
+        <Style x:Key="PagerBtn" TargetType="Button">
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#F1F5F9"/><Setter Property="Foreground" Value="#94A3B8"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Page.Resources>
 
     <Grid>
@@ -326,6 +347,28 @@
                         </Button.Template>
                         <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
                               Fill="#702943" Stretch="Uniform" Width="16" Height="16"/>
+                    </Button>
+                    <Button x:Name="BtnAddAdmin" Height="40" Padding="16,0" Cursor="Hand" Margin="0,0,8,0"
+                            VerticalAlignment="Center" Click="OpenAddAdminPanel_Click" Visibility="Collapsed">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="White" CornerRadius="20" BorderBrush="#702943" BorderThickness="1.5" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FAF0F3"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path Data="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M12,13C14.67,13 20,14.33 20,17V19H4V17C4,14.33 9.33,13 12,13Z"
+                                  Fill="#702943" Stretch="Uniform" Width="13" Height="13"
+                                  Margin="0,0,7,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="+ Add Admin" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="#702943" VerticalAlignment="Center"/>
+                        </StackPanel>
                     </Button>
                     <Button Height="40" Padding="18,0" Cursor="Hand"
                             VerticalAlignment="Center" Click="OpenAddPanel_Click">
@@ -561,7 +604,8 @@
                                                 <Button Height="28" Padding="10,0" BorderThickness="1"
                                                         BorderBrush="#E0CDD3" Background="#FDF8FA" Cursor="Hand"
                                                         Tag="{Binding Id}" Click="EditUser_Click" Margin="0,0,6,0"
-                                                        ToolTip="Edit User Details">
+                                                        IsEnabled="{Binding CanManage}"
+                                                        ToolTip="{Binding ActionDisabledToolTip, TargetNullValue='Edit User Details'}">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border x:Name="Bg" Background="{TemplateBinding Background}"
@@ -612,7 +656,9 @@
                                                                      DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                                                             <MenuItem Header="Reset Password"
                                                                       Click="ResetPassword_Click"
-                                                                      Style="{StaticResource RowMenuItem}">
+                                                                      Style="{StaticResource RowMenuItem}"
+                                                                      IsEnabled="{Binding CanManage}"
+                                                                      ToolTip="{Binding ActionDisabledToolTip}">
                                                                 <MenuItem.Icon>
                                                                     <Path Data="M7,14A2,2 0 0,1 5,12A2,2 0 0,1 7,10A2,2 0 0,1 9,12A2,2 0 0,1 7,14M12.65,10C11.83,7.67 9.61,6 7,6A6,6 0 0,0 1,12A6,6 0 0,0 7,18C9.61,18 11.83,16.33 12.65,14H17V18H21V14H23V10H12.65Z"
                                                                           Fill="#702943" Stretch="Uniform" Width="12" Height="12"/>
@@ -620,7 +666,9 @@
                                                             </MenuItem>
                                                             <MenuItem Header="{Binding ToggleActionToolTip}"
                                                                       Click="ToggleStatus_Click"
-                                                                      Style="{StaticResource RowMenuItem}">
+                                                                      Style="{StaticResource RowMenuItem}"
+                                                                      IsEnabled="{Binding CanManage}"
+                                                                      ToolTip="{Binding ActionDisabledToolTip}">
                                                                 <MenuItem.Icon>
                                                                     <Path Data="{Binding ToggleIconData}"
                                                                           Fill="{Binding ToggleIconBrush}"
@@ -630,7 +678,9 @@
                                                             <Separator Style="{StaticResource RowMenuSeparator}"/>
                                                             <MenuItem Header="Delete User"
                                                                       Click="DeleteUser_Click"
-                                                                      Style="{StaticResource DangerMenuItem}">
+                                                                      Style="{StaticResource DangerMenuItem}"
+                                                                      IsEnabled="{Binding CanManage}"
+                                                                      ToolTip="{Binding ActionDisabledToolTip}">
                                                                 <MenuItem.Icon>
                                                                     <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
                                                                           Fill="#E53935" Stretch="Uniform" Width="12" Height="12"/>
@@ -684,64 +734,33 @@
                 </Grid>
             </Border>
 
-            <!-- Row 3: Modern Pagination Footer -->
-            <Grid Grid.Row="3" Margin="24,0,24,20">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Button x:Name="BtnPrevPage" Width="105" Height="34" Cursor="Hand" Click="BtnPrevPage_Click" Margin="0,0,12,0">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="Bg" Background="White" CornerRadius="17"
-                                        BorderBrush="#E0D0D5" BorderThickness="1.5">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
-                                              Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
-                                        <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
-                                    </StackPanel>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
-                                        <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
-                                    </Trigger>
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-
-                    <Border Background="#FAF2F5" CornerRadius="14" Padding="14,6"
-                            BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,12,0" VerticalAlignment="Center">
-                        <TextBlock x:Name="TxtPageInfo" Text="Page 1 of 1" FontSize="12"
-                                   FontWeight="SemiBold" Foreground="#702943"/>
-                    </Border>
-
-                    <Button x:Name="BtnNextPage" Width="105" Height="34" Cursor="Hand" Click="BtnNextPage_Click">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="Bg" Background="White" CornerRadius="17"
-                                        BorderBrush="#E0D0D5" BorderThickness="1.5">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
-                                        <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
-                                              Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
-                                    </StackPanel>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
-                                        <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
-                                    </Trigger>
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                </StackPanel>
-            </Grid>
+            <!-- Row 3: Modern Pagination Footer (Subsidy Recco Style) -->
+            <Border Grid.Row="3" Margin="24,0,24,20" Background="#FAFAFA" BorderBrush="#EBD8DE" BorderThickness="1" CornerRadius="8" Height="42" Padding="14,0">
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Width="7" Height="7" Fill="#27AE60" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="TxtUsersSummary" Text="0 total users registered" FontSize="11" Foreground="#334155" VerticalAlignment="Center"/>
+                        <TextBlock Text=" • " FontSize="11" Foreground="#CBD5E1" Margin="4,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtUsersPageSummary" Text="Showing 0–0 of 0" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button x:Name="BtnPrevPage" Style="{StaticResource PagerBtn}" Margin="0,0,6,0" Click="BtnPrevPage_Click" ToolTip="Previous page">
+                            <TextBlock Text="‹ Previous" FontSize="10.5" FontWeight="SemiBold"/>
+                        </Button>
+                        <Border Background="#F1F5F9" CornerRadius="6" Padding="8,4" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <TextBlock x:Name="TxtPageInfo" Text="1 of 1" FontSize="10.5" FontWeight="Bold" Foreground="#702943"/>
+                        </Border>
+                        <Button x:Name="BtnNextPage" Style="{StaticResource PagerBtn}" Click="BtnNextPage_Click" ToolTip="Next page">
+                            <TextBlock Text="Next ›" FontSize="10.5" FontWeight="SemiBold"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
 
         <Border x:Name="AddUserPanel" Grid.Column="1" Background="White" BorderBrush="#E2E8F0"
@@ -814,8 +833,13 @@
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,14">
-                            <TextBlock Text="Position" Style="{StaticResource FieldLabel}"/>
-                            <TextBox x:Name="TxtPosition" Text="ENCODER" Style="{StaticResource FormBoxReadOnly}"/>
+                            <TextBlock Text="Position / Role *" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="CmbRole" Style="{StaticResource FormCombo}">
+                                <ComboBoxItem Content="CASEWORKER (ENCODER)" Tag="Caseworker" IsSelected="True"/>
+                                <ComboBoxItem x:Name="CmbRoleItemAdmin" Content="ADMIN" Tag="Admin"/>
+                                <ComboBoxItem x:Name="CmbRoleItemSuperAdmin" Content="SUPERADMIN" Tag="SuperAdmin"/>
+                            </ComboBox>
+                            <TextBox x:Name="TxtPosition" Text="ENCODER" Style="{StaticResource FormBoxReadOnly}" Visibility="Collapsed"/>
                         </StackPanel>
 
                         <StackPanel x:Name="PnlAccountStatus" Margin="0,0,0,14" Visibility="Collapsed">

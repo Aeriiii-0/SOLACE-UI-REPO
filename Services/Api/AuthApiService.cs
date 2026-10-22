@@ -1,3 +1,4 @@
+using SOLUM_UI.Models;
 using SOLUM_UI.Models.Api;
 using System;
 using System.Collections.Generic;
@@ -22,8 +23,14 @@ namespace SOLUM_UI.Services.Api
         public string CurrentUserId => ExtractUserIdFromToken(Token)?.ToString() ?? string.Empty;
 
         public bool IsAuthenticated => !string.IsNullOrWhiteSpace(Token);
-        public bool IsAdmin => CurrentRoles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
-                                                    r.Equals("Administrator", StringComparison.OrdinalIgnoreCase));
+        public bool IsSuperAdmin => CurrentRoles.Any(r => r.Equals(Roles.SuperAdmin, StringComparison.OrdinalIgnoreCase));
+        public bool IsAdmin => CurrentRoles.Any(r => r.Equals(Roles.Admin, StringComparison.OrdinalIgnoreCase) ||
+                                                    r.Equals(Roles.Administrator, StringComparison.OrdinalIgnoreCase) ||
+                                                    r.Equals(Roles.SuperAdmin, StringComparison.OrdinalIgnoreCase));
+        public bool IsAdminOrHigher => IsAdmin;
+        public bool IsCaseworker => CurrentRoles.Any(r => r.Equals(Roles.Caseworker, StringComparison.OrdinalIgnoreCase) ||
+                                                         r.Equals(Roles.Encoder, StringComparison.OrdinalIgnoreCase));
+
         public bool IsEncoder => CurrentRoles.Any(r => r.Equals("Encoder", StringComparison.OrdinalIgnoreCase)) ||
                                  !IsAdmin;
 
@@ -140,6 +147,20 @@ namespace SOLUM_UI.Services.Api
             };
 
             return await ApiClient.Instance.PostAsync<RegisterUserRequest, RegisterResponse>("api/auth/register-admin", req);
+        }
+
+        public async Task<BaseResponse<RegisterResponse>> RegisterSuperAdminAsync(string email, string password, string firstName, string lastName, string contactNumber = "")
+        {
+            var req = new RegisterUserRequest
+            {
+                Email = email?.Trim() ?? string.Empty,
+                Password = password ?? string.Empty,
+                FirstName = firstName?.Trim() ?? string.Empty,
+                LastName = lastName?.Trim() ?? string.Empty,
+                ContactNumber = contactNumber?.Trim() ?? string.Empty
+            };
+
+            return await ApiClient.Instance.PostAsync<RegisterUserRequest, RegisterResponse>("api/auth/register-superadmin", req);
         }
 
         public async Task<BaseResponse<string>> ChangePasswordAsync(string currentPassword, string newPassword)
