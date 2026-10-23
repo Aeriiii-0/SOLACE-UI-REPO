@@ -82,6 +82,9 @@ namespace SOLUM_UI.Models.Api
         string Relationship { get; }
         string EducationalLevel { get; }
         decimal Income { get; }
+        bool HasSpecialNeeds { get; }
+        string SpecialNeedsCategory { get; }
+        string SpecialNeedsDescription { get; }
     }
 
     public class CreateFamilyMemberRequest : IFamilyMemberRequest
@@ -94,6 +97,9 @@ namespace SOLUM_UI.Models.Api
         public string Relationship { get; set; } = string.Empty;
         public string EducationalLevel { get; set; } = string.Empty;
         public decimal Income { get; set; }
+        public bool HasSpecialNeeds { get; set; }
+        public string SpecialNeedsCategory { get; set; } = string.Empty;
+        public string SpecialNeedsDescription { get; set; } = string.Empty;
     }
 
     public class UpdateFamilyMemberRequest : IFamilyMemberRequest
@@ -107,6 +113,9 @@ namespace SOLUM_UI.Models.Api
         public string Relationship { get; set; } = string.Empty;
         public string EducationalLevel { get; set; } = string.Empty;
         public decimal Income { get; set; }
+        public bool HasSpecialNeeds { get; set; }
+        public string SpecialNeedsCategory { get; set; } = string.Empty;
+        public string SpecialNeedsDescription { get; set; } = string.Empty;
     }
 
     public class FamilyMemberDto
@@ -123,6 +132,9 @@ namespace SOLUM_UI.Models.Api
         public decimal Income { get; set; }
         public DateTime DateCreated { get; set; }
         public bool IsDeleted { get; set; }
+        public bool HasSpecialNeeds { get; set; }
+        public string SpecialNeedsCategory { get; set; } = string.Empty;
+        public string SpecialNeedsDescription { get; set; } = string.Empty;
     }
 
     public class RecordTermDto

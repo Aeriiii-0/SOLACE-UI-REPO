@@ -380,6 +380,68 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="PrimaryMaroonBtn" TargetType="Button">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="Background" Value="#702943"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BtnBg" Property="Background" Value="#8B3555"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="BtnBg" Property="Background" Value="#5A1F34"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="BtnBg" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="OutlineMaroonBtn" TargetType="Button">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderBrush" Value="#702943"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="BtnBg" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BtnBg" Property="Background" Value="#FDF0F3"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="BtnBg" Property="Background" Value="#F8E5EB"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="CardSection" TargetType="Border">
             <Setter Property="Background" Value="White"/>
             <Setter Property="CornerRadius" Value="10"/>
@@ -1180,116 +1242,62 @@
                                 <!-- CARD: IV. FAMILY COMPOSITION -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
-                                        <Border Style="{StaticResource CardSectionHeader}">
-                                            <TextBlock Text="IV. FAMILY COMPOSITION (Include other members of the household.)"
-                                                       Style="{StaticResource SectionLabel}"/>
-                                        </Border>
+                                        <!-- Header row with title and '+ Add Member' button -->
+                                        <Grid Margin="0,0,0,14">
+                                            <Border Style="{StaticResource CardSectionHeader}" Margin="0" VerticalAlignment="Center">
+                                                <StackPanel>
+                                                    <TextBlock Text="IV. FAMILY COMPOSITION" Style="{StaticResource SectionLabel}"/>
+                                                    <TextBlock Text="Include children and other dependents residing in the household."
+                                                               FontSize="11" Foreground="#777777" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <Button x:Name="BtnAddFamilyMember" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                    Style="{StaticResource PrimaryMaroonBtn}" Height="34" Padding="14,0"
+                                                    Click="BtnAddFamilyMember_Click">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Add Member" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </Grid>
 
-                                        <!-- family composition -->
-                                        <StackPanel Grid.IsSharedSizeScope="True" Margin="0,0,0,0">
+                                        <!-- Collapsible Add/Edit Member Inline Sub-Card -->
+                                        <Border x:Name="AddMemberSubCard" Background="#FFF9FB" BorderBrush="#702943" BorderThickness="1.5"
+                                                CornerRadius="10" Padding="0" Margin="0,0,0,16" Visibility="Collapsed" ClipToBounds="True">
+                                            <StackPanel>
+                                                <!-- Header Banner with deep maroon tint -->
+                                                <Border Background="#702943" Padding="16,10">
+                                                    <TextBlock x:Name="TxtAddMemberTitle" Text="Add Household Member"
+                                                               FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                                                </Border>
 
-                                            <!-- table header -->
-                                            <Grid Margin="0,0,0,4">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="270" SharedSizeGroup="C0"/>
-                                                    <ColumnDefinition Width="95"  SharedSizeGroup="C1"/>
-                                                    <ColumnDefinition Width="50"   SharedSizeGroup="C2"/>
-                                                    <ColumnDefinition Width="155"  SharedSizeGroup="C3"/>
-                                                    <ColumnDefinition Width="105"  SharedSizeGroup="C4"/>
-                                                    <ColumnDefinition Width="135"  SharedSizeGroup="C5"/>
-                                                    <ColumnDefinition Width="205"  SharedSizeGroup="C6"/>
-                                                    <ColumnDefinition Width="145"   SharedSizeGroup="C7"/>
-                                                    <ColumnDefinition Width="36"   SharedSizeGroup="C8"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Border Grid.ColumnSpan="9" Background="#F8F0F3" CornerRadius="6" Margin="0,0,0,2" Padding="4,8"/>
-                                                <TextBlock Grid.Column="0" Text="Name" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="1" Text="Sex" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="2" Text="Age" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="3" Text="Birthdate" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="4" Text="Civil Status" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="5" Text="Relationship" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="6" Text="Emp. / Highest Educ. Attainment" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="7" Text="Income" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="8" Text="" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,8"/>
-                                            </Grid>
-
-                                            <!-- data rows -->
-                                            <ItemsControl x:Name="FamilyRows">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Grid Margin="0,0,0,4">
+                                                <Border Padding="16,14">
+                                                    <StackPanel>
+                                                        <!-- Row 1: Name, Relationship, Sex, Civil Status -->
+                                                        <Grid Margin="0,0,0,12">
                                                             <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="270" SharedSizeGroup="C0"/>
-                                                                <ColumnDefinition Width="95"  SharedSizeGroup="C1"/>
-                                                                <ColumnDefinition Width="50"   SharedSizeGroup="C2"/>
-                                                                <ColumnDefinition Width="155"  SharedSizeGroup="C3"/>
-                                                                <ColumnDefinition Width="105"  SharedSizeGroup="C4"/>
-                                                                <ColumnDefinition Width="135"  SharedSizeGroup="C5"/>
-                                                                <ColumnDefinition Width="205"  SharedSizeGroup="C6"/>
-                                                                <ColumnDefinition Width="145"   SharedSizeGroup="C7"/>
-                                                                <ColumnDefinition Width="36"   SharedSizeGroup="C8"/>
+                                                                <ColumnDefinition Width="2*"/>
+                                                                <ColumnDefinition Width="10"/>
+                                                                <ColumnDefinition Width="1.2*"/>
+                                                                <ColumnDefinition Width="10"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="10"/>
+                                                                <ColumnDefinition Width="*"/>
                                                             </Grid.ColumnDefinitions>
-                                                            <Border Grid.Column="0" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
-                                                                <TextBox Height="38" FontSize="13"
-                                                                         BorderThickness="0"
-                                                                         Background="Transparent" Padding="10,0"
-                                                                         VerticalContentAlignment="Center"
-                                                                         MaxLength="50"
-                                                                         PreviewTextInput="NameOnly_PreviewTextInput"
-                                                                         LostFocus="FamilyMemberName_LostFocus"
-                                                                         Text="{Binding MemberName, UpdateSourceTrigger=PropertyChanged}"/>
-                                                            </Border>
-                                                            <Border Grid.Column="1" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
-                                                                <ComboBox Height="38"
-                                                                          Style="{StaticResource FormCombo}"
-                                                                          BorderThickness="0" Background="Transparent"
-                                                                          SelectedValuePath="Content"
-                                                                          SelectedValue="{Binding Sex, UpdateSourceTrigger=PropertyChanged}">
-                                                                    <ComboBoxItem Content=""/>
-                                                                    <ComboBoxItem Content="Female"/>
-                                                                    <ComboBoxItem Content="Male"/>
-                                                                </ComboBox>
-                                                            </Border>
-                                                            <Border Grid.Column="2" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="#F5F5F5" Margin="0,0,5,0">
-                                                                <TextBox Height="38" FontSize="13"
-                                                                         BorderThickness="0"
-                                                                         Background="Transparent" Padding="4,0"
-                                                                         VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
-                                                                         MaxLength="3"
-                                                                         IsReadOnly="True" Focusable="False" Cursor="Arrow"
-                                                                         ToolTip="Auto-calculated from Birthdate"
-                                                                         Text="{Binding Age, Mode=OneWay}"/>
-                                                            </Border>
-                                                            <Border Grid.Column="3" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
-                                                                <DatePicker Height="38"
-                                                                            Style="{StaticResource FormDate}"
-                                                                            BorderThickness="0" Background="Transparent"
-                                                                            DateValidationError="DatePicker_DateValidationError"
-                                                                            LostFocus="DatePicker_LostFocus"
-                                                                            SelectedDate="{Binding BirthdateDate, UpdateSourceTrigger=PropertyChanged}"/>
-                                                            </Border>
-                                                            <Border Grid.Column="4" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
-                                                                <ComboBox Height="38"
-                                                                          Style="{StaticResource FormCombo}"
-                                                                          BorderThickness="0" Background="Transparent"
-                                                                          SelectedValuePath="Content"
-                                                                          SelectedValue="{Binding CivilStatus, UpdateSourceTrigger=PropertyChanged}">
-                                                                    <ComboBoxItem Content=""/>
-                                                                    <ComboBoxItem Content="Single"/>
-                                                                    <ComboBoxItem Content="Married"/>
-                                                                    <ComboBoxItem Content="Widowed"/>
-                                                                    <ComboBoxItem Content="Separated"/>
-                                                                    <ComboBoxItem Content="Divorced"/>
-                                                                    <ComboBoxItem Content="Annulled"/>
-                                                                </ComboBox>
-                                                            </Border>
-                                                            <Border Grid.Column="5" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
-                                                                <ComboBox Height="38"
-                                                                          Style="{StaticResource FormCombo}"
-                                                                          BorderThickness="0" Background="Transparent"
-                                                                          SelectedValuePath="Content"
-                                                                          SelectedValue="{Binding Relationship, UpdateSourceTrigger=PropertyChanged}">
-                                                                    <ComboBoxItem Content=""/>
+
+                                                            <StackPanel Grid.Column="0">
+                                                                <TextBlock Style="{StaticResource FieldLabelSm}">
+                                                                    Full Name <Run Text="*" Foreground="#E53935"/>
+                                                                </TextBlock>
+                                                                <TextBox x:Name="TxtMemberName" Style="{StaticResource FormBoxSm}" MaxLength="60"
+                                                                         PreviewTextInput="NameOnly_PreviewTextInput"/>
+                                                            </StackPanel>
+
+                                                            <StackPanel Grid.Column="2">
+                                                                <TextBlock Style="{StaticResource FieldLabelSm}">
+                                                                    Relationship <Run Text="*" Foreground="#E53935"/>
+                                                                </TextBlock>
+                                                                <ComboBox x:Name="CmbMemberRel" Style="{StaticResource FormCombo}" Height="34" FontSize="12">
                                                                     <ComboBoxItem Content="Child"/>
                                                                     <ComboBoxItem Content="Spouse"/>
                                                                     <ComboBoxItem Content="Parent"/>
@@ -1300,72 +1308,259 @@
                                                                     <ComboBoxItem Content="Ward"/>
                                                                     <ComboBoxItem Content="Other"/>
                                                                 </ComboBox>
-                                                            </Border>
-                                                            <Border Grid.Column="6" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
-                                                                <TextBox Height="38" FontSize="13"
-                                                                         BorderThickness="0"
-                                                                         Background="Transparent" Padding="10,0"
-                                                                         VerticalContentAlignment="Center"
-                                                                         MaxLength="80"
-                                                                         Text="{Binding EducationEmployment, UpdateSourceTrigger=PropertyChanged}"/>
-                                                            </Border>
-                                                            <Border Grid.Column="7" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Margin="0,0,5,0">
-                                                                <TextBox Height="38" FontSize="13"
-                                                                         BorderThickness="0"
-                                                                         Background="Transparent" Padding="10,0"
-                                                                         VerticalContentAlignment="Center"
-                                                                         MaxLength="12"
-                                                                         PreviewTextInput="NumberOnly_PreviewTextInput"
-                                                                         Text="{Binding Income, UpdateSourceTrigger=PropertyChanged}"/>
-                                                            </Border>
-                                                            <Button Grid.Column="8" Height="38" Width="32" Cursor="Hand"
-                                                                    ToolTip="Remove row" Command="{Binding DeleteCommand}">
-                                                                <Button.Template>
-                                                                    <ControlTemplate TargetType="Button">
-                                                                        <Border x:Name="Bg" Background="Transparent" CornerRadius="6">
-                                                                            <Path Data="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z"
-                                                                                  Fill="#C0392B" Stretch="Uniform" Width="13" Height="13"
-                                                                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                                        </Border>
-                                                                        <ControlTemplate.Triggers>
-                                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                                <Setter TargetName="Bg" Property="Background" Value="#FDEDEC"/>
-                                                                            </Trigger>
-                                                                        </ControlTemplate.Triggers>
-                                                                    </ControlTemplate>
-                                                                </Button.Template>
-                                                            </Button>
+                                                            </StackPanel>
+
+                                                            <StackPanel Grid.Column="4">
+                                                                <TextBlock Style="{StaticResource FieldLabelSm}">
+                                                                    Sex <Run Text="*" Foreground="#E53935"/>
+                                                                </TextBlock>
+                                                                <ComboBox x:Name="CmbMemberSex" Style="{StaticResource FormCombo}" Height="34" FontSize="12">
+                                                                    <ComboBoxItem Content="Female"/>
+                                                                    <ComboBoxItem Content="Male"/>
+                                                                </ComboBox>
+                                                            </StackPanel>
+
+                                                            <StackPanel Grid.Column="6">
+                                                                <TextBlock Style="{StaticResource FieldLabelSm}">
+                                                                    Civil Status <Run Text="*" Foreground="#E53935"/>
+                                                                </TextBlock>
+                                                                <ComboBox x:Name="CmbMemberCivil" Style="{StaticResource FormCombo}" Height="34" FontSize="12">
+                                                                    <ComboBoxItem Content="Single"/>
+                                                                    <ComboBoxItem Content="Married"/>
+                                                                    <ComboBoxItem Content="Widowed"/>
+                                                                    <ComboBoxItem Content="Separated"/>
+                                                                    <ComboBoxItem Content="Divorced"/>
+                                                                    <ComboBoxItem Content="Annulled"/>
+                                                                </ComboBox>
+                                                            </StackPanel>
                                                         </Grid>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
 
-                                        </StackPanel>
+                                                        <!-- Row 2: Birthdate, Age (auto), Education/Employment, Income -->
+                                                        <Grid Margin="0,0,0,12">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="1.4*"/>
+                                                                <ColumnDefinition Width="10"/>
+                                                                <ColumnDefinition Width="0.7*"/>
+                                                                <ColumnDefinition Width="10"/>
+                                                                <ColumnDefinition Width="2*"/>
+                                                                <ColumnDefinition Width="10"/>
+                                                                <ColumnDefinition Width="1.3*"/>
+                                                            </Grid.ColumnDefinitions>
 
-                                        <Button Content="+ Add Row" Click="AddFamilyRow_Click"
-                                                Margin="0,8,0,0" HorizontalAlignment="Left"
-                                                Height="38" Padding="16,0"
-                                                Background="White" Foreground="#702943"
-                                                FontSize="12" FontWeight="SemiBold"
-                                                BorderBrush="#702943" BorderThickness="1"
-                                                Cursor="Hand">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border x:Name="Bg"
-                                                            Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <StackPanel Grid.Column="0">
+                                                                <TextBlock Style="{StaticResource FieldLabelSm}">
+                                                                    Birthdate <Run Text="*" Foreground="#E53935"/>
+                                                                </TextBlock>
+                                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Height="34">
+                                                                    <DatePicker x:Name="DpMemberDob" Style="{StaticResource FormDateSm}"
+                                                                                SelectedDateChanged="DpMemberDob_SelectedDateChanged"/>
+                                                                </Border>
+                                                            </StackPanel>
+
+                                                            <StackPanel Grid.Column="2">
+                                                                <TextBlock Text="Age" Style="{StaticResource FieldLabelSm}"/>
+                                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="#F5F5F5" Height="34">
+                                                                    <TextBox x:Name="TxtMemberAge" Style="{StaticResource FormBoxSm}" IsReadOnly="True"
+                                                                             Focusable="False" Cursor="Arrow" BorderThickness="0" Background="Transparent"
+                                                                             HorizontalContentAlignment="Center" ToolTip="Auto-calculated from Birthdate"/>
+                                                                </Border>
+                                                            </StackPanel>
+
+                                                            <StackPanel Grid.Column="4">
+                                                                <TextBlock Text="Educ. Attainment / Employment" Style="{StaticResource FieldLabelSm}"/>
+                                                                <TextBox x:Name="TxtMemberEdu" Style="{StaticResource FormBoxSm}" MaxLength="80"/>
+                                                            </StackPanel>
+
+                                                            <StackPanel Grid.Column="6">
+                                                                <TextBlock Text="Monthly Income (₱)" Style="{StaticResource FieldLabelSm}"/>
+                                                                <TextBox x:Name="TxtMemberIncome" Style="{StaticResource FormBoxSm}" Text="0.00"
+                                                                         PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                                            </StackPanel>
+                                                        </Grid>
+
+                                                        <!-- Row 3: Special Needs Integration Box (Revealed columns, starts disabled until checked) -->
+                                                        <Border Background="#FAFAFA" BorderBrush="#EAD3DC" BorderThickness="1" CornerRadius="8"
+                                                                Padding="14,12" Margin="0,0,0,14">
+                                                            <StackPanel>
+                                                                <CheckBox x:Name="ChkMemberSpecialNeeds" Content="Person with Special Needs / Disability (PWD)"
+                                                                          FontSize="12" FontWeight="SemiBold" Foreground="#702943"
+                                                                          Checked="ChkMemberSpecialNeeds_Changed" Unchecked="ChkMemberSpecialNeeds_Changed"
+                                                                          VerticalContentAlignment="Center" Cursor="Hand" Margin="0,0,0,10"/>
+
+                                                                <!-- Columns revealed already, starts uneditable until ChkMemberSpecialNeeds is checked -->
+                                                                <Grid x:Name="PnlSpecialNeedsDetails" IsEnabled="False" Opacity="0.5">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="1.5*"/>
+                                                                        <ColumnDefinition Width="12"/>
+                                                                        <ColumnDefinition Width="2.5*"/>
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <StackPanel Grid.Column="0">
+                                                                        <TextBlock Text="Special Needs Category" Style="{StaticResource FieldLabelSm}"/>
+                                                                        <ComboBox x:Name="CmbSpecialNeedsCategory" Style="{StaticResource FormCombo}" Height="34" FontSize="12">
+                                                                            <ComboBoxItem Content="Visual Impairment"/>
+                                                                            <ComboBoxItem Content="Hearing Impairment"/>
+                                                                            <ComboBoxItem Content="Mobility / Physical Disability"/>
+                                                                            <ComboBoxItem Content="Intellectual Disability"/>
+                                                                            <ComboBoxItem Content="Learning Disability"/>
+                                                                            <ComboBoxItem Content="Autism Spectrum"/>
+                                                                            <ComboBoxItem Content="Chronic Illness / Medical Condition"/>
+                                                                            <ComboBoxItem Content="Mental Health Condition"/>
+                                                                            <ComboBoxItem Content="Multiple Disabilities"/>
+                                                                            <ComboBoxItem Content="Other"/>
+                                                                        </ComboBox>
+                                                                    </StackPanel>
+
+                                                                    <StackPanel Grid.Column="2">
+                                                                        <TextBlock Text="Description / Special Accommodations (Optional)" Style="{StaticResource FieldLabelSm}"/>
+                                                                        <TextBox x:Name="TxtSpecialNeedsDescription" Style="{StaticResource FormBoxSm}" MaxLength="120"
+                                                                                 ToolTip="E.g., Requires wheelchair accessibility, SPED Grade 4, Maintenance medication"/>
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                            </StackPanel>
+                                                        </Border>
+
+                                                        <!-- Actions: Cancel and Save -->
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                            <Button Content="Cancel" Style="{StaticResource OutlineMaroonBtn}" Height="32" Padding="14,0"
+                                                                    Margin="0,0,8,0" Click="BtnCancelMember_Click"/>
+                                                            <Button x:Name="BtnSaveMember" Content="Save Member" Style="{StaticResource PrimaryMaroonBtn}"
+                                                                    Height="32" Padding="16,0" Click="BtnSaveMember_Click"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Deeper Colored Table Header Banner for the Dependents Cards List -->
+                                        <Border Background="#702943" CornerRadius="6" Padding="14,10" Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="2*"/>
+                                                    <ColumnDefinition Width="1.1*"/>
+                                                    <ColumnDefinition Width="1.5*"/>
+                                                    <ColumnDefinition Width="1.6*"/>
+                                                    <ColumnDefinition Width="84"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="NAME &amp; RELATIONSHIP" FontSize="11" FontWeight="Bold" Foreground="White"/>
+                                                <TextBlock Grid.Column="1" Text="AGE &amp; SEX" FontSize="11" FontWeight="Bold" Foreground="White"/>
+                                                <TextBlock Grid.Column="2" Text="EDUCATION &amp; INCOME" FontSize="11" FontWeight="Bold" Foreground="White"/>
+                                                <TextBlock Grid.Column="3" Text="DISABILITY / SPECIAL NEEDS" FontSize="11" FontWeight="Bold" Foreground="White"/>
+                                                <TextBlock Grid.Column="4" Text="ACTIONS" FontSize="11" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right" Margin="0,0,6,0"/>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- ItemsControl for Cards List -->
+                                        <ItemsControl x:Name="FamilyCardsList">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{Binding CardBg}" BorderBrush="{Binding BorderColor}" BorderThickness="1.2"
+                                                            CornerRadius="8" Padding="12,10" Margin="0,0,0,6">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="2*"/>
+                                                                <ColumnDefinition Width="1.1*"/>
+                                                                <ColumnDefinition Width="1.5*"/>
+                                                                <ColumnDefinition Width="1.6*"/>
+                                                                <ColumnDefinition Width="84"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <!-- Column 0: Name + Relationship (+ NEW Highlight Tag) -->
+                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding MemberName}" FontSize="13" FontWeight="SemiBold"
+                                                                               Foreground="#111827" TextTrimming="CharacterEllipsis" MaxWidth="190"/>
+                                                                    <Border Visibility="{Binding NewBadgeVisibility}" Background="#702943" CornerRadius="4"
+                                                                            Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                                        <TextBlock Text="NEW" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                                                    </Border>
+                                                                </StackPanel>
+                                                                <TextBlock Text="{Binding Relationship}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"/>
+                                                            </StackPanel>
+
+                                                            <!-- Column 1: Age & Sex -->
+                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding AgeDisplay}" FontSize="12" Foreground="#1F2937"/>
+                                                                <TextBlock Text="{Binding SexDisplay}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"/>
+                                                            </StackPanel>
+
+                                                            <!-- Column 2: Education / Work & Income -->
+                                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0">
+                                                                <TextBlock Text="{Binding EducationDisplay}" FontSize="12" Foreground="#1F2937" TextTrimming="CharacterEllipsis"/>
+                                                                <TextBlock Text="{Binding IncomeDisplay}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"/>
+                                                            </StackPanel>
+
+                                                            <!-- Column 3: Disability / Special Needs (Direct Typography, No Badges) -->
+                                                            <StackPanel Grid.Column="3" VerticalAlignment="Center" ToolTip="{Binding SpecialNeedsTooltip}" Margin="0,0,10,0">
+                                                                <TextBlock Text="{Binding DisabilityTitleDisplay}" FontSize="12"
+                                                                           FontWeight="{Binding DisabilityTextWeight}"
+                                                                           Foreground="{Binding DisabilityTextColor}"
+                                                                           TextTrimming="CharacterEllipsis"/>
+                                                                <TextBlock Text="{Binding DisabilitySubtitleDisplay}" FontSize="11" Foreground="#6B7280"
+                                                                           Visibility="{Binding DisabilitySubtitleVisibility}"
+                                                                           TextTrimming="CharacterEllipsis" Margin="0,1,0,0"/>
+                                                            </StackPanel>
+
+                                                            <!-- Column 4: Actions (Prominent Edit & Delete Icons) -->
+                                                            <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                                <!-- Prominent Edit Button -->
+                                                                <Button Width="32" Height="32" Margin="0,0,6,0" Cursor="Hand"
+                                                                        ToolTip="Edit member" Click="BtnEditFamilyMember_Click" Tag="{Binding}">
+                                                                    <Button.Template>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border x:Name="BtnBg" Background="#FDF2F5" BorderBrush="#E5B8C9" BorderThickness="1.2" CornerRadius="6">
+                                                                                <Path x:Name="BtnIcon" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87M3,17.25V21H6.75L17.81,9.93L14.07,6.19L3,17.25Z"
+                                                                                      Fill="#702943" Stretch="Uniform" Width="14" Height="14"
+                                                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter TargetName="BtnBg" Property="Background" Value="#702943"/>
+                                                                                    <Setter TargetName="BtnBg" Property="BorderBrush" Value="#702943"/>
+                                                                                    <Setter TargetName="BtnIcon" Property="Fill" Value="White"/>
+                                                                                </Trigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </Button.Template>
+                                                                </Button>
+
+                                                                <!-- Prominent Delete Button -->
+                                                                <Button Width="32" Height="32" Cursor="Hand"
+                                                                        ToolTip="Remove member" Click="BtnRemoveFamilyMember_Click" Tag="{Binding}">
+                                                                    <Button.Template>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border x:Name="DelBg" Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1.2" CornerRadius="6">
+                                                                                <Path x:Name="DelIcon" Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
+                                                                                      Fill="#DC2626" Stretch="Uniform" Width="14" Height="14"
+                                                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter TargetName="DelBg" Property="Background" Value="#DC2626"/>
+                                                                                    <Setter TargetName="DelBg" Property="BorderBrush" Value="#DC2626"/>
+                                                                                    <Setter TargetName="DelIcon" Property="Fill" Value="White"/>
+                                                                                </Trigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </Button.Template>
+                                                                </Button>
+                                                            </StackPanel>
+                                                        </Grid>
                                                     </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                        </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <!-- Empty state placeholder -->
+                                        <Border x:Name="PnlNoFamilyMembers" Background="#FAFAFA" BorderBrush="#E5E7EB" BorderThickness="1"
+                                                CornerRadius="8" Padding="20,16" Margin="0,4,0,0" Visibility="Collapsed">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock Text="No household members recorded yet." FontSize="12" FontWeight="SemiBold"
+                                                           Foreground="#6B7280" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="Click '+ Add Member' above to add qualified children or other household dependents."
+                                                           FontSize="11" Foreground="#9CA3AF" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                        </Border>
                                     </StackPanel>
                                 </Border>
 

@@ -17,6 +17,11 @@ namespace SOLUM_UI.Models
         public string EducationEmployment { get; set; }
         public string Income              { get; set; }
 
+        // Special needs
+        public bool HasSpecialNeeds       { get; set; } = false;
+        public string SpecialNeedsCategory { get; set; }
+        public string SpecialNeedsDescription { get; set; }
+
         // OCR confidence (0–1) per field; drives the cell background colour in OcrScanDialog
         public double NameConf { get; set; } = 0.90;
         public double SexConf  { get; set; } = 0.90;

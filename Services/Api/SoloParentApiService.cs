@@ -203,7 +203,10 @@ namespace SOLUM_UI.Services.Api
                             CivilStatus = string.IsNullOrWhiteSpace(fm.CivilStatus) ? "Single" : fm.CivilStatus,
                             Relationship = string.IsNullOrWhiteSpace(fm.Relationship) ? "Child" : fm.Relationship,
                             EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "Student" : fm.EducationEmployment,
-                            Income = ParseDecimal(fm.Income)
+                            Income = ParseDecimal(fm.Income),
+                            HasSpecialNeeds = fm.HasSpecialNeeds,
+                            SpecialNeedsCategory = fm.SpecialNeedsCategory,
+                            SpecialNeedsDescription = fm.SpecialNeedsDescription
                         });
                     }
                     // 2. Fallback: If Id was missing but matches an unclaimed existing member by Name
@@ -221,7 +224,10 @@ namespace SOLUM_UI.Services.Api
                             CivilStatus = string.IsNullOrWhiteSpace(fm.CivilStatus) ? "Single" : fm.CivilStatus,
                             Relationship = string.IsNullOrWhiteSpace(fm.Relationship) ? "Child" : fm.Relationship,
                             EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "Student" : fm.EducationEmployment,
-                            Income = ParseDecimal(fm.Income)
+                            Income = ParseDecimal(fm.Income),
+                            HasSpecialNeeds = fm.HasSpecialNeeds,
+                            SpecialNeedsCategory = fm.SpecialNeedsCategory,
+                            SpecialNeedsDescription = fm.SpecialNeedsDescription
                         });
                     }
                     // 3. New family member (omits ID per API contract)
@@ -300,7 +306,10 @@ namespace SOLUM_UI.Services.Api
                             CivilStatus = string.IsNullOrWhiteSpace(fm.CivilStatus) ? "Single" : fm.CivilStatus,
                             Relationship = string.IsNullOrWhiteSpace(fm.Relationship) ? "Child" : fm.Relationship,
                             EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "Student" : fm.EducationEmployment,
-                            Income = ParseDecimal(fm.Income)
+                            Income = ParseDecimal(fm.Income),
+                            HasSpecialNeeds = fm.HasSpecialNeeds,
+                            SpecialNeedsCategory = fm.SpecialNeedsCategory,
+                            SpecialNeedsDescription = fm.SpecialNeedsDescription
                         });
                     }
                     // 2. Fallback: If Id was missing but matches an unclaimed existing member by Name
@@ -318,7 +327,10 @@ namespace SOLUM_UI.Services.Api
                             CivilStatus = string.IsNullOrWhiteSpace(fm.CivilStatus) ? "Single" : fm.CivilStatus,
                             Relationship = string.IsNullOrWhiteSpace(fm.Relationship) ? "Child" : fm.Relationship,
                             EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "Student" : fm.EducationEmployment,
-                            Income = ParseDecimal(fm.Income)
+                            Income = ParseDecimal(fm.Income),
+                            HasSpecialNeeds = fm.HasSpecialNeeds,
+                            SpecialNeedsCategory = fm.SpecialNeedsCategory,
+                            SpecialNeedsDescription = fm.SpecialNeedsDescription
                         });
                     }
                     // 3. New family member
@@ -508,7 +520,10 @@ namespace SOLUM_UI.Services.Api
                     CivilStatus = fm.CivilStatus,
                     Relationship = fm.Relationship,
                     EducationEmployment = fm.EducationalLevel,
-                    Income = fm.Income > 0 ? fm.Income.ToString("N2") : "0"
+                    Income = fm.Income > 0 ? fm.Income.ToString("N2") : "0",
+                    HasSpecialNeeds = fm.HasSpecialNeeds,
+                    SpecialNeedsCategory = fm.SpecialNeedsCategory,
+                    SpecialNeedsDescription = fm.SpecialNeedsDescription
                 }).ToList();
 
                 record.Children = record.FamilyMembers.Count;
@@ -829,7 +844,10 @@ namespace SOLUM_UI.Services.Api
                 CivilStatus = !string.IsNullOrWhiteSpace(fm.CivilStatus) ? fm.CivilStatus.Trim() : "Single",
                 Relationship = !string.IsNullOrWhiteSpace(fm.Relationship) ? fm.Relationship.Trim() : "Child",
                 EducationalLevel = !string.IsNullOrWhiteSpace(fm.EducationEmployment) ? fm.EducationEmployment.Trim() : "Student",
-                Income = ParseDecimal(fm.Income)
+                Income = ParseDecimal(fm.Income),
+                HasSpecialNeeds = fm.HasSpecialNeeds,
+                SpecialNeedsCategory = fm.SpecialNeedsCategory,
+                SpecialNeedsDescription = fm.SpecialNeedsDescription
             };
         }
 

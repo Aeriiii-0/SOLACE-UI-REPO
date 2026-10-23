@@ -28,9 +28,17 @@ namespace SOLUM_UI
         private string _relationship;
         private string _educationEmployment;
         private string _income;
+        private bool _hasSpecialNeeds;
+        private string _specialNeedsCategory;
+        private string _specialNeedsDescription;
 
         public Guid? Id { get; set; }
-        public bool IsNew { get; set; } = true;
+        private bool _isNew = true;
+        public bool IsNew
+        {
+            get => _isNew;
+            set { _isNew = value; N(nameof(IsNew)); N(nameof(CardBg)); N(nameof(BorderColor)); N(nameof(NewBadgeVisibility)); }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void N(string p) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(p));
@@ -164,19 +172,175 @@ namespace SOLUM_UI
                 N(nameof(Relationship));
             }
         }
-        public string EducationEmployment { get => _educationEmployment; set { _educationEmployment = value?.ToUpper() ?? string.Empty; N(nameof(EducationEmployment)); } }
+        public string EducationEmployment
+        {
+            get => _educationEmployment;
+            set
+            {
+                _educationEmployment = value ?? string.Empty;
+                N(nameof(EducationEmployment));
+                N(nameof(EducationDisplay));
+            }
+        }
 
         public string Income
         {
             get => _income;
             set
             {
-                if (string.IsNullOrWhiteSpace(value)) { _income = string.Empty; N(nameof(Income)); return; }
+                if (string.IsNullOrWhiteSpace(value)) { _income = string.Empty; N(nameof(Income)); N(nameof(IncomeDisplay)); return; }
                 string clean = System.Text.RegularExpressions.Regex.Replace(value, @"[^\d\.]", "");
                 _income = clean;
                 N(nameof(Income));
+                N(nameof(IncomeDisplay));
             }
         }
+
+        // Special needs
+        public bool HasSpecialNeeds
+        {
+            get => _hasSpecialNeeds;
+            set
+            {
+                if (_hasSpecialNeeds != value)
+                {
+                    _hasSpecialNeeds = value;
+                    N(nameof(HasSpecialNeeds));
+                    N(nameof(SpecialNeedsBadgeText));
+                    N(nameof(SpecialNeedsBadgeBg));
+                    N(nameof(SpecialNeedsBadgeFg));
+                    N(nameof(SpecialNeedsBadgeBorder));
+                    N(nameof(SpecialNeedsDotBrush));
+                    N(nameof(SpecialNeedsTooltip));
+                    N(nameof(DisabilityTitleDisplay));
+                    N(nameof(DisabilitySubtitleDisplay));
+                    N(nameof(DisabilitySubtitleVisibility));
+                    N(nameof(DisabilityTextColor));
+                    N(nameof(DisabilityTextWeight));
+                }
+            }
+        }
+
+        public string SpecialNeedsCategory
+        {
+            get => _specialNeedsCategory;
+            set
+            {
+                _specialNeedsCategory = value ?? string.Empty;
+                N(nameof(SpecialNeedsCategory));
+                N(nameof(SpecialNeedsBadgeText));
+                N(nameof(SpecialNeedsTooltip));
+                N(nameof(DisabilityTitleDisplay));
+                N(nameof(DisabilitySubtitleDisplay));
+                N(nameof(DisabilitySubtitleVisibility));
+            }
+        }
+
+        public string SpecialNeedsDescription
+        {
+            get => _specialNeedsDescription;
+            set
+            {
+                _specialNeedsDescription = value ?? string.Empty;
+                N(nameof(SpecialNeedsDescription));
+                N(nameof(SpecialNeedsTooltip));
+                N(nameof(DisabilitySubtitleDisplay));
+                N(nameof(DisabilitySubtitleVisibility));
+            }
+        }
+
+        // Display Helpers
+        public string AgeDisplay => !string.IsNullOrWhiteSpace(Age) ? $"{Age} yrs old" : "—";
+        public string SexDisplay => !string.IsNullOrWhiteSpace(Sex) ? Sex : "—";
+        public string EducationDisplay => !string.IsNullOrWhiteSpace(EducationEmployment) ? EducationEmployment : "Not specified";
+        public string IncomeDisplay
+        {
+            get
+            {
+                if (decimal.TryParse(Income, out decimal inc) && inc > 0)
+                    return $"₱ {inc:N2}/mo";
+                return "No income";
+            }
+        }
+
+        // Disability & Special Needs Display (Clean typography, no badges)
+        public string DisabilityTitleDisplay
+        {
+            get
+            {
+                if (HasSpecialNeeds)
+                    return !string.IsNullOrWhiteSpace(SpecialNeedsCategory) ? SpecialNeedsCategory : "Special Needs (PWD)";
+                return "None";
+            }
+        }
+
+        public string DisabilitySubtitleDisplay
+        {
+            get
+            {
+                if (HasSpecialNeeds && !string.IsNullOrWhiteSpace(SpecialNeedsDescription))
+                    return SpecialNeedsDescription;
+                return string.Empty;
+            }
+        }
+
+        public Visibility DisabilitySubtitleVisibility =>
+            (HasSpecialNeeds && !string.IsNullOrWhiteSpace(SpecialNeedsDescription)) ? Visibility.Visible : Visibility.Collapsed;
+
+        public Brush DisabilityTextColor => HasSpecialNeeds
+            ? new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43))
+            : new SolidColorBrush(Color.FromRgb(0x9C, 0xA3, 0xAF));
+
+        public FontWeight DisabilityTextWeight => HasSpecialNeeds ? FontWeights.SemiBold : FontWeights.Normal;
+
+        public string SpecialNeedsBadgeText
+        {
+            get
+            {
+                if (HasSpecialNeeds)
+                {
+                    return !string.IsNullOrWhiteSpace(SpecialNeedsCategory) ? SpecialNeedsCategory : "Special Needs";
+                }
+                return "No Special Needs";
+            }
+        }
+
+        public Brush SpecialNeedsBadgeBg => HasSpecialNeeds
+            ? new SolidColorBrush(Color.FromRgb(0xFE, 0xF3, 0xC7))
+            : new SolidColorBrush(Color.FromRgb(0xF3, 0xF4, 0xF6));
+
+        public Brush SpecialNeedsBadgeFg => HasSpecialNeeds
+            ? new SolidColorBrush(Color.FromRgb(0x92, 0x40, 0x0E))
+            : new SolidColorBrush(Color.FromRgb(0x6B, 0x72, 0x80));
+
+        public Brush SpecialNeedsBadgeBorder => HasSpecialNeeds
+            ? new SolidColorBrush(Color.FromRgb(0xFC, 0xD3, 0x4D))
+            : new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB));
+
+        public Brush SpecialNeedsDotBrush => HasSpecialNeeds
+            ? new SolidColorBrush(Color.FromRgb(0xD9, 0x77, 0x06))
+            : new SolidColorBrush(Color.FromRgb(0x9C, 0xA3, 0xAF));
+
+        public string SpecialNeedsTooltip
+        {
+            get
+            {
+                if (!HasSpecialNeeds) return "No special needs recorded";
+                if (!string.IsNullOrWhiteSpace(SpecialNeedsDescription))
+                    return $"Special Needs: {SpecialNeedsCategory}\nAccommodations / Notes: {SpecialNeedsDescription}";
+                return $"Special Needs: {SpecialNeedsCategory}";
+            }
+        }
+
+        public Visibility NewBadgeVisibility => IsNew ? Visibility.Visible : Visibility.Collapsed;
+
+        public Brush CardBg => IsNew
+            ? new SolidColorBrush(Color.FromRgb(0xFA, 0xEE, 0xF3))
+            : new SolidColorBrush(Colors.White);
+
+        public Brush BorderColor => IsNew
+            ? new SolidColorBrush(Color.FromRgb(0xD0, 0x98, 0xAF))
+            : new SolidColorBrush(Color.FromRgb(0xED, 0xE0, 0xE5));
 
         public System.Windows.Input.ICommand DeleteCommand { get; set; }
     }
@@ -191,6 +355,7 @@ namespace SOLUM_UI
         private bool _isPopulating = false;
         private readonly ObservableCollection<FamilyMemberRow> _familyRowData = new ObservableCollection<FamilyMemberRow>();
         private readonly List<Guid> _removedFamilyMemberIds = new List<Guid>();
+        private FamilyMemberRow _editingFamilyMember = null;
 
         private static readonly SolidColorBrush ErrorBrush   = new SolidColorBrush(Color.FromRgb(0xE5, 0x39, 0x35));
         private static readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(0xD0, 0xB8, 0xC0));
@@ -202,9 +367,9 @@ namespace SOLUM_UI
             _existing  = existing;
             _isRenewal = false;
 
-            for (int i = 0; i < 5; i++)
-                _familyRowData.Add(MakeFamilyRow());
-            FamilyRows.ItemsSource = _familyRowData;
+            FamilyCardsList.ItemsSource = _familyRowData;
+            _familyRowData.CollectionChanged += (s, e) => { UpdateSaveButtonState(); UpdateFamilyCardsEmptyState(); };
+            UpdateFamilyCardsEmptyState();
 
             Loaded += (s, e) => SuppressDatePickerWatermarks();
 
@@ -528,9 +693,208 @@ namespace SOLUM_UI
             PnlB.Visibility  = ChkB.IsChecked  == true ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        private void AddFamilyRow_Click(object sender, RoutedEventArgs e)
+        private void UpdateFamilyCardsEmptyState()
         {
-            _familyRowData.Add(MakeFamilyRow(id: null, isNew: true));
+            if (PnlNoFamilyMembers != null)
+            {
+                PnlNoFamilyMembers.Visibility = _familyRowData.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        private void BtnAddFamilyMember_Click(object sender, RoutedEventArgs e)
+        {
+            _editingFamilyMember = null;
+            TxtAddMemberTitle.Text = "Add Household Member";
+            BtnSaveMember.Content = "Save Member";
+            TxtMemberName.Text = string.Empty;
+            CmbMemberRel.SelectedIndex = 0;
+            CmbMemberSex.SelectedIndex = 0;
+            CmbMemberCivil.SelectedIndex = 0;
+            DpMemberDob.SelectedDate = DateTime.Today.AddYears(-5);
+            TxtMemberAge.Text = "5";
+            TxtMemberEdu.Text = string.Empty;
+            TxtMemberIncome.Text = "0.00";
+            ChkMemberSpecialNeeds.IsChecked = false;
+            CmbSpecialNeedsCategory.SelectedIndex = 0;
+            TxtSpecialNeedsDescription.Text = string.Empty;
+            if (PnlSpecialNeedsDetails != null)
+            {
+                PnlSpecialNeedsDetails.IsEnabled = false;
+                PnlSpecialNeedsDetails.Opacity = 0.5;
+            }
+
+            AddMemberSubCard.Visibility = Visibility.Visible;
+            TxtMemberName.Focus();
+        }
+
+        private void BtnEditFamilyMember_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as FrameworkElement)?.Tag is FamilyMemberRow row)
+            {
+                _editingFamilyMember = row;
+                TxtAddMemberTitle.Text = $"Edit Household Member: {row.MemberName}";
+                BtnSaveMember.Content = "Update Member";
+
+                TxtMemberName.Text = row.MemberName;
+                SetComboByContent(CmbMemberRel, row.Relationship);
+                SetComboByContent(CmbMemberSex, row.Sex);
+                SetComboByContent(CmbMemberCivil, row.CivilStatus);
+
+                if (row.BirthdateDate.HasValue)
+                    DpMemberDob.SelectedDate = row.BirthdateDate.Value;
+                else if (DateTime.TryParse(row.Birthdate, out DateTime dt))
+                    DpMemberDob.SelectedDate = dt;
+                else
+                    DpMemberDob.SelectedDate = DateTime.Today.AddYears(-5);
+
+                TxtMemberAge.Text = row.Age;
+                TxtMemberEdu.Text = row.EducationEmployment;
+                TxtMemberIncome.Text = string.IsNullOrWhiteSpace(row.Income) ? "0.00" : row.Income;
+
+                bool hasSn = row.HasSpecialNeeds;
+                ChkMemberSpecialNeeds.IsChecked = hasSn;
+                if (PnlSpecialNeedsDetails != null)
+                {
+                    PnlSpecialNeedsDetails.IsEnabled = hasSn;
+                    PnlSpecialNeedsDetails.Opacity = hasSn ? 1.0 : 0.5;
+                }
+                SetComboByContent(CmbSpecialNeedsCategory, row.SpecialNeedsCategory);
+                TxtSpecialNeedsDescription.Text = row.SpecialNeedsDescription ?? string.Empty;
+
+                AddMemberSubCard.Visibility = Visibility.Visible;
+                TxtMemberName.Focus();
+            }
+        }
+
+        private void BtnRemoveFamilyMember_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as FrameworkElement)?.Tag is FamilyMemberRow row)
+            {
+                bool confirm = ActionConfirmDialog.Show(
+                    "Remove Household Member",
+                    $"Are you sure you want to remove {row.MemberName} from the family composition?",
+                    "Remove",
+                    "Keep Member",
+                    ConfirmThemeType.Danger,
+                    this);
+
+                if (confirm)
+                {
+                    if (!row.IsNew && row.Id.HasValue)
+                    {
+                        if (!_removedFamilyMemberIds.Contains(row.Id.Value))
+                            _removedFamilyMemberIds.Add(row.Id.Value);
+                    }
+                    _familyRowData.Remove(row);
+                    if (_editingFamilyMember == row)
+                    {
+                        AddMemberSubCard.Visibility = Visibility.Collapsed;
+                        _editingFamilyMember = null;
+                    }
+                    UpdateFamilyCardsEmptyState();
+                }
+            }
+        }
+
+        private void BtnCancelMember_Click(object sender, RoutedEventArgs e)
+        {
+            AddMemberSubCard.Visibility = Visibility.Collapsed;
+            _editingFamilyMember = null;
+        }
+
+        private void BtnSaveMember_Click(object sender, RoutedEventArgs e)
+        {
+            string name = TxtMemberName.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                ActionConfirmDialog.Warning("Validation", "Please enter the member's full name.", this);
+                TxtMemberName.Focus();
+                return;
+            }
+
+            if (!DpMemberDob.SelectedDate.HasValue)
+            {
+                ActionConfirmDialog.Warning("Validation", "Please select a valid birthdate.", this);
+                DpMemberDob.Focus();
+                return;
+            }
+
+            DateTime dob = DpMemberDob.SelectedDate.Value;
+            int age = SOLUM_UI.Services.OcrService.CalculateAge(dob);
+            if (age < 0 || age > 120) age = 0;
+
+            string rel = (CmbMemberRel.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Child";
+            string sex = (CmbMemberSex.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Female";
+            string civil = (CmbMemberCivil.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Single";
+            string edu = TxtMemberEdu.Text?.Trim() ?? string.Empty;
+            string income = TxtMemberIncome.Text?.Trim() ?? "0.00";
+            bool hasSn = ChkMemberSpecialNeeds.IsChecked == true;
+            string snCat = hasSn ? ((CmbSpecialNeedsCategory.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Other") : string.Empty;
+            string snDesc = hasSn ? (TxtSpecialNeedsDescription.Text?.Trim() ?? string.Empty) : string.Empty;
+
+            if (_editingFamilyMember != null)
+            {
+                _editingFamilyMember.MemberName = name;
+                _editingFamilyMember.Relationship = rel;
+                _editingFamilyMember.Sex = sex;
+                _editingFamilyMember.CivilStatus = civil;
+                _editingFamilyMember.BirthdateDate = dob;
+                _editingFamilyMember.Age = age.ToString();
+                _editingFamilyMember.EducationEmployment = edu;
+                _editingFamilyMember.Income = income;
+                _editingFamilyMember.HasSpecialNeeds = hasSn;
+                _editingFamilyMember.SpecialNeedsCategory = snCat;
+                _editingFamilyMember.SpecialNeedsDescription = snDesc;
+            }
+            else
+            {
+                var row = MakeFamilyRow(id: null, isNew: true);
+                row.MemberName = name;
+                row.Relationship = rel;
+                row.Sex = sex;
+                row.CivilStatus = civil;
+                row.BirthdateDate = dob;
+                row.Age = age.ToString();
+                row.EducationEmployment = edu;
+                row.Income = income;
+                row.HasSpecialNeeds = hasSn;
+                row.SpecialNeedsCategory = snCat;
+                row.SpecialNeedsDescription = snDesc;
+                _familyRowData.Add(row);
+            }
+
+            AddMemberSubCard.Visibility = Visibility.Collapsed;
+            _editingFamilyMember = null;
+            UpdateFamilyCardsEmptyState();
+            UpdateSaveButtonState();
+        }
+
+        private void DpMemberDob_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DpMemberDob.SelectedDate.HasValue)
+            {
+                int age = SOLUM_UI.Services.OcrService.CalculateAge(DpMemberDob.SelectedDate.Value);
+                TxtMemberAge.Text = (age >= 0 && age <= 120) ? age.ToString() : "0";
+            }
+            else
+            {
+                TxtMemberAge.Text = string.Empty;
+            }
+        }
+
+        private void ChkMemberSpecialNeeds_Changed(object sender, RoutedEventArgs e)
+        {
+            if (PnlSpecialNeedsDetails != null)
+            {
+                bool isSpecial = ChkMemberSpecialNeeds.IsChecked == true;
+                PnlSpecialNeedsDetails.IsEnabled = isSpecial;
+                PnlSpecialNeedsDetails.Opacity = isSpecial ? 1.0 : 0.5;
+                if (!isSpecial)
+                {
+                    if (CmbSpecialNeedsCategory != null) CmbSpecialNeedsCategory.SelectedIndex = 0;
+                    if (TxtSpecialNeedsDescription != null) TxtSpecialNeedsDescription.Text = string.Empty;
+                }
+            }
         }
 
         private FamilyMemberRow MakeFamilyRow(Guid? id = null, bool isNew = true)
@@ -549,6 +913,7 @@ namespace SOLUM_UI
                         _removedFamilyMemberIds.Add(row.Id.Value);
                 }
                 _familyRowData.Remove(row);
+                UpdateFamilyCardsEmptyState();
             });
             return row;
         }
@@ -665,9 +1030,14 @@ namespace SOLUM_UI
                     row.Relationship        = fm.Relationship;
                     row.EducationEmployment = fm.EducationEmployment;
                     row.Income              = fm.Income;
+                    row.HasSpecialNeeds     = fm.HasSpecialNeeds;
+                    row.SpecialNeedsCategory = fm.SpecialNeedsCategory;
+                    row.SpecialNeedsDescription = fm.SpecialNeedsDescription;
                     _familyRowData.Add(row);
                 }
             }
+
+            UpdateFamilyCardsEmptyState();
 
             Circumstance_Changed(null, null);
             UpdateAge(r.DateOfBirth);
@@ -1202,10 +1572,10 @@ namespace SOLUM_UI
                 rowNum++;
 
                 var rowMissing = new List<string>();
-                if (string.IsNullOrWhiteSpace(row.Sex))                 rowMissing.Add("Sex");
-                if (!row.BirthdateDate.HasValue)                         rowMissing.Add("Birthdate");
-                if (string.IsNullOrWhiteSpace(row.CivilStatus))         rowMissing.Add("Civil Status");
-                if (string.IsNullOrWhiteSpace(row.Relationship))        rowMissing.Add("Relationship");
+                if (string.IsNullOrWhiteSpace(row.Sex))                                      rowMissing.Add("Sex");
+                if (!row.BirthdateDate.HasValue && string.IsNullOrWhiteSpace(row.Birthdate)) rowMissing.Add("Birthdate");
+                if (string.IsNullOrWhiteSpace(row.CivilStatus))                              rowMissing.Add("Civil Status");
+                if (string.IsNullOrWhiteSpace(row.Relationship))                             rowMissing.Add("Relationship");
                 if (string.IsNullOrWhiteSpace(row.EducationEmployment)) rowMissing.Add("Education/Employment");
                 if (string.IsNullOrWhiteSpace(row.Income))              rowMissing.Add("Income");
 
@@ -1562,7 +1932,10 @@ namespace SOLUM_UI
                         CivilStatus         = row.CivilStatus,
                         Relationship        = row.Relationship,
                         EducationEmployment = row.EducationEmployment,
-                        Income              = row.Income
+                        Income              = row.Income,
+                        HasSpecialNeeds     = row.HasSpecialNeeds,
+                        SpecialNeedsCategory = row.SpecialNeedsCategory,
+                        SpecialNeedsDescription = row.SpecialNeedsDescription
                     });
                 }
             }
@@ -1885,7 +2258,8 @@ namespace SOLUM_UI
                 string rel  = !string.IsNullOrWhiteSpace(m.Relationship) ? $" ({m.Relationship.Trim()})" : "";
                 string age  = !string.IsNullOrWhiteSpace(m.Age) ? $", Age {m.Age.Trim()}" : "";
                 string sex  = !string.IsNullOrWhiteSpace(m.Sex) ? $", {m.Sex.Trim()}" : "";
-                return $"{name}{rel}{age}{sex}";
+                string sn   = m.HasSpecialNeeds ? $", Special Needs: {(!string.IsNullOrWhiteSpace(m.SpecialNeedsCategory) ? m.SpecialNeedsCategory : "Yes")}" : "";
+                return $"{name}{rel}{age}{sex}{sn}";
             }
 
             int newCount = r.FamilyMembers != null ? r.FamilyMembers.Count : 0;
