@@ -1263,7 +1263,7 @@
 
                 <!-- â”€â”€ Unified How-to + Encoder Mode banner â”€â”€ -->
                 <Border CornerRadius="10" Padding="14,11" Margin="0,0,0,18"
-                        Background="#FDF4F7" BorderBrush="#EAD4DC" BorderThickness="1">
+                        Background="#FDF4F7" BorderBrush="#D4A0B0" BorderThickness="1.5">
                     <Grid>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -1348,7 +1348,7 @@
                 </Border>
 
                 <!-- â”€â”€ Two-Column Search + Add card row â”€â”€ -->
-                <Grid Margin="0,0,0,24">
+                <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="18"/>
@@ -1630,7 +1630,7 @@
                                    IsLoading="True"
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Stretch"
-                                   Panel.ZIndex="9999"/>
+                                   Panel.ZIndex="9999" Loaded="PageLoadingOverlay_Loaded"/>
 
     </Grid>
 </Page>
