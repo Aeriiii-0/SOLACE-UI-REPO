@@ -337,35 +337,39 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="4"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
+                    <!-- Mode stripe (green) -->
+                    <Border Grid.Row="1" Background="#10B981"/>
+
                     <!-- Header -->
-                    <Border Grid.Row="0" Background="#10B981" CornerRadius="18,18,0,0" Padding="36,24,36,24">
+                    <Border Grid.Row="0" Background="White" CornerRadius="18,18,0,0" Padding="36,24,36,24">
                         <Grid>
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,6">
                                     <StackPanel>
                                         <TextBlock Text="Identity Verification" FontSize="20" FontWeight="Bold"
-                                                   Foreground="White"/>
+                                                   Foreground="#111111"/>
                                         <TextBlock Text="Check for existing records before proceeding to the full form."
-                                                   FontSize="12" Foreground="#E8F5E9" Margin="0,2,0,0"/>
+                                                   FontSize="12" Foreground="#666666" Margin="0,4,0,0"/>
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
-                            <Button HorizontalAlignment="Right" VerticalAlignment="Top"
+                            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
                                     Width="32" Height="32" Background="Transparent"
                                     BorderThickness="0" Cursor="Hand" Click="Close_Click">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="CloseBg" Background="Transparent" CornerRadius="16">
-                                            <TextBlock Text="&#x2715;" FontSize="14" Foreground="White"
+                                            <TextBlock Text="&#x2715;" FontSize="14" Foreground="#AAAAAA"
                                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="CloseBg" Property="Background" Value="#059669"/>
+                                                <Setter TargetName="CloseBg" Property="Background" Value="#F0F0F0"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -375,7 +379,7 @@
                     </Border>
 
                     <!-- Form body -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled"
                                   Background="White" Padding="36,28,36,20">
                         <StackPanel>
