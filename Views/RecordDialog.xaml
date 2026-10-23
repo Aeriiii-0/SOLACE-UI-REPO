@@ -1037,9 +1037,7 @@
                                                          MaxLength="200"
                                                          TextChanged="TxtEmergencyAddress_TextChanged"/>
                                                 <CheckBox x:Name="ChkSameAsApplicant" Content="Same as Applicant"
-                                                          FontSize="12" Foreground="#666666" Margin="0,4,0,0"
-                                                          Checked="ChkSameAsApplicant_Checked"
-                                                          Unchecked="ChkSameAsApplicant_Unchecked"/>
+                                                          FontSize="12" Foreground="#666666" Margin="0,4,0,0"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="3">
                                                 <TextBlock Text="Contact Number" Style="{StaticResource FieldLabel}"/>
@@ -1373,7 +1371,7 @@
 
                                                             <StackPanel Grid.Column="6">
                                                                 <TextBlock Text="Monthly Income (₱)" Style="{StaticResource FieldLabelSm}"/>
-                                                                <TextBox x:Name="TxtMemberIncome" Style="{StaticResource FormBoxSm}" Text="0.00"
+                                                                <TextBox x:Name="TxtMemberIncome" Style="{StaticResource FormBoxSm}"
                                                                          PreviewTextInput="NumberOnly_PreviewTextInput"/>
                                                             </StackPanel>
                                                         </Grid>

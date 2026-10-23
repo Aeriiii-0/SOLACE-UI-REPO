@@ -794,11 +794,7 @@ namespace SOLUM_UI
 
             if (view.OpenedRenew)
             {
-                if (view.IsQuickRenew || view.RenewalResult == null)
-                {
-                    await RenewRecordQuickAsync(recordToView, skipConfirmation: true);
-                }
-                else
+                if (view.RenewalResult != null)
                 {
                     await RenewRecordAsync(recordToView, view.RenewalResult);
                 }
@@ -1108,39 +1104,33 @@ namespace SOLUM_UI
             SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
             string recordName = vm != null ? vm.Name : id;
 
-            var methodDialog = new RenewalMethodDialog
-            {
-                Owner = Window.GetWindow(this)
-            };
-            if (methodDialog.ShowDialog() != true) return;
+            SoloParentRecord rawRecord = vm?.RawModel;
+            SoloParentDto existingDto = null;
 
-            if (methodDialog.SelectedChoice == RenewalChoice.QuickRenew)
+            PageLoadingOverlay.Visibility = Visibility.Visible;
+            try
             {
-                await RenewRecordQuickAsync(vm?.RawModel ?? new SoloParentRecord { Id = id, Surname = recordName });
-                return;
-            }
-
-            if (methodDialog.SelectedChoice == RenewalChoice.ReassessAndRenew)
-            {
-                SoloParentRecord rawRecord = vm?.RawModel;
-                SoloParentDto existingDto = null;
                 var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
                 if (fetch.Succeeded && fetch.Data != null)
                 {
                     existingDto = fetch.Data;
                     rawRecord = SoloParentApiService.Instance.MapToRecord(existingDto);
                 }
+            }
+            finally
+            {
+                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+            }
 
-                if (rawRecord == null) rawRecord = new SoloParentRecord { Id = id, Surname = recordName };
+            if (rawRecord == null) rawRecord = new SoloParentRecord { Id = id, Surname = recordName };
 
-                var dialog = new RenewalReassessmentDialog(rawRecord, existingDto)
-                {
-                    Owner = Window.GetWindow(this)
-                };
-                if (dialog.ShowDialog() == true && dialog.UpdatedRecord != null)
-                {
-                    await RenewRecordAsync(rawRecord, dialog.UpdatedRecord, existingDto);
-                }
+            var dialog = new RenewalReassessmentDialog(rawRecord, existingDto)
+            {
+                Owner = Window.GetWindow(this)
+            };
+            if (dialog.ShowDialog() == true && dialog.UpdatedRecord != null)
+            {
+                await RenewRecordAsync(rawRecord, dialog.UpdatedRecord, existingDto);
             }
         }
 

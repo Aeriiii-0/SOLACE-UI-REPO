@@ -7,7 +7,8 @@
         AllowsTransparency="True"
         Background="Transparent"
         ResizeMode="NoResize"
-        Width="880" Height="720">
+        SizeChanged="Window_SizeChanged"
+        Width="900" Height="760">
 
     <Window.Resources>
         <!-- ── Typography & Labels ── -->
@@ -406,6 +407,30 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="FormCheck" TargetType="ToggleButton">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#222222"/>
+            <Setter Property="Margin" Value="0,5,20,5"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="FormBoxSm" TargetType="TextBox" BasedOn="{StaticResource FormBox}">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="10,0"/>
+        </Style>
+
+        <Style x:Key="FormDateSm" TargetType="DatePicker" BasedOn="{StaticResource FormDate}">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style x:Key="FieldLabelSm" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#444444"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
+        </Style>
     </Window.Resources>
 
     <!-- Dimmed Modal Backdrop -->
@@ -416,7 +441,8 @@
             </Border.Effect>
 
             <!-- Dialog Shell -->
-            <Border x:Name="DialogShell" Background="#FAFAFA" CornerRadius="16" Width="860" Height="700"
+            <Border x:Name="DialogShell" Background="#FAFAFA" CornerRadius="16"
+                    VerticalAlignment="Center" HorizontalAlignment="Center"
                     BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -472,15 +498,8 @@
 
                             <!-- Info -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock x:Name="TxtApplicantName" Text="Maria Santos y Dela Cruz" FontSize="15" FontWeight="Bold" Foreground="#702943" FontFamily="Segoe UI"/>
-                                    <Border Background="#FDF0F3" BorderBrush="#EDD0DA" BorderThickness="1" CornerRadius="6" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock x:Name="TxtCategoryBadge" Text="A2 · Death of Spouse" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
-                                    </Border>
-                                </StackPanel>
+                                <TextBlock x:Name="TxtApplicantName" Text="Maria Santos y Dela Cruz" FontSize="15" FontWeight="Bold" Foreground="#702943" FontFamily="Segoe UI"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                    <TextBlock Text="ID: " FontSize="11" Foreground="#666666"/>
-                                    <TextBlock x:Name="TxtSoloParentId" Text="SP-2024-00123" FontSize="11" FontWeight="SemiBold" Foreground="#111111" Margin="0,0,14,0"/>
                                     <TextBlock Text="PhilSys: " FontSize="11" Foreground="#666666"/>
                                     <TextBlock x:Name="TxtPhilSysNumber" Text="1234-5678-9012" FontSize="11" FontWeight="SemiBold" Foreground="#111111" Margin="0,0,14,0"/>
                                     <TextBlock Text="Barangay: " FontSize="11" Foreground="#666666"/>
@@ -490,14 +509,7 @@
 
                             <!-- Expiry & Renewal Status -->
                             <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                <Border Background="#FEF3C7" BorderBrush="#FCD34D" BorderThickness="1" CornerRadius="6" Padding="10,4">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
-                                              Fill="#D97706" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                        <TextBlock x:Name="TxtExpiryNotice" Text="Current Expiry: Oct 18, 2026" FontSize="11" FontWeight="Bold" Foreground="#B45309"/>
-                                    </StackPanel>
-                                </Border>
-                                <TextBlock Text="Extends by 1 Year upon confirmation" FontSize="10" Foreground="#702943" FontWeight="SemiBold" HorizontalAlignment="Right" Margin="0,3,0,0"/>
+                                <TextBlock x:Name="TxtExpiryNotice" Text="Current Expiry: Oct 18, 2026" FontSize="12.5" FontWeight="SemiBold" Foreground="#555555"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -569,7 +581,7 @@
 
                         <!-- ──────── STEP 1: CIVIL STATUS & LIVELIHOOD ──────── -->
                         <ScrollViewer x:Name="Step1Panel" VerticalScrollBarVisibility="Auto" Padding="28,20" Visibility="Visible">
-                            <StackPanel MaxWidth="780" HorizontalAlignment="Stretch">
+                            <StackPanel HorizontalAlignment="Stretch">
                                 <TextBlock Text="Step 1: Civil Status &amp; Livelihood" Style="{StaticResource SectionHeading}" Margin="0,0,0,4"/>
                                 <TextBlock Text="Verify or update marital status and current household income. These factors determine ongoing subsidy eligibility." Style="{StaticResource HelperText}" Margin="0,0,0,16"/>
 
@@ -645,7 +657,7 @@
 
                         <!-- ──────── STEP 2: FAMILY COMPOSITION (DEPENDENTS) ──────── -->
                         <ScrollViewer x:Name="Step2Panel" VerticalScrollBarVisibility="Auto" Padding="28,20" Visibility="Collapsed">
-                            <StackPanel MaxWidth="780" HorizontalAlignment="Stretch">
+                            <StackPanel HorizontalAlignment="Stretch">
                                 <Grid Margin="0,0,0,14">
                                     <StackPanel VerticalAlignment="Center">
                                         <TextBlock Text="Step 2: Family Dependents" Style="{StaticResource SectionHeading}"/>
@@ -661,56 +673,94 @@
                                 </Grid>
 
                                 <!-- Add/Edit Dependent Inline Sub-Card (Collapsible) -->
-                                <Border x:Name="AddChildSubCard" Background="#FFF7F9" BorderBrush="#EDD0DA" BorderThickness="1.5"
+                                <Border x:Name="AddChildSubCard" Background="#FFF9FB" BorderBrush="#702943" BorderThickness="1.5"
                                         CornerRadius="10" Padding="18" Margin="0,0,0,16" Visibility="Collapsed">
                                     <StackPanel>
-                                        <TextBlock x:Name="TxtAddChildTitle" Text="Add New Dependent" FontSize="13" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,12"/>
+                                        <!-- Sub-Card Header Banner -->
+                                        <Border Background="#702943" CornerRadius="8,8,0,0" Padding="14,10" Margin="-18,-18,-18,14">
+                                            <Grid>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="👤" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                    <TextBlock x:Name="TxtAddChildTitle" Text="Add New Dependent"
+                                                               FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Row 1: Name, Relationship, Sex, Civil Status -->
                                         <Grid Margin="0,0,0,12">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="2*"/>
                                                 <ColumnDefinition Width="12"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="1.2*"/>
                                                 <ColumnDefinition Width="12"/>
                                                 <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="1.2*"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Full Name *" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtChildName" Style="{StaticResource FormBox}"/>
+                                                <TextBlock Text="Full Name *" Style="{StaticResource FieldLabelSm}"/>
+                                                <TextBox x:Name="TxtChildName" Style="{StaticResource FormBoxSm}" MaxLength="60"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
-                                                <TextBlock Text="Relationship *" Style="{StaticResource FieldLabel}"/>
-                                                <ComboBox x:Name="CmbChildRel" Style="{StaticResource FormCombo}">
+                                                <TextBlock Text="Relationship *" Style="{StaticResource FieldLabelSm}"/>
+                                                <ComboBox x:Name="CmbChildRel" Style="{StaticResource FormCombo}" Height="34" FontSize="12">
                                                     <ComboBoxItem Content="Child"/>
                                                     <ComboBoxItem Content="Adopted Child"/>
                                                     <ComboBoxItem Content="Legal Ward"/>
                                                     <ComboBoxItem Content="Dependent Relative"/>
+                                                    <ComboBoxItem Content="Parent"/>
+                                                    <ComboBoxItem Content="Sibling"/>
+                                                    <ComboBoxItem Content="Grandchild"/>
+                                                    <ComboBoxItem Content="Other"/>
                                                 </ComboBox>
                                             </StackPanel>
                                             <StackPanel Grid.Column="4">
-                                                <TextBlock Text="Sex *" Style="{StaticResource FieldLabel}"/>
-                                                <ComboBox x:Name="CmbChildSex" Style="{StaticResource FormCombo}">
+                                                <TextBlock Text="Sex *" Style="{StaticResource FieldLabelSm}"/>
+                                                <ComboBox x:Name="CmbChildSex" Style="{StaticResource FormCombo}" Height="34" FontSize="12">
                                                     <ComboBoxItem Content="Female"/>
                                                     <ComboBoxItem Content="Male"/>
                                                 </ComboBox>
                                             </StackPanel>
+                                            <StackPanel Grid.Column="6">
+                                                <TextBlock Text="Civil Status" Style="{StaticResource FieldLabelSm}"/>
+                                                <ComboBox x:Name="CmbChildCivil" Style="{StaticResource FormCombo}" Height="34" FontSize="12">
+                                                    <ComboBoxItem Content="Single"/>
+                                                    <ComboBoxItem Content="Married"/>
+                                                    <ComboBoxItem Content="Widowed"/>
+                                                    <ComboBoxItem Content="Separated"/>
+                                                    <ComboBoxItem Content="Annulled"/>
+                                                    <ComboBoxItem Content="Common-Law"/>
+                                                </ComboBox>
+                                            </StackPanel>
                                         </Grid>
+
+                                        <!-- Row 2: Birthdate, Age (Auto-calculated), Educational Level, Monthly Income -->
                                         <Grid Margin="0,0,0,14">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="1.2*"/>
                                                 <ColumnDefinition Width="12"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="0.7*"/>
                                                 <ColumnDefinition Width="12"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="1.5*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="1.2*"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Birthdate *" Style="{StaticResource FieldLabel}"/>
-                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Height="42">
-                                                    <DatePicker x:Name="DpChildDob" Style="{StaticResource FormDate}"/>
+                                                <TextBlock Text="Birthdate *" Style="{StaticResource FieldLabelSm}"/>
+                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Height="34">
+                                                    <DatePicker x:Name="DpChildDob" Style="{StaticResource FormDateSm}"
+                                                                SelectedDateChanged="DpChildDob_SelectedDateChanged"/>
                                                 </Border>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
-                                                <TextBlock Text="Educational Level *" Style="{StaticResource FieldLabel}"/>
-                                                <ComboBox x:Name="CmbChildEdu" Style="{StaticResource FormCombo}">
+                                                <TextBlock Text="Age" Style="{StaticResource FieldLabelSm}"/>
+                                                <TextBox x:Name="TxtChildAge" Style="{StaticResource FormBoxSm}" IsReadOnly="True"
+                                                         Background="#F5F5F5" Foreground="#666666" ToolTip="Calculated from birthdate"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Text="Educational Level" Style="{StaticResource FieldLabelSm}"/>
+                                                <ComboBox x:Name="CmbChildEdu" Style="{StaticResource FormCombo}" Height="34" FontSize="12">
                                                     <ComboBoxItem Content="None"/>
                                                     <ComboBoxItem Content="Preschool"/>
                                                     <ComboBoxItem Content="Elementary"/>
@@ -718,17 +768,62 @@
                                                     <ComboBoxItem Content="Senior High"/>
                                                     <ComboBoxItem Content="College"/>
                                                     <ComboBoxItem Content="Vocational"/>
+                                                    <ComboBoxItem Content="Post Graduate"/>
                                                     <ComboBoxItem Content="Employed"/>
                                                 </ComboBox>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="4">
-                                                <TextBlock Text="Monthly Income (₱)" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtChildIncome" Style="{StaticResource FormBox}" Text="0.00" PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                            <StackPanel Grid.Column="6">
+                                                <TextBlock Text="Monthly Income (₱)" Style="{StaticResource FieldLabelSm}"/>
+                                                <TextBox x:Name="TxtChildIncome" Style="{StaticResource FormBoxSm}"
+                                                         PreviewTextInput="NumberOnly_PreviewTextInput"/>
                                             </StackPanel>
                                         </Grid>
+
+                                        <!-- Row 3: Special Needs Integration Box (Revealed already, disabled until checked) -->
+                                        <Border Background="White" BorderBrush="#D0B8C0" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="0,0,0,14">
+                                            <StackPanel>
+                                                <CheckBox x:Name="ChkChildSpecialNeeds" Content="Person with Special Needs / Disability (PWD)"
+                                                          FontSize="12" FontWeight="SemiBold" Foreground="#702943"
+                                                          Checked="ChkChildSpecialNeeds_Changed" Unchecked="ChkChildSpecialNeeds_Changed"
+                                                          VerticalContentAlignment="Center" Cursor="Hand" Margin="0,0,0,10"/>
+
+                                                <!-- Columns revealed already, starts uneditable until ChkChildSpecialNeeds is checked -->
+                                                <Grid x:Name="PnlChildSpecialNeedsDetails" IsEnabled="False" Opacity="0.5">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="1.5*"/>
+                                                        <ColumnDefinition Width="12"/>
+                                                        <ColumnDefinition Width="2.5*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="Special Needs Category" Style="{StaticResource FieldLabelSm}"/>
+                                                        <ComboBox x:Name="CmbChildSpecialNeedsCategory" Style="{StaticResource FormCombo}" Height="34" FontSize="12">
+                                                            <ComboBoxItem Content="Visual Impairment"/>
+                                                            <ComboBoxItem Content="Hearing Impairment"/>
+                                                            <ComboBoxItem Content="Mobility / Physical Disability"/>
+                                                            <ComboBoxItem Content="Intellectual Disability"/>
+                                                            <ComboBoxItem Content="Learning Disability"/>
+                                                            <ComboBoxItem Content="Autism Spectrum"/>
+                                                            <ComboBoxItem Content="Chronic Illness / Medical Condition"/>
+                                                            <ComboBoxItem Content="Mental Health Condition"/>
+                                                            <ComboBoxItem Content="Multiple Disabilities"/>
+                                                            <ComboBoxItem Content="Other"/>
+                                                        </ComboBox>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="2">
+                                                        <TextBlock Text="Description / Special Accommodations (Optional)" Style="{StaticResource FieldLabelSm}"/>
+                                                        <TextBox x:Name="TxtChildSpecialNeedsDescription" Style="{StaticResource FormBoxSm}" MaxLength="120"
+                                                                 ToolTip="E.g., Requires wheelchair accessibility, SPED Grade 4, Maintenance medication"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Sub-Card Actions: Cancel and Save -->
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                             <Button Content="Cancel" Style="{StaticResource OutlineMaroonBtn}" Height="32" Padding="14,0" Margin="0,0,8,0" Click="BtnCancelChild_Click"/>
-                                            <Button Content="Save Dependent" Style="{StaticResource PrimaryMaroonBtn}" Height="32" Padding="14,0" Click="BtnSaveChild_Click"/>
+                                            <Button x:Name="BtnSaveChild" Content="Save Dependent" Style="{StaticResource PrimaryMaroonBtn}" Height="32" Padding="14,0" Click="BtnSaveChild_Click"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
@@ -740,68 +835,112 @@
                                             <TextBlock Text="IV. FAMILY COMPOSITION (ELIGIBLE DEPENDENTS)" Style="{StaticResource SectionLabel}"/>
                                         </Border>
 
-                                        <Grid Margin="8,4,8,8">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="1.2*"/>
-                                                <ColumnDefinition Width="1.2*"/>
-                                                <ColumnDefinition Width="100"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="NAME &amp; RELATIONSHIP" FontSize="11" FontWeight="Bold" Foreground="#702943"/>
-                                            <TextBlock Grid.Column="1" Text="AGE &amp; SEX" FontSize="11" FontWeight="Bold" Foreground="#702943"/>
-                                            <TextBlock Grid.Column="2" Text="EDUCATION / WORK" FontSize="11" FontWeight="Bold" Foreground="#702943"/>
-                                            <TextBlock Grid.Column="3" Text="STATUS" FontSize="11" FontWeight="Bold" Foreground="#702943"/>
-                                            <TextBlock Grid.Column="4" Text="ACTION" FontSize="11" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                        <Border Height="1" Background="#EDE0E5" Margin="0,0,0,8"/>
+                                        <!-- Deeper Colored Table Header Banner for the Dependents Cards List -->
+                                        <Border Background="#702943" CornerRadius="6" Padding="14,10" Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="2.2*"/>
+                                                    <ColumnDefinition Width="1.4*"/>
+                                                    <ColumnDefinition Width="1.8*"/>
+                                                    <ColumnDefinition Width="2.2*"/>
+                                                    <ColumnDefinition Width="80"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="NAME &amp; RELATIONSHIP" FontSize="11" FontWeight="Bold" Foreground="White"/>
+                                                <TextBlock Grid.Column="1" Text="AGE &amp; BIRTHDATE" FontSize="11" FontWeight="Bold" Foreground="White"/>
+                                                <TextBlock Grid.Column="2" Text="EDUCATION / WORK" FontSize="11" FontWeight="Bold" Foreground="White"/>
+                                                <TextBlock Grid.Column="3" Text="SPECIAL NEEDS / DISABILITY" FontSize="11" FontWeight="Bold" Foreground="White"/>
+                                                <TextBlock Grid.Column="4" Text="ACTIONS" FontSize="11" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                                            </Grid>
+                                        </Border>
 
                                         <ItemsControl x:Name="DependentsList">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Background="{Binding CardBg}" BorderBrush="{Binding BorderColor}" BorderThickness="1"
-                                                            CornerRadius="8" Padding="10,8" Margin="0,0,0,6">
+                                                            CornerRadius="8" Padding="14,10" Margin="0,0,0,8">
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="2*"/>
-                                                                <ColumnDefinition Width="*"/>
-                                                                <ColumnDefinition Width="1.2*"/>
-                                                                <ColumnDefinition Width="1.2*"/>
-                                                                <ColumnDefinition Width="100"/>
+                                                                <ColumnDefinition Width="2.2*"/>
+                                                                <ColumnDefinition Width="1.4*"/>
+                                                                <ColumnDefinition Width="1.8*"/>
+                                                                <ColumnDefinition Width="2.2*"/>
+                                                                <ColumnDefinition Width="80"/>
                                                             </Grid.ColumnDefinitions>
 
-                                                            <!-- Name + Relationship -->
+                                                            <!-- Column 0: Name + Relationship + Status Badge -->
                                                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" Foreground="{Binding TextColor}"/>
-                                                                <TextBlock Text="{Binding Relationship}" FontSize="11" Foreground="#777777"/>
+                                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                                                    <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"
+                                                                               Foreground="{Binding TextColor}" TextTrimming="CharacterEllipsis"/>
+                                                                    <!-- Status Badge if NEW or REMOVED -->
+                                                                    <Border Background="{Binding TagBg}" CornerRadius="4" Padding="5,1" Margin="6,0,0,0"
+                                                                            VerticalAlignment="Center">
+                                                                        <TextBlock Text="{Binding StatusTag}" FontSize="9.5" FontWeight="Bold"
+                                                                                   Foreground="{Binding TagFg}"/>
+                                                                    </Border>
+                                                                </StackPanel>
+                                                                <TextBlock Text="{Binding Relationship}" FontSize="11" Foreground="#757575"/>
                                                             </StackPanel>
 
-                                                            <!-- Age & Sex -->
+                                                            <!-- Column 1: Age & Birthdate -->
                                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding AgeDisplay}" FontSize="12" Foreground="#222222"/>
-                                                                <TextBlock Text="{Binding Sex}" FontSize="11" Foreground="#777777"/>
+                                                                <TextBlock Text="{Binding AgeDisplay}" FontSize="12.5" FontWeight="Medium" Foreground="{Binding TextColor}"/>
+                                                                <TextBlock Text="{Binding Birthdate, StringFormat=\{0:yyyy-MM-dd\}}" FontSize="11" Foreground="#757575"/>
                                                             </StackPanel>
 
-                                                            <!-- Education -->
+                                                            <!-- Column 2: Educational Level & Income -->
                                                             <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding EducationalLevel}" FontSize="12" Foreground="#222222"/>
-                                                                <TextBlock Text="{Binding IncomeDisplay}" FontSize="11" Foreground="#777777"/>
+                                                                <TextBlock Text="{Binding EducationalLevel}" FontSize="12" Foreground="{Binding TextColor}" TextTrimming="CharacterEllipsis"/>
+                                                                <TextBlock Text="{Binding IncomeDisplay}" FontSize="11" Foreground="#757575"/>
                                                             </StackPanel>
 
-                                                            <!-- Status Tag -->
-                                                            <Border Grid.Column="3" HorizontalAlignment="Left" VerticalAlignment="Center"
-                                                                    Background="{Binding TagBg}" CornerRadius="6" Padding="6,2">
-                                                                <TextBlock Text="{Binding StatusTag}" FontSize="10" FontWeight="Bold" Foreground="{Binding TagFg}"/>
-                                                            </Border>
+                                                            <!-- Column 3: Special Needs / Disability (Direct Typography, No Badges) -->
+                                                            <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding DisabilityTitleDisplay}" FontSize="12"
+                                                                           FontWeight="{Binding DisabilityTextWeight}"
+                                                                           Foreground="{Binding DisabilityTextColor}" TextTrimming="CharacterEllipsis"/>
+                                                                <TextBlock Text="{Binding DisabilitySubtitleDisplay}" FontSize="10.5"
+                                                                           Foreground="#757575" TextTrimming="CharacterEllipsis"
+                                                                           Visibility="{Binding DisabilitySubtitleVisibility}" Margin="0,1,0,0"/>
+                                                            </StackPanel>
 
-                                                            <!-- Actions -->
+                                                            <!-- Column 4: Actions (Prominent Edit & Delete / Undo Icons) -->
                                                             <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                                <Button Content="Edit" FontSize="11" Height="26" Padding="8,0" Margin="0,0,4,0"
-                                                                        Background="#FDF0F3" Foreground="#702943" BorderThickness="0" Cursor="Hand"
-                                                                        Click="BtnEditDependent_Click" Tag="{Binding}"/>
-                                                                <Button Content="{Binding ActionButtonText}" FontSize="11" Height="26" Padding="8,0"
-                                                                        Background="{Binding ActionButtonBg}" Foreground="{Binding ActionButtonFg}"
-                                                                        BorderThickness="0" Cursor="Hand" Click="BtnToggleRemoveDependent_Click" Tag="{Binding}"/>
+                                                                <!-- Prominent Edit Button (hidden if removed) -->
+                                                                <Button Width="32" Height="32" Margin="0,0,6,0" Cursor="Hand"
+                                                                        ToolTip="Edit dependent" Click="BtnEditDependent_Click" Tag="{Binding}"
+                                                                        Visibility="{Binding EditButtonVisibility}">
+                                                                    <Button.Template>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border x:Name="BtnBg" Background="#FDF2F5" BorderBrush="#E5B8C9" BorderThickness="1.2" CornerRadius="6">
+                                                                                <Path x:Name="BtnIcon" Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87M3,17.25V21H6.75L17.81,9.93L14.07,6.19L3,17.25Z"
+                                                                                      Fill="#702943" Stretch="Uniform" Width="14" Height="14"
+                                                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter TargetName="BtnBg" Property="Background" Value="#702943"/>
+                                                                                    <Setter TargetName="BtnBg" Property="BorderBrush" Value="#702943"/>
+                                                                                    <Setter TargetName="BtnIcon" Property="Fill" Value="White"/>
+                                                                                </Trigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </Button.Template>
+                                                                </Button>
+
+                                                                <!-- Prominent Delete / Undo Button -->
+                                                                <Button Width="32" Height="32" Cursor="Hand"
+                                                                        ToolTip="{Binding RemoveButtonToolTip}" Click="BtnToggleRemoveDependent_Click" Tag="{Binding}">
+                                                                    <Button.Template>
+                                                                        <ControlTemplate TargetType="Button">
+                                                                            <Border x:Name="DelBg" Background="{Binding ActionButtonBg}" BorderBrush="{Binding ActionButtonBorder}" BorderThickness="1.2" CornerRadius="6">
+                                                                                <Path x:Name="DelIcon" Data="{Binding ActionButtonIconData}"
+                                                                                      Fill="{Binding ActionButtonFg}" Stretch="Uniform" Width="14" Height="14"
+                                                                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                            </Border>
+                                                                        </ControlTemplate>
+                                                                    </Button.Template>
+                                                                </Button>
                                                             </StackPanel>
                                                         </Grid>
                                                     </Border>
@@ -818,87 +957,171 @@
 
                         <!-- ──────── STEP 3: CIRCUMSTANCES & NEEDS ASSESSMENT ──────── -->
                         <ScrollViewer x:Name="Step3Panel" VerticalScrollBarVisibility="Auto" Padding="28,20" Visibility="Collapsed">
-                            <StackPanel MaxWidth="780" HorizontalAlignment="Stretch">
+                            <StackPanel HorizontalAlignment="Stretch">
                                 <TextBlock Text="Step 3: Circumstances &amp; Needs Assessment" Style="{StaticResource SectionHeading}" Margin="0,0,0,4"/>
                                 <TextBlock Text="Review or update the primary legal basis for the solo parent classification, family needs, and other sources of income."
                                            Style="{StaticResource HelperText}" Margin="0,0,0,16"/>
 
-                                <!-- Circumstance / Problem Presented -->
+                                <!-- Circumstance / Problem Presented (Uniform with RecordDialog) -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
                                         <Border Style="{StaticResource CardSectionHeader}">
-                                            <TextBlock Text="III. CIRCUMSTANCE OF BEING SOLO PARENT" Style="{StaticResource SectionLabel}"/>
+                                            <TextBlock Text="III. PROBLEM PRESENTED / CIRCUMSTANCE OF BEING SOLO PARENT"
+                                                       Style="{StaticResource SectionLabel}"/>
                                         </Border>
 
-                                        <TextBlock Text="Primary Circumstance / Ground for Classification *" Style="{StaticResource FieldLabel}"/>
-                                        <ComboBox x:Name="CmbCircumstance" Style="{StaticResource FormCombo}" Margin="0,0,0,14" SelectionChanged="CmbCircumstance_SelectionChanged">
-                                            <ComboBoxItem Content="A1 · Gives birth as a result of rape" Tag="A1"/>
-                                            <ComboBoxItem Content="A2 · Death of spouse" Tag="A2"/>
-                                            <ComboBoxItem Content="A3 · Detention of spouse" Tag="A3"/>
-                                            <ComboBoxItem Content="A4 · Physical &amp; mental incapacity of spouse" Tag="A4"/>
-                                            <ComboBoxItem Content="A5 · Legal or de facto separation (at least 6 months)" Tag="A5"/>
-                                            <ComboBoxItem Content="A6 · Declaration of nullity or annulment of marriage" Tag="A6"/>
-                                            <ComboBoxItem Content="A7 · Abandonment of spouse for at least 6 months" Tag="A7"/>
-                                            <ComboBoxItem Content="B · OFW-related solo parent" Tag="B"/>
-                                            <ComboBoxItem Content="C · Unmarried mother or father" Tag="C"/>
-                                            <ComboBoxItem Content="D · Legal guardian, adoptive or foster parent" Tag="D"/>
-                                            <ComboBoxItem Content="E · Relative within 4th civil degree caring for child" Tag="E"/>
-                                            <ComboBoxItem Content="F · Pregnant woman alone" Tag="F"/>
-                                        </ComboBox>
+                                        <!-- 3-column circumstances: A1-A4 | A5-B | C-F -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
 
-                                        <!-- Dynamic Conditional Subfields -->
-                                        <!-- For A2 (Death) -->
-                                        <Border x:Name="PanelSubA2" Background="#FFF7F9" BorderBrush="#EDD0DA" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,14" Visibility="Collapsed">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="2*"/>
-                                                    <ColumnDefinition Width="14"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel Grid.Column="0">
-                                                    <TextBlock Text="Cause of Death" Style="{StaticResource FieldLabel}"/>
-                                                    <TextBox x:Name="TxtA2Cause" Style="{StaticResource FormBox}"/>
+                                            <!-- col 1: A1–A4 -->
+                                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                                <RadioButton x:Name="ChkA1" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="A1. " FontWeight="Bold"/>
+                                                        <Run Text="Gives birth as a result of rape"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+
+                                                <RadioButton x:Name="ChkA2" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="A2. " FontWeight="Bold"/>
+                                                        <Run Text="Death of Spouse"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                                <StackPanel x:Name="PnlA2" Visibility="Collapsed" Margin="22,2,0,6">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="8"/>
+                                                            <ColumnDefinition Width="140"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="Cause of death" Style="{StaticResource FieldLabelSm}"/>
+                                                            <TextBox x:Name="TxtA2Cause" Style="{StaticResource FormBoxSm}"
+                                                                     MaxLength="100"/>
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2">
+                                                            <TextBlock Text="Date" Style="{StaticResource FieldLabelSm}"/>
+                                                            <DatePicker x:Name="DpA2Date" Style="{StaticResource FormDateSm}"/>
+                                                        </StackPanel>
+                                                    </Grid>
                                                 </StackPanel>
-                                                <StackPanel Grid.Column="2">
-                                                    <TextBlock Text="Date of Death" Style="{StaticResource FieldLabel}"/>
-                                                    <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Height="42">
-                                                        <DatePicker x:Name="DpA2Date" Style="{StaticResource FormDate}"/>
-                                                    </Border>
+
+                                                <RadioButton x:Name="ChkA3" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="A3. " FontWeight="Bold"/>
+                                                        <Run Text="Detention of Spouse"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+
+                                                <RadioButton x:Name="ChkA4" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="A4. " FontWeight="Bold"/>
+                                                        <Run Text="Physical &amp; Mental Incapacity of Spouse"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                                <StackPanel x:Name="PnlA4" Visibility="Collapsed" Margin="22,2,0,6">
+                                                    <TextBlock Text="Type of disability" Style="{StaticResource FieldLabelSm}"/>
+                                                    <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBoxSm}"/>
                                                 </StackPanel>
-                                            </Grid>
-                                        </Border>
-
-                                        <!-- For A4 (Incapacity) -->
-                                        <Border x:Name="PanelSubA4" Background="#FFF7F9" BorderBrush="#EDD0DA" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,14" Visibility="Collapsed">
-                                            <StackPanel>
-                                                <TextBlock Text="Type of Disability / Incapacity" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBox}"/>
                                             </StackPanel>
-                                        </Border>
 
-                                        <!-- For A5 (Separation) -->
-                                        <Border x:Name="PanelSubA5" Background="#FFF7F9" BorderBrush="#EDD0DA" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,14" Visibility="Collapsed">
-                                            <StackPanel>
-                                                <TextBlock Text="Period of Separation (e.g. 2 years, since 2022)" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBox}"/>
-                                            </StackPanel>
-                                        </Border>
+                                            <!-- col 2: A5–B -->
+                                            <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                                                <RadioButton x:Name="ChkA5" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="A5. " FontWeight="Bold"/>
+                                                        <Run Text="Legal or de facto Separation"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                                <StackPanel x:Name="PnlA5" Visibility="Collapsed" Margin="22,2,0,6">
+                                                    <TextBlock Text="Period of separation" Style="{StaticResource FieldLabelSm}"/>
+                                                    <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}"/>
+                                                </StackPanel>
 
-                                        <!-- For A6 (Nullity / Annulment) -->
-                                        <Border x:Name="PanelSubA6" Background="#FFF7F9" BorderBrush="#EDD0DA" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,14" Visibility="Collapsed">
-                                            <StackPanel Orientation="Horizontal">
-                                                <RadioButton x:Name="RdoNullity" Content="Declaration of Nullity" GroupName="A6Sub" FontSize="13" Margin="0,0,24,0" IsChecked="True"/>
-                                                <RadioButton x:Name="RdoAnnulment" Content="Annulment of Marriage" GroupName="A6Sub" FontSize="13"/>
-                                            </StackPanel>
-                                        </Border>
+                                                <RadioButton x:Name="ChkA6" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="A6. " FontWeight="Bold"/>
+                                                        <Run Text="Declaration of:"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                                <StackPanel x:Name="PnlA6" Visibility="Collapsed" Margin="22,2,0,6">
+                                                    <TextBlock Text="Type of Declaration" Style="{StaticResource FieldLabelSm}"/>
+                                                    <ComboBox x:Name="CmbA6Declaration" Style="{StaticResource FormCombo}" Height="34">
+                                                        <ComboBoxItem Content=""/>
+                                                        <ComboBoxItem Content="Nullity of marriage"/>
+                                                        <ComboBoxItem Content="Annulment of marriage"/>
+                                                    </ComboBox>
+                                                </StackPanel>
 
-                                        <!-- For B (OFW) -->
-                                        <Border x:Name="PanelSubB" Background="#FFF7F9" BorderBrush="#EDD0DA" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,14" Visibility="Collapsed">
-                                            <StackPanel>
-                                                <TextBlock Text="Length of Stay Abroad (months)" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox x:Name="TxtBStayAbroad" Style="{StaticResource FormBox}" PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                                <RadioButton x:Name="ChkA7" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="A7. " FontWeight="Bold"/>
+                                                        <Run Text="Abandonment of spouse for at least 6 months"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+
+                                                <RadioButton x:Name="ChkB" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="B. " FontWeight="Bold"/>
+                                                        <Run Text="Spouse or any family member of an OFW"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                                <StackPanel x:Name="PnlB" Visibility="Collapsed" Margin="22,2,0,6">
+                                                    <TextBlock Text="Length of Stay Abroad (months)" Style="{StaticResource FieldLabelSm}"/>
+                                                    <TextBox x:Name="TxtBStayAbroad" Style="{StaticResource FormBoxSm}"
+                                                             PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                                </StackPanel>
                                             </StackPanel>
-                                        </Border>
+
+                                            <!-- col 3: C–F -->
+                                            <StackPanel Grid.Column="2">
+                                                <RadioButton x:Name="ChkC" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="C. " FontWeight="Bold"/>
+                                                        <Run Text="Unmarried Mother or Father"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+
+                                                <RadioButton x:Name="ChkD" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="D. " FontWeight="Bold"/>
+                                                        <Run Text="Legal Guardian / Adoptive / Foster Parent"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+
+                                                <RadioButton x:Name="ChkE" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="E. " FontWeight="Bold"/>
+                                                        <Run Text="Relative within the fourth (4th) civil degree of consanguinity or affinity"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+
+                                                <RadioButton x:Name="ChkF" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="F. " FontWeight="Bold"/>
+                                                        <Run Text="Pregnant Woman"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                            </StackPanel>
+                                        </Grid>
                                     </StackPanel>
                                 </Border>
 
@@ -935,7 +1158,7 @@
 
                         <!-- ──────── STEP 4: REVIEW & CONFIRM ──────── -->
                         <ScrollViewer x:Name="Step4Panel" VerticalScrollBarVisibility="Auto" Padding="28,20" Visibility="Collapsed">
-                            <StackPanel MaxWidth="780" HorizontalAlignment="Stretch">
+                            <StackPanel HorizontalAlignment="Stretch">
                                 <TextBlock Text="Step 4: Review Changes &amp; Confirm Renewal" Style="{StaticResource SectionHeading}" Margin="0,0,0,4"/>
                                 <TextBlock Text="Please review the changes before saving. Submitting will update the parent's record and automatically extend validity by 1 year."
                                            Style="{StaticResource HelperText}" Margin="0,0,0,16"/>
@@ -964,7 +1187,8 @@
                                             <TextBlock Text="RE-ASSESSMENT SUMMARY &amp; AUDIT TRAIL" Style="{StaticResource SectionLabel}"/>
                                         </Border>
 
-                                        <Grid Margin="0,0,0,8">
+                                        <!-- Column Headers for Changes Diff Table (only visible when changes exist) -->
+                                        <Grid x:Name="DiffTableHeader" Margin="0,0,0,8">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="180"/>
                                                 <ColumnDefinition Width="*"/>
@@ -974,7 +1198,24 @@
                                             <TextBlock Grid.Column="1" Text="CURRENT VALUE" FontSize="11" FontWeight="Bold" Foreground="#888888"/>
                                             <TextBlock Grid.Column="2" Text="NEW VALUE (FOR RENEWAL)" FontSize="11" FontWeight="Bold" Foreground="#702943"/>
                                         </Grid>
-                                        <Border Height="1" Background="#EDE0E5" Margin="0,0,0,8"/>
+                                        <Border x:Name="DiffTableDivider" Height="1" Background="#EDE0E5" Margin="0,0,0,8"/>
+
+                                        <!-- Empty State when no fields changed -->
+                                        <Border x:Name="PanelNoDiffs" Background="#F0F9F4" BorderBrush="#C8E6C9" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="0,0,0,8" Visibility="Collapsed">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Width="24" Height="24" CornerRadius="12" Background="#2E7D32" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="✓" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="No Field Changes Detected" FontSize="12.5" FontWeight="Bold" Foreground="#2E7D32"/>
+                                                    <TextBlock Text="The solo parent's circumstances, livelihood, and household information remain identical to previous records." FontSize="11" Foreground="#555555" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
 
                                         <ItemsControl x:Name="ReviewDiffList">
                                             <ItemsControl.ItemTemplate>

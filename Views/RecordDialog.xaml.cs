@@ -42,6 +42,7 @@ namespace SOLUM_UI
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void N(string p) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(p));
+        public void RefreshAll() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
 
         public string MemberName
         {
@@ -61,6 +62,7 @@ namespace SOLUM_UI
                 else
                     _sex = s;
                 N(nameof(Sex));
+                N(nameof(SexDisplay));
             }
         }
 
@@ -69,7 +71,7 @@ namespace SOLUM_UI
         public string Age
         {
             get => _age;
-            set { _age = SOLUM_UI.Services.OcrService.CleanAgeString(value); N(nameof(Age)); }
+            set { _age = SOLUM_UI.Services.OcrService.CleanAgeString(value); N(nameof(Age)); N(nameof(AgeDisplay)); }
         }
 
         public string Birthdate
@@ -87,7 +89,7 @@ namespace SOLUM_UI
                         _birthdateDate = dt.Value;
                         N(nameof(BirthdateDate));
                         int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(dt.Value);
-                        if (calcAge >= 0 && calcAge <= 120) { _age = calcAge.ToString(); N(nameof(Age)); }
+                        if (calcAge >= 0 && calcAge <= 120) { _age = calcAge.ToString(); N(nameof(Age)); N(nameof(AgeDisplay)); }
                     }
                 }
                 else
@@ -96,6 +98,7 @@ namespace SOLUM_UI
                     N(nameof(BirthdateDate));
                     _age = string.Empty;
                     N(nameof(Age));
+                    N(nameof(AgeDisplay));
                 }
             }
         }
@@ -112,7 +115,7 @@ namespace SOLUM_UI
                     _birthdate = value.Value.ToString("dd/MM/yyyy");
                     N(nameof(Birthdate));
                     int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(value.Value);
-                    if (calcAge >= 0 && calcAge <= 120) { _age = calcAge.ToString(); N(nameof(Age)); }
+                    if (calcAge >= 0 && calcAge <= 120) { _age = calcAge.ToString(); N(nameof(Age)); N(nameof(AgeDisplay)); }
                 }
                 else
                 {
@@ -120,6 +123,7 @@ namespace SOLUM_UI
                     N(nameof(Birthdate));
                     _age = string.Empty;
                     N(nameof(Age));
+                    N(nameof(AgeDisplay));
                 }
             }
         }
@@ -399,6 +403,8 @@ namespace SOLUM_UI
             AddHandler(System.Windows.Controls.Primitives.ToggleButton.CheckedEvent, new RoutedEventHandler((s, e) => UpdateSaveButtonState()));
             AddHandler(System.Windows.Controls.Primitives.ToggleButton.UncheckedEvent, new RoutedEventHandler((s, e) => UpdateSaveButtonState()));
             _familyRowData.CollectionChanged += (s, e) => UpdateSaveButtonState();
+
+            SOLUM_UI.Services.FormHelper.BindSameAsApplicantAddress(ChkSameAsApplicant, TxtAddress, TxtEmergencyAddress);
         }
 
         /// <summary>
@@ -707,15 +713,15 @@ namespace SOLUM_UI
             TxtAddMemberTitle.Text = "Add Household Member";
             BtnSaveMember.Content = "Save Member";
             TxtMemberName.Text = string.Empty;
-            CmbMemberRel.SelectedIndex = 0;
-            CmbMemberSex.SelectedIndex = 0;
-            CmbMemberCivil.SelectedIndex = 0;
-            DpMemberDob.SelectedDate = DateTime.Today.AddYears(-5);
-            TxtMemberAge.Text = "5";
+            CmbMemberRel.SelectedIndex = -1;
+            CmbMemberSex.SelectedIndex = -1;
+            CmbMemberCivil.SelectedIndex = -1;
+            DpMemberDob.SelectedDate = null;
+            TxtMemberAge.Text = string.Empty;
             TxtMemberEdu.Text = string.Empty;
-            TxtMemberIncome.Text = "0.00";
+            TxtMemberIncome.Text = string.Empty;
             ChkMemberSpecialNeeds.IsChecked = false;
-            CmbSpecialNeedsCategory.SelectedIndex = 0;
+            CmbSpecialNeedsCategory.SelectedIndex = -1;
             TxtSpecialNeedsDescription.Text = string.Empty;
             if (PnlSpecialNeedsDetails != null)
             {
@@ -745,11 +751,11 @@ namespace SOLUM_UI
                 else if (DateTime.TryParse(row.Birthdate, out DateTime dt))
                     DpMemberDob.SelectedDate = dt;
                 else
-                    DpMemberDob.SelectedDate = DateTime.Today.AddYears(-5);
+                    DpMemberDob.SelectedDate = null;
 
                 TxtMemberAge.Text = row.Age;
                 TxtMemberEdu.Text = row.EducationEmployment;
-                TxtMemberIncome.Text = string.IsNullOrWhiteSpace(row.Income) ? "0.00" : row.Income;
+                TxtMemberIncome.Text = string.IsNullOrWhiteSpace(row.Income) ? string.Empty : row.Income;
 
                 bool hasSn = row.HasSpecialNeeds;
                 ChkMemberSpecialNeeds.IsChecked = hasSn;
@@ -812,6 +818,22 @@ namespace SOLUM_UI
                 return;
             }
 
+            string rel = (CmbMemberRel.SelectedItem as ComboBoxItem)?.Content?.ToString();
+            if (string.IsNullOrWhiteSpace(rel))
+            {
+                ActionConfirmDialog.Warning("Validation", "Please select a relationship.", this);
+                CmbMemberRel.Focus();
+                return;
+            }
+
+            string sex = (CmbMemberSex.SelectedItem as ComboBoxItem)?.Content?.ToString();
+            if (string.IsNullOrWhiteSpace(sex))
+            {
+                ActionConfirmDialog.Warning("Validation", "Please select the member's sex.", this);
+                CmbMemberSex.Focus();
+                return;
+            }
+
             if (!DpMemberDob.SelectedDate.HasValue)
             {
                 ActionConfirmDialog.Warning("Validation", "Please select a valid birthdate.", this);
@@ -823,13 +845,21 @@ namespace SOLUM_UI
             int age = SOLUM_UI.Services.OcrService.CalculateAge(dob);
             if (age < 0 || age > 120) age = 0;
 
-            string rel = (CmbMemberRel.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Child";
-            string sex = (CmbMemberSex.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Female";
-            string civil = (CmbMemberCivil.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Single";
+            string civil = (CmbMemberCivil.SelectedItem as ComboBoxItem)?.Content?.ToString();
+            if (string.IsNullOrWhiteSpace(civil)) civil = "Single";
+
             string edu = TxtMemberEdu.Text?.Trim() ?? string.Empty;
-            string income = TxtMemberIncome.Text?.Trim() ?? "0.00";
+            string income = TxtMemberIncome.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(income)) income = "0.00";
+
             bool hasSn = ChkMemberSpecialNeeds.IsChecked == true;
-            string snCat = hasSn ? ((CmbSpecialNeedsCategory.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Other") : string.Empty;
+            string snCat = hasSn ? ((CmbSpecialNeedsCategory.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty) : string.Empty;
+            if (hasSn && string.IsNullOrWhiteSpace(snCat))
+            {
+                ActionConfirmDialog.Warning("Validation", "Please select a special needs category.", this);
+                CmbSpecialNeedsCategory.Focus();
+                return;
+            }
             string snDesc = hasSn ? (TxtSpecialNeedsDescription.Text?.Trim() ?? string.Empty) : string.Empty;
 
             if (_editingFamilyMember != null)
@@ -845,6 +875,8 @@ namespace SOLUM_UI
                 _editingFamilyMember.HasSpecialNeeds = hasSn;
                 _editingFamilyMember.SpecialNeedsCategory = snCat;
                 _editingFamilyMember.SpecialNeedsDescription = snDesc;
+                _editingFamilyMember.RefreshAll();
+                FamilyCardsList?.Items.Refresh();
             }
             else
             {
@@ -1383,7 +1415,11 @@ namespace SOLUM_UI
             }
         }
 
-        private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)        { ToUpperBox(TxtAddress); ClearFieldError(TxtAddress,      ErrAddress); }
+        private void TxtAddress_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ToUpperBox(TxtAddress);
+            ClearFieldError(TxtAddress, ErrAddress);
+        }
         private void TxtContact_TextChanged(object sender, TextChangedEventArgs e)
         {
             FormatPhoneBox(TxtContact);
@@ -1406,25 +1442,6 @@ namespace SOLUM_UI
         private void TxtOccupation_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtOccupation); }
         private void TxtEmergencyContact_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyContact); }
         private void TxtEmergencyAddress_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyAddress); }
-
-        private void ChkSameAsApplicant_Checked(object sender, RoutedEventArgs e)
-        {
-            // Copy applicant address to emergency contact address
-            if (TxtAddress != null && TxtEmergencyAddress != null)
-            {
-                TxtEmergencyAddress.Text = TxtAddress.Text;
-                TxtEmergencyAddress.IsEnabled = false;
-            }
-        }
-
-        private void ChkSameAsApplicant_Unchecked(object sender, RoutedEventArgs e)
-        {
-            // Enable the emergency contact address field for editing
-            if (TxtEmergencyAddress != null)
-            {
-                TxtEmergencyAddress.IsEnabled = true;
-            }
-        }
 
         private void TxtA2Cause_TextChanged(object sender, TextChangedEventArgs e)        { }
         private void TxtA4Disability_TextChanged(object sender, TextChangedEventArgs e)   { }

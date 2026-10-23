@@ -42,7 +42,7 @@ namespace SOLUM_UI.Services
             CompareField(changes, "PhilSys Number", before.PhilSysNumber, after.PhilSysNumber);
             CompareField(changes, "Religion", before.Religion, after.Religion);
             CompareField(changes, "Occupation", before.Occupation, after.Occupation);
-            CompareField(changes, "Monthly Income", before.MonthlyIncome, after.MonthlyIncome);
+            CompareMonthlyIncome(changes, before.MonthlyIncome, after.MonthlyIncome);
             CompareField(changes, "Employment Status - Employed", FormatBool(before.IsEmployed), FormatBool(after.IsEmployed));
             CompareField(changes, "Employment Status - Self-Employed", FormatBool(before.IsSelfEmployed), FormatBool(after.IsSelfEmployed));
             CompareField(changes, "Employment Status - Not Employed", FormatBool(before.IsNotEmployed), FormatBool(after.IsNotEmployed));
@@ -114,12 +114,38 @@ namespace SOLUM_UI.Services
 
         /// <summary>
         /// Compares two field values and adds a ChangeDetail to the list if they differ.
+        /// Treats null and whitespace-only strings as identical to avoid false-positive audit logs.
         /// </summary>
         private void CompareField(List<ChangeDetail> changes, string fieldName, string oldValue, string newValue)
         {
-            if (!string.Equals(oldValue ?? "", newValue ?? "", StringComparison.Ordinal))
+            string sOld = (oldValue ?? "").Trim();
+            string sNew = (newValue ?? "").Trim();
+
+            if (!string.Equals(sOld, sNew, StringComparison.OrdinalIgnoreCase))
             {
-                changes.Add(new ChangeDetail(fieldName, oldValue, newValue));
+                changes.Add(new ChangeDetail(fieldName, string.IsNullOrEmpty(sOld) ? null : sOld, string.IsNullOrEmpty(sNew) ? null : sNew));
+            }
+        }
+
+        /// <summary>
+        /// Compares monthly income numerically so formatting differences (e.g. "10000" vs "10,000.00")
+        /// do not trigger misleading change entries.
+        /// </summary>
+        private void CompareMonthlyIncome(List<ChangeDetail> changes, string oldValue, string newValue)
+        {
+            string cleanOld = System.Text.RegularExpressions.Regex.Replace(oldValue ?? "", @"[^\d.]", "");
+            string cleanNew = System.Text.RegularExpressions.Regex.Replace(newValue ?? "", @"[^\d.]", "");
+
+            if (decimal.TryParse(cleanOld, out decimal dOld) && decimal.TryParse(cleanNew, out decimal dNew))
+            {
+                if (dOld != dNew)
+                {
+                    changes.Add(new ChangeDetail("Monthly Income", $"₱ {dOld:N2}", $"₱ {dNew:N2}"));
+                }
+            }
+            else
+            {
+                CompareField(changes, "Monthly Income", oldValue, newValue);
             }
         }
 

@@ -360,6 +360,7 @@
     <Compile Include="Services\OcrService.cs" />
     <Compile Include="Services\WiaScannerService.cs" />
     <Compile Include="Services\PasswordGenerator.cs" />
+    <Compile Include="Services\FormHelper.cs" />
     <Compile Include="ViewModels\AnalyticsViewModel.cs" />
     <Compile Include="ViewModels\AuditLogViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />

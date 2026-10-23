@@ -61,48 +61,31 @@ namespace SOLUM_UI.Views.Components
             }
         }
 
-        private void Renew_Click(object sender, RoutedEventArgs e)
+        private async void Renew_Click(object sender, RoutedEventArgs e)
         {
             if (Vm?.Record == null || string.IsNullOrWhiteSpace(Vm.Record.Id)) return;
 
             var parentWindow = Window.GetWindow(this);
-            var methodDialog = new RenewalMethodDialog
+            var record = Vm.Record;
+
+            Models.Api.SoloParentDto existingDto = null;
+            if (Guid.TryParse(record.Id, out var guid))
+            {
+                var fetch = await Services.Api.SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
+                if (fetch.Succeeded && fetch.Data != null)
+                {
+                    existingDto = fetch.Data;
+                    record = Services.Api.SoloParentApiService.Instance.MapToRecord(existingDto);
+                }
+            }
+
+            var dialog = new Views.Dialogs.RenewalReassessmentDialog(record, existingDto)
             {
                 Owner = parentWindow?.Owner ?? parentWindow
             };
-            if (methodDialog.ShowDialog() != true) return;
+            if (dialog.ShowDialog() != true || dialog.UpdatedRecord == null) return;
 
-            if (methodDialog.SelectedChoice == RenewalChoice.QuickRenew)
-            {
-                string personName = !string.IsNullOrWhiteSpace(Vm.Record.Name) ? Vm.Record.Name : "this solo parent";
-                string nextExpiry = DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
-                const string renewIcon = "M12,4V1L8,5L12,9V6C15.31,6 18,8.69 18,12C18,13.04 17.73,14.01 17.27,14.86L18.74,16.33C19.54,15.08 20,13.6 20,12C20,7.58 16.42,4 12,4M12,18C8.69,18 6,15.31 6,12C6,10.96 6.27,9.99 6.73,9.14L5.26,7.67C4.46,8.92 4,10.4 4,12C4,16.42 7.58,20 12,20V23L16,19L12,15V18Z";
-
-                bool isConfirmed = Views.Dialogs.ActionConfirmDialog.Show(
-                    title: "Confirm Quick Renewal",
-                    message: $"Are you sure you want to renew the solo parent ID card for {personName}?\n\nThis will automatically extend record validity by 1 year until {nextExpiry} with no changes reported.",
-                    confirmText: "Renew Record",
-                    cancelText: "Cancel",
-                    theme: Views.Dialogs.ConfirmThemeType.Success,
-                    owner: parentWindow,
-                    customIconData: renewIcon);
-
-                if (!isConfirmed) return;
-
-                Vm.HandleQuickRenew();
-                return;
-            }
-
-            if (methodDialog.SelectedChoice == RenewalChoice.ReassessAndRenew)
-            {
-                var dialog = new RenewalReassessmentDialog(Vm.Record)
-                {
-                    Owner = parentWindow?.Owner ?? parentWindow
-                };
-                if (dialog.ShowDialog() != true || dialog.UpdatedRecord == null) return;
-
-                Vm.HandleRenewResult(dialog.UpdatedRecord);
-            }
+            Vm.HandleRenewResult(dialog.UpdatedRecord);
         }
 
         // ── Edit ──────────────────────────────────────────────────────────────
