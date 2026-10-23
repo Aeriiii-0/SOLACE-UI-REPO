@@ -214,6 +214,9 @@
     <Compile Include="Views\Components\CivilStatusListCard.xaml.cs">
       <DependentUpon>CivilStatusListCard.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Components\RecordSortControl.xaml.cs">
+      <DependentUpon>RecordSortControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\AnalyticsPage.xaml.cs">
       <DependentUpon>AnalyticsPage.xaml</DependentUpon>
     </Compile>
@@ -361,11 +364,16 @@
     <Compile Include="Services\WiaScannerService.cs" />
     <Compile Include="Services\PasswordGenerator.cs" />
     <Compile Include="Services\FormHelper.cs" />
+    <Compile Include="Services\RecordSortingHelper.cs" />
     <Compile Include="ViewModels\AnalyticsViewModel.cs" />
     <Compile Include="ViewModels\AuditLogViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />
     <Compile Include="ViewModels\SoloParentRecordViewModel.cs" />
     <Compile Include="ViewModels\RecordViewDialogViewModel.cs" />
+    <Page Include="Views\Components\RecordSortControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Components\LoadingOverlay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

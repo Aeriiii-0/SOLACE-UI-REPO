@@ -1,0 +1,152 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.RecordSortControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d">
+    <Grid>
+        <!-- Capsule Trigger Button -->
+        <Border Background="#FFFFFF" CornerRadius="22"
+                BorderBrush="#E0D0D5" BorderThickness="1.5">
+            <Button x:Name="SortDropBtn"
+                    Background="Transparent" BorderThickness="0"
+                    Cursor="Hand" Height="44" Padding="14,0"
+                    Click="SortDropBtn_Click" ToolTip="Sort records">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent" CornerRadius="22" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z"
+                          Fill="#702943" Stretch="Uniform" Width="13" Height="13"
+                          VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <TextBlock x:Name="TxtSortLabel" Text="Sort"
+                               FontSize="13" FontWeight="SemiBold"
+                               Foreground="#702943" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Border>
+
+        <!-- Sort Popup -->
+        <Popup x:Name="SortPopup"
+               PlacementTarget="{Binding ElementName=SortDropBtn}"
+               Placement="Bottom" StaysOpen="False"
+               AllowsTransparency="True" PopupAnimation="Fade">
+            <Border Background="White" CornerRadius="14"
+                    BorderBrush="#E8D4DA" BorderThickness="1.5" Padding="16"
+                    MinWidth="270">
+                <Border.Effect>
+                    <DropShadowEffect Color="#702943" BlurRadius="20" ShadowDepth="4" Opacity="0.12"/>
+                </Border.Effect>
+                <StackPanel>
+                    <!-- Header -->
+                    <TextBlock Text="SORT RECORDS" FontFamily="Segoe UI" FontSize="10"
+                               FontWeight="Bold" Foreground="#702943" Margin="0,0,0,12"/>
+
+                    <!-- Direction Toggle Segmented Pills -->
+                    <Border Background="#F5EEF1" CornerRadius="8" Padding="2" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="BtnAscending" Grid.Column="0" Height="28" Cursor="Hand"
+                                    BorderThickness="0" Click="DirectionBtn_Click" Tag="ASC">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="PillBg" Background="#702943" CornerRadius="6">
+                                            <TextBlock x:Name="PillTxt" Text="▲ Ascending" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <Button x:Name="BtnDescending" Grid.Column="1" Height="28" Cursor="Hand"
+                                    BorderThickness="0" Click="DirectionBtn_Click" Tag="DESC">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="PillBg" Background="Transparent" CornerRadius="6">
+                                            <TextBlock x:Name="PillTxt" Text="▼ Descending" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="#702943" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Sort Fields Options List -->
+                    <StackPanel>
+                        <!-- Status -->
+                        <Border x:Name="OptStatus" CornerRadius="8" Cursor="Hand" Padding="10,7" Margin="0,0,0,2"
+                                MouseLeftButtonDown="SortOpt_Click" Tag="Status">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Status" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222"/>
+                                    <TextBlock x:Name="TxtStatusSubtitle" Text="Valid first, then Inactive" FontSize="10.5" Foreground="#777777"/>
+                                </StackPanel>
+                                <TextBlock x:Name="IndStatus" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Valid Until -->
+                        <Border x:Name="OptValidUntil" CornerRadius="8" Cursor="Hand" Padding="10,7" Margin="0,0,0,2"
+                                MouseLeftButtonDown="SortOpt_Click" Tag="ValidUntil">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Valid Until (Expiry)" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222"/>
+                                    <TextBlock x:Name="TxtValidUntilSubtitle" Text="Almost expiring first" FontSize="10.5" Foreground="#777777"/>
+                                </StackPanel>
+                                <TextBlock x:Name="IndValidUntil" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Last Updated -->
+                        <Border x:Name="OptLastUpdated" CornerRadius="8" Cursor="Hand" Padding="10,7" Margin="0,0,0,2"
+                                MouseLeftButtonDown="SortOpt_Click" Tag="LastUpdated">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Last Updated" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222"/>
+                                    <TextBlock x:Name="TxtLastUpdatedSubtitle" Text="Recently updated first" FontSize="10.5" Foreground="#777777"/>
+                                </StackPanel>
+                                <TextBlock x:Name="IndLastUpdated" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Name -->
+                        <Border x:Name="OptName" CornerRadius="8" Cursor="Hand" Padding="10,7" Margin="0,0,0,2"
+                                MouseLeftButtonDown="SortOpt_Click" Tag="Name">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Applicant Name" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222"/>
+                                    <TextBlock x:Name="TxtNameSubtitle" Text="A to Z" FontSize="10.5" Foreground="#777777"/>
+                                </StackPanel>
+                                <TextBlock x:Name="IndName" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Visible"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Barangay -->
+                        <Border x:Name="OptBarangay" CornerRadius="8" Cursor="Hand" Padding="10,7"
+                                MouseLeftButtonDown="SortOpt_Click" Tag="Barangay">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Barangay" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222"/>
+                                    <TextBlock x:Name="TxtBarangaySubtitle" Text="A to Z" FontSize="10.5" Foreground="#777777"/>
+                                </StackPanel>
+                                <TextBlock x:Name="IndBarangay" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>

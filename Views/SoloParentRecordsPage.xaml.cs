@@ -27,7 +27,6 @@ namespace SOLUM_UI
         private string _statusFilter = "All";
         private string _sexFilter = "All";
         private string _barangayFilter = "All";
-        private string _sortOption = "Name A-Z";
 
         private int _pageSize = 10;
         private int _currentPage = 1;
@@ -428,17 +427,9 @@ namespace SOLUM_UI
                     }
                 }
 
-                string sortBy = "LastName";
-                string sortOrder = "asc";
-
-                switch (_sortOption)
-                {
-                    case "Name A-Z": sortBy = "LastName"; sortOrder = "asc"; break;
-                    case "Name Z-A": sortBy = "LastName"; sortOrder = "desc"; break;
-                    case "Newest": sortBy = "datecreated"; sortOrder = "desc"; break;
-                    case "Oldest": sortBy = "datecreated"; sortOrder = "asc"; break;
-                    case "Barangay": sortBy = "barangay"; sortOrder = "asc"; break;
-                }
+                var (sortBy, sortOrder) = SortControl != null
+                    ? RecordSortingHelper.MapToApiParams(SortControl.SelectedField, SortControl.IsAscending)
+                    : ("LastName", "asc");
 
                 var req = new GetSoloParentRequest
                 {
@@ -510,8 +501,17 @@ namespace SOLUM_UI
                     }
 
                     var vm = new SoloParentRecordViewModel(rec);
-                    vm.SetAlternate(i % 2 != 0);
                     _allRecords.Add(vm);
+                }
+
+                if (SortControl != null)
+                {
+                    _allRecords = RecordSortingHelper.Sort(_allRecords, SortControl.SelectedField, SortControl.IsAscending);
+                }
+
+                for (int i = 0; i < _allRecords.Count; i++)
+                {
+                    _allRecords[i].SetAlternate(i % 2 != 0);
                 }
 
                 _filteredRecords = new List<SoloParentRecordViewModel>(_allRecords);
@@ -710,7 +710,6 @@ namespace SOLUM_UI
         }
 
         private void FilterDrop_Click(object sender, RoutedEventArgs e) => FilterPopup.IsOpen = true;
-        private void SortDrop_Click(object sender, RoutedEventArgs e) => SortPopup.IsOpen = true;
 
         private void FilterCombo_Changed(object sender, SelectionChangedEventArgs e) { }
 
@@ -742,11 +741,62 @@ namespace SOLUM_UI
 
         private void SexOpt_Click(object sender, MouseButtonEventArgs e) { }
 
-        private void SortOpt_Click(object sender, MouseButtonEventArgs e)
+        private void RecordSortControl_SortChanged(object sender, RecordSortEventArgs e)
         {
-            _sortOption = (sender as FrameworkElement)?.Tag?.ToString() ?? "Barangay";
-            SortPopup.IsOpen = false;
-            ApplyFiltersAndPage();
+            if (_allRecords != null && _allRecords.Count > 0)
+            {
+                _allRecords = RecordSortingHelper.Sort(_allRecords, e.Field, e.IsAscending);
+                for (int i = 0; i < _allRecords.Count; i++)
+                {
+                    _allRecords[i].SetAlternate(i % 2 != 0);
+                }
+            }
+
+            if (_filteredRecords != null && _filteredRecords.Count > 0)
+            {
+                _filteredRecords = RecordSortingHelper.Sort(_filteredRecords, e.Field, e.IsAscending);
+                for (int i = 0; i < _filteredRecords.Count; i++)
+                {
+                    _filteredRecords[i].SetAlternate(i % 2 != 0);
+                }
+                RecordsList.ItemsSource = null;
+                RecordsList.ItemsSource = _filteredRecords;
+            }
+        }
+
+        private void RecordsListColumnHeader_Click(object sender, RoutedEventArgs e)
+        {
+            if (e.OriginalSource is GridViewColumnHeader header && header.Column != null)
+            {
+                string colHeader = header.Column.Header?.ToString();
+                RecordSortField? targetField = null;
+                switch (colHeader)
+                {
+                    case "NAME":
+                        targetField = RecordSortField.Name;
+                        break;
+                    case "BARANGAY":
+                        targetField = RecordSortField.Barangay;
+                        break;
+                    case "LAST UPDATED":
+                        targetField = RecordSortField.LastUpdated;
+                        break;
+                    case "VALID UNTIL":
+                        targetField = RecordSortField.ValidUntil;
+                        break;
+                    case "STATUS":
+                        targetField = RecordSortField.Status;
+                        break;
+                }
+
+                if (targetField.HasValue && SortControl != null)
+                {
+                    bool isAsc = (SortControl.SelectedField == targetField.Value)
+                        ? !SortControl.IsAscending
+                        : (targetField.Value != RecordSortField.LastUpdated);
+                    SortControl.SetSort(targetField.Value, isAsc);
+                }
+            }
         }
 
         private void RecordsList_SelectionChanged(object sender, SelectionChangedEventArgs e) { }

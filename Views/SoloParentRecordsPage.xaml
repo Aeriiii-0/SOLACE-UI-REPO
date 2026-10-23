@@ -1,4 +1,4 @@
-﻿<Page x:Class="SOLUM_UI.SoloParentRecordsPage"
+<Page x:Class="SOLUM_UI.SoloParentRecordsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
@@ -435,11 +435,10 @@
             </StackPanel>
         </Grid>
 
-        <!-- Admin Toolbar (search + filter + sort + add + share) -->
+        <!-- Admin Toolbar (search + filter + sort + add + refresh) -->
         <Grid x:Name="AdminToolbar" Grid.Row="1" Margin="24,6,24,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -697,51 +696,10 @@
                 </Border>
             </Popup>
 
-            <Border Grid.Column="2"
-                    Background="#FFFFFF" CornerRadius="22"
-                    BorderBrush="#E0D0D5" BorderThickness="1.5"
-                    Margin="0,0,10,0">
-                <Button x:Name="SortDropBtn"
-                        Background="Transparent" BorderThickness="0"
-                        Cursor="Hand" Width="44" Height="44"
-                        Click="SortDrop_Click" ToolTip="Sort">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="Transparent" CornerRadius="22">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
-                    <Path Data="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z"
-                          Fill="#702943" Stretch="Uniform" Width="18" Height="18"/>
-                </Button>
-            </Border>
-
-            <Popup x:Name="SortPopup"
-                   PlacementTarget="{Binding ElementName=SortDropBtn}"
-                   Placement="Bottom" StaysOpen="False"
-                   AllowsTransparency="True" PopupAnimation="Fade">
-                <Border Background="White" CornerRadius="12"
-                        BorderBrush="#E0D0D5" BorderThickness="1" Padding="4">
-                    <Border.Effect>
-                        <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.18"/>
-                    </Border.Effect>
-                    <StackPanel MinWidth="160">
-                        <Border CornerRadius="8" Cursor="Hand" MouseLeftButtonDown="SortOpt_Click" Tag="Barangay">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FDF3F5"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="By Barangay" FontSize="13" Foreground="#333333" Padding="12,9"/>
-                        </Border>
-                    </StackPanel>
-                </Border>
-            </Popup>
+            <!-- Enhanced Sorting Control with Field Selection & Reversible Direction -->
+            <components:RecordSortControl x:Name="SortControl" Grid.Column="2"
+                                         Margin="0,0,10,0"
+                                         SortChanged="RecordSortControl_SortChanged"/>
 
             <Button Grid.Column="3"
                     Height="44" Padding="18,0"
@@ -765,29 +723,8 @@
                 <TextBlock Text="+ Add New Record" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
             </Button>
 
-            <Button Grid.Column="4"
-                    Width="44" Height="44"
-                    BorderThickness="0" Background="#FFFFFF"
-                    Cursor="Hand" ToolTip="Export">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                CornerRadius="22" BorderBrush="#E0D0D5" BorderThickness="1.5">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F5ECEE"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
-                <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"
-                      Fill="#702943" Stretch="Uniform" Width="16" Height="16"/>
-            </Button>
-
-            <Button x:Name="BtnRefreshRecords" Grid.Column="5"
-                    Width="44" Height="44" Margin="6,0,0,0"
+            <Button x:Name="BtnRefreshRecords" Grid.Column="4"
+                    Width="44" Height="44" Margin="0,0,0,0"
                     BorderThickness="0" Background="#FFFFFF"
                     Cursor="Hand" ToolTip="Refresh records"
                     Click="BtnRefreshRecords_Click">
@@ -844,7 +781,8 @@
                           HorizontalContentAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           MouseDoubleClick="RecordsList_MouseDoubleClick"
-                          ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="0">
+                          ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="0"
+                          GridViewColumnHeader.Click="RecordsListColumnHeader_Click">
                     <ListView.View>
                         <GridView ColumnHeaderContainerStyle="{StaticResource GvHeader}">
 
