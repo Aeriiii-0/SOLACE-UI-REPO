@@ -333,7 +333,7 @@
 
             <Border x:Name="DialogShell" Background="White" CornerRadius="18"
                     ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Width="780" MinHeight="620" BorderBrush="#2196F3" BorderThickness="2">
+                    Width="780" MinHeight="620" BorderBrush="#E0E0E0" BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -342,7 +342,7 @@
                     </Grid.RowDefinitions>
 
                     <!-- Header -->
-                    <Border Grid.Row="0" Background="#1976D2" CornerRadius="18,18,0,0" Padding="36,24,36,24">
+                    <Border Grid.Row="0" Background="#10B981" CornerRadius="18,18,0,0" Padding="36,24,36,24">
                         <Grid>
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,6">
@@ -350,7 +350,7 @@
                                         <TextBlock Text="Identity Verification" FontSize="20" FontWeight="Bold"
                                                    Foreground="White"/>
                                         <TextBlock Text="Check for existing records before proceeding to the full form."
-                                                   FontSize="12" Foreground="#BBDEFB" Margin="0,2,0,0"/>
+                                                   FontSize="12" Foreground="#E8F5E9" Margin="0,2,0,0"/>
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
@@ -365,7 +365,7 @@
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="CloseBg" Property="Background" Value="#1565C0"/>
+                                                <Setter TargetName="CloseBg" Property="Background" Value="#059669"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -381,18 +381,18 @@
                         <StackPanel>
 
                             <!-- Step hint -->
-                            <Border Background="#E1F5FE" CornerRadius="10" Padding="16,12" Margin="0,0,0,24"
-                                    BorderBrush="#2196F3" BorderThickness="1">
+                            <Border Background="#F0FDF4" CornerRadius="10" Padding="16,12" Margin="0,0,0,24"
+                                    BorderBrush="#D1FAE5" BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
                                     <Border Width="28" Height="28" CornerRadius="14"
-                                            Background="#1976D2" Margin="0,0,12,0" VerticalAlignment="Center">
+                                            Background="#10B981" Margin="0,0,12,0" VerticalAlignment="Center">
                                         <TextBlock Text="1" FontSize="13" FontWeight="Bold" Foreground="White"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#1976D2"
+                                        <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#10B981"
                                                    Text="Step 1 of 2 — Identity Verification"/>
-                                        <TextBlock FontSize="11" Foreground="#42A5F5" Margin="0,2,0,0"
+                                        <TextBlock FontSize="11" Foreground="#34D399" Margin="0,2,0,0"
                                                    Text="Fill in the fields below, then click Check &amp; Continue to search for duplicates."/>
                                     </StackPanel>
                                 </StackPanel>
