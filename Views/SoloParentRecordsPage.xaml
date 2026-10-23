@@ -935,7 +935,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="220" HeaderContainerStyle="{StaticResource GvHeaderActions}">
+                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="80" HeaderContainerStyle="{StaticResource GvHeaderActions}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColActions}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,8">
@@ -943,36 +943,6 @@
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"
                                                         Margin="4,0">
-
-                                                <!-- View -->
-                                                <Button Style="{StaticResource ActionBtn}"
-                                                        Tag="{Binding Id}"
-                                                        Click="ViewRecord_Click"
-                                                        ToolTip="View record"
-                                                        Margin="0,0,4,0">
-                                                    <Path Data="M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z"
-                                                          Fill="#702943" Stretch="Uniform" Width="12" Height="12"/>
-                                                </Button>
-
-                                                <!-- Edit -->
-                                                <Button Style="{StaticResource ActionBtn}"
-                                                        Tag="{Binding Id}"
-                                                        Click="Edit_Click"
-                                                        ToolTip="Edit record"
-                                                        Margin="0,0,4,0">
-                                                    <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"
-                                                          Fill="#507A60" Stretch="Uniform" Width="12" Height="12"/>
-                                                </Button>
-
-                                                <!-- Renew -->
-                                                <Button Style="{StaticResource ActionBtn}"
-                                                        Tag="{Binding Id}"
-                                                        Click="Renew_Click"
-                                                        ToolTip="Renew record"
-                                                        Margin="0,0,4,0">
-                                                    <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
-                                                          Fill="#3A6FA8" Stretch="Uniform" Width="12" Height="12"/>
-                                                </Button>
 
                                                 <!-- Export -->
                                                 <Button Style="{StaticResource ActionBtn}"
@@ -985,14 +955,6 @@
                                                 </Button>
 
                                                 <!-- Delete (Admin only â€” hidden by code-behind for Encoder/BasicUser) -->
-                                                <Button x:Name="BtnDelete" Style="{StaticResource ActionBtn}"
-                                                        Tag="{Binding Id}"
-                                                        Click="Delete_Click"
-                                                        ToolTip="Delete record">
-                                                    <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
-                                                          Fill="#C0392B" Stretch="Uniform" Width="12" Height="12"/>
-                                                </Button>
-
                                             </StackPanel>
                                         </Border>
                                     </DataTemplate>
@@ -1301,7 +1263,7 @@
 
                 <!-- â”€â”€ Unified How-to + Encoder Mode banner â”€â”€ -->
                 <Border CornerRadius="10" Padding="14,11" Margin="0,0,0,18"
-                        Background="#FDF4F7" BorderBrush="#EAD4DC" BorderThickness="1">
+                        Background="#FDF4F7" BorderBrush="#D4A0B0" BorderThickness="1.5">
                     <Grid>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -1386,7 +1348,7 @@
                 </Border>
 
                 <!-- â”€â”€ Two-Column Search + Add card row â”€â”€ -->
-                <Grid Margin="0,0,0,24">
+                <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="18"/>
@@ -1668,7 +1630,7 @@
                                    IsLoading="True"
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Stretch"
-                                   Panel.ZIndex="9999"/>
+                                   Panel.ZIndex="9999" Loaded="PageLoadingOverlay_Loaded"/>
 
     </Grid>
 </Page>

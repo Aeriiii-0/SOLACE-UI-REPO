@@ -333,34 +333,38 @@
 
             <Border x:Name="DialogShell" Background="White" CornerRadius="18"
                     ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Width="780" MinHeight="620" BorderBrush="#90CAF9" BorderThickness="2">
+                    Width="780" MinHeight="620" BorderBrush="#E0E0E0" BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="4"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
+                    <!-- Mode stripe (green) -->
+                    <Border Grid.Row="1" Background="#10B981"/>
+
                     <!-- Header -->
-                    <Border Grid.Row="0" Background="#E3F2FD" CornerRadius="18,18,0,0" Padding="36,24,36,24">
+                    <Border Grid.Row="0" Background="White" CornerRadius="18,18,0,0" Padding="36,24,36,24">
                         <Grid>
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,6">
                                     <StackPanel>
                                         <TextBlock Text="Identity Verification" FontSize="20" FontWeight="Bold"
-                                                   Foreground="#0D47A1"/>
+                                                   Foreground="#111111"/>
                                         <TextBlock Text="Check for existing records before proceeding to the full form."
-                                                   FontSize="12" Foreground="#1565C0" Margin="0,2,0,0"/>
+                                                   FontSize="12" Foreground="#666666" Margin="0,4,0,0"/>
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
-                            <Button HorizontalAlignment="Right" VerticalAlignment="Top"
+                            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
                                     Width="32" Height="32" Background="Transparent"
                                     BorderThickness="0" Cursor="Hand" Click="Close_Click">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="CloseBg" Background="Transparent" CornerRadius="16">
-                                            <TextBlock Text="&#x2715;" FontSize="14" Foreground="#1565C0"
+                                            <TextBlock Text="&#x2715;" FontSize="14" Foreground="#AAAAAA"
                                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
@@ -375,24 +379,24 @@
                     </Border>
 
                     <!-- Form body -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled"
                                   Background="White" Padding="36,28,36,20">
                         <StackPanel>
 
                             <!-- Step hint -->
-                            <Border Background="#E3F2FD" CornerRadius="10" Padding="16,12" Margin="0,0,0,24"
-                                    BorderBrush="#90CAF9" BorderThickness="1">
+                            <Border Background="#F0FDF4" CornerRadius="10" Padding="16,12" Margin="0,0,0,24"
+                                    BorderBrush="#D1FAE5" BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
                                     <Border Width="28" Height="28" CornerRadius="14"
-                                            Background="#0D47A1" Margin="0,0,12,0" VerticalAlignment="Center">
+                                            Background="#10B981" Margin="0,0,12,0" VerticalAlignment="Center">
                                         <TextBlock Text="1" FontSize="13" FontWeight="Bold" Foreground="White"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#0D47A1"
+                                        <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#10B981"
                                                    Text="Step 1 of 2 — Identity Verification"/>
-                                        <TextBlock FontSize="11" Foreground="#1565C0" Margin="0,2,0,0"
+                                        <TextBlock FontSize="11" Foreground="#34D399" Margin="0,2,0,0"
                                                    Text="Fill in the fields below, then click Check &amp; Continue to search for duplicates."/>
                                     </StackPanel>
                                 </StackPanel>

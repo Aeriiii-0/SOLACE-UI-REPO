@@ -139,13 +139,13 @@ namespace SOLUM_UI
             var show = Visibility.Visible;
             var hide = Visibility.Collapsed;
 
-            // Results table (Row 3)
+            // Results table (Row 3) — always visible for Encoder/BasicUser
             if (RecordsClipGrid != null)
-                RecordsClipGrid.Visibility = showResults ? show : hide;
+                RecordsClipGrid.Visibility = show;
 
-            // Empty-state placeholder — shown when table is visible but no search done yet
+            // Empty-state placeholder in search panel — hidden now that table is always visible
             if (SearchFirstPanel != null)
-                SearchFirstPanel.Visibility = showResults ? hide : show;
+                SearchFirstPanel.Visibility = hide;
 
             // Table empty state overlay — shown inside table when no search done yet
             if (TableEmptyStateOverlay != null)
@@ -1306,27 +1306,8 @@ namespace SOLUM_UI
                 return;
             }
 
-            // Manual entry — run identity pre-check first
-            var preCheck = new PreCheckDialog { Owner = Window.GetWindow(this) };
-            bool? preResult = preCheck.ShowDialog();
-
-            if (preResult != true)
-            {
-                if (mainWindow != null) mainWindow.MainContent.Effect = null;
-                return;
-            }
-
-            // User clicked "View Existing Record" from the duplicate banner
-            if (preCheck.ExistingRecordToView != null)
-            {
-                var viewer = new RecordViewDialog(preCheck.ExistingRecordToView) { Owner = Window.GetWindow(this) };
-                viewer.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
-                viewer.ShowDialog();
-                return;
-            }
-
-            // No duplicate — open full form pre-filled with the primary data
-            RecordDialog dialog = new RecordDialog(preCheck.PrimaryData) { Owner = Window.GetWindow(this) };
+            // Manual entry — open RecordDialog Step 1 (Primary Info) directly
+            RecordDialog dialog = new RecordDialog() { Owner = Window.GetWindow(this) };
             dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
@@ -1487,6 +1468,11 @@ namespace SOLUM_UI
                 RecordsList.SelectedItem = vm;
                 RecordsList.ScrollIntoView(vm);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        private void PageLoadingOverlay_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
