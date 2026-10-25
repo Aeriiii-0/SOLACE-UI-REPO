@@ -27,6 +27,9 @@ namespace SOLUM_UI
         private string _statusFilter = "All";
         private string _sexFilter = "All";
         private string _barangayFilter = "All";
+        private bool? _isPantawidFilter = null;
+        private bool? _isLGBTFilter = null;
+        private bool? _isIndigenousFilter = null;
 
         private int _pageSize = 10;
         private int _currentPage = 1;
@@ -190,181 +193,38 @@ namespace SOLUM_UI
                 string effectiveBarangay = IsBasicUser ? CurrentUserBarangay : _barangayFilter;
 
                 // Handle search query based on user role
-                string query = string.Empty;
+                string query = (IsEncoder || IsBasicUser)
+                    ? (EncSearchQuery?.Text?.Trim() ?? string.Empty)
+                    : (SearchName?.Text?.Trim() ?? string.Empty);
+
                 Guid? searchGuid = null;
                 string firstName = null;
                 string lastName = null;
+                string fullname = null;
                 string philsysId = null;
                 string barangay = null;
 
-                if (IsEncoder)
+                if (!string.IsNullOrWhiteSpace(query))
                 {
-                    // Encoder users: parse the unified search query
-                    query = EncSearchQuery?.Text?.Trim() ?? string.Empty;
-
-                    if (!string.IsNullOrWhiteSpace(query))
+                    string selectedMode = "AUTO";
+                    if (IsEncoder || IsBasicUser)
                     {
-                        // Get search mode from dropdown (if it exists)
-                        string selectedMode = "AUTO";
-                        if (EncSearchMode?.SelectedItem is ComboBoxItem modeItem)
-                        {
-                            selectedMode = modeItem.Tag?.ToString() ?? "AUTO";
-                        }
-
-                        // Try to parse as GUID first
-                        if (Guid.TryParse(query, out var parsedGuid))
-                        {
-                            searchGuid = parsedGuid;
-                        }
-                        else
-                        {
-                            switch (selectedMode)
-                            {
-                                case "FIRST_NAME":
-                                    firstName = query;
-                                    break;
-
-                                case "LAST_NAME":
-                                    lastName = query;
-                                    break;
-
-                                case "FULL_NAME":
-                                    // Parse as full name (last name, first name)
-                                    if (query.Contains(","))
-                                    {
-                                        var parts = query.Split(new[] { ',' }, 2);
-                                        lastName = parts[0].Trim();
-                                        firstName = parts.Length > 1 ? parts[1].Trim() : null;
-                                    }
-                                    else if (query.Contains(" "))
-                                    {
-                                        int firstSpace = query.IndexOf(' ');
-                                        firstName = query.Substring(0, firstSpace).Trim();
-                                        lastName = query.Substring(firstSpace + 1).Trim();
-                                    }
-                                    else
-                                    {
-                                        // Single word: treat as last name so the search never runs unfiltered
-                                        lastName = query;
-                                    }
-                                    break;
-
-                                case "PHILSYS_ID":
-                                    philsysId = query;
-                                    break;
-
-                                case "AUTO":
-                                default:
-                                    // Auto-detect: if digits + spaces/hyphens with >= 4 digits -> PhilSys ID
-                                    string digitsOnly = System.Text.RegularExpressions.Regex.Replace(query, @"\D", "");
-                                    if (digitsOnly.Length >= 4 && System.Text.RegularExpressions.Regex.IsMatch(query, @"^[\d\s\-]+$"))
-                                    {
-                                        philsysId = query;
-                                    }
-                                    else if (query.Contains(","))
-                                    {
-                                        // Comma format: "Dela Cruz, Juana" -> Last Name = "Dela Cruz", First Name = "Juana"
-                                        var parts = query.Split(new[] { ',' }, 2);
-                                        lastName = parts[0].Trim();
-                                        firstName = parts.Length > 1 ? parts[1].Trim() : null;
-                                    }
-                                    else if (query.Contains(" "))
-                                    {
-                                        // Space format: "Juana Dela Cruz" -> First Name = "Juana", Last Name = "Dela Cruz"
-                                        int firstSpace = query.IndexOf(' ');
-                                        firstName = query.Substring(0, firstSpace).Trim();
-                                        lastName = query.Substring(firstSpace + 1).Trim();
-                                    }
-                                    else
-                                    {
-                                        // Single word: assume last name
-                                        lastName = query;
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-                }
-                else if (IsBasicUser)
-                {
-                    // BasicUser now uses the shared EncSearchQuery / EncSearchMode panel
-                    query = EncSearchQuery?.Text?.Trim() ?? string.Empty;
-
-                    if (!string.IsNullOrWhiteSpace(query))
-                    {
-                        string selectedMode = "AUTO";
-                        if (EncSearchMode?.SelectedItem is ComboBoxItem modeItemBu)
-                            selectedMode = modeItemBu.Tag?.ToString() ?? "AUTO";
-
-                        if (Guid.TryParse(query, out var parsedGuidBu))
-                        {
-                            searchGuid = parsedGuidBu;
-                        }
-                        else
-                        {
-                            switch (selectedMode)
-                            {
-                                case "FIRST_NAME": firstName = query; break;
-                                case "LAST_NAME":  lastName  = query; break;
-                                case "PHILSYS_ID": philsysId = query; break;
-                                case "FULL_NAME":
-                                    if (query.Contains(","))
-                                    {
-                                        var parts = query.Split(new[] { ',' }, 2);
-                                        lastName  = parts[0].Trim();
-                                        firstName = parts.Length > 1 ? parts[1].Trim() : null;
-                                    }
-                                    else if (query.Contains(" "))
-                                    {
-                                        int sp = query.IndexOf(' ');
-                                        firstName = query.Substring(0, sp).Trim();
-                                        lastName  = query.Substring(sp + 1).Trim();
-                                    }
-                                    else { lastName = query; }
-                                    break;
-                                case "AUTO":
-                                default:
-                                    string dOnly = System.Text.RegularExpressions.Regex.Replace(query, @"\D", "");
-                                    if (dOnly.Length >= 4 && System.Text.RegularExpressions.Regex.IsMatch(query, @"^[\d\s\-]+$"))
-                                        philsysId = query;
-                                    else if (query.Contains(","))
-                                    {
-                                        var parts = query.Split(new[] { ',' }, 2);
-                                        lastName  = parts[0].Trim();
-                                        firstName = parts.Length > 1 ? parts[1].Trim() : null;
-                                    }
-                                    else if (query.Contains(" "))
-                                    {
-                                        int sp = query.IndexOf(' ');
-                                        firstName = query.Substring(0, sp).Trim();
-                                        lastName  = query.Substring(sp + 1).Trim();
-                                    }
-                                    else { lastName = query; }
-                                    break;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    query = SearchName?.Text?.Trim() ?? string.Empty;
-                }
-
-                // Handle generic search query (admin only; Encoder and BasicUser are handled above)
-                if (!IsEncoder && !IsBasicUser && !string.IsNullOrWhiteSpace(query))
-                {
-                    if (Guid.TryParse(query, out var parsedGuid))
-                    {
-                        searchGuid = parsedGuid;
+                        if (EncSearchMode?.SelectedItem is ComboBoxItem modeItemEnc)
+                            selectedMode = modeItemEnc.Tag?.ToString() ?? "AUTO";
                     }
                     else
                     {
-                        string selectedMode = "AUTO";
-                        if (!IsBasicUser && CmbSearchMode?.SelectedItem is ComboBoxItem modeItem)
-                        {
-                            selectedMode = modeItem.Tag?.ToString() ?? "AUTO";
-                        }
+                        if (CmbSearchMode?.SelectedItem is ComboBoxItem modeItemAdmin)
+                            selectedMode = modeItemAdmin.Tag?.ToString() ?? "AUTO";
+                    }
 
+                    if (selectedMode == "RECORD_ID" || (selectedMode == "AUTO" && Guid.TryParse(query, out var parsedGuidAuto)))
+                    {
+                        if (Guid.TryParse(query, out var parsedGuid))
+                            searchGuid = parsedGuid;
+                    }
+                    else
+                    {
                         switch (selectedMode)
                         {
                             case "FIRST_NAME":
@@ -376,7 +236,7 @@ namespace SOLUM_UI
                                 break;
 
                             case "FULL_NAME":
-                                // fullname handled separately below
+                                fullname = query.Trim();
                                 break;
 
                             case "PHILSYS_ID":
@@ -385,7 +245,6 @@ namespace SOLUM_UI
 
                             case "AUTO":
                             default:
-                                // If input consists only of digits and hyphens/spaces and has >= 4 digits, treat as PhilSys ID
                                 string digitsOnly = System.Text.RegularExpressions.Regex.Replace(query, @"\D", "");
                                 if (digitsOnly.Length >= 4 && System.Text.RegularExpressions.Regex.IsMatch(query, @"^[\d\s\-]+$"))
                                 {
@@ -393,17 +252,17 @@ namespace SOLUM_UI
                                 }
                                 else if (query.Contains(","))
                                 {
-                                    // Comma format: "Dela Cruz, Juana" -> Last Name = "Dela Cruz", First Name = "Juana"
                                     var parts = query.Split(new[] { ',' }, 2);
                                     lastName = parts[0].Trim();
                                     firstName = parts.Length > 1 ? parts[1].Trim() : null;
                                 }
                                 else if (query.Contains(" "))
                                 {
-                                    // Space format: "Juana Dela Cruz" -> First Name = "Juana", Last Name = "Dela Cruz"
-                                    int firstSpace = query.IndexOf(' ');
-                                    firstName = query.Substring(0, firstSpace).Trim();
-                                    lastName = query.Substring(firstSpace + 1).Trim();
+                                    fullname = query.Trim();
+                                }
+                                else
+                                {
+                                    lastName = query;
                                 }
                                 break;
                         }
@@ -411,9 +270,26 @@ namespace SOLUM_UI
                 }
 
                 bool? isActive = null;
+                bool? isDeleted = null;
                 if (!IsEncoder && !IsBasicUser && _statusFilter != "All")
                 {
-                    isActive = string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase);
+                    if (string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(_statusFilter, "Active (Valid)", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isActive = true;
+                        isDeleted = false;
+                    }
+                    else if (string.Equals(_statusFilter, "Inactive", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(_statusFilter, "Inactive (Expired)", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isActive = false;
+                        isDeleted = false;
+                    }
+                    else if (string.Equals(_statusFilter, "Terminated (Deleted)", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(_statusFilter, "Terminated", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isDeleted = true;
+                    }
                 }
 
                 string sex = (!IsEncoder && !IsBasicUser && _sexFilter != "All") ? _sexFilter : null;
@@ -436,10 +312,15 @@ namespace SOLUM_UI
                     Id = searchGuid,
                     FirstName = firstName,
                     LastName = lastName,
+                    Fullname = fullname,
                     PhilsysId = philsysId,
                     Barangay = barangay,
                     Sex = sex,
                     IsActive = isActive,
+                    IsDeleted = isDeleted,
+                    IsLGBT = (!IsEncoder && !IsBasicUser) ? _isLGBTFilter : null,
+                    IsPantawidBeneficiary = (!IsEncoder && !IsBasicUser) ? _isPantawidFilter : null,
+                    IsIndigenous = (!IsEncoder && !IsBasicUser) ? _isIndigenousFilter : null,
                     SortBy = sortBy,
                     SortOrder = sortOrder,
                     Page = _currentPage,
@@ -622,6 +503,9 @@ namespace SOLUM_UI
         {
             switch (mode)
             {
+                case "RECORD_ID":
+                    SearchPlaceholder = "Search by record ID (GUID)...";
+                    break;
                 case "FIRST_NAME":
                     SearchPlaceholder = "Search by first name (e.g. Juana)...";
                     break;
@@ -636,7 +520,7 @@ namespace SOLUM_UI
                     break;
                 case "AUTO":
                 default:
-                    SearchPlaceholder = "Search records (name, PhilSys ID)...";
+                    SearchPlaceholder = "Search records (name, PhilSys ID, record ID)...";
                     break;
             }
         }
@@ -721,6 +605,11 @@ namespace SOLUM_UI
             _sexFilter = sexVal;
             _barangayFilter = barangayVal;
             _statusFilter = statusVal;
+
+            _isPantawidFilter = null;
+            _isLGBTFilter = null;
+            _isIndigenousFilter = null;
+
             FilterPopup.IsOpen = false;
             ApplyFiltersAndPage();
         }
@@ -730,9 +619,16 @@ namespace SOLUM_UI
             if (CmbFilterSex != null) CmbFilterSex.SelectedIndex = 0;
             if (CmbFilterBarangay != null) CmbFilterBarangay.SelectedIndex = 0;
             if (CmbFilterStatus != null) CmbFilterStatus.SelectedIndex = 0;
+
+
+
             _sexFilter = "All";
             _barangayFilter = "All";
             _statusFilter = "All";
+            _isPantawidFilter = null;
+            _isLGBTFilter = null;
+            _isIndigenousFilter = null;
+
             FilterPopup.IsOpen = false;
             ApplyFiltersAndPage();
         }
@@ -743,25 +639,8 @@ namespace SOLUM_UI
 
         private void RecordSortControl_SortChanged(object sender, RecordSortEventArgs e)
         {
-            if (_allRecords != null && _allRecords.Count > 0)
-            {
-                _allRecords = RecordSortingHelper.Sort(_allRecords, e.Field, e.IsAscending);
-                for (int i = 0; i < _allRecords.Count; i++)
-                {
-                    _allRecords[i].SetAlternate(i % 2 != 0);
-                }
-            }
-
-            if (_filteredRecords != null && _filteredRecords.Count > 0)
-            {
-                _filteredRecords = RecordSortingHelper.Sort(_filteredRecords, e.Field, e.IsAscending);
-                for (int i = 0; i < _filteredRecords.Count; i++)
-                {
-                    _filteredRecords[i].SetAlternate(i % 2 != 0);
-                }
-                RecordsList.ItemsSource = null;
-                RecordsList.ItemsSource = _filteredRecords;
-            }
+            // Triggers a backend API query with the updated sortBy and sortOrder parameters
+            ApplyFiltersAndPage();
         }
 
         private void RecordsListColumnHeader_Click(object sender, RoutedEventArgs e)
@@ -772,20 +651,12 @@ namespace SOLUM_UI
                 RecordSortField? targetField = null;
                 switch (colHeader)
                 {
-                    case "NAME":
-                        targetField = RecordSortField.Name;
-                        break;
+
                     case "BARANGAY":
                         targetField = RecordSortField.Barangay;
                         break;
                     case "LAST UPDATED":
                         targetField = RecordSortField.LastUpdated;
-                        break;
-                    case "VALID UNTIL":
-                        targetField = RecordSortField.ValidUntil;
-                        break;
-                    case "STATUS":
-                        targetField = RecordSortField.Status;
                         break;
                 }
 

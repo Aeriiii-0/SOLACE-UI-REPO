@@ -80,60 +80,8 @@
 
                     <!-- Sort Fields Options List -->
                     <StackPanel>
-                        <!-- Status -->
-                        <Border x:Name="OptStatus" CornerRadius="8" Cursor="Hand" Padding="10,7" Margin="0,0,0,2"
-                                MouseLeftButtonDown="SortOpt_Click" Tag="Status">
-                            <Grid>
-                                <StackPanel>
-                                    <TextBlock Text="Status" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222"/>
-                                    <TextBlock x:Name="TxtStatusSubtitle" Text="Valid first, then Inactive" FontSize="10.5" Foreground="#777777"/>
-                                </StackPanel>
-                                <TextBlock x:Name="IndStatus" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
-                                           HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed"/>
-                            </Grid>
-                        </Border>
-
-                        <!-- Valid Until -->
-                        <Border x:Name="OptValidUntil" CornerRadius="8" Cursor="Hand" Padding="10,7" Margin="0,0,0,2"
-                                MouseLeftButtonDown="SortOpt_Click" Tag="ValidUntil">
-                            <Grid>
-                                <StackPanel>
-                                    <TextBlock Text="Valid Until (Expiry)" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222"/>
-                                    <TextBlock x:Name="TxtValidUntilSubtitle" Text="Almost expiring first" FontSize="10.5" Foreground="#777777"/>
-                                </StackPanel>
-                                <TextBlock x:Name="IndValidUntil" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
-                                           HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed"/>
-                            </Grid>
-                        </Border>
-
-                        <!-- Last Updated -->
-                        <Border x:Name="OptLastUpdated" CornerRadius="8" Cursor="Hand" Padding="10,7" Margin="0,0,0,2"
-                                MouseLeftButtonDown="SortOpt_Click" Tag="LastUpdated">
-                            <Grid>
-                                <StackPanel>
-                                    <TextBlock Text="Last Updated" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222"/>
-                                    <TextBlock x:Name="TxtLastUpdatedSubtitle" Text="Recently updated first" FontSize="10.5" Foreground="#777777"/>
-                                </StackPanel>
-                                <TextBlock x:Name="IndLastUpdated" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
-                                           HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed"/>
-                            </Grid>
-                        </Border>
-
-                        <!-- Name -->
-                        <Border x:Name="OptName" CornerRadius="8" Cursor="Hand" Padding="10,7" Margin="0,0,0,2"
-                                MouseLeftButtonDown="SortOpt_Click" Tag="Name">
-                            <Grid>
-                                <StackPanel>
-                                    <TextBlock Text="Applicant Name" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222"/>
-                                    <TextBlock x:Name="TxtNameSubtitle" Text="A to Z" FontSize="10.5" Foreground="#777777"/>
-                                </StackPanel>
-                                <TextBlock x:Name="IndName" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
-                                           HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Visible"/>
-                            </Grid>
-                        </Border>
-
                         <!-- Barangay -->
-                        <Border x:Name="OptBarangay" CornerRadius="8" Cursor="Hand" Padding="10,7"
+                        <Border x:Name="OptBarangay" CornerRadius="8" Cursor="Hand" Padding="10,7" Margin="0,0,0,2"
                                 MouseLeftButtonDown="SortOpt_Click" Tag="Barangay">
                             <Grid>
                                 <StackPanel>
@@ -141,6 +89,19 @@
                                     <TextBlock x:Name="TxtBarangaySubtitle" Text="A to Z" FontSize="10.5" Foreground="#777777"/>
                                 </StackPanel>
                                 <TextBlock x:Name="IndBarangay" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Visible"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Last Updated / Date Created -->
+                        <Border x:Name="OptLastUpdated" CornerRadius="8" Cursor="Hand" Padding="10,7"
+                                MouseLeftButtonDown="SortOpt_Click" Tag="LastUpdated">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Date Created" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222"/>
+                                    <TextBlock x:Name="TxtLastUpdatedSubtitle" Text="Recently created first" FontSize="10.5" Foreground="#777777"/>
+                                </StackPanel>
+                                <TextBlock x:Name="IndLastUpdated" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
                                            HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed"/>
                             </Grid>
                         </Border>

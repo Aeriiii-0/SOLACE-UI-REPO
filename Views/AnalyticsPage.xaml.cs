@@ -346,7 +346,7 @@ namespace SOLUM_UI
                 int? queryYear = (filterType == "CustomRange") ? (int?)null : targetYear;
 
                 var dashboardTask = AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
-                var monthlyTask = AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(targetYear, targetMonth, barangay, start, end);
+                var monthlyTask = AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(targetYear, targetMonth, barangay);
                 var breakdownTask = AnalyticsApiService.Instance.GetBarangayBreakdownAsync(
                     quarter: queryQuarter,
                     year: queryYear,

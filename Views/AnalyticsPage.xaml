@@ -506,7 +506,7 @@
                             </Grid>
 
                             <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
-                                <TextBlock Text="{Binding TotalRegisteredCount}" FontSize="36" FontWeight="Bold"
+                                <TextBlock Text="{Binding TotalRegisteredCount, Mode=OneWay}" FontSize="36" FontWeight="Bold"
                                            Foreground="{StaticResource StatCard1Border}" TextAlignment="Left" LineHeight="38"/>
                                 <TextBlock Text="Total registered" FontSize="13" FontWeight="SemiBold"
                                            Foreground="{StaticResource StatCard1Border}" Opacity="0.95" Margin="0,2,0,0"/>
@@ -514,7 +514,7 @@
 
                             <Border Grid.Row="2" Background="#1F9C2F55" CornerRadius="8" Padding="10,4">
                                 <TextBlock FontSize="11" Foreground="{StaticResource StatCard1Border}">
-                                    Added this month: <Bold><Run Text="{Binding AddedThisMonthCount}"/></Bold>
+                                    Added this month: <Bold><Run Text="{Binding AddedThisMonthCount, Mode=OneWay}"/></Bold>
                                 </TextBlock>
                             </Border>
                         </Grid>
@@ -545,7 +545,7 @@
                             </Grid>
 
                             <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
-                                <TextBlock Text="{Binding ActiveRecordsCount}" FontSize="32" FontWeight="Bold"
+                                <TextBlock Text="{Binding ActiveRecordsCount, Mode=OneWay}" FontSize="32" FontWeight="Bold"
                                            Foreground="{StaticResource StatCard2Border}" TextAlignment="Left" LineHeight="34"/>
                                 <TextBlock Text="Active" FontSize="12" FontWeight="SemiBold"
                                            Foreground="{StaticResource StatCard2Border}" Opacity="0.95" Margin="0,2,0,0"/>
@@ -553,7 +553,7 @@
 
                             <Border Grid.Row="2" Background="#1F8A6A00" CornerRadius="6" Padding="8,4">
                                 <TextBlock FontSize="11" Foreground="{StaticResource StatCard2Border}" TextTrimming="CharacterEllipsis">
-                                    Expiring this month: <Bold><Run Text="{Binding ExpiringThisMonthCount}"/></Bold>
+                                    Expiring this month: <Bold><Run Text="{Binding ExpiringThisMonthCount, Mode=OneWay}"/></Bold>
                                 </TextBlock>
                             </Border>
                         </Grid>
@@ -584,7 +584,7 @@
                             </Grid>
 
                             <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
-                                <TextBlock Text="{Binding InactiveRecordsCount}" FontSize="32" FontWeight="Bold"
+                                <TextBlock Text="{Binding InactiveRecordsCount, Mode=OneWay}" FontSize="32" FontWeight="Bold"
                                            Foreground="{StaticResource StatCard3Border}" TextAlignment="Left" LineHeight="34"/>
                                 <TextBlock Text="Inactive records" FontSize="12" FontWeight="SemiBold"
                                            Foreground="{StaticResource StatCard3Border}" Opacity="0.95" Margin="0,2,0,0"/>
@@ -592,7 +592,7 @@
 
                             <Border Grid.Row="2" Background="#1F3F7A1F" CornerRadius="6" Padding="8,4">
                                 <TextBlock FontSize="11" Foreground="{StaticResource StatCard3Border}" TextTrimming="CharacterEllipsis">
-                                    <Run Text="{Binding InactiveSubtext}"/>
+                                    <Run Text="{Binding InactiveSubtext, Mode=OneWay}"/>
                                 </TextBlock>
                             </Border>
                         </Grid>
@@ -623,7 +623,7 @@
                             </Grid>
 
                             <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
-                                <TextBlock Text="{Binding TopBarangayCount}" FontSize="32" FontWeight="Bold"
+                                <TextBlock Text="{Binding TopBarangayCount, Mode=OneWay}" FontSize="32" FontWeight="Bold"
                                            Foreground="{StaticResource StatCard4Border}" TextAlignment="Left" LineHeight="34"/>
                                 <TextBlock Text="Solo Parents" FontSize="12" FontWeight="SemiBold"
                                            Foreground="{StaticResource StatCard4Border}" Opacity="0.95" Margin="0,2,0,0"/>
@@ -631,7 +631,7 @@
 
                             <Border Grid.Row="2" Background="#1F1F7A8C" CornerRadius="6" Padding="8,4">
                                 <TextBlock FontSize="11" Foreground="{StaticResource StatCard4Border}" TextTrimming="CharacterEllipsis">
-                                    <Run Text="Top: "/><Run Text="{Binding TopBarangayName}"/>
+                                    <Run Text="Top: "/><Run Text="{Binding TopBarangayName, Mode=OneWay}"/>
                                 </TextBlock>
                             </Border>
                         </Grid>
@@ -1131,7 +1131,7 @@
                               Margin="0,0,0,18"
                               SelectionChanged="FilterCombo_Changed">
                         <ComboBoxItem Content="All" IsSelected="True"/>
-                        <ComboBoxItem Content="Biñan (Poblacion)"/>
+                        <ComboBoxItem Content="Bi&#241;an (Poblacion)"/>
                         <ComboBoxItem Content="Bungahan"/>
                         <ComboBoxItem Content="Canlalay"/>
                         <ComboBoxItem Content="Casile"/>
@@ -1149,7 +1149,7 @@
                         <ComboBoxItem Content="San Jose"/>
                         <ComboBoxItem Content="San Vicente"/>
                         <ComboBoxItem Content="Santo Domingo"/>
-                        <ComboBoxItem Content="Santo Niño"/>
+                        <ComboBoxItem Content="Santo Ni&#241;o"/>
                         <ComboBoxItem Content="Santo Tomas (Calabuso)"/>
                         <ComboBoxItem Content="Soro-Soro"/>
                         <ComboBoxItem Content="Timbao"/>

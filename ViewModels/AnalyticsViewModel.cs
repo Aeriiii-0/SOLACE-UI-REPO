@@ -20,6 +20,7 @@ namespace SOLUM_UI.ViewModels
             {
                 SetProperty(ref _totalSoloParents, value);
                 OnPropertyChanged(nameof(DisplayTotalEnrolled));
+                OnPropertyChanged(nameof(TotalRegisteredCount));
             }
         }
 
@@ -99,35 +100,38 @@ namespace SOLUM_UI.ViewModels
             {
                 SetProperty(ref _totalRegistered, value);
                 OnPropertyChanged(nameof(DisplayTotalEnrolled));
+                OnPropertyChanged(nameof(TotalRegisteredCount));
             }
         }
 
-        private int _addedThisMonthCount;
+        public int TotalRegisteredCount
+        {
+            get => DisplayTotalEnrolled;
+            set { }
+        }
+
         public int AddedThisMonthCount
         {
-            get => _addedThisMonthCount;
-            set => SetProperty(ref _addedThisMonthCount, value);
+            get => DisplayRegisteredCount;
+            set { }
         }
 
-        private int _activeRecordsCount;
         public int ActiveRecordsCount
         {
-            get => _activeRecordsCount;
-            set => SetProperty(ref _activeRecordsCount, value);
+            get => DisplayActiveRecords;
+            set { }
         }
 
-        private int _expiringThisMonthCount;
         public int ExpiringThisMonthCount
         {
-            get => _expiringThisMonthCount;
-            set => SetProperty(ref _expiringThisMonthCount, value);
+            get => RenewalsDueThisMonth;
+            set { }
         }
 
-        private int _inactiveRecordsCount;
         public int InactiveRecordsCount
         {
-            get => _inactiveRecordsCount;
-            set => SetProperty(ref _inactiveRecordsCount, value);
+            get => DisplayInactiveRecords;
+            set { }
         }
 
         private string _inactiveSubtext = "Requires review";
@@ -137,12 +141,14 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _inactiveSubtext, value);
         }
 
-        // Convenience property for XAML binding
-        public int TotalRegisteredCount => TotalRegistered;
-
         public int DisplayTotalEnrolled
         {
-            get => IsFilterActive ? _totalSoloParents : (_totalRegistered > 0 ? _totalRegistered : _totalSoloParents);
+            get
+            {
+                if (IsFilterActive)
+                    return _totalSoloParents > 0 ? _totalSoloParents : _totalRegistered;
+                return _totalRegistered > 0 ? _totalRegistered : _totalSoloParents;
+            }
             set { }
         }
 
@@ -154,6 +160,7 @@ namespace SOLUM_UI.ViewModels
             {
                 SetProperty(ref _activeRecords, value);
                 OnPropertyChanged(nameof(DisplayActiveRecords));
+                OnPropertyChanged(nameof(ActiveRecordsCount));
             }
         }
 
@@ -165,6 +172,7 @@ namespace SOLUM_UI.ViewModels
             {
                 SetProperty(ref _inactiveRecords, value);
                 OnPropertyChanged(nameof(DisplayInactiveRecords));
+                OnPropertyChanged(nameof(InactiveRecordsCount));
             }
         }
 
@@ -176,12 +184,18 @@ namespace SOLUM_UI.ViewModels
             {
                 SetProperty(ref _filteredActiveRecords, value);
                 OnPropertyChanged(nameof(DisplayActiveRecords));
+                OnPropertyChanged(nameof(ActiveRecordsCount));
             }
         }
 
         public int DisplayActiveRecords
         {
-            get => IsFilterActive ? _filteredActiveRecords : (_activeRecords > 0 ? _activeRecords : _filteredActiveRecords);
+            get
+            {
+                if (IsFilterActive)
+                    return _filteredActiveRecords > 0 ? _filteredActiveRecords : _activeRecords;
+                return _activeRecords > 0 ? _activeRecords : _filteredActiveRecords;
+            }
             set { }
         }
 
@@ -193,12 +207,18 @@ namespace SOLUM_UI.ViewModels
             {
                 SetProperty(ref _filteredInactiveRecords, value);
                 OnPropertyChanged(nameof(DisplayInactiveRecords));
+                OnPropertyChanged(nameof(InactiveRecordsCount));
             }
         }
 
         public int DisplayInactiveRecords
         {
-            get => IsFilterActive ? _filteredInactiveRecords : (_inactiveRecords > 0 ? _inactiveRecords : _filteredInactiveRecords);
+            get
+            {
+                if (IsFilterActive)
+                    return _filteredInactiveRecords > 0 ? _filteredInactiveRecords : _inactiveRecords;
+                return _inactiveRecords > 0 ? _inactiveRecords : _filteredInactiveRecords;
+            }
             set { }
         }
 
@@ -232,7 +252,11 @@ namespace SOLUM_UI.ViewModels
         public int RenewalsDueThisMonth
         {
             get => _renewalsDueThisMonth;
-            set => SetProperty(ref _renewalsDueThisMonth, value);
+            set
+            {
+                SetProperty(ref _renewalsDueThisMonth, value);
+                OnPropertyChanged(nameof(ExpiringThisMonthCount));
+            }
         }
 
         private int _renewalsCompletedToday;
@@ -257,6 +281,7 @@ namespace SOLUM_UI.ViewModels
             {
                 SetProperty(ref _registeredThisMonth, value);
                 OnPropertyChanged(nameof(DisplayRegisteredCount));
+                OnPropertyChanged(nameof(AddedThisMonthCount));
             }
         }
 
@@ -268,6 +293,7 @@ namespace SOLUM_UI.ViewModels
             {
                 SetProperty(ref _filteredNewRegistrations, value);
                 OnPropertyChanged(nameof(DisplayRegisteredCount));
+                OnPropertyChanged(nameof(AddedThisMonthCount));
             }
         }
 
@@ -328,9 +354,13 @@ namespace SOLUM_UI.ViewModels
             {
                 SetProperty(ref _isFilterActive, value);
                 OnPropertyChanged(nameof(DisplayTotalEnrolled));
+                OnPropertyChanged(nameof(TotalRegisteredCount));
                 OnPropertyChanged(nameof(DisplayActiveRecords));
+                OnPropertyChanged(nameof(ActiveRecordsCount));
                 OnPropertyChanged(nameof(DisplayInactiveRecords));
+                OnPropertyChanged(nameof(InactiveRecordsCount));
                 OnPropertyChanged(nameof(DisplayRegisteredCount));
+                OnPropertyChanged(nameof(AddedThisMonthCount));
                 OnPropertyChanged(nameof(DisplayRegisteredLabel));
             }
         }
@@ -1015,6 +1045,9 @@ namespace SOLUM_UI.ViewModels
             RenewalsCompletedToday = dto.RenewalsCompletedToday;
             RenewalsThisMonth = dto.RenewalsThisMonth;
             RegisteredThisMonth = dto.RegisteredThisMonth;
+
+            if (TotalSoloParents <= 0 && dto.TotalRegistered > 0)
+                TotalSoloParents = dto.TotalRegistered;
         }
 
         /// <summary>
@@ -1193,11 +1226,16 @@ namespace SOLUM_UI.ViewModels
             // If not in a custom filter, synchronize the real-time card numbers and KPIs from monthly DTO
             if (!IsFilterActive)
             {
-                TotalSoloParents = dto.TotalSoloParents;
-                FilteredActiveRecords = dto.ActiveSoloParents;
-                FilteredInactiveRecords = dto.InactiveSoloParents;
-                FilteredNewRegistrations = dto.NewRegistrations;
-                FilteredRenewals = dto.Renewals;
+                if (dto.TotalSoloParents > 0 || TotalSoloParents <= 0)
+                    TotalSoloParents = dto.TotalSoloParents;
+                if (dto.ActiveSoloParents > 0 || FilteredActiveRecords <= 0)
+                    FilteredActiveRecords = dto.ActiveSoloParents;
+                if (dto.InactiveSoloParents > 0 || FilteredInactiveRecords <= 0)
+                    FilteredInactiveRecords = dto.InactiveSoloParents;
+                if (dto.NewRegistrations > 0 || FilteredNewRegistrations <= 0)
+                    FilteredNewRegistrations = dto.NewRegistrations;
+                if (dto.Renewals > 0 || FilteredRenewals <= 0)
+                    FilteredRenewals = dto.Renewals;
 
                 if (dto.NewRegistrations > 0 || RegisteredThisMonth == 0)
                     RegisteredThisMonth = dto.NewRegistrations;

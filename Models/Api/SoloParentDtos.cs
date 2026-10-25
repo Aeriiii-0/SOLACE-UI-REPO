@@ -217,6 +217,10 @@ namespace SOLUM_UI.Models.Api
         public string Sex { get; set; }
         public string Barangay { get; set; }
         public bool? IsActive { get; set; }
+        public bool? IsDeleted { get; set; }
+        public bool? IsLGBT { get; set; }
+        public bool? IsPantawidBeneficiary { get; set; }
+        public bool? IsIndigenous { get; set; }
         public string Status { get; set; } // "Active", "Inactive", "Terminated"
         public string SortBy { get; set; } = "LastName";
         public string SortOrder { get; set; } = "asc";
@@ -231,6 +235,11 @@ namespace SOLUM_UI.Models.Api
         public string Sex { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public string Status { get; set; } // "Active", "Inactive", or "Terminated"
+        public bool IsDeleted { get; set; }
+        public bool IsLGBT { get; set; }
+        public bool IsPantawidBeneficiary { get; set; }
+        public bool IsIndigenous { get; set; }
+        public string SubsidyEligibility { get; set; }
         public DateTime DateCreated { get; set; }
     }
 

@@ -77,6 +77,18 @@ namespace SOLUM_UI.Services.Api
             if (request.IsActive.HasValue)
                 queryParams.Add($"isActive={request.IsActive.Value.ToString().ToLowerInvariant()}");
 
+            if (request.IsDeleted.HasValue)
+                queryParams.Add($"isDeleted={request.IsDeleted.Value.ToString().ToLowerInvariant()}");
+
+            if (request.IsLGBT.HasValue)
+                queryParams.Add($"isLGBT={request.IsLGBT.Value.ToString().ToLowerInvariant()}");
+
+            if (request.IsPantawidBeneficiary.HasValue)
+                queryParams.Add($"isPantawidBeneficiary={request.IsPantawidBeneficiary.Value.ToString().ToLowerInvariant()}");
+
+            if (request.IsIndigenous.HasValue)
+                queryParams.Add($"isIndigenous={request.IsIndigenous.Value.ToString().ToLowerInvariant()}");
+
             if (!string.IsNullOrWhiteSpace(request.Status) && !request.Status.Equals("All", StringComparison.OrdinalIgnoreCase))
                 queryParams.Add($"status={Uri.EscapeDataString(request.Status.Trim())}");
 

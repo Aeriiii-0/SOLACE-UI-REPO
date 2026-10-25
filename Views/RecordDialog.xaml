@@ -888,7 +888,7 @@
                                                 <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
                                                            SelectionChanged="CmbBarangay_SelectionChanged">
                                                     <ComboBoxItem Content=""/>
-                                                    <ComboBoxItem Content="Biñan (Poblacion)"/>
+                                                    <ComboBoxItem Content="Bi&#241;an (Poblacion)"/>
                                                     <ComboBoxItem Content="Bungahan"/>
                                                     <ComboBoxItem Content="Canlalay"/>
                                                     <ComboBoxItem Content="Casile"/>
@@ -906,7 +906,7 @@
                                                     <ComboBoxItem Content="San Jose"/>
                                                     <ComboBoxItem Content="San Vicente"/>
                                                     <ComboBoxItem Content="Santo Domingo"/>
-                                                    <ComboBoxItem Content="Santo Niño"/>
+                                                    <ComboBoxItem Content="Santo Ni&#241;o"/>
                                                     <ComboBoxItem Content="Santo Tomas (Calabuso)"/>
                                                     <ComboBoxItem Content="Soro-Soro"/>
                                                     <ComboBoxItem Content="Timbao"/>

@@ -11,7 +11,7 @@ namespace SOLUM_UI.Views.Components
     {
         public event EventHandler<RecordSortEventArgs> SortChanged;
 
-        public RecordSortField SelectedField { get; private set; } = RecordSortField.Name;
+        public RecordSortField SelectedField { get; private set; } = RecordSortField.Barangay;
         public bool IsAscending { get; private set; } = true;
 
         private static readonly SolidColorBrush ActiveBg = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
@@ -81,41 +81,30 @@ namespace SOLUM_UI.Views.Components
             ApplyPillStyle(BtnDescending, !IsAscending);
 
             // Dynamic Subtitles
-            TxtStatusSubtitle.Text = IsAscending ? "Valid first, then Inactive" : "Inactive first, then Valid (Reversed)";
-            TxtValidUntilSubtitle.Text = IsAscending ? "Almost expiring first (Expiring soonest)" : "Latest expiry first (Reversed)";
-            TxtLastUpdatedSubtitle.Text = IsAscending ? "Oldest updated first (Reversed)" : "Recently updated first (Newest)";
-            TxtNameSubtitle.Text = IsAscending ? "A to Z" : "Z to A (Reversed)";
-            TxtBarangaySubtitle.Text = IsAscending ? "A to Z" : "Z to A (Reversed)";
+            if (TxtBarangaySubtitle != null)
+                TxtBarangaySubtitle.Text = IsAscending ? "A to Z" : "Z to A (Reversed)";
+            if (TxtLastUpdatedSubtitle != null)
+                TxtLastUpdatedSubtitle.Text = IsAscending ? "Oldest created first (Reversed)" : "Recently created first (Newest)";
 
             // Update Field Item Selection
-            UpdateOptionRow(OptStatus, IndStatus, SelectedField == RecordSortField.Status);
-            UpdateOptionRow(OptValidUntil, IndValidUntil, SelectedField == RecordSortField.ValidUntil);
-            UpdateOptionRow(OptLastUpdated, IndLastUpdated, SelectedField == RecordSortField.LastUpdated);
-            UpdateOptionRow(OptName, IndName, SelectedField == RecordSortField.Name);
             UpdateOptionRow(OptBarangay, IndBarangay, SelectedField == RecordSortField.Barangay);
+            UpdateOptionRow(OptLastUpdated, IndLastUpdated, SelectedField == RecordSortField.LastUpdated);
 
             // Update Trigger Label
             string arrow = IsAscending ? "▲" : "▼";
             string fieldName;
             switch (SelectedField)
             {
-                case RecordSortField.Status:
-                    fieldName = "Status";
-                    break;
-                case RecordSortField.ValidUntil:
-                    fieldName = "Valid Until";
-                    break;
                 case RecordSortField.LastUpdated:
-                    fieldName = "Last Updated";
+                    fieldName = "Date Created";
                     break;
                 case RecordSortField.Barangay:
+                default:
                     fieldName = "Barangay";
                     break;
-                default:
-                    fieldName = "Name";
-                    break;
             }
-            TxtSortLabel.Text = $"Sort: {fieldName} {arrow}";
+            if (TxtSortLabel != null)
+                TxtSortLabel.Text = $"Sort: {fieldName} {arrow}";
         }
 
         private void ApplyPillStyle(Button btn, bool isActive)

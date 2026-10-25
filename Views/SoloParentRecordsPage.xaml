@@ -466,6 +466,7 @@
                               Margin="5,0,5,0"
                               SelectionChanged="CmbSearchMode_SelectionChanged">
                         <ComboBoxItem Content="All / Auto" Tag="AUTO" IsSelected="True"/>
+                        <ComboBoxItem Content="Record ID" Tag="RECORD_ID"/>
                         <ComboBoxItem Content="First Name" Tag="FIRST_NAME"/>
                         <ComboBoxItem Content="Last Name" Tag="LAST_NAME"/>
                         <ComboBoxItem Content="Full Name" Tag="FULL_NAME"/>
@@ -610,7 +611,7 @@
                                   Margin="0,0,0,14"
                                   SelectionChanged="FilterCombo_Changed">
                             <ComboBoxItem Content="All" IsSelected="True"/>
-                            <ComboBoxItem Content="BiÃ±an (Poblacion)"/>
+                            <ComboBoxItem Content="Bi&#241;an (Poblacion)"/>
                             <ComboBoxItem Content="Bungahan"/>
                             <ComboBoxItem Content="Canlalay"/>
                             <ComboBoxItem Content="Casile"/>
@@ -628,7 +629,7 @@
                             <ComboBoxItem Content="San Jose"/>
                             <ComboBoxItem Content="San Vicente"/>
                             <ComboBoxItem Content="Santo Domingo"/>
-                            <ComboBoxItem Content="Santo NiÃ±o"/>
+                            <ComboBoxItem Content="Santo Ni&#241;o"/>
                             <ComboBoxItem Content="Santo Tomas (Calabuso)"/>
                             <ComboBoxItem Content="Soro-Soro"/>
                             <ComboBoxItem Content="Timbao"/>
@@ -640,12 +641,15 @@
                                    FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
                         <ComboBox x:Name="CmbFilterStatus"
                                   Style="{StaticResource FilterComboBox}"
-                                  Margin="0,0,0,18"
+                                  Margin="0,0,0,14"
                                   SelectionChanged="FilterCombo_Changed">
                             <ComboBoxItem Content="All" IsSelected="True"/>
-                            <ComboBoxItem Content="Valid"/>
-                            <ComboBoxItem Content="Inactive"/>
+                            <ComboBoxItem Content="Active (Valid)"/>
+                            <ComboBoxItem Content="Inactive (Expired)"/>
+                            <ComboBoxItem Content="Terminated (Deleted)"/>
                         </ComboBox>
+
+
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -1338,6 +1342,7 @@
                                                   VerticalAlignment="Center"
                                                   SelectionChanged="EncSearchMode_SelectionChanged">
                                             <ComboBoxItem Content="All / auto" Tag="AUTO" IsSelected="True"/>
+                                            <ComboBoxItem Content="Record ID" Tag="RECORD_ID"/>
                                             <ComboBoxItem Content="First Name" Tag="FIRST_NAME"/>
                                             <ComboBoxItem Content="Last Name" Tag="LAST_NAME"/>
                                             <ComboBoxItem Content="Full Name" Tag="FULL_NAME"/>
