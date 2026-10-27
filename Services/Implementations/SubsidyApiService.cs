@@ -13,6 +13,10 @@ namespace SOLUM_UI.Services.Implementations
 {
     public class SubsidyApiService : ISubsidyApiService
     {
+        private static List<SubsidyCycleDto> _cachedCycles;
+        private static DateTime _cyclesCachedAt = DateTime.MinValue;
+        private static readonly TimeSpan CyclesCacheTtl = TimeSpan.FromMinutes(5);
+
         public async Task<BaseResponse<SubsidyCycleDto>> GetActiveCycleAsync()
         {
             return await ApiClient.Instance.GetAsync<SubsidyCycleDto>("api/subsidy/cycles/active");
@@ -20,26 +24,22 @@ namespace SOLUM_UI.Services.Implementations
 
         public async Task<BaseResponse<List<SubsidyCycleDto>>> GetCyclesAsync()
         {
-            int currentYear = DateTime.Now.Year;
-            var resp = await ApiClient.Instance.GetAsync<List<SubsidyCycleDto>>("api/subsidy/cycles");
-            if (resp != null && resp.Succeeded && resp.Data != null && resp.Data.Count > 0)
+            if (_cachedCycles != null && (DateTime.UtcNow - _cyclesCachedAt) < CyclesCacheTtl)
             {
-                if (!resp.Data.Any(c => c.FiscalYear == currentYear))
-                {
-                    resp.Data.Insert(0, new SubsidyCycleDto
-                    {
-                        FiscalYear = currentYear,
-                        Status = "Active",
-                        AllocatedSlots = 100,
-                        TotalBudget = 100000m,
-                        PerGranteeAmount = 1000m
-                    });
-                }
-                return resp;
+                return BaseResponse<List<SubsidyCycleDto>>.Success(_cachedCycles);
             }
 
+            int currentYear = DateTime.Now.Year;
             var list = new List<SubsidyCycleDto>();
-            var activeResp = await GetActiveCycleAsync();
+
+            // Concurrently fetch active cycle and past historical grantee counts
+            var activeTask = GetActiveCycleAsync();
+            var y1Task = GetGranteesByFiscalYearAsync(currentYear - 1);
+            var y2Task = GetGranteesByFiscalYearAsync(currentYear - 2);
+
+            await Task.WhenAll(activeTask, y1Task, y2Task);
+
+            var activeResp = await activeTask;
             if (activeResp?.Data != null)
             {
                 list.Add(activeResp.Data);
@@ -57,35 +57,45 @@ namespace SOLUM_UI.Services.Implementations
                 });
             }
 
-            int baseYear = Math.Max(currentYear, list.Max(c => c.FiscalYear));
-            for (int y = baseYear - 1; y >= baseYear - 2; y--)
+            var gr1 = await y1Task;
+            int count1 = gr1?.Data?.Count ?? 0;
+            list.Add(new SubsidyCycleDto
             {
-                if (!list.Any(c => c.FiscalYear == y))
-                {
-                    var gr = await GetGranteesByFiscalYearAsync(y);
-                    int count = gr?.Data?.Count ?? 0;
-                    list.Add(new SubsidyCycleDto
-                    {
-                        FiscalYear = y,
-                        Status = "Finalized",
-                        TotalFinalGrantees = count,
-                        AllocatedSlots = Math.Max(100, count),
-                        TotalBudget = Math.Max(100000m, count * 1000m),
-                        PerGranteeAmount = 1000m
-                    });
-                }
-            }
+                FiscalYear = currentYear - 1,
+                Status = "Finalized",
+                TotalFinalGrantees = count1,
+                AllocatedSlots = Math.Max(100, count1),
+                TotalBudget = Math.Max(100000m, count1 * 1000m),
+                PerGranteeAmount = 1000m
+            });
 
-            return BaseResponse<List<SubsidyCycleDto>>.Success(list.OrderByDescending(c => c.FiscalYear).ToList());
+            var gr2 = await y2Task;
+            int count2 = gr2?.Data?.Count ?? 0;
+            list.Add(new SubsidyCycleDto
+            {
+                FiscalYear = currentYear - 2,
+                Status = "Finalized",
+                TotalFinalGrantees = count2,
+                AllocatedSlots = Math.Max(100, count2),
+                TotalBudget = Math.Max(100000m, count2 * 1000m),
+                PerGranteeAmount = 1000m
+            });
+
+            _cachedCycles = list.OrderByDescending(c => c.FiscalYear).ToList();
+            _cyclesCachedAt = DateTime.UtcNow;
+
+            return BaseResponse<List<SubsidyCycleDto>>.Success(_cachedCycles);
         }
 
         public async Task<BaseResponse<SubsidyCycleDto>> CreateCycleAsync(CreateSubsidyCycleRequest request)
         {
+            _cachedCycles = null;
             return await ApiClient.Instance.PostAsync<CreateSubsidyCycleRequest, SubsidyCycleDto>("api/subsidy/cycles", request);
         }
 
         public async Task<BaseResponse<SubsidyCycleDto>> UpdateCycleAsync(Guid cycleId, UpdateSubsidyCycleRequest request)
         {
+            _cachedCycles = null;
             return await ApiClient.Instance.PutAsync<UpdateSubsidyCycleRequest, SubsidyCycleDto>($"api/subsidy/cycles/{cycleId}", request);
         }
 

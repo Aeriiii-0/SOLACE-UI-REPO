@@ -72,7 +72,7 @@ namespace SOLUM_UI.ViewModels
                 await ExportCsvAsync($"Final_Grantee_Ledger_FY{yr}", _apiService.ExportFinalLedgerCsvAsync(FinalGranteesList.ToList(), yr), $"Final grantee ledger for FY {yr} exported successfully.");
             });
             ViewFullRecordCommand = new RelayCommand(async p => await OpenFullRecordViewAsync(p as SubsidyItem ?? ActiveCandidate));
-            RefreshCommand = new RelayCommand(async _ => await RefreshDataAsync()); GenerateRecommendationsCommand = new RelayCommand(async _ => await GenerateAndRefreshAsync());
+            RefreshCommand = new RelayCommand(async _ => await RefreshDataAsync(), _ => !IsLoading); GenerateRecommendationsCommand = new RelayCommand(async _ => await GenerateAndRefreshAsync(), _ => !IsLoading);
             ToggleRosterLockCommand = new RelayCommand(_ => ToggleRosterLock()); StartNewCycleCommand = new RelayCommand(async _ => await StartNewCycleAsync()); SaveQuotaCommand = new RelayCommand(async _ => await SaveQuotaAsync());
         }
 

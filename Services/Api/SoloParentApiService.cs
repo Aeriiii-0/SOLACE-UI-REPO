@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -14,6 +15,10 @@ namespace SOLUM_UI.Services.Api
         private static readonly Lazy<SoloParentApiService> _instance =
             new Lazy<SoloParentApiService>(() => new SoloParentApiService());
         public static SoloParentApiService Instance => _instance.Value;
+
+        private static readonly ConcurrentDictionary<Guid, (SoloParentDto Data, DateTime CachedAt)> _soloParentDetailCache =
+            new ConcurrentDictionary<Guid, (SoloParentDto Data, DateTime CachedAt)>();
+        private static readonly TimeSpan DetailCacheTtl = TimeSpan.FromMinutes(10);
 
         private SoloParentApiService() { }
 
@@ -106,7 +111,17 @@ namespace SOLUM_UI.Services.Api
 
         public async Task<BaseResponse<SoloParentDto>> GetSoloParentByIdAsync(Guid id)
         {
-            return await ApiClient.Instance.GetAsync<SoloParentDto>($"api/soloparent/{id}");
+            if (_soloParentDetailCache.TryGetValue(id, out var cached) && (DateTime.UtcNow - cached.CachedAt) < DetailCacheTtl)
+            {
+                return BaseResponse<SoloParentDto>.Success(cached.Data);
+            }
+
+            var resp = await ApiClient.Instance.GetAsync<SoloParentDto>($"api/soloparent/{id}");
+            if (resp != null && resp.Succeeded && resp.Data != null)
+            {
+                _soloParentDetailCache[id] = (resp.Data, DateTime.UtcNow);
+            }
+            return resp;
         }
 
         public async Task<BaseResponse<Guid>> CreateSoloParentAsync(CreateSoloParentRequest request)
@@ -116,12 +131,14 @@ namespace SOLUM_UI.Services.Api
 
         public async Task<BaseResponse<bool>> UpdateSoloParentAsync(Guid id, UpdateSoloParentRequest request)
         {
+            _soloParentDetailCache.TryRemove(id, out _);
             request.Id = id;
             return await ApiClient.Instance.PutAsync<UpdateSoloParentRequest, bool>($"api/soloparent/{id}", request);
         }
 
         public async Task<BaseResponse<bool>> DeleteSoloParentAsync(Guid id)
         {
+            _soloParentDetailCache.TryRemove(id, out _);
             return await ApiClient.Instance.DeleteAsync<bool>($"api/soloparent/{id}");
         }
 

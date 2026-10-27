@@ -324,6 +324,13 @@
                     <TextBlock x:Name="TxtUserCount" Visibility="Collapsed"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border VerticalAlignment="Center" Background="#FAF2F5" CornerRadius="12" Padding="10,6" BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
+                                  Fill="#702943" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0" Opacity="0.75"/>
+                            <TextBlock x:Name="TxtUsersLastRefreshed" Text="Updated: Just now" FontSize="11.5" FontFamily="Segoe UI" FontWeight="Medium" Foreground="#702943"/>
+                        </StackPanel>
+                    </Border>
                     <Button x:Name="BtnRefreshUsers"
                             Width="40" Height="40" Margin="0,0,8,0"
                             BorderThickness="0" Background="White"
@@ -730,6 +737,12 @@
                                 <TextBlock Text="Clear Filters" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
                             </Button>
                         </StackPanel>
+
+                        <components:UserTableSkeletonLoader x:Name="UsersSkeletonLoader"
+                                                            Visibility="Collapsed"
+                                                            HorizontalAlignment="Stretch"
+                                                            VerticalAlignment="Stretch"
+                                                            Panel.ZIndex="10"/>
                     </Grid>
                 </Grid>
             </Border>

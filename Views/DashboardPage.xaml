@@ -42,12 +42,19 @@
                                            FontFamily="Segoe UI" FontSize="14"
                                            Foreground="#A06080" Margin="0,5,0,0"/>
                             </StackPanel>
-                            <Button x:Name="BtnRefreshDashboard"
-                                    HorizontalAlignment="Right" VerticalAlignment="Top"
-                                    Width="40" Height="40" Cursor="Hand"
-                                    BorderThickness="0" Background="White"
-                                    ToolTip="Refresh dashboard data"
-                                    Command="{Binding RefreshCommand}">
+                            <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Orientation="Horizontal">
+                                <Border VerticalAlignment="Center" Background="#FAF2F5" CornerRadius="12" Padding="10,6" BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,10,0">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
+                                              Fill="#702943" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0" Opacity="0.75"/>
+                                        <TextBlock Text="{Binding LastRefreshedText, FallbackValue='Updated: Just now'}" FontSize="11.5" FontFamily="Segoe UI" FontWeight="Medium" Foreground="#702943"/>
+                                    </StackPanel>
+                                </Border>
+                                <Button x:Name="BtnRefreshDashboard"
+                                        Width="40" Height="40" Cursor="Hand"
+                                        BorderThickness="0" Background="White"
+                                        ToolTip="{Binding RefreshTooltip, FallbackValue='Refresh dashboard data'}"
+                                        Command="{Binding RefreshCommand}">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="Bg" Background="{TemplateBinding Background}"
@@ -66,7 +73,8 @@
                                 </Button.Template>
                                 <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
                                       Fill="#702943" Stretch="Uniform" Width="16" Height="16"/>
-                            </Button>
+                                </Button>
+                            </StackPanel>
                         </Grid>
                     </StackPanel>
 
@@ -730,9 +738,15 @@
             </Border>
         </Grid>
 
+        <components:DashboardSkeletonLoader x:Name="DashboardSkeleton"
+                                            Margin="28,92,28,22"
+                                            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            Panel.ZIndex="50"/>
+
         <components:LoadingOverlay Grid.RowSpan="99" Grid.ColumnSpan="99"
                                    x:Name="DashboardLoadingOverlay"
-                                   IsLoading="{Binding IsLoading}"
+                                   IsLoading="False"
+                                   Visibility="Collapsed"
                                    Panel.ZIndex="9999"/>
     </Grid>
 </Page>

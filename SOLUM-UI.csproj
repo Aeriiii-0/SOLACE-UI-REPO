@@ -184,6 +184,21 @@
     <Compile Include="Views\Components\LoadingOverlay.xaml.cs">
       <DependentUpon>LoadingOverlay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Components\TableSkeletonLoader.xaml.cs">
+      <DependentUpon>TableSkeletonLoader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\UserTableSkeletonLoader.xaml.cs">
+      <DependentUpon>UserTableSkeletonLoader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\DashboardSkeletonLoader.xaml.cs">
+      <DependentUpon>DashboardSkeletonLoader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\AnalyticsSkeletonLoader.xaml.cs">
+      <DependentUpon>AnalyticsSkeletonLoader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\SubsidyTableSkeletonLoader.xaml.cs">
+      <DependentUpon>SubsidyTableSkeletonLoader.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Components\NotificationCardComponent.xaml.cs">
       <DependentUpon>NotificationCardComponent.xaml</DependentUpon>
     </Compile>
@@ -375,6 +390,26 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Components\LoadingOverlay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\TableSkeletonLoader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\UserTableSkeletonLoader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\DashboardSkeletonLoader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\AnalyticsSkeletonLoader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\SubsidyTableSkeletonLoader.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

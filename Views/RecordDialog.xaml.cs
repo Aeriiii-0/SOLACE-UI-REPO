@@ -360,6 +360,7 @@ namespace SOLUM_UI
         private readonly ObservableCollection<FamilyMemberRow> _familyRowData = new ObservableCollection<FamilyMemberRow>();
         private readonly List<Guid> _removedFamilyMemberIds = new List<Guid>();
         private FamilyMemberRow _editingFamilyMember = null;
+        private System.Windows.Threading.DispatcherTimer _dirtyCheckTimer = null;
 
         private static readonly SolidColorBrush ErrorBrush   = new SolidColorBrush(Color.FromRgb(0xE5, 0x39, 0x35));
         private static readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(0xD0, 0xB8, 0xC0));
@@ -396,13 +397,13 @@ namespace SOLUM_UI
                 Loaded += (s, e) => { ApplyModeStyle(isRenewal: false); UpdateSaveButtonState(); };
             }
 
-            // Routed event handlers to react to any input change and update save button state
-            AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent, new TextChangedEventHandler((s, e) => UpdateSaveButtonState()));
-            AddHandler(System.Windows.Controls.Primitives.Selector.SelectionChangedEvent, new SelectionChangedEventHandler((s, e) => UpdateSaveButtonState()));
-            AddHandler(DatePicker.SelectedDateChangedEvent, new EventHandler<SelectionChangedEventArgs>((s, e) => UpdateSaveButtonState()));
-            AddHandler(System.Windows.Controls.Primitives.ToggleButton.CheckedEvent, new RoutedEventHandler((s, e) => UpdateSaveButtonState()));
-            AddHandler(System.Windows.Controls.Primitives.ToggleButton.UncheckedEvent, new RoutedEventHandler((s, e) => UpdateSaveButtonState()));
-            _familyRowData.CollectionChanged += (s, e) => UpdateSaveButtonState();
+            // Routed event handlers to react to any input change with debounced save button state
+            AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent, new TextChangedEventHandler((s, e) => ScheduleUpdateSaveButtonState()));
+            AddHandler(System.Windows.Controls.Primitives.Selector.SelectionChangedEvent, new SelectionChangedEventHandler((s, e) => ScheduleUpdateSaveButtonState()));
+            AddHandler(DatePicker.SelectedDateChangedEvent, new EventHandler<SelectionChangedEventArgs>((s, e) => ScheduleUpdateSaveButtonState()));
+            AddHandler(System.Windows.Controls.Primitives.ToggleButton.CheckedEvent, new RoutedEventHandler((s, e) => ScheduleUpdateSaveButtonState()));
+            AddHandler(System.Windows.Controls.Primitives.ToggleButton.UncheckedEvent, new RoutedEventHandler((s, e) => ScheduleUpdateSaveButtonState()));
+            _familyRowData.CollectionChanged += (s, e) => ScheduleUpdateSaveButtonState();
 
             SOLUM_UI.Services.FormHelper.BindSameAsApplicantAddress(ChkSameAsApplicant, TxtAddress, TxtEmergencyAddress);
         }
@@ -658,6 +659,7 @@ namespace SOLUM_UI
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
+            _dirtyCheckTimer?.Stop();
             if (_savedSuccessfully) return;
             if (!HasAnyInput()) return;
 
@@ -936,7 +938,7 @@ namespace SOLUM_UI
                 Id = id,
                 IsNew = isNew
             };
-            row.PropertyChanged += (s, e) => UpdateSaveButtonState();
+            row.PropertyChanged += (s, e) => ScheduleUpdateSaveButtonState();
             row.DeleteCommand = new RelayCommand(() =>
             {
                 if (!row.IsNew && row.Id.HasValue)
@@ -1301,14 +1303,25 @@ namespace SOLUM_UI
             }
         }
 
+        private bool _isUpdatingCase = false;
         private void ToUpperBox(TextBox tb)
         {
-            if (_isPopulating || tb == null) return;
-            if (tb.Text != tb.Text.ToUpper())
+            if (_isPopulating || _isUpdatingCase || tb == null) return;
+            string text = tb.Text ?? string.Empty;
+            string upper = text.ToUpper();
+            if (!string.Equals(text, upper, StringComparison.Ordinal))
             {
-                int caret = tb.SelectionStart;
-                tb.Text = tb.Text.ToUpper();
-                tb.SelectionStart = Math.Min(caret + 1, tb.Text.Length);
+                _isUpdatingCase = true;
+                try
+                {
+                    int caret = tb.SelectionStart;
+                    tb.Text = upper;
+                    tb.SelectionStart = Math.Min(caret, tb.Text.Length);
+                }
+                finally
+                {
+                    _isUpdatingCase = false;
+                }
             }
         }
 
@@ -1803,6 +1816,35 @@ namespace SOLUM_UI
             UpdateSaveButtonState();
         }
 
+        private void ScheduleUpdateSaveButtonState()
+        {
+            if (_isPopulating || BtnSave == null) return;
+            bool isEdit = _existing != null && !string.IsNullOrEmpty(_existing.Id);
+            if (!isEdit)
+            {
+                BtnSave.IsEnabled = true;
+                BtnSave.Opacity = 1.0;
+                BtnSave.ToolTip = null;
+                return;
+            }
+
+            if (_dirtyCheckTimer == null)
+            {
+                _dirtyCheckTimer = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(250)
+                };
+                _dirtyCheckTimer.Tick += (s, e) =>
+                {
+                    _dirtyCheckTimer.Stop();
+                    UpdateSaveButtonState();
+                };
+            }
+
+            _dirtyCheckTimer.Stop();
+            _dirtyCheckTimer.Start();
+        }
+
         private void UpdateSaveButtonState()
         {
             if (_isPopulating || BtnSave == null) return;
@@ -1857,6 +1899,8 @@ namespace SOLUM_UI
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            _dirtyCheckTimer?.Stop();
+            UpdateSaveButtonState();
             ValidationMessage.Visibility = Visibility.Collapsed;
             bool isEdit = _existing != null && !string.IsNullOrEmpty(_existing.Id);
             if (isEdit && !HasAnyChanges())

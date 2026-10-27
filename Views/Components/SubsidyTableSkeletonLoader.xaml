@@ -1,0 +1,276 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.SubsidyTableSkeletonLoader"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="White">
+
+    <UserControl.Resources>
+        <Storyboard x:Key="PulseStoryboard" RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimation Storyboard.TargetName="SkeletonRoot"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0.95" To="0.32"
+                             Duration="0:0:0.85">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Style x:Key="SkPill" TargetType="Border">
+            <Setter Property="Background" Value="#EDE2E6"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border CornerRadius="14" BorderBrush="#E8D4DA" BorderThickness="1.5" Background="White">
+        <Grid x:Name="SkeletonRoot">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="46"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="42"/>
+            </Grid.RowDefinitions>
+
+            <!-- Table Header Row -->
+            <Border Grid.Row="0" Background="#FAF2F5" BorderBrush="#EBD8DE" BorderThickness="0,0,0,1" Padding="12,0">
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="56"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="76"/>
+                        <ColumnDefinition Width="145"/>
+                        <ColumnDefinition Width="135"/>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource SkPill}" Width="36" Height="11" HorizontalAlignment="Center"/>
+                    <Border Grid.Column="1" Style="{StaticResource SkPill}" Width="85" Height="11" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                    <Border Grid.Column="2" Style="{StaticResource SkPill}" Width="45" Height="11" HorizontalAlignment="Center"/>
+                    <Border Grid.Column="3" Style="{StaticResource SkPill}" Width="60" Height="11" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                    <Border Grid.Column="4" Style="{StaticResource SkPill}" Width="100" Height="11" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                    <Border Grid.Column="5" Style="{StaticResource SkPill}" Width="85" Height="11" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                    <Border Grid.Column="6" Style="{StaticResource SkPill}" Width="95" Height="11" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                    <Border Grid.Column="7" Style="{StaticResource SkPill}" Width="65" Height="11" HorizontalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- Table Rows (8 Candidate Rows) -->
+            <StackPanel Grid.Row="1">
+                <!-- Row 1 -->
+                <Border BorderBrush="#F2EAEF" BorderThickness="0,0,0,1" Padding="12,11" Background="White">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="56"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="76"/>
+                            <ColumnDefinition Width="145"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource SkPill}" Width="26" Height="16" HorizontalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="110" Height="12" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="70" Height="10" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="2" Style="{StaticResource SkPill}" Width="40" Height="16" HorizontalAlignment="Center" CornerRadius="4"/>
+                        <Border Grid.Column="3" Style="{StaticResource SkPill}" Width="75" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="4" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="70" Height="11" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="55" Height="9" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="5" Style="{StaticResource SkPill}" Width="95" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <Border Grid.Column="6" Style="{StaticResource SkPill}" Width="110" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6" Margin="0,0,6,0"/>
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Row 2 -->
+                <Border BorderBrush="#F2EAEF" BorderThickness="0,0,0,1" Padding="12,11" Background="White">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="56"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="76"/>
+                            <ColumnDefinition Width="145"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource SkPill}" Width="26" Height="16" HorizontalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="125" Height="12" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="80" Height="10" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="2" Style="{StaticResource SkPill}" Width="40" Height="16" HorizontalAlignment="Center" CornerRadius="4"/>
+                        <Border Grid.Column="3" Style="{StaticResource SkPill}" Width="65" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="4" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="60" Height="11" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="45" Height="9" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="5" Style="{StaticResource SkPill}" Width="105" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <Border Grid.Column="6" Style="{StaticResource SkPill}" Width="95" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6" Margin="0,0,6,0"/>
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Row 3 -->
+                <Border BorderBrush="#F2EAEF" BorderThickness="0,0,0,1" Padding="12,11" Background="White">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="56"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="76"/>
+                            <ColumnDefinition Width="145"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource SkPill}" Width="26" Height="16" HorizontalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="95" Height="12" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="65" Height="10" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="2" Style="{StaticResource SkPill}" Width="40" Height="16" HorizontalAlignment="Center" CornerRadius="4"/>
+                        <Border Grid.Column="3" Style="{StaticResource SkPill}" Width="80" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="4" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="75" Height="11" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="50" Height="9" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="5" Style="{StaticResource SkPill}" Width="85" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <Border Grid.Column="6" Style="{StaticResource SkPill}" Width="120" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6" Margin="0,0,6,0"/>
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Row 4 -->
+                <Border BorderBrush="#F2EAEF" BorderThickness="0,0,0,1" Padding="12,11" Background="White">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="56"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="76"/>
+                            <ColumnDefinition Width="145"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource SkPill}" Width="26" Height="16" HorizontalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="130" Height="12" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="75" Height="10" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="2" Style="{StaticResource SkPill}" Width="40" Height="16" HorizontalAlignment="Center" CornerRadius="4"/>
+                        <Border Grid.Column="3" Style="{StaticResource SkPill}" Width="70" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="4" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="65" Height="11" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="50" Height="9" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="5" Style="{StaticResource SkPill}" Width="110" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <Border Grid.Column="6" Style="{StaticResource SkPill}" Width="100" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6" Margin="0,0,6,0"/>
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Row 5 -->
+                <Border BorderBrush="#F2EAEF" BorderThickness="0,0,0,1" Padding="12,11" Background="White">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="56"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="76"/>
+                            <ColumnDefinition Width="145"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource SkPill}" Width="26" Height="16" HorizontalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="105" Height="12" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="60" Height="10" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="2" Style="{StaticResource SkPill}" Width="40" Height="16" HorizontalAlignment="Center" CornerRadius="4"/>
+                        <Border Grid.Column="3" Style="{StaticResource SkPill}" Width="85" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="4" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="70" Height="11" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="55" Height="9" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="5" Style="{StaticResource SkPill}" Width="90" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <Border Grid.Column="6" Style="{StaticResource SkPill}" Width="115" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6" Margin="0,0,6,0"/>
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Row 6 -->
+                <Border BorderBrush="#F2EAEF" BorderThickness="0,0,0,1" Padding="12,11" Background="White">
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="56"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="76"/>
+                            <ColumnDefinition Width="145"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource SkPill}" Width="26" Height="16" HorizontalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="115" Height="12" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="70" Height="10" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="2" Style="{StaticResource SkPill}" Width="40" Height="16" HorizontalAlignment="Center" CornerRadius="4"/>
+                        <Border Grid.Column="3" Style="{StaticResource SkPill}" Width="75" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="4" Margin="10,0,0,0">
+                            <Border Style="{StaticResource SkPill}" Width="60" Height="11" HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                            <Border Style="{StaticResource SkPill}" Width="45" Height="9" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border Grid.Column="5" Style="{StaticResource SkPill}" Width="100" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <Border Grid.Column="6" Style="{StaticResource SkPill}" Width="90" Height="12" HorizontalAlignment="Left" Margin="10,0,0,0"/>
+                        <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6" Margin="0,0,6,0"/>
+                            <Border Style="{StaticResource SkPill}" Width="52" Height="24" CornerRadius="6"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <!-- Table Paging Footer -->
+            <Border Grid.Row="2" Background="#FAFAFA" BorderBrush="#EBD8DE" BorderThickness="0,1,0,0" Padding="14,0">
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Style="{StaticResource SkPill}" Width="160" Height="12"/>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Border Style="{StaticResource SkPill}" Width="45" Height="26" CornerRadius="6" Margin="0,0,6,0"/>
+                        <Border Style="{StaticResource SkPill}" Width="45" Height="26" CornerRadius="6"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

@@ -219,6 +219,9 @@
                 <c:RecommendationQueueGrid Visibility="{Binding TabRecommendationsVisible, Converter={StaticResource BoolToVis}}"/>
                 <c:ShortlistAuditGrid Visibility="{Binding TabShortlistVisible, Converter={StaticResource BoolToVis}}"/>
                 <c:FinalGranteesArchiveGrid Visibility="{Binding TabFinalVisible, Converter={StaticResource BoolToVis}}"/>
+                <c:SubsidyTableSkeletonLoader x:Name="SubsidySkeleton"
+                                              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                                              Panel.ZIndex="10"/>
             </Grid>
 
             <!-- Detail / Explain Drawer (Accessible on Tab 0 and Tab 1) -->
@@ -229,7 +232,7 @@
         <!-- Outlier Rejection Modal Overlay (Spans all rows) -->
         <c:ModalOutlierRejection Grid.RowSpan="4"/>
 
-        <!-- Loading Overlay (Spans all rows when gathering data) -->
-        <c:LoadingOverlay Grid.RowSpan="4" IsLoading="{Binding IsLoading}" Panel.ZIndex="9999"/>
+        <!-- Loading Overlay (Disabled in favor of modern Skeleton Loader) -->
+        <c:LoadingOverlay Grid.RowSpan="4" IsLoading="False" Visibility="Collapsed" Panel.ZIndex="9999"/>
     </Grid>
 </Page>

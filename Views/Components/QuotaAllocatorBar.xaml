@@ -34,7 +34,22 @@
                     <!-- Refresh Queue Button -->
                     <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Margin="0,0,8,0">
                         <Button Background="Transparent" BorderThickness="0" Cursor="Hand" Height="30" Padding="10,0" Command="{Binding RefreshCommand}" ToolTip="Refresh recommendations queue from server">
-                            <Button.Template><ControlTemplate TargetType="Button"><Border Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}"><TextBlock Text="Refresh" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                        <TextBlock Text="Refresh" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="BtnBorder" Property="Background" Value="#FDF2F4"/>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="BtnBorder" Property="Opacity" Value="0.45"/>
+                                            <Setter Property="Cursor" Value="Wait"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
                         </Button>
                     </Border>
 
@@ -42,7 +57,22 @@
                     <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Margin="0,0,8,0"
                             Visibility="{Binding CanModifyGrantees, Converter={StaticResource BoolToVis}}">
                         <Button Background="Transparent" BorderThickness="0" Cursor="Hand" Height="30" Padding="10,0" Command="{Binding GenerateRecommendationsCommand}" ToolTip="Run ML triage batch scoring for active applicants">
-                            <Button.Template><ControlTemplate TargetType="Button"><Border Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}"><TextBlock Text="Run ML Triage" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                        <TextBlock Text="Run ML Triage" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="BtnBorder" Property="Background" Value="#FDF2F4"/>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="BtnBorder" Property="Opacity" Value="0.45"/>
+                                            <Setter Property="Cursor" Value="Wait"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
                         </Button>
                     </Border>
 

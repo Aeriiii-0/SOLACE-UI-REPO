@@ -61,6 +61,20 @@ namespace SOLUM_UI.ViewModels
             private set { _registeredSoloParents = value; OnPropertyChanged(); }
         }
 
+        private string _lastRefreshedText = "Updated: Just now";
+        public string LastRefreshedText
+        {
+            get => _lastRefreshedText;
+            private set { _lastRefreshedText = value; OnPropertyChanged(); }
+        }
+
+        private string _refreshTooltip = "Refresh dashboard data";
+        public string RefreshTooltip
+        {
+            get => _refreshTooltip;
+            private set { _refreshTooltip = value; OnPropertyChanged(); }
+        }
+
         private int _activeSoloParents;
         public int ActiveSoloParents
         {
@@ -183,6 +197,13 @@ namespace SOLUM_UI.ViewModels
         }
         public bool IsLogDetailVisible => _selectedLog != null;
 
+        private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
+        private DateTime _lastLoadedTime = DateTime.MinValue;
+        private DateTime _lastRefreshTime = DateTime.MinValue;
+        private bool _hasLoadedData = false;
+        public bool HasLoadedData => _hasLoadedData;
+
         public ICommand SelectLogCommand     { get; }
         public ICommand CloseLogDetailCommand { get; }
         public ICommand RefreshCommand        { get; }
@@ -192,15 +213,22 @@ namespace SOLUM_UI.ViewModels
             SelectLogCommand      = new RelayCommand(param => SelectedLog = param as AuditLog);
             CloseLogDetailCommand = new RelayCommand(_ => SelectedLog = null);
             RefreshCommand        = new RelayCommand(
-                async _ => await LoadAsync(),
-                _         => !IsLoading);
+                async _ => await LoadAsync(forceRefresh: true),
+                _         => !IsLoading && (DateTime.UtcNow - _lastRefreshTime) >= RefreshCooldown);
 
             LoadChart();
         }
 
-        public async Task LoadAsync()
+        public async Task LoadAsync(bool forceRefresh = false)
         {
             if (IsLoading) return;
+            if (forceRefresh && (DateTime.UtcNow - _lastRefreshTime) < RefreshCooldown)
+                return;
+            if (_hasLoadedData && !forceRefresh && (DateTime.UtcNow - _lastLoadedTime) < CacheTtl)
+                return;
+
+            if (forceRefresh)
+                _lastRefreshTime = DateTime.UtcNow;
 
             IsLoading    = true;
             ErrorMessage = null;
@@ -252,10 +280,7 @@ namespace SOLUM_UI.ViewModels
                         RecentLogs.Add(MapDtoToLog(dto));
                 }
 
-                // UNBLOCK THE UI IMMEDIATELY! KPI cards and Recent Activity are now rendered and interactive
-                IsLoading = false;
-
-                // 2. Await monthly chart data and populate the chart bars without holding up the loading overlay
+                // 2. Await monthly chart data and populate the chart bars
                 var monthlyResponses = await Task.WhenAll(monthlyTasks);
                 var monthlyValues = new int[12];
                 for (int i = 0; i < 12; i++)
@@ -284,6 +309,11 @@ namespace SOLUM_UI.ViewModels
                         TooltipText = $"{_monthLabels[i]} {currentYear}: {val:N0} new registrations"
                     });
                 }
+
+                _lastLoadedTime = DateTime.UtcNow;
+                _hasLoadedData = true;
+                LastRefreshedText = $"Updated: {DateTime.Now:h:mm tt}";
+                RefreshTooltip = $"Refresh dashboard data (Last refreshed: {DateTime.Now:h:mm:ss tt})";
             }
             catch (Exception ex)
             {

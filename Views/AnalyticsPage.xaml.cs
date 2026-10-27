@@ -14,6 +14,7 @@ using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
 using SOLUM_UI.ViewModels;
+using System.Threading.Tasks;
 using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
@@ -23,6 +24,12 @@ namespace SOLUM_UI
         private AnalyticsViewModel _vm;
         private bool _redrawPending;
         private INotifyCollectionChanged _hookedBarangay;
+
+        private static readonly TimeSpan DataFreshnessTtl = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
+        private DateTime _lastLoadedTime = DateTime.MinValue;
+        private DateTime _lastRefreshClickTime = DateTime.MinValue;
+        private bool _hasLoadedData = false;
 
         private static readonly string[] AgeLabels = { "19 & below", "20-39", "40-59", "60 & above" };
         private static readonly string[] AgeProps = { "ParentAge19Below", "ParentAge20_39", "ParentAge40_59", "ParentAge60Above" };
@@ -53,7 +60,14 @@ namespace SOLUM_UI
                 {
                     InitFilterControls();
                     HookChartCanvases();
-                    await LoadDataAsync();
+
+                    bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
+                    if (isStale)
+                    {
+                        if (AnalyticsSkeleton != null) AnalyticsSkeleton.Visibility = Visibility.Visible;
+                        await LoadDataAsync();
+                    }
+
                     ScheduleRedraw();
                 };
             }
@@ -66,6 +80,12 @@ namespace SOLUM_UI
 
         private void OnVmPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(AnalyticsViewModel.IsLoading))
+            {
+                if (AnalyticsSkeleton != null)
+                    AnalyticsSkeleton.Visibility = _vm.IsLoading ? Visibility.Visible : Visibility.Collapsed;
+            }
+
             if (e.PropertyName == nameof(AnalyticsViewModel.BarangayData))
                 HookBarangayCollection();
 
@@ -257,6 +277,7 @@ namespace SOLUM_UI
             {
                 if (_vm == null) return;
                 _vm.IsLoading = true;
+                if (AnalyticsSkeleton != null) AnalyticsSkeleton.Visibility = Visibility.Visible;
 
                 SyncFilterValuesFromUi();
                 _vm.UpdateActiveFilterSummary();
@@ -401,6 +422,14 @@ namespace SOLUM_UI
                 _vm.UpdateActiveFilterSummary();
                 HookBarangayCollection();
                 ScheduleRedraw();
+
+                _lastLoadedTime = DateTime.UtcNow;
+                _hasLoadedData = true;
+
+                if (TxtAnalyticsLastRefreshed != null)
+                    TxtAnalyticsLastRefreshed.Text = $"Updated: {DateTime.Now:h:mm tt}";
+                if (RefreshBtn != null)
+                    RefreshBtn.ToolTip = $"Refresh Analytics Data (Last refreshed: {DateTime.Now:h:mm:ss tt})";
             }
             catch (Exception ex)
             {
@@ -411,6 +440,8 @@ namespace SOLUM_UI
             finally
             {
                 if (_vm != null) _vm.IsLoading = false;
+                if (AnalyticsSkeleton != null) AnalyticsSkeleton.Visibility = Visibility.Collapsed;
+                if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
             }
         }
 
@@ -1225,6 +1256,11 @@ namespace SOLUM_UI
 
         private async void RefreshBtn_Click(object sender, RoutedEventArgs e)
         {
+            if ((_vm != null && _vm.IsLoading) || (DateTime.UtcNow - _lastRefreshClickTime) < RefreshCooldown)
+                return;
+
+            _lastRefreshClickTime = DateTime.UtcNow;
+
             try
             {
                 var refreshBtn = this.FindName("RefreshBtn") as Button;
@@ -1268,7 +1304,17 @@ namespace SOLUM_UI
                         if (loadingSpinner != null)
                             loadingSpinner.Visibility = Visibility.Collapsed;
 
-                        refreshBtn.IsEnabled = true;
+                        _ = Task.Run(async () =>
+                        {
+                            var elapsed = DateTime.UtcNow - _lastRefreshClickTime;
+                            if (elapsed < RefreshCooldown)
+                                await Task.Delay(RefreshCooldown - elapsed);
+                            await Dispatcher.InvokeAsync(() =>
+                            {
+                                var btn = this.FindName("RefreshBtn") as Button;
+                                if (btn != null) btn.IsEnabled = true;
+                            });
+                        });
                     }
                 }
                 catch (Exception ex)

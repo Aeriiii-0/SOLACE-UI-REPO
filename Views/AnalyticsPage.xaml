@@ -365,6 +365,14 @@
                             </Button>
                         </Border>
 
+                        <Border VerticalAlignment="Center" Background="#FAF2F5" CornerRadius="12" Padding="10,6" BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 12,22A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
+                                      Fill="#702943" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0" Opacity="0.75"/>
+                                <TextBlock x:Name="TxtAnalyticsLastRefreshed" Text="Updated: Just now" FontSize="11.5" FontFamily="Segoe UI" FontWeight="Medium" Foreground="#702943"/>
+                            </StackPanel>
+                        </Border>
+
                         <Border Background="White" BorderBrush="#D4A0B0" BorderThickness="1.5"
                                 CornerRadius="20" Width="40" Height="40"
                                 Padding="0">
@@ -1206,7 +1214,16 @@
             </Border>
         </Grid>
 
-        <!-- Full-Page Loading Overlay -->
-        <components:LoadingOverlay x:Name="PageLoadingOverlay" IsLoading="{Binding IsLoading}" Panel.ZIndex="9999"/>
+        <!-- Analytics Skeleton Loader -->
+        <components:AnalyticsSkeletonLoader x:Name="AnalyticsSkeleton"
+                                            Margin="24,142,24,24"
+                                            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            Panel.ZIndex="50"/>
+
+        <!-- Full-Page Loading Overlay (Disabled in favor of modern Skeleton Loader) -->
+        <components:LoadingOverlay x:Name="PageLoadingOverlay"
+                                   IsLoading="False"
+                                   Visibility="Collapsed"
+                                   Panel.ZIndex="9999"/>
     </Grid>
 </Page>

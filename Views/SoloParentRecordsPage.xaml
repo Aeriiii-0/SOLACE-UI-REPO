@@ -429,10 +429,21 @@
 
         <!-- Row 0: Page Title & Header (hidden for Encoder/BasicUser) -->
         <Grid x:Name="PageTitleGrid" Grid.Row="0" Margin="24,16,24,8">
-            <StackPanel VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
                 <TextBlock Text="Record Management" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
                 <TextBlock Text="Registry database of registered solo parents and validity term statuses." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,4,0,0"/>
             </StackPanel>
+            <Border Grid.Column="1" VerticalAlignment="Center" Background="#FAF2F5" CornerRadius="12" Padding="10,6" BorderBrush="#EBD8DE" BorderThickness="1">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
+                          Fill="#702943" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0" Opacity="0.75"/>
+                    <TextBlock x:Name="TxtLastRefreshed" Text="Updated: Just now" FontSize="11.5" FontFamily="Segoe UI" FontWeight="Medium" Foreground="#702943"/>
+                </StackPanel>
+            </Border>
         </Grid>
 
         <!-- Admin Toolbar (search + filter + sort + add + refresh) -->
@@ -1146,6 +1157,12 @@
                                TextWrapping="Wrap" MaxWidth="400"
                                Text="To view, edit, renew a record, please use the search bar above to verify identity."/>
                 </StackPanel>
+
+                <components:TableSkeletonLoader x:Name="RecordsSkeletonLoader"
+                                                Visibility="Collapsed"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                Panel.ZIndex="30"/>
             </Grid>
         </Border>
 
@@ -1458,7 +1475,7 @@
 
         <components:LoadingOverlay Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="99"
                                    x:Name="PageLoadingOverlay"
-                                   IsLoading="True"
+                                   IsLoading="False"
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Stretch"
                                    Panel.ZIndex="9999" Loaded="PageLoadingOverlay_Loaded"/>

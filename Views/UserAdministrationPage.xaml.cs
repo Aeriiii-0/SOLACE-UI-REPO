@@ -209,7 +209,16 @@ namespace SOLUM_UI
         private int _currentPage = 1;                
 
         private int _totalPages = 1;
-        private int _totalCount = 0;               
+        private int _totalCount = 0;
+
+        private static readonly TimeSpan DataFreshnessTtl = TimeSpan.FromMinutes(2);
+
+        private DateTime _lastLoadedTime = DateTime.MinValue;
+
+        private bool _hasLoadedData = false;
+        private bool _isLoadingUsers = false;
+        private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
+        private DateTime _lastRefreshClickTime = DateTime.MinValue;
 
         public UserAdministrationPage()
 
@@ -217,7 +226,13 @@ namespace SOLUM_UI
 
             InitializeComponent();
 
-            Loaded += async (s, e) => await LoadUsersAsync();
+            Loaded += async (s, e) =>
+        {
+            if (!_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl)
+            {
+                await LoadUsersAsync();
+            }
+        };
 
             DataObject.AddPastingHandler(TxtFirstName, NamePasteHandler);
 
@@ -230,8 +245,10 @@ namespace SOLUM_UI
         private async Task LoadUsersAsync()
 
         {
+            if (_isLoadingUsers) return;
+            _isLoadingUsers = true;
 
-            if (UsersLoadingOverlay  != null) UsersLoadingOverlay.IsLoading  = true;
+            if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Visible;
 
             if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = false;
 
@@ -473,15 +490,38 @@ namespace SOLUM_UI
 
                 UpdatePagingControls();
 
+                _lastLoadedTime = DateTime.UtcNow;
+
+                _hasLoadedData = true;
+
+                if (TxtUsersLastRefreshed != null) TxtUsersLastRefreshed.Text = $"Updated: {DateTime.Now:h:mm tt}";
+
+                if (BtnRefreshUsers != null) BtnRefreshUsers.ToolTip = $"Refresh user list (Last refreshed: {DateTime.Now:h:mm:ss tt})";
+
             }
 
             finally
 
             {
 
+                if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Collapsed;
+
                 if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
 
-                if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = true;
+                _isLoadingUsers = false;
+                if (BtnRefreshUsers != null)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        var elapsed = DateTime.UtcNow - _lastRefreshClickTime;
+                        if (elapsed < RefreshCooldown)
+                            await Task.Delay(RefreshCooldown - elapsed);
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = true;
+                        });
+                    });
+                }
 
             }
 
@@ -529,6 +569,13 @@ namespace SOLUM_UI
         private async void BtnRefreshUsers_Click(object sender, RoutedEventArgs e)
 
         {
+            if (_isLoadingUsers || (DateTime.UtcNow - _lastRefreshClickTime) < RefreshCooldown)
+                return;
+
+            _lastRefreshClickTime = DateTime.UtcNow;
+            if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = false;
+
+            _lastLoadedTime = DateTime.MinValue;
 
             _currentPage = 1;
 

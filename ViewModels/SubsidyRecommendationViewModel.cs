@@ -183,12 +183,25 @@ namespace SOLUM_UI.ViewModels
         public ICommand ExportCityEducCommand { get; private set; } public ICommand ExportPantawid4PsCommand { get; private set; } public ICommand ExportFinalLedgerCommand { get; private set; } public ICommand ViewFullRecordCommand { get; private set; }
         public ICommand RefreshCommand { get; private set; } public ICommand GenerateRecommendationsCommand { get; private set; } public ICommand ToggleRosterLockCommand { get; private set; } public ICommand StartNewCycleCommand { get; private set; } public ICommand ToggleShortlistBatchModeCommand { get; private set; } public ICommand SaveQuotaCommand { get; private set; }
 
-        public async Task RefreshDataAsync()
+        private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
+        private DateTime _lastRefreshTime = DateTime.MinValue;
+
+        public async Task RefreshDataAsync(bool forceReloadCycles = false)
         {
             if (IsLoading) return;
+            if ((DateTime.UtcNow - _lastRefreshTime) < RefreshCooldown) return;
+            _lastRefreshTime = DateTime.UtcNow;
+
             IsLoading = true;
             try
             {
+                // When refreshing the active/selected cycle, bypass cycles re-fetch to load immediately
+                if (!forceReloadCycles && SelectedFiscalCycle != null && AvailableFiscalCycles.Count > 0)
+                {
+                    await LoadCycleDataInternalAsync(SelectedFiscalCycle);
+                    return;
+                }
+
                 var cyclesResp = await _apiService.GetCyclesAsync();
                 AvailableFiscalCycles.Clear();
                 FiscalCycleOption activeOption = null;

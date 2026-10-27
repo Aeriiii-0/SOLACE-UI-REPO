@@ -16,6 +16,17 @@ namespace SOLUM_UI
             if (!(DataContext is DashboardViewModel))
                 DataContext = new DashboardViewModel();
 
+            if (DataContext is DashboardViewModel dvm)
+            {
+                dvm.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(DashboardViewModel.IsLoading))
+                    {
+                        DashboardSkeleton.Visibility = dvm.IsLoading ? Visibility.Visible : Visibility.Collapsed;
+                    }
+                };
+            }
+
             // Assign the log VM to the overlay immediately so it is ready.
             LogsOverlay.DataContext = _logsVm;
 
@@ -23,7 +34,12 @@ namespace SOLUM_UI
             {
                 // Load dashboard data
                 if (DataContext is DashboardViewModel vm)
+                {
+                    if (!vm.HasLoadedData)
+                        DashboardSkeleton.Visibility = Visibility.Visible;
+
                     await vm.LoadAsync();
+                }
 
                 // Pre-fetch first page of audit logs in the background without blocking dashboard
                 if (!_logsVm.IsInitialized)

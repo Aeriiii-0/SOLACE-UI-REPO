@@ -37,6 +37,12 @@ namespace SOLUM_UI
         private int _totalCount = 0;
         private bool _isLoading = false;
 
+        private static readonly TimeSpan DataFreshnessTtl = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
+        private DateTime _lastLoadedTime = DateTime.MinValue;
+        private DateTime _lastRefreshClickTime = DateTime.MinValue;
+        private bool _hasLoadedData = false;
+
         public static readonly DependencyProperty SearchPlaceholderProperty =
             DependencyProperty.Register(
                 nameof(SearchPlaceholder),
@@ -65,12 +71,17 @@ namespace SOLUM_UI
             {
                 ApplyRoleView();
                 ResizeNameColumn();
-                // Turn on loading overlay for non-Encoder users, or for Encoder users who have search fields filled
-                if (!IsEncoder || HasSearchQuery())
+
+                bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
+                if (isStale)
                 {
-                    if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
+                    // Show skeleton loader for non-Encoder users, or for Encoder users who have search fields filled
+                    if (!IsEncoder || HasSearchQuery())
+                    {
+                        if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
+                    }
+                    _ = LoadRecordsAsync();
                 }
-                _ = LoadRecordsAsync();
                 _ = Task.Run(() => OcrService.EnsureServerRunningAsync(25));
             };
             SizeChanged += Page_SizeChanged;
@@ -151,6 +162,10 @@ namespace SOLUM_UI
             if (TableEmptyStateOverlay != null)
                 TableEmptyStateOverlay.Visibility = showResults ? Visibility.Collapsed : Visibility.Visible;
 
+            // If returning to landing view, hide skeleton loader
+            if (!showResults && RecordsSkeletonLoader != null)
+                RecordsSkeletonLoader.Visibility = Visibility.Collapsed;
+
             // Paging row
             if (PagingRow != null)
                 PagingRow.Visibility = showResults ? show : hide;
@@ -171,14 +186,15 @@ namespace SOLUM_UI
                 // Back to the landing view (banner + tips)
                 SetEncoderResultsVisible(false);
 
-                // Ensure loading overlay is turned off
+                // Ensure loading overlay and skeleton loader are turned off
                 if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
+                if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Collapsed;
                 return;
             }
 
             _isLoading = true;
             if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = false;
-            if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = true;
+            if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
 
             // Encoder/BasicUser with a search: show the results card
             if (IsEncoder || IsBasicUser)
@@ -411,6 +427,14 @@ namespace SOLUM_UI
 
                 UpdatePagingUI();
 
+                _lastLoadedTime = DateTime.UtcNow;
+                _hasLoadedData = true;
+
+                if (TxtLastRefreshed != null)
+                    TxtLastRefreshed.Text = $"Updated: {DateTime.Now:h:mm tt}";
+                if (BtnRefreshRecords != null)
+                    BtnRefreshRecords.ToolTip = $"Refresh records (Last updated: {DateTime.Now:h:mm:ss tt})";
+
                 // Ensure delete is hidden for non-admin roles after every data load
                 HideDeleteButtonsIfNotAdmin();
             }
@@ -421,13 +445,33 @@ namespace SOLUM_UI
             finally
             {
                 _isLoading = false;
-                if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = true;
+                if (BtnRefreshRecords != null)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        var elapsed = DateTime.UtcNow - _lastRefreshClickTime;
+                        if (elapsed < RefreshCooldown)
+                            await Task.Delay(RefreshCooldown - elapsed);
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = true;
+                        });
+                    });
+                }
                 if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
+                if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Collapsed;
             }
         }
 
         private async void BtnRefreshRecords_Click(object sender, RoutedEventArgs e)
         {
+            if (_isLoading || (DateTime.UtcNow - _lastRefreshClickTime) < RefreshCooldown)
+                return;
+
+            _lastRefreshClickTime = DateTime.UtcNow;
+            if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = false;
+
+            _lastLoadedTime = DateTime.MinValue; // Force fresh fetch
             await LoadRecordsAsync();
         }
 
@@ -692,10 +736,6 @@ namespace SOLUM_UI
 
         private async void OpenViewDialog(SoloParentRecordViewModel vm)
         {
-            MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
-            if (mainWindow != null)
-                mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
-
             SoloParentRecord recordToView = vm.RawModel;
 
             if (Guid.TryParse(vm.Id, out var id))
@@ -708,7 +748,6 @@ namespace SOLUM_UI
             }
 
             var view = new RecordViewDialog(recordToView) { Owner = Window.GetWindow(this) };
-            view.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
             view.ShowDialog();
 
             if (view.OpenedRenew)
@@ -740,23 +779,17 @@ namespace SOLUM_UI
 
         private async void AddNewRecord_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
-            if (mainWindow != null)
-                mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
-
             var methodDialog = new EntryMethodDialog { Owner = Window.GetWindow(this) };
             bool? picked = methodDialog.ShowDialog();
 
             if (picked != true || methodDialog.Selected == EntryMethod.None)
             {
-                if (mainWindow != null) mainWindow.MainContent.Effect = null;
                 return;
             }
 
             if (methodDialog.Selected == EntryMethod.Scan)
             {
                 var ocr = new OcrScanDialog { Owner = Window.GetWindow(this) };
-                ocr.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
@@ -767,7 +800,6 @@ namespace SOLUM_UI
 
             // Manual entry — open 3-step wizard (Step 1 performs validation & duplicate check)
             RecordDialog dialog = new RecordDialog { Owner = Window.GetWindow(this) };
-            dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
@@ -954,10 +986,6 @@ namespace SOLUM_UI
 
         private async Task EditRecordAsync(SoloParentRecord rawRecord)
         {
-            MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
-            if (mainWindow != null)
-                mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
-
             SoloParentDto existingDto = null;
             if (Guid.TryParse(rawRecord.Id, out var id))
             {
@@ -970,7 +998,6 @@ namespace SOLUM_UI
             }
 
             RecordDialog dialog = new RecordDialog(rawRecord) { Owner = Window.GetWindow(this) };
-            dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
@@ -1190,23 +1217,17 @@ namespace SOLUM_UI
 
         private async void BasicUserAddRecord_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
-            if (mainWindow != null)
-                mainWindow.MainContent.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
-
             var methodDialog = new EntryMethodDialog { Owner = Window.GetWindow(this) };
             bool? picked = methodDialog.ShowDialog();
 
             if (picked != true || methodDialog.Selected == EntryMethod.None)
             {
-                if (mainWindow != null) mainWindow.MainContent.Effect = null;
                 return;
             }
 
             if (methodDialog.Selected == EntryMethod.Scan)
             {
                 var ocr = new OcrScanDialog { Owner = Window.GetWindow(this) };
-                ocr.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
@@ -1217,7 +1238,6 @@ namespace SOLUM_UI
 
             // Manual entry — open RecordDialog Step 1 (Primary Info) directly
             RecordDialog dialog = new RecordDialog() { Owner = Window.GetWindow(this) };
-            dialog.Closed += (s, args) => { if (mainWindow != null) mainWindow.MainContent.Effect = null; };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {

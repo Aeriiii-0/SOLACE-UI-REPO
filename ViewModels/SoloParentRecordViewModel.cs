@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 using SOLUM_UI.Models;
@@ -68,15 +68,32 @@ namespace SOLUM_UI.ViewModels
             _isAlternate = value;
         }
 
+        private static readonly SolidColorBrush SelectedRowBrush = CreateFrozen(0xF0, 0xE4, 0xE8);
+        private static readonly SolidColorBrush AlternateRowBrush = CreateFrozen(0xFD, 0xF8, 0xF9);
+        private static readonly SolidColorBrush WhiteBrush = Brushes.White;
+
+        private static readonly SolidColorBrush StatusValidBadgeBrush = CreateFrozen(0xE6, 0xF9, 0xEE);
+        private static readonly SolidColorBrush StatusInactiveBadgeBrush = CreateFrozen(0xF5, 0xF5, 0xF5);
+        private static readonly SolidColorBrush TransparentBrush = Brushes.Transparent;
+
+        private static readonly SolidColorBrush StatusValidTextBrush = CreateFrozen(0x27, 0xAE, 0x60);
+        private static readonly SolidColorBrush StatusInactiveTextBrush = CreateFrozen(0x99, 0x99, 0x99);
+        private static readonly SolidColorBrush BlackBrush = Brushes.Black;
+
+        private static SolidColorBrush CreateFrozen(byte r, byte g, byte b)
+        {
+            var brush = new SolidColorBrush(Color.FromRgb(r, g, b));
+            brush.Freeze();
+            return brush;
+        }
+
         public SolidColorBrush RowBackground
         {
             get
             {
                 if (_isSelected)
-                    return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0E4E8"));
-                return _isAlternate
-                    ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FDF8F9"))
-                    : new SolidColorBrush(Colors.White);
+                    return SelectedRowBrush;
+                return _isAlternate ? AlternateRowBrush : WhiteBrush;
             }
         }
 
@@ -86,9 +103,9 @@ namespace SOLUM_UI.ViewModels
             {
                 switch (_model.Status)
                 {
-                    case "Valid": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
-                    case "Inactive": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F5F5F5"));
-                    default: return new SolidColorBrush(Colors.Transparent);
+                    case "Valid": return StatusValidBadgeBrush;
+                    case "Inactive": return StatusInactiveBadgeBrush;
+                    default: return TransparentBrush;
                 }
             } 
         }
@@ -99,9 +116,9 @@ namespace SOLUM_UI.ViewModels
             {
                 switch (_model.Status)
                 {
-                    case "Valid": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
-                    case "Inactive": return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#999999"));
-                    default: return new SolidColorBrush(Colors.Black);
+                    case "Valid": return StatusValidTextBrush;
+                    case "Inactive": return StatusInactiveTextBrush;
+                    default: return BlackBrush;
                 }
             }
         }

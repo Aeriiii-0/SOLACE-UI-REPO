@@ -48,7 +48,18 @@ namespace SOLUM_UI.ViewModels
 
                 GranteeSlots = cycle.AllocatedSlots > 0 ? cycle.AllocatedSlots : 100;
                 GrantAmountPerRecipient = cycle.PerGranteeAmount > 0 ? (int)cycle.PerGranteeAmount : DefaultGrantAmount;
-                var grResp = await _apiService.GetGranteesByFiscalYearAsync(cycle.FiscalYear);
+
+                // Concurrently fetch Grantees, Shortlist, and Recommendations in parallel
+                var granteesTask = _apiService.GetGranteesByFiscalYearAsync(cycle.FiscalYear);
+                var shortlistTask = _apiService.GetShortlistAsync(cycle.CycleId);
+                var recsTask = _apiService.GetRecommendationsAsync(cycle.CycleId);
+
+                await Task.WhenAll(granteesTask, shortlistTask, recsTask);
+
+                var grResp = await granteesTask;
+                var slResp = await shortlistTask;
+                var dtos = await recsTask;
+
                 FinalGranteesList.Clear();
                 int rk = 1;
                 if (grResp?.Data != null && grResp.Data.Count > 0)
@@ -60,7 +71,6 @@ namespace SOLUM_UI.ViewModels
                 ShortlistRows.Clear();
                 foreach (var g in FinalGranteesList) ShortlistRows.Add(g);
 
-                var slResp = await _apiService.GetShortlistAsync(cycle.CycleId);
                 if (slResp?.Data != null && slResp.Data.Count > 0)
                 {
                     foreach (var d in slResp.Data)
@@ -72,10 +82,9 @@ namespace SOLUM_UI.ViewModels
                         if (!inShortlist) ShortlistRows.Add(SubsidyModelMapper.ToRow(d, rk++));
                     }
                 }
-                UpdateShortlistAndFinalCollections();
+                UpdateShortlistAndFinalCollections(enrich: false);
 
                 _allItems.Clear();
-                var dtos = await _apiService.GetRecommendationsAsync(cycle.CycleId);
                 if (dtos?.Data != null && dtos.Data.Count > 0)
                 {
                     foreach (var d in dtos.Data)
@@ -111,30 +120,30 @@ namespace SOLUM_UI.ViewModels
             }
         }
 
-    public async Task StartNewCycleAsync()
-    {
-        if (!IsRosterLocked)
+        public async Task StartNewCycleAsync()
         {
-            ToastNotification.Show("Active Cycle Incomplete", $"Please finalize and lock the FY {ActiveCycleFiscalYear} grantee roster before launching a new cycle.", ToastType.Warning);
-            return;
-        }
-
-        int nextYear = ActiveCycleFiscalYear + 1;
-        bool ok = ActionConfirmDialog.Show("Launch New Fiscal Cycle", $"Starting a new cycle will advance the active operational cycle to FY {nextYear}.\n\nThe current FY {ActiveCycleFiscalYear} certified roster will be archived.\n\nDo you wish to proceed?", "Launch Cycle", "Cancel", ConfirmThemeType.Primary);
-        if (!ok) return;
-
-        var dlg = new NewCycleDialog(nextYear) { Owner = Application.Current?.MainWindow };
-        if (dlg.ShowDialog() == true && dlg.ResultRequest != null)
-        {
-            try
+            if (!IsRosterLocked)
             {
-                var resp = await _apiService.CreateCycleAsync(dlg.ResultRequest);
-                if (resp != null && resp.Succeeded)
+                ToastNotification.Show("Active Cycle Incomplete", $"Please finalize and lock the FY {ActiveCycleFiscalYear} grantee roster before launching a new cycle.", ToastType.Warning);
+                return;
+            }
+
+            int nextYear = ActiveCycleFiscalYear + 1;
+            bool ok = ActionConfirmDialog.Show("Launch New Fiscal Cycle", $"Starting a new cycle will advance the active operational cycle to FY {nextYear}.\n\nThe current FY {ActiveCycleFiscalYear} certified roster will be archived.\n\nDo you wish to proceed?", "Launch Cycle", "Cancel", ConfirmThemeType.Primary);
+            if (!ok) return;
+
+            var dlg = new NewCycleDialog(nextYear) { Owner = Application.Current?.MainWindow };
+            if (dlg.ShowDialog() == true && dlg.ResultRequest != null)
+            {
+                try
                 {
-                    IsRosterLocked = false;
-                    await RefreshDataAsync();
-                    ToastNotification.Show("New Cycle Active", $"Fiscal Year {dlg.ResultRequest.FiscalYear} cycle started successfully.", ToastType.Success);
-                }
+                    var resp = await _apiService.CreateCycleAsync(dlg.ResultRequest);
+                    if (resp != null && resp.Succeeded)
+                    {
+                        IsRosterLocked = false;
+                        await RefreshDataAsync(forceReloadCycles: true);
+                        ToastNotification.Show("New Cycle Active", $"Fiscal Year {dlg.ResultRequest.FiscalYear} cycle started successfully.", ToastType.Success);
+                    }
                     else
                     {
                         string err = resp?.Errors != null ? string.Join(", ", resp.Errors) : "Failed to create cycle.";
@@ -167,20 +176,24 @@ namespace SOLUM_UI.ViewModels
             OnPropertyChanged(nameof(GranteeSlotsText)); OnPropertyChanged(nameof(SelectTopNLabel)); OnPropertyChanged(nameof(SelectAllQueueButtonText)); OnPropertyChanged(nameof(SelectedCountSummary)); OnPropertyChanged(nameof(HasQueueSelection));
         }
 
-        private void UpdateShortlistAndFinalCollections()
+        private void UpdateShortlistAndFinalCollections(bool enrich = true)
         {
             var sorted = ShortlistRows.OrderByDescending(x => x.Score).ToList();
             ShortlistRows.Clear();
             for (int i = 0; i < sorted.Count; i++) { sorted[i].Rank = i + 1; sorted[i].IsWaitlisted = !sorted[i].IsFinalGrantee && (i >= _granteeSlots); ShortlistRows.Add(sorted[i]); }
             FinalGranteesList.Clear(); foreach (var r in ShortlistRows.Where(x => x.IsFinalGrantee).OrderBy(x => x.Name)) FinalGranteesList.Add(r);
             UpdateFinalPaged();
-            EnrichAllCandidatesFromRecordsAsync();
+            if (enrich) EnrichAllCandidatesFromRecordsAsync();
             FilterShortlistRows(); OnPropertyChanged(nameof(Tab2QuotaSummary)); OnPropertyChanged(nameof(ShortlistSummary)); OnPropertyChanged(nameof(FinalSummaryText));
         }
 
         public void EnrichAllCandidatesFromRecordsAsync()
         {
-            var targets = ShortlistRows.Select(x => x.SoloParentId).Concat(FinalGranteesList.Select(x => x.SoloParentId)).Where(id => id != Guid.Empty).Distinct().ToList();
+            var targets = ShortlistRows.Concat(FinalGranteesList)
+                .Where(x => x.SoloParentId != Guid.Empty && (x.ChildrenDetails == null || x.ChildrenDetails.Count == 0 || string.IsNullOrEmpty(x.Circumstance)))
+                .Select(x => x.SoloParentId)
+                .Distinct()
+                .ToList();
             if (targets.Count == 0) return;
             Task.Run(async () =>
             {
@@ -194,12 +207,12 @@ namespace SOLUM_UI.ViewModels
                             var resp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(id);
                             if (resp?.Data != null)
                             {
-                                Application.Current?.Dispatcher?.Invoke(() =>
+                                Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
                                 {
                                     foreach (var row in ShortlistRows.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
                                     foreach (var row in FinalGranteesList.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
                                     if (ActiveCandidate?.SoloParentId == id) OnPropertyChanged(nameof(ActiveCandidate));
-                                });
+                                }));
                             }
                         }
                         catch { }
