@@ -48,15 +48,17 @@ namespace SOLUM_UI.ViewModels
         // ── Colour palette (presentation constants) ──────────────────────────
         // Declared internal so the code-behind card-builder helpers can still
         // reference them during Phase 2 without duplication.
-        internal static readonly SolidColorBrush BrLabel   = Clr(0x88, 0x88, 0x88);
-        internal static readonly SolidColorBrush BrValue   = Clr(0x11, 0x11, 0x11);
-        internal static readonly SolidColorBrush BrCardBdr = Clr(0x70, 0x29, 0x43);
-        internal static readonly SolidColorBrush BrDivider = Clr(0xE8, 0xD8, 0xDE);
-        internal static readonly SolidColorBrush BrHead    = Clr(0x70, 0x29, 0x43);
-        internal static readonly SolidColorBrush BrChipBg  = Clr(0xF5, 0xEC, 0xEF);
-        internal static readonly SolidColorBrush BrChipTxt = Clr(0x70, 0x29, 0x43);
-        internal static readonly SolidColorBrush BrRowAlt  = Clr(0xFD, 0xF5, 0xF7);
-        internal static readonly SolidColorBrush BrSecBg   = Clr(0xFF, 0xFF, 0xFF);
+        internal static readonly SolidColorBrush BrLabel    = Clr(0x7A, 0x6B, 0x72);
+        internal static readonly SolidColorBrush BrValue    = Clr(0x1F, 0x29, 0x37);
+        internal static readonly SolidColorBrush BrMutedVal = Clr(0x9E, 0x8F, 0x95);
+        internal static readonly SolidColorBrush BrCardBdr  = Clr(0xEA, 0xDE, 0xE3);
+        internal static readonly SolidColorBrush BrDivider  = Clr(0xEE, 0xE4, 0xE8);
+        internal static readonly SolidColorBrush BrHead     = Clr(0x70, 0x29, 0x43);
+        internal static readonly SolidColorBrush BrChipBg   = Clr(0xFA, 0xF0, 0xF3);
+        internal static readonly SolidColorBrush BrChipTxt  = Clr(0x70, 0x29, 0x43);
+        internal static readonly SolidColorBrush BrChipBdr  = Clr(0xDF, 0x9B, 0xB1);
+        internal static readonly SolidColorBrush BrRowAlt   = Clr(0xFA, 0xF6, 0xF8);
+        internal static readonly SolidColorBrush BrSecBg    = Clr(0xFF, 0xFF, 0xFF);
 
         /// <summary>Factory helper preserved verbatim from the original code-behind.</summary>
         internal static SolidColorBrush Clr(byte r, byte g, byte b) =>

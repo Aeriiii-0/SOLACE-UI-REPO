@@ -712,7 +712,7 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="Full Name *" Style="{StaticResource FieldLabelSm}"/>
-                                                <TextBox x:Name="TxtChildName" Style="{StaticResource FormBoxSm}" MaxLength="60"/>
+                                                <TextBox x:Name="TxtChildName" Style="{StaticResource FormBoxSm}" MaxLength="60" CharacterCasing="Upper"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="Relationship *" Style="{StaticResource FieldLabelSm}"/>

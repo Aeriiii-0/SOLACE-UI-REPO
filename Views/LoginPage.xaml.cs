@@ -237,7 +237,7 @@ namespace SOLUM_UI
                     : email;
 
                 Guid id = AuthApiService.ExtractUserIdFromToken(loginResponse.Data.Token) ?? Guid.Empty;
-                string assignedRole = AuthApiService.Instance.IsSuperAdmin ? "SuperAdmin" : (AuthApiService.Instance.IsAdmin ? "Administrator" : "Encoder");
+                string assignedRole = AuthApiService.Instance.IsSuperAdmin ? "SuperAdmin" : (AuthApiService.Instance.IsAdmin ? "Administrator" : (AuthApiService.Instance.IsBarangaySecretary ? "BarangaySecretary" : "Encoder"));
                 MainWindow.CurrentUserRole = assignedRole;
 
                 ApplicationUserDTO loggedInUser = null;

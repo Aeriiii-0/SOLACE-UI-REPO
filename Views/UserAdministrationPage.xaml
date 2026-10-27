@@ -405,9 +405,10 @@
                 </StackPanel>
             </Grid>
 
-            <Grid Grid.Row="1" Margin="24,6,24,10">
+                        <Grid Grid.Row="1" Margin="24,6,24,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
@@ -457,8 +458,22 @@
                     </Grid>
                 </Border>
 
+                                <!-- Role Filter -->
                 <Border Grid.Column="1" Margin="12,0,0,0" Height="44">
-                    <ComboBox x:Name="CmbUserStatus" Width="150" Height="44"
+                    <ComboBox x:Name="CmbRoleFilter" Width="170" Height="44"
+                              Style="{StaticResource FormCombo}"
+                              SelectionChanged="CmbRoleFilter_SelectionChanged">
+                        <ComboBoxItem Content="All Roles" Tag="ALL" IsSelected="True"/>
+                        <ComboBoxItem x:Name="CmbFilterRoleAdmin" Content="Admin" Tag="Admin"/>
+                        <ComboBoxItem Content="Caseworker" Tag="Encoder"/>
+                        <ComboBoxItem Content="Barangay Secretary" Tag="BarangaySecretary"/>
+                        <ComboBoxItem x:Name="CmbFilterRoleSuperAdmin" Content="SuperAdmin" Tag="SuperAdmin"/>
+                    </ComboBox>
+                </Border>
+
+                <!-- Status Filter -->
+                <Border Grid.Column="2" Margin="12,0,0,0" Height="44">
+                    <ComboBox x:Name="CmbUserStatus" Width="140" Height="44"
                               Style="{StaticResource FormCombo}"
                               SelectionChanged="CmbUserStatus_SelectionChanged">
                         <ComboBoxItem Content="All Status" Tag="ALL" IsSelected="True"/>
@@ -486,31 +501,30 @@
                             BorderBrush="#EBD8DE" BorderThickness="0,0,0,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="1.2*"/>
+                                <ColumnDefinition Width="2.2*"/>
+                                <ColumnDefinition Width="1.5*"/>
+                                <ColumnDefinition Width="1.6*"/>
+                                <ColumnDefinition Width="1.3*"/>
                                 <ColumnDefinition Width="110"/>
-                                <ColumnDefinition Width="145"/>
+                                <ColumnDefinition Width="130"/>
                             </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" BorderBrush="#EBD8DE" BorderThickness="0,0,1,0" Padding="16,0">
-                                <TextBlock Text="USER NAME" Style="{StaticResource TableHeaderText}"
-                                           HorizontalAlignment="Left" Margin="50,0,0,0"/>
+                            <Border Grid.Column="0" Padding="20,0,12,0">
+                                <TextBlock Text="USER" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Left"/>
                             </Border>
-                            <Border Grid.Column="1" BorderBrush="#EBD8DE" BorderThickness="0,0,1,0" Padding="16,0">
-                                <TextBlock Text="ROLE" Style="{StaticResource TableHeaderText}"
-                                           HorizontalAlignment="Left"/>
+                            <Border Grid.Column="1" Padding="12,0">
+                                <TextBlock Text="ROLE" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Left"/>
                             </Border>
-                            <Border Grid.Column="2" BorderBrush="#EBD8DE" BorderThickness="0,0,1,0" Padding="16,0">
-                                <TextBlock Text="CONTACT" Style="{StaticResource TableHeaderText}"
-                                           HorizontalAlignment="Left"/>
+                            <Border Grid.Column="2" Padding="12,0">
+                                <TextBlock Text="ASSIGNED JURISDICTION" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Left"/>
                             </Border>
-                            <Border Grid.Column="3" BorderBrush="#EBD8DE" BorderThickness="0,0,1,0" Padding="8,0">
-                                <TextBlock Text="STATUS" Style="{StaticResource TableHeaderText}"
-                                           HorizontalAlignment="Center"/>
+                            <Border Grid.Column="3" Padding="12,0">
+                                <TextBlock Text="CONTACT" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Left"/>
                             </Border>
                             <Border Grid.Column="4" Padding="8,0">
-                                <TextBlock Text="ACTIONS" Style="{StaticResource TableHeaderText}"
-                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="STATUS" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Column="5" Padding="8,0">
+                                <TextBlock Text="ACTIONS" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
                             </Border>
                         </Grid>
                     </Border>
@@ -528,6 +542,7 @@
                                     <Setter Property="BorderBrush" Value="#F2EAEF"/>
                                     <Setter Property="Padding" Value="0"/>
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="ListViewItem">
@@ -540,6 +555,9 @@
                                                     <Trigger Property="IsMouseOver" Value="True">
                                                         <Setter TargetName="Bg" Property="Background" Value="#FDF6F8"/>
                                                     </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="Bg" Property="Background" Value="#FAF0F3"/>
+                                                    </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Setter.Value>
@@ -548,68 +566,99 @@
                             </ListView.ItemContainerStyle>
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid>
+                                    <Grid MinHeight="56">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="2*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="1.2*"/>
+                                            <ColumnDefinition Width="2.2*"/>
+                                            <ColumnDefinition Width="1.5*"/>
+                                            <ColumnDefinition Width="1.6*"/>
+                                            <ColumnDefinition Width="1.3*"/>
                                             <ColumnDefinition Width="110"/>
-                                            <ColumnDefinition Width="145"/>
+                                            <ColumnDefinition Width="130"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- User Identity Column -->
-                                        <Border Grid.Column="0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="16,11">
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <!-- Col 0: User Identity -->
+                                        <Border Grid.Column="0" Padding="20,10,12,10">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                 <Border Width="38" Height="38" CornerRadius="19"
                                                         Background="#FAF0F3" BorderBrush="#E8D4DA" BorderThickness="1.5"
                                                         VerticalAlignment="Center" Margin="0,0,12,0">
                                                     <TextBlock Text="{Binding Initials}" FontSize="13" FontWeight="Bold"
-                                                                Foreground="#702943" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                               Foreground="#702943" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                 </Border>
                                                 <StackPanel VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding FullName}" FontSize="13" FontWeight="SemiBold" Foreground="#1F2937"/>
-                                                    <TextBlock Text="{Binding Email}" FontSize="11.5" Foreground="#6B7280" Margin="0,2,0,0"/>
+                                                    <TextBlock Text="{Binding FullName}" FontSize="13" FontWeight="SemiBold"
+                                                               Foreground="#1E293B" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding Email}" FontSize="11.5" Foreground="#64748B"
+                                                               Margin="0,2.5,0,0" TextTrimming="CharacterEllipsis"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </Border>
 
-                                        <!-- Role Badge Column -->
-                                        <Border Grid.Column="1" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="16,11">
+                                        <!-- Col 1: Role Badge -->
+                                        <Border Grid.Column="1" Padding="12,10">
                                             <Border CornerRadius="12" Background="{Binding RoleBadgeColor}"
                                                     BorderBrush="{Binding RoleBadgeBorder}" BorderThickness="1"
-                                                    Padding="10,3.5" VerticalAlignment="Center" HorizontalAlignment="Left">
-                                                <TextBlock Text="{Binding Role}" FontSize="11" FontWeight="Bold"
-                                                           Foreground="{Binding RoleTextColor}"/>
+                                                    Padding="9,4" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Path Data="{Binding RoleIconData}"
+                                                          Fill="{Binding RoleTextColor}"
+                                                          Stretch="Uniform" Width="11" Height="11"
+                                                          Margin="0,0,5.5,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding RoleDisplay}" FontSize="10.5" FontWeight="SemiBold"
+                                                               Foreground="{Binding RoleTextColor}" VerticalAlignment="Center"/>
+                                                </StackPanel>
                                             </Border>
                                         </Border>
 
-                                        <!-- Contact Number Column -->
-                                        <Border Grid.Column="2" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="16,11">
-                                            <TextBlock Text="{Binding DisplayContact}" FontSize="12.5"
-                                                       Foreground="#4B5563" VerticalAlignment="Center"
-                                                       TextTrimming="CharacterEllipsis"/>
+                                        <!-- Col 2: Assigned Jurisdiction / Area -->
+                                        <Border Grid.Column="2" Padding="12,10">
+                                            <Border CornerRadius="6" Background="{Binding ScopeBadgeBackground}"
+                                                    BorderBrush="{Binding ScopeBadgeBorder}" BorderThickness="1"
+                                                    Padding="8,4" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Path Data="{Binding ScopeIconData}"
+                                                          Fill="{Binding ScopeIconBrush}"
+                                                          Stretch="Uniform" Width="10.5" Height="10.5"
+                                                          Margin="0,0,5.5,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding ScopeDisplay}" FontSize="11" FontWeight="Medium"
+                                                               Foreground="{Binding ScopeTextColor}" VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+                                            </Border>
                                         </Border>
 
-                                        <!-- Status Badge Column -->
-                                        <Border Grid.Column="3" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="8,11">
+                                        <!-- Col 3: Contact Number -->
+                                        <Border Grid.Column="3" Padding="12,10">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Path Data="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z"
+                                                      Fill="#94A3B8" Stretch="Uniform" Width="11" Height="11" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                      Visibility="{Binding HasContactVisibility}"/>
+                                                <TextBlock Text="{Binding DisplayContact}" FontSize="12"
+                                                           Foreground="{Binding ContactTextColor}" VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Col 4: Status Badge -->
+                                        <Border Grid.Column="4" Padding="8,10">
                                             <Border CornerRadius="12" Background="{Binding StatusBadgeColor}"
                                                     BorderBrush="{Binding StatusBadgeBorder}" BorderThickness="1"
-                                                    Padding="10,4" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                    Padding="9,3.5" VerticalAlignment="Center" HorizontalAlignment="Center">
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <Ellipse Width="7" Height="7" Fill="{Binding StatusDotColor}" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                                    <TextBlock Text="{Binding StatusText}" FontSize="11" FontWeight="Bold"
+                                                    <Ellipse Width="6" Height="6" Fill="{Binding StatusDotColor}" Margin="0,0,5.5,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding StatusText}" FontSize="10.5" FontWeight="Bold"
                                                                Foreground="{Binding StatusTextColor}" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                             </Border>
                                         </Border>
 
-                                        <!-- Row Actions Column -->
-                                        <Border Grid.Column="4" Padding="8,11">
+                                        <!-- Col 5: Row Actions -->
+                                        <Border Grid.Column="5" Padding="8,10">
                                             <StackPanel Orientation="Horizontal"
                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <!-- Edit User Primary Button -->
-                                                <Button Height="28" Padding="10,0" BorderThickness="1"
-                                                        BorderBrush="#E0CDD3" Background="#FDF8FA" Cursor="Hand"
+                                                <Button Height="28" Padding="9,0" BorderThickness="1"
+                                                        BorderBrush="#E0CDD3" Background="#FFFFFF" Cursor="Hand"
                                                         Tag="{Binding Id}" Click="EditUser_Click" Margin="0,0,6,0"
                                                         IsEnabled="{Binding CanManage}"
                                                         ToolTip="{Binding ActionDisabledToolTip, TargetNullValue='Edit User Details'}">
@@ -623,23 +672,28 @@
                                                             </Border>
                                                             <ControlTemplate.Triggers>
                                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter TargetName="Bg" Property="Background" Value="#F0E4E8"/>
+                                                                    <Setter TargetName="Bg" Property="Background" Value="#FAF0F3"/>
                                                                     <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                                                </Trigger>
+                                                                <Trigger Property="IsEnabled" Value="False">
+                                                                    <Setter Property="Opacity" Value="0.4"/>
+                                                                    <Setter Property="Cursor" Value="No"/>
                                                                 </Trigger>
                                                             </ControlTemplate.Triggers>
                                                         </ControlTemplate>
                                                     </Button.Template>
                                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                         <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"
-                                                              Fill="#702943" Stretch="Uniform" Width="11" Height="11" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                                              Fill="#702943" Stretch="Uniform" Width="10.5" Height="10.5" Margin="0,0,4.5,0" VerticalAlignment="Center"/>
                                                         <TextBlock Text="Edit" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
                                                     </StackPanel>
                                                 </Button>
 
                                                 <!-- More Actions (⋮) Button with Dropdown Menu -->
                                                 <Button Width="28" Height="28" BorderThickness="1"
-                                                        BorderBrush="#E8D4DA" Background="#FAFAFA" Cursor="Hand"
-                                                        Click="MoreActions_Click" ToolTip="More Options">
+                                                        BorderBrush="#E8D4DA" Background="#FFFFFF" Cursor="Hand"
+                                                        Click="MoreActions_Click" ToolTip="More Options"
+                                                        IsEnabled="{Binding CanManage}">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border x:Name="Bg" Background="{TemplateBinding Background}"
@@ -650,8 +704,12 @@
                                                             </Border>
                                                             <ControlTemplate.Triggers>
                                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter TargetName="Bg" Property="Background" Value="#F0E4E8"/>
+                                                                    <Setter TargetName="Bg" Property="Background" Value="#FAF0F3"/>
                                                                     <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                                                </Trigger>
+                                                                <Trigger Property="IsEnabled" Value="False">
+                                                                    <Setter Property="Opacity" Value="0.4"/>
+                                                                    <Setter Property="Cursor" Value="No"/>
                                                                 </Trigger>
                                                             </ControlTemplate.Triggers>
                                                         </ControlTemplate>
@@ -847,12 +905,46 @@
 
                         <StackPanel Margin="0,0,0,14">
                             <TextBlock Text="Position / Role *" Style="{StaticResource FieldLabel}"/>
-                            <ComboBox x:Name="CmbRole" Style="{StaticResource FormCombo}">
+                            <ComboBox x:Name="CmbRole" Style="{StaticResource FormCombo}" SelectionChanged="CmbRole_SelectionChanged">
                                 <ComboBoxItem Content="CASEWORKER (ENCODER)" Tag="Caseworker" IsSelected="True"/>
+                                <ComboBoxItem x:Name="CmbRoleItemBarangaySecretary" Content="BARANGAY SECRETARY" Tag="BarangaySecretary"/>
                                 <ComboBoxItem x:Name="CmbRoleItemAdmin" Content="ADMIN" Tag="Admin"/>
                                 <ComboBoxItem x:Name="CmbRoleItemSuperAdmin" Content="SUPERADMIN" Tag="SuperAdmin"/>
                             </ComboBox>
                             <TextBox x:Name="TxtPosition" Text="ENCODER" Style="{StaticResource FormBoxReadOnly}" Visibility="Collapsed"/>
+                        </StackPanel>
+
+                        <!-- Assigned Barangay (Required for Barangay Secretary) -->
+                        <StackPanel x:Name="PnlUserBarangay" Margin="0,0,0,14" Visibility="Collapsed">
+                            <TextBlock Text="Assigned Barangay * (Required for Barangay Secretary)" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="CmbUserBarangay" Style="{StaticResource FormCombo}">
+                                <ComboBoxItem Content="Select Barangay..." IsSelected="True" Tag=""/>
+                                <ComboBoxItem Content="Biñan (Poblacion)"/>
+                                <ComboBoxItem Content="Bungahan"/>
+                                <ComboBoxItem Content="Canlalay"/>
+                                <ComboBoxItem Content="Casile"/>
+                                <ComboBoxItem Content="De La Paz"/>
+                                <ComboBoxItem Content="Ganado"/>
+                                <ComboBoxItem Content="Langkiwa"/>
+                                <ComboBoxItem Content="Loma"/>
+                                <ComboBoxItem Content="Malaban"/>
+                                <ComboBoxItem Content="Malamig"/>
+                                <ComboBoxItem Content="Mambog"/>
+                                <ComboBoxItem Content="Platero"/>
+                                <ComboBoxItem Content="Poblacion"/>
+                                <ComboBoxItem Content="San Antonio"/>
+                                <ComboBoxItem Content="San Francisco (Halang)"/>
+                                <ComboBoxItem Content="San Jose"/>
+                                <ComboBoxItem Content="San Vicente"/>
+                                <ComboBoxItem Content="Santo Domingo"/>
+                                <ComboBoxItem Content="Santo Niño"/>
+                                <ComboBoxItem Content="Santo Tomas (Calabuso)"/>
+                                <ComboBoxItem Content="Soro-Soro"/>
+                                <ComboBoxItem Content="Timbao"/>
+                                <ComboBoxItem Content="Tubigan"/>
+                                <ComboBoxItem Content="Zapote"/>
+                            </ComboBox>
+                            <TextBlock x:Name="ErrUserBarangay" Text="Barangay is required for Barangay Secretary." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
 
                         <StackPanel x:Name="PnlAccountStatus" Margin="0,0,0,14" Visibility="Collapsed">

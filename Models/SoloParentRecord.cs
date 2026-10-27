@@ -8,13 +8,23 @@ namespace SOLUM_UI.Models
     {
         public Guid? Id                   { get; set; }
         public bool IsNew                 { get; set; } = true;
-        public string MemberName          { get; set; }
+        private string _memberName;
+        public string MemberName
+        {
+            get => _memberName;
+            set => _memberName = value?.ToUpper() ?? string.Empty;
+        }
         public string Sex                 { get; set; }
         public string Age                 { get; set; }
         public string Birthdate           { get; set; }
         public string CivilStatus         { get; set; }
         public string Relationship        { get; set; }
-        public string EducationEmployment { get; set; }
+        private string _educationEmployment;
+        public string EducationEmployment
+        {
+            get => _educationEmployment;
+            set => _educationEmployment = value?.ToUpper() ?? string.Empty;
+        }
         public string Income              { get; set; }
 
         // Special needs

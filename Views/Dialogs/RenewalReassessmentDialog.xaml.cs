@@ -55,7 +55,7 @@ namespace SOLUM_UI.Views.Dialogs
             {
                 if (_name != value)
                 {
-                    _name = value;
+                    _name = value?.ToUpper();
                     OnPropertyChanged();
                 }
             }
@@ -835,7 +835,7 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void BtnSaveChild_Click(object sender, RoutedEventArgs e)
         {
-            string name = TxtChildName.Text?.Trim();
+            string name = TxtChildName.Text?.Trim()?.ToUpper();
             if (string.IsNullOrWhiteSpace(name))
             {
                 ActionConfirmDialog.Warning("Validation", "Please enter the dependent's full name.", this);

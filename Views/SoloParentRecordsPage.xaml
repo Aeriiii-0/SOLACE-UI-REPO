@@ -888,26 +888,32 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="80" HeaderContainerStyle="{StaticResource GvHeaderActions}">
+                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="96" HeaderContainerStyle="{StaticResource GvHeaderActions}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColActions}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,8">
                                             <StackPanel Orientation="Horizontal"
                                                         HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"
-                                                        Margin="4,0">
+                                                        VerticalAlignment="Center">
+
+                                                <!-- View Record -->
+                                                <Button Style="{StaticResource ActionBtn}"
+                                                        Tag="{Binding Id}"
+                                                        Click="ViewRecord_Click"
+                                                        ToolTip="View Full Profile"
+                                                        Margin="0,0,6,0">
+                                                    <Path Data="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"
+                                                          Fill="#702943" Stretch="Uniform" Width="13" Height="13"/>
+                                                </Button>
 
                                                 <!-- Export -->
                                                 <Button Style="{StaticResource ActionBtn}"
                                                         Tag="{Binding Id}"
                                                         Click="ExportRecord_Click"
-                                                        ToolTip="Export to PDF"
-                                                        Margin="0,0,4,0">
+                                                        ToolTip="Export to PDF">
                                                     <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"
                                                           Fill="#702943" Stretch="Uniform" Width="12" Height="12"/>
                                                 </Button>
-
-                                                <!-- Delete (Admin only â€” hidden by code-behind for Encoder/BasicUser) -->
                                             </StackPanel>
                                         </Border>
                                     </DataTemplate>

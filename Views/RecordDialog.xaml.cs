@@ -181,7 +181,7 @@ namespace SOLUM_UI
             get => _educationEmployment;
             set
             {
-                _educationEmployment = value ?? string.Empty;
+                _educationEmployment = value?.ToUpper() ?? string.Empty;
                 N(nameof(EducationEmployment));
                 N(nameof(EducationDisplay));
             }
@@ -221,6 +221,7 @@ namespace SOLUM_UI
                     N(nameof(DisabilitySubtitleVisibility));
                     N(nameof(DisabilityTextColor));
                     N(nameof(DisabilityTextWeight));
+                    N(nameof(SpecialNeedsBadgeVisibility));
                 }
             }
         }
@@ -337,6 +338,7 @@ namespace SOLUM_UI
         }
 
         public Visibility NewBadgeVisibility => IsNew ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility SpecialNeedsBadgeVisibility => HasSpecialNeeds ? Visibility.Visible : Visibility.Collapsed;
 
         public Brush CardBg => IsNew
             ? new SolidColorBrush(Color.FromRgb(0xFA, 0xEE, 0xF3))
@@ -809,7 +811,7 @@ namespace SOLUM_UI
 
         private void BtnSaveMember_Click(object sender, RoutedEventArgs e)
         {
-            string name = TxtMemberName.Text?.Trim();
+            string name = TxtMemberName.Text?.Trim()?.ToUpper();
             if (string.IsNullOrWhiteSpace(name))
             {
                 ActionConfirmDialog.Warning("Validation", "Please enter the member's full name.", this);
@@ -847,7 +849,7 @@ namespace SOLUM_UI
             string civil = (CmbMemberCivil.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (string.IsNullOrWhiteSpace(civil)) civil = "Single";
 
-            string edu = TxtMemberEdu.Text?.Trim() ?? string.Empty;
+            string edu = TxtMemberEdu.Text?.Trim()?.ToUpper() ?? string.Empty;
             string income = TxtMemberIncome.Text?.Trim();
             if (string.IsNullOrWhiteSpace(income)) income = "0.00";
 
@@ -1353,6 +1355,8 @@ namespace SOLUM_UI
         private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtLastName); ClearFieldError(TxtLastName,     ErrLastName); }
         private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)      { ToUpperBox(TxtFirstName); ClearFieldError(TxtFirstName,    ErrFirstName); }
         private void TxtMiddleName_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtMiddleName); }
+        private void TxtMemberName_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtMemberName); }
+        private void TxtMemberEdu_TextChanged(object sender, TextChangedEventArgs e)      { ToUpperBox(TxtMemberEdu); }
 
         private SoloParentRecord _foundRecord;
         private bool _isFormattingPhilSys = false;
@@ -2321,7 +2325,9 @@ namespace SOLUM_UI
                 string rel  = !string.IsNullOrWhiteSpace(m.Relationship) ? $" ({m.Relationship.Trim()})" : "";
                 string age  = !string.IsNullOrWhiteSpace(m.Age) ? $", Age {m.Age.Trim()}" : "";
                 string sex  = !string.IsNullOrWhiteSpace(m.Sex) ? $", {m.Sex.Trim()}" : "";
-                string sn   = m.HasSpecialNeeds ? $", Special Needs: {(!string.IsNullOrWhiteSpace(m.SpecialNeedsCategory) ? m.SpecialNeedsCategory : "Yes")}" : "";
+                string sn   = m.HasSpecialNeeds
+                    ? $", Special Needs (PWD): {(!string.IsNullOrWhiteSpace(m.SpecialNeedsCategory) ? m.SpecialNeedsCategory : "Yes")}" + (!string.IsNullOrWhiteSpace(m.SpecialNeedsDescription) ? $" ({m.SpecialNeedsDescription.Trim()})" : "")
+                    : ", Special Needs: None";
                 return $"{name}{rel}{age}{sex}{sn}";
             }
 

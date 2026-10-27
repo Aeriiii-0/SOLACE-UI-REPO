@@ -30,8 +30,25 @@ namespace SOLUM_UI.Models.Api
             }
         }
 
+        [Newtonsoft.Json.JsonProperty("roles")]
+        public IList<string> Roles { get; set; } = new List<string>();
+
+        [Newtonsoft.Json.JsonProperty("role")]
         public string Role { get; set; } = string.Empty;
+
+        public string Barangay { get; set; } = string.Empty;
+
+        public string PrimaryRole
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(Role)) return Role;
+                if (Roles != null && Roles.Count > 0) return Roles[0];
+                return string.Empty;
+            }
+        }
     }
+
     public class GetApplicationUserRequest
     {
         public Guid Id { get; set; }

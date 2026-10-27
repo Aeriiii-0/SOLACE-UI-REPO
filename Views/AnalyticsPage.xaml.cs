@@ -202,6 +202,31 @@ namespace SOLUM_UI
 
                 if (cmbPeriodType != null && cmbPeriodType.SelectedIndex < 0)
                     cmbPeriodType.SelectedIndex = 0;
+
+                // If Barangay Secretary, lock barangay filter to assigned barangay
+                if (SOLUM_UI.Services.Api.AuthApiService.Instance.IsBarangaySecretary &&
+                    !string.IsNullOrWhiteSpace(SOLUM_UI.Services.Api.AuthApiService.Instance.CurrentUserBarangay))
+                {
+                    string userBrgy = SOLUM_UI.Services.Api.AuthApiService.Instance.CurrentUserBarangay;
+                    var cmbFilterBarangay = this.FindName("CmbFilterBarangay") as ComboBox;
+                    if (cmbFilterBarangay != null)
+                    {
+                        foreach (var item in cmbFilterBarangay.Items)
+                        {
+                            if (item is ComboBoxItem cbItem && string.Equals(cbItem.Content?.ToString(), userBrgy, StringComparison.OrdinalIgnoreCase))
+                            {
+                                cmbFilterBarangay.SelectedItem = cbItem;
+                                break;
+                            }
+                        }
+                        cmbFilterBarangay.IsEnabled = false;
+                        cmbFilterBarangay.ToolTip = $"Scoped to your assigned barangay ({userBrgy})";
+                    }
+                    if (_vm != null)
+                    {
+                        _vm.SelectedBarangay = userBrgy;
+                    }
+                }
             }
             catch (Exception ex)
             {

@@ -15,13 +15,6 @@
             </DoubleAnimation>
         </Storyboard>
 
-        <Style x:Key="UserCellBorder" TargetType="Border">
-            <Setter Property="BorderBrush" Value="#F2EAEF"/>
-            <Setter Property="BorderThickness" Value="0,0,1,0"/>
-            <Setter Property="Padding" Value="16,0"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-
         <Style x:Key="UserPill" TargetType="Border">
             <Setter Property="Background" Value="#EDE2E6"/>
             <Setter Property="CornerRadius" Value="4"/>
@@ -34,193 +27,205 @@
         <StackPanel x:Name="SkeletonRowsContainer">
 
             <!-- Row 1 -->
-            <Grid Height="52" Background="White">
+            <Grid MinHeight="56" Background="White">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="145"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Style="{StaticResource UserCellBorder}">
+                <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="18" Width="36" Height="36" Margin="0,0,14,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="19" Width="38" Height="38" Margin="0,0,12,0"/>
                         <StackPanel VerticalAlignment="Center">
-                            <Border Style="{StaticResource UserPill}" Width="140" HorizontalAlignment="Left" Margin="0,0,0,5"/>
+                            <Border Style="{StaticResource UserPill}" Width="135" Height="13" HorizontalAlignment="Left" Margin="0,0,0,5"/>
                             <Border Style="{StaticResource UserPill}" Width="85" Height="11" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="1" Style="{StaticResource UserCellBorder}">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="80" HorizontalAlignment="Left"/>
+                <Border Grid.Column="1" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="24" Width="95" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="2" Style="{StaticResource UserCellBorder}">
-                    <Border Style="{StaticResource UserPill}" Width="105" HorizontalAlignment="Left"/>
+                <Border Grid.Column="2" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="6" Height="22" Width="130" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="3" Style="{StaticResource UserCellBorder}" Padding="8,0">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="60" HorizontalAlignment="Center"/>
+                <Border Grid.Column="3" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Style="{StaticResource UserPill}" Width="100" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="4" Padding="8,0" VerticalAlignment="Center">
+                <Border Grid.Column="4" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="22" Width="68" HorizontalAlignment="Center"/>
+                </Border>
+                <Border Grid.Column="5" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="52" Height="28" Margin="0,0,6,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
             <!-- Row 2 -->
-            <Grid Height="52" Background="#FCF9FA">
+            <Grid MinHeight="56" Background="#FCF9FA">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="145"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Style="{StaticResource UserCellBorder}">
+                <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="18" Width="36" Height="36" Margin="0,0,14,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="19" Width="38" Height="38" Margin="0,0,12,0"/>
                         <StackPanel VerticalAlignment="Center">
-                            <Border Style="{StaticResource UserPill}" Width="115" HorizontalAlignment="Left" Margin="0,0,0,5"/>
+                            <Border Style="{StaticResource UserPill}" Width="115" Height="13" HorizontalAlignment="Left" Margin="0,0,0,5"/>
                             <Border Style="{StaticResource UserPill}" Width="70" Height="11" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="1" Style="{StaticResource UserCellBorder}">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="70" HorizontalAlignment="Left"/>
+                <Border Grid.Column="1" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="24" Width="80" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="2" Style="{StaticResource UserCellBorder}">
-                    <Border Style="{StaticResource UserPill}" Width="95" HorizontalAlignment="Left"/>
+                <Border Grid.Column="2" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="6" Height="22" Width="115" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="3" Style="{StaticResource UserCellBorder}" Padding="8,0">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="60" HorizontalAlignment="Center"/>
+                <Border Grid.Column="3" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Style="{StaticResource UserPill}" Width="90" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="4" Padding="8,0" VerticalAlignment="Center">
+                <Border Grid.Column="4" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="22" Width="68" HorizontalAlignment="Center"/>
+                </Border>
+                <Border Grid.Column="5" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="52" Height="28" Margin="0,0,6,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
             <!-- Row 3 -->
-            <Grid Height="52" Background="White">
+            <Grid MinHeight="56" Background="White">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="145"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Style="{StaticResource UserCellBorder}">
+                <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="18" Width="36" Height="36" Margin="0,0,14,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="19" Width="38" Height="38" Margin="0,0,12,0"/>
                         <StackPanel VerticalAlignment="Center">
-                            <Border Style="{StaticResource UserPill}" Width="155" HorizontalAlignment="Left" Margin="0,0,0,5"/>
-                            <Border Style="{StaticResource UserPill}" Width="90" Height="11" HorizontalAlignment="Left"/>
+                            <Border Style="{StaticResource UserPill}" Width="150" Height="13" HorizontalAlignment="Left" Margin="0,0,0,5"/>
+                            <Border Style="{StaticResource UserPill}" Width="95" Height="11" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="1" Style="{StaticResource UserCellBorder}">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="85" HorizontalAlignment="Left"/>
+                <Border Grid.Column="1" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="24" Width="105" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="2" Style="{StaticResource UserCellBorder}">
-                    <Border Style="{StaticResource UserPill}" Width="110" HorizontalAlignment="Left"/>
+                <Border Grid.Column="2" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="6" Height="22" Width="140" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="3" Style="{StaticResource UserCellBorder}" Padding="8,0">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="60" HorizontalAlignment="Center"/>
+                <Border Grid.Column="3" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Style="{StaticResource UserPill}" Width="105" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="4" Padding="8,0" VerticalAlignment="Center">
+                <Border Grid.Column="4" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="22" Width="68" HorizontalAlignment="Center"/>
+                </Border>
+                <Border Grid.Column="5" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="52" Height="28" Margin="0,0,6,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
             <!-- Row 4 -->
-            <Grid Height="52" Background="#FCF9FA">
+            <Grid MinHeight="56" Background="#FCF9FA">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="145"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Style="{StaticResource UserCellBorder}">
+                <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="18" Width="36" Height="36" Margin="0,0,14,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="19" Width="38" Height="38" Margin="0,0,12,0"/>
                         <StackPanel VerticalAlignment="Center">
-                            <Border Style="{StaticResource UserPill}" Width="125" HorizontalAlignment="Left" Margin="0,0,0,5"/>
+                            <Border Style="{StaticResource UserPill}" Width="120" Height="13" HorizontalAlignment="Left" Margin="0,0,0,5"/>
                             <Border Style="{StaticResource UserPill}" Width="75" Height="11" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="1" Style="{StaticResource UserCellBorder}">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="70" HorizontalAlignment="Left"/>
+                <Border Grid.Column="1" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="24" Width="85" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="2" Style="{StaticResource UserCellBorder}">
-                    <Border Style="{StaticResource UserPill}" Width="90" HorizontalAlignment="Left"/>
+                <Border Grid.Column="2" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="6" Height="22" Width="120" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="3" Style="{StaticResource UserCellBorder}" Padding="8,0">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="60" HorizontalAlignment="Center"/>
+                <Border Grid.Column="3" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Style="{StaticResource UserPill}" Width="95" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="4" Padding="8,0" VerticalAlignment="Center">
+                <Border Grid.Column="4" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="22" Width="68" HorizontalAlignment="Center"/>
+                </Border>
+                <Border Grid.Column="5" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="52" Height="28" Margin="0,0,6,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
             <!-- Row 5 -->
-            <Grid Height="52" Background="White">
+            <Grid MinHeight="56" Background="White">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="145"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Style="{StaticResource UserCellBorder}">
+                <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="18" Width="36" Height="36" Margin="0,0,14,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="19" Width="38" Height="38" Margin="0,0,12,0"/>
                         <StackPanel VerticalAlignment="Center">
-                            <Border Style="{StaticResource UserPill}" Width="145" HorizontalAlignment="Left" Margin="0,0,0,5"/>
+                            <Border Style="{StaticResource UserPill}" Width="140" Height="13" HorizontalAlignment="Left" Margin="0,0,0,5"/>
                             <Border Style="{StaticResource UserPill}" Width="80" Height="11" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="1" Style="{StaticResource UserCellBorder}">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="80" HorizontalAlignment="Left"/>
+                <Border Grid.Column="1" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="24" Width="90" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="2" Style="{StaticResource UserCellBorder}">
-                    <Border Style="{StaticResource UserPill}" Width="105" HorizontalAlignment="Left"/>
+                <Border Grid.Column="2" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="6" Height="22" Width="135" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="3" Style="{StaticResource UserCellBorder}" Padding="8,0">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="60" HorizontalAlignment="Center"/>
+                <Border Grid.Column="3" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Style="{StaticResource UserPill}" Width="100" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="4" Padding="8,0" VerticalAlignment="Center">
+                <Border Grid.Column="4" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="22" Width="68" HorizontalAlignment="Center"/>
+                </Border>
+                <Border Grid.Column="5" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="52" Height="28" Margin="0,0,6,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
             <!-- Row 6 -->
-            <Grid Height="52" Background="#FCF9FA">
+            <Grid MinHeight="56" Background="#FCF9FA">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="145"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Style="{StaticResource UserCellBorder}">
+                <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="18" Width="36" Height="36" Margin="0,0,14,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="19" Width="38" Height="38" Margin="0,0,12,0"/>
                         <StackPanel VerticalAlignment="Center">
-                            <Border Style="{StaticResource UserPill}" Width="135" HorizontalAlignment="Left" Margin="0,0,0,5"/>
+                            <Border Style="{StaticResource UserPill}" Width="125" Height="13" HorizontalAlignment="Left" Margin="0,0,0,5"/>
                             <Border Style="{StaticResource UserPill}" Width="85" Height="11" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="1" Style="{StaticResource UserCellBorder}">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="75" HorizontalAlignment="Left"/>
+                <Border Grid.Column="1" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="24" Width="78" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="2" Style="{StaticResource UserCellBorder}">
-                    <Border Style="{StaticResource UserPill}" Width="100" HorizontalAlignment="Left"/>
+                <Border Grid.Column="2" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="6" Height="22" Width="118" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="3" Style="{StaticResource UserCellBorder}" Padding="8,0">
-                    <Border Background="#EDE2E6" CornerRadius="11" Height="22" Width="60" HorizontalAlignment="Center"/>
+                <Border Grid.Column="3" Padding="12,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Style="{StaticResource UserPill}" Width="92" HorizontalAlignment="Left"/>
                 </Border>
-                <Border Grid.Column="4" Padding="8,0" VerticalAlignment="Center">
+                <Border Grid.Column="4" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
+                    <Border Background="#EDE2E6" CornerRadius="12" Height="22" Width="68" HorizontalAlignment="Center"/>
+                </Border>
+                <Border Grid.Column="5" Padding="8,10" VerticalAlignment="Center" BorderThickness="0,0,0,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
-                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28" Margin="3,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="52" Height="28" Margin="0,0,6,0"/>
+                        <Border Background="#EDE2E6" CornerRadius="6" Width="28" Height="28"/>
                     </StackPanel>
                 </Border>
             </Grid>

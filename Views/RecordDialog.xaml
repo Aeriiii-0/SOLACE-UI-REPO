@@ -1301,7 +1301,7 @@
                                                                 <TextBlock Style="{StaticResource FieldLabelSm}">
                                                                     Full Name <Run Text="*" Foreground="#E53935"/>
                                                                 </TextBlock>
-                                                                <TextBox x:Name="TxtMemberName" Style="{StaticResource FormBoxSm}" MaxLength="60"
+                                                                <TextBox x:Name="TxtMemberName" Style="{StaticResource FormBoxSm}" MaxLength="60" CharacterCasing="Upper" TextChanged="TxtMemberName_TextChanged"
                                                                          PreviewTextInput="NameOnly_PreviewTextInput"/>
                                                             </StackPanel>
 
@@ -1380,7 +1380,7 @@
 
                                                             <StackPanel Grid.Column="4">
                                                                 <TextBlock Text="Educ. Attainment / Employment" Style="{StaticResource FieldLabelSm}"/>
-                                                                <TextBox x:Name="TxtMemberEdu" Style="{StaticResource FormBoxSm}" MaxLength="80"/>
+                                                                <TextBox x:Name="TxtMemberEdu" Style="{StaticResource FormBoxSm}" MaxLength="80" CharacterCasing="Upper" TextChanged="TxtMemberEdu_TextChanged"/>
                                                             </StackPanel>
 
                                                             <StackPanel Grid.Column="6">
@@ -1485,6 +1485,10 @@
                                                                     <Border Visibility="{Binding NewBadgeVisibility}" Background="#702943" CornerRadius="4"
                                                                             Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
                                                                         <TextBlock Text="NEW" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                                                    </Border>
+                                                                    <Border Visibility="{Binding SpecialNeedsBadgeVisibility}" Background="#702943" CornerRadius="4"
+                                                                            Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="{Binding SpecialNeedsTooltip}">
+                                                                        <TextBlock Text="PWD" FontSize="9" FontWeight="Bold" Foreground="White"/>
                                                                     </Border>
                                                                 </StackPanel>
                                                                 <TextBlock Text="{Binding Relationship}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"/>

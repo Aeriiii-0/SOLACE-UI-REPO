@@ -20,6 +20,7 @@ namespace SOLUM_UI.Services.Api
         public string RefreshToken { get; private set; } = string.Empty;
         public List<string> CurrentRoles { get; private set; } = new List<string>();
 
+        public string CurrentUserBarangay { get; private set; } = string.Empty;
         public string CurrentUserId => ExtractUserIdFromToken(Token)?.ToString() ?? string.Empty;
 
         public bool IsAuthenticated => !string.IsNullOrWhiteSpace(Token);
@@ -30,6 +31,8 @@ namespace SOLUM_UI.Services.Api
         public bool IsAdminOrHigher => IsAdmin;
         public bool IsCaseworker => CurrentRoles.Any(r => r.Equals(Roles.Caseworker, StringComparison.OrdinalIgnoreCase) ||
                                                          r.Equals(Roles.Encoder, StringComparison.OrdinalIgnoreCase));
+        public bool IsBarangaySecretary => CurrentRoles.Any(r => r.Equals(Roles.BarangaySecretary, StringComparison.OrdinalIgnoreCase) ||
+                                                                 r.Equals("BARANGAY SECRETARY", StringComparison.OrdinalIgnoreCase));
 
         public bool IsEncoder => CurrentRoles.Any(r => r.Equals("Encoder", StringComparison.OrdinalIgnoreCase)) ||
                                  !IsAdmin;
@@ -161,6 +164,21 @@ namespace SOLUM_UI.Services.Api
             };
 
             return await ApiClient.Instance.PostAsync<RegisterUserRequest, RegisterResponse>("api/auth/register-superadmin", req);
+        }
+
+        public async Task<BaseResponse<RegisterResponse>> RegisterBarangaySecretaryAsync(string email, string password, string firstName, string lastName, string contactNumber, string barangay)
+        {
+            var req = new RegisterBarangaySecretaryRequest
+            {
+                Email = email?.Trim() ?? string.Empty,
+                Password = password ?? string.Empty,
+                FirstName = firstName?.Trim() ?? string.Empty,
+                LastName = lastName?.Trim() ?? string.Empty,
+                ContactNumber = contactNumber?.Trim() ?? string.Empty,
+                Barangay = barangay?.Trim() ?? string.Empty
+            };
+
+            return await ApiClient.Instance.PostAsync<RegisterBarangaySecretaryRequest, RegisterResponse>("api/auth/register-barangay-secretary", req);
         }
 
         public async Task<BaseResponse<string>> ChangePasswordAsync(string currentPassword, string newPassword)

@@ -13,6 +13,7 @@ namespace SOLUM_UI.Models.Api
         public string Token { get; set; } = string.Empty;
         public string RefreshToken { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string Barangay { get; set; } = string.Empty;
         public IEnumerable<string> Roles { get; set; } = new List<string>();
     }
 
@@ -27,6 +28,11 @@ namespace SOLUM_UI.Models.Api
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string ContactNumber { get; set; } = string.Empty;
+    }
+
+    public class RegisterBarangaySecretaryRequest : RegisterUserRequest
+    {
+        public string Barangay { get; set; } = string.Empty;
     }
 
     public class TokenRequest
