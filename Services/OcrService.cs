@@ -679,6 +679,44 @@ namespace SOLUM_UI.Services
             return dict;
         }
 
+        public static void SaveTemplateBoundingBoxes(Dictionary<string, double[]> boxes)
+        {
+            if (boxes == null) return;
+            try
+            {
+                string path = GetLocalTemplatePath();
+                if (File.Exists(path))
+                {
+                    string json = File.ReadAllText(path);
+                    var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+                    var root = serializer.Deserialize<Dictionary<string, object>>(json);
+                    if (root != null && root.TryGetValue("fields", out var fieldsObj) && fieldsObj is Dictionary<string, object> fields)
+                    {
+                        foreach (var kvp in boxes)
+                        {
+                            if (fields.TryGetValue(kvp.Key, out var fieldObj) && fieldObj is Dictionary<string, object> fieldDict)
+                            {
+                                fieldDict["bbox"] = kvp.Value;
+                            }
+                            else
+                            {
+                                fields[kvp.Key] = new Dictionary<string, object>
+                                {
+                                    { "bbox", kvp.Value }
+                                };
+                            }
+                        }
+                        string updatedJson = serializer.Serialize(root);
+                        File.WriteAllText(path, updatedJson, new System.Text.UTF8Encoding(false));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("[OcrService] Error saving template bboxes: " + ex.Message);
+            }
+        }
+
         #region Official Biñan Barangays & Fuzzy Matching
 
         public static readonly string[] BinanBarangays = new[]
@@ -1387,7 +1425,7 @@ namespace SOLUM_UI.Services
             // Only allow letters, ñ, Ñ, spaces, hyphens, periods, and apostrophes
             t = Regex.Replace(t, @"[^a-zA-ZñÑ\s\.\-']", "");
             t = Regex.Replace(t, @"\s+", " ").Trim();
-            return t;
+            return t.ToUpperInvariant();
         }
 
         public static string CleanAgeString(string raw)

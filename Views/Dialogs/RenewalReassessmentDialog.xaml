@@ -69,6 +69,7 @@
             <Setter Property="Background" Value="White"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="CharacterCasing" Value="Upper"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
@@ -435,14 +436,25 @@
 
     <!-- Dimmed Modal Backdrop -->
     <Border Background="#55000000">
-        <Border Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="36" ShadowDepth="0" Opacity="0.25"/>
-            </Border.Effect>
+        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+            <!-- Shadow Layer: Sibling with NO children. Rendered once into GPU cache, NEVER invalidated by typing inside DialogShell -->
+            <Border Background="#FAFAFA" CornerRadius="16"
+                    IsHitTestVisible="False"
+                    Visibility="{Binding Visibility, ElementName=DialogShell}">
+                <Border.CacheMode>
+                    <BitmapCache EnableClearType="False" RenderAtScale="1" SnapsToDevicePixels="True"/>
+                </Border.CacheMode>
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="36" ShadowDepth="0" Opacity="0.25" RenderingBias="Performance"/>
+                </Border.Effect>
+            </Border>
 
             <!-- Dialog Shell -->
             <Border x:Name="DialogShell" Background="#FAFAFA" CornerRadius="16"
                     VerticalAlignment="Center" HorizontalAlignment="Center"
+                    TextOptions.TextFormattingMode="Display"
+                    RenderOptions.ClearTypeHint="Enabled"
+                    SnapsToDevicePixels="True"
                     BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -1258,6 +1270,6 @@
                     </Border>
                 </Grid>
             </Border>
-        </Border>
+        </Grid>
     </Border>
 </Window>

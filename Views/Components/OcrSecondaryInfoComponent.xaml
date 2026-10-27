@@ -1,0 +1,429 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.OcrSecondaryInfoComponent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="600">
+    <ScrollViewer x:Name="ScrollStep2" VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  Background="#F4F6F9">
+        <StackPanel Margin="20,12,20,16">
+
+            <!-- CARD: II. DEMOGRAPHIC & RESIDENTIAL INFORMATION -->
+            <Border Style="{StaticResource CardSection}">
+                <StackPanel>
+                    <Border Style="{StaticResource CardSectionHeader}">
+                        <TextBlock Text="II. DEMOGRAPHIC &amp; RESIDENTIAL INFORMATION" Style="{StaticResource SectionLabel}"/>
+                    </Border>
+
+                    <!-- ROW 1: Civil Status | Sex | Place of Birth -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.4*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Civil Status *" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_CivilStatus" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_CivilStatus" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
+                                          Tag="civil_status" GotFocus="Field_GotFocus"
+                                          SelectionChanged="CmbCivilStatus_SelectionChanged"
+                                          BorderThickness="0" Background="Transparent">
+                                    <ComboBoxItem Content="Single"/>
+                                    <ComboBoxItem Content="Married"/>
+                                    <ComboBoxItem Content="Widowed"/>
+                                    <ComboBoxItem Content="Separated"/>
+                                    <ComboBoxItem Content="Divorced"/>
+                                    <ComboBoxItem Content="Annulled"/>
+                                </ComboBox>
+                            </Border>
+                            <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Sex *" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_Sex" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_Sex" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                <ComboBox x:Name="CmbSex" Style="{StaticResource FormCombo}"
+                                          Tag="sex" GotFocus="Field_GotFocus"
+                                          SelectionChanged="CmbSex_SelectionChanged"
+                                          BorderThickness="0" Background="Transparent">
+                                    <ComboBoxItem Content="Male"/>
+                                    <ComboBoxItem Content="Female"/>
+                                </ComboBox>
+                            </Border>
+                            <TextBlock x:Name="ErrSex" Text="Required." Style="{StaticResource ErrorText}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Birthplace *" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_Birthplace" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_Birthplace" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtPlaceOfBirth" Style="{StaticResource FormBox}"
+                                     Tag="birthplace" GotFocus="Field_GotFocus"
+                                     MaxLength="100"
+                                     TextChanged="TxtPlaceOfBirth_TextChanged"/>
+                            <TextBlock x:Name="ErrPlaceOfBirth" Text="Required." Style="{StaticResource ErrorText}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- ROW 2: Address | Barangay | Contact Number -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.5*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Address (House No. / Street / Purok) *" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_Address" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_Address" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtAddress" Style="{StaticResource FormBox}"
+                                     Tag="address" GotFocus="Field_GotFocus"
+                                     MaxLength="200"
+                                     TextChanged="TxtAddress_TextChanged"/>
+                            <TextBlock x:Name="ErrAddress" Text="Required." Style="{StaticResource ErrorText}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Barangay *" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_Barangay" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_Barangay" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
+                                          BorderThickness="0" Background="Transparent"
+                                          Tag="barangay" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
+                                          SelectionChanged="CmbBarangay_SelectionChanged">
+                                    <ComboBoxItem Content=""/>
+                                    <ComboBoxItem Content="Bi&#241;an (Poblacion)"/>
+                                    <ComboBoxItem Content="Bungahan"/>
+                                    <ComboBoxItem Content="Canlalay"/>
+                                    <ComboBoxItem Content="Casile"/>
+                                    <ComboBoxItem Content="De La Paz"/>
+                                    <ComboBoxItem Content="Ganado"/>
+                                    <ComboBoxItem Content="Langkiwa"/>
+                                    <ComboBoxItem Content="Loma"/>
+                                    <ComboBoxItem Content="Malaban"/>
+                                    <ComboBoxItem Content="Malamig"/>
+                                    <ComboBoxItem Content="Mambog"/>
+                                    <ComboBoxItem Content="Platero"/>
+                                    <ComboBoxItem Content="Poblacion"/>
+                                    <ComboBoxItem Content="San Antonio"/>
+                                    <ComboBoxItem Content="San Francisco (Halang)"/>
+                                    <ComboBoxItem Content="San Jose"/>
+                                    <ComboBoxItem Content="San Vicente"/>
+                                    <ComboBoxItem Content="Santo Domingo"/>
+                                    <ComboBoxItem Content="Santo Ni&#241;o"/>
+                                    <ComboBoxItem Content="Santo Tomas (Calabuso)"/>
+                                    <ComboBoxItem Content="Soro-Soro"/>
+                                    <ComboBoxItem Content="Timbao"/>
+                                    <ComboBoxItem Content="Tubigan"/>
+                                    <ComboBoxItem Content="Zapote"/>
+                                </ComboBox>
+                            </Border>
+                            <TextBlock x:Name="ErrBarangay" Text="Required." Style="{StaticResource ErrorText}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Contact Number *" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_Contact" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_Contact" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtContact" Style="{StaticResource FormBox}"
+                                     Tag="contact_number" GotFocus="Field_GotFocus"
+                                     MaxLength="13"
+                                     PreviewTextInput="Phone_PreviewTextInput"
+                                     PreviewKeyDown="Phone_PreviewKeyDown"
+                                     TextChanged="TxtContact_TextChanged"/>
+                            <TextBlock x:Name="ErrContact" Text="Required." Style="{StaticResource ErrorText}"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- CARD: III. SOCIOECONOMIC & EDUCATION -->
+            <Border Style="{StaticResource CardSection}">
+                <StackPanel>
+                    <Border Style="{StaticResource CardSectionHeader}">
+                        <TextBlock Text="III. SOCIOECONOMIC &amp; EDUCATION" Style="{StaticResource SectionLabel}"/>
+                    </Border>
+
+                    <!-- ROW 1: Educational Attainment | Religion -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.3*"/>
+                            <ColumnDefinition Width="1.3*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Educational Attainment" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_Education" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_Education" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                <ComboBox x:Name="CmbEducation" Style="{StaticResource FormCombo}"
+                                          Tag="educational_attainment" GotFocus="Field_GotFocus"
+                                          BorderThickness="0" Background="Transparent">
+                                    <ComboBoxItem Content="Elementary"/>
+                                    <ComboBoxItem Content="High School"/>
+                                    <ComboBoxItem Content="Vocational"/>
+                                    <ComboBoxItem Content="College"/>
+                                    <ComboBoxItem Content="Post Graduate"/>
+                                </ComboBox>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Religion" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_Religion" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_Religion" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtReligion" Style="{StaticResource FormBox}"
+                                     Tag="religion" GotFocus="Field_GotFocus"
+                                     MaxLength="60"
+                                     TextChanged="TxtReligion_TextChanged"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- ROW 2: Occupation | Monthly Income | Employment Status -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.3*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Occupation / Source" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_Occupation" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_Occupation" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtOccupation" Style="{StaticResource FormBox}"
+                                     Tag="occupation" GotFocus="Field_GotFocus"
+                                     MaxLength="80"
+                                     TextChanged="TxtOccupation_TextChanged"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Monthly Income (₱)" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_MonthlyIncome" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_MonthlyIncome" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtMonthlyIncome" Style="{StaticResource FormBox}"
+                                     Tag="monthly_income" GotFocus="Field_GotFocus"
+                                     MaxLength="12"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Employment Status" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_EmploymentStatus" Grid.Column="1" Margin="8,0,0,0" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_EmploymentStatus" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                <ComboBox x:Name="CmbEmploymentStatus" Style="{StaticResource FormCombo}"
+                                          BorderThickness="0" Background="Transparent"
+                                          Tag="employment_status" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
+                                    <ComboBoxItem Content=""/>
+                                    <ComboBoxItem Content="Employed"/>
+                                    <ComboBoxItem Content="Self-Employed"/>
+                                    <ComboBoxItem Content="Not Employed"/>
+                                </ComboBox>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- CARD: II. EMERGENCY CONTACT -->
+            <Border Style="{StaticResource CardSection}">
+                <StackPanel>
+                    <Border Style="{StaticResource CardSectionHeader}">
+                        <TextBlock Text="II. EMERGENCY CONTACT" Style="{StaticResource SectionLabel}"/>
+                    </Border>
+
+                    <!-- ROW 1: Contact Person | Relationship | Phone -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.5*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Emergency Contact Person" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_EmergencyContact" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_EmergencyContact" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtEmergencyContact" Style="{StaticResource FormBox}"
+                                     Tag="emergency_name" GotFocus="Field_GotFocus"
+                                     MaxLength="50"
+                                     PreviewTextInput="NameOnly_PreviewTextInput"
+                                     TextChanged="TxtEmergencyContact_TextChanged"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Relationship" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_Relationship" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_Relationship" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtRelationship" Style="{StaticResource FormBox}"
+                                     Tag="emergency_relationship" GotFocus="Field_GotFocus"
+                                     MaxLength="50"
+                                     PreviewTextInput="NameOnly_PreviewTextInput"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Emergency Phone Number" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_EmergencyNumber" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_EmergencyNumber" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtEmergencyNumber" Style="{StaticResource FormBox}"
+                                     Tag="emergency_number" GotFocus="Field_GotFocus"
+                                     MaxLength="13"
+                                     PreviewTextInput="Phone_PreviewTextInput"
+                                     PreviewKeyDown="Phone_PreviewKeyDown"
+                                     TextChanged="TxtEmergencyNumber_TextChanged"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- ROW 2: Emergency Address -->
+                    <Grid Margin="0,0,0,14">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Emergency Contact Address" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_EmergencyAddress" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_EmergencyAddress" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtEmergencyAddress" Style="{StaticResource FormBox}"
+                                     Tag="emergency_address" GotFocus="Field_GotFocus"
+                                     MaxLength="200"
+                                     TextChanged="TxtEmergencyAddress_TextChanged"/>
+                            <CheckBox x:Name="ChkSameAsApplicant" Content="Same as Applicant"
+                                      FontSize="12" Foreground="#666666" Margin="0,6,0,0"
+                                      Cursor="Hand"/>
+                        </StackPanel>
+                    </Grid>
+
+                </StackPanel>
+            </Border>
+
+            <!-- CARD: ADDITIONAL INFORMATION -->
+            <Border Style="{StaticResource CardSection}">
+                <StackPanel>
+                    <Border Style="{StaticResource CardSectionHeader}">
+                        <TextBlock Text="ADDITIONAL INFORMATION" Style="{StaticResource SectionLabel}"/>
+                    </Border>
+                    <CheckBox x:Name="ChkPantawid" Content="Pantawid Beneficiary"
+                              FontSize="13" Foreground="#333333" Margin="0,6,0,8"/>
+                    <CheckBox x:Name="ChkIndigenous" Content="Indigenous Person"
+                              FontSize="13" Foreground="#333333" Margin="0,0,0,8"/>
+                    <CheckBox x:Name="ChkLGBTQ" Content="LGBTQ+"
+                              FontSize="13" Foreground="#333333" Margin="0,0,0,6"/>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

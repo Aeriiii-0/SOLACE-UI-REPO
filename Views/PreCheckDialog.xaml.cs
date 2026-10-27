@@ -39,6 +39,10 @@ namespace SOLUM_UI
         private static readonly SolidColorBrush ErrorBrush   = new SolidColorBrush(Color.FromRgb(0xE5, 0x39, 0x35));
         private static readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(0xC0, 0xA0, 0xAA));
 
+        private static readonly Regex NameRegex = new Regex(@"^[a-zA-ZñÑ\s\.\-']+$", RegexOptions.Compiled);
+        private static readonly Regex NumberOnlyRegex = new Regex(@"^\d+$", RegexOptions.Compiled);
+        private static readonly Regex PhilSysRegex = new Regex(@"^[\d\-]+$", RegexOptions.Compiled);
+
         public PreCheckDialog()
         {
             InitializeComponent();
@@ -82,17 +86,17 @@ namespace SOLUM_UI
 
         private void NameOnly_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
-            e.Handled = !Regex.IsMatch(e.Text, @"^[a-zA-ZñÑ\s\.\-']+$");
+            e.Handled = !NameRegex.IsMatch(e.Text);
         }
 
         private void NumberOnly_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
-            e.Handled = !Regex.IsMatch(e.Text, @"^\d+$");
+            e.Handled = !NumberOnlyRegex.IsMatch(e.Text);
         }
 
         private void PhilSys_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
-            e.Handled = !Regex.IsMatch(e.Text, @"^[\d\-]+$");
+            e.Handled = !PhilSysRegex.IsMatch(e.Text);
         }
 
         private void Name_TextChanged(object sender, TextChangedEventArgs e)
@@ -169,13 +173,16 @@ namespace SOLUM_UI
             FormatPhilSysBox(TxtPhilSys);
             _foundRecord = null;
             HideBanner();
-            if (ErrPhilSys != null) ErrPhilSys.Visibility = Visibility.Collapsed;
-            if (TxtPhilSys != null) { TxtPhilSys.BorderBrush = DefaultBrush; TxtPhilSys.BorderThickness = new Thickness(1.2); }
+            if (ErrPhilSys != null && ErrPhilSys.Visibility != Visibility.Collapsed)
+            {
+                ErrPhilSys.Visibility = Visibility.Collapsed;
+                if (TxtPhilSys != null) { TxtPhilSys.BorderBrush = DefaultBrush; TxtPhilSys.BorderThickness = new Thickness(1.2); }
+            }
         }
 
         private void ToUpperBox(TextBox tb)
         {
-            if (tb == null) return;
+            if (tb == null || tb.CharacterCasing == CharacterCasing.Upper) return;
             if (tb.Text != tb.Text.ToUpper())
             {
                 int caret = tb.SelectionStart;
@@ -457,9 +464,12 @@ namespace SOLUM_UI
 
         private void HideBanner()
         {
-            BannerPanel.Visibility   = Visibility.Collapsed;
-            BtnViewRecord.Visibility = Visibility.Collapsed;
-            BtnContinueText.Text     = "Check & Continue";
+            if (BannerPanel != null && BannerPanel.Visibility != Visibility.Collapsed)
+            {
+                BannerPanel.Visibility   = Visibility.Collapsed;
+                BtnViewRecord.Visibility = Visibility.Collapsed;
+                BtnContinueText.Text     = "Check & Continue";
+            }
         }
 
         // ── Field error helpers ───────────────────────────────────────────────────
@@ -473,12 +483,15 @@ namespace SOLUM_UI
         private void ClearNameError(TextBox tb)
         {
             if (tb == null) return;
-            tb.BorderBrush     = DefaultBrush;
-            tb.BorderThickness = new Thickness(1.2);
             TextBlock err = tb == TxtLastName  ? ErrLastName
                           : tb == TxtFirstName ? ErrFirstName
                           : null;
-            if (err != null) err.Visibility = Visibility.Collapsed;
+            if (err != null && err.Visibility != Visibility.Collapsed)
+            {
+                err.Visibility = Visibility.Collapsed;
+                tb.BorderBrush     = DefaultBrush;
+                tb.BorderThickness = new Thickness(1.2);
+            }
         }
 
         private void ClearBirthdateError()

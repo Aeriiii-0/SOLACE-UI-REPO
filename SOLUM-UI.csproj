@@ -259,8 +259,20 @@
     <Compile Include="Views\SplashScreen.xaml.cs">
       <DependentUpon>SplashScreen.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\OcrScanDialog.xaml.cs">
+    <Compile Include="Views\Dialogs\OcrScanDialog.xaml.cs">
       <DependentUpon>OcrScanDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\OcrDocumentViewportComponent.xaml.cs">
+      <DependentUpon>OcrDocumentViewportComponent.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\OcrPrimaryInfoComponent.xaml.cs">
+      <DependentUpon>OcrPrimaryInfoComponent.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\OcrSecondaryInfoComponent.xaml.cs">
+      <DependentUpon>OcrSecondaryInfoComponent.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\OcrFamilyMembersComponent.xaml.cs">
+      <DependentUpon>OcrFamilyMembersComponent.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\OcrTemplateConfigWindow.xaml.cs">
       <DependentUpon>OcrTemplateConfigWindow.xaml</DependentUpon>
@@ -319,7 +331,11 @@
     </Compile>
     <Compile Include="Core\ObservableObject.cs" />
     <Compile Include="Core\RelayCommand.cs" />
+    <Compile Include="DTOs\OcrDtos.cs" />
     <Compile Include="DTOs\SubsidyRecommendationDto.cs" />
+    <Compile Include="Services\Interfaces\IOcrService.cs" />
+    <Compile Include="Services\Implementations\OcrApiService.cs" />
+    <Compile Include="ViewModels\OcrScanDialogViewModel.cs" />
     <Compile Include="DTOs\QuotaAllocationDto.cs" />
     <Compile Include="DTOs\OutlierRejectionDto.cs" />
     <Compile Include="DTOs\FinalGranteeConfirmationDto.cs" />
@@ -493,7 +509,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\OcrScanDialog.xaml">
+    <Page Include="Themes\OcrDialogTheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\OcrScanDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\OcrDocumentViewportComponent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\OcrPrimaryInfoComponent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\OcrSecondaryInfoComponent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\OcrFamilyMembersComponent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -366,6 +366,10 @@ namespace SOLUM_UI
         private static readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(0xD0, 0xB8, 0xC0));
         private static readonly Thickness DefaultThickness   = new Thickness(1);
 
+        private static readonly Regex NameRegex = new Regex(@"^[a-zA-ZñÑ\s\.\-']+$", RegexOptions.Compiled);
+        private static readonly Regex PhoneRegex = new Regex(@"^[\d\-]+$", RegexOptions.Compiled);
+        private static readonly Regex NumberOnlyRegex = new Regex(@"^\d+$", RegexOptions.Compiled);
+
         public RecordDialog(SoloParentRecord existing = null)
         {
             InitializeComponent();
@@ -625,14 +629,7 @@ namespace SOLUM_UI
         {
             double screenW, screenH, screenLeft, screenTop;
 
-            if (Owner != null && Owner.WindowState == WindowState.Maximized)
-            {
-                screenW    = SystemParameters.WorkArea.Width;
-                screenH    = SystemParameters.WorkArea.Height;
-                screenLeft = SystemParameters.WorkArea.Left;
-                screenTop  = SystemParameters.WorkArea.Top;
-            }
-            else if (Owner != null)
+            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
                 screenW    = Owner.ActualWidth;
                 screenH    = Owner.ActualHeight;
@@ -647,10 +644,10 @@ namespace SOLUM_UI
                 screenTop  = SystemParameters.WorkArea.Top;
             }
 
-            Width  = screenW;
-            Height = screenH;
-            Left   = screenLeft;
-            Top    = screenTop;
+            if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
+            if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
+            if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
+            if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
 
             DialogShell.MaxHeight = screenH * 0.90;
             DialogShell.Width     = Math.Min(screenW * 0.88, 1320);
@@ -1225,7 +1222,7 @@ namespace SOLUM_UI
 
         private void NameOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !Regex.IsMatch(e.Text, @"^[a-zA-ZñÑ\s\.\-']+$");
+            e.Handled = !NameRegex.IsMatch(e.Text);
         }
 
         private void FamilyBirthdate_LostFocus(object sender, RoutedEventArgs e)
@@ -1306,7 +1303,7 @@ namespace SOLUM_UI
         private bool _isUpdatingCase = false;
         private void ToUpperBox(TextBox tb)
         {
-            if (_isPopulating || _isUpdatingCase || tb == null) return;
+            if (_isPopulating || _isUpdatingCase || tb == null || tb.CharacterCasing == CharacterCasing.Upper) return;
             string text = tb.Text ?? string.Empty;
             string upper = text.ToUpper();
             if (!string.Equals(text, upper, StringComparison.Ordinal))
@@ -1345,12 +1342,12 @@ namespace SOLUM_UI
 
         private void Phone_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !Regex.IsMatch(e.Text, @"^[\d\-]+$");
+            e.Handled = !PhoneRegex.IsMatch(e.Text);
         }
 
         private void NumberOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !Regex.IsMatch(e.Text, @"^\d+$");
+            e.Handled = !NumberOnlyRegex.IsMatch(e.Text);
         }
 
         private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtLastName); ClearFieldError(TxtLastName,     ErrLastName); }
@@ -1495,14 +1492,14 @@ namespace SOLUM_UI
 
         private void ClearFieldError(Control ctrl, TextBlock lbl)
         {
-            if (ctrl != null)
-            {
-                ctrl.BorderBrush     = DefaultBrush;
-                ctrl.BorderThickness = DefaultThickness;
-            }
-            if (lbl != null)
+            if (lbl != null && lbl.Visibility != Visibility.Collapsed)
             {
                 lbl.Visibility = Visibility.Collapsed;
+                if (ctrl != null)
+                {
+                    ctrl.BorderBrush     = DefaultBrush;
+                    ctrl.BorderThickness = DefaultThickness;
+                }
             }
         }
 
@@ -1822,9 +1819,12 @@ namespace SOLUM_UI
             bool isEdit = _existing != null && !string.IsNullOrEmpty(_existing.Id);
             if (!isEdit)
             {
-                BtnSave.IsEnabled = true;
-                BtnSave.Opacity = 1.0;
-                BtnSave.ToolTip = null;
+                if (!BtnSave.IsEnabled)
+                {
+                    BtnSave.IsEnabled = true;
+                    BtnSave.Opacity = 1.0;
+                    BtnSave.ToolTip = null;
+                }
                 return;
             }
 
@@ -1832,7 +1832,7 @@ namespace SOLUM_UI
             {
                 _dirtyCheckTimer = new System.Windows.Threading.DispatcherTimer
                 {
-                    Interval = TimeSpan.FromMilliseconds(250)
+                    Interval = TimeSpan.FromMilliseconds(300)
                 };
                 _dirtyCheckTimer.Tick += (s, e) =>
                 {
@@ -1841,8 +1841,10 @@ namespace SOLUM_UI
                 };
             }
 
-            _dirtyCheckTimer.Stop();
-            _dirtyCheckTimer.Start();
+            if (!_dirtyCheckTimer.IsEnabled)
+            {
+                _dirtyCheckTimer.Start();
+            }
         }
 
         private void UpdateSaveButtonState()

@@ -789,7 +789,7 @@ namespace SOLUM_UI
 
             if (methodDialog.Selected == EntryMethod.Scan)
             {
-                var ocr = new OcrScanDialog { Owner = Window.GetWindow(this) };
+                var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Window.GetWindow(this) };
 
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
@@ -1227,7 +1227,7 @@ namespace SOLUM_UI
 
             if (methodDialog.Selected == EntryMethod.Scan)
             {
-                var ocr = new OcrScanDialog { Owner = Window.GetWindow(this) };
+                var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Window.GetWindow(this) };
 
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {

@@ -40,14 +40,7 @@ namespace SOLUM_UI.Views.Dialogs
         private void ApplySize()
         {
             double screenW, screenH, screenLeft, screenTop;
-            if (Owner != null && Owner.WindowState == WindowState.Maximized)
-            {
-                screenW    = SystemParameters.WorkArea.Width;
-                screenH    = SystemParameters.WorkArea.Height;
-                screenLeft = SystemParameters.WorkArea.Left;
-                screenTop  = SystemParameters.WorkArea.Top;
-            }
-            else if (Owner != null)
+            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
                 screenW    = Owner.ActualWidth;
                 screenH    = Owner.ActualHeight;
@@ -61,10 +54,12 @@ namespace SOLUM_UI.Views.Dialogs
                 screenLeft = SystemParameters.WorkArea.Left;
                 screenTop  = SystemParameters.WorkArea.Top;
             }
-            Width  = screenW;
-            Height = screenH;
-            Left   = screenLeft;
-            Top    = screenTop;
+
+            if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
+            if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
+            if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
+            if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
+
             DialogShell.MaxHeight = screenH * 0.90;
             DialogShell.Width     = Math.Min(screenW * 0.62, 880);
         }

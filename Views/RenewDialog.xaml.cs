@@ -37,6 +37,9 @@ namespace SOLUM_UI
         private static readonly SolidColorBrush _defaultBrush = new SolidColorBrush(Color.FromRgb(0xC0, 0xA0, 0xAA));
         private static readonly Thickness       _defaultThick  = new Thickness(1.2);
 
+        private static readonly Regex PhoneRegex = new Regex(@"^[\d\-]+$", RegexOptions.Compiled);
+        private static readonly Regex NumberOnlyRegex = new Regex(@"^\d+$", RegexOptions.Compiled);
+
         public RenewDialog(SoloParentRecord original)
         {
             InitializeComponent();
@@ -51,14 +54,7 @@ namespace SOLUM_UI
         private void ApplySize()
         {
             double sw, sh, sl, st;
-            if (Owner != null && Owner.WindowState == WindowState.Maximized)
-            {
-                sw = SystemParameters.WorkArea.Width;
-                sh = SystemParameters.WorkArea.Height;
-                sl = SystemParameters.WorkArea.Left;
-                st = SystemParameters.WorkArea.Top;
-            }
-            else if (Owner != null)
+            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
                 sw = Owner.ActualWidth;
                 sh = Owner.ActualHeight;
@@ -72,10 +68,11 @@ namespace SOLUM_UI
                 sl = SystemParameters.WorkArea.Left;
                 st = SystemParameters.WorkArea.Top;
             }
-            Width  = sw;
-            Height = sh;
-            Left   = sl;
-            Top    = st;
+
+            if (Math.Abs(Width - sw) > 0.5) Width = sw;
+            if (Math.Abs(Height - sh) > 0.5) Height = sh;
+            if (Math.Abs(Left - sl) > 0.5) Left = sl;
+            if (Math.Abs(Top - st) > 0.5) Top = st;
             DialogShell.MaxHeight = sh * 0.90;
             DialogShell.Width     = Math.Min(sw * 0.62, 860);
         }
@@ -448,7 +445,7 @@ namespace SOLUM_UI
         }
 
         private void Phone_PreviewTextInput(object sender, TextCompositionEventArgs e)
-            => e.Handled = !Regex.IsMatch(e.Text, @"^[\d\-]+$");
+            => e.Handled = !PhoneRegex.IsMatch(e.Text);
 
         private void Phone_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -464,6 +461,6 @@ namespace SOLUM_UI
         }
 
         private void NumberOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
-            => e.Handled = !Regex.IsMatch(e.Text, @"^\d+$");
+            => e.Handled = !NumberOnlyRegex.IsMatch(e.Text);
     }
 }

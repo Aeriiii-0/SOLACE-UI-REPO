@@ -35,7 +35,11 @@ namespace SOLUM_UI.Services
             {
                 if (chkSame.IsChecked == true)
                 {
-                    txtEmergencyAddress.Text = txtApplicantAddress.Text ?? string.Empty;
+                    string newText = txtApplicantAddress.Text ?? string.Empty;
+                    if (txtEmergencyAddress.Text != newText)
+                    {
+                        txtEmergencyAddress.Text = newText;
+                    }
                 }
             };
         }

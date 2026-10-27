@@ -302,6 +302,8 @@ namespace SOLUM_UI.Views.Dialogs
         private bool _isSyncingOtherIncome = false;
         private bool _isCircumstanceChanged = false;
 
+        private static readonly Regex DecimalRegex = new Regex(@"^[0-9.]+$", RegexOptions.Compiled);
+
         public RenewSoloParentRequest RenewRequest { get; private set; }
         public SoloParentRecord UpdatedRecord { get; private set; }
 
@@ -339,14 +341,7 @@ namespace SOLUM_UI.Views.Dialogs
         {
             double screenW, screenH, screenLeft, screenTop;
 
-            if (Owner != null && Owner.WindowState == WindowState.Maximized)
-            {
-                screenW    = SystemParameters.WorkArea.Width;
-                screenH    = SystemParameters.WorkArea.Height;
-                screenLeft = SystemParameters.WorkArea.Left;
-                screenTop  = SystemParameters.WorkArea.Top;
-            }
-            else if (Owner != null)
+            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
                 screenW    = Owner.ActualWidth;
                 screenH    = Owner.ActualHeight;
@@ -361,10 +356,10 @@ namespace SOLUM_UI.Views.Dialogs
                 screenTop  = SystemParameters.WorkArea.Top;
             }
 
-            Width  = screenW;
-            Height = screenH;
-            Left   = screenLeft;
-            Top    = screenTop;
+            if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
+            if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
+            if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
+            if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
 
             if (DialogShell != null)
             {
@@ -382,7 +377,7 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void NumberOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !Regex.IsMatch(e.Text, @"^[0-9.]+$");
+            e.Handled = !DecimalRegex.IsMatch(e.Text);
         }
 
         private void TxtOtherIncomeStep1_TextChanged(object sender, TextChangedEventArgs e)

@@ -26,6 +26,7 @@
             <Setter Property="BorderThickness" Value="1.2"/>
             <Setter Property="Background" Value="White"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="CharacterCasing" Value="Upper"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
@@ -326,13 +327,24 @@
     </Window.Resources>
 
     <Border Background="#55000000">
-        <Border Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="40" ShadowDepth="0" Opacity="0.22"/>
-            </Border.Effect>
+        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+            <!-- Shadow Layer: Sibling with NO children. Rendered once into GPU cache, NEVER invalidated by typing inside DialogShell -->
+            <Border Background="White" CornerRadius="18"
+                    IsHitTestVisible="False"
+                    Visibility="{Binding Visibility, ElementName=DialogShell}">
+                <Border.CacheMode>
+                    <BitmapCache EnableClearType="False" RenderAtScale="1" SnapsToDevicePixels="True"/>
+                </Border.CacheMode>
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="40" ShadowDepth="0" Opacity="0.22" RenderingBias="Performance"/>
+                </Border.Effect>
+            </Border>
 
             <Border x:Name="DialogShell" Background="White" CornerRadius="18"
                     ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    TextOptions.TextFormattingMode="Display"
+                    RenderOptions.ClearTypeHint="Enabled"
+                    SnapsToDevicePixels="True"
                     Width="780" MinHeight="620" BorderBrush="#E0E0E0" BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -548,6 +560,6 @@
 
                 </Grid>
             </Border>
-        </Border>
+        </Grid>
     </Border>
 </Window>

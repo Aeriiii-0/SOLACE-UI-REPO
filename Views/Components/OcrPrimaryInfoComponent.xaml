@@ -1,0 +1,244 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.OcrPrimaryInfoComponent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="600">
+    <ScrollViewer x:Name="ScrollStep1" VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  Background="#F4F6F9">
+        <StackPanel Margin="20,12,20,16">
+
+            <!-- CARD: I. IDENTIFYING INFORMATION -->
+            <Border Style="{StaticResource CardSection}">
+                <StackPanel>
+                    <Border Style="{StaticResource CardSectionHeader}">
+                        <Grid>
+                            <TextBlock Text="I. IDENTIFYING INFORMATION" Style="{StaticResource SectionLabel}" Padding="0,4,0,0"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="Date of Application:" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="#222222" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Border BorderBrush="#7B1426" BorderThickness="1.5" CornerRadius="6" Background="White" Width="180" Height="44" Padding="8,0,8,0">
+                                    <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDateSm}"
+                                                Tag="application_date" GotFocus="Field_GotFocus"
+                                                GotKeyboardFocus="Field_GotFocus"
+                                                PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
+                                                CalendarOpened="DatePicker_CalendarOpened"
+                                                DateValidationError="DatePicker_DateValidationError"
+                                                LostFocus="DatePicker_LostFocus"
+                                                BorderThickness="0" Background="Transparent"
+                                                Foreground="#222222" Cursor="Hand"/>
+                                </Border>
+                                <Border x:Name="Badge_AppDate" CornerRadius="3" Padding="4,1" Visibility="Collapsed" Margin="6,0,0,0">
+                                    <TextBlock x:Name="TxtConf_AppDate" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- ROW 1: Full Name (Last Name | First Name | Middle Name | Ext.) -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.4*"/>
+                            <ColumnDefinition Width="1.4*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="75"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Last Name *" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_LastName" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_LastName" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtLastName" Style="{StaticResource FormBox}"
+                                     Tag="last_name" GotFocus="Field_GotFocus"
+                                     MaxLength="50"
+                                     PreviewTextInput="NameOnly_PreviewTextInput"
+                                     TextChanged="TxtLastName_TextChanged"/>
+                            <TextBlock x:Name="ErrLastName" Text="Required." Style="{StaticResource ErrorText}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="First Name *" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_FirstName" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_FirstName" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtFirstName" Style="{StaticResource FormBox}"
+                                     Tag="first_name" GotFocus="Field_GotFocus"
+                                     MaxLength="50"
+                                     PreviewTextInput="NameOnly_PreviewTextInput"
+                                     TextChanged="TxtFirstName_TextChanged"/>
+                            <TextBlock x:Name="ErrFirstName" Text="Required." Style="{StaticResource ErrorText}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Middle Name" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_MiddleName" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_MiddleName" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtMiddleName" Style="{StaticResource FormBox}"
+                                     Tag="middle_name" GotFocus="Field_GotFocus"
+                                     MaxLength="50"
+                                     PreviewTextInput="NameOnly_PreviewTextInput"
+                                     TextChanged="TxtMiddleName_TextChanged"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Ext." Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_Extension" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_Extension" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtExtension" Style="{StaticResource FormBox}"
+                                     Tag="ext_name" GotFocus="Field_GotFocus"
+                                     MaxLength="10"
+                                     PreviewTextInput="NameOnly_PreviewTextInput"
+                                     TextChanged="TxtExtension_TextChanged"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- ROW 2: Birthdate | Age | PhilSys Card Number -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.2*"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="1.4*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Birthdate *" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_Birthdate" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_Birthdate" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                                <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
+                                            Tag="birthdate" GotFocus="Field_GotFocus"
+                                            GotKeyboardFocus="Field_GotFocus"
+                                            PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
+                                            CalendarOpened="DatePicker_CalendarOpened"
+                                            SelectedDateChanged="DpBirthdate_SelectedDateChanged"
+                                            DateValidationError="DatePicker_DateValidationError"
+                                            LostFocus="DatePicker_LostFocus"
+                                            BorderThickness="0" Background="Transparent"/>
+                            </Border>
+                            <TextBlock x:Name="ErrBirthdate" Text="Required." Style="{StaticResource ErrorText}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                            <TextBlock Text="Age" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="TxtAge" Style="{StaticResource FormBox}"
+                                     Tag="age" GotFocus="Field_GotFocus"
+                                     IsReadOnly="True" Background="#F0F0F0"
+                                     HorizontalContentAlignment="Center"
+                                     VerticalContentAlignment="Center"
+                                     FontWeight="SemiBold"
+                                     Foreground="#222222"
+                                     Padding="0"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <Grid Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="PhilSys Card Number" Style="{StaticResource FieldLabel}"/>
+                                <Border x:Name="Badge_PhilSys" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtConf_PhilSys" Text="—" FontSize="9" FontWeight="Bold"/>
+                                </Border>
+                            </Grid>
+                            <TextBox x:Name="TxtPhilSys" Style="{StaticResource FormBox}"
+                                     Tag="philsys_number" GotFocus="Field_GotFocus"
+                                     MaxLength="19"
+                                     PreviewKeyDown="PhilSys_PreviewKeyDown"
+                                     PreviewTextInput="NumberOnly_PreviewTextInput"
+                                     TextChanged="TxtPhilSys_TextChanged"/>
+                            <TextBlock x:Name="ErrPhilSys" Text="Required." Style="{StaticResource ErrorText}"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Duplicate Banner in Step 1 -->
+            <Border x:Name="DuplicateBannerPanel" Visibility="Collapsed" CornerRadius="10"
+                    Background="#B71C1C" Padding="16,12" Margin="0,8,0,4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17"
+                            Background="#22FFFFFF" Margin="0,0,12,0" VerticalAlignment="Top">
+                        <TextBlock Text="&#x26A0;" FontSize="16" Foreground="White"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock x:Name="DuplicateBannerTitle" FontSize="13" FontWeight="Bold"
+                                   Foreground="White" Text="Existing Record Found" Margin="0,0,0,3"/>
+                        <TextBlock x:Name="DuplicateBannerText" Foreground="White" FontSize="12"
+                                   TextWrapping="Wrap" Opacity="0.95"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button x:Name="BtnViewExistingRecord" Content="View Existing Record"
+                                    Height="32" Padding="14,0" Background="White" Foreground="#702943"
+                                    FontSize="12" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand"
+                                    Click="ViewExistingRecord_Click" Margin="0,0,10,0">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <Button x:Name="BtnContinueAnyway" Content="Continue to Step 2 &#x2192;"
+                                    Height="32" Padding="14,0" Background="#33FFFFFF" Foreground="White"
+                                    FontSize="12" FontWeight="SemiBold" BorderBrush="White" BorderThickness="1"
+                                    Cursor="Hand" Click="ContinueAnyway_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

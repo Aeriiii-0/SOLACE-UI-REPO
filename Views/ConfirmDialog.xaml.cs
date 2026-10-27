@@ -105,6 +105,19 @@ namespace SOLUM_UI
             }
         }
 
+        protected override void OnSourceInitialized(System.EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
+            {
+                if (System.Math.Abs(Width - Owner.ActualWidth) > 0.5) Width = Owner.ActualWidth;
+                if (System.Math.Abs(Height - Owner.ActualHeight) > 0.5) Height = Owner.ActualHeight;
+                if (System.Math.Abs(Left - Owner.Left) > 0.5) Left = Owner.Left;
+                if (System.Math.Abs(Top - Owner.Top) > 0.5) Top = Owner.Top;
+                Shell.MaxHeight = Height * 0.90;
+            }
+        }
+
         private void SetConfirmBtn(string hexColor)
         {
             // Named elements inside ControlTemplates aren't direct fields;
