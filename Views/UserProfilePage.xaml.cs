@@ -22,26 +22,24 @@ namespace SOLUM_UI
         /// <summary>Populate all read-only fields from current session.</summary>
         private void PopulateProfile()
         {
-            string name     = MainWindow.FullName;
-            string role     = MainWindow.CurrentUserRole;
+            string name = MainWindow.FullName;
+            string role = MainWindow.CurrentUserRole;
             string barangay = MainWindow.CurrentUserBarangay;
             string firstName = MainWindow.FirstName;
             string lastName = MainWindow.LastName;
-            string email    = MainWindow.CurrentUserEmail;
+            string email = MainWindow.CurrentUserEmail;
             string contactNumber = MainWindow.ContactNumber;
 
-            TxtDisplayName.Text  = (name ?? string.Empty).ToUpper();
-            TxtDisplayRole.Text  = (role ?? string.Empty).ToUpper();
+            TxtDisplayName.Text = (name ?? string.Empty).ToUpper();
+            TxtDisplayRole.Text = (role ?? string.Empty).ToUpper();
             TxtDisplayEmail.Text = email;
-            TxtFullName.Text     = (name ?? string.Empty).ToUpper();
-            TxtRole.Text         = (role ?? string.Empty).ToUpper();
+            TxtFullName.Text = (name ?? string.Empty).ToUpper();
+            TxtRole.Text = (role ?? string.Empty).ToUpper();
             TxtContactNumber.Text = string.IsNullOrWhiteSpace(contactNumber) ? "—" : contactNumber;
-            TxtBarangay.Text     = (string.IsNullOrWhiteSpace(barangay) || barangay.Equals("ALL", StringComparison.OrdinalIgnoreCase))
+            TxtBarangay.Text = (string.IsNullOrWhiteSpace(barangay) || barangay.Equals("ALL", StringComparison.OrdinalIgnoreCase))
                 ? "ALL BARANGAYS"
                 : barangay.ToUpper();
-            TxtInitial.Text      = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "U";
-
-            string[] parts = name.Split(' ');
+            TxtInitial.Text = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "U";
 
             TxtSessionStart.Text = _sessionStart.ToString("MMM d, yyyy  h:mm tt");
         }

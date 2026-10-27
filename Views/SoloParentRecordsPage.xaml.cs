@@ -91,8 +91,6 @@ namespace SOLUM_UI
                 PagingRow.Visibility = Visibility.Collapsed;
                 _barangayFilter = CurrentUserBarangay;
 
-                if (EncoderSubtitle != null) EncoderSubtitle.Text = "Look up a registered solo parent record, or add a new one.";
-
                 // Start with the search-first state
                 SetEncoderResultsVisible(false);
 

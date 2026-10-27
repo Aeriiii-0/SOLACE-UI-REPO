@@ -966,6 +966,65 @@
                                HorizontalAlignment="Center" TextAlignment="Center"
                                TextWrapping="Wrap" MaxWidth="400"
                                Text="To view, edit, renew a record, please use the search bar above to verify identity."/>
+
+                    <!-- Horizontal Steps (encoder mode) -->
+                    <Grid Margin="0,28,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Step 1: Search -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Border Width="28" Height="28" CornerRadius="14" Background="#702943" Margin="0,0,10,0">
+                                <TextBlock Text="1" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
+                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Search" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#333333"/>
+                                <TextBlock Text="by name or ID" FontFamily="Segoe UI" FontSize="10" Foreground="#888888"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Arrow 1 -->
+                        <Path Grid.Column="1" Data="M4,12 L14,12 M11,8 L15,12 L11,16"
+                              Stroke="#D4A0B0" StrokeThickness="2" Margin="16,0"
+                              VerticalAlignment="Center" HorizontalAlignment="Center"
+                              StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round"/>
+
+                        <!-- Step 2: View/Edit -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Border Width="28" Height="28" CornerRadius="14" Background="#702943" Margin="0,0,10,0">
+                                <TextBlock Text="2" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
+                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="View/Edit" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#333333"/>
+                                <TextBlock Text="record details" FontFamily="Segoe UI" FontSize="10" Foreground="#888888"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Arrow 2 -->
+                        <Path Grid.Column="3" Data="M4,12 L14,12 M11,8 L15,12 L11,16"
+                              Stroke="#D4A0B0" StrokeThickness="2" Margin="16,0"
+                              VerticalAlignment="Center" HorizontalAlignment="Center"
+                              StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round"/>
+
+                        <!-- Step 3: Save/Renew -->
+                        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Border Width="28" Height="28" CornerRadius="14" Background="#702943" Margin="0,0,10,0">
+                                <TextBlock Text="3" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
+                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Save/Renew" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#333333"/>
+                                <TextBlock Text="changes" FontFamily="Segoe UI" FontSize="10" Foreground="#888888"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
 
                 <!-- No results after a search -->
@@ -1189,302 +1248,131 @@
             </Grid>
         </Border>
 
-        <!-- ENCODER / BASIC USER PANEL (top portion only â€” Row 0-2, no ZIndex overlay) -->
-        <!-- Row 3 (results table) sits below this, fully interactive -->
-        <ScrollViewer x:Name="EncoderSearchPanel" Grid.Row="0" Grid.RowSpan="3"
-                      Visibility="Collapsed"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled"
-                      Background="#FFFFFF">
-            <StackPanel Margin="28,20,28,28">
+        <!-- ENCODER / BASIC USER PANEL: Simple top banner with search box -->
+        <Border x:Name="EncoderSearchPanel" Grid.Row="1"
+                Visibility="Collapsed"
+                Background="#E8F5E8EE" CornerRadius="16"
+                Margin="24,16,24,12"
+                BorderBrush="#702943" BorderThickness="2.5"
+                Padding="28,36,28,36">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <!-- Page heading -->
-                <TextBlock Text="Record management" FontFamily="Segoe UI" FontSize="22" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,4"/>
-                <TextBlock x:Name="EncoderSubtitle" Text="Look up a registered solo parent, or register a new one."
-                           FontFamily="Segoe UI" FontSize="13" Foreground="#A06080" Margin="0,0,0,14"/>
+                <!-- Header Row: Title + Subtitle + Not Registered Text + Add Button -->
+                <Grid Grid.Row="0" Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- â”€â”€ Unified How-to + Encoder Mode banner â”€â”€ -->
-                <Border CornerRadius="10" Padding="14,11" Margin="0,0,0,18"
-                        Background="#FDF4F7" BorderBrush="#D4A0B0" BorderThickness="1.5">
-                    <Grid>
+                    <!-- Left: Title + Subtitle -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Find a solo parent" FontFamily="Segoe UI" FontSize="16" FontWeight="Bold" Foreground="#702943"/>
+                        <TextBlock Text="Search by name or PhilSys ID to open their record." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <!-- Center: Not Registered Text (moved left, before button) -->
+                    <TextBlock Grid.Column="1" Text="Not registered?" FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" VerticalAlignment="Center" Margin="0,0,16,0"/>
+
+                    <!-- Right: Add Button -->
+                    <Button Grid.Column="2" Height="40" Padding="18,0" Cursor="Hand" Click="BasicUserAddRecord_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="#702943" CornerRadius="20" Padding="{TemplateBinding Padding}">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="2" Opacity="0.22"/>
+                                    </Border.Effect>
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.88"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="+ " FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                            <TextBlock Text="Add new record" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <!-- Search Box Row: Rounded white search bar + round search button -->
+                <Border Grid.Row="1" Background="White" CornerRadius="28" Height="56" BorderBrush="#702943" BorderThickness="1.5">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="1"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- How to use label -->
-                        <TextBlock Grid.Column="0" Text="How to use"
-                                   FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold"
-                                   Foreground="#702943" VerticalAlignment="Center" Margin="0,0,20,0"/>
+                        <!-- Mode Dropdown -->
+                        <ComboBox x:Name="EncSearchMode" Grid.Column="0" Style="{StaticResource SearchModeCombo}" Margin="12,0,0,0" VerticalAlignment="Center" SelectionChanged="EncSearchMode_SelectionChanged">
+                            <ComboBoxItem Content="All / Auto" Tag="AUTO" IsSelected="True"/>
+                            <ComboBoxItem Content="First Name" Tag="FIRST_NAME"/>
+                            <ComboBoxItem Content="Last Name" Tag="LAST_NAME"/>
+                            <ComboBoxItem Content="Full Name" Tag="FULL_NAME"/>
+                            <ComboBoxItem Content="PhilSys ID" Tag="PHILSYS_ID"/>
+                        </ComboBox>
 
-                        <!-- Step 1 -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                    HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Border Width="22" Height="22" CornerRadius="11" Background="#702943" Margin="0,0,8,0">
-                                <TextBlock Text="1" FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
-                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="Search by Name or ID" FontFamily="Segoe UI" FontSize="12"
-                                       Foreground="#555555" VerticalAlignment="Center"/>
-                        </StackPanel>
+                        <!-- Divider -->
+                        <Rectangle Grid.Column="1" Fill="#D4A0B0" Width="1.5" Margin="8,12,8,12"/>
 
-                        <!-- Arrow -->
-                        <Path Grid.Column="2" Data="M4,12 L14,12 M11,8 L15,12 L11,16"
-                              Stroke="#CCBBCC" StrokeThickness="1.5" Margin="12,0"
-                              VerticalAlignment="Center" HorizontalAlignment="Center"
-                              StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round"/>
+                        <!-- Search Text Box -->
+                        <TextBox x:Name="EncSearchQuery" Grid.Column="2" BorderThickness="0" Background="Transparent" FontFamily="Segoe UI" FontSize="13" Foreground="#333333" Padding="16,0" VerticalAlignment="Center" TextChanged="EncoderFields_TextChanged" KeyDown="SearchBox_KeyDown">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="TextBox">
+                                                <Grid>
+                                                    <TextBlock Text="Search records (name, PhilSys ID)..." Foreground="#C0A8B0" FontSize="13" VerticalAlignment="Center" Padding="16,0" IsHitTestVisible="False">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Margin="16,0"/>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
 
-                        <!-- Step 2 -->
-                        <StackPanel Grid.Column="3" Orientation="Horizontal"
-                                    HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Border Width="22" Height="22" CornerRadius="11" Background="#702943" Margin="0,0,8,0">
-                                <TextBlock Text="2" FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
-                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="View / Edit Record" FontFamily="Segoe UI" FontSize="12"
-                                       Foreground="#555555" VerticalAlignment="Center"/>
-                        </StackPanel>
-
-                        <!-- Arrow -->
-                        <Path Grid.Column="4" Data="M4,12 L14,12 M11,8 L15,12 L11,16"
-                              Stroke="#CCBBCC" StrokeThickness="1.5" Margin="12,0"
-                              VerticalAlignment="Center" HorizontalAlignment="Center"
-                              StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round"/>
-
-                        <!-- Step 3 -->
-                        <StackPanel Grid.Column="5" Orientation="Horizontal"
-                                    HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Border Width="22" Height="22" CornerRadius="11" Background="#702943" Margin="0,0,8,0">
-                                <TextBlock Text="3" FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
-                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="Save / Renew" FontFamily="Segoe UI" FontSize="12"
-                                       Foreground="#555555" VerticalAlignment="Center"/>
-                        </StackPanel>
-
-                        <!-- Vertical divider -->
-                        <Border Grid.Column="6" Width="1" Background="#E0C8D0" Margin="20,2,20,2"/>
-
-                        <!-- Encoder Mode note -->
-                        <StackPanel Grid.Column="7" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Path Data="M18,8H17V6A5,5 0 0,0 7,6V8H6A2,2 0 0,0 4,10V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V10A2,2 0 0,0 18,8M12,17A2,2 0 0,1 10,15A2,2 0 0,1 12,13A2,2 0 0,1 14,15A2,2 0 0,1 12,17M15.1,8H8.9V6A3.1,3.1 0 0,1 12,2.9A3.1,3.1 0 0,1 15.1,6V8Z"
-                                  Fill="#702943" Stretch="Uniform" Width="13" Height="13"
-                                  VerticalAlignment="Top" Margin="0,2,7,0"/>
-                            <StackPanel>
-                                <TextBlock FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold"
-                                           Foreground="#702943" Text="Encoder Mode"/>
-                                <TextBlock FontFamily="Segoe UI" FontSize="10.5" Foreground="#A06080"
-                                           TextWrapping="Wrap" MaxWidth="190"
-                                           Text="Viewing, editing, and renewing are enabled. Data deletion is restricted."/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
+                        <!-- Search Button (fully round, 48x48) -->
+                        <Button Grid.Column="3" Width="48" Height="48" Margin="8,0,8,0" Cursor="Hand" Click="EncoderSearchBtn_Click" ToolTip="Search records">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="#702943" CornerRadius="24">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="0.82"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <Path Data="M15.5,14H14.71L14.43,13.73C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 3,9.5A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.73,14.43L14,14.71V15.5L19,20.5L20.5,19L15.5,14M9.5,14C7,14 5,12 5,9.5C5,7 7,5 9.5,5C12,5 14,7 14,9.5C14,12 12,14 9.5,14Z" Fill="White" Stretch="Uniform" Width="18" Height="18"/>
+                        </Button>
                     </Grid>
                 </Border>
-
-                <!-- â”€â”€ Two-Column Search + Add card row â”€â”€ -->
-                <Grid Margin="0,0,0,12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="18"/>
-                        <ColumnDefinition Width="280"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- LEFT: Search card (dark maroon) -->
-                    <Border Grid.Column="0" CornerRadius="18" Padding="30,26">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="#7A2D4A" Offset="0"/>
-                                <GradientStop Color="#5C1F35" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                        <Border.Effect>
-                            <DropShadowEffect Color="#702943" BlurRadius="18" ShadowDepth="5" Opacity="0.18"/>
-                        </Border.Effect>
-                        <!-- decorative circle -->
-                        <Grid>
-                            <Ellipse Width="160" Height="160" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                     Margin="0,0,-30,-30" Opacity="0.12">
-                                <Ellipse.Fill>
-                                    <SolidColorBrush Color="#FFFFFF"/>
-                                </Ellipse.Fill>
-                            </Ellipse>
-                            <StackPanel>
-                                <TextBlock Text="Find a solo parent's record"
-                                           FontFamily="Segoe UI" FontSize="20" FontWeight="Bold"
-                                           Foreground="White" Margin="0,0,0,6"/>
-                                <TextBlock Text="Search by name or PhilSys ID to open their record."
-                                           FontFamily="Segoe UI" FontSize="12.5" Foreground="#EAD0D8"
-                                           Margin="0,0,0,20" TextWrapping="Wrap"/>
-
-                                <!-- Search row -->
-                                <Border CornerRadius="12" Background="White" Height="48">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="1"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <!-- Mode dropdown -->
-                                        <ComboBox x:Name="EncSearchMode"
-                                                  Grid.Column="0"
-                                                  Style="{StaticResource SearchModeCombo}"
-                                                  Margin="8,0,0,0"
-                                                  VerticalAlignment="Center"
-                                                  SelectionChanged="EncSearchMode_SelectionChanged">
-                                            <ComboBoxItem Content="All / auto" Tag="AUTO" IsSelected="True"/>
-                                            <ComboBoxItem Content="Record ID" Tag="RECORD_ID"/>
-                                            <ComboBoxItem Content="First Name" Tag="FIRST_NAME"/>
-                                            <ComboBoxItem Content="Last Name" Tag="LAST_NAME"/>
-                                            <ComboBoxItem Content="Full Name" Tag="FULL_NAME"/>
-                                            <ComboBoxItem Content="PhilSys ID" Tag="PHILSYS_ID"/>
-                                        </ComboBox>
-
-                                        <Rectangle Grid.Column="1" Fill="#E0D0D5" Width="1" Margin="6,10,6,10"/>
-
-                                        <!-- Search text box -->
-                                        <TextBox x:Name="EncSearchQuery"
-                                                 Grid.Column="2"
-                                                 BorderThickness="0" Background="Transparent"
-                                                 FontFamily="Segoe UI" FontSize="13" Foreground="#333333"
-                                                 VerticalAlignment="Center"
-                                                 TextChanged="EncoderFields_TextChanged"
-                                                 KeyDown="SearchBox_KeyDown">
-                                            <TextBox.Style>
-                                                <Style TargetType="TextBox">
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="TextBox">
-                                                                <Grid>
-                                                                    <TextBlock Text="Search records..."
-                                                                               Foreground="#C0A8B0" FontSize="13"
-                                                                               VerticalAlignment="Center"
-                                                                               IsHitTestVisible="False">
-                                                                        <TextBlock.Style>
-                                                                            <Style TargetType="TextBlock">
-                                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                                                <Style.Triggers>
-                                                                                    <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-                                                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                                                    </DataTrigger>
-                                                                                </Style.Triggers>
-                                                                            </Style>
-                                                                        </TextBlock.Style>
-                                                                    </TextBlock>
-                                                                    <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                                                </Grid>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </TextBox.Style>
-                                        </TextBox>
-
-                                        <!-- Search icon button -->
-                                        <Button Grid.Column="3"
-                                                Width="44" Height="44" Margin="2,2,2,2"
-                                                Cursor="Hand" Click="EncoderSearchBtn_Click" ToolTip="Search records">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="#702943" CornerRadius="10">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Opacity" Value="0.82"/>
-                                                        </Trigger>
-                                                        <Trigger Property="IsPressed" Value="True">
-                                                            <Setter Property="Opacity" Value="0.65"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <Path Data="M15.5,14H14.71L14.43,13.73C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 3,9.5A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.73,14.43L14,14.71V15.5L19,20.5L20.5,19L15.5,14M9.5,14C7,14 5,12 5,9.5C5,7 7,5 9.5,5C12,5 14,7 14,9.5C14,12 12,14 9.5,14Z"
-                                                  Fill="White" Stretch="Uniform" Width="17" Height="17"/>
-                                        </Button>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Tip line -->
-                                <StackPanel Orientation="Horizontal" Margin="2,10,0,0">
-                                    <Path Data="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M21,9H15V22H13V16H11V22H9V9H3V7H21V9Z"
-                                          Fill="#EAC060" Stretch="Uniform" Width="11" Height="11"
-                                          VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <TextBlock FontFamily="Segoe UI" FontSize="11" Foreground="#EAD0D8"
-                                               VerticalAlignment="Center" TextWrapping="Wrap">
-                                        Tip: Search by PhilSys ID for the fastest result. Records are kept secure and private.
-                                    </TextBlock>
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- RIGHT: Not-registered card (warm beige) -->
-                    <Border Grid.Column="2" CornerRadius="18" Background="#FEF9EC" Padding="22,26">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#C8B070" BlurRadius="14" ShadowDepth="3" Opacity="0.1"/>
-                        </Border.Effect>
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <!-- Icon -->
-                            <Grid Width="52" Height="52" HorizontalAlignment="Center" Margin="0,0,0,14">
-                                <Border CornerRadius="26" Background="#FFF3D0"/>
-                                <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14M12,6A2,2 0 0,0 10,8A2,2 0 0,0 12,10A2,2 0 0,0 14,8A2,2 0 0,0 12,6M12,15.9C9.03,15.9 5.9,17.36 5.9,18V19.1H18.1V18C18.1,17.36 14.97,15.9 12,15.9Z"
-                                      Fill="#B8923A" Stretch="Uniform" Width="26" Height="26"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                <!-- Plus badge -->
-                                <Border Width="18" Height="18" CornerRadius="9" Background="#702943"
-                                        HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                        Margin="0,0,-4,-4">
-                                    <TextBlock Text="+" FontSize="11" FontWeight="Bold" Foreground="White"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </Grid>
-
-                            <TextBlock Text="Not registered yet?"
-                                       FontFamily="Segoe UI" FontSize="14" FontWeight="Bold"
-                                       Foreground="#7A5C20" HorizontalAlignment="Center"
-                                       Margin="0,0,0,5"/>
-                            <TextBlock Text="Start a new solo parent record."
-                                       FontFamily="Segoe UI" FontSize="11.5" Foreground="#B8A060"
-                                       HorizontalAlignment="Center" TextAlignment="Center"
-                                       Margin="0,0,0,18" TextWrapping="Wrap"/>
-
-                            <Button Height="40" Cursor="Hand" Click="BasicUserAddRecord_Click">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="#5C3D10" CornerRadius="10" Padding="16,0">
-                                            <Border.Effect>
-                                                <DropShadowEffect Color="#5C3D10" BlurRadius="8" ShadowDepth="2" Opacity="0.22"/>
-                                            </Border.Effect>
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Opacity" Value="0.88"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="+ " FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
-                                    <TextBlock Text="Add new record" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="White"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-            </StackPanel>
-        </ScrollViewer>
+            </Grid>
+        </Border>
 
 
         <!-- Paging row (Row 4, hidden for Encoder) -->
