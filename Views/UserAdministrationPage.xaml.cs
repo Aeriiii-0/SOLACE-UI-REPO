@@ -302,6 +302,7 @@ namespace SOLUM_UI
         private DateTime _lastRefreshClickTime = DateTime.MinValue;
         private bool _hasLoadedData = false;
         private bool _isLoading = false;
+        private bool _isUpdatingFilters = false;
 
         public UserAdministrationPage()
         {
@@ -324,118 +325,120 @@ namespace SOLUM_UI
 
         }
 
-                        private async Task LoadUsersAsync(bool forceRefresh = false)
+        private void InitRolePermissions()
         {
-            if (_isLoading) return;
-            _isLoading = true;
-                        if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Visible;
-            if (EmptyStatePanel != null) EmptyStatePanel.Visibility = Visibility.Collapsed;
-            if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = false;
-
             bool isSuperAdmin = AuthApiService.Instance.IsSuperAdmin ||
                                 string.Equals(MainWindow.CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
-
-            bool isAdminOrHigher = isSuperAdmin ||
-                                   AuthApiService.Instance.IsAdmin ||
-                                   string.Equals(MainWindow.CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
-                                   string.Equals(MainWindow.CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase);
 
             if (BtnAddAdmin != null)
                 BtnAddAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
 
-            if (CmbFilterRoleAdmin != null)
-                CmbFilterRoleAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
-
-            if (CmbFilterRoleSuperAdmin != null)
-                CmbFilterRoleSuperAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
-
-            if (!isSuperAdmin && CmbRoleFilter != null)
+            _isUpdatingFilters = true;
+            try
             {
-                var selTag = (CmbRoleFilter.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-                if (selTag == "Admin" || selTag == "SuperAdmin")
+                if (CmbFilterRoleAdmin != null)
+                    CmbFilterRoleAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
+
+                if (CmbFilterRoleSuperAdmin != null)
+                    CmbFilterRoleSuperAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
+
+                if (!isSuperAdmin && CmbRoleFilter != null)
                 {
-                    CmbRoleFilter.SelectedIndex = 0;
+                    var selTag = (CmbRoleFilter.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+                    if (selTag == "Admin" || selTag == "SuperAdmin")
+                    {
+                        CmbRoleFilter.SelectedIndex = 0;
+                    }
                 }
             }
+            finally
+            {
+                _isUpdatingFilters = false;
+            }
+        }
+
+        private async Task LoadUsersAsync(bool forceRefresh = false)
+        {
+            if (_isLoading) return;
+
+            if (!forceRefresh && _hasLoadedData && (DateTime.UtcNow - _lastLoadedTime) <= DataFreshnessTtl)
+            {
+                ApplyFilters();
+                return;
+            }
+
+            _isLoading = true;
+            if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Visible;
+            if (EmptyStatePanel != null) EmptyStatePanel.Visibility = Visibility.Collapsed;
+            if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = false;
+
+            InitRolePermissions();
+
+            bool isSuperAdmin = AuthApiService.Instance.IsSuperAdmin ||
+                                string.Equals(MainWindow.CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
 
             try
             {
-                string roleTag = (CmbRoleFilter?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "ALL";
-                string statusTag = (CmbUserStatus?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "ALL";
-                string searchTerm = SearchBox?.Text?.Trim() ?? string.Empty;
-
                 var rolesToFetch = new List<string>();
-                if (roleTag == "ALL")
+                if (isSuperAdmin)
                 {
-                    if (isSuperAdmin)
-                    {
-                        rolesToFetch.Add("Admin");
-                        rolesToFetch.Add("Encoder");
-                        rolesToFetch.Add("BarangaySecretary");
-                        rolesToFetch.Add("SuperAdmin");
-                    }
-                    else
-                    {
-                        rolesToFetch.Add("Encoder");
-                        rolesToFetch.Add("BarangaySecretary");
-                    }
+                    rolesToFetch.Add("Admin");
+                    rolesToFetch.Add("Encoder");
+                    rolesToFetch.Add("BarangaySecretary");
+                    rolesToFetch.Add("SuperAdmin");
                 }
                 else
                 {
-                    rolesToFetch.Add(roleTag);
+                    rolesToFetch.Add("Encoder");
+                    rolesToFetch.Add("BarangaySecretary");
                 }
 
                 var tasks = new List<Task<(string role, bool isActive, BaseResponse<PagedResult<ApplicationUserDTO>> res)>>();
 
                 foreach (var role in rolesToFetch)
                 {
-                    if (statusTag == "ACTIVE" || statusTag == "ALL")
+                    string r = role;
+                    // Active users
+                    tasks.Add(Task.Run(async () =>
                     {
-                        string r = role;
-                        tasks.Add(Task.Run(async () =>
+                        try
                         {
-                            try
+                            var res = await UserApiService.Instance.GetApplicationUsersAsync(new GetApplicationUserRequest
                             {
-                                var res = await UserApiService.Instance.GetApplicationUsersAsync(new GetApplicationUserRequest
-                                {
-                                    Role = r,
-                                    SearchTerm = searchTerm,
-                                    Page = 1,
-                                    PageSize = 100,
-                                    IsActive = true
-                                });
-                                return (r, true, res);
-                            }
-                            catch
-                            {
-                                return (r, true, (BaseResponse<PagedResult<ApplicationUserDTO>>)null);
-                            }
-                        }));
-                    }
+                                Role = r,
+                                SearchTerm = string.Empty,
+                                Page = 1,
+                                PageSize = 100,
+                                IsActive = true
+                            });
+                            return (r, true, res);
+                        }
+                        catch
+                        {
+                            return (r, true, (BaseResponse<PagedResult<ApplicationUserDTO>>)null);
+                        }
+                    }));
 
-                    if (statusTag == "DISABLED" || statusTag == "ALL")
+                    // Disabled users
+                    tasks.Add(Task.Run(async () =>
                     {
-                        string r = role;
-                        tasks.Add(Task.Run(async () =>
+                        try
                         {
-                            try
+                            var res = await UserApiService.Instance.GetApplicationUsersAsync(new GetApplicationUserRequest
                             {
-                                var res = await UserApiService.Instance.GetApplicationUsersAsync(new GetApplicationUserRequest
-                                {
-                                    Role = r,
-                                    SearchTerm = searchTerm,
-                                    Page = 1,
-                                    PageSize = 100,
-                                    IsActive = false
-                                });
-                                return (r, false, res);
-                            }
-                            catch
-                            {
-                                return (r, false, (BaseResponse<PagedResult<ApplicationUserDTO>>)null);
-                            }
-                        }));
-                    }
+                                Role = r,
+                                SearchTerm = string.Empty,
+                                Page = 1,
+                                PageSize = 100,
+                                IsActive = false
+                            });
+                            return (r, false, res);
+                        }
+                        catch
+                        {
+                            return (r, false, (BaseResponse<PagedResult<ApplicationUserDTO>>)null);
+                        }
+                    }));
                 }
 
                 await Task.WhenAll(tasks);
@@ -478,75 +481,104 @@ namespace SOLUM_UI
                     }
                 }
 
-                var allCombined = userMap.Values
+                _allUsers = userMap.Values
                     .OrderBy(u => u.LastName)
                     .ThenBy(u => u.FirstName)
                     .ToList();
 
-                _totalCount = allCombined.Count;
-                _totalPages = Math.Max(1, (int)Math.Ceiling(_totalCount / (double)PageSize));
-                if (_currentPage > _totalPages) _currentPage = _totalPages;
+                _hasLoadedData = true;
+                _lastLoadedTime = DateTime.UtcNow;
 
-                _allUsers = allCombined
-                    .Skip((_currentPage - 1) * PageSize)
-                    .Take(PageSize)
-                    .ToList();
-
-                _filtered = new List<AppUser>(_allUsers);
-                RefreshList();
-                UpdatePagingControls();
+                ApplyFilters();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[UserAdmin] LoadUsersAsync error: {ex.Message}");
             }
             finally
             {
+                _isLoading = false;
                 if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Collapsed;
                 if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = true;
             }
         }
 
-        private void PopulateUsersFromResponse(IEnumerable<ApplicationUserDTO> items, int totalCount, bool defaultIsActive = true)
-
+        private void ApplyFilters()
         {
+            string roleTag = (CmbRoleFilter?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "ALL";
+            string statusTag = (CmbUserStatus?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "ALL";
+            string search = SearchBox?.Text?.Trim() ?? string.Empty;
 
-            _allUsers = items.Select(dto => new AppUser
+            IEnumerable<AppUser> query = _allUsers;
 
+            // 1. Role Filter
+            if (!string.Equals(roleTag, "ALL", StringComparison.OrdinalIgnoreCase))
             {
+                if (string.Equals(roleTag, "Admin", StringComparison.OrdinalIgnoreCase))
+                    query = query.Where(u => u.IsAdminUser);
+                else if (string.Equals(roleTag, "SuperAdmin", StringComparison.OrdinalIgnoreCase))
+                    query = query.Where(u => u.IsSuperAdminUser);
+                else if (string.Equals(roleTag, "Encoder", StringComparison.OrdinalIgnoreCase))
+                    query = query.Where(u => u.IsEncoderUser || u.IsCaseworkerUser);
+                else if (string.Equals(roleTag, "BarangaySecretary", StringComparison.OrdinalIgnoreCase))
+                    query = query.Where(u => u.IsBarangaySecretaryUser);
+                else
+                    query = query.Where(u => string.Equals(u.Role, roleTag, StringComparison.OrdinalIgnoreCase));
+            }
 
-                Id = dto.Id,
+            // 2. Status Filter
+            if (string.Equals(statusTag, "ACTIVE", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(u => u.IsActive);
+            }
+            else if (string.Equals(statusTag, "DISABLED", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(u => !u.IsActive);
+            }
 
-                FirstName = dto.FirstName?.ToUpper(),
+            // 3. Search Filter
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(u =>
+                    (!string.IsNullOrEmpty(u.FirstName) && u.FirstName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (!string.IsNullOrEmpty(u.LastName) && u.LastName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (!string.IsNullOrEmpty(u.FullName) && u.FullName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (!string.IsNullOrEmpty(u.Email) && u.Email.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (!string.IsNullOrEmpty(u.ContactNumber) && u.ContactNumber.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (!string.IsNullOrEmpty(u.Barangay) && u.Barangay.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (!string.IsNullOrEmpty(u.RoleDisplay) && u.RoleDisplay.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)
+                );
+            }
 
-                LastName = dto.LastName?.ToUpper(),
+            _filtered = query
+                .OrderBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .ToList();
 
-                Email = dto.Email,
+            _totalCount = _filtered.Count;
+            _totalPages = Math.Max(1, (int)Math.Ceiling(_totalCount / (double)PageSize));
+            if (_currentPage > _totalPages) _currentPage = _totalPages;
+            if (_currentPage < 1) _currentPage = 1;
 
-                ContactNumber = dto.ContactNumber ?? string.Empty,
-
-                IsActive = dto.IsActive ?? defaultIsActive,
-
-                Role = (string.IsNullOrWhiteSpace(dto.Role) ? "ENCODER" : dto.Role).ToUpper()
-
-            }).ToList();
-
-            _totalCount = totalCount;
-            _totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)PageSize));
-
+            RefreshList();
+            UpdatePagingControls();
         }
 
-                private async void CmbRoleFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CmbRoleFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!IsLoaded) return;
+            if (!IsLoaded || _isUpdatingFilters) return;
             _currentPage = 1;
-            await LoadUsersAsync();
+            ApplyFilters();
         }
 
-        private async void CmbUserStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CmbUserStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!IsLoaded) return;
+            if (!IsLoaded || _isUpdatingFilters) return;
             _currentPage = 1;
-            await LoadUsersAsync();
+            ApplyFilters();
         }
 
-                private async void BtnRefreshUsers_Click(object sender, RoutedEventArgs e)
+        private async void BtnRefreshUsers_Click(object sender, RoutedEventArgs e)
         {
             if (_isLoading || (DateTime.UtcNow - _lastRefreshClickTime) < RefreshCooldown) return;
             _lastRefreshClickTime = DateTime.UtcNow;
@@ -578,71 +610,62 @@ namespace SOLUM_UI
                 BtnNextPage.IsEnabled = _currentPage < _totalPages;
         }
 
-        // NEW
-
-        private async void BtnPrevPage_Click(object sender, RoutedEventArgs e)
-
+        private void BtnPrevPage_Click(object sender, RoutedEventArgs e)
         {
-
             if (_currentPage <= 1) return;
-
             _currentPage--;
-
-            await LoadUsersAsync();
-
+            RefreshList();
+            UpdatePagingControls();
         }
 
-        // NEW
-
-        private async void BtnNextPage_Click(object sender, RoutedEventArgs e)
-
+        private void BtnNextPage_Click(object sender, RoutedEventArgs e)
         {
-
             if (_currentPage >= _totalPages) return;
-
             _currentPage++;
-
-            await LoadUsersAsync();
-
+            RefreshList();
+            UpdatePagingControls();
         }
 
         private void RefreshList()
-
         {
+            var paged = _filtered
+                .Skip((_currentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
 
             UserList.ItemsSource = null;
-
-            UserList.ItemsSource = _filtered;
+            UserList.ItemsSource = paged;
 
             TxtUserCount.Text = " " + _filtered.Count;
 
             if (EmptyStatePanel != null)
-
             {
-
                 EmptyStatePanel.Visibility = (_filtered == null || _filtered.Count == 0) ? Visibility.Visible : Visibility.Collapsed;
-
             }
-
         }
 
-                private void ClearFilters_Click(object sender, RoutedEventArgs e)
+        private void ClearFilters_Click(object sender, RoutedEventArgs e)
         {
-            if (SearchBox != null) SearchBox.Text = string.Empty;
-            if (CmbRoleFilter != null) CmbRoleFilter.SelectedIndex = 0;
-            if (CmbUserStatus != null) CmbUserStatus.SelectedIndex = 0;
-        }
-
-        
-
-        private async void Search_TextChanged(object sender, TextChangedEventArgs e)
-
-        {
-
+            _isUpdatingFilters = true;
+            try
+            {
+                if (SearchBox != null) SearchBox.Text = string.Empty;
+                if (CmbRoleFilter != null) CmbRoleFilter.SelectedIndex = 0;
+                if (CmbUserStatus != null) CmbUserStatus.SelectedIndex = 0;
+            }
+            finally
+            {
+                _isUpdatingFilters = false;
+            }
             _currentPage = 1;
+            ApplyFilters();
+        }
 
-            await LoadUsersAsync();
-
+        private void Search_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!IsLoaded || _isUpdatingFilters) return;
+            _currentPage = 1;
+            ApplyFilters();
         }
 
         private void OpenAddPanel_Click(object sender, RoutedEventArgs e)
