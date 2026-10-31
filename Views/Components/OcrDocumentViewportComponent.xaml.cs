@@ -24,16 +24,22 @@ namespace SOLUM_UI.Views.Components
         public event Action<OcrFormResponse, string> DocumentProcessed;
         public event Action<OcrWarmupProgress> WarmupProgressChanged;
         public event Action<bool, string> ServerStatusChanged;
+        public event Action<string> DocumentFieldClicked;
 
         private Dictionary<string, double[]> _fieldBBoxes = new Dictionary<string, double[]>(StringComparer.OrdinalIgnoreCase);
 
-        // Zoom factor and drag panning
+        // Zoom factor, rotation, and drag panning
         private double _zoomFactor = 1.0;
+        private double _currentRotationAngle = 0.0;
         private Point _scrollMousePoint;
+        private Point _mouseDownPos;
         private double _hOffset = 0;
         private double _vOffset = 0;
         private bool _isDragging = false;
-        private ScaleTransform _zoomTransform;
+        private bool _hasDragged = false;
+        private ScaleTransform _zoomTransform = new ScaleTransform(1.0, 1.0);
+        private RotateTransform _rotateTransform = new RotateTransform(0.0);
+        private TransformGroup _transformGroup;
 
         private CancellationTokenSource _dismissCts;
         private bool _isSpinning = false;
@@ -548,13 +554,15 @@ namespace SOLUM_UI.Views.Components
 
         #endregion
 
-        #region Pan & Zoom Controls
+        #region Pan, Zoom & Document Interaction Controls
 
         private void DocScrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _scrollMousePoint = e.GetPosition(DocScrollViewer);
+            _mouseDownPos = _scrollMousePoint;
             _hOffset = DocScrollViewer.HorizontalOffset;
             _vOffset = DocScrollViewer.VerticalOffset;
+            _hasDragged = false;
             DocScrollViewer.CaptureMouse();
             _isDragging = true;
         }
@@ -567,6 +575,11 @@ namespace SOLUM_UI.Views.Components
                 double deltaX = _scrollMousePoint.X - currentPoint.X;
                 double deltaY = _scrollMousePoint.Y - currentPoint.Y;
 
+                if (Math.Abs(currentPoint.X - _mouseDownPos.X) > 4 || Math.Abs(currentPoint.Y - _mouseDownPos.Y) > 4)
+                {
+                    _hasDragged = true;
+                }
+
                 DocScrollViewer.ScrollToHorizontalOffset(_hOffset + deltaX);
                 DocScrollViewer.ScrollToVerticalOffset(_vOffset + deltaY);
             }
@@ -578,7 +591,82 @@ namespace SOLUM_UI.Views.Components
             {
                 _isDragging = false;
                 DocScrollViewer.ReleaseMouseCapture();
+
+                // If mouse wasn't dragged, it's a click to jump to field!
+                if (!_hasDragged && ImgDocument.Source != null && ImgDocument.ActualWidth > 0 && ImgDocument.ActualHeight > 0)
+                {
+                    Point clickOnImg = e.GetPosition(ImgDocument);
+                    double nx = clickOnImg.X / ImgDocument.ActualWidth;
+                    double ny = clickOnImg.Y / ImgDocument.ActualHeight;
+
+                    if (nx >= 0.0 && nx <= 1.0 && ny >= 0.0 && ny <= 1.0)
+                    {
+                        HandleDocumentClick(nx, ny);
+                    }
+                }
             }
+        }
+
+        private void HandleDocumentClick(double nx, double ny)
+        {
+            if (_fieldBBoxes == null || _fieldBBoxes.Count == 0) return;
+
+            string bestKey = null;
+            double minArea = double.MaxValue;
+
+            foreach (var kvp in _fieldBBoxes)
+            {
+                var b = kvp.Value;
+                if (b == null || b.Length < 4) continue;
+                double bx = b[0], by = b[1], bw = b[2], bh = b[3];
+                if (nx >= bx && nx <= bx + bw && ny >= by && ny <= by + bh)
+                {
+                    double area = bw * bh;
+                    if (area < minArea)
+                    {
+                        minArea = area;
+                        bestKey = kvp.Key;
+                    }
+                }
+            }
+
+            if (bestKey != null)
+            {
+                FocusOnField(bestKey);
+                DocumentFieldClicked?.Invoke(bestKey);
+            }
+        }
+
+        private void DocScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (ImgDocument.Source == null || ImgDocument.ActualWidth <= 0 || ImgDocument.ActualHeight <= 0)
+                return;
+
+            Point mousePosInViewer = e.GetPosition(DocScrollViewer);
+
+            double oldZoom = _zoomFactor;
+            double zoomDelta = e.Delta > 0 ? 0.15 : -0.15;
+            double newZoom = Math.Max(0.3, Math.Min(5.0, _zoomFactor + zoomDelta));
+
+            if (Math.Abs(newZoom - oldZoom) < 0.001)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            double contentX = (DocScrollViewer.HorizontalOffset + mousePosInViewer.X) / oldZoom;
+            double contentY = (DocScrollViewer.VerticalOffset + mousePosInViewer.Y) / oldZoom;
+
+            _zoomFactor = newZoom;
+            ApplyZoom();
+
+            double newHorizontalOffset = (contentX * newZoom) - mousePosInViewer.X;
+            double newVerticalOffset = (contentY * newZoom) - mousePosInViewer.Y;
+
+            DocScrollViewer.ScrollToHorizontalOffset(Math.Max(0, newHorizontalOffset));
+            DocScrollViewer.ScrollToVerticalOffset(Math.Max(0, newVerticalOffset));
+
+            e.Handled = true;
         }
 
         private void ZoomIn_Click(object sender, RoutedEventArgs e)
@@ -589,7 +677,7 @@ namespace SOLUM_UI.Views.Components
 
         private void ZoomOut_Click(object sender, RoutedEventArgs e)
         {
-            _zoomFactor = Math.Max(0.5, _zoomFactor - 0.3);
+            _zoomFactor = Math.Max(0.3, _zoomFactor - 0.3);
             ApplyZoom();
         }
 
@@ -597,20 +685,45 @@ namespace SOLUM_UI.Views.Components
         {
             HighlightCanvas.Children.Clear();
             _zoomFactor = 1.0;
+            _currentRotationAngle = 0.0;
+            ApplyZoom();
+            DocScrollViewer.ScrollToHorizontalOffset(0);
+            DocScrollViewer.ScrollToVerticalOffset(0);
+        }
+
+        private void ZoomReset_Click(object sender, MouseButtonEventArgs e)
+        {
+            _zoomFactor = 1.0;
+            ApplyZoom();
+        }
+
+        private void RotateDocument_Click(object sender, RoutedEventArgs e)
+        {
+            _currentRotationAngle = (_currentRotationAngle + 90.0) % 360.0;
             ApplyZoom();
         }
 
         private void ApplyZoom()
         {
-            if (_zoomTransform == null)
+            if (_transformGroup == null)
             {
                 _zoomTransform = new ScaleTransform(_zoomFactor, _zoomFactor);
-                CanvasContainer.LayoutTransform = _zoomTransform;
+                _rotateTransform = new RotateTransform(_currentRotationAngle);
+                _transformGroup = new TransformGroup();
+                _transformGroup.Children.Add(_zoomTransform);
+                _transformGroup.Children.Add(_rotateTransform);
+                CanvasContainer.LayoutTransform = _transformGroup;
             }
             else
             {
                 _zoomTransform.ScaleX = _zoomFactor;
                 _zoomTransform.ScaleY = _zoomFactor;
+                _rotateTransform.Angle = _currentRotationAngle;
+            }
+
+            if (TxtZoomLevel != null)
+            {
+                TxtZoomLevel.Text = $"{_zoomFactor * 100:F0}%";
             }
         }
 

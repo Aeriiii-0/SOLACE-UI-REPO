@@ -28,6 +28,7 @@ namespace SOLUM_UI.Views.Dialogs
             // Wire up viewport and child component events
             DocumentViewport.DocumentProcessed += OnDocumentProcessed;
             DocumentViewport.ServerStatusChanged += OnServerStatusChanged;
+            DocumentViewport.DocumentFieldClicked += OnDocumentFieldClicked;
 
             PrimaryInfoSection.FieldFocused += tag => DocumentViewport.FocusOnField(tag);
             SecondaryInfoSection.FieldFocused += tag => DocumentViewport.FocusOnField(tag);
@@ -246,6 +247,50 @@ namespace SOLUM_UI.Views.Dialogs
             else if (ViewModel.CurrentStep == 2)
             {
                 GoToStep(1);
+            }
+        }
+
+        private void OnDocumentFieldClicked(string fieldKey)
+        {
+            if (string.IsNullOrEmpty(fieldKey)) return;
+            string key = fieldKey.ToLowerInvariant();
+
+            int targetStep = 1;
+            if (key.StartsWith("fam_") || key.StartsWith("circ_") || key == "needs" || key == "needs_and_problems")
+            {
+                targetStep = 3;
+            }
+            else if (key.Contains("address") || key.Contains("barangay") || key.Contains("contact") ||
+                     key.Contains("emergency") || key.Contains("occupation") || key.Contains("income") ||
+                     key.Contains("employed") || key.Contains("employment") || key.Contains("religion") ||
+                     key.Contains("pantawid") || key.Contains("indigenous") || key.Contains("lgbtq") ||
+                     key.Contains("birthplace") || key.Contains("civil_status") || key.Contains("sex") ||
+                     key.Contains("educational_attainment"))
+            {
+                targetStep = 2;
+            }
+            else
+            {
+                // Personal identity fields: name, birthdate, age, philsys, date of application
+                targetStep = 1;
+            }
+
+            if (ViewModel.CurrentStep != targetStep)
+            {
+                GoToStep(targetStep);
+            }
+
+            if (targetStep == 1)
+            {
+                PrimaryInfoSection.FocusField(fieldKey);
+            }
+            else if (targetStep == 2)
+            {
+                SecondaryInfoSection.FocusField(fieldKey);
+            }
+            else if (targetStep == 3)
+            {
+                FamilyMembersSection.FocusField(fieldKey);
             }
         }
 

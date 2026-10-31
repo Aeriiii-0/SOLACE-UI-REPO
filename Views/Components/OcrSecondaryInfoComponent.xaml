@@ -444,7 +444,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <CheckBox x:Name="ChkPantawid" Grid.Column="0" VerticalAlignment="Center" Cursor="Hand" Margin="0,0,9,0">
+                                <CheckBox x:Name="ChkPantawid" Tag="pantawid" GotFocus="Field_GotFocus" Grid.Column="0" VerticalAlignment="Center" Cursor="Hand" Margin="0,0,9,0">
                                     <CheckBox.LayoutTransform>
                                         <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
                                     </CheckBox.LayoutTransform>
@@ -464,7 +464,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <CheckBox x:Name="ChkIndigenous" Grid.Column="0" VerticalAlignment="Center" Cursor="Hand" Margin="0,0,9,0">
+                                <CheckBox x:Name="ChkIndigenous" Tag="indigenous" GotFocus="Field_GotFocus" Grid.Column="0" VerticalAlignment="Center" Cursor="Hand" Margin="0,0,9,0">
                                     <CheckBox.LayoutTransform>
                                         <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
                                     </CheckBox.LayoutTransform>
@@ -484,7 +484,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <CheckBox x:Name="ChkLGBTQ" Grid.Column="0" VerticalAlignment="Center" Cursor="Hand" Margin="0,0,9,0">
+                                <CheckBox x:Name="ChkLGBTQ" Tag="lgbtq" GotFocus="Field_GotFocus" Grid.Column="0" VerticalAlignment="Center" Cursor="Hand" Margin="0,0,9,0">
                                     <CheckBox.LayoutTransform>
                                         <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
                                     </CheckBox.LayoutTransform>

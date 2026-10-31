@@ -146,15 +146,28 @@
                     <!-- MAIN WORKSPACE -->
                     <Grid Grid.Row="2" Margin="16,12">
                         <Grid.ColumnDefinitions>
-                            <!-- Left: Document Viewport (~44% width) -->
-                            <ColumnDefinition Width="520"/>
-                            <ColumnDefinition Width="12"/>
-                            <!-- Right: Partitioned Record Verification (~56% width) -->
-                            <ColumnDefinition Width="*"/>
+                            <!-- Left: Document Viewport (Resizable) -->
+                            <ColumnDefinition Width="540" MinWidth="380" MaxWidth="850"/>
+                            <ColumnDefinition Width="10"/>
+                            <!-- Right: Partitioned Record Verification -->
+                            <ColumnDefinition Width="*" MinWidth="460"/>
                         </Grid.ColumnDefinitions>
 
                         <!-- LEFT: INTERACTIVE LIVE DOCUMENT VIEWPORT COMPONENT -->
                         <components:OcrDocumentViewportComponent x:Name="DocumentViewport" Grid.Column="0"/>
+
+                        <!-- DRAGGABLE WORKSPACE SPLITTER -->
+                        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                                      Background="Transparent" Cursor="SizeWE" ShowsPreview="False">
+                            <GridSplitter.Template>
+                                <ControlTemplate TargetType="GridSplitter">
+                                    <Border Background="Transparent" Width="10" HorizontalAlignment="Center">
+                                        <Border Width="2" Background="#E2D4D8" CornerRadius="1" HorizontalAlignment="Center"
+                                                VerticalAlignment="Stretch" Margin="0,12"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </GridSplitter.Template>
+                        </GridSplitter>
 
                         <!-- RIGHT: 1:1 RECORD VERIFICATION WITH 3-STEP WIZARD -->
                         <Border Grid.Column="2" Background="White" BorderBrush="#DDD0D5" BorderThickness="1" CornerRadius="10" Padding="0" ClipToBounds="True">

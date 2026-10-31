@@ -194,51 +194,8 @@
                         </Button>
                     </StackPanel>
 
-                    <!-- Zoom Controls -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal">
-                        <Button Content="-" Click="ZoomOut_Click" Width="26" Height="28" Background="White" Foreground="#555555" BorderBrush="#D0C0C6" BorderThickness="1" Margin="0,0,3,0" FontWeight="Bold" FontSize="11" Cursor="Hand">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                        <Button Content="Fit" Click="ZoomFit_Click" Height="28" Padding="6,0" Background="White" Foreground="#555555" BorderBrush="#D0C0C6" BorderThickness="1" Margin="0,0,3,0" FontSize="10" FontWeight="SemiBold" Cursor="Hand">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                        <Button Content="+" Click="ZoomIn_Click" Width="26" Height="28" Background="White" Foreground="#555555" BorderBrush="#D0C0C6" BorderThickness="1" FontWeight="Bold" FontSize="11" Cursor="Hand">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                    </StackPanel>
+                    <!-- Viewport Hint -->
+                    <TextBlock Grid.Column="2" Text="💡 Wheel to zoom • Click box to inspect" FontSize="10.5" Foreground="#888888" VerticalAlignment="Center" Margin="0,0,4,0"/>
                 </Grid>
 
                 <!-- Scrollable Pan & Zoom Document Canvas -->
@@ -248,6 +205,7 @@
                                       PreviewMouseLeftButtonDown="DocScrollViewer_PreviewMouseLeftButtonDown"
                                       PreviewMouseMove="DocScrollViewer_PreviewMouseMove"
                                       PreviewMouseLeftButtonUp="DocScrollViewer_PreviewMouseLeftButtonUp"
+                                      PreviewMouseWheel="DocScrollViewer_PreviewMouseWheel"
                                       Cursor="Hand">
                             <Grid x:Name="CanvasContainer" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Image x:Name="ImgDocument" Stretch="Uniform"
@@ -257,6 +215,112 @@
                                         Height="{Binding ActualHeight, ElementName=ImgDocument}"/>
                             </Grid>
                         </ScrollViewer>
+
+                        <!-- FLOATING CONCISE NAVIGATION DOCK (Bottom-Right) -->
+                        <Border x:Name="FloatingNavDock" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                Margin="0,0,14,14" Background="#F4FFFFFF" BorderBrush="#D0C0C6" BorderThickness="1"
+                                CornerRadius="16" Padding="6,3" SnapsToDevicePixels="True">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.16"/>
+                            </Border.Effect>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <!-- Zoom Out -->
+                                <Button x:Name="BtnFloatZoomOut" Click="ZoomOut_Click" Width="24" Height="24"
+                                        Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
+                                        ToolTip="Zoom Out (−)">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
+                                                <TextBlock Text="−" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
+                                                    <Setter Property="Foreground" Value="#702943"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Zoom Percentage Readout / Reset -->
+                                <Border x:Name="PillZoomLevel" Background="Transparent" CornerRadius="8" Padding="5,2"
+                                        Cursor="Hand" MouseLeftButtonUp="ZoomReset_Click" ToolTip="Click to reset zoom to 100%">
+                                    <TextBlock x:Name="TxtZoomLevel" Text="100%" FontSize="10.5" FontWeight="Bold" Foreground="#702943"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+
+                                <!-- Zoom In -->
+                                <Button x:Name="BtnFloatZoomIn" Click="ZoomIn_Click" Width="24" Height="24"
+                                        Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
+                                        ToolTip="Zoom In (+)">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
+                                                <TextBlock Text="+" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
+                                                    <Setter Property="Foreground" Value="#702943"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Vertical Separator -->
+                                <Border Width="1" Height="14" Background="#E0D0D5" Margin="4,0"/>
+
+                                <!-- Fit Page in View -->
+                                <Button x:Name="BtnFloatZoomFit" Click="ZoomFit_Click" Width="24" Height="24"
+                                        Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
+                                        ToolTip="Fit Entire Page in View">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
+                                                <Viewbox Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Canvas Width="24" Height="24">
+                                                        <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                              Data="M5,5H10V7H7V10H5V5M14,5H19V10H17V7H14V5M17,14H19V19H14V17H17V14M10,17V19H5V14H7V17H10Z"/>
+                                                    </Canvas>
+                                                </Viewbox>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
+                                                    <Setter Property="Foreground" Value="#702943"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Rotate 90° Clockwise -->
+                                <Button x:Name="BtnFloatRotate" Click="RotateDocument_Click" Width="24" Height="24"
+                                        Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
+                                        ToolTip="Rotate 90° Clockwise">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
+                                                <Viewbox Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Canvas Width="24" Height="24">
+                                                        <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                              Data="M7.11,8.53L5.7,7.11C4.8,8.27 4.24,9.61 4.07,11.05H6.09C6.25,10.13 6.6,9.27 7.11,8.53M16.89,8.53C17.4,9.27 17.75,10.13 17.91,11.05H19.93C19.76,9.61 19.2,8.27 18.3,7.11L16.89,8.53M12,4A8,8 0 0,0 4,12H1L4.89,15.89L8.78,12H5.78C5.78,8.57 8.57,5.78 12,5.78C15.43,5.78 18.22,8.57 18.22,12C18.22,15.43 15.43,18.22 12,18.22C10.54,18.22 9.19,17.72 8.12,16.88L6.7,18.3C8.16,19.46 9.99,20.22 12,20.22A8.22,8.22 0 0,0 20.22,12A8.22,8.22 0 0,0 12,4Z"/>
+                                                    </Canvas>
+                                                </Viewbox>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
+                                                    <Setter Property="Foreground" Value="#702943"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+                        </Border>
 
                         <!-- Empty State Canvas Graphic -->
                         <Grid x:Name="EmptyCanvasState" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20" Visibility="Visible">

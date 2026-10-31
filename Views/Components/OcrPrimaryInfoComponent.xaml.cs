@@ -66,6 +66,47 @@ namespace SOLUM_UI.Views.Components
 
         #region Focus & Navigation Handling
 
+        public bool FocusField(string tag)
+        {
+            if (string.IsNullOrEmpty(tag)) return false;
+            var el = FindElementByTag(this, tag);
+            if (el != null)
+            {
+                el.BringIntoView();
+                el.Focus();
+                return true;
+            }
+            return false;
+        }
+
+        private static FrameworkElement FindElementByTag(DependencyObject parent, string tag)
+        {
+            if (parent == null || string.IsNullOrEmpty(tag)) return null;
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is FrameworkElement fe && fe.Tag != null)
+                {
+                    string feTag = fe.Tag.ToString();
+                    if (string.Equals(feTag, tag, StringComparison.OrdinalIgnoreCase))
+                        return fe;
+                    if ((tag == "dob" || tag == "birthdate") && (feTag == "dob" || feTag == "birthdate"))
+                        return fe;
+                    if (tag.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase) && feTag.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int tagIdx = tag.LastIndexOf('_');
+                        int feIdx = feTag.LastIndexOf('_');
+                        if (tagIdx >= 0 && feIdx >= 0 && string.Equals(tag.Substring(tagIdx), feTag.Substring(feIdx), StringComparison.OrdinalIgnoreCase))
+                            return fe;
+                    }
+                }
+                var res = FindElementByTag(child, tag);
+                if (res != null) return res;
+            }
+            return null;
+        }
+
         private void Field_GotFocus(object sender, RoutedEventArgs e)
         {
             if (sender is FrameworkElement elem && elem.Tag is string tag && !string.IsNullOrEmpty(tag))
