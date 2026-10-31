@@ -19,7 +19,28 @@ namespace SOLUM_UI.Views.Components
         public RecordActionToolbar()
         {
             InitializeComponent();
-            Loaded += (s, e) => UpdateDeleteButtonVisibility();
+            Loaded += (s, e) =>
+            {
+                UpdateDeleteButtonVisibility();
+                UpdateRenewButtonAppearance();
+            };
+        }
+
+        private void UpdateRenewButtonAppearance()
+        {
+            if (BtnRenew == null || Vm?.Record == null) return;
+            if (!Vm.Record.CanRenew(out _, out var earliestDate))
+            {
+                BtnRenew.Opacity = 0.55;
+                if (earliestDate.HasValue)
+                {
+                    BtnRenew.ToolTip = $"Renewal available on {earliestDate.Value:MMM dd, yyyy} (Active < 1 month)";
+                }
+            }
+            else
+            {
+                BtnRenew.Opacity = 1.0;
+            }
         }
 
         private void UpdateDeleteButtonVisibility()
@@ -68,6 +89,16 @@ namespace SOLUM_UI.Views.Components
             var parentWindow = Window.GetWindow(this);
             var record = Vm.Record;
 
+            // Pre-check with in-memory record first
+            if (!record.CanRenew(out string preCheckReason, out _))
+            {
+                ActionConfirmDialog.Warning(
+                    "Renewal Not Available",
+                    preCheckReason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
+                    parentWindow);
+                return;
+            }
+
             Models.Api.SoloParentDto existingDto = null;
             if (Guid.TryParse(record.Id, out var guid))
             {
@@ -77,6 +108,16 @@ namespace SOLUM_UI.Views.Components
                     existingDto = fetch.Data;
                     record = Services.Api.SoloParentApiService.Instance.MapToRecord(existingDto);
                 }
+            }
+
+            // Post-fetch check with latest backend data
+            if (!record.CanRenew(out string reason, out _))
+            {
+                ActionConfirmDialog.Warning(
+                    "Renewal Not Available",
+                    reason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
+                    parentWindow);
+                return;
             }
 
             var dialog = new Views.Dialogs.RenewalReassessmentDialog(record, existingDto)

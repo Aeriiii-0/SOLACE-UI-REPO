@@ -872,6 +872,15 @@ namespace SOLUM_UI
                 return;
             }
 
+            if (!record.CanRenew(out string quickRenewReason, out _))
+            {
+                Views.Dialogs.ActionConfirmDialog.Warning(
+                    "Renewal Not Available",
+                    quickRenewReason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
+                    Window.GetWindow(this));
+                return;
+            }
+
             if (!skipConfirmation)
             {
                 string personName = !string.IsNullOrWhiteSpace(record.Name) ? record.Name : "this solo parent";
@@ -928,6 +937,15 @@ namespace SOLUM_UI
                 Views.Dialogs.ActionConfirmDialog.Warning(
                     "Renew",
                     "Cannot renew: invalid record ID.");
+                return;
+            }
+
+            if (!original.CanRenew(out string renewReason, out _))
+            {
+                Views.Dialogs.ActionConfirmDialog.Warning(
+                    "Renewal Not Available",
+                    renewReason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
+                    Window.GetWindow(this));
                 return;
             }
 
@@ -1069,6 +1087,15 @@ namespace SOLUM_UI
             }
 
             if (rawRecord == null) rawRecord = new SoloParentRecord { Id = id, Surname = recordName };
+
+            if (!rawRecord.CanRenew(out string renewalEligibilityReason, out _))
+            {
+                Views.Dialogs.ActionConfirmDialog.Warning(
+                    "Renewal Not Available",
+                    renewalEligibilityReason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
+                    Window.GetWindow(this));
+                return;
+            }
 
             var dialog = new RenewalReassessmentDialog(rawRecord, existingDto)
             {

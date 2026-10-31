@@ -51,6 +51,9 @@ namespace SOLUM_UI.ViewModels
 
         public SoloParentRecord RawModel => _model;
 
+        /// <summary>True when eligible for renewal (active >= 1 month or expired/inactive).</summary>
+        public bool CanRenew => _model.CanRenew(out _, out _);
+
         public bool IsSelected
         {
             get => _isSelected;

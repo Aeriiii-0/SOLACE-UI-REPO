@@ -220,5 +220,81 @@ namespace SOLUM_UI.Models
                 return "—";
             }
         }
+
+        /// <summary>
+        /// Gets the start/issue date of the current active term.
+        /// Checks the latest term in RecordTerms, then LastUpdated, then DateOfApplication, then CurrentTermExpiresAt - 1 year.
+        /// </summary>
+        public DateTime GetActiveTermStartDate()
+        {
+            DateTime latestStart = DateTime.MinValue;
+
+            if (RecordTerms != null && RecordTerms.Count > 0)
+            {
+                foreach (var rt in RecordTerms)
+                {
+                    DateTime dt = rt.DateCreated ?? DateTime.MinValue;
+                    if (DateTime.TryParse(rt.StartsAt, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var s) && s > dt)
+                        dt = s;
+                    else if (DateTime.TryParse(rt.StartsAt, out var s2) && s2 > dt)
+                        dt = s2;
+
+                    if (dt > latestStart)
+                        latestStart = dt;
+                }
+            }
+
+            if (latestStart != DateTime.MinValue)
+                return latestStart;
+
+            if (LastUpdated != DateTime.MinValue)
+                return LastUpdated;
+
+            if (DateOfApplication != DateTime.MinValue)
+                return DateOfApplication;
+
+            if (CurrentTermExpiresAt.HasValue && CurrentTermExpiresAt.Value != DateTime.MinValue)
+                return CurrentTermExpiresAt.Value.AddYears(-1);
+
+            return DateTime.MinValue;
+        }
+
+        /// <summary>
+        /// Determines whether the record is eligible for renewal.
+        /// Rule: Solo parents cannot renew if their record is active for less than 1 month since its issue/start date.
+        /// Expired or inactive records can always be renewed.
+        /// </summary>
+        public bool CanRenew(out string failureReason, out DateTime? earliestRenewalDate)
+        {
+            failureReason = null;
+            earliestRenewalDate = null;
+
+            bool isExpired = CurrentTermExpiresAt.HasValue && CurrentTermExpiresAt.Value.Date < DateTime.Today;
+            bool isStatusInactive = string.Equals(Status, "Inactive", StringComparison.OrdinalIgnoreCase) ||
+                                    string.Equals(Status, "Expired", StringComparison.OrdinalIgnoreCase);
+
+            // Expired or inactive records are always eligible for renewal
+            if (isExpired || isStatusInactive)
+            {
+                return true;
+            }
+
+            DateTime startDate = GetActiveTermStartDate();
+            if (startDate != DateTime.MinValue)
+            {
+                DateTime minRenewal = startDate.Date.AddMonths(1);
+                if (DateTime.Today < minRenewal)
+                {
+                    earliestRenewalDate = minRenewal;
+                    int daysRemaining = Math.Max(1, (minRenewal - DateTime.Today).Days);
+                    failureReason = $"This record has been active for less than a month (activated on {startDate:MMM dd, yyyy}). Renewal will be available starting {minRenewal:MMM dd, yyyy} ({daysRemaining} day{(daysRemaining == 1 ? "" : "s")} remaining).";
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool IsEligibleForRenewal => CanRenew(out _, out _);
     }
 }

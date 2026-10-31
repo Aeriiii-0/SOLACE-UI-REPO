@@ -321,6 +321,17 @@ namespace SOLUM_UI.Views.Dialogs
 
             Loaded += (s, e) =>
             {
+                if (!_original.CanRenew(out string failureReason, out _))
+                {
+                    ActionConfirmDialog.Warning(
+                        "Renewal Not Allowed",
+                        failureReason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
+                        this);
+                    DialogResult = false;
+                    Close();
+                    return;
+                }
+
                 PopulateIdentity();
                 PopulateStep1();
                 PopulateStep2();
@@ -1334,6 +1345,16 @@ namespace SOLUM_UI.Views.Dialogs
         private void BtnSubmitRenew_Click(object sender, RoutedEventArgs e)
         {
             if (!BtnSubmitRenew.IsEnabled) return;
+
+            if (!_original.CanRenew(out string failureReason, out _))
+            {
+                ActionConfirmDialog.Warning(
+                    "Renewal Not Allowed",
+                    failureReason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
+                    this);
+                return;
+            }
+
             // Build RenewSoloParentRequest
             string civ = (CmbCivilStatus.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Single";
             string empStatusTag = (CmbEmploymentStatus.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "employed";
