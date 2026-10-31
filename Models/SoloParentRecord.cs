@@ -60,6 +60,7 @@ namespace SOLUM_UI.Models
         // id
         public string   Id          { get; set; }
         public string   CreatedBy   { get; set; }
+        public string   LastModifiedBy { get; set; }
         public DateTime LastUpdated { get; set; }
         public string   Status      { get; set; }
 

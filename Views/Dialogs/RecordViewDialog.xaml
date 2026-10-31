@@ -5,7 +5,7 @@
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize" SizeChanged="Window_SizeChanged"
-        Closing="Window_Closing" Width="1000" Height="820">
+        Closing="Window_Closing" Width="920" Height="780">
 
     <Border Background="#60000000">
         <Border Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -21,7 +21,7 @@
 
                 <!-- â”€â”€ Dialog Shell â”€â”€ -->
                 <Border x:Name="DialogShell" Grid.Column="0"
-                        Background="White" CornerRadius="14"
+                        Background="#FDFBFC" CornerRadius="14"
                         VerticalAlignment="Center" HorizontalAlignment="Center">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -64,55 +64,41 @@
                         <!-- Content -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled"
-                                      Background="#FDFBFC">
-                            <StackPanel Margin="24,18,24,18">
-                                <!-- Top Profile Summary Banner -->
+                                      Background="White">
+                            <StackPanel Margin="22,18,22,18">
                                 <Border Background="White" CornerRadius="12"
-                                        BorderBrush="#EADDE2" BorderThickness="1.2"
-                                        Padding="20,16" Margin="0,0,0,16">
+                                        BorderBrush="#E8D4DA" BorderThickness="1.2"
+                                        Padding="20,16" Margin="0,0,0,14">
                                     <Border.Effect>
                                         <DropShadowEffect Color="#702943" BlurRadius="12" ShadowDepth="2" Opacity="0.05"/>
                                     </Border.Effect>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-
-                                        <!-- Avatar Initials -->
-                                        <Border Grid.Column="0" Width="48" Height="48" CornerRadius="24"
-                                                Background="#FAF0F3" BorderBrush="#DF9BB1" BorderThickness="1.5"
-                                                Margin="0,0,16,0" VerticalAlignment="Center">
-                                            <TextBlock x:Name="TxtAvatarInitials" Text="SP"
-                                                       FontSize="16" FontWeight="Bold" Foreground="#702943"
-                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-
-                                        <!-- Name & Subtitle -->
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                             <TextBlock x:Name="TxtRecordName" Text=""
-                                                       FontSize="18" FontWeight="Bold" Foreground="#1F2937" TextWrapping="Wrap"
-                                                       FontFamily="Segoe UI" Margin="0,0,0,3"/>
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                                       FontSize="18" FontWeight="Bold" Foreground="#1E293B" TextWrapping="Wrap"
+                                                       FontFamily="Segoe UI" Margin="0,0,0,4"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,3" VerticalAlignment="Center">
                                                 <TextBlock x:Name="TxtSexAge" Text=""
-                                                           FontSize="12.5" FontWeight="SemiBold" Foreground="#594B52"
+                                                           FontSize="12.5" FontWeight="SemiBold" Foreground="#64748B"
                                                            FontFamily="Segoe UI"/>
+                                                <TextBlock Text=" • " FontSize="12" Foreground="#CBD5E1" Margin="4,0" VerticalAlignment="Center"/>
                                                 <TextBlock x:Name="TxtBarangayBadge" Text=""
-                                                           FontSize="12.5" Foreground="#7A6B72"
-                                                           FontFamily="Segoe UI" Margin="6,0,0,0"/>
+                                                           FontSize="12.5" FontWeight="SemiBold" Foreground="#702943"
+                                                           FontFamily="Segoe UI"/>
                                             </StackPanel>
                                             <TextBlock x:Name="TxtContact" Text=""
-                                                       FontSize="12" Foreground="#8A7A81"
+                                                       FontSize="12" Foreground="#64748B"
                                                        FontFamily="Segoe UI"/>
                                         </StackPanel>
-
-                                        <!-- Status & Validity Badges -->
-                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
                                             <Border x:Name="StatusBadge"
-                                                    CornerRadius="12" Padding="10,3.5"
-                                                    HorizontalAlignment="Right" Margin="0,0,0,6"
-                                                    Background="#E8F5E9" BorderBrush="#A5D6A7" BorderThickness="1">
+                                                    CornerRadius="12" Padding="10,4"
+                                                    HorizontalAlignment="Right" Margin="0,0,0,5"
+                                                    Background="#E8F8EE" BorderBrush="#A5D6A7" BorderThickness="1">
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                     <Ellipse x:Name="StatusDot" Width="7" Height="7" Fill="#2E7D32" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                                     <TextBlock x:Name="TxtStatusBadge" Text=""
@@ -131,7 +117,6 @@
                                         </StackPanel>
                                     </Grid>
                                 </Border>
-
                                 <StackPanel x:Name="CardPanel"/>
                             </StackPanel>
                         </ScrollViewer>

@@ -439,9 +439,14 @@ namespace SOLUM_UI.Services.Api
             if (!isNewApplicant && !isRenewal)
                 isNewApplicant = true;
 
-            // LastUpdated: prefer the most-recent term's start date over DateCreated because
-            // DateCreated never changes after the initial insert.
-            DateTime lastUpdated = lastTermStart != DateTime.MinValue ? lastTermStart : dto.DateCreated;
+            // LastUpdated: prefer the backend UpdatedAt timestamp, then the most-recent term's start date, then DateCreated.
+            DateTime lastUpdated = dto.UpdatedAt.HasValue && dto.UpdatedAt.Value != DateTime.MinValue
+                ? dto.UpdatedAt.Value
+                : (lastTermStart != DateTime.MinValue ? lastTermStart : dto.DateCreated);
+
+            DateTime dateOfApplication = dto.CreatedAt.HasValue && dto.CreatedAt.Value != DateTime.MinValue
+                ? dto.CreatedAt.Value
+                : (dto.DateCreated != DateTime.MinValue ? dto.DateCreated : DateTime.MinValue);
 
             string computedStatus = "Inactive";
             if (!string.IsNullOrWhiteSpace(dto.Status))
@@ -456,10 +461,11 @@ namespace SOLUM_UI.Services.Api
             var record = new SoloParentRecord
             {
                 Id = dto.Id.ToString(),
-                CreatedBy = "Admin",
+                CreatedBy = !string.IsNullOrWhiteSpace(dto.CreatedBy) ? dto.CreatedBy : "System",
+                LastModifiedBy = !string.IsNullOrWhiteSpace(dto.LastModifiedBy) ? dto.LastModifiedBy : dto.CreatedBy,
                 LastUpdated = lastUpdated,
                 Status = computedStatus,
-                DateOfApplication = dto.DateCreated,
+                DateOfApplication = dateOfApplication,
                 IsNewApplicant = isNewApplicant,
                 IsRenewal      = isRenewal,
                 CurrentTermExpiresAt = dto.CurrentTermExpiresAt ?? (validUntil != DateTime.MinValue ? (DateTime?)validUntil : null),
@@ -587,6 +593,10 @@ namespace SOLUM_UI.Services.Api
             var adapted = new SoloParentDto
             {
                 Id                    = dto.Id,
+                CreatedBy             = dto.CreatedBy,
+                CreatedAt             = dto.CreatedAt,
+                LastModifiedBy        = dto.LastModifiedBy,
+                UpdatedAt             = dto.UpdatedAt,
                 PersonalInfo          = new PersonalInfo
                 {
                     FirstName              = firstName,

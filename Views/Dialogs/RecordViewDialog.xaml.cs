@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using SOLUM_UI.Models;
 using SOLUM_UI.ViewModels;
 
@@ -40,14 +43,7 @@ namespace SOLUM_UI.Views.Dialogs
         private void ApplySize()
         {
             double screenW, screenH, screenLeft, screenTop;
-            if (Owner != null && Owner.WindowState == WindowState.Maximized)
-            {
-                screenW    = SystemParameters.WorkArea.Width;
-                screenH    = SystemParameters.WorkArea.Height;
-                screenLeft = SystemParameters.WorkArea.Left;
-                screenTop  = SystemParameters.WorkArea.Top;
-            }
-            else if (Owner != null)
+            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
                 screenW    = Owner.ActualWidth;
                 screenH    = Owner.ActualHeight;
@@ -61,1445 +57,566 @@ namespace SOLUM_UI.Views.Dialogs
                 screenLeft = SystemParameters.WorkArea.Left;
                 screenTop  = SystemParameters.WorkArea.Top;
             }
-            Width  = screenW;
-            Height = screenH;
-            Left   = screenLeft;
-            Top    = screenTop;
-            DialogShell.MaxHeight = Math.Min(screenH * 0.92, 880);
-            DialogShell.Width     = Math.Min(Math.Max(screenW * 0.74, 950), 1040);
+
+            if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
+            if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
+            if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
+            if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
+
+            DialogShell.MaxHeight = screenH * 0.90;
+            DialogShell.Width     = Math.Min(screenW * 0.70, 940);
         }
 
-        // ── Programmatic card-builders (Phase 4 will replace with UserControls) ─
+        // ── Programmatic card-builders ────────────────────────────────────────
 
-                        private void BuildContent()
-
+        private void BuildContent()
         {
+            var r = _vm.Record;
+            if (r == null) return;
+
+            TxtRecordName.Text = r.Name ?? string.Empty;
+
+            int age = 0;
+            if (r.DateOfBirth != DateTime.MinValue)
+            {
+                age = DateTime.Today.Year - r.DateOfBirth.Year;
+                if (r.DateOfBirth.Date > DateTime.Today.AddYears(-age)) age--;
+            }
+
+            TxtSexAge.Text = (r.Sex ?? "—") + (age > 0 ? $"  ·  {age} years old" : string.Empty);
+
+            string brgy = !string.IsNullOrWhiteSpace(r.Barangay) ? r.Barangay : "Biñan";
+            if (!brgy.StartsWith("Brgy", StringComparison.OrdinalIgnoreCase) && !brgy.StartsWith("Barangay", StringComparison.OrdinalIgnoreCase))
+                brgy = "Brgy. " + brgy;
+            TxtBarangayBadge.Text = brgy;
+
+            string phone = string.IsNullOrWhiteSpace(r.ContactNumber) ? "Not applicable" : SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber);
+            TxtContact.Text = phone;
+
+            string status = string.IsNullOrWhiteSpace(r.Status) ? "Active" : r.Status;
+            TxtStatusBadge.Text = status;
+
+            // Status styling
+            if (string.Equals(status, "Valid", StringComparison.OrdinalIgnoreCase) || string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase))
+            {
+                StatusBadge.Background = new SolidColorBrush(Color.FromRgb(0xE8, 0xF8, 0xEE));
+                StatusBadge.BorderBrush = new SolidColorBrush(Color.FromRgb(0xA5, 0xD6, 0xA7));
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
+                TxtStatusBadge.Foreground = new SolidColorBrush(Color.FromRgb(0x1B, 0x5E, 0x20));
+            }
+            else if (string.Equals(status, "For Renewal", StringComparison.OrdinalIgnoreCase))
+            {
+                StatusBadge.Background = new SolidColorBrush(Color.FromRgb(0xFE, 0xF3, 0xC7));
+                StatusBadge.BorderBrush = new SolidColorBrush(Color.FromRgb(0xFC, 0xD3, 0x4D));
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0xD9, 0x77, 0x06));
+                TxtStatusBadge.Foreground = new SolidColorBrush(Color.FromRgb(0x92, 0x40, 0x0E));
+            }
+            else
+            {
+                StatusBadge.Background = new SolidColorBrush(Color.FromRgb(0xF3, 0xF4, 0xF6));
+                StatusBadge.BorderBrush = new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB));
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(0x6B, 0x72, 0x80));
+                TxtStatusBadge.Foreground = new SolidColorBrush(Color.FromRgb(0x4B, 0x55, 0x63));
+            }
+
+            // Validity styling
+            string validUntil = r.CurrentTermExpiresAt.HasValue
+                ? r.CurrentTermExpiresAt.Value.ToString("MMM d, yyyy")
+                : r.LastUpdated != DateTime.MinValue
+                    ? r.LastUpdated.AddYears(1).ToString("MMM d, yyyy")
+                    : "Not applicable";
+
+            TxtValidUntil.Text = "Valid until: " + validUntil;
+            TxtSpId.Text = !string.IsNullOrWhiteSpace(r.Id) ? $"ID: {r.Id}" : string.Empty;
 
             CardPanel.Children.Clear();
 
-            var r = _vm.Record;
-
-            if (r == null) return;
-
-
-
-            int age = r.DateOfBirth != DateTime.MinValue ? SOLUM_UI.Services.OcrService.CalculateAge(r.DateOfBirth) : 0;
-
-            string formattedContact = SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber);
-
-
-
-            // ── Populate Top Profile Summary Banner ──
-
-            string fullName = !string.IsNullOrWhiteSpace(r.FullName) ? r.FullName : (r.Name ?? string.Empty);
-
-            TxtRecordName.Text = fullName;
-
-
-
-            // Avatar initials (first letter of first name + first letter of last name, or "SP")
-
-            string initials = "SP";
-
-            string f = r.FirstName?.Trim();
-
-            string l = r.Surname?.Trim();
-
-            if (!string.IsNullOrEmpty(f) && !string.IsNullOrEmpty(l))
-
-                initials = $"{char.ToUpper(f[0])}{char.ToUpper(l[0])}";
-
-            else if (!string.IsNullOrEmpty(fullName))
-
+            // 1. Identity & Personal Info
+            AddCard("Identity & Personal Information", new[]
             {
-
-                var parts = fullName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (parts.Length >= 2)
-
-                    initials = $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[parts.Length - 1][0])}";
-
-                else if (parts.Length == 1 && parts[0].Length >= 2)
-
-                    initials = parts[0].Substring(0, 2).ToUpper();
-
-            }
-
-            TxtAvatarInitials.Text = initials;
-
-
-
-            // Sex & Age
-
-            string sexStr = !string.IsNullOrWhiteSpace(r.Sex) ? r.Sex : "—";
-
-            string ageStr = age > 0 ? $"{age} years old" : string.Empty;
-
-            TxtSexAge.Text = !string.IsNullOrEmpty(ageStr) ? $"{sexStr}  •  {ageStr}" : sexStr;
-
-
-
-            // Barangay Badge
-
-            TxtBarangayBadge.Text = !string.IsNullOrWhiteSpace(r.Barangay) ? $"•  Brgy. {r.Barangay}, Biñan" : "•  City of Biñan";
-
-
-
-            // Contact
-
-            TxtContact.Text = !string.IsNullOrWhiteSpace(formattedContact) ? $"📞 {formattedContact}" : "📞 No contact number provided";
-
-
-
-            // Status Badge
-
-            string status = !string.IsNullOrWhiteSpace(r.Status) ? r.Status : "Active";
-
-            TxtStatusBadge.Text = status;
-
-            if (string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase))
-
-            {
-
-                StatusBadge.Background = RecordViewDialogViewModel.Clr(0xE8, 0xF5, 0xE9);
-
-                StatusBadge.BorderBrush = RecordViewDialogViewModel.Clr(0xA5, 0xD6, 0xA7);
-
-                StatusDot.Fill = RecordViewDialogViewModel.Clr(0x2E, 0x7D, 0x32);
-
-                TxtStatusBadge.Foreground = RecordViewDialogViewModel.Clr(0x1B, 0x5E, 0x20);
-
-            }
-
-            else if (string.Equals(status, "Inactive", StringComparison.OrdinalIgnoreCase))
-
-            {
-
-                StatusBadge.Background = RecordViewDialogViewModel.Clr(0xF3, 0xF4, 0xF6);
-
-                StatusBadge.BorderBrush = RecordViewDialogViewModel.Clr(0xE5, 0xE7, 0xEB);
-
-                StatusDot.Fill = RecordViewDialogViewModel.Clr(0x9C, 0xA3, 0xAF);
-
-                TxtStatusBadge.Foreground = RecordViewDialogViewModel.Clr(0x4B, 0x55, 0x63);
-
-            }
-
-            else if (string.Equals(status, "For Renewal", StringComparison.OrdinalIgnoreCase))
-
-            {
-
-                StatusBadge.Background = RecordViewDialogViewModel.Clr(0xFE, 0xF6, 0xEB);
-
-                StatusBadge.BorderBrush = RecordViewDialogViewModel.Clr(0xF4, 0xD6, 0xB4);
-
-                StatusDot.Fill = RecordViewDialogViewModel.Clr(0xD9, 0x77, 0x06);
-
-                TxtStatusBadge.Foreground = RecordViewDialogViewModel.Clr(0x8B, 0x4E, 0x12);
-
-            }
-
-            else
-
-            {
-
-                StatusBadge.Background = RecordViewDialogViewModel.Clr(0xFE, 0xF2, 0xF2);
-
-                StatusBadge.BorderBrush = RecordViewDialogViewModel.Clr(0xFE, 0xCA, 0xCA);
-
-                StatusDot.Fill = RecordViewDialogViewModel.Clr(0xDC, 0x26, 0x26);
-
-                TxtStatusBadge.Foreground = RecordViewDialogViewModel.Clr(0x99, 0x1B, 0x1B);
-
-            }
-
-
-
-            // Validity Badge
-
-            DateTime? validDate = _vm.ValidUntil ?? r.CurrentTermExpiresAt;
-            if (validDate.HasValue && validDate.Value != DateTime.MinValue)
-
-            {
-
-                ValidityBadge.Visibility = Visibility.Visible;
-
-                TxtValidUntil.Text = $"Valid Until: {validDate.Value:MMM d, yyyy}";
-
-            }
-
-            else
-
-            {
-
-                ValidityBadge.Visibility = Visibility.Collapsed;
-
-            }
-
-
-
-            // Footer SP ID
-
-            TxtSpId.Text = !string.IsNullOrWhiteSpace(r.Id) ? $"SOLO PARENT ID: {r.Id}" : string.Empty;
-
-
-
-            // Two-column responsive layout for executive readability
-
-            var twoColGrid = new Grid { Margin = new Thickness(0, 0, 0, 14) };
-
-            twoColGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-            twoColGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
-
-            twoColGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-
-
-            var leftCol = new StackPanel();
-
-            Grid.SetColumn(leftCol, 0);
-
-
-
-            var rightCol = new StackPanel();
-
-            Grid.SetColumn(rightCol, 2);
-
-
-
-            twoColGrid.Children.Add(leftCol);
-
-            twoColGrid.Children.Add(rightCol);
-
-
-
-            // Left Column: Identity, Residence, Livelihood
-
-            leftCol.Children.Add(CreateCard("Personal & Civil Details", new (string, string, bool)[]
-
-            {
-
-                ("Civil Status",   r.CivilStatus, false),
-
-                ("Sex",            r.Sex, false),
-
-                ("Date of Birth",  r.DateOfBirth != DateTime.MinValue ? r.DateOfBirth.ToString("MMMM d, yyyy") : "—", false),
-
-                ("Age",            age > 0 ? $"{age} years old" : "—", false),
-
-                ("Place of Birth", r.PlaceOfBirth, true),
-
-                ("Religion",       r.Religion, false),
-
-                ("PhilSys Card No.", r.PhilSysNumber, false),
-
-            }));
-
-
-
-            leftCol.Children.Add(CreateCard("Residence & Identification", new (string, string, bool)[]
-
-            {
-
-                ("Barangay",         r.Barangay, false),
-
-                ("Contact Number",   formattedContact, false),
-
-                ("Complete Address", r.Address, true),
-
-            }));
-
-
-
-            leftCol.Children.Add(CreateCard("Employment & Livelihood", new (string, string, bool)[]
-
-            {
-
-                ("Employment Status",      r.EmploymentStatusDisplay, false),
-
-                ("Monthly Income",         string.IsNullOrWhiteSpace(r.MonthlyIncome) ? "—" : "₱ " + r.MonthlyIncome, false),
-
-                ("Occupation",             r.Occupation, true),
-
-                ("Educational Attainment", r.EducationalAttainment, true),
-
-                ("Other Income Sources",   string.IsNullOrWhiteSpace(r.OtherIncomeSource) ? "—" : r.OtherIncomeSource, true),
-
-            }));
-
-
-
-            // Right Column: Circumstances & Classifications, Emergency Contact
-
-            rightCol.Children.Add(CreateCircumstancesAndNeedsCard(r));
-
-
-
-            if (!string.IsNullOrWhiteSpace(r.EmergencyContactName) ||
-
-                !string.IsNullOrWhiteSpace(r.EmergencyContactNumber) ||
-
-                !string.IsNullOrWhiteSpace(r.EmergencyAddress))
-
-            {
-
-                rightCol.Children.Add(CreateCard("Emergency Contact", new (string, string, bool)[]
-
-                {
-
-                    ("Contact Person", r.EmergencyContactName, false),
-
-                    ("Relationship",   r.EmergencyRelationship, false),
-
-                    ("Contact No.",    SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.EmergencyContactNumber), false),
-
-                    ("Complete Address", r.EmergencyAddress, true),
-
-                }));
-
-            }
-
-
-
-            CardPanel.Children.Add(twoColGrid);
-
-
-
-            // Full Width: Family Composition
-
-            if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
-
-                CardPanel.Children.Add(CreateFamilyCard(r.FamilyMembers));
-
-            else
-
-                CardPanel.Children.Add(CreateEmptyFamilyCard());
-
-
-
-            // Footer Metadata
-
-            CardPanel.Children.Add(CreateSystemInfoCard(r));
-
-        }
-
-
-
-        private Border CreateCard(string title, (string Label, string Value, bool FullWidth)[] fields)
-
-        {
-
-            var card  = MakeCard();
-
-            var inner = new StackPanel();
-
-            inner.Children.Add(MakeSectionHeader(title));
-
-
-
-            var grid = new Grid { Margin = new Thickness(0, 10, 0, 0) };
-
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-
-
-            int row = 0, col = 0;
-
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-
-
-            foreach (var (label, value, fullWidth) in fields)
-
-            {
-
-                if (fullWidth)
-
-                {
-
-                    if (col != 0)
-
-                    {
-
-                        row++;
-
-                        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-                        col = 0;
-
-                    }
-
-                    var cell = MakeCell(label, value);
-
-                    Grid.SetRow(cell, row);
-
-                    Grid.SetColumn(cell, 0);
-
-                    Grid.SetColumnSpan(cell, 2);
-
-                    grid.Children.Add(cell);
-
-
-
-                    row++;
-
-                    grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-                    col = 0;
-
-                }
-
-                else
-
-                {
-
-                    var cell = MakeCell(label, value);
-
-                    Grid.SetRow(cell, row);
-
-                    Grid.SetColumn(cell, col);
-
-                    grid.Children.Add(cell);
-
-
-
-                    col++;
-
-                    if (col > 1)
-
-                    {
-
-                        col = 0;
-
-                        row++;
-
-                        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-                    }
-
-                }
-
-            }
-
-
-
-            inner.Children.Add(grid);
-
-            card.Child = inner;
-
-            return card;
-
-        }
-
-
-
-        private Border CreateCircumstancesAndNeedsCard(SoloParentRecord r)
-
-        {
-
-            var card  = MakeCard();
-
-            var inner = new StackPanel();
-
-            inner.Children.Add(MakeSectionHeader("Circumstances & Classifications"));
-
-
-
-            string display = r.CircumstancesDisplay;
-
-            bool hasCircumstance = false;
-
-
-
-            if (!string.IsNullOrWhiteSpace(display) && display != "—")
-
-            {
-
-                var circSp = new StackPanel { Margin = new Thickness(0, 10, 0, 6) };
-
-                foreach (var rawLine in display.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-
-                {
-
-                    string line = rawLine.Trim();
-
-                    if (string.IsNullOrWhiteSpace(line)) continue;
-
-                    hasCircumstance = true;
-
-
-
-                    var item = new Border
-
-                    {
-
-                        Background = RecordViewDialogViewModel.BrChipBg,
-
-                        BorderBrush = RecordViewDialogViewModel.BrChipBdr,
-
-                        BorderThickness = new Thickness(1),
-
-                        CornerRadius = new CornerRadius(8),
-
-                        Padding = new Thickness(12, 8, 12, 8),
-
-                        Margin = new Thickness(0, 0, 0, 6)
-
-                    };
-
-                    var itemSp = new StackPanel { Orientation = Orientation.Horizontal };
-
-                    itemSp.Children.Add(new TextBlock
-
-                    {
-
-                        Text = "●",
-
-                        FontSize = 8,
-
-                        Foreground = RecordViewDialogViewModel.BrHead,
-
-                        Margin = new Thickness(0, 3, 8, 0),
-
-                        VerticalAlignment = VerticalAlignment.Top
-
-                    });
-
-                    itemSp.Children.Add(new TextBlock
-
-                    {
-
-                        Text = line,
-
-                        FontSize = 12,
-
-                        FontWeight = FontWeights.SemiBold,
-
-                        Foreground = RecordViewDialogViewModel.BrChipTxt,
-
-                        TextWrapping = TextWrapping.Wrap,
-
-                        FontFamily = new FontFamily("Segoe UI")
-
-                    });
-
-                    item.Child = itemSp;
-
-                    circSp.Children.Add(item);
-
-                }
-
-                inner.Children.Add(circSp);
-
-            }
-
-
-
-            // Special demographic tags
-
-            var wrap = new WrapPanel { Margin = new Thickness(0, 4, 0, 4) };
-
-            if (r.IsPantawidBeneficiary)
-
-            {
-
-                hasCircumstance = true;
-
-                wrap.Children.Add(new Border
-
-                {
-
-                    Background      = RecordViewDialogViewModel.Clr(0xFE, 0xF6, 0xEB),
-
-                    BorderBrush     = RecordViewDialogViewModel.Clr(0xF4, 0xD6, 0xB4),
-
-                    BorderThickness = new Thickness(1),
-
-                    CornerRadius    = new CornerRadius(12),
-
-                    Padding         = new Thickness(10, 4, 10, 4),
-
-                    Margin          = new Thickness(0, 0, 6, 6),
-
-                    Child           = new TextBlock
-
-                    {
-
-                        Text       = "4Ps / Pantawid Beneficiary", FontSize = 11.5,
-
-                        FontWeight = FontWeights.SemiBold,
-
-                        Foreground = RecordViewDialogViewModel.Clr(0x8B, 0x4E, 0x12),
-
-                        FontFamily = new FontFamily("Segoe UI")
-
-                    }
-
-                });
-
-            }
-
-
-
-            if (r.IsIndigenous)
-
-            {
-
-                hasCircumstance = true;
-
-                wrap.Children.Add(new Border
-
-                {
-
-                    Background      = RecordViewDialogViewModel.Clr(0xFA, 0xF0, 0xF3),
-
-                    BorderBrush     = RecordViewDialogViewModel.Clr(0xDF, 0x9B, 0xB1),
-
-                    BorderThickness = new Thickness(1),
-
-                    CornerRadius    = new CornerRadius(12),
-
-                    Padding         = new Thickness(10, 4, 10, 4),
-
-                    Margin          = new Thickness(0, 0, 6, 6),
-
-                    Child           = new TextBlock
-
-                    {
-
-                        Text       = "Indigenous Peoples (IP)", FontSize = 11.5,
-
-                        FontWeight = FontWeights.SemiBold,
-
-                        Foreground = RecordViewDialogViewModel.Clr(0x70, 0x29, 0x43),
-
-                        FontFamily = new FontFamily("Segoe UI")
-
-                    }
-
-                });
-
-            }
-
-
-
-            if (r.IsLGBT)
-
-            {
-
-                hasCircumstance = true;
-
-                wrap.Children.Add(new Border
-
-                {
-
-                    Background      = RecordViewDialogViewModel.Clr(0xF4, 0xF1, 0xF6),
-
-                    BorderBrush     = RecordViewDialogViewModel.Clr(0xD5, 0xCE, 0xDE),
-
-                    BorderThickness = new Thickness(1),
-
-                    CornerRadius    = new CornerRadius(12),
-
-                    Padding         = new Thickness(10, 4, 10, 4),
-
-                    Margin          = new Thickness(0, 0, 6, 6),
-
-                    Child           = new TextBlock
-
-                    {
-
-                        Text       = "LGBTQ+", FontSize = 11.5,
-
-                        FontWeight = FontWeights.SemiBold,
-
-                        Foreground = RecordViewDialogViewModel.Clr(0x56, 0x3E, 0x6E),
-
-                        FontFamily = new FontFamily("Segoe UI")
-
-                    }
-
-                });
-
-            }
-
-
-
-            if (!hasCircumstance)
-
-            {
-
-                wrap.Children.Add(new TextBlock
-
-                {
-
-                    Text = "No specific circumstances or demographic classifications indicated.",
-
-                    FontSize = 12, Foreground = RecordViewDialogViewModel.BrLabel,
-
-                    FontFamily = new FontFamily("Segoe UI"), FontStyle = FontStyles.Italic
-
-                });
-
-            }
-
-
-
-            inner.Children.Add(wrap);
-
-
-
-            // Identified Needs & Problems (clean narrative callout if present)
-
-            if (!string.IsNullOrWhiteSpace(r.NeedsAndProblems) &&
-
-                !string.Equals(r.NeedsAndProblems.Trim(), "None specified", StringComparison.OrdinalIgnoreCase) &&
-
-                !string.Equals(r.NeedsAndProblems.Trim(), "None", StringComparison.OrdinalIgnoreCase))
-
-            {
-
-                var needsBox = new Border
-
-                {
-
-                    Background      = RecordViewDialogViewModel.Clr(0xFA, 0xF8, 0xF9),
-
-                    BorderBrush     = RecordViewDialogViewModel.BrDivider,
-
-                    BorderThickness = new Thickness(1),
-
-                    CornerRadius    = new CornerRadius(8),
-
-                    Padding         = new Thickness(12, 10, 12, 10),
-
-                    Margin          = new Thickness(0, 10, 0, 2)
-
-                };
-
-                var needsSp = new StackPanel();
-
-                needsSp.Children.Add(new TextBlock
-
-                {
-
-                    Text = "IDENTIFIED NEEDS & PROBLEMS",
-
-                    FontSize = 10, FontWeight = FontWeights.Bold,
-
-                    Foreground = RecordViewDialogViewModel.BrLabel,
-
-                    Margin = new Thickness(0, 0, 0, 4),
-
-                    FontFamily = new FontFamily("Segoe UI")
-
-                });
-
-                needsSp.Children.Add(new TextBlock
-
-                {
-
-                    Text = r.NeedsAndProblems.Trim(),
-
-                    FontSize = 12.5, Foreground = RecordViewDialogViewModel.BrValue,
-
-                    TextWrapping = TextWrapping.Wrap,
-
-                    FontFamily = new FontFamily("Segoe UI")
-
-                });
-
-                needsBox.Child = needsSp;
-
-                inner.Children.Add(needsBox);
-
-            }
-
-
-
-            card.Child = inner;
-
-            return card;
-
-        }
-
-
-
-        private Border CreateEmptyFamilyCard()
-
-        {
-
-            var card  = MakeCard();
-
-            var inner = new StackPanel();
-
-            inner.Children.Add(MakeSectionHeader("Family Composition"));
-
-
-
-            var emptyTb = new TextBlock
-
-            {
-
-                Text = "No dependent family members or children registered for this record.",
-
-                FontSize = 12,
-
-                Foreground = RecordViewDialogViewModel.BrLabel,
-
-                FontStyle = FontStyles.Italic,
-
-                FontFamily = new FontFamily("Segoe UI"),
-
-                Margin = new Thickness(4, 10, 4, 4)
-
-            };
-
-            inner.Children.Add(emptyTb);
-
-
-
-            card.Child = inner;
-
-            return card;
-
-        }
-
-
-
-                private Border CreateFamilyCard(System.Collections.Generic.List<FamilyMember> members)
-
-        {
-
-            var card  = MakeCard();
-
-            var inner = new StackPanel();
-
-            inner.Children.Add(MakeSectionHeader($"Family Composition ({members.Count} {(members.Count == 1 ? "Dependent" : "Dependents")})"));
-
-
-
-            // 5 Data columns + 4 Vertical Column Lines = 9 Grid Columns
-
-            // Col 0: Name & Rel (2.2*)
-
-            // Col 1: Divider (1px)
-
-            // Col 2: Demographics (1.3*)
-
-            // Col 3: Divider (1px)
-
-            // Col 4: Education & Employment (2.4*) -> generous width so text never cuts
-
-            // Col 5: Divider (1px)
-
-            // Col 6: Monthly Income (1.0*)
-
-            // Col 7: Divider (1px)
-
-            // Col 8: Special Needs / PWD (1.9*)
-
-
-
-            var tableContainer = new Border
-
-            {
-
-                Background      = Brushes.White,
-
-                BorderBrush     = RecordViewDialogViewModel.Clr(0xD8, 0xC8, 0xD0),
-
-                BorderThickness = new Thickness(1.2),
-
-                CornerRadius    = new CornerRadius(12),
-
-                ClipToBounds    = true,
-
-                Margin          = new Thickness(0, 10, 0, 4)
-
-            };
-
-
-
-            var tableStack = new StackPanel();
-
-
-
-            // ── Header Banner (with matching top rounded corners) ──
-
-            var headerBorder = new Border
-
-            {
-
-                Background   = RecordViewDialogViewModel.Clr(0x70, 0x29, 0x43),
-
-                CornerRadius = new CornerRadius(11, 11, 0, 0),
-
-                Padding      = new Thickness(0, 10, 0, 10)
-
-            };
-
-
-
-            var headerGrid = new Grid();
-
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2.2, GridUnitType.Star), MinWidth = 150 });
-
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1) });
-
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.3, GridUnitType.Star), MinWidth = 110 });
-
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1) });
-
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2.4, GridUnitType.Star), MinWidth = 160 });
-
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1) });
-
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star), MinWidth = 85 });
-
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1) });
-
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.9, GridUnitType.Star), MinWidth = 140 });
-
-
-
-            string[] colLabels = { "NAME & RELATIONSHIP", "DEMOGRAPHICS", "EDUCATION & EMPLOYMENT", "MONTHLY INCOME", "SPECIAL NEEDS (PWD)" };
-
-            int[] dataCols = { 0, 2, 4, 6, 8 };
-
-
-
-            for (int i = 0; i < colLabels.Length; i++)
-
-            {
-
-                var tb = new TextBlock
-
-                {
-
-                    Text              = colLabels[i],
-
-                    FontSize          = 10,
-
-                    FontWeight        = FontWeights.Bold,
-
-                    Foreground        = Brushes.White,
-
-                    TextWrapping      = TextWrapping.Wrap,
-
-                    Margin            = new Thickness(10, 0, 10, 0),
-
-                    FontFamily        = new FontFamily("Segoe UI"),
-
-                    VerticalAlignment = VerticalAlignment.Center
-
-                };
-
-                if (i == 3) tb.HorizontalAlignment = HorizontalAlignment.Right;
-
-                Grid.SetColumn(tb, dataCols[i]);
-
-                headerGrid.Children.Add(tb);
-
-
-
-                // Add header vertical divider line if not last column
-
-                if (i < colLabels.Length - 1)
-
-                {
-
-                    var div = new Border
-
-                    {
-
-                        Width             = 1,
-
-                        Background        = new SolidColorBrush(Color.FromArgb(0x44, 0xFF, 0xFF, 0xFF)),
-
-                        VerticalAlignment = VerticalAlignment.Stretch
-
-                    };
-
-                    Grid.SetColumn(div, dataCols[i] + 1);
-
-                    headerGrid.Children.Add(div);
-
-                }
-
-            }
-
-
-
-            headerBorder.Child = headerGrid;
-
-            tableStack.Children.Add(headerBorder);
-
-
-
-            // ── Data Rows ──
-
-            bool alt = false;
-
-            for (int mIdx = 0; mIdx < members.Count; mIdx++)
-
-            {
-
-                var m = members[mIdx];
-
-                bool isLast = (mIdx == members.Count - 1);
-
-
-
-                var rowBorder = new Border
-
-                {
-
-                    Background      = alt ? RecordViewDialogViewModel.Clr(0xFD, 0xFB, 0xFC) : Brushes.White,
-
-                    BorderBrush     = RecordViewDialogViewModel.Clr(0xEE, 0xE4, 0xE8),
-
-                    BorderThickness = new Thickness(0, 0, 0, isLast ? 0 : 1),
-
-                    CornerRadius    = isLast ? new CornerRadius(0, 0, 11, 11) : new CornerRadius(0),
-
-                    Padding         = new Thickness(0, 9, 0, 9)
-
-                };
-
-
-
-                var rowGrid = new Grid();
-
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2.2, GridUnitType.Star), MinWidth = 150 });
-
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1) });
-
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.3, GridUnitType.Star), MinWidth = 110 });
-
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1) });
-
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2.4, GridUnitType.Star), MinWidth = 160 });
-
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1) });
-
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star), MinWidth = 85 });
-
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1) });
-
-                rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.9, GridUnitType.Star), MinWidth = 140 });
-
-
-
-                // Add 1px vertical column divider lines
-
-                int[] divCols = { 1, 3, 5, 7 };
-
-                foreach (var dc in divCols)
-
-                {
-
-                    var colDiv = new Border
-
-                    {
-
-                        Width             = 1,
-
-                        Background        = RecordViewDialogViewModel.Clr(0xEA, 0xDE, 0xE3),
-
-                        VerticalAlignment = VerticalAlignment.Stretch
-
-                    };
-
-                    Grid.SetColumn(colDiv, dc);
-
-                    rowGrid.Children.Add(colDiv);
-
-                }
-
-
-
-                // ── Col 0: Name & Relationship ──
-
-                var col0 = new StackPanel { Margin = new Thickness(10, 2, 10, 2), VerticalAlignment = VerticalAlignment.Center };
-
-                var nameRow = new StackPanel { Orientation = Orientation.Horizontal };
-
-                nameRow.Children.Add(new TextBlock
-
-                {
-
-                    Text         = string.IsNullOrWhiteSpace(m.MemberName) ? "—" : m.MemberName,
-
-                    FontSize     = 13,
-
-                    FontWeight   = FontWeights.Bold,
-
-                    Foreground   = RecordViewDialogViewModel.BrValue,
-
-                    TextWrapping = TextWrapping.Wrap,
-
-                    FontFamily   = new FontFamily("Segoe UI")
-
-                });
-
-                if (m.HasSpecialNeeds)
-
-                {
-
-                    var pwdBadge = new Border
-
-                    {
-
-                        Background        = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43)),
-
-                        CornerRadius      = new CornerRadius(3),
-
-                        Padding           = new Thickness(5, 1, 5, 1),
-
-                        Margin            = new Thickness(6, 0, 0, 0),
-
-                        VerticalAlignment = VerticalAlignment.Center,
-
-                        ToolTip           = !string.IsNullOrWhiteSpace(m.SpecialNeedsCategory) ? $"Person with Special Needs: {m.SpecialNeedsCategory}" : "Person with Special Needs (PWD)"
-
-                    };
-
-                    pwdBadge.Child = new TextBlock
-
-                    {
-
-                        Text       = "PWD",
-
-                        FontSize   = 9,
-
-                        FontWeight = FontWeights.Bold,
-
-                        Foreground = Brushes.White,
-
-                        FontFamily = new FontFamily("Segoe UI")
-
-                    };
-
-                    nameRow.Children.Add(pwdBadge);
-
-                }
-
-                col0.Children.Add(nameRow);
-
-
-
-                string relText = !string.IsNullOrWhiteSpace(m.Relationship) ? m.Relationship : "Dependent";
-
-                string civilText = !string.IsNullOrWhiteSpace(m.CivilStatus) ? $" • {m.CivilStatus}" : "";
-
-                col0.Children.Add(new TextBlock
-
-                {
-
-                    Text       = $"{relText}{civilText}",
-
-                    FontSize   = 11.5,
-
-                    Foreground = RecordViewDialogViewModel.BrLabel,
-
-                    Margin     = new Thickness(0, 2, 0, 0),
-
-                    FontFamily = new FontFamily("Segoe UI")
-
-                });
-
-                Grid.SetColumn(col0, 0);
-
-                rowGrid.Children.Add(col0);
-
-
-
-                // ── Col 2: Demographics (Age, Sex, Birthdate) ──
-
-                var col2 = new StackPanel { Margin = new Thickness(10, 2, 10, 2), VerticalAlignment = VerticalAlignment.Center };
-
-                string ageText = !string.IsNullOrWhiteSpace(m.Age) ? $"{m.Age} yrs old" : "—";
-
-                string sexText = !string.IsNullOrWhiteSpace(m.Sex) ? $" • {m.Sex}" : "";
-
-                col2.Children.Add(new TextBlock
-
-                {
-
-                    Text       = $"{ageText}{sexText}",
-
-                    FontSize   = 12.5,
-
-                    FontWeight = FontWeights.SemiBold,
-
-                    Foreground = RecordViewDialogViewModel.BrValue,
-
-                    FontFamily = new FontFamily("Segoe UI")
-
-                });
-
-                string dobText = !string.IsNullOrWhiteSpace(m.Birthdate) ? $"Born: {m.Birthdate}" : "—";
-
-                col2.Children.Add(new TextBlock
-
-                {
-
-                    Text       = dobText,
-
-                    FontSize   = 11,
-
-                    Foreground = RecordViewDialogViewModel.BrLabel,
-
-                    Margin     = new Thickness(0, 2, 0, 0),
-
-                    FontFamily = new FontFamily("Segoe UI")
-
-                });
-
-                Grid.SetColumn(col2, 2);
-
-                rowGrid.Children.Add(col2);
-
-
-
-                // ── Col 4: Education & Employment (Word-wrapped and generous width) ──
-
-                var col4 = new StackPanel { Margin = new Thickness(10, 2, 10, 2), VerticalAlignment = VerticalAlignment.Center };
-
-                string eduText = !string.IsNullOrWhiteSpace(m.EducationEmployment) ? m.EducationEmployment : "Not specified";
-
-                col4.Children.Add(new TextBlock
-
-                {
-
-                    Text         = eduText,
-
-                    FontSize     = 12,
-
-                    FontWeight   = FontWeights.Medium,
-
-                    Foreground   = RecordViewDialogViewModel.BrValue,
-
-                    TextWrapping = TextWrapping.Wrap,
-
-                    FontFamily   = new FontFamily("Segoe UI")
-
-                });
-
-                Grid.SetColumn(col4, 4);
-
-                rowGrid.Children.Add(col4);
-
-
-
-                // ── Col 6: Monthly Income ──
-
-                var col6 = new StackPanel { Margin = new Thickness(10, 2, 10, 2), VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Right };
-
-                string incText = string.IsNullOrWhiteSpace(m.Income) || m.Income == "—" ? "—" : (m.Income.StartsWith("₱") ? m.Income : "₱ " + m.Income);
-
-                col6.Children.Add(new TextBlock
-
-                {
-
-                    Text                = incText,
-
-                    FontSize            = 12.5,
-
-                    FontWeight          = FontWeights.SemiBold,
-
-                    Foreground          = incText == "—" ? RecordViewDialogViewModel.BrMutedVal : RecordViewDialogViewModel.BrValue,
-
-                    HorizontalAlignment = HorizontalAlignment.Right,
-
-                    FontFamily          = new FontFamily("Segoe UI")
-
-                });
-
-                Grid.SetColumn(col6, 6);
-
-                rowGrid.Children.Add(col6);
-
-
-
-                // ── Col 8: Special Needs / Disability ──
-
-                var col8 = new StackPanel { Margin = new Thickness(10, 2, 10, 2), VerticalAlignment = VerticalAlignment.Center };
-
-                if (m.HasSpecialNeeds)
-
-                {
-
-                    var badge = new Border
-
-                    {
-
-                        Background          = new SolidColorBrush(Color.FromRgb(0xFA, 0xF0, 0xF3)),
-
-                        BorderBrush         = new SolidColorBrush(Color.FromRgb(0xEA, 0xD3, 0xDC)),
-
-                        BorderThickness     = new Thickness(1),
-
-                        CornerRadius        = new CornerRadius(4),
-
-                        Padding             = new Thickness(7, 2.5, 7, 2.5),
-
-                        HorizontalAlignment = HorizontalAlignment.Left
-
-                    };
-
-                    string catText = !string.IsNullOrWhiteSpace(m.SpecialNeedsCategory) ? m.SpecialNeedsCategory : "Special Needs (PWD)";
-
-                    badge.Child = new TextBlock
-
-                    {
-
-                        Text         = catText,
-
-                        FontSize     = 11,
-
-                        FontWeight   = FontWeights.SemiBold,
-
-                        Foreground   = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43)),
-
-                        TextWrapping = TextWrapping.Wrap,
-
-                        FontFamily   = new FontFamily("Segoe UI")
-
-                    };
-
-                    col8.Children.Add(badge);
-
-
-
-                    if (!string.IsNullOrWhiteSpace(m.SpecialNeedsDescription))
-
-                    {
-
-                        col8.Children.Add(new TextBlock
-
-                        {
-
-                            Text         = m.SpecialNeedsDescription,
-
-                            FontSize     = 10.5,
-
-                            Foreground   = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)),
-
-                            TextWrapping = TextWrapping.Wrap,
-
-                            Margin       = new Thickness(2, 3, 0, 0),
-
-                            FontFamily   = new FontFamily("Segoe UI")
-
-                        });
-
-                    }
-
-                }
-
-                else
-
-                {
-
-                    col8.Children.Add(new TextBlock
-
-                    {
-
-                        Text       = "None",
-
-                        FontSize   = 12,
-
-                        Foreground = RecordViewDialogViewModel.BrMutedVal,
-
-                        FontFamily = new FontFamily("Segoe UI")
-
-                    });
-
-                }
-
-                Grid.SetColumn(col8, 8);
-
-                rowGrid.Children.Add(col8);
-
-
-
-                rowBorder.Child = rowGrid;
-
-                tableStack.Children.Add(rowBorder);
-
-                alt = !alt;
-
-            }
-
-
-
-            tableContainer.Child = tableStack;
-
-            inner.Children.Add(tableContainer);
-
-
-
-            card.Child = inner;
-
-            return card;
-
-        }
-
-
-
-private Border CreateSystemInfoCard(SoloParentRecord r)
-        {
-            var card = new Border
-            {
-                Background = Brushes.Transparent,
-                Padding    = new Thickness(4, 6, 4, 12),
-                Margin     = new Thickness(0, 4, 0, 0)
-            };
-
-            var sp = new StackPanel
-            {
-                Orientation         = Orientation.Horizontal,
-                HorizontalAlignment = HorizontalAlignment.Center
-            };
-
-            string updated = r.LastUpdated != DateTime.MinValue ? r.LastUpdated.ToString("MMMM d, yyyy") : "—";
-            string createdBy = string.IsNullOrWhiteSpace(r.CreatedBy) ? "System" : r.CreatedBy;
-
-            sp.Children.Add(new TextBlock
-            {
-                Text       = $"Last Modified: {updated}   •   Encoded By: {createdBy}",
-                FontSize   = 11,
-                Foreground = RecordViewDialogViewModel.BrLabel,
-                FontFamily = new FontFamily("Segoe UI")
+                ("Last Name",      r.Surname),
+                ("First Name",     r.FirstName),
+                ("Middle Name",    r.MiddleName),
+                ("Extension Name", r.ExtensionName),
+                ("Sex",            r.Sex),
+                ("Civil Status",   r.CivilStatus),
+                ("Date of Birth",  r.DateOfBirth != DateTime.MinValue ? r.DateOfBirth.ToString("MMMM d, yyyy") : "Not applicable"),
+                ("Age",            age > 0 ? $"{age} years old" : "Not applicable"),
+                ("Place of Birth", r.PlaceOfBirth),
+                ("Citizenship",    string.IsNullOrWhiteSpace(r.Citizenship) ? "Filipino" : r.Citizenship),
             });
 
-            card.Child = sp;
-            return card;
+            // 2. Background & Socio-Economic
+            AddCard("Background & Socio-Economic", new[]
+            {
+                ("Educational Attainment", r.EducationalAttainment),
+                ("Religion",               r.Religion),
+                ("Occupation",             r.Occupation),
+                ("Monthly Income",         string.IsNullOrWhiteSpace(r.MonthlyIncome) ? "Not applicable" : "₱ " + r.MonthlyIncome),
+                ("Employment Status",      r.EmploymentStatusDisplay),
+                ("PhilSys Card No.",       r.PhilSysNumber),
+            });
+
+            // 3. Address & Contacts
+            AddCard("Address & Contact", new[]
+            {
+                ("Address",     r.Address),
+                ("Barangay",    r.Barangay),
+                ("Contact No.", string.IsNullOrWhiteSpace(r.ContactNumber) ? "Not applicable" : SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber)),
+            });
+
+            // 4. Emergency Contact
+            AddCard("Emergency Contact", new[]
+            {
+                ("Contact Person", r.EmergencyContactName),
+                ("Relationship",   r.EmergencyRelationship),
+                ("Address",        r.EmergencyAddress),
+                ("Contact No.",    string.IsNullOrWhiteSpace(r.EmergencyContactNumber) ? "Not applicable" : SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.EmergencyContactNumber)),
+            });
+
+            // 5. Circumstances
+            AddCircumstancesCard(r.CircumstancesDisplay);
+
+            // 6. Additional Classifications (Shows "Not applicable" if none present)
+            AddClassificationsCard(r);
+
+            // 7. Family Composition (with non-colliding layout and Special Needs badges)
+            AddFamilyCard(r.FamilyMembers);
+
+            // 8. Assessment / Needs & Income
+            AddCard("Assessment / Needs & Income", new[]
+            {
+                ("Needs & Problems",        string.IsNullOrWhiteSpace(r.NeedsAndProblems) || r.NeedsAndProblems.Equals("None specified", StringComparison.OrdinalIgnoreCase) ? "Not applicable" : r.NeedsAndProblems),
+                ("Other Sources of Income", string.IsNullOrWhiteSpace(r.OtherIncomeSource) || r.OtherIncomeSource.Equals("None", StringComparison.OrdinalIgnoreCase) ? "Not applicable" : r.OtherIncomeSource),
+            });
+
+            // 9. System Information
+            AddCard("System Information", new[]
+            {
+                ("Record ID",            r.Id),
+                ("Application Type",     r.ApplicationType),
+                ("Date of Application",  r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("MMMM d, yyyy") : "Not applicable"),
+                ("Current Term Expiry",  validUntil),
+                ("Encoded By",           !string.IsNullOrWhiteSpace(r.CreatedBy) ? r.CreatedBy : "Not applicable"),
+                ("Last Modified By",     !string.IsNullOrWhiteSpace(r.LastModifiedBy) ? r.LastModifiedBy : "Not applicable"),
+                ("Last Updated",         r.LastUpdated != DateTime.MinValue ? r.LastUpdated.ToString("MMMM d, yyyy") : "Not applicable"),
+                ("Record Status",        !string.IsNullOrWhiteSpace(r.Status) ? r.Status : "Not applicable"),
+            });
+        }
+
+        private void AddCard(string title, (string Label, string Value)[] fields)
+        {
+            var card  = MakeCard();
+            var inner = new StackPanel();
+            inner.Children.Add(MakeSectionHeader(title));
+
+            var grid = new Grid { Margin = new Thickness(0, 10, 0, 0) };
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            int row = 0, col = 0;
+            foreach (var (label, value) in fields)
+            {
+                if (col == 0)
+                    grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                var cell = MakeCell(label, value);
+                Grid.SetRow(cell, row);
+                Grid.SetColumn(cell, col);
+                grid.Children.Add(cell);
+
+                col++;
+                if (col > 1) { col = 0; row++; }
+            }
+
+            inner.Children.Add(grid);
+            card.Child = inner;
+            CardPanel.Children.Add(card);
+        }
+
+        private void AddCircumstancesCard(string display)
+        {
+            var card  = MakeCard();
+            var inner = new StackPanel();
+            inner.Children.Add(MakeSectionHeader("Qualifying Circumstances"));
+
+            var wrap = new WrapPanel { Margin = new Thickness(0, 10, 0, 2) };
+
+            if (!string.IsNullOrWhiteSpace(display) && display != "—" && !display.Equals("Not applicable", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var line in display.Split('\n'))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var chip = new Border
+                    {
+                        Background      = RecordViewDialogViewModel.BrChipBg,
+                        BorderBrush     = RecordViewDialogViewModel.BrChipBdr,
+                        BorderThickness = new Thickness(1),
+                        CornerRadius    = new CornerRadius(8),
+                        Padding         = new Thickness(10, 5, 10, 5),
+                        Margin          = new Thickness(0, 0, 8, 8)
+                    };
+                    var sp = new StackPanel { Orientation = Orientation.Horizontal };
+                    sp.Children.Add(new TextBlock
+                    {
+                        Text       = "✓ ",
+                        FontSize   = 11,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = RecordViewDialogViewModel.BrChipTxt,
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+                    sp.Children.Add(new TextBlock
+                    {
+                        Text       = line.Trim(),
+                        FontSize   = 11.5,
+                        FontWeight = FontWeights.SemiBold,
+                        Foreground = RecordViewDialogViewModel.BrChipTxt,
+                        FontFamily = new FontFamily("Segoe UI"),
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+                    chip.Child = sp;
+                    wrap.Children.Add(chip);
+                }
+            }
+            else
+            {
+                wrap.Children.Add(new TextBlock
+                {
+                    Text       = "Not applicable",
+                    FontSize   = 12.5,
+                    Foreground = RecordViewDialogViewModel.BrMutedVal,
+                    FontFamily = new FontFamily("Segoe UI"),
+                    Margin     = new Thickness(2, 4, 0, 4)
+                });
+            }
+
+            inner.Children.Add(wrap);
+            card.Child = inner;
+            CardPanel.Children.Add(card);
+        }
+
+        private void AddClassificationsCard(SoloParentRecord r)
+        {
+            var card = MakeCard();
+            var inner = new StackPanel();
+            inner.Children.Add(MakeSectionHeader("Additional Classifications"));
+
+            bool hasAny = r.IsPantawidBeneficiary || r.IsIndigenous || r.IsLGBT;
+
+            if (!hasAny)
+            {
+                inner.Children.Add(new TextBlock
+                {
+                    Text       = "Not applicable",
+                    FontSize   = 12.5,
+                    Foreground = RecordViewDialogViewModel.BrMutedVal,
+                    Margin     = new Thickness(2, 10, 0, 4),
+                    FontFamily = new FontFamily("Segoe UI")
+                });
+            }
+            else
+            {
+                var wrap = new WrapPanel { Margin = new Thickness(0, 10, 0, 2) };
+
+                if (r.IsPantawidBeneficiary)
+                    wrap.Children.Add(MakeActiveClassificationBadge("Pantawid (4Ps) Beneficiary", Color.FromRgb(0x27, 0xAE, 0x60)));
+                if (r.IsIndigenous)
+                    wrap.Children.Add(MakeActiveClassificationBadge("Indigenous Person", Color.FromRgb(0x70, 0x29, 0x43)));
+                if (r.IsLGBT)
+                    wrap.Children.Add(MakeActiveClassificationBadge("LGBTQ+ Member", Color.FromRgb(0x8E, 0x44, 0xAD)));
+
+                inner.Children.Add(wrap);
+            }
+
+            card.Child = inner;
+            CardPanel.Children.Add(card);
+        }
+
+        private Border MakeActiveClassificationBadge(string title, Color activeColor)
+        {
+            var bdr = new Border
+            {
+                CornerRadius    = new CornerRadius(8),
+                Padding         = new Thickness(10, 6, 10, 6),
+                Margin          = new Thickness(0, 0, 8, 8),
+                BorderThickness = new Thickness(1),
+                Background      = new SolidColorBrush(Color.FromArgb(20, activeColor.R, activeColor.G, activeColor.B)),
+                BorderBrush     = new SolidColorBrush(Color.FromArgb(80, activeColor.R, activeColor.G, activeColor.B))
+            };
+            var sp = new StackPanel { Orientation = Orientation.Horizontal };
+            sp.Children.Add(new Ellipse
+            {
+                Width             = 7,
+                Height            = 7,
+                Fill              = new SolidColorBrush(activeColor),
+                Margin            = new Thickness(0, 0, 6, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            });
+            sp.Children.Add(new TextBlock
+            {
+                Text              = $"✓ {title}",
+                FontSize          = 11.5,
+                FontWeight        = FontWeights.Bold,
+                Foreground        = new SolidColorBrush(activeColor),
+                FontFamily        = new FontFamily("Segoe UI"),
+                VerticalAlignment = VerticalAlignment.Center
+            });
+            bdr.Child = sp;
+            return bdr;
+        }
+
+        private void AddFamilyCard(List<FamilyMember> members)
+        {
+            var card  = MakeCard();
+            var inner = new StackPanel();
+
+            int totalMembers = members?.Count ?? 0;
+            int snCount = members?.Count(m => m.HasSpecialNeeds) ?? 0;
+
+            string countText = totalMembers == 1 ? "1 DEPENDENT" : $"{totalMembers} DEPENDENTS";
+            if (snCount > 0)
+            {
+                countText += $" · {snCount} WITH SPECIAL NEEDS (PWD)";
+            }
+
+            inner.Children.Add(MakeSectionHeader($"Family Composition ({countText})"));
+
+            if (totalMembers == 0)
+            {
+                inner.Children.Add(new TextBlock
+                {
+                    Text       = "Not applicable",
+                    FontSize   = 12.5,
+                    Foreground = RecordViewDialogViewModel.BrMutedVal,
+                    Margin     = new Thickness(2, 10, 0, 4),
+                    FontFamily = new FontFamily("Segoe UI")
+                });
+                card.Child = inner;
+                CardPanel.Children.Add(card);
+                return;
+            }
+
+            // 4-Column non-colliding layout matching RecordDialog
+            string[] colLabels = { "NAME & RELATIONSHIP", "BIRTHDATE & AGE", "EDUCATION & INCOME", "SPECIAL NEEDS (PWD)" };
+            double[] widths    = { 2.4, 1.8, 2.0, 2.2 };
+
+            var headerGrid = new Grid { Margin = new Thickness(0, 12, 0, 6) };
+            for (int c = 0; c < colLabels.Length; c++)
+                headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(widths[c], GridUnitType.Star) });
+            headerGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            for (int c = 0; c < colLabels.Length; c++)
+            {
+                var tb = new TextBlock
+                {
+                    Text       = colLabels[c],
+                    FontSize   = 10,
+                    FontWeight = FontWeights.Bold,
+                    Foreground = RecordViewDialogViewModel.BrHead,
+                    Margin     = new Thickness(6, 0, 6, 0),
+                    FontFamily = new FontFamily("Segoe UI")
+                };
+                Grid.SetColumn(tb, c);
+                headerGrid.Children.Add(tb);
+            }
+            inner.Children.Add(headerGrid);
+            inner.Children.Add(new Border { Height = 1, Background = RecordViewDialogViewModel.BrDivider, Margin = new Thickness(0, 2, 0, 4) });
+
+            bool alt = false;
+            foreach (var m in members)
+            {
+                var rowBorder = new Border
+                {
+                    Background   = alt ? RecordViewDialogViewModel.BrRowAlt : Brushes.White,
+                    BorderBrush  = alt ? RecordViewDialogViewModel.BrDivider : Brushes.Transparent,
+                    BorderThickness = new Thickness(0, 0, 0, 1),
+                    CornerRadius = new CornerRadius(6),
+                    Padding      = new Thickness(6, 9, 6, 9),
+                    Margin       = new Thickness(0, 1, 0, 1)
+                };
+                var rowGrid = new Grid();
+                for (int c = 0; c < colLabels.Length; c++)
+                    rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(widths[c], GridUnitType.Star) });
+                rowGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                // Column 0: Name & Relationship
+                var col0 = new StackPanel { Margin = new Thickness(6, 0, 6, 0), VerticalAlignment = VerticalAlignment.Center };
+                col0.Children.Add(new TextBlock
+                {
+                    Text         = string.IsNullOrWhiteSpace(m.MemberName) ? "Not applicable" : m.MemberName,
+                    FontSize     = 12.5,
+                    FontWeight   = FontWeights.SemiBold,
+                    Foreground   = RecordViewDialogViewModel.BrValue,
+                    TextTrimming = TextTrimming.CharacterEllipsis,
+                    FontFamily   = new FontFamily("Segoe UI")
+                });
+                string relInfo = !string.IsNullOrWhiteSpace(m.Relationship) ? m.Relationship : "Dependent";
+                if (!string.IsNullOrWhiteSpace(m.CivilStatus) && !m.CivilStatus.Equals("—", StringComparison.OrdinalIgnoreCase))
+                    relInfo += $" · {m.CivilStatus}";
+                col0.Children.Add(new TextBlock
+                {
+                    Text         = relInfo,
+                    FontSize     = 11,
+                    Foreground   = RecordViewDialogViewModel.BrLabel,
+                    Margin       = new Thickness(0, 2, 0, 0),
+                    FontFamily   = new FontFamily("Segoe UI")
+                });
+                Grid.SetColumn(col0, 0);
+                rowGrid.Children.Add(col0);
+
+                // Column 1: Birthdate & Sex/Age
+                var col1 = new StackPanel { Margin = new Thickness(6, 0, 6, 0), VerticalAlignment = VerticalAlignment.Center };
+                col1.Children.Add(new TextBlock
+                {
+                    Text         = string.IsNullOrWhiteSpace(m.Birthdate) ? "Not applicable" : m.Birthdate,
+                    FontSize     = 12,
+                    Foreground   = RecordViewDialogViewModel.BrValue,
+                    FontFamily   = new FontFamily("Segoe UI")
+                });
+                string sexAge;
+                if (!string.IsNullOrWhiteSpace(m.Sex) && !string.IsNullOrWhiteSpace(m.Age))
+                    sexAge = $"{m.Sex} · {m.Age} yrs old";
+                else if (!string.IsNullOrWhiteSpace(m.Sex))
+                    sexAge = m.Sex;
+                else if (!string.IsNullOrWhiteSpace(m.Age))
+                    sexAge = $"{m.Age} yrs old";
+                else
+                    sexAge = "Not applicable";
+
+                col1.Children.Add(new TextBlock
+                {
+                    Text         = sexAge,
+                    FontSize     = 11,
+                    Foreground   = RecordViewDialogViewModel.BrLabel,
+                    Margin       = new Thickness(0, 2, 0, 0),
+                    FontFamily   = new FontFamily("Segoe UI")
+                });
+                Grid.SetColumn(col1, 1);
+                rowGrid.Children.Add(col1);
+
+                // Column 2: Education & Monthly Income
+                var col2 = new StackPanel { Margin = new Thickness(6, 0, 6, 0), VerticalAlignment = VerticalAlignment.Center };
+                col2.Children.Add(new TextBlock
+                {
+                    Text         = string.IsNullOrWhiteSpace(m.EducationEmployment) ? "Not applicable" : m.EducationEmployment,
+                    FontSize     = 12,
+                    Foreground   = RecordViewDialogViewModel.BrValue,
+                    TextTrimming = TextTrimming.CharacterEllipsis,
+                    FontFamily   = new FontFamily("Segoe UI")
+                });
+                string incDisplay = "No income";
+                if (decimal.TryParse(m.Income, out var incVal))
+                    incDisplay = incVal > 0 ? $"₱ {incVal:N2}/mo" : "No income";
+                else if (!string.IsNullOrWhiteSpace(m.Income) && m.Income != "0")
+                    incDisplay = m.Income;
+
+                col2.Children.Add(new TextBlock
+                {
+                    Text         = incDisplay,
+                    FontSize     = 11,
+                    Foreground   = RecordViewDialogViewModel.BrLabel,
+                    Margin       = new Thickness(0, 2, 0, 0),
+                    FontFamily   = new FontFamily("Segoe UI")
+                });
+                Grid.SetColumn(col2, 2);
+                rowGrid.Children.Add(col2);
+
+                // Column 3: Special Needs / PWD
+                UIElement snElement;
+                if (m.HasSpecialNeeds)
+                {
+                    var snPanel = new StackPanel { Margin = new Thickness(6, 0, 6, 0), VerticalAlignment = VerticalAlignment.Center };
+                    var snBadge = new Border
+                    {
+                        Background      = new SolidColorBrush(Color.FromRgb(0xFE, 0xF3, 0xC7)),
+                        BorderBrush     = new SolidColorBrush(Color.FromRgb(0xFC, 0xD3, 0x4D)),
+                        BorderThickness = new Thickness(1),
+                        CornerRadius    = new CornerRadius(10),
+                        Padding         = new Thickness(8, 3, 8, 3),
+                        HorizontalAlignment = HorizontalAlignment.Left
+                    };
+                    var badgeStack = new StackPanel { Orientation = Orientation.Horizontal };
+                    badgeStack.Children.Add(new Ellipse
+                    {
+                        Width             = 6,
+                        Height            = 6,
+                        Fill              = new SolidColorBrush(Color.FromRgb(0xD9, 0x77, 0x06)),
+                        Margin            = new Thickness(0, 0, 5, 0),
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+                    string catText = !string.IsNullOrWhiteSpace(m.SpecialNeedsCategory) ? m.SpecialNeedsCategory : "Special Needs (PWD)";
+                    badgeStack.Children.Add(new TextBlock
+                    {
+                        Text       = catText,
+                        FontSize   = 10.5,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = new SolidColorBrush(Color.FromRgb(0x92, 0x40, 0x0E)),
+                        FontFamily = new FontFamily("Segoe UI"),
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+                    snBadge.Child = badgeStack;
+                    snPanel.Children.Add(snBadge);
+
+                    if (!string.IsNullOrWhiteSpace(m.SpecialNeedsDescription))
+                    {
+                        snPanel.Children.Add(new TextBlock
+                        {
+                            Text         = m.SpecialNeedsDescription.Trim(),
+                            FontSize     = 10,
+                            Foreground   = new SolidColorBrush(Color.FromRgb(0x78, 0x35, 0x0F)),
+                            Margin       = new Thickness(2, 3, 0, 0),
+                            TextWrapping = TextWrapping.Wrap,
+                            FontFamily   = new FontFamily("Segoe UI")
+                        });
+                    }
+                    snElement = snPanel;
+                }
+                else
+                {
+                    snElement = new TextBlock
+                    {
+                        Text              = "Not applicable",
+                        FontSize          = 11.5,
+                        Foreground        = RecordViewDialogViewModel.BrMutedVal,
+                        Margin            = new Thickness(6, 0, 6, 0),
+                        FontFamily        = new FontFamily("Segoe UI"),
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                }
+
+                Grid.SetColumn(snElement, 3);
+                rowGrid.Children.Add(snElement);
+
+                rowBorder.Child = rowGrid;
+                inner.Children.Add(rowBorder);
+                alt = !alt;
+            }
+
+            card.Child = inner;
+            CardPanel.Children.Add(card);
         }
 
         private Border MakeCard() => new Border
         {
             Background      = Brushes.White,
-            CornerRadius    = new CornerRadius(10),
+            CornerRadius    = new CornerRadius(12),
             BorderBrush     = RecordViewDialogViewModel.BrCardBdr,
-            BorderThickness = new Thickness(1),
-            Padding         = new Thickness(18, 14, 18, 14),
+            BorderThickness = new Thickness(1.2),
+            Padding         = new Thickness(18, 14, 18, 12),
             Margin          = new Thickness(0, 0, 0, 12)
         };
 
         private UIElement MakeSectionHeader(string title)
         {
-            var sp = new StackPanel
+            var container = new Border
             {
-                Orientation = Orientation.Horizontal,
-                Margin      = new Thickness(0, 0, 0, 10)
+                Background      = Brushes.Transparent,
+                Padding         = new Thickness(0, 0, 0, 8),
+                Margin          = new Thickness(0, 0, 0, 4),
+                BorderBrush     = RecordViewDialogViewModel.BrDivider,
+                BorderThickness = new Thickness(0, 0, 0, 1)
             };
-
+            var sp = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
             sp.Children.Add(new Border
             {
                 Width             = 3.5,
@@ -1509,7 +626,6 @@ private Border CreateSystemInfoCard(SoloParentRecord r)
                 Margin            = new Thickness(0, 0, 8, 0),
                 VerticalAlignment = VerticalAlignment.Center
             });
-
             sp.Children.Add(new TextBlock
             {
                 Text              = title.ToUpper(),
@@ -1519,13 +635,13 @@ private Border CreateSystemInfoCard(SoloParentRecord r)
                 FontFamily        = new FontFamily("Segoe UI"),
                 VerticalAlignment = VerticalAlignment.Center
             });
-
-            return sp;
+            container.Child = sp;
+            return container;
         }
 
         private StackPanel MakeCell(string label, string value)
         {
-            var sp = new StackPanel { Margin = new Thickness(4, 0, 8, 12) };
+            var sp = new StackPanel { Margin = new Thickness(4, 0, 4, 12) };
             sp.Children.Add(new TextBlock
             {
                 Text       = label.ToUpper(),
@@ -1533,16 +649,16 @@ private Border CreateSystemInfoCard(SoloParentRecord r)
                 Foreground = RecordViewDialogViewModel.BrLabel,
                 Margin     = new Thickness(0, 0, 0, 3),
                 FontFamily = new FontFamily("Segoe UI"),
-                FontWeight = FontWeights.SemiBold
+                FontWeight = FontWeights.Bold
             });
-
-            bool isDash = string.IsNullOrWhiteSpace(value) || value == "—";
+            bool isBlank = string.IsNullOrWhiteSpace(value) || value == "—" || value.Equals("None", StringComparison.OrdinalIgnoreCase);
+            string displayVal = isBlank ? "Not applicable" : value;
             sp.Children.Add(new TextBlock
             {
-                Text         = isDash ? "—" : value,
-                FontSize     = 13,
-                FontWeight   = FontWeights.SemiBold,
-                Foreground   = isDash ? RecordViewDialogViewModel.BrMutedVal : RecordViewDialogViewModel.BrValue,
+                Text         = displayVal,
+                FontSize     = 13.5,
+                FontWeight   = isBlank ? FontWeights.Normal : FontWeights.SemiBold,
+                Foreground   = isBlank ? RecordViewDialogViewModel.BrMutedVal : RecordViewDialogViewModel.BrValue,
                 TextWrapping = TextWrapping.Wrap,
                 FontFamily   = new FontFamily("Segoe UI")
             });

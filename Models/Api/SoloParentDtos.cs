@@ -241,6 +241,10 @@ namespace SOLUM_UI.Models.Api
         public bool IsIndigenous { get; set; }
         public string SubsidyEligibility { get; set; }
         public DateTime DateCreated { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public string LastModifiedBy { get; set; }
     }
 
     public class SoloParentListItemDto
@@ -266,6 +270,10 @@ namespace SOLUM_UI.Models.Api
         public string OtherSourcesOfIncome { get; set; }
 
         public DateTime DateCreated { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public string LastModifiedBy { get; set; }
         public bool IsActive { get; set; }
         public string Status { get; set; }
     }
@@ -283,6 +291,10 @@ namespace SOLUM_UI.Models.Api
         public EmergencyContactInfo EmergencyContact { get; set; } = new EmergencyContactInfo();
         public ProblemPresentedDetails ProblemPresented { get; set; } = new ProblemPresentedDetails();
         public DateTime DateCreated { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public string LastModifiedBy { get; set; }
         public bool IsDeleted { get; set; }
         public bool IsActive { get; set; }
         public string Status { get; set; } // "Active", "Inactive", or "Terminated"
