@@ -17,6 +17,7 @@ namespace SOLUM_UI
 {
     public partial class SoloParentRecordsPage : Page
     {
+        private bool _isSavingRecord = false;
         public static string CurrentUserName { get; set; } = string.Empty;
         public static string CurrentUserRole { get; set; } = string.Empty;
         public static string CurrentUserBarangay { get; set; } = string.Empty;
@@ -790,8 +791,14 @@ namespace SOLUM_UI
 
         private async Task SaveNewRecordAsync(SoloParentRecord record)
         {
-            // Show loading indicator
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            if (_isSavingRecord)
+            {
+                ToastNotification.Show("Please Wait", "A record is currently being saved.", ToastType.Warning);
+                return;
+            }
+
+            _isSavingRecord = true;
+            ToastNotification.Show("Adding Record...", $"Saving record for {record.Name}...", ToastType.Info);
 
             try
             {
@@ -823,8 +830,7 @@ namespace SOLUM_UI
             }
             finally
             {
-                // Hide loading indicator
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+                _isSavingRecord = false;
             }
         }
 
@@ -880,7 +886,7 @@ namespace SOLUM_UI
                 if (!isConfirmed) return;
             }
 
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            ToastNotification.Show("Renewing Record...", $"Renewing ID card for {record.Name}...", ToastType.Info);
             try
             {
                 var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid, null);
@@ -907,7 +913,6 @@ namespace SOLUM_UI
             }
             finally
             {
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -930,7 +935,7 @@ namespace SOLUM_UI
                 return;
             }
 
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            ToastNotification.Show("Renewing Record...", $"Saving renewal for {original.Name}...", ToastType.Info);
             try
             {
                 if (existingDto == null)
@@ -979,7 +984,6 @@ namespace SOLUM_UI
             }
             finally
             {
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -1000,8 +1004,7 @@ namespace SOLUM_UI
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                // Show loading indicator
-                PageLoadingOverlay.Visibility = Visibility.Visible;
+                ToastNotification.Show("Updating Record...", $"Saving changes for {dialog.Result.Name}...", ToastType.Info);
 
                 try
                 {
@@ -1029,8 +1032,6 @@ namespace SOLUM_UI
                 }
                 finally
                 {
-                    // Hide loading indicator
-                    PageLoadingOverlay.Visibility = Visibility.Collapsed;
                 }
             }
         }
@@ -1052,19 +1053,11 @@ namespace SOLUM_UI
             SoloParentRecord rawRecord = vm?.RawModel;
             SoloParentDto existingDto = null;
 
-            PageLoadingOverlay.Visibility = Visibility.Visible;
-            try
+            var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
+            if (fetch.Succeeded && fetch.Data != null)
             {
-                var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
-                if (fetch.Succeeded && fetch.Data != null)
-                {
-                    existingDto = fetch.Data;
-                    rawRecord = SoloParentApiService.Instance.MapToRecord(existingDto);
-                }
-            }
-            finally
-            {
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+                existingDto = fetch.Data;
+                rawRecord = SoloParentApiService.Instance.MapToRecord(existingDto);
             }
 
             if (rawRecord == null) rawRecord = new SoloParentRecord { Id = id, Surname = recordName };
@@ -1126,8 +1119,7 @@ namespace SOLUM_UI
 
             if (!isConfirmed) return;
 
-            // Show loading indicator
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            ToastNotification.Show("Deleting Record...", $"Removing record for {recordName}...", ToastType.Info);
 
             try
             {
@@ -1149,8 +1141,6 @@ namespace SOLUM_UI
             }
             finally
             {
-                // Hide loading indicator
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
             }
         }
 

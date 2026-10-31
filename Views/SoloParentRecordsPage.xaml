@@ -1479,9 +1479,12 @@
             </StackPanel>
         </Grid>
 
+        <!-- Full-Page Loading Overlay (Disabled in favor of modern TableSkeletonLoader and Toast Notifications) -->
         <components:LoadingOverlay Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="99"
                                    x:Name="PageLoadingOverlay"
                                    IsLoading="False"
+                                   Visibility="Collapsed"
+                                   IsHitTestVisible="False"
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Stretch"
                                    Panel.ZIndex="9999" Loaded="PageLoadingOverlay_Loaded"/>
