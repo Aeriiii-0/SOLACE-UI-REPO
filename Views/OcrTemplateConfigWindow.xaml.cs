@@ -59,8 +59,13 @@ namespace SOLUM_UI
         private bool _isDragging = false;
         private Point _dragStartPoint;
         private double _origX, _origY, _origW, _origH;
-        private bool _updatingFromCode = false;
         private List<OcrWordToken> _activeRoiTokens = new List<OcrWordToken>();
+
+        // Canvas Panning State
+        private bool _isPanning = false;
+        private Point _panStartMousePoint;
+        private double _panStartH;
+        private double _panStartV;
 
         public bool TemplateSaved { get; private set; } = false;
         private readonly string _initialFieldKey;
@@ -410,9 +415,7 @@ namespace SOLUM_UI
         {
             if (sender is Button btn && btn.Tag is string dir)
             {
-                double step = 0.001;
-                if (RbStepMedium.IsChecked == true) step = 0.003;
-                else if (RbStepMacro.IsChecked == true) step = 0.010;
+                double step = (RbStepNormal?.IsChecked == true) ? 0.005 : 0.001;
 
                 double dx = 0;
                 double dy = 0;
@@ -430,38 +433,40 @@ namespace SOLUM_UI
 
         private void ApplyNudge(double dx, double dy)
         {
+            if (_selectedField == null) return;
             PushUndoState();
 
-            if (RbScopeAll.IsChecked == true)
-            {
-                foreach (var f in _fields)
-                {
-                    f.X = Math.Max(0.0, Math.Min(0.98, Math.Round(f.X + dx, 4)));
-                    f.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(f.Y + dy, 4)));
-                }
-            }
-            else if (RbScopeSection.IsChecked == true && _selectedField != null)
-            {
-                string targetCat = _selectedField.Category;
-                foreach (var f in _fields)
-                {
-                    if (string.Equals(f.Category, targetCat, StringComparison.OrdinalIgnoreCase))
-                    {
-                        f.X = Math.Max(0.0, Math.Min(0.98, Math.Round(f.X + dx, 4)));
-                        f.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(f.Y + dy, 4)));
-                    }
-                }
-            }
-            else if (_selectedField != null)
-            {
-                _selectedField.X = Math.Max(0.0, Math.Min(0.98, Math.Round(_selectedField.X + dx, 4)));
-                _selectedField.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(_selectedField.Y + dy, 4)));
-            }
+            _selectedField.X = Math.Max(0.0, Math.Min(0.98, Math.Round(_selectedField.X + dx, 4)));
+            _selectedField.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(_selectedField.Y + dy, 4)));
 
-            if (_selectedField != null)
-            {
-                UpdateSidebarFromField(_selectedField);
-            }
+            UpdateSidebarFromField(_selectedField);
+            RedrawAllCanvasBoxes();
+        }
+
+        private void ExpandBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedField == null) return;
+            PushUndoState();
+            double step = (RbStepNormal?.IsChecked == true) ? 0.004 : 0.001;
+            _selectedField.X = Math.Max(0.0, Math.Round(_selectedField.X - step / 2.0, 4));
+            _selectedField.Y = Math.Max(0.0, Math.Round(_selectedField.Y - step / 2.0, 4));
+            _selectedField.W = Math.Min(1.0 - _selectedField.X, Math.Round(_selectedField.W + step, 4));
+            _selectedField.H = Math.Min(1.0 - _selectedField.Y, Math.Round(_selectedField.H + step, 4));
+            UpdateSidebarFromField(_selectedField);
+            RedrawAllCanvasBoxes();
+        }
+
+        private void ShrinkBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedField == null) return;
+            PushUndoState();
+            double step = (RbStepNormal?.IsChecked == true) ? 0.004 : 0.001;
+            if (_selectedField.W <= 0.004 || _selectedField.H <= 0.004) return;
+            _selectedField.X = Math.Min(0.98, Math.Round(_selectedField.X + step / 2.0, 4));
+            _selectedField.Y = Math.Min(0.98, Math.Round(_selectedField.Y + step / 2.0, 4));
+            _selectedField.W = Math.Max(0.002, Math.Round(_selectedField.W - step, 4));
+            _selectedField.H = Math.Max(0.002, Math.Round(_selectedField.H - step, 4));
+            UpdateSidebarFromField(_selectedField);
             RedrawAllCanvasBoxes();
         }
 
@@ -544,7 +549,7 @@ namespace SOLUM_UI
                     Height = Math.Max(4 / z, height),
                     Stroke = isSelected ? new SolidColorBrush(Color.FromRgb(233, 30, 99)) : new SolidColorBrush(Color.FromArgb(170, 33, 150, 243)),
                     StrokeThickness = isSelected ? strokeSelected : strokeUnselected,
-                    Fill = isSelected ? new SolidColorBrush(Color.FromArgb(35, 233, 30, 99)) : new SolidColorBrush(Color.FromArgb(12, 33, 150, 243)),
+                    Fill = isSelected ? Brushes.Transparent : new SolidColorBrush(Color.FromArgb(12, 33, 150, 243)),
                     Tag = new HandleTagInfo { Field = f, HandleType = ResizeHandleType.Move },
                     Cursor = Cursors.SizeAll
                 };
@@ -664,45 +669,47 @@ namespace SOLUM_UI
 
         private void UpdateSidebarFromField(TemplateFieldItem f)
         {
-            _updatingFromCode = true;
+            if (f == null) return;
             TxtFieldKey.Text = f.Key;
             TxtFieldCategory.Text = f.Category;
-            SliderX.Value = f.X;
-            SliderY.Value = f.Y;
-            SliderW.Value = f.W;
-            SliderH.Value = f.H;
-            _updatingFromCode = false;
-        }
-
-        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (_updatingFromCode || _selectedField == null) return;
-
-            _selectedField.X = Math.Round(SliderX.Value, 3);
-            _selectedField.Y = Math.Round(SliderY.Value, 3);
-            _selectedField.W = Math.Round(SliderW.Value, 3);
-            _selectedField.H = Math.Round(SliderH.Value, 3);
-
-            RedrawAllCanvasBoxes();
+            TxtValX.Text = f.X.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
+            TxtValY.Text = f.Y.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
+            TxtValW.Text = f.W.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
+            TxtValH.Text = f.H.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void OverlayCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var hit = e.OriginalSource as FrameworkElement;
-            if (hit != null)
+            if (e.ChangedButton == MouseButton.Middle)
             {
+                _isPanning = true;
+                _panStartMousePoint = e.GetPosition(CanvasScrollViewer);
+                _panStartH = CanvasScrollViewer.HorizontalOffset;
+                _panStartV = CanvasScrollViewer.VerticalOffset;
+                OverlayCanvas.CaptureMouse();
+                OverlayCanvas.Cursor = Cursors.Hand;
+                e.Handled = true;
+                return;
+            }
+
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                var hit = e.OriginalSource as FrameworkElement;
                 TemplateFieldItem fieldItem = null;
                 ResizeHandleType handleType = ResizeHandleType.Move;
 
-                if (hit.Tag is HandleTagInfo hInfo)
+                if (hit != null)
                 {
-                    fieldItem = hInfo.Field;
-                    handleType = hInfo.HandleType;
-                }
-                else if (hit.Tag is TemplateFieldItem f)
-                {
-                    fieldItem = f;
-                    handleType = ResizeHandleType.Move;
+                    if (hit.Tag is HandleTagInfo hInfo)
+                    {
+                        fieldItem = hInfo.Field;
+                        handleType = hInfo.HandleType;
+                    }
+                    else if (hit.Tag is TemplateFieldItem f)
+                    {
+                        fieldItem = f;
+                        handleType = ResizeHandleType.Move;
+                    }
                 }
 
                 if (fieldItem != null)
@@ -718,12 +725,35 @@ namespace SOLUM_UI
                     _origW = fieldItem.W;
                     _origH = fieldItem.H;
                     OverlayCanvas.CaptureMouse();
+                    e.Handled = true;
+                }
+                else
+                {
+                    // Empty canvas space clicked - initiate panning drag
+                    _isPanning = true;
+                    _panStartMousePoint = e.GetPosition(CanvasScrollViewer);
+                    _panStartH = CanvasScrollViewer.HorizontalOffset;
+                    _panStartV = CanvasScrollViewer.VerticalOffset;
+                    OverlayCanvas.CaptureMouse();
+                    OverlayCanvas.Cursor = Cursors.Hand;
+                    e.Handled = true;
                 }
             }
         }
 
         private void OverlayCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            if (_isPanning && OverlayCanvas.IsMouseCaptured)
+            {
+                Point currentPoint = e.GetPosition(CanvasScrollViewer);
+                double deltaX = _panStartMousePoint.X - currentPoint.X;
+                double deltaY = _panStartMousePoint.Y - currentPoint.Y;
+
+                CanvasScrollViewer.ScrollToHorizontalOffset(_panStartH + deltaX);
+                CanvasScrollViewer.ScrollToVerticalOffset(_panStartV + deltaY);
+                return;
+            }
+
             if (_isDragging && _selectedField != null)
             {
                 var curPos = e.GetPosition(OverlayCanvas);
@@ -793,10 +823,53 @@ namespace SOLUM_UI
 
         private void OverlayCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_isPanning)
+            {
+                _isPanning = false;
+                OverlayCanvas.ReleaseMouseCapture();
+                OverlayCanvas.Cursor = Cursors.Arrow;
+            }
+
             if (_isDragging)
             {
                 _isDragging = false;
                 OverlayCanvas.ReleaseMouseCapture();
+            }
+        }
+
+        private void CanvasScrollViewer_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left || e.ChangedButton == MouseButton.Middle)
+            {
+                _isPanning = true;
+                _panStartMousePoint = e.GetPosition(CanvasScrollViewer);
+                _panStartH = CanvasScrollViewer.HorizontalOffset;
+                _panStartV = CanvasScrollViewer.VerticalOffset;
+                CanvasScrollViewer.CaptureMouse();
+                CanvasScrollViewer.Cursor = Cursors.Hand;
+            }
+        }
+
+        private void CanvasScrollViewer_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isPanning && CanvasScrollViewer.IsMouseCaptured)
+            {
+                Point currentPoint = e.GetPosition(CanvasScrollViewer);
+                double deltaX = _panStartMousePoint.X - currentPoint.X;
+                double deltaY = _panStartMousePoint.Y - currentPoint.Y;
+
+                CanvasScrollViewer.ScrollToHorizontalOffset(_panStartH + deltaX);
+                CanvasScrollViewer.ScrollToVerticalOffset(_panStartV + deltaY);
+            }
+        }
+
+        private void CanvasScrollViewer_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isPanning && CanvasScrollViewer.IsMouseCaptured)
+            {
+                _isPanning = false;
+                CanvasScrollViewer.ReleaseMouseCapture();
+                CanvasScrollViewer.Cursor = Cursors.Arrow;
             }
         }
 
@@ -830,11 +903,27 @@ namespace SOLUM_UI
                     string timeInfo = roiResult.ExecutionTimeSeconds > 0 ? $" [{roiResult.ExecutionTimeSeconds:F2}s]" : "";
                     var sb = new StringBuilder();
 
-                    if (!string.IsNullOrEmpty(roiResult.Value))
+                    bool isCheckbox = _selectedField != null && (
+                        _selectedField.Key.StartsWith("is_") ||
+                        _selectedField.Key.StartsWith("circ_") ||
+                        _selectedField.Name.ToLower().Contains("checkbox") ||
+                        roiResult.Value == "True" ||
+                        roiResult.Value == "False"
+                    );
+
+                    if (isCheckbox && (roiResult.Value == "True" || roiResult.Value == "False" || (!string.IsNullOrEmpty(roiResult.RawValue) && roiResult.RawValue.StartsWith("Checkbox Ink:"))))
+                    {
+                        bool isMarked = (roiResult.Value == "True");
+                        string markPill = isMarked ? "✓ MARKED" : "✗ UNMARKED";
+                        sb.AppendLine($"Status: {markPill} ({roiResult.RawValue})");
+                        sb.AppendLine($"Confidence: {roiResult.Confidence:F2} ({roiResult.Rating ?? "High"}){timeInfo}");
+                    }
+                    else if (!string.IsNullOrEmpty(roiResult.Value))
                     {
                         if (!string.IsNullOrEmpty(roiResult.RawValue) && !string.Equals(roiResult.RawValue, roiResult.Value, StringComparison.OrdinalIgnoreCase))
                         {
-                            sb.AppendLine($"Extracted{timeInfo}: \"{roiResult.Value}\" (Raw: \"{roiResult.RawValue}\", Conf: {roiResult.Confidence:F2})");
+                            sb.AppendLine($"Extracted{timeInfo}: \"{roiResult.Value}\"");
+                            sb.AppendLine($"Raw: \"{roiResult.RawValue}\" (Conf: {roiResult.Confidence:F2})");
                         }
                         else
                         {
@@ -1003,7 +1092,7 @@ namespace SOLUM_UI
 
         private void ZoomIn_Click(object sender, RoutedEventArgs e)
         {
-            _currentZoom = Math.Min(3.0, _currentZoom + 0.2);
+            _currentZoom = Math.Min(5.0, _currentZoom + 0.2);
             ApplyZoom();
         }
 
@@ -1018,32 +1107,91 @@ namespace SOLUM_UI
             ZoomFit();
         }
 
+        private void ZoomReset_Click(object sender, MouseButtonEventArgs e)
+        {
+            _currentZoom = 1.0;
+            ApplyZoom();
+        }
+
+        private void ZoomReset1to1_Click(object sender, RoutedEventArgs e)
+        {
+            _currentZoom = 1.0;
+            ApplyZoom();
+        }
+
         private void ZoomFit()
         {
             if (CanvasScrollViewer.ActualWidth > 0 && CanvasContainer.Width > 0 && CanvasContainer.Height > 0)
             {
-                double fitScaleW = (CanvasScrollViewer.ActualWidth - 40) / CanvasContainer.Width;
-                double fitScaleH = (CanvasScrollViewer.ActualHeight - 40) / CanvasContainer.Height;
+                double fitScaleW = (CanvasScrollViewer.ActualWidth - 60) / CanvasContainer.Width;
+                double fitScaleH = (CanvasScrollViewer.ActualHeight - 60) / CanvasContainer.Height;
                 double fitScale = (fitScaleH > 0) ? Math.Min(fitScaleW, fitScaleH) : fitScaleW;
                 _currentZoom = Math.Max(0.1, Math.Min(1.2, fitScale));
                 ApplyZoom();
+                CanvasScrollViewer.ScrollToHorizontalOffset(0);
+                CanvasScrollViewer.ScrollToVerticalOffset(0);
             }
         }
 
         private void CanvasScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (e.Delta > 0)
-                _currentZoom = Math.Min(4.0, _currentZoom + 0.12);
-            else
-                _currentZoom = Math.Max(0.1, _currentZoom - 0.12);
+            if (CanvasContainer.ActualWidth <= 0 || CanvasContainer.ActualHeight <= 0)
+                return;
 
-            ApplyZoom();
-            e.Handled = true;
+            // Zoom ONLY when Ctrl is held down (cursor-centered zoom)
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            {
+                Point mousePosInViewer = e.GetPosition(CanvasScrollViewer);
+
+                double oldZoom = _currentZoom;
+                double zoomDelta = e.Delta > 0 ? 0.15 : -0.15;
+                double newZoom = Math.Max(0.1, Math.Min(5.0, _currentZoom + zoomDelta));
+
+                if (Math.Abs(newZoom - oldZoom) < 0.001)
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                double contentX = (CanvasScrollViewer.HorizontalOffset + mousePosInViewer.X) / oldZoom;
+                double contentY = (CanvasScrollViewer.VerticalOffset + mousePosInViewer.Y) / oldZoom;
+
+                _currentZoom = newZoom;
+                ApplyZoom();
+
+                double newHorizontalOffset = (contentX * newZoom) - mousePosInViewer.X;
+                double newVerticalOffset = (contentY * newZoom) - mousePosInViewer.Y;
+
+                CanvasScrollViewer.ScrollToHorizontalOffset(Math.Max(0, newHorizontalOffset));
+                CanvasScrollViewer.ScrollToVerticalOffset(Math.Max(0, newVerticalOffset));
+
+                e.Handled = true;
+                return;
+            }
+
+            // Normal scroll behavior without Ctrl:
+            // Scroll vertically (or Shift+Wheel horizontally) smoothly without zooming
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            {
+                double newOffset = CanvasScrollViewer.HorizontalOffset - (e.Delta * 0.8);
+                CanvasScrollViewer.ScrollToHorizontalOffset(Math.Max(0, Math.Min(CanvasScrollViewer.ScrollableWidth, newOffset)));
+                e.Handled = true;
+            }
+            else
+            {
+                double newOffset = CanvasScrollViewer.VerticalOffset - (e.Delta * 0.8);
+                CanvasScrollViewer.ScrollToVerticalOffset(Math.Max(0, Math.Min(CanvasScrollViewer.ScrollableHeight, newOffset)));
+                e.Handled = true;
+            }
         }
 
         private void ApplyZoom()
         {
             CanvasContainer.LayoutTransform = new ScaleTransform(_currentZoom, _currentZoom);
+            if (TxtZoomLevel != null)
+            {
+                TxtZoomLevel.Text = $"{(int)Math.Round(_currentZoom * 100)}%";
+            }
             RedrawAllCanvasBoxes();
         }
 
