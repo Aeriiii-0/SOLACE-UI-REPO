@@ -10,18 +10,33 @@
         ShowInTaskbar="False">
 
     <Border x:Name="BackdropBorder" Background="#66000000">
-        <!-- Main Interactive Shell Layer -->
-        <Border x:Name="DialogShell" Background="White" CornerRadius="16"
-                BorderBrush="#702943" BorderThickness="1.5"
-                HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="4" Opacity="0.30"/>
-            </Border.Effect>
-            <Border.RenderTransform>
-                <TranslateTransform x:Name="DialogShellTransform"/>
-            </Border.RenderTransform>
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+            <!-- Shadow Layer: Sibling with NO children. Rendered once into GPU cache -->
+            <Border x:Name="ShadowLayer" Background="White" CornerRadius="16"
+                    IsHitTestVisible="False"
+                    Width="{Binding ActualWidth, ElementName=DialogShell}"
+                    Height="{Binding ActualHeight, ElementName=DialogShell}">
+                <Border.RenderTransform>
+                    <TranslateTransform X="{Binding X, ElementName=DialogShellTransform}"
+                                        Y="{Binding Y, ElementName=DialogShellTransform}"/>
+                </Border.RenderTransform>
+                <Border.CacheMode>
+                    <BitmapCache EnableClearType="False" RenderAtScale="1" SnapsToDevicePixels="True"/>
+                </Border.CacheMode>
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="4" Opacity="0.25" RenderingBias="Performance"/>
+                </Border.Effect>
+            </Border>
 
-            <Grid>
+            <!-- Main Interactive Shell Layer (Clean, ZERO DropShadowEffect on visual tree) -->
+            <Border x:Name="DialogShell" Background="White" CornerRadius="16"
+                    BorderBrush="#702943" BorderThickness="1.5"
+                    SnapsToDevicePixels="True">
+                <Border.RenderTransform>
+                    <TranslateTransform x:Name="DialogShellTransform"/>
+                </Border.RenderTransform>
+
+                <Grid>
                 <Grid.RowDefinitions>
                     <!-- Header -->
                     <RowDefinition Height="60"/>
@@ -513,5 +528,6 @@
                 </Border>
             </Grid>
         </Border>
+        </Grid>
     </Border>
 </Window>
