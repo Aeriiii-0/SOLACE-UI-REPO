@@ -56,7 +56,7 @@ namespace SOLUM_UI.ViewModels
                 {
                     CycleId = cycle.CycleId,
                     Page = 1,
-                    PageSize = PageSize,
+                    PageSize = QueuePageSize,
                     SortBy = "PriorityScore",
                     SortOrder = "desc"
                 });
@@ -131,6 +131,8 @@ namespace SOLUM_UI.ViewModels
                 RecalculateSelectionCounts();
                 NotifyQuotaMetricsChanged();
                 EnrichAllCandidatesFromRecordsAsync();
+                LastRefreshedText = $"Updated: {DateTime.Now:h:mm tt}";
+                RefreshTooltip = $"Refresh subsidy recommendations (Last refreshed: {DateTime.Now:h:mm:ss tt})";
             }
             else
             {

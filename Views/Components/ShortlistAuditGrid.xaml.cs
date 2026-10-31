@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using SOLUM_UI.Models;
 using SOLUM_UI.ViewModels;
 
@@ -10,12 +11,37 @@ namespace SOLUM_UI.Views.Components
 {
     public partial class ShortlistAuditGrid : UserControl
     {
+        private readonly DispatcherTimer _resizeDebounceTimer;
+
         public ShortlistAuditGrid()
         {
             InitializeComponent();
+            _resizeDebounceTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(200)
+            };
+            _resizeDebounceTimer.Tick += (s, e) =>
+            {
+                _resizeDebounceTimer.Stop();
+                UpdateDynamicPageSize();
+            };
+
             DataContextChanged += OnDataContextChanged;
-            Loaded += (s, e) => { UpdateBatchColumn(); AdjustColumnWidths(); };
-            IsVisibleChanged += (s, e) => { if (IsVisible) { UpdateBatchColumn(); AdjustColumnWidths(); } };
+            Loaded += (s, e) =>
+            {
+                UpdateBatchColumn();
+                AdjustColumnWidths();
+                UpdateDynamicPageSize();
+            };
+            IsVisibleChanged += (s, e) =>
+            {
+                if (IsVisible)
+                {
+                    UpdateBatchColumn();
+                    AdjustColumnWidths();
+                    UpdateDynamicPageSize();
+                }
+            };
         }
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -26,6 +52,7 @@ namespace SOLUM_UI.Views.Components
             {
                 newVm.PropertyChanged += OnViewModelPropertyChanged;
                 UpdateBatchColumn();
+                UpdateDynamicPageSize();
             }
         }
 
@@ -44,7 +71,33 @@ namespace SOLUM_UI.Views.Components
             AdjustColumnWidths();
         }
 
-        private void ShortlistListView_SizeChanged(object sender, SizeChangedEventArgs e) => AdjustColumnWidths();
+        private void ShortlistListView_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.WidthChanged)
+                AdjustColumnWidths();
+
+            if (e.HeightChanged)
+            {
+                _resizeDebounceTimer.Stop();
+                _resizeDebounceTimer.Start();
+            }
+        }
+
+        private void UpdateDynamicPageSize()
+        {
+            double availableHeight = ShortlistListView.ActualHeight;
+            if (availableHeight <= 100) return;
+
+            // GridViewColumnHeader is 46px, each shortlist candidate row is ~58px
+            double rowsHeight = availableHeight - 46.0;
+            int calculated = (int)Math.Floor(rowsHeight / 58.0);
+            int optimal = Math.Max(4, Math.Min(35, calculated));
+
+            if (DataContext is SubsidyRecommendationViewModel vm && optimal != vm.ShortlistPageSize)
+            {
+                vm.UpdateShortlistPageSize(optimal);
+            }
+        }
 
         private void AdjustColumnWidths()
         {
