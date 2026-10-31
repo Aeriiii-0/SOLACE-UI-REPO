@@ -56,11 +56,7 @@
 
                     <!-- TOP HEADER -->
                     <Border x:Name="HeaderBorder" Grid.Row="0" Background="White" CornerRadius="16,16,0,0"
-                            BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="28,16"
-                            Cursor="SizeAll"
-                            MouseLeftButtonDown="Header_MouseLeftButtonDown"
-                            MouseMove="Header_MouseMove"
-                            MouseLeftButtonUp="Header_MouseLeftButtonUp">
+                            BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="28,16">
                         <Grid VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>

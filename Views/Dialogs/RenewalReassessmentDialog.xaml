@@ -473,11 +473,7 @@
                     </Grid.RowDefinitions>
 
                     <!-- ── 1. TITLE HEADER (Maroon Brand) ── -->
-                    <Border Grid.Row="0" Background="#702943" Padding="26,14"
-                            Cursor="SizeAll"
-                            MouseLeftButtonDown="Header_MouseLeftButtonDown"
-                            MouseMove="Header_MouseMove"
-                            MouseLeftButtonUp="Header_MouseLeftButtonUp">
+                    <Border Grid.Row="0" Background="#702943" Padding="26,14">
                         <Grid>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock x:Name="TxtDialogTitle" Text="Annual Re-assessment &amp; Renewal" FontSize="16" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>

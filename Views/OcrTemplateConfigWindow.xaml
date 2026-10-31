@@ -47,11 +47,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- HEADER -->
-                <Border x:Name="HeaderBorder" Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="24,0"
-                        Cursor="SizeAll"
-                        MouseLeftButtonDown="Header_MouseLeftButtonDown"
-                        MouseMove="Header_MouseMove"
-                        MouseLeftButtonUp="Header_MouseLeftButtonUp">
+                <Border x:Name="HeaderBorder" Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="24,0">
                     <Grid VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

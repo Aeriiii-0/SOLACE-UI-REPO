@@ -36,11 +36,7 @@
                         </Grid.RowDefinitions>
 
                         <!-- Header -->
-                        <Border Grid.Row="0" Background="#702943" CornerRadius="14,14,0,0" Padding="24,13"
-                                Cursor="SizeAll"
-                                MouseLeftButtonDown="Header_MouseLeftButtonDown"
-                                MouseMove="Header_MouseMove"
-                                MouseLeftButtonUp="Header_MouseLeftButtonUp">
+                        <Border Grid.Row="0" Background="#702943" CornerRadius="14,14,0,0" Padding="24,13">
                             <Grid>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="Profile Details"

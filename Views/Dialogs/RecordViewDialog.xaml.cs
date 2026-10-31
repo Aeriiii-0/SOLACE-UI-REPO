@@ -50,59 +50,6 @@ namespace SOLUM_UI.Views.Dialogs
         }
 
         // ── UI-layout logic (permitted in code-behind per AGENT.md §2) ────────
-        private Point _dragStartPoint;
-        private Point _currentMousePoint;
-        private bool _isDraggingShell = false;
-        private bool _hasPendingDragMove = false;
-
-        private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                _isDraggingShell = true;
-                _hasPendingDragMove = false;
-                _dragStartPoint = e.GetPosition(this);
-                _currentMousePoint = _dragStartPoint;
-                ((UIElement)sender).CaptureMouse();
-                CompositionTarget.Rendering += OnCompositionTargetRendering;
-            }
-        }
-
-        private void Header_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_isDraggingShell && e.LeftButton == MouseButtonState.Pressed)
-            {
-                _currentMousePoint = e.GetPosition(this);
-                _hasPendingDragMove = true;
-            }
-        }
-
-        private void OnCompositionTargetRendering(object sender, EventArgs e)
-        {
-            if (!_isDraggingShell || !_hasPendingDragMove || DialogShellTransform == null) return;
-
-            double deltaX = _currentMousePoint.X - _dragStartPoint.X;
-            double deltaY = _currentMousePoint.Y - _dragStartPoint.Y;
-
-            if (Math.Abs(deltaX) > 0.05 || Math.Abs(deltaY) > 0.05)
-            {
-                DialogShellTransform.X += deltaX;
-                DialogShellTransform.Y += deltaY;
-                _dragStartPoint = _currentMousePoint;
-            }
-            _hasPendingDragMove = false;
-        }
-
-        private void Header_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (_isDraggingShell)
-            {
-                _isDraggingShell = false;
-                _hasPendingDragMove = false;
-                CompositionTarget.Rendering -= OnCompositionTargetRendering;
-                ((UIElement)sender).ReleaseMouseCapture();
-            }
-        }
 
         private void ApplySize()
         {

@@ -88,59 +88,7 @@ namespace SOLUM_UI
             ApplySize();
         }
 
-        private Point _dragStartPointShell;
-        private Point _currentMousePoint;
-        private bool _isDraggingShell = false;
-        private bool _hasPendingDragMove = false;
 
-        private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                _isDraggingShell = true;
-                _hasPendingDragMove = false;
-                _dragStartPointShell = e.GetPosition(this);
-                _currentMousePoint = _dragStartPointShell;
-                ((UIElement)sender).CaptureMouse();
-                CompositionTarget.Rendering += OnCompositionTargetRendering;
-            }
-        }
-
-        private void Header_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_isDraggingShell && e.LeftButton == MouseButtonState.Pressed)
-            {
-                _currentMousePoint = e.GetPosition(this);
-                _hasPendingDragMove = true;
-            }
-        }
-
-        private void OnCompositionTargetRendering(object sender, EventArgs e)
-        {
-            if (!_isDraggingShell || !_hasPendingDragMove || DialogShellTransform == null) return;
-
-            double deltaX = _currentMousePoint.X - _dragStartPointShell.X;
-            double deltaY = _currentMousePoint.Y - _dragStartPointShell.Y;
-
-            if (Math.Abs(deltaX) > 0.05 || Math.Abs(deltaY) > 0.05)
-            {
-                DialogShellTransform.X += deltaX;
-                DialogShellTransform.Y += deltaY;
-                _dragStartPointShell = _currentMousePoint;
-            }
-            _hasPendingDragMove = false;
-        }
-
-        private void Header_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (_isDraggingShell)
-            {
-                _isDraggingShell = false;
-                _hasPendingDragMove = false;
-                CompositionTarget.Rendering -= OnCompositionTargetRendering;
-                ((UIElement)sender).ReleaseMouseCapture();
-            }
-        }
 
         private void ApplySize()
         {
