@@ -195,7 +195,7 @@
                     </StackPanel>
 
                     <!-- Viewport Hint -->
-                    <TextBlock Grid.Column="2" Text="💡 Wheel to zoom • Click box to inspect" FontSize="10.5" Foreground="#888888" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <TextBlock Grid.Column="2" Text="🖱️ Scroll to pan • Ctrl+Wheel to zoom • Click box to inspect" FontSize="10.5" Foreground="#888888" VerticalAlignment="Center" Margin="0,0,4,0"/>
                 </Grid>
 
                 <!-- Scrollable Pan & Zoom Document Canvas -->
@@ -216,9 +216,9 @@
                             </Grid>
                         </ScrollViewer>
 
-                        <!-- FLOATING CONCISE NAVIGATION DOCK (Bottom-Right) -->
+                        <!-- FLOATING CONCISE NAVIGATION DOCK (Shifted left to fully clear scrollbars) -->
                         <Border x:Name="FloatingNavDock" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                Margin="0,0,14,14" Background="#F4FFFFFF" BorderBrush="#D0C0C6" BorderThickness="1"
+                                Margin="0,0,48,24" Background="#F4FFFFFF" BorderBrush="#D0C0C6" BorderThickness="1"
                                 CornerRadius="16" Padding="6,3" SnapsToDevicePixels="True">
                             <Border.Effect>
                                 <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.16"/>

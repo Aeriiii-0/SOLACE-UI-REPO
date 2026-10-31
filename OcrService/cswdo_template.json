@@ -168,17 +168,6 @@
       ],
       "type": "text"
     },
-    "employment_status": {
-      "name": "Employment Status",
-      "category": "Section I",
-      "bbox": [
-        0.614,
-        0.233,
-        0.371,
-        0.029
-      ],
-      "type": "text"
-    },
     "is_employed": {
       "name": "Checkbox: Employed",
       "category": "Section I",
@@ -238,8 +227,8 @@
       "name": "Contact Number",
       "category": "Section I",
       "bbox": [
-        0.685,
-        0.275,
+        0.687,
+        0.277,
         0.297,
         0.016
       ],

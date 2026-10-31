@@ -174,10 +174,9 @@ namespace SOLUM_UI
             _fields.Add(new TemplateFieldItem { Key = "religion", Name = "Religion", Category = "Section I", X = 0.070, Y = 0.235, W = 0.140, H = 0.016 });
             _fields.Add(new TemplateFieldItem { Key = "occupation", Name = "Occupation / Source of Income", Category = "Section I", X = 0.260, Y = 0.235, W = 0.200, H = 0.016 });
             _fields.Add(new TemplateFieldItem { Key = "monthly_income", Name = "Monthly Income", Category = "Section I", X = 0.480, Y = 0.235, W = 0.125, H = 0.016 });
-            _fields.Add(new TemplateFieldItem { Key = "employment_status", Name = "Employment Status", Category = "Section I", X = 0.605, Y = 0.224, W = 0.370, H = 0.024 });
-            _fields.Add(new TemplateFieldItem { Key = "is_employed", Name = "Checkbox: Employed", Category = "Section I", X = 0.648, Y = 0.230, W = 0.028, H = 0.018 });
-            _fields.Add(new TemplateFieldItem { Key = "is_self_employed", Name = "Checkbox: Self-Employed", Category = "Section I", X = 0.763, Y = 0.230, W = 0.028, H = 0.018 });
-            _fields.Add(new TemplateFieldItem { Key = "is_not_employed", Name = "Checkbox: Not Employed", Category = "Section I", X = 0.833, Y = 0.230, W = 0.028, H = 0.018 });
+            _fields.Add(new TemplateFieldItem { Key = "is_employed", Name = "Checkbox: Employed", Category = "Section I", X = 0.6167, Y = 0.2347, W = 0.0084, H = 0.0056 });
+            _fields.Add(new TemplateFieldItem { Key = "is_self_employed", Name = "Checkbox: Self-Employed", Category = "Section I", X = 0.7056, Y = 0.2347, W = 0.0084, H = 0.0056 });
+            _fields.Add(new TemplateFieldItem { Key = "is_not_employed", Name = "Checkbox: Not Employed", Category = "Section I", X = 0.8256, Y = 0.2347, W = 0.0084, H = 0.0056 });
             _fields.Add(new TemplateFieldItem { Key = "address", Name = "Address (House/Street)", Category = "Section I", X = 0.030, Y = 0.260, W = 0.395, H = 0.016 });
             _fields.Add(new TemplateFieldItem { Key = "barangay", Name = "Barangay", Category = "Section I", X = 0.480, Y = 0.254, W = 0.205, H = 0.016 });
             _fields.Add(new TemplateFieldItem { Key = "contact_number", Name = "Contact Number", Category = "Section I", X = 0.760, Y = 0.260, W = 0.215, H = 0.016 });

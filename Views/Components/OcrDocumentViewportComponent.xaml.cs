@@ -239,6 +239,26 @@ namespace SOLUM_UI.Views.Components
             else if (key == "self_employed") key = "is_self_employed";
             else if (key == "not_employed") key = "is_not_employed";
 
+            if (key == "employment_status")
+            {
+                // Direct focus to the marked checkbox, defaulting to is_employed if none marked yet
+                if (OcrResponse?.Fields != null)
+                {
+                    if (OcrResponse.Fields.TryGetValue("is_not_employed", out var n) && (n?.Value == "True" || n?.Value == "1"))
+                        key = "is_not_employed";
+                    else if (OcrResponse.Fields.TryGetValue("is_self_employed", out var s) && (s?.Value == "True" || s?.Value == "1"))
+                        key = "is_self_employed";
+                    else if (OcrResponse.Fields.TryGetValue("is_employed", out var e) && (e?.Value == "True" || e?.Value == "1"))
+                        key = "is_employed";
+                    else
+                        key = "is_employed";
+                }
+                else
+                {
+                    key = "is_employed";
+                }
+            }
+
             if (key.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase))
             {
                 if (key.Contains("_civil")) key = key.Replace("_civil", "_civ");
@@ -258,13 +278,9 @@ namespace SOLUM_UI.Views.Components
             {
                 bbox = fieldRes.Bbox;
             }
-            else if ((key == "is_employed" || key == "is_self_employed" || key == "is_not_employed") && _fieldBBoxes.TryGetValue("employment_status", out var empParent))
-            {
-                double px = empParent[0], py = empParent[1], pw = empParent[2], ph = empParent[3];
-                if (key == "is_employed") bbox = new[] { px + pw * 0.07, py + ph * 0.35, pw * 0.05, ph * 0.50 };
-                else if (key == "is_self_employed") bbox = new[] { px + pw * 0.33, py + ph * 0.35, pw * 0.05, ph * 0.50 };
-                else if (key == "is_not_employed") bbox = new[] { px + pw * 0.66, py + ph * 0.35, pw * 0.06, ph * 0.50 };
-            }
+            else if (key == "is_employed") bbox = new[] { 0.6167, 0.2347, 0.0084, 0.0056 };
+            else if (key == "is_self_employed") bbox = new[] { 0.7056, 0.2347, 0.0084, 0.0056 };
+            else if (key == "is_not_employed") bbox = new[] { 0.8256, 0.2347, 0.0084, 0.0056 };
 
             if (bbox == null || bbox.Length < 4) return;
 
@@ -647,31 +663,51 @@ namespace SOLUM_UI.Views.Components
             if (ImgDocument.Source == null || ImgDocument.ActualWidth <= 0 || ImgDocument.ActualHeight <= 0)
                 return;
 
-            Point mousePosInViewer = e.GetPosition(DocScrollViewer);
-
-            double oldZoom = _zoomFactor;
-            double zoomDelta = e.Delta > 0 ? 0.15 : -0.15;
-            double newZoom = Math.Max(0.3, Math.Min(5.0, _zoomFactor + zoomDelta));
-
-            if (Math.Abs(newZoom - oldZoom) < 0.001)
+            // Zoom ONLY when Ctrl is held down
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
+                Point mousePosInViewer = e.GetPosition(DocScrollViewer);
+
+                double oldZoom = _zoomFactor;
+                double zoomDelta = e.Delta > 0 ? 0.15 : -0.15;
+                double newZoom = Math.Max(0.3, Math.Min(5.0, _zoomFactor + zoomDelta));
+
+                if (Math.Abs(newZoom - oldZoom) < 0.001)
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                double contentX = (DocScrollViewer.HorizontalOffset + mousePosInViewer.X) / oldZoom;
+                double contentY = (DocScrollViewer.VerticalOffset + mousePosInViewer.Y) / oldZoom;
+
+                _zoomFactor = newZoom;
+                ApplyZoom();
+
+                double newHorizontalOffset = (contentX * newZoom) - mousePosInViewer.X;
+                double newVerticalOffset = (contentY * newZoom) - mousePosInViewer.Y;
+
+                DocScrollViewer.ScrollToHorizontalOffset(Math.Max(0, newHorizontalOffset));
+                DocScrollViewer.ScrollToVerticalOffset(Math.Max(0, newVerticalOffset));
+
                 e.Handled = true;
                 return;
             }
 
-            double contentX = (DocScrollViewer.HorizontalOffset + mousePosInViewer.X) / oldZoom;
-            double contentY = (DocScrollViewer.VerticalOffset + mousePosInViewer.Y) / oldZoom;
-
-            _zoomFactor = newZoom;
-            ApplyZoom();
-
-            double newHorizontalOffset = (contentX * newZoom) - mousePosInViewer.X;
-            double newVerticalOffset = (contentY * newZoom) - mousePosInViewer.Y;
-
-            DocScrollViewer.ScrollToHorizontalOffset(Math.Max(0, newHorizontalOffset));
-            DocScrollViewer.ScrollToVerticalOffset(Math.Max(0, newVerticalOffset));
-
-            e.Handled = true;
+            // Normal scroll behavior without Ctrl:
+            // Scroll vertically (or Shift+Wheel horizontally) smoothly without accidental zooming
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            {
+                double newOffset = DocScrollViewer.HorizontalOffset - (e.Delta * 0.8);
+                DocScrollViewer.ScrollToHorizontalOffset(Math.Max(0, Math.Min(DocScrollViewer.ScrollableWidth, newOffset)));
+                e.Handled = true;
+            }
+            else
+            {
+                double newOffset = DocScrollViewer.VerticalOffset - (e.Delta * 0.8);
+                DocScrollViewer.ScrollToVerticalOffset(Math.Max(0, Math.Min(DocScrollViewer.ScrollableHeight, newOffset)));
+                e.Handled = true;
+            }
         }
 
         private void ZoomIn_Click(object sender, RoutedEventArgs e)

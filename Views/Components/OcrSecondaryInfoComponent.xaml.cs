@@ -92,6 +92,8 @@ namespace SOLUM_UI.Views.Components
                         return fe;
                     if ((tag == "dob" || tag == "birthdate") && (feTag == "dob" || feTag == "birthdate"))
                         return fe;
+                    if ((tag == "is_employed" || tag == "is_self_employed" || tag == "is_not_employed" || tag == "employed" || tag == "self_employed" || tag == "not_employed") && feTag == "employment_status")
+                        return fe;
                     if (tag.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase) && feTag.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase))
                     {
                         int tagIdx = tag.LastIndexOf('_');

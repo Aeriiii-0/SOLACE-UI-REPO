@@ -171,41 +171,16 @@ def measure_checkbox_ink(image: np.ndarray, bbox: list) -> float:
     ink_mask = inner < thresh_val
     return float(np.sum(ink_mask)) / float(inner.size)
 
-def detect_employment_status(enhanced_image: np.ndarray, ocr_engine, fields_config: dict, all_detections: list = None, raw_text: str = "") -> tuple:
+def detect_employment_status(enhanced_image, ocr_engine, fields_config: dict, all_detections: list = None, raw_text: str = "") -> tuple:
     """
-    Detects which employment status checkbox or write-in text is marked:
+    Detects which employment status checkbox is marked exclusively from the 3 checkbox ROIs:
     1. Checkbox: Employed (is_employed)
     2. Checkbox: Self-Employed (is_self_employed)
     3. Checkbox: Not Employed (is_not_employed)
+    Bypasses broad text searches to prevent printed label interference.
     Returns: (status_string, confidence)
     """
-    # Step A: Direct write-in OCR detection in Employment Status zone
-    if raw_text and not raw_text.startswith("{{"):
-        low = raw_text.lower().strip()
-        if "self" in low:
-            return "Self-Employed", 0.95
-        if "not" in low or "unemploy" in low or "wala" in low or "none" in low:
-            return "Not Employed", 0.95
-        if "employ" in low:
-            return "Employed", 0.95
-
-    # Check candidate text boxes inside the employment_status region
-    if all_detections:
-        p_bbox = fields_config.get("employment_status", {}).get("bbox", [0.605, 0.222, 0.370, 0.026])
-        px, py, pw, ph = p_bbox
-        for d in all_detections:
-            if (px - 0.012 <= d["cx"] <= px + pw + 0.012) and (py - 0.010 <= d["cy"] <= py + ph + 0.014):
-                txt = d["text"].lower().strip()
-                if txt.startswith("{{") or txt in ["employment", "status:", "employment status", "employment status:", "employed", "self-employed", "not employed", ": self-employed", ". not"]:
-                    continue
-                if "self" in txt:
-                    return "Self-Employed", 0.95
-                if "not" in txt or "unemploy" in txt or "none" in txt or "wala" in txt:
-                    return "Not Employed", 0.95
-                if "employ" in txt:
-                    return "Employed", 0.95
-
-    # Step B: Calibrated Checkbox Ink & Checkmark Symbol Analysis
+    # Calibrated Checkbox Ink & Checkmark Symbol Analysis
     if enhanced_image is not None and enhanced_image.size > 0:
         box_emp = fields_config.get("is_employed", {}).get("bbox") or [0.6167, 0.2347, 0.0084, 0.0056]
         box_self = fields_config.get("is_self_employed", {}).get("bbox") or [0.7056, 0.2347, 0.0084, 0.0056]
@@ -219,7 +194,7 @@ def detect_employment_status(enhanced_image: np.ndarray, ocr_engine, fields_conf
         rec_self, _ = recognize_crop(ocr_engine, crop_roi(enhanced_image, box_self)) if ocr_engine else ("", 0.0)
         rec_not, _ = recognize_crop(ocr_engine, crop_roi(enhanced_image, box_not)) if ocr_engine else ("", 0.0)
 
-        mark_chars = set("vx17✓/\\o*ckyes")
+        mark_chars = {"v", "x", "1", "7", "o", "/", chr(92), "*", "c", "k", "y", "e", "s"}
         has_mark_emp = any(c in mark_chars for c in rec_emp.lower()) if rec_emp else False
         has_mark_self = any(c in mark_chars for c in rec_self.lower()) if rec_self else False
         has_mark_not = any(c in mark_chars for c in rec_not.lower()) if rec_not else False
@@ -231,10 +206,10 @@ def detect_employment_status(enhanced_image: np.ndarray, ocr_engine, fields_conf
         rec_emp_safe = rec_emp.encode('ascii', 'replace').decode('ascii')
         rec_self_safe = rec_self.encode('ascii', 'replace').decode('ascii')
         rec_not_safe = rec_not.encode('ascii', 'replace').decode('ascii')
-        print(f"[Employment Ink Analysis] Employed: {score_emp:.3f} (ink:{ink_emp:.3f}, ocr:'{rec_emp_safe}'), Self: {score_self:.3f} (ink:{ink_self:.3f}, ocr:'{rec_self_safe}'), Not: {score_not:.3f} (ink:{ink_not:.3f}, ocr:'{rec_not_safe}')")
+        print(f"[Employment Checkbox Analysis] Employed: {score_emp:.3f} (ink:{ink_emp:.3f}), Self: {score_self:.3f} (ink:{ink_self:.3f}), Not: {score_not:.3f} (ink:{ink_not:.3f})")
 
         max_score = max(score_emp, score_self, score_not)
-        if max_score >= 0.05:
+        if max_score >= 0.10:
             if score_not >= score_emp and score_not >= score_self:
                 return "Not Employed", 0.95
             elif score_self >= score_emp and score_self >= score_not:
@@ -247,12 +222,7 @@ def detect_employment_status(enhanced_image: np.ndarray, ocr_engine, fields_conf
     inc_val = str(fields_config.get("monthly_income", {}).get("value", "")).strip()
     if occ_val in ["none", "wala", "n/a", "no work", "unemployed", "housewife", "homemaker"] or inc_val in ["0", "0.0", "none"]:
         return "Not Employed", 0.75
-    if any(term in occ_val for term in ["vendor", "sari-sari", "freelance", "business", "driver", "online", "tindero", "tindera"]):
-        return "Self-Employed", 0.75
-    if len(occ_val) >= 3 and occ_val not in ["na", "n/a", "none", "wala"]:
-        return "Employed", 0.75
 
-    # If completely blank with no markings or context, return empty so UI does not default
     return "", 0.0
 
 def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_config: dict, all_detections: list = None) -> list:
