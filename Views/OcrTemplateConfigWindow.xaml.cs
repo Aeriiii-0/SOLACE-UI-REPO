@@ -1320,27 +1320,31 @@ namespace SOLUM_UI
 
         #region Global Nudge and Scale (All Boxes)
 
-        private void GlobalNudgeUp_Click(object sender, RoutedEventArgs e) => GlobalNudge(0.0, -0.005);
-        private void GlobalNudgeDown_Click(object sender, RoutedEventArgs e) => GlobalNudge(0.0, 0.005);
-        private void GlobalNudgeLeft_Click(object sender, RoutedEventArgs e) => GlobalNudge(-0.005, 0.0);
-        private void GlobalNudgeRight_Click(object sender, RoutedEventArgs e) => GlobalNudge(0.005, 0.0);
+        private void GlobalNudgeUp_Click(object sender, RoutedEventArgs e) => GlobalNudge(0.0, -1.0);
+        private void GlobalNudgeDown_Click(object sender, RoutedEventArgs e) => GlobalNudge(0.0, 1.0);
+        private void GlobalNudgeLeft_Click(object sender, RoutedEventArgs e) => GlobalNudge(-1.0, 0.0);
+        private void GlobalNudgeRight_Click(object sender, RoutedEventArgs e) => GlobalNudge(1.0, 0.0);
 
         private void GlobalScaleExpand_Click(object sender, RoutedEventArgs e) => GlobalScale(1.01, 1.01);
         private void GlobalScaleShrink_Click(object sender, RoutedEventArgs e) => GlobalScale(0.99, 0.99);
         private void GlobalScaleWidth_Click(object sender, RoutedEventArgs e) => GlobalScale(1.01, 1.0);
         private void GlobalScaleHeight_Click(object sender, RoutedEventArgs e) => GlobalScale(1.0, 1.01);
 
-        private void GlobalNudge(double dx, double dy)
+        private void GlobalNudge(double dirX, double dirY)
         {
             PushUndoState();
+            double step = (RbGlobalStepNormal?.IsChecked == true) ? 0.005 : 0.001;
+            double dx = dirX * step;
+            double dy = dirY * step;
+
             foreach (var f in _fields)
             {
-                f.X = Math.Max(0.0, Math.Min(0.98, Math.Round(f.X + dx, 3)));
-                f.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(f.Y + dy, 3)));
+                f.X = Math.Max(0.0, Math.Min(0.98, Math.Round(f.X + dx, 4)));
+                f.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(f.Y + dy, 4)));
             }
             if (_selectedField != null) UpdateSidebarFromField(_selectedField);
             RedrawAllCanvasBoxes();
-            TxtStatusMessage.Text = $"🌐 Nudged all boxes (dx: {(dx * 100):+0.0;-0.0;0}%, dy: {(dy * 100):+0.0;-0.0;0}%).";
+            TxtStatusMessage.Text = $"🌐 Nudged all boxes by {(RbGlobalStepNormal?.IsChecked == true ? "5px" : "1px")}.";
         }
 
         private void GlobalScale(double scaleX, double scaleY)

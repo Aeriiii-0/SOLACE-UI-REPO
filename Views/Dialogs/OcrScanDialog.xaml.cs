@@ -84,22 +84,21 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void ApplySize()
         {
-            double workW = SystemParameters.WorkArea.Width;
-            double workH = SystemParameters.WorkArea.Height;
-            double workLeft = SystemParameters.WorkArea.Left;
-            double workTop = SystemParameters.WorkArea.Top;
+            double screenW, screenH, screenLeft, screenTop;
 
-            double screenW = workW;
-            double screenH = workH;
-            double screenLeft = workLeft;
-            double screenTop = workTop;
-
-            if (Owner != null && Owner.WindowState != WindowState.Maximized && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
+            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
-                screenW    = Math.Min(Owner.ActualWidth, workW);
-                screenH    = Math.Min(Owner.ActualHeight, workH);
-                screenLeft = Math.Max(workLeft, Owner.Left);
-                screenTop  = Math.Max(workTop, Owner.Top);
+                screenW    = Owner.ActualWidth;
+                screenH    = Owner.ActualHeight;
+                screenLeft = Owner.Left;
+                screenTop  = Owner.Top;
+            }
+            else
+            {
+                screenW    = SystemParameters.WorkArea.Width;
+                screenH    = SystemParameters.WorkArea.Height;
+                screenLeft = SystemParameters.WorkArea.Left;
+                screenTop  = SystemParameters.WorkArea.Top;
             }
 
             if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
@@ -109,8 +108,8 @@ namespace SOLUM_UI.Views.Dialogs
 
             if (DialogShell != null)
             {
-                double availH = Math.Min(screenH, workH);
-                double availW = Math.Min(screenW, workW);
+                double availH = Math.Min(screenH, SystemParameters.WorkArea.Height);
+                double availW = Math.Min(screenW, SystemParameters.WorkArea.Width);
                 DialogShell.MaxHeight = Math.Max(500, Math.Min(availH - 30, 840));
                 DialogShell.Height    = Math.Max(500, Math.Min(availH - 45, 800));
                 DialogShell.MaxWidth  = Math.Max(800, Math.Min(availW - 30, 1440));

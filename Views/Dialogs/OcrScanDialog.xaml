@@ -14,7 +14,7 @@
         Width="1380" Height="860">
 
     <!-- Outer Shadow and Dialog Shell -->
-    <Border Background="#44000000" Padding="0">
+    <Border Background="#66000000" Padding="0">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <!-- Shadow Layer: Sibling with NO children. Rendered once into GPU cache -->
             <Border Background="White" CornerRadius="16"
