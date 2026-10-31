@@ -349,6 +349,36 @@ namespace SOLUM_UI.Views.Components
 
         #endregion
 
+        #region OCR Settings Popover Handlers
+
+        private void BtnOcrSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (OcrSettingsPopup != null)
+            {
+                OcrSettingsPopup.IsOpen = !OcrSettingsPopup.IsOpen;
+            }
+        }
+
+        private void MenuScannerSettings_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (OcrSettingsPopup != null) OcrSettingsPopup.IsOpen = false;
+            ScannerSettings_Click(sender, e);
+        }
+
+        private void MenuAdjustBoxes_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (OcrSettingsPopup != null) OcrSettingsPopup.IsOpen = false;
+            AdjustTemplate_Click(sender, e);
+        }
+
+        private void MenuViewAiBoxes_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (OcrSettingsPopup != null) OcrSettingsPopup.IsOpen = false;
+            ViewDetections_Click(sender, e);
+        }
+
+        #endregion
+
         #region Scanning & Document Processing
 
         private void ScannerSettings_Click(object sender, RoutedEventArgs e)
@@ -365,10 +395,14 @@ namespace SOLUM_UI.Views.Components
 
         private void UpdateScannerStatusBadge()
         {
+            string dev = string.IsNullOrWhiteSpace(_scannerSettings.DeviceName) ? "Auto-detect" : _scannerSettings.DeviceName;
             if (TxtScannerStatusBadge != null)
             {
-                string dev = string.IsNullOrWhiteSpace(_scannerSettings.DeviceName) ? "Auto-detect" : _scannerSettings.DeviceName;
                 TxtScannerStatusBadge.Text = $"Status: {dev} ({_scannerSettings.Dpi} DPI - {_scannerSettings.ColorMode})";
+            }
+            if (TxtMenuScannerSub != null)
+            {
+                TxtMenuScannerSub.Text = $"{dev} • {_scannerSettings.Dpi} DPI • {_scannerSettings.ColorMode}";
             }
         }
 
@@ -379,7 +413,7 @@ namespace SOLUM_UI.Views.Components
             {
                 if (BtnScanHardware != null) BtnScanHardware.IsEnabled = false;
                 if (BtnSelectImage != null) BtnSelectImage.IsEnabled = false;
-                if (BtnScannerSettings != null) BtnScannerSettings.IsEnabled = false;
+                if (BtnOcrSettings != null) BtnOcrSettings.IsEnabled = false;
 
                 OverlayProcessing.Visibility = Visibility.Visible;
                 OcrStageProgressBar.Value = 5;
@@ -421,7 +455,7 @@ namespace SOLUM_UI.Views.Components
             {
                 if (BtnScanHardware != null) BtnScanHardware.IsEnabled = true;
                 if (BtnSelectImage != null) BtnSelectImage.IsEnabled = true;
-                if (BtnScannerSettings != null) BtnScannerSettings.IsEnabled = true;
+                if (BtnOcrSettings != null) BtnOcrSettings.IsEnabled = true;
             }
         }
 
