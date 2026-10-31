@@ -78,25 +78,85 @@ namespace SOLUM_UI
             InitializeComponent();
             _imagePath = imagePath;
             _initialFieldKey = initialFieldKey;
-            Loaded += OcrTemplateConfigWindow_Loaded;
+            Loaded += (s, e) => { ApplySize(); OcrTemplateConfigWindow_Loaded(s, e); };
+            SizeChanged += (s, e) => ApplySize();
         }
 
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
-            double workW = SystemParameters.WorkArea.Width;
-            double workH = SystemParameters.WorkArea.Height;
-            Width = Math.Min(1340, workW - 30);
-            Height = Math.Min(840, workH - 30);
-            Left = SystemParameters.WorkArea.Left + (workW - Width) / 2;
-            Top = SystemParameters.WorkArea.Top + (workH - Height) / 2;
+            ApplySize();
         }
+
+        private Point _dragStartPointShell;
+        private bool _isDraggingShell = false;
 
         private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
             {
-                DragMove();
+                _isDraggingShell = true;
+                _dragStartPointShell = e.GetPosition(this);
+                ((UIElement)sender).CaptureMouse();
+            }
+        }
+
+        private void Header_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDraggingShell && e.LeftButton == MouseButtonState.Pressed && DialogShellTransform != null)
+            {
+                Point currentPos = e.GetPosition(this);
+                double deltaX = currentPos.X - _dragStartPointShell.X;
+                double deltaY = currentPos.Y - _dragStartPointShell.Y;
+
+                DialogShellTransform.X += deltaX;
+                DialogShellTransform.Y += deltaY;
+
+                _dragStartPointShell = currentPos;
+            }
+        }
+
+        private void Header_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isDraggingShell)
+            {
+                _isDraggingShell = false;
+                ((UIElement)sender).ReleaseMouseCapture();
+            }
+        }
+
+        private void ApplySize()
+        {
+            double screenW, screenH, screenLeft, screenTop;
+
+            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
+            {
+                screenW    = Owner.ActualWidth;
+                screenH    = Owner.ActualHeight;
+                screenLeft = Owner.Left;
+                screenTop  = Owner.Top;
+            }
+            else
+            {
+                screenW    = SystemParameters.WorkArea.Width;
+                screenH    = SystemParameters.WorkArea.Height;
+                screenLeft = SystemParameters.WorkArea.Left;
+                screenTop  = SystemParameters.WorkArea.Top;
+            }
+
+            if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
+            if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
+            if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
+            if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
+
+            if (DialogShell != null)
+            {
+                double availW = Math.Min(screenW, SystemParameters.WorkArea.Width);
+                double availH = Math.Min(screenH, SystemParameters.WorkArea.Height);
+                DialogShell.MaxWidth  = Math.Max(800, Math.Min(availW - 30, 1480));
+                DialogShell.Width     = Math.Max(800, Math.Min(availW - 40, 1380));
+                DialogShell.MaxHeight = Math.Max(500, Math.Min(availH - 30, 920));
+                DialogShell.Height    = Math.Max(500, Math.Min(availH - 45, 860));
             }
         }
 

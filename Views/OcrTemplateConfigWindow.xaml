@@ -6,15 +6,20 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        Width="1340" Height="860"
-        ResizeMode="CanResizeWithGrip"
+        ResizeMode="NoResize"
         ShowInTaskbar="False">
 
-    <Border Background="#33000000">
-        <Border Background="White" CornerRadius="16" Margin="16">
+    <Border x:Name="BackdropBorder" Background="#66000000">
+        <!-- Main Interactive Shell Layer -->
+        <Border x:Name="DialogShell" Background="White" CornerRadius="16"
+                BorderBrush="#702943" BorderThickness="1.5"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
             <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="30" ShadowDepth="4" Opacity="0.35"/>
+                <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="4" Opacity="0.30"/>
             </Border.Effect>
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="DialogShellTransform"/>
+            </Border.RenderTransform>
 
             <Grid>
                 <Grid.RowDefinitions>
@@ -27,8 +32,11 @@
                 </Grid.RowDefinitions>
 
                 <!-- HEADER -->
-                <Border Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="24,0"
-                        Cursor="SizeAll" MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                <Border x:Name="HeaderBorder" Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="24,0"
+                        Cursor="SizeAll"
+                        MouseLeftButtonDown="Header_MouseLeftButtonDown"
+                        MouseMove="Header_MouseMove"
+                        MouseLeftButtonUp="Header_MouseLeftButtonUp">
                     <Grid VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

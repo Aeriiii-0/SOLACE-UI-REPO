@@ -4,10 +4,9 @@
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        Width="540" Height="500"
         ShowInTaskbar="False">
 
-    <Border Background="#66000000">
+    <Border x:Name="BackdropBorder" Background="#66000000" MouseLeftButtonDown="Backdrop_MouseLeftButtonDown">
         <Border Background="White" CornerRadius="16" Width="500"
                 VerticalAlignment="Center" HorizontalAlignment="Center"
                 BorderBrush="#702943" BorderThickness="1.5">

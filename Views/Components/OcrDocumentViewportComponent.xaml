@@ -102,12 +102,16 @@
                 <!-- Viewport Toolbar -->
                 <Grid Grid.Row="1" Margin="0,0,0,8">
                     <Grid.ColumnDefinitions>
+                        <!-- Left: Scan & Upload Actions -->
                         <ColumnDefinition Width="Auto"/>
+                        <!-- Middle: Viewport Hint -->
                         <ColumnDefinition Width="*"/>
+                        <!-- Right: Icon-Only Settings Button & Popover -->
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Orientation="Horizontal">
+                    <!-- Left: Scan & Upload Actions -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
                         <!-- 1. Scan Document -->
                         <Button x:Name="BtnScanHardware" Content="Scan Document" Click="ScanHardware_Click"
                                 Height="28" Padding="12,0" Background="#702943" Foreground="White" FontWeight="SemiBold"
@@ -143,139 +147,137 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-
-                        <!-- 3. Consolidated OCR & Scanner Settings Popover -->
-                        <Grid Margin="6,0,0,0">
-                            <Button x:Name="BtnOcrSettings" Click="BtnOcrSettings_Click"
-                                    Height="28" Padding="9,0" Background="White" Foreground="#702943" FontWeight="SemiBold"
-                                    FontSize="11" BorderBrush="#D0B8C0" BorderThickness="1" Cursor="Hand" ToolTip="OCR &amp; Scanner Settings">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <!-- Sleek Vector Gear Icon -->
-                                    <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"
-                                          Fill="#702943" Stretch="Uniform" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                    <TextBlock Text="Settings" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
-                                    <TextBlock Text=" ▾" FontSize="9" Foreground="#702943" VerticalAlignment="Center" Margin="2,-1,0,0"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Clean Contextual Settings Popover -->
-                            <Popup x:Name="OcrSettingsPopup" PlacementTarget="{Binding ElementName=BtnOcrSettings}"
-                                   Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade"
-                                   VerticalOffset="4">
-                                <Border Background="White" CornerRadius="10" BorderBrush="#D0B8C0" BorderThickness="1"
-                                        Padding="6" Width="260">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="4" Opacity="0.14"/>
-                                    </Border.Effect>
-                                    <StackPanel>
-                                        <!-- Header Label -->
-                                        <Border Padding="10,6,10,4">
-                                            <TextBlock Text="OCR &amp; SCANNER TOOLS" FontSize="9.5" FontWeight="Bold" Foreground="#999999"/>
-                                        </Border>
-
-                                        <!-- 1. Scanner Settings -->
-                                        <Border x:Name="ItemScannerSettings" CornerRadius="6" Cursor="Hand" Padding="10,8"
-                                                MouseLeftButtonDown="MenuScannerSettings_Click" Background="Transparent">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Style.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#FDF5F7"/>
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="26"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Path Grid.Column="0" Data="M19,8H5C3.34,8 2,9.34 2,11V17H6V21H18V17H22V11C22,9.34 20.66,8 19,8M16,19H8V15H16V19M19,12C18.45,12 18,11.55 18,11C18,10.45 18.45,10 19,10C19.55,10 20,10.45 20,11C20,11.55 19.55,12 19,12M18,3H6V7H18V3Z"
-                                                      Fill="#702943" Stretch="Uniform" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                    <TextBlock Text="Scanner Configuration" FontSize="11.5" FontWeight="SemiBold" Foreground="#222222"/>
-                                                    <TextBlock x:Name="TxtMenuScannerSub" Text="Resolution (DPI), color &amp; device" FontSize="10" Foreground="#777777" Margin="0,1,0,0"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-
-                                        <!-- Separator -->
-                                        <Border Height="1" Background="#F0E4E8" Margin="6,2"/>
-
-                                        <!-- 2. Adjust Template Boxes -->
-                                        <Border x:Name="ItemAdjustBoxes" CornerRadius="6" Cursor="Hand" Padding="10,8"
-                                                MouseLeftButtonDown="MenuAdjustBoxes_Click" Background="Transparent">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Style.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#FDF5F7"/>
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="26"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Path Grid.Column="0" Data="M3,3V9H5V5H9V3H3M15,3V5H19V9H21V3H15M3,15V21H9V19H5V15H3M19,15V19H15V21H21V15H19M8,8H16V16H8V8Z"
-                                                      Fill="#702943" Stretch="Uniform" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                    <TextBlock Text="Adjust Template Boxes" FontSize="11.5" FontWeight="SemiBold" Foreground="#222222"/>
-                                                    <TextBlock Text="Fine-tune box coordinates &amp; sizing" FontSize="10" Foreground="#777777" Margin="0,1,0,0"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-
-                                        <!-- Separator -->
-                                        <Border Height="1" Background="#F0E4E8" Margin="6,2"/>
-
-                                        <!-- 3. View AI Detection Boxes -->
-                                        <Border x:Name="ItemViewAiBoxes" CornerRadius="6" Cursor="Hand" Padding="10,8"
-                                                MouseLeftButtonDown="MenuViewAiBoxes_Click" Background="Transparent">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Style.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#FDF5F7"/>
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="26"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Path Grid.Column="0" Data="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"
-                                                      Fill="#702943" Stretch="Uniform" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                    <TextBlock Text="View AI Detection Boxes" FontSize="11.5" FontWeight="SemiBold" Foreground="#222222"/>
-                                                    <TextBlock Text="Inspect neural detection overlay" FontSize="10" Foreground="#777777" Margin="0,1,0,0"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </StackPanel>
-                                </Border>
-                            </Popup>
-                        </Grid>
                     </StackPanel>
 
-                    <!-- Viewport Hint -->
-                    <TextBlock Grid.Column="2" Text="🖱️ Scroll to pan • Ctrl+Wheel to zoom • Click box to inspect" FontSize="10.5" Foreground="#888888" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <!-- Middle: Viewport Hint -->
+                    <TextBlock Grid.Column="1" Text="🖱️ Scroll to pan • Ctrl+Wheel to zoom • Click box to inspect"
+                               FontSize="10.5" Foreground="#888888" VerticalAlignment="Center" Margin="10,0,10,0"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <!-- Right: Icon-Only Settings Button & Popover -->
+                    <Grid Grid.Column="2" HorizontalAlignment="Right">
+                        <Button x:Name="BtnOcrSettings" Click="BtnOcrSettings_Click"
+                                Width="28" Height="28" Padding="0" Background="White" Foreground="#702943"
+                                BorderBrush="#D0B8C0" BorderThickness="1" Cursor="Hand" ToolTip="OCR &amp; Scanner Settings">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <!-- Sleek Vector Gear Icon -->
+                            <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"
+                                  Fill="#702943" Stretch="Uniform" Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Button>
+
+                        <!-- Clean Contextual Settings Popover (Right-aligned with HorizontalOffset="-232") -->
+                        <Popup x:Name="OcrSettingsPopup" PlacementTarget="{Binding ElementName=BtnOcrSettings}"
+                               Placement="Bottom" HorizontalOffset="-232" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade"
+                               VerticalOffset="4">
+                            <Border Background="White" CornerRadius="10" BorderBrush="#D0B8C0" BorderThickness="1"
+                                    Padding="6" Width="260">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="4" Opacity="0.14"/>
+                                </Border.Effect>
+                                <StackPanel>
+                                    <!-- Header Label -->
+                                    <Border Padding="10,6,10,4">
+                                        <TextBlock Text="OCR &amp; SCANNER TOOLS" FontSize="9.5" FontWeight="Bold" Foreground="#999999"/>
+                                    </Border>
+
+                                    <!-- 1. Scanner Settings -->
+                                    <Border x:Name="ItemScannerSettings" CornerRadius="6" Cursor="Hand" Padding="10,8"
+                                            MouseLeftButtonDown="MenuScannerSettings_Click" Background="Transparent">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FDF5F7"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="26"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Path Grid.Column="0" Data="M19,8H5C3.34,8 2,9.34 2,11V17H6V21H18V17H22V11C22,9.34 20.66,8 19,8M16,19H8V15H16V19M19,12C18.45,12 18,11.55 18,11C18,10.45 18.45,10 19,10C19.55,10 20,10.45 20,11C20,11.55 19.55,12 19,12M18,3H6V7H18V3Z"
+                                                  Fill="#702943" Stretch="Uniform" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="Scanner Configuration" FontSize="11.5" FontWeight="SemiBold" Foreground="#222222"/>
+                                                <TextBlock x:Name="TxtMenuScannerSub" Text="Resolution (DPI), color &amp; device" FontSize="10" Foreground="#777777" Margin="0,1,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Separator -->
+                                    <Border Height="1" Background="#F0E4E8" Margin="6,2"/>
+
+                                    <!-- 2. Adjust Template Boxes -->
+                                    <Border x:Name="ItemAdjustBoxes" CornerRadius="6" Cursor="Hand" Padding="10,8"
+                                            MouseLeftButtonDown="MenuAdjustBoxes_Click" Background="Transparent">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FDF5F7"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="26"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Path Grid.Column="0" Data="M3,3V9H5V5H9V3H3M15,3V5H19V9H21V3H15M3,15V21H9V19H5V15H3M19,15V19H15V21H21V15H19M8,8H16V16H8V8Z"
+                                                  Fill="#702943" Stretch="Uniform" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="Adjust Template Boxes" FontSize="11.5" FontWeight="SemiBold" Foreground="#222222"/>
+                                                <TextBlock Text="Fine-tune box coordinates &amp; sizing" FontSize="10" Foreground="#777777" Margin="0,1,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Separator -->
+                                    <Border Height="1" Background="#F0E4E8" Margin="6,2"/>
+
+                                    <!-- 3. View AI Detection Boxes -->
+                                    <Border x:Name="ItemViewAiBoxes" CornerRadius="6" Cursor="Hand" Padding="10,8"
+                                            MouseLeftButtonDown="MenuViewAiBoxes_Click" Background="Transparent">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FDF5F7"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="26"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Path Grid.Column="0" Data="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"
+                                                  Fill="#702943" Stretch="Uniform" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="View AI Detection Boxes" FontSize="11.5" FontWeight="SemiBold" Foreground="#222222"/>
+                                                <TextBlock Text="Inspect neural detection overlay" FontSize="10" Foreground="#777777" Margin="0,1,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
+                    </Grid>
                 </Grid>
 
                 <!-- Scrollable Pan & Zoom Document Canvas -->

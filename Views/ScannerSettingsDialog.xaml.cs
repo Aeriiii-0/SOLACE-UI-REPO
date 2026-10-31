@@ -20,7 +20,46 @@ namespace SOLUM_UI
             Settings = currentSettings ?? ScannerSettings.Load();
 
             ApplySettingsToUI();
-            Loaded += async (s, e) => await RefreshDevicesListAsync();
+            Loaded += async (s, e) =>
+            {
+                ApplySize();
+                await RefreshDevicesListAsync();
+            };
+            SizeChanged += (s, e) => ApplySize();
+        }
+
+        private void ApplySize()
+        {
+            double screenW, screenH, screenLeft, screenTop;
+
+            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
+            {
+                screenW    = Owner.ActualWidth;
+                screenH    = Owner.ActualHeight;
+                screenLeft = Owner.Left;
+                screenTop  = Owner.Top;
+            }
+            else
+            {
+                screenW    = SystemParameters.WorkArea.Width;
+                screenH    = SystemParameters.WorkArea.Height;
+                screenLeft = SystemParameters.WorkArea.Left;
+                screenTop  = SystemParameters.WorkArea.Top;
+            }
+
+            if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
+            if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
+            if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
+            if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
+        }
+
+        private void Backdrop_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource == BackdropBorder)
+            {
+                DialogResult = false;
+                Close();
+            }
         }
 
         private void ApplySettingsToUI()
