@@ -54,7 +54,8 @@ namespace SOLUM_UI
         private readonly Stack<string> _undoStack = new Stack<string>();
         private readonly Stack<string> _redoStack = new Stack<string>();
         private TemplateFieldItem _selectedField;
-        private readonly HashSet<TemplateFieldItem> _selectedFields = new HashSet<TemplateFieldItem>();
+        private readonly HashSet<string> _selectedFieldKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private bool _isUpdatingSelectionFromCanvas = false;
         private class BoxCoordSnapshot { public double X; public double Y; public double W; public double H; }
         private readonly Dictionary<TemplateFieldItem, BoxCoordSnapshot> _origCoords = new Dictionary<TemplateFieldItem, BoxCoordSnapshot>();
         private ResizeHandleType _activeHandle = ResizeHandleType.Move;
@@ -342,8 +343,8 @@ namespace SOLUM_UI
                 _fields.Clear();
                 ParseTemplateJson(prevJson);
                 PopulateFieldCombo();
-                _selectedFields.Clear();
-                if (_selectedField != null) _selectedFields.Add(_selectedField);
+                _selectedFieldKeys.Clear();
+                if (_selectedField != null) _selectedFieldKeys.Add(_selectedField.Key);
                 RedrawAllCanvasBoxes();
                 UpdateUndoRedoButtons();
                 TxtStatusMessage.Text = "↩ Undid last change.";
@@ -359,8 +360,8 @@ namespace SOLUM_UI
                 _fields.Clear();
                 ParseTemplateJson(nextJson);
                 PopulateFieldCombo();
-                _selectedFields.Clear();
-                if (_selectedField != null) _selectedFields.Add(_selectedField);
+                _selectedFieldKeys.Clear();
+                if (_selectedField != null) _selectedFieldKeys.Add(_selectedField.Key);
                 RedrawAllCanvasBoxes();
                 UpdateUndoRedoButtons();
                 TxtStatusMessage.Text = "↪ Redid change.";
@@ -390,7 +391,7 @@ namespace SOLUM_UI
                 }
             }
 
-            if (_selectedFields.Count > 0 || _selectedField != null)
+            if (_selectedFieldKeys.Count > 0 || _selectedField != null)
             {
                 double step = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift ? 0.005 : 0.001;
 
@@ -439,12 +440,17 @@ namespace SOLUM_UI
 
         private void ApplyNudge(double dx, double dy)
         {
-            if (_selectedFields.Count == 0 && _selectedField != null) _selectedFields.Add(_selectedField);
-            if (_selectedFields.Count == 0) return;
+            var selectedList = _fields.Where(f => _selectedFieldKeys.Contains(f.Key)).ToList();
+            if (selectedList.Count == 0 && _selectedField != null)
+            {
+                _selectedFieldKeys.Add(_selectedField.Key);
+                selectedList.Add(_selectedField);
+            }
+            if (selectedList.Count == 0) return;
 
             PushUndoState();
 
-            foreach (var sf in _selectedFields)
+            foreach (var sf in selectedList)
             {
                 sf.X = Math.Max(0.0, Math.Min(0.98, Math.Round(sf.X + dx, 4)));
                 sf.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(sf.Y + dy, 4)));
@@ -452,18 +458,23 @@ namespace SOLUM_UI
 
             if (_selectedField != null) UpdateSidebarFromField(_selectedField);
             RedrawAllCanvasBoxes();
-            TxtStatusMessage.Text = $"🎯 Nudged {_selectedFields.Count} box{(_selectedFields.Count > 1 ? "es" : "")}.";
+            TxtStatusMessage.Text = $"🎯 Nudged {selectedList.Count} box{(selectedList.Count > 1 ? "es" : "")}.";
         }
 
         private void ExpandBox_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedFields.Count == 0 && _selectedField != null) _selectedFields.Add(_selectedField);
-            if (_selectedFields.Count == 0) return;
+            var selectedList = _fields.Where(f => _selectedFieldKeys.Contains(f.Key)).ToList();
+            if (selectedList.Count == 0 && _selectedField != null)
+            {
+                _selectedFieldKeys.Add(_selectedField.Key);
+                selectedList.Add(_selectedField);
+            }
+            if (selectedList.Count == 0) return;
 
             PushUndoState();
             double step = (RbStepNormal?.IsChecked == true) ? 0.004 : 0.001;
 
-            foreach (var sf in _selectedFields)
+            foreach (var sf in selectedList)
             {
                 sf.X = Math.Max(0.0, Math.Round(sf.X - step / 2.0, 4));
                 sf.Y = Math.Max(0.0, Math.Round(sf.Y - step / 2.0, 4));
@@ -473,18 +484,23 @@ namespace SOLUM_UI
 
             if (_selectedField != null) UpdateSidebarFromField(_selectedField);
             RedrawAllCanvasBoxes();
-            TxtStatusMessage.Text = $"➕ Expanded {_selectedFields.Count} box{(_selectedFields.Count > 1 ? "es" : "")}.";
+            TxtStatusMessage.Text = $"➕ Expanded {selectedList.Count} box{(selectedList.Count > 1 ? "es" : "")}.";
         }
 
         private void ShrinkBox_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedFields.Count == 0 && _selectedField != null) _selectedFields.Add(_selectedField);
-            if (_selectedFields.Count == 0) return;
+            var selectedList = _fields.Where(f => _selectedFieldKeys.Contains(f.Key)).ToList();
+            if (selectedList.Count == 0 && _selectedField != null)
+            {
+                _selectedFieldKeys.Add(_selectedField.Key);
+                selectedList.Add(_selectedField);
+            }
+            if (selectedList.Count == 0) return;
 
             PushUndoState();
             double step = (RbStepNormal?.IsChecked == true) ? 0.004 : 0.001;
 
-            foreach (var sf in _selectedFields)
+            foreach (var sf in selectedList)
             {
                 if (sf.W <= 0.004 || sf.H <= 0.004) continue;
                 sf.X = Math.Min(0.98, Math.Round(sf.X + step / 2.0, 4));
@@ -495,7 +511,7 @@ namespace SOLUM_UI
 
             if (_selectedField != null) UpdateSidebarFromField(_selectedField);
             RedrawAllCanvasBoxes();
-            TxtStatusMessage.Text = $"➖ Shrunk {_selectedFields.Count} box{(_selectedFields.Count > 1 ? "es" : "")}.";
+            TxtStatusMessage.Text = $"➖ Shrunk {selectedList.Count} box{(selectedList.Count > 1 ? "es" : "")}.";
         }
 
         private void PopulateFieldCombo()
@@ -510,16 +526,16 @@ namespace SOLUM_UI
                     if (match != null)
                     {
                         _selectedField = match;
-                        _selectedFields.Clear();
-                        _selectedFields.Add(match);
+                        _selectedFieldKeys.Clear();
+                        _selectedFieldKeys.Add(match.Key);
                         CmbFields.SelectedItem = match;
                         ScrollToField(match);
                         return;
                     }
                 }
                 _selectedField = _fields[0];
-                _selectedFields.Clear();
-                _selectedFields.Add(_selectedField);
+                _selectedFieldKeys.Clear();
+                _selectedFieldKeys.Add(_selectedField.Key);
                 CmbFields.SelectedIndex = 0;
             }
         }
@@ -569,7 +585,7 @@ namespace SOLUM_UI
 
             foreach (var f in _fields)
             {
-                bool isSelected = _selectedFields.Contains(f) || (_selectedField != null && _selectedField.Key == f.Key);
+                bool isSelected = _selectedFieldKeys.Contains(f.Key) || (_selectedField != null && _selectedField.Key == f.Key);
 
                 double left = f.X * cW;
                 double top = f.Y * cH;
@@ -691,11 +707,13 @@ namespace SOLUM_UI
 
         private void CmbFields_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_isUpdatingSelectionFromCanvas) return;
+
             if (CmbFields.SelectedItem is TemplateFieldItem item)
             {
                 _selectedField = item;
-                _selectedFields.Clear();
-                _selectedFields.Add(item);
+                _selectedFieldKeys.Clear();
+                _selectedFieldKeys.Add(item.Key);
                 _activeRoiTokens.Clear();
                 UpdateSidebarFromField(item);
                 RedrawAllCanvasBoxes();
@@ -706,9 +724,9 @@ namespace SOLUM_UI
         private void UpdateSidebarFromField(TemplateFieldItem f)
         {
             if (f == null) return;
-            if (_selectedFields.Count > 1)
+            if (_selectedFieldKeys.Count > 1)
             {
-                TxtFieldKey.Text = $"{_selectedFields.Count} boxes selected";
+                TxtFieldKey.Text = $"{_selectedFieldKeys.Count} boxes selected";
                 TxtFieldCategory.Text = "Multi-Select (Shift)";
             }
             else
@@ -759,22 +777,25 @@ namespace SOLUM_UI
                 if (fieldItem != null)
                 {
                     PushUndoState();
-                    bool isShift = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
+                    bool isShift = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift
+                                || Keyboard.IsKeyDown(Key.LeftShift)
+                                || Keyboard.IsKeyDown(Key.RightShift);
 
                     if (isShift)
                     {
                         // Shift+Click: Toggle field in multi-selection
-                        if (_selectedFields.Contains(fieldItem))
+                        if (_selectedFieldKeys.Contains(fieldItem.Key))
                         {
-                            if (_selectedFields.Count > 1)
+                            if (_selectedFieldKeys.Count > 1)
                             {
-                                _selectedFields.Remove(fieldItem);
-                                _selectedField = _selectedFields.FirstOrDefault();
+                                _selectedFieldKeys.Remove(fieldItem.Key);
+                                string nextKey = _selectedFieldKeys.FirstOrDefault();
+                                _selectedField = _fields.FirstOrDefault(f => string.Equals(f.Key, nextKey, StringComparison.OrdinalIgnoreCase));
                             }
                         }
                         else
                         {
-                            _selectedFields.Add(fieldItem);
+                            _selectedFieldKeys.Add(fieldItem.Key);
                             _selectedField = fieldItem;
                         }
                     }
@@ -782,10 +803,10 @@ namespace SOLUM_UI
                     {
                         // Standard Click: If clicking an unselected box, select only this box.
                         // If clicking an already selected box, retain multi-selection for simultaneous dragging/resizing.
-                        if (!_selectedFields.Contains(fieldItem))
+                        if (!_selectedFieldKeys.Contains(fieldItem.Key))
                         {
-                            _selectedFields.Clear();
-                            _selectedFields.Add(fieldItem);
+                            _selectedFieldKeys.Clear();
+                            _selectedFieldKeys.Add(fieldItem.Key);
                             _selectedField = fieldItem;
                         }
                         else
@@ -795,11 +816,21 @@ namespace SOLUM_UI
                     }
 
                     _activeHandle = handleType;
-                    CmbFields.SelectedItem = _selectedField;
+
+                    _isUpdatingSelectionFromCanvas = true;
+                    try
+                    {
+                        CmbFields.SelectedItem = _selectedField;
+                    }
+                    finally
+                    {
+                        _isUpdatingSelectionFromCanvas = false;
+                    }
 
                     // Snapshot starting coordinates for all selected fields for simultaneous resizing/dragging
                     _origCoords.Clear();
-                    foreach (var sf in _selectedFields)
+                    var selectedList = _fields.Where(f => _selectedFieldKeys.Contains(f.Key)).ToList();
+                    foreach (var sf in selectedList)
                     {
                         _origCoords[sf] = new BoxCoordSnapshot { X = sf.X, Y = sf.Y, W = sf.W, H = sf.H };
                     }
@@ -811,7 +842,7 @@ namespace SOLUM_UI
 
                     UpdateSidebarFromField(_selectedField);
                     RedrawAllCanvasBoxes();
-                    TxtStatusMessage.Text = $"● {_selectedFields.Count} box{(_selectedFields.Count > 1 ? "es" : "")} selected. Hold Shift to add/remove.";
+                    TxtStatusMessage.Text = $"● {_selectedFieldKeys.Count} box{(_selectedFieldKeys.Count > 1 ? "es" : "")} selected. Hold Shift to select multiple.";
                 }
                 else
                 {
