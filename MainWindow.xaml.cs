@@ -328,7 +328,10 @@ namespace SOLUM_UI
                     var subPage = (SubsidyRecommendationPage)GetOrCreatePage("SubsidyRecommendation", () => new SubsidyRecommendationPage());
                     if (subPage.DataContext is SubsidyRecommendationViewModel subVm)
                     {
-                        _ = subVm.RefreshDataAsync();
+                        if (!subVm.IsDataFresh)
+                        {
+                            _ = subVm.RefreshDataAsync();
+                        }
                     }
                     NavigatePage(subPage);
                     break;

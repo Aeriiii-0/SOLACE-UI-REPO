@@ -251,14 +251,26 @@ def clean_relationship(raw_text: str) -> str:
 def clean_education(raw_text: str) -> str:
     """
     Fuzzy normalization of Educational Attainment snapping to exact RecordDialog dropdown items:
-    Elementary, High School, Vocational, College, Post Graduate.
+    Elementary, High School, Vocational, College, Post Graduate, or Student/None.
     """
-    if not raw_text or is_ocr_na(raw_text):
+    if not raw_text:
+        return ""
+    if is_ocr_na(raw_text) and raw_text.strip().lower() not in ["none", "wala", "not attending"]:
         return ""
     t = raw_text.strip().lower()
     t_clean = re.sub(r'[^a-z0-9]', '', t)
 
-    # 1. Keyword containment & Philippine education terminology
+    # 1. Early Childhood / Kindergarten / Preschool
+    if any(k in t for k in ["kinder", "nursery", "day care", "daycare", "pre-school", "preschool", "prep", "pre-elem"]):
+        return "Elementary"
+
+    # 2. Grade levels (G1-G6 -> Elementary, G7-G12 -> High School)
+    if re.search(r'\b(g|gr|grade)[\.\s\-]*(1[0-2]|[7-9])\b', t) or re.search(r'\b(jhs|shs|junior\s*high|senior\s*high)\b', t):
+        return "High School"
+    if re.search(r'\b(g|gr|grade)[\.\s\-]*[1-6]\b', t):
+        return "Elementary"
+
+    # 3. Keyword containment & Philippine education terminology
     if any(k in t for k in ["elem", "primary", "grade", "elementaria"]):
         return "Elementary"
     if any(k in t for k in ["high", "hs", "h.s", "sec", "secondary", "junior high", "senior high", "highschool"]):
@@ -269,8 +281,12 @@ def clean_education(raw_text: str) -> str:
         return "Post Graduate"
     if any(k in t for k in ["col", "univ", "bach", "bs", "ba", "degree", "undergrad", "college", "tertiary"]):
         return "College"
+    if any(k in t for k in ["none", "wala", "not attending"]):
+        return "None"
+    if any(k in t for k in ["student", "estudyante", "pupil"]):
+        return "Student"
 
-    # 2. Fuzzy similarity across standard dropdown choices
+    # 4. Fuzzy similarity across standard dropdown choices
     options = ["Elementary", "High School", "Vocational", "College", "Post Graduate"]
     best_opt = ""
     best_score = 0.0
@@ -510,7 +526,7 @@ def clean_sex(raw_text: str) -> str:
     t = re.sub(r'^(sex|gender|kasarian)\s*[:\-_.]*', '', t, flags=re.IGNORECASE).strip()
     t_alpha = re.sub(r'[^a-z]', '', t)
     
-    if t_alpha in ["m", "male", "lalaki", "boy", "son", "father", "brother", "l", "masc", "mas", "man"]:
+    if t_alpha in ["m", "male", "lalaki", "boy", "son", "father", "brother", "l", "masc", "mas", "man", "h", "n", "iv", "w"]:
         return "Male"
     if t_alpha in ["f", "female", "babae", "fem", "girl", "daughter", "mother", "sister", "b", "w", "woman"]:
         return "Female"

@@ -290,6 +290,11 @@ namespace SOLUM_UI.ViewModels
         private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
         private DateTime _lastRefreshTime = DateTime.MinValue;
 
+        public static readonly TimeSpan DataFreshnessTtl = TimeSpan.FromMinutes(2);
+        private DateTime _lastSuccessfulLoadTime = DateTime.MinValue;
+        public bool IsDataFresh => (DateTime.UtcNow - _lastSuccessfulLoadTime) < DataFreshnessTtl;
+        public void InvalidateCache() => _lastSuccessfulLoadTime = DateTime.MinValue;
+
         public async Task RefreshDataAsync(bool forceReloadCycles = false)
         {
             if (IsLoading) return;
@@ -303,6 +308,7 @@ namespace SOLUM_UI.ViewModels
                 if (!forceReloadCycles && SelectedFiscalCycle != null && AvailableFiscalCycles.Count > 0)
                 {
                     await LoadCycleDataInternalAsync(SelectedFiscalCycle);
+                    _lastSuccessfulLoadTime = DateTime.UtcNow;
                     return;
                 }
 
@@ -340,6 +346,7 @@ namespace SOLUM_UI.ViewModels
                 {
                     if (!target.IsActive) ActiveTabIndex = 2;
                     await LoadCycleDataInternalAsync(target);
+                    _lastSuccessfulLoadTime = DateTime.UtcNow;
                 }
             }
             catch (Exception ex) { ToastNotification.Show("API Error", ex.Message, ToastType.Error); } finally { IsLoading = false; }

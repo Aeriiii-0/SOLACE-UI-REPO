@@ -267,14 +267,14 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
     r_step = avail_h / float(row_count)
 
     cols_default = [
-        ("name", 0.025, 0.230),
-        ("sex",  0.255, 0.060),
-        ("age",  0.315, 0.055),
-        ("dob",  0.370, 0.135),
-        ("civ",  0.505, 0.095),
-        ("rel",  0.600, 0.120),
-        ("edu",  0.720, 0.140),
-        ("inc",  0.860, 0.105)
+        ("name", 0.033, 0.268),
+        ("sex",  0.303, 0.050),
+        ("age",  0.354, 0.050),
+        ("dob",  0.405, 0.106),
+        ("civ",  0.511, 0.093),
+        ("rel",  0.604, 0.113),
+        ("edu",  0.717, 0.175),
+        ("inc",  0.891, 0.095)
     ]
 
     for r_idx in range(row_count):
@@ -383,6 +383,25 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
         # 8. Income
         raw_inc, inc_conf = get_cell_text("inc", 7)
         clean_m_inc = "0" if is_ocr_na(raw_inc) else (clean_income(raw_inc) or "0")
+
+        # Cross-Field Semantic Inference: Sex from Relationship
+        rel_upper = clean_m_rel.strip().upper()
+        if not clean_m_sex or is_ocr_na(clean_m_sex):
+            if any(k in rel_upper for k in ["SON", "ANAK NA LALAKI", "BROTHER", "FATHER", "NEPHEW", "GRANDSON", "BOY"]):
+                clean_m_sex = "Male"
+                sex_conf = max(sex_conf, 0.95)
+            elif any(k in rel_upper for k in ["DAUGHTER", "ANAK NA BABAE", "SISTER", "MOTHER", "NIECE", "GRANDDAUGHTER", "GIRL"]):
+                clean_m_sex = "Female"
+                sex_conf = max(sex_conf, 0.95)
+
+        # Infant/Toddler Education fallback
+        if not clean_m_edu or is_ocr_na(clean_m_edu):
+            try:
+                if clean_m_age and int(clean_m_age) <= 4:
+                    clean_m_edu = "None"
+                    edu_conf = max(edu_conf, 0.90)
+            except Exception:
+                pass
 
         family_members.append({
             "memberName": clean_m_name,

@@ -166,14 +166,20 @@ namespace SOLUM_UI.Services
             norm = Regex.Replace(norm, @"^(sex|gender|kasarian)\s*[:\-_.]*", "");
             string clean = Regex.Replace(norm, @"[^a-z]", "");
 
-            if (clean == "f" || clean == "female" || clean == "fem" || clean == "b" || clean == "babae" || clean == "w" || clean == "woman")
+            if (clean == "f" || clean == "female" || clean == "fem" || clean == "b" || clean == "babae" || clean == "w" || clean == "woman" || clean == "girl" || clean == "daughter" || clean == "sister")
                 return "Female";
-            if (clean == "m" || clean == "male" || clean == "mas" || clean == "masc" || clean == "l" || clean == "lalaki" || clean == "man")
+            if (clean == "m" || clean == "male" || clean == "mas" || clean == "masc" || clean == "l" || clean == "lalaki" || clean == "man" || clean == "boy" || clean == "son" || clean == "brother")
                 return "Male";
 
-            if (clean.StartsWith("fem") || norm.Contains("female") || norm.Contains("babae"))
+            // Handwritten OCR single-character confusions in Sex column
+            if (clean == "h" || clean == "n" || clean == "iv")
+                return "Male";
+            if (clean == "t" || clean == "p")
                 return "Female";
-            if (clean.StartsWith("mas") || (norm.Contains("male") && !norm.Contains("female")) || norm.Contains("lalaki"))
+
+            if (clean.StartsWith("fem") || norm.Contains("female") || norm.Contains("babae") || norm.Contains("daughter"))
+                return "Female";
+            if (clean.StartsWith("mas") || (norm.Contains("male") && !norm.Contains("female")) || norm.Contains("lalaki") || norm.Contains("son"))
                 return "Male";
 
             if (clean.StartsWith("f"))
@@ -404,6 +410,22 @@ namespace SOLUM_UI.Services
                 return "Vocational";
             }
 
+            // Early Childhood / Kindergarten / Preschool
+            if (clean.Contains("kinder") || clean.Contains("nursery") || clean.Contains("daycare") || clean.Contains("prep") || clean.Contains("preschool"))
+            {
+                return "Elementary";
+            }
+
+            // Grade levels (G1-G6 -> Elementary, G7-G12 -> High School)
+            if (Regex.IsMatch(norm, @"(g|gr|grade)[\.\s\-]*(1[0-2]|[7-9])") || clean.Contains("jhs") || clean.Contains("shs"))
+            {
+                return "High School";
+            }
+            if (Regex.IsMatch(norm, @"(g|gr|grade)[\.\s\-]*[1-6]"))
+            {
+                return "Elementary";
+            }
+
             // High School
             if (clean.Contains("high") || clean.Contains("hs") || clean.Contains("secondary") || 
                 clean.Contains("mataas") || clean.Contains("senior") || clean.Contains("junior") || clean.Contains("shs") || clean.Contains("jhs"))
@@ -417,8 +439,11 @@ namespace SOLUM_UI.Services
                 return "Elementary";
             }
 
-            if (clean.Contains("none") || clean.Contains("wala") || clean.Contains("na"))
-                return string.Empty;
+            if (clean == "student" || clean == "estudyante" || clean == "pupil")
+                return "Student";
+
+            if (clean.Contains("none") || clean.Contains("wala") || clean == "na" || clean == "notattending")
+                return "None";
 
             // Fallback similarity check against standard 5
             string[] standardOptions = { "College", "High School", "Elementary", "Vocational", "Post Graduate" };

@@ -239,7 +239,7 @@
                                                 Full Name <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
                                             <TextBox x:Name="TxtMemberName" Style="{StaticResource FormBoxSm}" MaxLength="60"
-                                                     CharacterCasing="Upper"
+                                                     CharacterCasing="Upper" Tag="fam_row_name" GotFocus="Field_GotFocus"
                                                      PreviewTextInput="NameOnly_PreviewTextInput"/>
                                         </StackPanel>
 
@@ -247,7 +247,7 @@
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Relationship <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
-                                            <ComboBox x:Name="CmbMemberRel" Style="{StaticResource FormCombo}" Height="32" FontSize="12">
+                                            <ComboBox x:Name="CmbMemberRel" Style="{StaticResource FormCombo}" Height="32" FontSize="12" Tag="fam_row_rel" GotFocus="Field_GotFocus">
                                                 <ComboBoxItem Content="Child"/>
                                                 <ComboBoxItem Content="Spouse"/>
                                                 <ComboBoxItem Content="Parent"/>
@@ -264,7 +264,7 @@
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Sex <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
-                                            <ComboBox x:Name="CmbMemberSex" Style="{StaticResource FormCombo}" Height="32" FontSize="12">
+                                            <ComboBox x:Name="CmbMemberSex" Style="{StaticResource FormCombo}" Height="32" FontSize="12" Tag="fam_row_sex" GotFocus="Field_GotFocus">
                                                 <ComboBoxItem Content="Female"/>
                                                 <ComboBoxItem Content="Male"/>
                                             </ComboBox>
@@ -274,7 +274,7 @@
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Civil Status <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
-                                            <ComboBox x:Name="CmbMemberCivil" Style="{StaticResource FormCombo}" Height="32" FontSize="12">
+                                            <ComboBox x:Name="CmbMemberCivil" Style="{StaticResource FormCombo}" Height="32" FontSize="12" Tag="fam_row_civ" GotFocus="Field_GotFocus">
                                                 <ComboBoxItem Content="Single"/>
                                                 <ComboBoxItem Content="Married"/>
                                                 <ComboBoxItem Content="Widowed"/>
@@ -302,7 +302,7 @@
                                                 Birthdate <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
                                             <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Height="32">
-                                                <DatePicker x:Name="DpMemberDob" Style="{StaticResource FormDateSm}"
+                                                <DatePicker x:Name="DpMemberDob" Style="{StaticResource FormDateSm}" Tag="fam_row_dob" GotFocus="Field_GotFocus"
                                                             SelectedDateChanged="DpMemberDob_SelectedDateChanged"/>
                                             </Border>
                                         </StackPanel>
@@ -312,18 +312,19 @@
                                             <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="#F5F5F5" Height="32">
                                                 <TextBox x:Name="TxtMemberAge" Style="{StaticResource FormBoxSm}" IsReadOnly="True"
                                                          Focusable="False" Cursor="Arrow" BorderThickness="0" Background="Transparent"
+                                                         Tag="fam_row_age" GotFocus="Field_GotFocus"
                                                          HorizontalContentAlignment="Center" ToolTip="Auto-calculated from Birthdate"/>
                                             </Border>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="4">
                                             <TextBlock Text="Educ. Attainment / Employment" Style="{StaticResource FieldLabelSm}"/>
-                                            <TextBox x:Name="TxtMemberEdu" Style="{StaticResource FormBoxSm}" MaxLength="80" CharacterCasing="Upper"/>
+                                            <TextBox x:Name="TxtMemberEdu" Style="{StaticResource FormBoxSm}" MaxLength="80" CharacterCasing="Upper" Tag="fam_row_edu" GotFocus="Field_GotFocus"/>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="6">
                                             <TextBlock Text="Monthly Income (₱)" Style="{StaticResource FieldLabelSm}"/>
-                                            <TextBox x:Name="TxtMemberIncome" Style="{StaticResource FormBoxSm}"
+                                            <TextBox x:Name="TxtMemberIncome" Style="{StaticResource FormBoxSm}" Tag="fam_row_inc" GotFocus="Field_GotFocus"
                                                      PreviewTextInput="NumberOnly_PreviewTextInput"/>
                                         </StackPanel>
                                     </Grid>
@@ -405,7 +406,9 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="{Binding CardBg}" BorderBrush="{Binding BorderColor}" BorderThickness="1.2"
-                                        CornerRadius="8" Padding="12,10" Margin="0,0,0,6">
+                                        CornerRadius="8" Padding="12,10" Margin="0,0,0,6"
+                                        Tag="fam_row_name" PreviewMouseDown="Field_PreviewMouseDown" Cursor="Hand"
+                                        ToolTip="Click to view member on document preview">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="2*"/>
@@ -419,25 +422,37 @@
                                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="{Binding MemberName}" FontSize="13" FontWeight="SemiBold"
-                                                           Foreground="#111827" TextTrimming="CharacterEllipsis" MaxWidth="190"/>
+                                                           Foreground="#111827" TextTrimming="CharacterEllipsis" MaxWidth="190"
+                                                           Cursor="Hand" ToolTip="Click to view Name on document preview"
+                                                           Tag="fam_row_name" PreviewMouseDown="Field_PreviewMouseDown"/>
                                                 <Border Visibility="{Binding NewBadgeVisibility}" Background="#702943" CornerRadius="4"
                                                         Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock Text="NEW" FontSize="9" FontWeight="Bold" Foreground="White"/>
                                                 </Border>
                                             </StackPanel>
-                                            <TextBlock Text="{Binding Relationship}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"/>
+                                            <TextBlock Text="{Binding Relationship}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"
+                                                       Cursor="Hand" ToolTip="Click to view Relationship on document preview"
+                                                       Tag="fam_row_rel" PreviewMouseDown="Field_PreviewMouseDown"/>
                                         </StackPanel>
 
                                         <!-- Column 1: Age & Sex -->
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding AgeDisplay}" FontSize="12" Foreground="#1F2937"/>
-                                            <TextBlock Text="{Binding SexDisplay}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"/>
+                                            <TextBlock Text="{Binding AgeDisplay}" FontSize="12" Foreground="#1F2937"
+                                                       Cursor="Hand" ToolTip="Click to view Age on document preview"
+                                                       Tag="fam_row_age" PreviewMouseDown="Field_PreviewMouseDown"/>
+                                            <TextBlock Text="{Binding SexDisplay}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"
+                                                       Cursor="Hand" ToolTip="Click to view Sex on document preview"
+                                                       Tag="fam_row_sex" PreviewMouseDown="Field_PreviewMouseDown"/>
                                         </StackPanel>
 
                                         <!-- Column 2: Education / Work & Income -->
                                         <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0">
-                                            <TextBlock Text="{Binding EducationDisplay}" FontSize="12" Foreground="#1F2937" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Text="{Binding IncomeDisplay}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"/>
+                                            <TextBlock Text="{Binding EducationDisplay}" FontSize="12" Foreground="#1F2937" TextTrimming="CharacterEllipsis"
+                                                       Cursor="Hand" ToolTip="Click to view Educational Attainment on document preview"
+                                                       Tag="fam_row_edu" PreviewMouseDown="Field_PreviewMouseDown"/>
+                                            <TextBlock Text="{Binding IncomeDisplay}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"
+                                                       Cursor="Hand" ToolTip="Click to view Income on document preview"
+                                                       Tag="fam_row_inc" PreviewMouseDown="Field_PreviewMouseDown"/>
                                         </StackPanel>
 
                                         <!-- Column 3: Disability / Special Needs -->

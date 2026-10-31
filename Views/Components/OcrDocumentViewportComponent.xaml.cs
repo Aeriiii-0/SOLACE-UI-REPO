@@ -125,7 +125,7 @@ namespace SOLUM_UI.Views.Components
             bool online = await OcrService.IsServerOnlineAsync();
             if (online)
             {
-                ServerStatusChanged?.Invoke(true, "AI Engine: Ready (Offline)");
+                ServerStatusChanged?.Invoke(true, "AI Engine: Ready");
                 OcrWarmupBanner.Visibility = Visibility.Collapsed;
                 return;
             }
@@ -145,7 +145,7 @@ namespace SOLUM_UI.Views.Components
                 if (p.IsReady)
                 {
                     StopWarmupSpinner();
-                    ServerStatusChanged?.Invoke(true, "AI Engine: Ready (Offline)");
+                    ServerStatusChanged?.Invoke(true, "AI Engine: Ready");
 
                     OcrWarmupBanner.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0FDF4"));
                     OcrWarmupBanner.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#86EFAC"));
@@ -232,6 +232,11 @@ namespace SOLUM_UI.Views.Components
             else if (key == "employed") key = "is_employed";
             else if (key == "self_employed") key = "is_self_employed";
             else if (key == "not_employed") key = "is_not_employed";
+
+            if (key.Contains("_civil")) key = key.Replace("_civil", "_civ");
+            else if (key.Contains("_income")) key = key.Replace("_income", "_inc");
+            else if (key.Contains("_education")) key = key.Replace("_education", "_edu");
+            else if (key.Contains("_relationship")) key = key.Replace("_relationship", "_rel");
 
             double[] bbox = null;
 

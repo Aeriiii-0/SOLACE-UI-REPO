@@ -89,9 +89,14 @@ namespace SOLUM_UI.Views.Components
 
         private string ResolveDynamicTag(FrameworkElement elem, string tag)
         {
-            if (tag.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase) && elem.DataContext is FamilyMemberRow row)
+            if (tag.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase))
             {
-                int rIndex = _familyRowData.IndexOf(row);
+                var row = elem.DataContext as FamilyMemberRow ?? _editingFamilyMember;
+                int rIndex = row != null ? _familyRowData.IndexOf(row) : -1;
+                if (rIndex < 0 && _editingFamilyMember == null && _familyRowData != null)
+                {
+                    rIndex = Math.Min(4, _familyRowData.Count);
+                }
                 if (rIndex >= 0)
                 {
                     var parts = tag.Split('_');
@@ -206,12 +211,39 @@ namespace SOLUM_UI.Views.Components
                             ageVal = OcrService.IsOcrNotApplicable(m.Age) ? string.Empty : m.Age;
                         }
 
+                        string matchedSex = OcrService.IsOcrNotApplicable(m.Sex) ? string.Empty : OcrService.FuzzyMatchSex(m.Sex);
+                        string matchedRel = OcrService.IsOcrNotApplicable(m.Relationship) ? string.Empty : (OcrService.FuzzyMatchRelationship(m.Relationship)?.ToUpperInvariant() ?? string.Empty);
+
+                        // Cross-field semantic inference: Infer Sex from Relationship if Sex was blank or ambiguous
+                        if (string.IsNullOrEmpty(matchedSex) && !string.IsNullOrEmpty(matchedRel))
+                        {
+                            if (matchedRel == "SON" || matchedRel.Contains("BOY") || matchedRel == "BROTHER" || matchedRel == "FATHER" || matchedRel == "NEPHEW" || matchedRel == "GRANDSON")
+                                matchedSex = "Male";
+                            else if (matchedRel == "DAUGHTER" || matchedRel.Contains("GIRL") || matchedRel == "SISTER" || matchedRel == "MOTHER" || matchedRel == "NIECE" || matchedRel == "GRANDDAUGHTER")
+                                matchedSex = "Female";
+                        }
+
+                        // Educational Attainment normalization & infant/toddler fallback
+                        string matchedEdu = OcrService.IsOcrNotApplicable(m.EducationEmployment) ? string.Empty : m.EducationEmployment.Trim();
+                        if (!string.IsNullOrEmpty(matchedEdu))
+                        {
+                            string fuzzyEdu = OcrService.FuzzyMatchEducation(matchedEdu);
+                            matchedEdu = !string.IsNullOrEmpty(fuzzyEdu) ? fuzzyEdu.ToUpperInvariant() : matchedEdu.ToUpperInvariant();
+                        }
+                        else
+                        {
+                            if (int.TryParse(ageVal, out int parsedAge) && parsedAge >= 0 && parsedAge <= 4)
+                            {
+                                matchedEdu = "NONE";
+                            }
+                        }
+
                         var ocrRow = MakeFamilyRow();
                         ocrRow.MemberName = OcrService.CleanPersonName(m.MemberName);
-                        ocrRow.Sex = OcrService.IsOcrNotApplicable(m.Sex) ? string.Empty : OcrService.FuzzyMatchSex(m.Sex);
+                        ocrRow.Sex = matchedSex;
                         ocrRow.CivilStatus = OcrService.IsOcrNotApplicable(m.CivilStatus) ? string.Empty : OcrService.FuzzyMatchCivilStatus(m.CivilStatus);
-                        ocrRow.Relationship = OcrService.IsOcrNotApplicable(m.Relationship) ? string.Empty : (OcrService.FuzzyMatchRelationship(m.Relationship)?.ToUpperInvariant() ?? string.Empty);
-                        ocrRow.EducationEmployment = (OcrService.IsOcrNotApplicable(m.EducationEmployment) ? string.Empty : m.EducationEmployment)?.ToUpperInvariant() ?? string.Empty;
+                        ocrRow.Relationship = matchedRel;
+                        ocrRow.EducationEmployment = matchedEdu;
                         ocrRow.Income = OcrService.IsOcrNotApplicable(m.Income) ? "0" : OcrService.FuzzyMatchIncome(m.Income);
                         if (dt.HasValue && dt.Value != DateTime.MinValue)
                             ocrRow.BirthdateDate = dt.Value;
