@@ -29,6 +29,41 @@ namespace SOLUM_UI.Services
             ChildrenDetails = d.Children?.Select(c => new ChildDetailItem { Name = c.Name, Age = c.Age }).ToList() ?? new List<ChildDetailItem>()
         };
 
+        public static void UpdateItemFromDto(SubsidyItem item, SubsidyRecommendationDto d)
+        {
+            if (item == null || d == null) return;
+            item.Priority = NormPrio(d.Priority);
+            item.Score = d.Score;
+            item.Confidence = d.Confidence;
+            item.MonthlyIncome = d.MonthlyIncome;
+            item.IncomePerCapita = CalcCapita(d.MonthlyIncome, d.Dependants, d.IncomePerCapita);
+            item.EmploymentStatus = d.EmploymentStatus;
+            item.Dependants = d.Dependants;
+            item.MinorDependentsCount = d.MinorDependentsCount;
+            item.ToddlersUnder5Count = d.ToddlersUnder5Count;
+            item.CollegeAgeDependentsCount = d.CollegeAgeDependentsCount;
+            item.Circumstance = !string.IsNullOrEmpty(d.Circumstance) ? d.Circumstance : d.ProblemPresented;
+            item.ProblemPresented = d.ProblemPresented;
+            item.HasSpecialNeedsDependent = d.HasSpecialNeedsDependent;
+            item.SpecialNeedsDependentsCount = d.SpecialNeedsDependentsCount;
+            item.CivilStatus = d.CivilStatus;
+            item.Sex = d.Sex;
+            item.OtherIncomeSource = d.OtherIncomeSource;
+            item.NeedsAndProblems = d.NeedsAndProblems;
+            item.EconomicStrainScore = d.EconomicStrainScore;
+            item.DependencyBurdenScore = d.DependencyBurdenScore;
+            item.CareBurdenScore = d.CareBurdenScore;
+            item.ResourceAdequacyScore = d.ResourceAdequacyScore;
+            item.IsPantawidBeneficiary = d.IsPantawidBeneficiary;
+            item.ModelVersion = d.ModelVersion;
+            item.Children0To6Count = d.Children0To6;
+            item.Children7To22Count = d.Children7To22;
+            if (d.Children != null && d.Children.Count > 0)
+            {
+                item.ChildrenDetails = d.Children.Select(c => new ChildDetailItem { Name = c.Name, Age = c.Age }).ToList();
+            }
+        }
+
         public static SelectionRow ToRow(SubsidyRecommendationDto d, int rk) => new SelectionRow
         {
             Rank = rk, EvaluationId = d.EvaluationId, CycleId = d.CycleId, SoloParentId = d.SoloParentId,

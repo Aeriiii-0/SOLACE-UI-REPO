@@ -105,6 +105,12 @@ namespace SOLUM_UI.Services.Implementations
             return await ApiClient.Instance.PostAsync<object, int>(url, new { });
         }
 
+        public async Task<BaseResponse<SubsidyRecommendationDto>> PredictCandidateAsync(Guid soloParentId)
+        {
+            string url = $"api/subsidy/recommendations/{soloParentId}/predict";
+            return await ApiClient.Instance.PostAsync<object, SubsidyRecommendationDto>(url, new { });
+        }
+
         public async Task<BaseResponse<PagedResult<SubsidyRecommendationDto>>> GetRecommendationsPagedAsync(GetSubsidyRecommendationsRequest request)
         {
             string url = "api/subsidy/recommendations" + BuildRecommendationsQueryParams(request);

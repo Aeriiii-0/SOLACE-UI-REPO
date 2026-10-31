@@ -181,6 +181,7 @@ namespace SOLUM_UI.Models
         public SolidColorBrush ScoreBarColor => Score >= 75 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Score >= 50 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")));
         public SolidColorBrush StatusColor => Status == "Approved" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")) : (Status == "Rejected" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8")) : (Status == "Waitlisted" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF0F5"))));
         public SolidColorBrush StatusTextColor => Status == "Approved" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")) : (Status == "Rejected" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Status == "Waitlisted" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943"))));
+        public void RefreshVisuals() => OnPropertyChanged(string.Empty);
     }
 
     public class ChildDetailItem

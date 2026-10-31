@@ -480,8 +480,8 @@
                             MouseLeftButtonUp="Header_MouseLeftButtonUp">
                         <Grid>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Annual Re-assessment &amp; Renewal" FontSize="16" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
-                                <TextBlock Text="Update changeable circumstances, employment, and family composition for the annual solo parent renewal."
+                                <TextBlock x:Name="TxtDialogTitle" Text="Annual Re-assessment &amp; Renewal" FontSize="16" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                                <TextBlock x:Name="TxtDialogSubtitle" Text="Update changeable circumstances, employment, and family composition for the annual solo parent renewal."
                                            FontSize="11" Foreground="#F0E4E8" FontFamily="Segoe UI" Margin="0,2,0,0"/>
                             </StackPanel>
                             <Button HorizontalAlignment="Right" VerticalAlignment="Center"

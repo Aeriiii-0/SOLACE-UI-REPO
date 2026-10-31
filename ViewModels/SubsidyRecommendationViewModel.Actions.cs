@@ -128,9 +128,109 @@ namespace SOLUM_UI.ViewModels
                 }
                 if (recordToView == null)
                     recordToView = new SoloParentRecord { Id = item.SpId, Name = item.Name, Barangay = item.Barangay, Sex = item.Sex, CivilStatus = item.CivilStatus, MonthlyIncome = item.MonthlyIncome.ToString("N2"), Status = "Active" };
-                new RecordViewDialog(recordToView) { Owner = Application.Current.MainWindow }.ShowDialog();
+                var dlg = new RecordViewDialog(recordToView) { Owner = Application.Current.MainWindow };
+                dlg.ShowDialog();
+                if (dlg.Renewed || dlg.OpenedEdit || dlg.RenewalResult != null)
+                {
+                    await RunQuickPredictAsync(item);
+                }
             }
             catch (Exception ex) { ToastNotification.Show("Unable to Open Record", ex.Message, ToastType.Error); }
+        }
+
+        private async Task RunQuickPredictAsync(SubsidyItem item)
+        {
+            if (item == null) return;
+            Guid targetId = item.SoloParentId != Guid.Empty ? item.SoloParentId : (Guid.TryParse(item.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
+            if (targetId == Guid.Empty)
+            {
+                ToastNotification.Show("Re-scoring Error", "Cannot determine applicant ID.", ToastType.Error);
+                return;
+            }
+
+            try
+            {
+                var resp = await _apiService.PredictCandidateAsync(targetId);
+                if (resp != null && resp.Succeeded && resp.Data != null)
+                {
+                    SubsidyModelMapper.UpdateItemFromDto(item, resp.Data);
+                    item.RefreshVisuals();
+
+                    // Re-enrich with details like children items
+                    await FetchRecordForDrawerAsync(item);
+
+                    if (ActiveCandidate == item)
+                    {
+                        OnPropertyChanged(nameof(ActiveCandidate));
+                    }
+
+                    // Recalculate quota & sort to update queue order and badges
+                    RecalculateQuotaAndFilter();
+
+                    ToastNotification.Show("Prediction Updated",
+                        $"{item.Name} re-scored: {item.Score:F1} ({item.Priority}) via {resp.Data.ModelVersion}.",
+                        ToastType.Success);
+                }
+                else
+                {
+                    string err = resp?.Errors != null && resp.Errors.Count > 0 ? string.Join(", ", resp.Errors) : "Prediction could not be computed.";
+                    ToastNotification.Show("Re-scoring Failed", err, ToastType.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show("Re-scoring Error", ex.Message, ToastType.Error);
+            }
+        }
+
+        private async Task OpenReassessmentFormAsync(SubsidyItem item)
+        {
+            if (item == null) return;
+            Guid targetId = item.SoloParentId != Guid.Empty ? item.SoloParentId : (Guid.TryParse(item.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
+            if (targetId == Guid.Empty) return;
+
+            try
+            {
+                SoloParentRecord recordToReassess = null;
+                Models.Api.SoloParentDto existingDto = null;
+
+                var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(targetId);
+                if (detailResp != null && detailResp.Succeeded && detailResp.Data != null)
+                {
+                    existingDto = detailResp.Data;
+                    recordToReassess = SoloParentApiService.Instance.MapToRecord(existingDto);
+                }
+
+                if (recordToReassess == null)
+                {
+                    ToastNotification.Show("Unable to Load Record", "Failed to retrieve candidate profile for re-assessment.", ToastType.Error);
+                    return;
+                }
+
+                var dialog = new RenewalReassessmentDialog(recordToReassess, existingDto, isReassessmentMode: true)
+                {
+                    Owner = Application.Current.MainWindow
+                };
+
+                if (dialog.ShowDialog() == true && dialog.UpdatedRecord != null)
+                {
+                    // Save circumstance & profile updates via update request
+                    var updateReq = SoloParentApiService.Instance.MapToUpdateRequest(targetId, dialog.UpdatedRecord, existingDto);
+                    var saveResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(targetId, updateReq);
+
+                    if (saveResp != null && saveResp.Succeeded)
+                    {
+                        ToastNotification.Show("Record Updated", $"{recordToReassess.Name} circumstances updated successfully.", ToastType.Success);
+                    }
+
+                    // Run fresh ML prediction on the updated facts
+                    await RunQuickPredictAsync(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show("Re-assessment Error", ex.Message, ToastType.Error);
+            }
         }
 
         private async Task FetchRecordForDrawerAsync(SubsidyItem item)

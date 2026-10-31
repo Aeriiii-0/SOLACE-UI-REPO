@@ -14,6 +14,7 @@ namespace SOLUM_UI.Services.Interfaces
         Task<BaseResponse<SubsidyCycleDto>> CreateCycleAsync(CreateSubsidyCycleRequest request);
         Task<BaseResponse<SubsidyCycleDto>> UpdateCycleAsync(Guid cycleId, UpdateSubsidyCycleRequest request);
         Task<BaseResponse<int>> GenerateRecommendationsAsync(Guid? cycleId = null);
+        Task<BaseResponse<SubsidyRecommendationDto>> PredictCandidateAsync(Guid soloParentId);
         Task<BaseResponse<PagedResult<SubsidyRecommendationDto>>> GetRecommendationsPagedAsync(GetSubsidyRecommendationsRequest request);
         Task<BaseResponse<List<SubsidyRecommendationDto>>> GetAllRecommendationsAsync(GetSubsidyRecommendationsRequest request = null);
         Task<BaseResponse<List<SubsidyRecommendationDto>>> GetRecommendationsAsync(Guid? cycleId = null);

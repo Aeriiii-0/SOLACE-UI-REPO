@@ -44,10 +44,32 @@
                             <TextBlock Text="{Binding ActiveCandidate.ScoreLabel}" FontSize="28" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
                             <TextBlock Text="Vulnerability Priority Score" FontSize="11" FontWeight="SemiBold" Foreground="#888888" HorizontalAlignment="Center" Margin="0,1,0,0"/>
 
-                            <!-- Calculation Origin Badge (ML Model vs Fallback Heuristic) -->
-                            <Border Background="{Binding ActiveCandidate.ModelSourceBg}" BorderBrush="{Binding ActiveCandidate.ModelSourceBorder}" BorderThickness="1" CornerRadius="4" Padding="8,2" Margin="0,6,0,0" HorizontalAlignment="Center" ToolTip="{Binding ActiveCandidate.ModelSourceTooltip}">
-                                <TextBlock Text="{Binding ActiveCandidate.ModelSourceFullBadge}" FontSize="10.5" FontWeight="Bold" Foreground="{Binding ActiveCandidate.ModelSourceFg}" HorizontalAlignment="Center"/>
-                            </Border>
+                            <!-- Calculation Origin Badge (ML Model vs Fallback Heuristic) with Quick Re-predict -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0">
+                                <Border Background="{Binding ActiveCandidate.ModelSourceBg}" BorderBrush="{Binding ActiveCandidate.ModelSourceBorder}" BorderThickness="1" CornerRadius="4" Padding="8,2" ToolTip="{Binding ActiveCandidate.ModelSourceTooltip}">
+                                    <TextBlock Text="{Binding ActiveCandidate.ModelSourceFullBadge}" FontSize="10.5" FontWeight="Bold" Foreground="{Binding ActiveCandidate.ModelSourceFg}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Button Command="{Binding QuickPredictCandidateCommand}"
+                                        CommandParameter="{Binding ActiveCandidate}"
+                                        Cursor="Hand" Margin="6,0,0,0"
+                                        ToolTip="Re-run live ML model prediction on this applicant's current data"
+                                        Background="#EFF6FF" BorderBrush="#93C5FD" BorderThickness="1" Padding="6,2">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="BtnBg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="BtnBg" Property="Background" Value="#DBEAFE"/></Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="↺" FontSize="11" FontWeight="Bold" Foreground="#1D4ED8" Margin="0,0,3,0"/>
+                                        <TextBlock Text="Re-score" FontSize="10" FontWeight="SemiBold" Foreground="#1D4ED8"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
 
                             <!-- Model Confidence directly underneath (Visible for live ML model) -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0"
@@ -61,10 +83,33 @@
                     <!-- Fallback Notice Banner (Conditional when IsFallbackScore is true) -->
                     <Border Background="#FEF3C7" BorderBrush="#F59E0B" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,0,0,12"
                             Visibility="{Binding ActiveCandidate.IsFallbackScore, Converter={StaticResource BoolToVis}}">
-                        <StackPanel>
-                            <TextBlock Text="{Binding ActiveCandidate.FallbackAlertTitle}" FontSize="11" FontWeight="Bold" Foreground="#B45309"/>
-                            <TextBlock Text="{Binding ActiveCandidate.FallbackAlertDesc}" FontSize="10" Foreground="#78350F" TextWrapping="Wrap" Margin="0,2,0,0"/>
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="{Binding ActiveCandidate.FallbackAlertTitle}" FontSize="11" FontWeight="Bold" Foreground="#B45309"/>
+                                <TextBlock Text="{Binding ActiveCandidate.FallbackAlertDesc}" FontSize="10" Foreground="#78350F" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0"
+                                    Command="{Binding QuickPredictCandidateCommand}"
+                                    CommandParameter="{Binding ActiveCandidate}"
+                                    Cursor="Hand" Background="#F59E0B" Padding="8,4" BorderThickness="0"
+                                    ToolTip="Trigger live ML scoring for this applicant">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Fbg" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Fbg" Property="Background" Value="#D97706"/></Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Text="Run ML ↺" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                            </Button>
+                        </Grid>
                     </Border>
 
                     <!-- Audit Notice Banner (Conditional) -->
@@ -177,10 +222,26 @@
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="6"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Height="32" Cursor="Hand" Command="{Binding OpenOutlierModalCommand}"
+                        <Button Grid.Column="0" Height="32" Cursor="Hand" Command="{Binding OpenReassessmentFormCommand}"
+                                CommandParameter="{Binding ActiveCandidate}" ToolTip="Re-assess circumstances (income, dependents) and re-evaluate">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#EFF6FF" BorderBrush="#93C5FD" BorderThickness="1" CornerRadius="8">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#DBEAFE"/></Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="Re-assess ↺" FontSize="10" FontWeight="SemiBold" Foreground="#1D4ED8"/>
+                        </Button>
+                        <Button Grid.Column="2" Height="32" Cursor="Hand" Command="{Binding OpenOutlierModalCommand}"
                                 CommandParameter="{Binding ActiveCandidate}">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
@@ -192,9 +253,9 @@
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
-                            <TextBlock Text="Disqualify Outlier" FontSize="10.5" FontWeight="SemiBold" Foreground="#C53030"/>
+                            <TextBlock Text="Disqualify" FontSize="10" FontWeight="SemiBold" Foreground="#C53030"/>
                         </Button>
-                        <Button Grid.Column="2" Height="32" Cursor="Hand" Command="{Binding ViewFullRecordCommand}"
+                        <Button Grid.Column="4" Height="32" Cursor="Hand" Command="{Binding ViewFullRecordCommand}"
                                 CommandParameter="{Binding ActiveCandidate}">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">

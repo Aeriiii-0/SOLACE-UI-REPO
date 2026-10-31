@@ -310,18 +310,20 @@ namespace SOLUM_UI.Views.Dialogs
         private readonly ObservableCollection<DependentItemViewModel> _dependents = new ObservableCollection<DependentItemViewModel>();
         private readonly List<Guid> _removedFamilyMemberIds = new List<Guid>();
         private DependentItemViewModel _editingDependent = null;
+        private readonly bool _isReassessmentMode;
 
-        public RenewalReassessmentDialog(SoloParentRecord original, SoloParentDto dto = null)
+        public RenewalReassessmentDialog(SoloParentRecord original, SoloParentDto dto = null, bool isReassessmentMode = false)
         {
             InitializeComponent();
             _original = original ?? throw new ArgumentNullException(nameof(original));
             _dto = dto;
+            _isReassessmentMode = isReassessmentMode;
 
             DependentsList.ItemsSource = _dependents;
 
             Loaded += (s, e) =>
             {
-                if (!_original.CanRenew(out string failureReason, out _))
+                if (!_isReassessmentMode && !_original.CanRenew(out string failureReason, out _))
                 {
                     ActionConfirmDialog.Warning(
                         "Renewal Not Allowed",
@@ -330,6 +332,13 @@ namespace SOLUM_UI.Views.Dialogs
                     DialogResult = false;
                     Close();
                     return;
+                }
+
+                if (_isReassessmentMode)
+                {
+                    Title = "Case Re-assessment";
+                    if (TxtDialogTitle != null) TxtDialogTitle.Text = "Case Re-assessment & Eligibility Review";
+                    if (TxtDialogSubtitle != null) TxtDialogSubtitle.Text = "Update circumstances, income, and family composition to evaluate vulnerability and subsidy priority.";
                 }
 
                 PopulateIdentity();
@@ -1521,7 +1530,7 @@ namespace SOLUM_UI.Views.Dialogs
                 Status = "Active",
                 IsRenewal = true,
                 IsNewApplicant = false,
-                CurrentTermExpiresAt = DateTime.Today.AddYears(1),
+                CurrentTermExpiresAt = _isReassessmentMode ? (_original.CurrentTermExpiresAt ?? DateTime.Today.AddYears(1)) : DateTime.Today.AddYears(1),
                 DateOfApplication = _original.DateOfApplication,
                 RecordTerms = _original.RecordTerms,
 
