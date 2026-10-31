@@ -38,7 +38,7 @@ namespace SOLUM_UI.ViewModels
                     var orig = _allItems.FirstOrDefault(x => x.SpId == r.SpId);
                     if (orig != null) { orig.IsDisqualified = true; orig.DisqualificationReason = OutlierRejectionReason; orig.Status = "Rejected"; }
                     if (r.EvaluationId != Guid.Empty)
-                        _ = _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = r.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = OutlierAutoPromote });
+                        _ = _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = r.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = false });
                 }
                 _shortlistRevokeTargets = null;
                 IsOutlierModalOpen = false;
@@ -54,10 +54,10 @@ namespace SOLUM_UI.ViewModels
                 target.DisqualificationReason = OutlierRejectionReason;
                 target.Status = "Rejected";
                 if (target.EvaluationId != Guid.Empty)
-                    await _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = target.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = OutlierAutoPromote });
+                    await _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = target.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = false });
                 IsOutlierModalOpen = false;
                 RecalculateQuotaAndFilter();
-                ToastNotification.Show("Outlier Disqualified", $"{target.Name} removed from queue. Next candidate promoted.", ToastType.Warning);
+                ToastNotification.Show("Candidate Disqualified", $"{target.Name} disqualified from queue ({OutlierRejectionReason}).", ToastType.Warning);
             }
         }
 

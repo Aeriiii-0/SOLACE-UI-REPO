@@ -109,49 +109,6 @@
                         </Border>
                     </Popup>
 
-                    <!-- Grantee Slots, Grant Rate & Total Budget Allocator -->
-                    <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Padding="8,2" Height="30" Margin="0,0,8,0">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="Grantees:" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                            <Border Background="#FDF5F8" CornerRadius="4" BorderBrush="#D0B8C0" BorderThickness="1" Padding="4,1" Height="22">
-                                <TextBox Text="{Binding GranteeSlots, UpdateSourceTrigger=PropertyChanged}" Width="38" Height="18"
-                                         FontSize="11" FontWeight="Bold"
-                                         BorderThickness="0" Background="Transparent" Foreground="#702943"
-                                         VerticalContentAlignment="Center" HorizontalContentAlignment="Center" ToolTip="Number of target grantee slots"/>
-                            </Border>
-                            <TextBlock Text="Grant:" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" Margin="8,0,4,0"/>
-                            <Border Background="#FDF5F8" CornerRadius="4" BorderBrush="#D0B8C0" BorderThickness="1" Padding="4,1" Height="22">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="₱" FontSize="10.5" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center" Margin="2,0,1,0"/>
-                                    <TextBox Text="{Binding GrantAmountPerRecipient, UpdateSourceTrigger=PropertyChanged}" Width="46" Height="18"
-                                             FontSize="11" FontWeight="Bold"
-                                             BorderThickness="0" Background="Transparent" Foreground="#702943"
-                                             VerticalContentAlignment="Center" HorizontalContentAlignment="Center" ToolTip="Subsidy grant amount per recipient (PHP)"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="#FFF0F5" CornerRadius="4" Padding="6,2" Margin="6,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding CommittedBudgetText, StringFormat='Budget: {0}'}" FontSize="10.5" FontWeight="SemiBold" Foreground="#702943" ToolTip="Total committed budget = Grantees × Grant Rate"/>
-                            </Border>
-                            <!-- Save Quota Button -->
-                            <Button Command="{Binding SaveQuotaCommand}" IsEnabled="{Binding CanModifyGrantees}" Margin="6,0,0,0" Height="22" Cursor="Hand" ToolTip="Save quota allocations and grant rate">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border x:Name="SaveBtnBg" Background="#702943" CornerRadius="4" Padding="7,0">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Path Data="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z"
-                                                      Fill="White" Width="9" Height="9" Stretch="Uniform" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                                <TextBlock Text="Save" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="SaveBtnBg" Property="Opacity" Value="0.88"/></Trigger>
-                                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="SaveBtnBg" Property="Opacity" Value="0.45"/></Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </StackPanel>
-                    </Border>
 
                     <!-- Refresh Queue Icon Button (At the End of the Ribbon) -->
                     <Button Width="30" Height="30" Cursor="Hand"

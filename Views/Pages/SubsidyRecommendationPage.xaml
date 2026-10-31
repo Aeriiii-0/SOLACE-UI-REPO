@@ -72,18 +72,24 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Progress Bar & Acceptance Label -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Width="180" Margin="0,0,14,0">
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Width="185" Margin="0,0,14,0">
                         <TextBlock Text="ACCEPTED RECIPIENTS" FontSize="9" FontWeight="Bold" Foreground="#888888" Margin="0,0,0,4"/>
                         <Border Height="6" Background="#F5E8EC" CornerRadius="3" ClipToBounds="True">
                             <ProgressBar Value="{Binding QuotaFillPercentage, Mode=OneWay}" Minimum="0" Maximum="100" Height="6" BorderThickness="0" Background="Transparent" Foreground="#27AE60"/>
                         </Border>
                         <TextBlock Text="{Binding QuotaProgressText}" FontSize="9.5" FontWeight="SemiBold" Foreground="#27AE60" Margin="0,3,0,0"/>
+                        <!-- Grant Rate & Committed Budget Summary under Accepted Recipients -->
+                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                            <TextBlock Text="{Binding GrantAmountPerRecipient, StringFormat='₱{0:N0} / recipient'}" FontSize="9.5" FontWeight="SemiBold" Foreground="#702943"/>
+                            <TextBlock Text=" • " FontSize="9.5" Foreground="#C4A0B0"/>
+                            <TextBlock Text="{Binding CommittedBudgetText}" FontSize="9.5" Foreground="#702943"/>
+                        </StackPanel>
                     </StackPanel>
 
                     <!-- Vertical Divider -->
                     <Border Grid.Column="1" Width="1" Background="#EEDDE2" Margin="0,2,14,2"/>
 
-                    <!-- Slots Indicators & Details Action -->
+                    <!-- Slots Indicators, Details Action & Edit Quota Action -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <!-- Total Slots -->
                         <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
@@ -98,7 +104,7 @@
                         </StackPanel>
 
                         <!-- Details Flyout Button -->
-                        <Grid VerticalAlignment="Center">
+                        <Grid VerticalAlignment="Center" Margin="0,0,6,0">
                             <Button x:Name="SlotBreakdownBtn" Height="28" Padding="10,0" Cursor="Hand" Click="SlotBreakdownBtn_Click">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
@@ -130,6 +136,95 @@
                                         <Grid Margin="0,2">
                                             <TextBlock Text="Remaining Open Slots:" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
                                             <TextBlock Text="{Binding RemainingSlots}" FontSize="12" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </Popup>
+                        </Grid>
+
+                        <!-- Edit Quota Button -->
+                        <Grid VerticalAlignment="Center">
+                            <Button x:Name="EditQuotaBtn" Height="28" Padding="10,0" Cursor="Hand"
+                                    Click="EditQuotaBtn_Click"
+                                    IsEnabled="{Binding CanModifyGrantees}"
+                                    ToolTip="Edit target grantee slots and subsidy grant amount">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="#FBF5F7" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.07,6.19L3,17.25Z"
+                                                      Fill="#702943" Width="10" Height="10" Stretch="Uniform" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="Edit" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#F5ECEE"/></Trigger>
+                                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+
+                            <!-- Edit Quota Popup -->
+                            <Popup x:Name="EditQuotaPopup" PlacementTarget="{Binding ElementName=EditQuotaBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                                <Border Background="White" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1.5" Padding="14,12" MinWidth="260">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="3" Opacity="0.16"/>
+                                    </Border.Effect>
+                                    <StackPanel>
+                                        <TextBlock Text="Edit Quota &amp; Grant Allocation" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,10"/>
+
+                                        <!-- Target Grantees Input -->
+                                        <TextBlock Text="Target Grantees (Slots)" FontSize="10.5" FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,3"/>
+                                        <Border Background="#FDF5F8" CornerRadius="6" BorderBrush="#D0B8C0" BorderThickness="1" Padding="8,4" Margin="0,0,0,8">
+                                            <TextBox Text="{Binding GranteeSlots, UpdateSourceTrigger=PropertyChanged}"
+                                                     FontSize="12" FontWeight="Bold" Foreground="#702943" BorderThickness="0" Background="Transparent"/>
+                                        </Border>
+
+                                        <!-- Grant Amount Input -->
+                                        <TextBlock Text="Grant Amount Per Recipient (PHP)" FontSize="10.5" FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,3"/>
+                                        <Border Background="#FDF5F8" CornerRadius="6" BorderBrush="#D0B8C0" BorderThickness="1" Padding="8,4" Margin="0,0,0,10">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="₱ " FontSize="12" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="1" Text="{Binding GrantAmountPerRecipient, UpdateSourceTrigger=PropertyChanged}"
+                                                         FontSize="12" FontWeight="Bold" Foreground="#702943" BorderThickness="0" Background="Transparent"/>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Real-time Budget Calculation -->
+                                        <Border Background="#FFF0F5" CornerRadius="6" Padding="8,6" Margin="0,0,0,12">
+                                            <TextBlock Text="{Binding CommittedBudgetText}" FontSize="11" FontWeight="SemiBold" Foreground="#702943" HorizontalAlignment="Center"/>
+                                        </Border>
+
+                                        <!-- Actions -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Content="Cancel" Height="28" Click="CancelEditQuota_Click" Cursor="Hand">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="#F3F4F6" CornerRadius="6" Padding="10,0">
+                                                            <TextBlock Text="Cancel" FontSize="11" FontWeight="SemiBold" Foreground="#475569" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
+                                            <Button Grid.Column="2" Height="28" Command="{Binding SaveQuotaCommand}" Click="SaveEditQuota_Click" Cursor="Hand">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="#702943" CornerRadius="6" Padding="10,0">
+                                                            <TextBlock Text="Save" FontSize="11" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
                                         </Grid>
                                     </StackPanel>
                                 </Border>

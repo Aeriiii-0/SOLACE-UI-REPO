@@ -167,12 +167,9 @@
                 <TextBox Height="72" TextWrapping="Wrap" AcceptsReturn="True"
                          Style="{StaticResource ModalFormBox}"
                          Text="{Binding OutlierNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,0,0,16"/>
+                         Margin="0,0,0,22"/>
 
-                <!-- Auto-promote checkbox -->
-                <CheckBox IsChecked="{Binding OutlierAutoPromote, Mode=TwoWay}"
-                          Content="Auto-promote highest-ranked waitlist candidate to maintain budget quota"
-                          FontSize="12" Foreground="#333333" Margin="0,0,0,22"/>
+
 
                 <!-- Modal Actions Styled after Form CancelBtn and SaveBtn -->
                 <Grid>

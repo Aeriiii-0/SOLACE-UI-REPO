@@ -23,7 +23,7 @@ namespace SOLUM_UI.ViewModels
         private int _activeTabIndex, _budgetAmount = 100000, _granteeSlots = 100, _grantAmountPerRecipient = DefaultGrantAmount, _selectedFiscalYearIndex;
         private string _auditFilter = "All", _shortlistAuditFilter = "All", _outlierModalTitle = "Disqualify Candidate", _outlierRejectionReason = "Ineligible Income / Undisclosed Assets", _outlierNotes = string.Empty, _shortlistSearchText = string.Empty, _outlierTargetNameAndId;
         private SubsidyItem _activeCandidate, _outlierTarget;
-        private bool _isDrawerOpen, _isOutlierModalOpen, _outlierAutoPromote = true, _isBatchMode, _isLoading;
+        private bool _isDrawerOpen, _isOutlierModalOpen, _outlierAutoPromote = false, _isBatchMode, _isLoading;
 
         public SubsidyRecommendationViewModel(ISubsidyApiService apiService = null)
         {
