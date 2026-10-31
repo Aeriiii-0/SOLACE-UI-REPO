@@ -135,7 +135,7 @@ def measure_checkbox_ink(image: np.ndarray, bbox: list) -> float:
         return 0.0
     gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY) if len(crop.shape) == 3 else crop
     h, w = gray.shape[:2]
-    if h < 5 or w < 5:
+    if h < 4 or w < 4:
         return 0.0
 
     # Auto-detect the checkbox square contour inside crop if present
@@ -145,26 +145,30 @@ def measure_checkbox_ink(image: np.ndarray, bbox: list) -> float:
     for c in contours:
         bx, by, bw, bh = cv2.boundingRect(c)
         aspect = float(bw) / float(max(1, bh))
-        if bw >= w * 0.30 and bh >= h * 0.30 and 0.7 <= aspect <= 1.4:
+        if bw >= w * 0.40 and bh >= h * 0.40 and 0.7 <= aspect <= 1.4:
             box_rect = (bx, by, bw, bh)
             break
 
     if box_rect:
         bx, by, bw, bh = box_rect
-        pad_x = max(2, int(round(bw * 0.22)))
-        pad_y = max(2, int(round(bh * 0.22)))
+        pad_x = max(1, int(round(bw * 0.18)))
+        pad_y = max(1, int(round(bh * 0.18)))
         inner = gray[by + pad_y : by + bh - pad_y, bx + pad_x : bx + bw - pad_x]
     else:
-        inner = gray[int(h * 0.25) : int(h * 0.75), int(w * 0.25) : int(w * 0.75)]
+        pad_x = max(1, int(round(w * 0.20)))
+        pad_y = max(1, int(round(h * 0.20)))
+        inner = gray[pad_y : h - pad_y, pad_x : w - pad_x]
 
     if inner.size == 0:
-        return 0.0
+        inner = gray
 
+    # Checkmark / ink density measurement:
     paper_median = float(np.median(inner))
-    if paper_median < 40:
-        return 0.0
-
-    ink_mask = (inner < (paper_median - 25)) & (inner < 185)
+    if paper_median < 160:
+        # Box interior is predominantly dark / filled with pen ink
+        return 1.0
+    thresh_val = min(195, int(paper_median - 25))
+    ink_mask = inner < thresh_val
     return float(np.sum(ink_mask)) / float(inner.size)
 
 def detect_employment_status(enhanced_image: np.ndarray, ocr_engine, fields_config: dict, all_detections: list = None, raw_text: str = "") -> tuple:
@@ -203,9 +207,9 @@ def detect_employment_status(enhanced_image: np.ndarray, ocr_engine, fields_conf
 
     # Step B: Calibrated Checkbox Ink & Checkmark Symbol Analysis
     if enhanced_image is not None and enhanced_image.size > 0:
-        box_emp = fields_config.get("is_employed", {}).get("bbox") or [0.658, 0.233, 0.014, 0.012]
-        box_self = fields_config.get("is_self_employed", {}).get("bbox") or [0.776, 0.233, 0.014, 0.012]
-        box_not = fields_config.get("is_not_employed", {}).get("bbox") or [0.844, 0.233, 0.014, 0.012]
+        box_emp = fields_config.get("is_employed", {}).get("bbox") or [0.6167, 0.2347, 0.0084, 0.0056]
+        box_self = fields_config.get("is_self_employed", {}).get("bbox") or [0.7056, 0.2347, 0.0084, 0.0056]
+        box_not = fields_config.get("is_not_employed", {}).get("bbox") or [0.8256, 0.2347, 0.0084, 0.0056]
 
         ink_emp = measure_checkbox_ink(enhanced_image, box_emp)
         ink_self = measure_checkbox_ink(enhanced_image, box_self)
@@ -287,6 +291,11 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
             bbox = [cols_default[col_idx][1], r_top, cols_default[col_idx][2], r_height]
             if custom_key in fields_config and "bbox" in fields_config[custom_key]:
                 bbox = fields_config[custom_key]["bbox"]
+
+            # Narrow column: shave ~2-3px inward horizontally to avoid clipping vertical table grid borders
+            if col_name == "sex":
+                x_margin = 0.004
+                bbox = [bbox[0] + x_margin, bbox[1], max(0.005, bbox[2] - x_margin * 2.0), bbox[3]]
 
             raw_text = ""
             conf = 0.90

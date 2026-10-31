@@ -239,10 +239,13 @@ namespace SOLUM_UI.Views.Components
             else if (key == "self_employed") key = "is_self_employed";
             else if (key == "not_employed") key = "is_not_employed";
 
-            if (key.Contains("_civil")) key = key.Replace("_civil", "_civ");
-            else if (key.Contains("_income")) key = key.Replace("_income", "_inc");
-            else if (key.Contains("_education")) key = key.Replace("_education", "_edu");
-            else if (key.Contains("_relationship")) key = key.Replace("_relationship", "_rel");
+            if (key.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase))
+            {
+                if (key.Contains("_civil")) key = key.Replace("_civil", "_civ");
+                else if (key.Contains("_income")) key = key.Replace("_income", "_inc");
+                else if (key.Contains("_education")) key = key.Replace("_education", "_edu");
+                else if (key.Contains("_relationship")) key = key.Replace("_relationship", "_rel");
+            }
 
             double[] bbox = null;
 
@@ -274,20 +277,22 @@ namespace SOLUM_UI.Views.Components
             double boxW = bbox[2] * imgW;
             double boxH = bbox[3] * imgH;
 
-            // Exact 1:1 scope match with OcrTemplateConfigWindow without artificial offsets or padding
+            // Outset dashed highlight frame: hugs the field boundary cleanly from outside
+            // Transparent interior ensures handwriting and checkboxes remain completely unobscured
+            double pad = 3.0;
             var rect = new System.Windows.Shapes.Rectangle
             {
-                Width = Math.Max(4, boxW),
-                Height = Math.Max(4, boxH),
-                Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E91E63")),
-                StrokeThickness = 2.5,
-                StrokeDashArray = new DoubleCollection { 4, 2 },
-                Fill = new SolidColorBrush(Color.FromArgb(35, 233, 30, 99)),
-                RadiusX = 2,
-                RadiusY = 2
+                Width = Math.Max(4, boxW + pad * 2.0),
+                Height = Math.Max(4, boxH + pad * 2.0),
+                Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E11D48")), // Rose-600 clear accent
+                StrokeThickness = 1.6,
+                StrokeDashArray = new DoubleCollection { 4, 3 },
+                Fill = Brushes.Transparent, // Pure transparent fill so handwriting/ticks are 100% visible
+                RadiusX = 3,
+                RadiusY = 3
             };
-            Canvas.SetLeft(rect, boxX);
-            Canvas.SetTop(rect, boxY);
+            Canvas.SetLeft(rect, boxX - pad);
+            Canvas.SetTop(rect, boxY - pad);
             HighlightCanvas.Children.Add(rect);
 
             _zoomFactor = 2.8;

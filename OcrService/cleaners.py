@@ -519,24 +519,27 @@ def clean_date(raw_text: str) -> str:
     return ""
 
 def clean_sex(raw_text: str) -> str:
-    """Fuzzy normalization of Sex field, robust to shortened F/M and surrounding punctuation."""
+    """Fuzzy normalization of Sex field, robust to shortened F/M, OCR visual confusion, and punctuation."""
     if not raw_text or is_ocr_na(raw_text):
         return ""
     t = raw_text.strip().lower()
     t = re.sub(r'^(sex|gender|kasarian)\s*[:\-_.]*', '', t, flags=re.IGNORECASE).strip()
-    t_alpha = re.sub(r'[^a-z]', '', t)
+    t_alpha = re.sub(r'[^a-z0-9]', '', t)
     
-    if t_alpha in ["m", "male", "lalaki", "boy", "son", "father", "brother", "l", "masc", "mas", "man", "h", "n", "iv", "w"]:
+    # Visual confusion mappings for handwriting in single-letter table cells:
+    # Male: M often misread as H, N, IV, U, 11, 1 (due to table border lines or vertical strokes)
+    # Female: F often misread as P, PL, E, T, 7 (due to horizontal crossbars or curved top)
+    if t_alpha in ["m", "male", "lalaki", "boy", "son", "father", "brother", "l", "masc", "mas", "man", "h", "n", "iv", "u", "11", "1"]:
         return "Male"
-    if t_alpha in ["f", "female", "babae", "fem", "girl", "daughter", "mother", "sister", "b", "w", "woman"]:
+    if t_alpha in ["f", "female", "babae", "fem", "girl", "daughter", "mother", "sister", "b", "woman", "p", "pl", "e", "t", "7"]:
         return "Female"
     if t_alpha.startswith("fem") or re.search(r'\b(female|babae|fem)\b', t):
         return "Female"
     if t_alpha.startswith("mas") or re.search(r'\b(male|lalaki)\b', t):
         return "Male"
-    if t_alpha == "f" or t_alpha.startswith("f"):
+    if t_alpha.startswith("f"):
         return "Female"
-    if t_alpha == "m" or (t_alpha.startswith("m") and t_alpha != "mother"):
+    if t_alpha.startswith("m") and t_alpha != "mother":
         return "Male"
     val = clean_text(raw_text)
     return "" if is_ocr_na(val) else val
