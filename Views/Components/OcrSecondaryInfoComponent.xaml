@@ -437,74 +437,88 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Tile 1: Pantawid Beneficiary (4Ps) -->
-                        <Border Grid.Column="0" Background="#FAFAFA" BorderBrush="#E5E7EB" BorderThickness="1.2"
-                                CornerRadius="8" Padding="12,10">
-                            <StackPanel>
-                                <Grid Margin="0,0,0,6">
+                        <Border Grid.Column="0" Background="#FFFBFD" BorderBrush="#E5B8C9" BorderThickness="1"
+                                CornerRadius="7" Padding="0" ClipToBounds="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="4"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#702943"/>
+                                <Grid Grid.Column="1" Margin="10,7,10,7" VerticalAlignment="Center">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Border Grid.Column="0" Background="#FDF2F5" BorderBrush="#E5B8C9" BorderThickness="1" CornerRadius="6" Width="26" Height="26">
-                                        <Path Data="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"
-                                              Fill="#702943" Stretch="Uniform" Width="13" Height="13"
-                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <CheckBox x:Name="ChkPantawid" Grid.Column="2" VerticalAlignment="Center" Cursor="Hand"/>
+                                    <CheckBox x:Name="ChkPantawid" Grid.Column="0" VerticalAlignment="Center" Cursor="Hand" Margin="0,0,9,0">
+                                        <CheckBox.LayoutTransform>
+                                            <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
+                                        </CheckBox.LayoutTransform>
+                                    </CheckBox>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Pantawid 4Ps" FontSize="12" FontWeight="Bold" Foreground="#702943"/>
+                                        <TextBlock Text="CCT beneficiary program" FontSize="10" Foreground="#6B7280" TextTrimming="CharacterEllipsis" Margin="0,1,0,0"/>
+                                    </StackPanel>
                                 </Grid>
-                                <TextBlock Text="Pantawid 4Ps" FontSize="12" FontWeight="SemiBold" Foreground="#111827"/>
-                                <TextBlock Text="CCT beneficiary program" FontSize="10.5" Foreground="#6B7280" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
-                            </StackPanel>
+                            </Grid>
                         </Border>
 
                         <!-- Tile 2: Indigenous Person (IP) -->
-                        <Border Grid.Column="2" Background="#FAFAFA" BorderBrush="#E5E7EB" BorderThickness="1.2"
-                                CornerRadius="8" Padding="12,10">
-                            <StackPanel>
-                                <Grid Margin="0,0,0,6">
+                        <Border Grid.Column="2" Background="#FFFBFD" BorderBrush="#E5B8C9" BorderThickness="1"
+                                CornerRadius="7" Padding="0" ClipToBounds="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="4"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#702943"/>
+                                <Grid Grid.Column="1" Margin="10,7,10,7" VerticalAlignment="Center">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Border Grid.Column="0" Background="#FDF2F5" BorderBrush="#E5B8C9" BorderThickness="1" CornerRadius="6" Width="26" Height="26">
-                                        <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.79 4.21,10.21L9,15V16A2,2 0 0,0 11,18V19.93M17.9,17.39C17.64,16.58 16.9,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.78 20,8.65 20,12C20,14.08 19.2,15.97 17.9,17.39Z"
-                                              Fill="#702943" Stretch="Uniform" Width="13" Height="13"
-                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <CheckBox x:Name="ChkIndigenous" Grid.Column="2" VerticalAlignment="Center" Cursor="Hand"/>
+                                    <CheckBox x:Name="ChkIndigenous" Grid.Column="0" VerticalAlignment="Center" Cursor="Hand" Margin="0,0,9,0">
+                                        <CheckBox.LayoutTransform>
+                                            <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
+                                        </CheckBox.LayoutTransform>
+                                    </CheckBox>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Indigenous Person" FontSize="12" FontWeight="Bold" Foreground="#702943"/>
+                                        <TextBlock Text="Recognized IP community" FontSize="10" Foreground="#6B7280" TextTrimming="CharacterEllipsis" Margin="0,1,0,0"/>
+                                    </StackPanel>
                                 </Grid>
-                                <TextBlock Text="Indigenous Person" FontSize="12" FontWeight="SemiBold" Foreground="#111827"/>
-                                <TextBlock Text="Recognized IP community" FontSize="10.5" Foreground="#6B7280" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
-                            </StackPanel>
+                            </Grid>
                         </Border>
 
                         <!-- Tile 3: LGBTQ+ -->
-                        <Border Grid.Column="4" Background="#FAFAFA" BorderBrush="#E5E7EB" BorderThickness="1.2"
-                                CornerRadius="8" Padding="12,10">
-                            <StackPanel>
-                                <Grid Margin="0,0,0,6">
+                        <Border Grid.Column="4" Background="#FFFBFD" BorderBrush="#E5B8C9" BorderThickness="1"
+                                CornerRadius="7" Padding="0" ClipToBounds="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="4"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#702943"/>
+                                <Grid Grid.Column="1" Margin="10,7,10,7" VerticalAlignment="Center">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Border Grid.Column="0" Background="#FDF2F5" BorderBrush="#E5B8C9" BorderThickness="1" CornerRadius="6" Width="26" Height="26">
-                                        <Path Data="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"
-                                              Fill="#702943" Stretch="Uniform" Width="13" Height="13"
-                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <CheckBox x:Name="ChkLGBTQ" Grid.Column="2" VerticalAlignment="Center" Cursor="Hand"/>
+                                    <CheckBox x:Name="ChkLGBTQ" Grid.Column="0" VerticalAlignment="Center" Cursor="Hand" Margin="0,0,9,0">
+                                        <CheckBox.LayoutTransform>
+                                            <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
+                                        </CheckBox.LayoutTransform>
+                                    </CheckBox>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="LGBTQ+ Sector" FontSize="12" FontWeight="Bold" Foreground="#702943"/>
+                                        <TextBlock Text="Diverse SOGIESC community" FontSize="10" Foreground="#6B7280" TextTrimming="CharacterEllipsis" Margin="0,1,0,0"/>
+                                    </StackPanel>
                                 </Grid>
-                                <TextBlock Text="LGBTQ+ Sector" FontSize="12" FontWeight="SemiBold" Foreground="#111827"/>
-                                <TextBlock Text="Diverse SOGIESC community" FontSize="10.5" Foreground="#6B7280" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </Grid>
                 </StackPanel>
             </Border>
-
         </StackPanel>
     </ScrollViewer>
 </UserControl>
