@@ -387,14 +387,14 @@
                     <Border Background="#702943" CornerRadius="6" Padding="14,10" Margin="0,0,0,8">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="1.1*"/>
+                                <ColumnDefinition Width="1.8*"/>
+                                <ColumnDefinition Width="1.3*"/>
                                 <ColumnDefinition Width="1.5*"/>
-                                <ColumnDefinition Width="1.6*"/>
+                                <ColumnDefinition Width="1.5*"/>
                                 <ColumnDefinition Width="84"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="NAME &amp; RELATIONSHIP" FontSize="11" FontWeight="Bold" Foreground="White"/>
-                            <TextBlock Grid.Column="1" Text="AGE &amp; SEX" FontSize="11" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Grid.Column="1" Text="AGE, SEX &amp; DOB" FontSize="11" FontWeight="Bold" Foreground="White"/>
                             <TextBlock Grid.Column="2" Text="EDUCATION &amp; INCOME" FontSize="11" FontWeight="Bold" Foreground="White"/>
                             <TextBlock Grid.Column="3" Text="DISABILITY / SPECIAL NEEDS" FontSize="11" FontWeight="Bold" Foreground="White"/>
                             <TextBlock Grid.Column="4" Text="ACTIONS" FontSize="11" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right" Margin="0,0,6,0"/>
@@ -411,10 +411,10 @@
                                         ToolTip="Click to view member on document preview">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="2*"/>
-                                            <ColumnDefinition Width="1.1*"/>
+                                            <ColumnDefinition Width="1.8*"/>
+                                            <ColumnDefinition Width="1.3*"/>
                                             <ColumnDefinition Width="1.5*"/>
-                                            <ColumnDefinition Width="1.6*"/>
+                                            <ColumnDefinition Width="1.5*"/>
                                             <ColumnDefinition Width="84"/>
                                         </Grid.ColumnDefinitions>
 
@@ -435,14 +435,20 @@
                                                        Tag="fam_row_rel" PreviewMouseDown="Field_PreviewMouseDown"/>
                                         </StackPanel>
 
-                                        <!-- Column 1: Age & Sex -->
+                                        <!-- Column 1: Age, Sex & Birthdate -->
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding AgeDisplay}" FontSize="12" Foreground="#1F2937"
-                                                       Cursor="Hand" ToolTip="Click to view Age on document preview"
-                                                       Tag="fam_row_age" PreviewMouseDown="Field_PreviewMouseDown"/>
-                                            <TextBlock Text="{Binding SexDisplay}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"
-                                                       Cursor="Hand" ToolTip="Click to view Sex on document preview"
-                                                       Tag="fam_row_sex" PreviewMouseDown="Field_PreviewMouseDown"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding AgeDisplay}" FontSize="12" FontWeight="SemiBold" Foreground="#1F2937"
+                                                           Cursor="Hand" ToolTip="Click to view Age on document preview"
+                                                           Tag="fam_row_age" PreviewMouseDown="Field_PreviewMouseDown"/>
+                                                <TextBlock Text=" • " FontSize="11" Foreground="#9CA3AF"/>
+                                                <TextBlock Text="{Binding SexDisplay}" FontSize="12" Foreground="#4B5563"
+                                                           Cursor="Hand" ToolTip="Click to view Sex on document preview"
+                                                           Tag="fam_row_sex" PreviewMouseDown="Field_PreviewMouseDown"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding BirthdateDisplay, StringFormat='DOB: {0}'}" FontSize="11" Foreground="#6B7280" Margin="0,2,0,0"
+                                                       Cursor="Hand" ToolTip="Click to view Birthdate on document preview"
+                                                       Tag="fam_row_dob" PreviewMouseDown="Field_PreviewMouseDown"/>
                                         </StackPanel>
 
                                         <!-- Column 2: Education / Work & Income -->
@@ -577,30 +583,7 @@
                 </StackPanel>
             </Border>
 
-            <!-- CARD: VII. APPLICATION STATUS -->
-            <Border Style="{StaticResource CardSection}">
-                <StackPanel>
-                    <Border Style="{StaticResource CardSectionHeader}">
-                        <TextBlock Text="VII. APPLICATION STATUS" Style="{StaticResource SectionLabel}"/>
-                    </Border>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Status *" Style="{StaticResource FieldLabel}"/>
-                            <ComboBox x:Name="CmbStatus" Style="{StaticResource FormCombo}"
-                                      Tag="status" GotFocus="Field_GotFocus"
-                                      SelectionChanged="CmbStatus_SelectionChanged">
-                                <ComboBoxItem Content="Valid" IsSelected="True"/>
-                                <ComboBoxItem Content="Inactive"/>
-                            </ComboBox>
-                            <TextBlock x:Name="ErrStatus" Text="Required." Style="{StaticResource ErrorText}"/>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Border>
+
 
         </StackPanel>
     </ScrollViewer>

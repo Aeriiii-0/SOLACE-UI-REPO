@@ -67,7 +67,7 @@ namespace SOLUM_UI.Views.Components
 
         public string NeedsAndProblems => TxtNeeds.Text.Trim();
         public string OtherIncomeSource => TxtOtherIncome.Text.Trim();
-        public string ApplicationStatus => GetComboValue(CmbStatus);
+        public string ApplicationStatus => "Valid";
 
         #region Focus & Navigation Handling
 
@@ -261,7 +261,7 @@ namespace SOLUM_UI.Views.Components
                 SetFieldConfidence("needs", Badge_Needs, TxtConf_Needs, resp);
                 SetFieldConfidence("other_income", Badge_OtherIncome, TxtConf_OtherIncome, resp);
 
-                SetComboByContent(CmbStatus, "Valid");
+                
             }
             finally
             {
@@ -615,10 +615,7 @@ namespace SOLUM_UI.Views.Components
             e.Handled = !NumberOnlyRegex.IsMatch(e.Text);
         }
 
-        private void CmbStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ClearFieldError(CmbStatus, ErrStatus);
-        }
+
 
         private void SetComboByContent(ComboBox combo, string value)
         {
@@ -689,12 +686,7 @@ namespace SOLUM_UI.Views.Components
                 }
             }
 
-            if (CmbStatus.SelectedItem == null)
-            {
-                MarkError(CmbStatus, ErrStatus, "Required.");
-                missing.Add("Application Status");
-                ok = false;
-            }
+
 
             return ok;
         }

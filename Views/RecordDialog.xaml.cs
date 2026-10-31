@@ -100,6 +100,7 @@ namespace SOLUM_UI
                     N(nameof(Age));
                     N(nameof(AgeDisplay));
                 }
+                N(nameof(BirthdateDisplay));
             }
         }
 
@@ -125,6 +126,7 @@ namespace SOLUM_UI
                     N(nameof(Age));
                     N(nameof(AgeDisplay));
                 }
+                N(nameof(BirthdateDisplay));
             }
         }
 
@@ -257,6 +259,17 @@ namespace SOLUM_UI
         // Display Helpers
         public string AgeDisplay => !string.IsNullOrWhiteSpace(Age) ? $"{Age} yrs old" : "—";
         public string SexDisplay => !string.IsNullOrWhiteSpace(Sex) ? Sex : "—";
+        public string BirthdateDisplay
+        {
+            get
+            {
+                if (BirthdateDate.HasValue && BirthdateDate.Value != DateTime.MinValue)
+                    return BirthdateDate.Value.ToString("MM/dd/yyyy");
+                if (!string.IsNullOrWhiteSpace(Birthdate))
+                    return Birthdate;
+                return "—";
+            }
+        }
         public string EducationDisplay => !string.IsNullOrWhiteSpace(EducationEmployment) ? EducationEmployment : "Not specified";
         public string IncomeDisplay
         {
