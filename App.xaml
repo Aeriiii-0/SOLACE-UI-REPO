@@ -6,6 +6,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/SolumTheme.xaml"/>
                 <ResourceDictionary Source="Themes/AnalyticsTheme.xaml"/>
                 <ResourceDictionary Source="Themes/OcrDialogTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>

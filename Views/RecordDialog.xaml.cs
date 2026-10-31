@@ -814,7 +814,7 @@ namespace SOLUM_UI
             string name = TxtMemberName.Text?.Trim()?.ToUpper();
             if (string.IsNullOrWhiteSpace(name))
             {
-                ActionConfirmDialog.Warning("Validation", "Please enter the member's full name.", this);
+                ToastNotification.Show("Validation Required", "Please enter the member's full name.", ToastType.Warning);
                 TxtMemberName.Focus();
                 return;
             }
@@ -822,7 +822,7 @@ namespace SOLUM_UI
             string rel = (CmbMemberRel.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (string.IsNullOrWhiteSpace(rel))
             {
-                ActionConfirmDialog.Warning("Validation", "Please select a relationship.", this);
+                ToastNotification.Show("Validation Required", "Please select a relationship.", ToastType.Warning);
                 CmbMemberRel.Focus();
                 return;
             }
@@ -830,14 +830,14 @@ namespace SOLUM_UI
             string sex = (CmbMemberSex.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (string.IsNullOrWhiteSpace(sex))
             {
-                ActionConfirmDialog.Warning("Validation", "Please select the member's sex.", this);
+                ToastNotification.Show("Validation Required", "Please select the member's sex.", ToastType.Warning);
                 CmbMemberSex.Focus();
                 return;
             }
 
             if (!DpMemberDob.SelectedDate.HasValue)
             {
-                ActionConfirmDialog.Warning("Validation", "Please select a valid birthdate.", this);
+                ToastNotification.Show("Validation Required", "Please select a valid birthdate.", ToastType.Warning);
                 DpMemberDob.Focus();
                 return;
             }
@@ -857,7 +857,7 @@ namespace SOLUM_UI
             string snCat = hasSn ? ((CmbSpecialNeedsCategory.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty) : string.Empty;
             if (hasSn && string.IsNullOrWhiteSpace(snCat))
             {
-                ActionConfirmDialog.Warning("Validation", "Please select a special needs category.", this);
+                ToastNotification.Show("Validation Required", "Please select a special needs category.", ToastType.Warning);
                 CmbSpecialNeedsCategory.Focus();
                 return;
             }

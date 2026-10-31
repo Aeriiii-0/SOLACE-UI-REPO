@@ -75,11 +75,7 @@ namespace SOLUM_UI
                 bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
                 if (isStale)
                 {
-                    // Show skeleton loader for non-Encoder users, or for Encoder users who have search fields filled
-                    if (!IsEncoder || HasSearchQuery())
-                    {
-                        if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
-                    }
+                    if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
                     _ = LoadRecordsAsync();
                 }
                 _ = Task.Run(() => OcrService.EnsureServerRunningAsync(25));
@@ -175,22 +171,7 @@ namespace SOLUM_UI
         {
             if (_isLoading) return;
 
-            // For Encoder/BasicUser: only load records if they have initiated a search
-            if ((IsEncoder || IsBasicUser) && !HasSearchQuery())
-            {
-                _allRecords = new List<SoloParentRecordViewModel>();
-                _filteredRecords = new List<SoloParentRecordViewModel>();
-                if (RecordsList != null) RecordsList.ItemsSource = null;
-                if (NoResultsPanel != null) NoResultsPanel.Visibility = Visibility.Collapsed;
-
-                // Back to the landing view (banner + tips)
-                SetEncoderResultsVisible(false);
-
-                // Ensure loading overlay and skeleton loader are turned off
-                if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
-                if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Collapsed;
-                return;
-            }
+            // For all users: automatically hydrate initial records (scoped to user's barangay for BasicUser / Caseworker / Barangay Secretary)
 
             _isLoading = true;
             if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = false;

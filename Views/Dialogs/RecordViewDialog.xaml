@@ -10,7 +10,7 @@
     <Border Background="#60000000">
         <Border Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="40" ShadowDepth="0" Opacity="0.20"/>
+                <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="3" Opacity="0.18" RenderingBias="Performance"/>
             </Border.Effect>
 
             <Grid>
@@ -22,6 +22,8 @@
                 <!-- â”€â”€ Dialog Shell â”€â”€ -->
                 <Border x:Name="DialogShell" Grid.Column="0"
                         Background="#FDFBFC" CornerRadius="14"
+                        TextOptions.TextFormattingMode="Display"
+                        RenderOptions.ClearTypeHint="Enabled"
                         VerticalAlignment="Center" HorizontalAlignment="Center">
                     <Border.RenderTransform>
                         <TranslateTransform x:Name="DialogShellTransform"/>
@@ -71,14 +73,14 @@
                         <!-- Content -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled"
-                                      Background="White">
+                                      Background="White"
+                                      PanningMode="VerticalOnly"
+                                      CanContentScroll="False"
+                                      PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
                             <StackPanel Margin="22,18,22,18">
                                 <Border Background="White" CornerRadius="12"
                                         BorderBrush="#E8D4DA" BorderThickness="1.2"
                                         Padding="20,16" Margin="0,0,0,14">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#702943" BlurRadius="12" ShadowDepth="2" Opacity="0.05"/>
-                                    </Border.Effect>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>

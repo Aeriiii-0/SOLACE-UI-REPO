@@ -769,18 +769,19 @@ namespace SOLUM_UI.Views.Dialogs
             {
                 if (CmbCivilStatus.SelectedItem == null)
                 {
-                    ActionConfirmDialog.Warning("Validation", "Please select a Civil Status.");
+                    ToastNotification.Show("Validation Required", "Please select a Civil Status.", ToastType.Warning);
+                    CmbCivilStatus.Focus();
                     return false;
                 }
                 if (string.IsNullOrWhiteSpace(TxtOccupation.Text))
                 {
-                    ActionConfirmDialog.Warning("Validation", "Please enter an Occupation or source of livelihood.");
+                    ToastNotification.Show("Validation Required", "Please enter an Occupation or source of livelihood.", ToastType.Warning);
                     TxtOccupation.Focus();
                     return false;
                 }
                 if (string.IsNullOrWhiteSpace(TxtMonthlyIncome.Text) || !decimal.TryParse(TxtMonthlyIncome.Text.Trim(), out _))
                 {
-                    ActionConfirmDialog.Warning("Validation", "Please enter a valid monthly income number.");
+                    ToastNotification.Show("Validation Required", "Please enter a valid monthly income number.", ToastType.Warning);
                     TxtMonthlyIncome.Focus();
                     return false;
                 }
@@ -805,7 +806,7 @@ namespace SOLUM_UI.Views.Dialogs
                 string tag = GetSelectedCircumstanceTag();
                 if (string.IsNullOrWhiteSpace(tag))
                 {
-                    ActionConfirmDialog.Warning("Validation", "Please select the primary Circumstance / Ground.");
+                    ToastNotification.Show("Validation Required", "Please select the primary Circumstance / Ground.", ToastType.Warning);
                     return false;
                 }
             }
@@ -887,7 +888,7 @@ namespace SOLUM_UI.Views.Dialogs
             string name = TxtChildName.Text?.Trim()?.ToUpper();
             if (string.IsNullOrWhiteSpace(name))
             {
-                ActionConfirmDialog.Warning("Validation", "Please enter the dependent's full name.", this);
+                ToastNotification.Show("Validation Required", "Please enter the dependent's full name.", ToastType.Warning);
                 TxtChildName.Focus();
                 return;
             }
@@ -895,7 +896,7 @@ namespace SOLUM_UI.Views.Dialogs
             string rel = (CmbChildRel.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (string.IsNullOrWhiteSpace(rel))
             {
-                ActionConfirmDialog.Warning("Validation", "Please select a relationship.", this);
+                ToastNotification.Show("Validation Required", "Please select a relationship.", ToastType.Warning);
                 CmbChildRel.Focus();
                 return;
             }
@@ -903,14 +904,14 @@ namespace SOLUM_UI.Views.Dialogs
             string sex = (CmbChildSex.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (string.IsNullOrWhiteSpace(sex))
             {
-                ActionConfirmDialog.Warning("Validation", "Please select the dependent's sex.", this);
+                ToastNotification.Show("Validation Required", "Please select the dependent's sex.", ToastType.Warning);
                 CmbChildSex.Focus();
                 return;
             }
 
             if (!DpChildDob.SelectedDate.HasValue)
             {
-                ActionConfirmDialog.Warning("Validation", "Please select a valid birthdate.", this);
+                ToastNotification.Show("Validation Required", "Please select a valid birthdate.", ToastType.Warning);
                 DpChildDob.Focus();
                 return;
             }
@@ -935,7 +936,7 @@ namespace SOLUM_UI.Views.Dialogs
             string snCat = hasSn ? ((CmbChildSpecialNeedsCategory.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty) : string.Empty;
             if (hasSn && string.IsNullOrWhiteSpace(snCat))
             {
-                ActionConfirmDialog.Warning("Validation", "Please select a special needs category.", this);
+                ToastNotification.Show("Validation Required", "Please select a special needs category.", ToastType.Warning);
                 CmbChildSpecialNeedsCategory.Focus();
                 return;
             }

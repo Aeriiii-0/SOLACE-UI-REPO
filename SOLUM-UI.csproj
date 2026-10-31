@@ -295,9 +295,6 @@
     <Compile Include="Views\Dialogs\RenewalReassessmentDialog.xaml.cs">
       <DependentUpon>RenewalReassessmentDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\RenewDialog.xaml.cs">
-      <DependentUpon>RenewDialog.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\RelayCommand.cs" />
     <Compile Include="Views\ScannerSettingsDialog.xaml.cs">
       <DependentUpon>ScannerSettingsDialog.xaml</DependentUpon>
@@ -565,10 +562,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\RenewDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\ScannerSettingsDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -628,6 +621,10 @@
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\SolumTheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\AnalyticsTheme.xaml">
       <SubType>Designer</SubType>

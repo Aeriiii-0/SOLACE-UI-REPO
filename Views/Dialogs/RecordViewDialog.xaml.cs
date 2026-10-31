@@ -40,6 +40,15 @@ namespace SOLUM_UI.Views.Dialogs
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e) => ApplySize();
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) { }
 
+        private void ScrollViewer_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            if (sender is ScrollViewer sv)
+            {
+                sv.ScrollToVerticalOffset(sv.VerticalOffset - (e.Delta * 0.7));
+                e.Handled = true;
+            }
+        }
+
         // ── UI-layout logic (permitted in code-behind per AGENT.md §2) ────────
         private Point _dragStartPoint;
         private bool _isDraggingShell = false;

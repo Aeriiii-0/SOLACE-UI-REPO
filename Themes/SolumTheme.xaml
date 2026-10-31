@@ -1,0 +1,141 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ── SOLUM Brand Colors ── -->
+    <Color x:Key="SolumPrimaryColor">#702943</Color>
+    <Color x:Key="SolumPrimaryHoverColor">#8B3D56</Color>
+    <Color x:Key="SolumPrimaryPressedColor">#5A2035</Color>
+    <Color x:Key="SolumPrimaryMutedColor">#F5E8EC</Color>
+    <Color x:Key="SolumPrimaryBorderColor">#E8D4DA</Color>
+
+    <SolidColorBrush x:Key="SolumPrimaryBrush" Color="{StaticResource SolumPrimaryColor}"/>
+    <SolidColorBrush x:Key="SolumPrimaryHoverBrush" Color="{StaticResource SolumPrimaryHoverColor}"/>
+    <SolidColorBrush x:Key="SolumPrimaryPressedBrush" Color="{StaticResource SolumPrimaryPressedColor}"/>
+    <SolidColorBrush x:Key="SolumPrimaryMutedBrush" Color="{StaticResource SolumPrimaryMutedColor}"/>
+    <SolidColorBrush x:Key="SolumPrimaryBorderBrush" Color="{StaticResource SolumPrimaryBorderColor}"/>
+
+    <!-- ── Neutral & Typography Colors (Slate Palette) ── -->
+    <SolidColorBrush x:Key="SolumTextHeadingBrush" Color="#0F172A"/>
+    <SolidColorBrush x:Key="SolumTextBodyBrush" Color="#1E293B"/>
+    <SolidColorBrush x:Key="SolumTextMutedBrush" Color="#64748B"/>
+    <SolidColorBrush x:Key="SolumTextSubtleBrush" Color="#94A3B8"/>
+    <SolidColorBrush x:Key="SolumBorderSubtleBrush" Color="#E2E8F0"/>
+    <SolidColorBrush x:Key="SolumBorderDividerBrush" Color="#EEE4E8"/>
+
+    <!-- ── Surfaces ── -->
+    <SolidColorBrush x:Key="SolumPageBgBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="SolumCardBgBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="SolumCardAltBgBrush" Color="#FDFBFC"/>
+    <SolidColorBrush x:Key="SolumRowAltBrush" Color="#F8FAFC"/>
+
+    <!-- ── Status Semantic Brushes ── -->
+    <!-- Valid / Active (Green) -->
+    <SolidColorBrush x:Key="StatusValidBg" Color="#DCFCE7"/>
+    <SolidColorBrush x:Key="StatusValidFg" Color="#15803D"/>
+    <SolidColorBrush x:Key="StatusValidBdr" Color="#86EFAC"/>
+
+    <!-- Inactive / Expired (Slate) -->
+    <SolidColorBrush x:Key="StatusInactiveBg" Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="StatusInactiveFg" Color="#475569"/>
+    <SolidColorBrush x:Key="StatusInactiveBdr" Color="#CBD5E1"/>
+
+    <!-- Terminated / Deleted (Red) -->
+    <SolidColorBrush x:Key="StatusTerminatedBg" Color="#FEE2E2"/>
+    <SolidColorBrush x:Key="StatusTerminatedFg" Color="#B91C1C"/>
+    <SolidColorBrush x:Key="StatusTerminatedBdr" Color="#FCA5A5"/>
+
+    <!-- Warning / Renewal Due (Amber) -->
+    <SolidColorBrush x:Key="StatusWarningBg" Color="#FEF3C7"/>
+    <SolidColorBrush x:Key="StatusWarningFg" Color="#B45309"/>
+    <SolidColorBrush x:Key="StatusWarningBdr" Color="#FCD34D"/>
+
+    <!-- Special Needs / PWD (Amber Tag) -->
+    <SolidColorBrush x:Key="SpecialNeedsBg" Color="#FEF3C7"/>
+    <SolidColorBrush x:Key="SpecialNeedsFg" Color="#B45309"/>
+    <SolidColorBrush x:Key="SpecialNeedsBdr" Color="#FCD34D"/>
+
+    <!-- ── Standard Shadows ── -->
+    <DropShadowEffect x:Key="SolumCardShadow" Color="#702943" BlurRadius="12" ShadowDepth="2" Opacity="0.05"/>
+    <DropShadowEffect x:Key="SolumModalShadow" Color="#000000" BlurRadius="24" ShadowDepth="6" Opacity="0.16"/>
+    <DropShadowEffect x:Key="SolumDropdownShadow" Color="#702943" BlurRadius="14" ShadowDepth="3" Opacity="0.12"/>
+
+    <!-- ── Standard Form Control Styles ── -->
+    <!-- Primary Action Button -->
+    <Style x:Key="SolumPrimaryButton" TargetType="Button">
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Padding" Value="16,0"/>
+        <Setter Property="Background" Value="{StaticResource SolumPrimaryBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="FontFamily" Value="Segoe UI"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource SolumPrimaryHoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource SolumPrimaryPressedBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.45"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Secondary / Outline Button -->
+    <Style x:Key="SolumSecondaryButton" TargetType="Button">
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Padding" Value="16,0"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="{StaticResource SolumTextBodyBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource SolumBorderSubtleBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="FontFamily" Value="Segoe UI"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#F8FAFC"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="#CBD5E1"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#F1F5F9"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.45"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>
