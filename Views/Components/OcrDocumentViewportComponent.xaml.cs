@@ -239,7 +239,7 @@ namespace SOLUM_UI.Views.Components
 
         #region Focus & Coordinate Highlighting
 
-        public void FocusOnField(string fieldKey)
+        public void FocusOnField(string fieldKey, bool autoCenter = true)
         {
             if (string.IsNullOrEmpty(fieldKey)) return;
             _lastFocusedFieldKey = fieldKey;
@@ -328,20 +328,23 @@ namespace SOLUM_UI.Views.Components
             Canvas.SetTop(rect, boxY - pad);
             HighlightCanvas.Children.Add(rect);
 
-            _zoomFactor = 2.8;
-            ApplyZoom();
-
-            Dispatcher.BeginInvoke(new Action(() =>
+            if (autoCenter)
             {
-                double targetCenterX = (boxX + boxW / 2.0) * _zoomFactor;
-                double targetCenterY = (boxY + boxH / 2.0) * _zoomFactor;
+                _zoomFactor = 2.8;
+                ApplyZoom();
 
-                double scrollX = targetCenterX - (DocScrollViewer.ViewportWidth / 2.0);
-                double scrollY = targetCenterY - (DocScrollViewer.ViewportHeight / 2.0);
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    double targetCenterX = (boxX + boxW / 2.0) * _zoomFactor;
+                    double targetCenterY = (boxY + boxH / 2.0) * _zoomFactor;
 
-                DocScrollViewer.ScrollToHorizontalOffset(Math.Max(0, scrollX));
-                DocScrollViewer.ScrollToVerticalOffset(Math.Max(0, scrollY));
-            }), System.Windows.Threading.DispatcherPriority.Loaded);
+                    double scrollX = targetCenterX - (DocScrollViewer.ViewportWidth / 2.0);
+                    double scrollY = targetCenterY - (DocScrollViewer.ViewportHeight / 2.0);
+
+                    DocScrollViewer.ScrollToHorizontalOffset(Math.Max(0, scrollX));
+                    DocScrollViewer.ScrollToVerticalOffset(Math.Max(0, scrollY));
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
         }
 
         #endregion
@@ -681,7 +684,8 @@ namespace SOLUM_UI.Views.Components
 
             if (bestKey != null)
             {
-                FocusOnField(bestKey);
+                // When clicking a box directly on the document, highlight without jarring auto-center pan/zoom
+                FocusOnField(bestKey, autoCenter: false);
                 DocumentFieldClicked?.Invoke(bestKey);
             }
         }

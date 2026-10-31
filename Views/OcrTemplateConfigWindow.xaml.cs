@@ -663,7 +663,7 @@ namespace SOLUM_UI
                 _activeRoiTokens.Clear();
                 UpdateSidebarFromField(item);
                 RedrawAllCanvasBoxes();
-                ScrollToField(item);
+                // Do not auto-scroll or pan to center the box; preserve current pan/zoom position
             }
         }
 
