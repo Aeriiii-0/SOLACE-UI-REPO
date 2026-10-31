@@ -91,13 +91,13 @@ namespace SOLUM_UI.Views.Components
             _isPopulating = true;
             try
             {
-                TxtPlaceOfBirth.Text = GetVal(resp, "birthplace");
+                TxtPlaceOfBirth.Text = GetVal(resp, "birthplace")?.ToUpperInvariant() ?? string.Empty;
                 SetComboByContent(CmbCivilStatus, OcrService.FuzzyMatchCivilStatus(GetVal(resp, "civil_status")));
                 SetComboByContent(CmbSex, OcrService.FuzzyMatchSex(GetVal(resp, "sex")));
                 SetComboByContent(CmbEducation, OcrService.FuzzyMatchEducation(GetVal(resp, "educational_attainment")));
 
-                TxtReligion.Text = OcrService.FuzzyMatchReligion(GetVal(resp, "religion"));
-                TxtOccupation.Text = GetVal(resp, "occupation");
+                TxtReligion.Text = OcrService.FuzzyMatchReligion(GetVal(resp, "religion"))?.ToUpperInvariant() ?? string.Empty;
+                TxtOccupation.Text = GetVal(resp, "occupation")?.ToUpperInvariant() ?? string.Empty;
                 TxtMonthlyIncome.Text = OcrService.FuzzyMatchIncome(GetVal(resp, "monthly_income"));
 
                 string empRaw = GetVal(resp, "employment_status").ToLower();
@@ -110,12 +110,12 @@ namespace SOLUM_UI.Views.Components
                 else if (empRaw.Contains("employed") || isEmp == "true" || isEmp == "1") SetComboByContent(CmbEmploymentStatus, "Employed");
                 else CmbEmploymentStatus.SelectedIndex = 0;
 
-                TxtAddress.Text = GetVal(resp, "address");
+                TxtAddress.Text = GetVal(resp, "address")?.ToUpperInvariant() ?? string.Empty;
                 SetComboByContent(CmbBarangay, OcrService.FuzzyMatchBarangay(GetVal(resp, "barangay")));
                 TxtContact.Text = OcrService.FormatPhoneNumber(GetVal(resp, "contact_number"));
 
                 TxtEmergencyContact.Text = OcrService.CleanPersonName(GetVal(resp, "emergency_name"));
-                TxtRelationship.Text = OcrService.FuzzyMatchRelationship(GetVal(resp, "emergency_relationship"));
+                TxtRelationship.Text = OcrService.FuzzyMatchRelationship(GetVal(resp, "emergency_relationship"))?.ToUpperInvariant() ?? string.Empty;
                 string emAddr = GetVal(resp, "emergency_address");
                 string cleanEmAddr = emAddr?.Trim();
                 if (!string.IsNullOrWhiteSpace(cleanEmAddr) &&
@@ -136,7 +136,7 @@ namespace SOLUM_UI.Views.Components
                 else
                 {
                     ChkSameAsApplicant.IsChecked = false;
-                    TxtEmergencyAddress.Text = emAddr;
+                    TxtEmergencyAddress.Text = emAddr?.ToUpperInvariant() ?? string.Empty;
                 }
                 TxtEmergencyNumber.Text = OcrService.FormatPhoneNumber(GetVal(resp, "emergency_number"));
 

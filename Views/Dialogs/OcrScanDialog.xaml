@@ -20,6 +20,10 @@
             <Border Background="White" CornerRadius="16"
                     IsHitTestVisible="False"
                     Visibility="{Binding Visibility, ElementName=DialogShell}">
+                <Border.RenderTransform>
+                    <TranslateTransform X="{Binding X, ElementName=DialogShellTransform}"
+                                        Y="{Binding Y, ElementName=DialogShellTransform}"/>
+                </Border.RenderTransform>
                 <Border.CacheMode>
                     <BitmapCache EnableClearType="False" RenderAtScale="1" SnapsToDevicePixels="True"/>
                 </Border.CacheMode>
@@ -35,6 +39,9 @@
                     RenderOptions.ClearTypeHint="Enabled"
                     SnapsToDevicePixels="True"
                     BorderBrush="#C8E6C9" BorderThickness="2">
+                <Border.RenderTransform>
+                    <TranslateTransform x:Name="DialogShellTransform"/>
+                </Border.RenderTransform>
                 <Grid>
                     <Grid.RowDefinitions>
                         <!-- Row 0: Top Header -->
@@ -49,7 +56,11 @@
 
                     <!-- TOP HEADER -->
                     <Border x:Name="HeaderBorder" Grid.Row="0" Background="White" CornerRadius="16,16,0,0"
-                            BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="28,16">
+                            BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="28,16"
+                            Cursor="SizeAll"
+                            MouseLeftButtonDown="Header_MouseLeftButtonDown"
+                            MouseMove="Header_MouseMove"
+                            MouseLeftButtonUp="Header_MouseLeftButtonUp">
                         <Grid VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>

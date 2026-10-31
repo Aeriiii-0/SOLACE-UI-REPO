@@ -392,6 +392,10 @@
     <Compile Include="Services\AuditLogService.cs" />
     <Compile Include="Services\ChangeTrackingService.cs" />
     <Compile Include="Services\OcrService.cs" />
+    <Compile Include="Services\OcrService.Process.cs" />
+    <Compile Include="Services\OcrService.Api.cs" />
+    <Compile Include="Services\OcrService.Template.cs" />
+    <Compile Include="Services\OcrService.Formatting.cs" />
     <Compile Include="Services\WiaScannerService.cs" />
     <Compile Include="Services\PasswordGenerator.cs" />
     <Compile Include="Services\FormHelper.cs" />

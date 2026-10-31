@@ -74,6 +74,7 @@ namespace SOLUM_UI.ViewModels
             ViewFullRecordCommand = new RelayCommand(async p => await OpenFullRecordViewAsync(p as SubsidyItem ?? ActiveCandidate));
             RefreshCommand = new RelayCommand(async _ => await RefreshDataAsync(), _ => !IsLoading); GenerateRecommendationsCommand = new RelayCommand(async _ => await GenerateAndRefreshAsync(), _ => !IsLoading);
             ToggleRosterLockCommand = new RelayCommand(_ => ToggleRosterLock()); StartNewCycleCommand = new RelayCommand(async _ => await StartNewCycleAsync()); SaveQuotaCommand = new RelayCommand(async _ => await SaveQuotaAsync());
+            ExportAllQueueCommand = new RelayCommand(async _ => await ExportRecommendationsQueueAsync());
         }
 
         private async Task GenerateAndRefreshAsync()

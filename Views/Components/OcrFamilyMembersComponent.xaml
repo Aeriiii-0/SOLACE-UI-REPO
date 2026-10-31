@@ -62,6 +62,7 @@
                                     <StackPanel Grid.Column="0">
                                         <TextBlock Text="Cause of death" Style="{StaticResource FieldLabelSm}"/>
                                         <TextBox x:Name="TxtA2Cause" Style="{StaticResource FormBoxSm}" Tag="circ_a2_cause" GotFocus="Field_GotFocus"
+                                                 CharacterCasing="Upper"
                                                  MaxLength="100"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
@@ -91,7 +92,7 @@
                             </RadioButton>
                             <StackPanel x:Name="PnlA4" Visibility="Collapsed" Margin="18,0,0,4">
                                 <TextBlock Text="Type of disability" Style="{StaticResource FieldLabelSm}"/>
-                                <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBoxSm}" Tag="circ_a4_disability" GotFocus="Field_GotFocus"/>
+                                <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBoxSm}" Tag="circ_a4_disability" GotFocus="Field_GotFocus" CharacterCasing="Upper"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -107,7 +108,7 @@
                             </RadioButton>
                             <StackPanel x:Name="PnlA5" Visibility="Collapsed" Margin="18,0,0,4">
                                 <TextBlock Text="Period of separation" Style="{StaticResource FieldLabelSm}"/>
-                                <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}" Tag="circ_a5_period" GotFocus="Field_GotFocus"/>
+                                <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}" Tag="circ_a5_period" GotFocus="Field_GotFocus" CharacterCasing="Upper"/>
                             </StackPanel>
 
                             <RadioButton x:Name="ChkA6" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a6" GotFocus="Field_GotFocus"
@@ -145,7 +146,7 @@
                             </RadioButton>
                             <StackPanel x:Name="PnlB" Visibility="Collapsed" Margin="18,0,0,4">
                                 <TextBlock Text="Length of stay abroad" Style="{StaticResource FieldLabelSm}"/>
-                                <TextBox x:Name="TxtBStayAbroad" Style="{StaticResource FormBoxSm}" Tag="circ_b_stay" GotFocus="Field_GotFocus"/>
+                                <TextBox x:Name="TxtBStayAbroad" Style="{StaticResource FormBoxSm}" Tag="circ_b_stay" GotFocus="Field_GotFocus" CharacterCasing="Upper"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -238,6 +239,7 @@
                                                 Full Name <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
                                             <TextBox x:Name="TxtMemberName" Style="{StaticResource FormBoxSm}" MaxLength="60"
+                                                     CharacterCasing="Upper"
                                                      PreviewTextInput="NameOnly_PreviewTextInput"/>
                                         </StackPanel>
 
@@ -316,7 +318,7 @@
 
                                         <StackPanel Grid.Column="4">
                                             <TextBlock Text="Educ. Attainment / Employment" Style="{StaticResource FieldLabelSm}"/>
-                                            <TextBox x:Name="TxtMemberEdu" Style="{StaticResource FormBoxSm}" MaxLength="80"/>
+                                            <TextBox x:Name="TxtMemberEdu" Style="{StaticResource FormBoxSm}" MaxLength="80" CharacterCasing="Upper"/>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="6">
@@ -361,6 +363,7 @@
                                                 <StackPanel Grid.Column="2">
                                                     <TextBlock Text="Description / Special Accommodations (Optional)" Style="{StaticResource FieldLabelSm}"/>
                                                     <TextBox x:Name="TxtSpecialNeedsDescription" Style="{StaticResource FormBoxSm}" MaxLength="120"
+                                                             CharacterCasing="Upper"
                                                              ToolTip="E.g., Requires wheelchair accessibility, SPED Grade 4, Maintenance medication"/>
                                                 </StackPanel>
                                             </Grid>
@@ -526,6 +529,7 @@
                     </Border>
                     <TextBox x:Name="TxtNeeds" Style="{StaticResource FormBox}"
                              Tag="needs" GotFocus="Field_GotFocus"
+                             CharacterCasing="Upper"
                              MaxLength="500"
                              Height="60" TextWrapping="Wrap" AcceptsReturn="True"
                              VerticalScrollBarVisibility="Auto"
@@ -550,6 +554,7 @@
                     </Border>
                     <TextBox x:Name="TxtOtherIncome" Style="{StaticResource FormBox}"
                              Tag="other_income" GotFocus="Field_GotFocus"
+                             CharacterCasing="Upper"
                              MaxLength="500"
                              Height="50" TextWrapping="Wrap" AcceptsReturn="True"
                              VerticalScrollBarVisibility="Auto"

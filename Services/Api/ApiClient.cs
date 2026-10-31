@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using SOLUM_UI.Models.Api;
 
@@ -181,6 +182,53 @@ namespace SOLUM_UI.Services.Api
                     {
                         return (BaseResponse<T>)(object)BaseResponse<string>.Success(body);
                     }
+
+                    try
+                    {
+                        var jToken = JToken.Parse(body);
+                        if (jToken is JObject jObj)
+                        {
+                            var dataToken = jObj["data"] ?? jObj["Data"];
+                            bool succeeded = jObj["succeeded"]?.Value<bool>() ?? jObj["Succeeded"]?.Value<bool>() ?? true;
+                            var errors = jObj["errors"]?.ToObject<List<string>>() ?? jObj["Errors"]?.ToObject<List<string>>() ?? new List<string>();
+
+                            // Scenario A: Caller expects List<TItem> or IEnumerable, but backend returned PagedResult with "items" inside data
+                            if (typeof(System.Collections.IEnumerable).IsAssignableFrom(typeof(T)) && typeof(T) != typeof(string))
+                            {
+                                var itemsToken = dataToken?["items"] ?? dataToken?["Items"] ?? jObj["items"] ?? jObj["Items"];
+                                if (itemsToken != null)
+                                {
+                                    var items = itemsToken.ToObject<T>(JsonSerializer.Create(_jsonSettings));
+                                    return new BaseResponse<T> { Succeeded = succeeded, Errors = errors, Data = items };
+                                }
+                            }
+
+                            // Scenario B: Caller expects PagedResult<TItem>, but backend returned a flat list or array in data
+                            if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(PagedResult<>))
+                            {
+                                if (dataToken is JArray jArr)
+                                {
+                                    var itemType = typeof(T).GetGenericArguments()[0];
+                                    var listType = typeof(List<>).MakeGenericType(itemType);
+                                    var itemsList = jArr.ToObject(listType, JsonSerializer.Create(_jsonSettings));
+
+                                    var pagedInstance = Activator.CreateInstance(typeof(T));
+                                    typeof(T).GetProperty("Items")?.SetValue(pagedInstance, itemsList);
+                                    int count = jArr.Count;
+                                    typeof(T).GetProperty("TotalCount")?.SetValue(pagedInstance, count);
+                                    typeof(T).GetProperty("Page")?.SetValue(pagedInstance, 1);
+                                    typeof(T).GetProperty("PageSize")?.SetValue(pagedInstance, Math.Max(1, count));
+
+                                    return new BaseResponse<T> { Succeeded = succeeded, Errors = errors, Data = (T)pagedInstance };
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Fall through to empty response
+                    }
+
                     return new BaseResponse<T> { Succeeded = true };
                 }
             }

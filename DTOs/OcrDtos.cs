@@ -48,6 +48,7 @@ namespace SOLUM_UI.DTOs
         public string OverallRating { get; set; } = "Low";
         public double ExecutionTimeSeconds { get; set; }
         public string PreviewImageBase64 { get; set; } = string.Empty;
+        public string DebugImagePath { get; set; } = string.Empty;
         public Dictionary<string, OcrFieldResultDto> Fields { get; set; } = new Dictionary<string, OcrFieldResultDto>(StringComparer.OrdinalIgnoreCase);
         public OcrCircumstanceResultDto Circumstance { get; set; } = new OcrCircumstanceResultDto();
         public List<OcrFamilyMemberDto> FamilyMembers { get; set; } = new List<OcrFamilyMemberDto>();
@@ -73,5 +74,15 @@ namespace SOLUM_UI.DTOs
         public string Rating { get; set; } = "Low";
         public double ExecutionTimeSeconds { get; set; }
         public double[] Bbox { get; set; } = new double[4];
+        public List<OcrWordTokenDto> Tokens { get; set; } = new List<OcrWordTokenDto>();
+        public List<string> FilteredLabels { get; set; } = new List<string>();
+    }
+
+    public class OcrWordTokenDto
+    {
+        public string Text { get; set; } = string.Empty;
+        public double Confidence { get; set; }
+        public double[] Bbox { get; set; } = new double[4];
+        public bool IsLabel { get; set; } = false;
     }
 }

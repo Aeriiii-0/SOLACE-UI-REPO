@@ -43,4 +43,27 @@ namespace SOLUM_UI.DTOs
         public string Reason { get; set; }
         public string Remarks { get; set; }
     }
+
+    public class GetSubsidyRecommendationsRequest
+    {
+        public Guid? CycleId { get; set; }
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string SortBy { get; set; } = "PriorityScore";
+        public string SortOrder { get; set; } = "desc";
+        public string Search { get; set; }
+        public string Barangay { get; set; }
+        public string PriorityLevel { get; set; }
+        public bool? NeedsCloserReview { get; set; }
+        public string EmploymentStatus { get; set; }
+        public bool? HasSpecialNeeds { get; set; }
+        public decimal? MinIncome { get; set; }
+        public decimal? MaxIncome { get; set; }
+    }
+
+    public class ShortlistTopQuotaRequest
+    {
+        public Guid? CycleId { get; set; }
+        public int? TopCount { get; set; }
+    }
 }

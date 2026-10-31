@@ -49,10 +49,17 @@ namespace SOLUM_UI.ViewModels
                 GranteeSlots = cycle.AllocatedSlots > 0 ? cycle.AllocatedSlots : 100;
                 GrantAmountPerRecipient = cycle.PerGranteeAmount > 0 ? (int)cycle.PerGranteeAmount : DefaultGrantAmount;
 
-                // Concurrently fetch Grantees, Shortlist, and Recommendations in parallel
+                // Concurrently fetch Grantees, Shortlist, and server-side Recommendations page 1 in parallel
                 var granteesTask = _apiService.GetGranteesByFiscalYearAsync(cycle.FiscalYear);
                 var shortlistTask = _apiService.GetShortlistAsync(cycle.CycleId);
-                var recsTask = _apiService.GetRecommendationsAsync(cycle.CycleId);
+                var recsTask = _apiService.GetRecommendationsPagedAsync(new SOLUM_UI.DTOs.GetSubsidyRecommendationsRequest
+                {
+                    CycleId = cycle.CycleId,
+                    Page = 1,
+                    PageSize = PageSize,
+                    SortBy = "PriorityScore",
+                    SortOrder = "desc"
+                });
 
                 await Task.WhenAll(granteesTask, shortlistTask, recsTask);
 
@@ -84,23 +91,44 @@ namespace SOLUM_UI.ViewModels
                 }
                 UpdateShortlistAndFinalCollections(enrich: false);
 
+                PagedRecommendations.Clear();
+                FilteredRecommendations.Clear();
                 _allItems.Clear();
-                if (dtos?.Data != null && dtos.Data.Count > 0)
+
+                if (dtos?.Data != null)
                 {
-                    foreach (var d in dtos.Data)
+                    QueueTotalCount = dtos.Data.TotalCount;
+                    QueueTotalPages = Math.Max(1, dtos.Data.TotalPages);
+                    _queueCurrentPage = dtos.Data.Page;
+
+                    if (dtos.Data.Items != null)
                     {
-                        bool inAudit = ShortlistRows.Any(s => (!string.IsNullOrEmpty(d.SpId) && s.SpId == d.SpId)
-                                                           || (d.EvaluationId != Guid.Empty && s.EvaluationId == d.EvaluationId)
-                                                           || (d.SoloParentId != Guid.Empty && s.SoloParentId == d.SoloParentId)
-                                                           || (!string.IsNullOrEmpty(d.Name) && string.Equals(s.Name, d.Name, StringComparison.OrdinalIgnoreCase)));
-                        bool inAll = _allItems.Any(x => (d.EvaluationId != Guid.Empty && x.EvaluationId == d.EvaluationId)
-                                                     || (d.SoloParentId != Guid.Empty && x.SoloParentId == d.SoloParentId)
-                                                     || (!string.IsNullOrEmpty(d.SpId) && x.SpId == d.SpId)
-                                                     || (!string.IsNullOrEmpty(d.Name) && string.Equals(x.Name, d.Name, StringComparison.OrdinalIgnoreCase)));
-                        if (!inAudit && !inAll) _allItems.Add(SubsidyModelMapper.ToItem(d));
+                        int startIndex = (dtos.Data.Page - 1) * dtos.Data.PageSize;
+                        for (int i = 0; i < dtos.Data.Items.Count; i++)
+                        {
+                            var item = SubsidyModelMapper.ToItem(dtos.Data.Items[i]);
+                            item.Rank = startIndex + i + 1;
+                            item.IsWithinQuota = (item.Rank <= _granteeSlots);
+                            PagedRecommendations.Add(item);
+                            FilteredRecommendations.Add(item);
+                            _allItems.Add(item);
+                        }
                     }
                 }
-                RecalculateQuotaAndFilter();
+                else
+                {
+                    QueueTotalCount = 0;
+                    QueueTotalPages = 1;
+                    _queueCurrentPage = 1;
+                }
+
+                OnPropertyChanged(nameof(QueueCurrentPage));
+                OnPropertyChanged(nameof(CanQueuePrevPage));
+                OnPropertyChanged(nameof(CanQueueNextPage));
+                OnPropertyChanged(nameof(QueuePageNumberLabel));
+                OnPropertyChanged(nameof(QueuePageSummary));
+                OnPropertyChanged(nameof(RecommendationsSummary));
+                RecalculateSelectionCounts();
                 NotifyQuotaMetricsChanged();
                 EnrichAllCandidatesFromRecordsAsync();
             }
@@ -157,23 +185,26 @@ namespace SOLUM_UI.ViewModels
             }
         }
 
-        public void ApplyAuditFilter(string filter) { _auditFilter = filter; OnPropertyChanged(nameof(AuditFilterLabel)); RecalculateQuotaAndFilter(); }
+        public async void ApplyAuditFilter(string filter) { _auditFilter = filter; OnPropertyChanged(nameof(AuditFilterLabel)); await LoadQueuePageAsync(1); }
         public void ApplyShortlistAuditFilter(string filter) { _shortlistAuditFilter = filter; OnPropertyChanged(nameof(ShortlistAuditFilterLabel)); FilterShortlistRows(); }
         public void RecalculateSelectionCounts() { OnPropertyChanged(nameof(SelectedCountSummary)); OnPropertyChanged(nameof(SelectTopNLabel)); OnPropertyChanged(nameof(SelectAllQueueButtonText)); OnPropertyChanged(nameof(HasQueueSelection)); }
 
         private void RecalculateQuotaAndFilter()
         {
-            IEnumerable<SubsidyItem> q = _allItems.Where(x => !x.IsDisqualified && !ShortlistRows.Any(s => (!string.IsNullOrEmpty(s.SpId) && s.SpId == x.SpId) || (x.EvaluationId != Guid.Empty && s.EvaluationId == x.EvaluationId) || (x.SoloParentId != Guid.Empty && s.SoloParentId == x.SoloParentId) || (!string.IsNullOrEmpty(x.Name) && string.Equals(s.Name, x.Name, StringComparison.OrdinalIgnoreCase))));
-            if (_auditFilter == "Clean") q = q.Where(x => !x.HasCollegeAgeDependent);
-            else if (_auditFilter == "CollegeAge") q = q.Where(x => x.HasCollegeAgeDependent);
-            var list = q.GroupBy(x => x.SoloParentId != Guid.Empty ? x.SoloParentId.ToString() : (x.EvaluationId != Guid.Empty ? x.EvaluationId.ToString() : (x.SpId ?? x.Name)))
-                        .Select(g => g.First())
-                        .OrderByDescending(x => x.Score)
-                        .ToList();
-            FilteredRecommendations.Clear();
-            for (int i = 0; i < list.Count; i++) { list[i].Rank = i + 1; list[i].IsWithinQuota = (i < _granteeSlots); FilteredRecommendations.Add(list[i]); }
-            UpdateQueuePaged();
-            OnPropertyChanged(nameof(GranteeSlotsText)); OnPropertyChanged(nameof(SelectTopNLabel)); OnPropertyChanged(nameof(SelectAllQueueButtonText)); OnPropertyChanged(nameof(SelectedCountSummary)); OnPropertyChanged(nameof(HasQueueSelection));
+            foreach (var item in PagedRecommendations)
+            {
+                item.IsWithinQuota = (item.Rank <= _granteeSlots);
+            }
+            foreach (var item in FilteredRecommendations)
+            {
+                item.IsWithinQuota = (item.Rank <= _granteeSlots);
+            }
+            OnPropertyChanged(nameof(GranteeSlotsText));
+            OnPropertyChanged(nameof(SelectTopNLabel));
+            OnPropertyChanged(nameof(SelectAllQueueButtonText));
+            OnPropertyChanged(nameof(SelectedCountSummary));
+            OnPropertyChanged(nameof(HasQueueSelection));
+            OnPropertyChanged(nameof(RecommendationsSummary));
         }
 
         private void UpdateShortlistAndFinalCollections(bool enrich = true)

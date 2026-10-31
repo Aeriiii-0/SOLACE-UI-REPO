@@ -35,6 +35,7 @@ namespace SOLUM_UI.Models
         public string OverallRating { get; set; } = "Low";
         public double ExecutionTimeSeconds { get; set; }
         public string PreviewImageBase64 { get; set; } = string.Empty;
+        public string DebugImagePath { get; set; } = string.Empty;
         public Dictionary<string, OcrFieldResult> Fields { get; set; } = new Dictionary<string, OcrFieldResult>(StringComparer.OrdinalIgnoreCase);
         public OcrCircumstanceResult Circumstance { get; set; } = new OcrCircumstanceResult();
         public List<FamilyMember> FamilyMembers { get; set; } = new List<FamilyMember>();
@@ -44,9 +45,20 @@ namespace SOLUM_UI.Models
     {
         public string Status { get; set; } = "error";
         public string Value { get; set; } = string.Empty;
+        public string RawValue { get; set; } = string.Empty;
         public double Confidence { get; set; }
         public string Rating { get; set; } = "Low";
         public double ExecutionTimeSeconds { get; set; }
         public double[] Bbox { get; set; } = new double[4];
+        public List<OcrWordToken> Tokens { get; set; } = new List<OcrWordToken>();
+        public List<string> FilteredLabels { get; set; } = new List<string>();
+    }
+
+    public class OcrWordToken
+    {
+        public string Text { get; set; } = string.Empty;
+        public double Confidence { get; set; }
+        public double[] Bbox { get; set; } = new double[4];
+        public bool IsLabel { get; set; } = false;
     }
 }

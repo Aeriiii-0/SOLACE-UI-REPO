@@ -151,17 +151,17 @@ namespace SOLUM_UI.Views.Components
 
                     if (ChkA2.IsChecked == true)
                     {
-                        TxtA2Cause.Text = resp.Circumstance.SubfieldCause ?? string.Empty;
+                        TxtA2Cause.Text = (resp.Circumstance.SubfieldCause ?? string.Empty).ToUpperInvariant();
                         if (OcrService.TryParseOcrDate(resp.Circumstance.SubfieldDate, out var dDate))
                             DpA2Date.SelectedDate = dDate;
                     }
                     if (ChkA4.IsChecked == true)
                     {
-                        TxtA4Disability.Text = resp.Circumstance.SubfieldDisability ?? string.Empty;
+                        TxtA4Disability.Text = (resp.Circumstance.SubfieldDisability ?? string.Empty).ToUpperInvariant();
                     }
                     if (ChkA5.IsChecked == true)
                     {
-                        TxtA5Period.Text = resp.Circumstance.SubfieldPeriod ?? string.Empty;
+                        TxtA5Period.Text = (resp.Circumstance.SubfieldPeriod ?? string.Empty).ToUpperInvariant();
                     }
                     if (ChkA6.IsChecked == true && CmbA6Declaration != null)
                     {
@@ -172,7 +172,7 @@ namespace SOLUM_UI.Views.Components
                     }
                     if (ChkB.IsChecked == true)
                     {
-                        TxtBStayAbroad.Text = resp.Circumstance.SubfieldStayAbroad ?? string.Empty;
+                        TxtBStayAbroad.Text = (resp.Circumstance.SubfieldStayAbroad ?? string.Empty).ToUpperInvariant();
                     }
                 }
                 else
@@ -210,8 +210,8 @@ namespace SOLUM_UI.Views.Components
                         ocrRow.MemberName = OcrService.CleanPersonName(m.MemberName);
                         ocrRow.Sex = OcrService.IsOcrNotApplicable(m.Sex) ? string.Empty : OcrService.FuzzyMatchSex(m.Sex);
                         ocrRow.CivilStatus = OcrService.IsOcrNotApplicable(m.CivilStatus) ? string.Empty : OcrService.FuzzyMatchCivilStatus(m.CivilStatus);
-                        ocrRow.Relationship = OcrService.IsOcrNotApplicable(m.Relationship) ? string.Empty : OcrService.FuzzyMatchRelationship(m.Relationship);
-                        ocrRow.EducationEmployment = OcrService.IsOcrNotApplicable(m.EducationEmployment) ? string.Empty : m.EducationEmployment;
+                        ocrRow.Relationship = OcrService.IsOcrNotApplicable(m.Relationship) ? string.Empty : (OcrService.FuzzyMatchRelationship(m.Relationship)?.ToUpperInvariant() ?? string.Empty);
+                        ocrRow.EducationEmployment = (OcrService.IsOcrNotApplicable(m.EducationEmployment) ? string.Empty : m.EducationEmployment)?.ToUpperInvariant() ?? string.Empty;
                         ocrRow.Income = OcrService.IsOcrNotApplicable(m.Income) ? "0" : OcrService.FuzzyMatchIncome(m.Income);
                         if (dt.HasValue && dt.Value != DateTime.MinValue)
                             ocrRow.BirthdateDate = dt.Value;
@@ -224,8 +224,8 @@ namespace SOLUM_UI.Views.Components
                 UpdateFamilyCardsEmptyState();
 
                 // Needs & Other Sources of Income
-                TxtNeeds.Text = GetVal(resp, "needs");
-                TxtOtherIncome.Text = GetVal(resp, "other_income");
+                TxtNeeds.Text = GetVal(resp, "needs")?.ToUpperInvariant() ?? string.Empty;
+                TxtOtherIncome.Text = GetVal(resp, "other_income")?.ToUpperInvariant() ?? string.Empty;
                 SetFieldConfidence("needs", Badge_Needs, TxtConf_Needs, resp);
                 SetFieldConfidence("other_income", Badge_OtherIncome, TxtConf_OtherIncome, resp);
 
@@ -401,7 +401,7 @@ namespace SOLUM_UI.Views.Components
         private void BtnSaveMember_Click(object sender, RoutedEventArgs e)
         {
             var window = Window.GetWindow(this);
-            string name = TxtMemberName.Text?.Trim();
+            string name = TxtMemberName.Text?.Trim().ToUpperInvariant();
             if (string.IsNullOrWhiteSpace(name))
             {
                 ActionConfirmDialog.Warning("Validation", "Please enter the member's full name.", window);
@@ -439,7 +439,7 @@ namespace SOLUM_UI.Views.Components
             string civil = (CmbMemberCivil.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (string.IsNullOrWhiteSpace(civil)) civil = "Single";
 
-            string edu = TxtMemberEdu.Text?.Trim() ?? string.Empty;
+            string edu = (TxtMemberEdu.Text?.Trim() ?? string.Empty).ToUpperInvariant();
             string income = TxtMemberIncome.Text?.Trim();
             if (string.IsNullOrWhiteSpace(income)) income = "0.00";
 
@@ -451,7 +451,7 @@ namespace SOLUM_UI.Views.Components
                 CmbSpecialNeedsCategory.Focus();
                 return;
             }
-            string snDesc = hasSn ? (TxtSpecialNeedsDescription.Text?.Trim() ?? string.Empty) : string.Empty;
+            string snDesc = hasSn ? (TxtSpecialNeedsDescription.Text?.Trim() ?? string.Empty).ToUpperInvariant() : string.Empty;
 
             if (_editingFamilyMember != null)
             {

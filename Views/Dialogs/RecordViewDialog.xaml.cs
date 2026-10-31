@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using SOLUM_UI.Models;
@@ -40,22 +41,64 @@ namespace SOLUM_UI.Views.Dialogs
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) { }
 
         // ── UI-layout logic (permitted in code-behind per AGENT.md §2) ────────
+        private Point _dragStartPoint;
+        private bool _isDraggingShell = false;
+
+        private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                _isDraggingShell = true;
+                _dragStartPoint = e.GetPosition(this);
+                ((UIElement)sender).CaptureMouse();
+            }
+        }
+
+        private void Header_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDraggingShell && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Point currentPos = e.GetPosition(this);
+                double deltaX = currentPos.X - _dragStartPoint.X;
+                double deltaY = currentPos.Y - _dragStartPoint.Y;
+
+                DialogShellTransform.X += deltaX;
+                DialogShellTransform.Y += deltaY;
+
+                _dragStartPoint = currentPos;
+            }
+        }
+
+        private void Header_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isDraggingShell)
+            {
+                _isDraggingShell = false;
+                ((UIElement)sender).ReleaseMouseCapture();
+            }
+        }
+
         private void ApplySize()
         {
             double screenW, screenH, screenLeft, screenTop;
-            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
+            double workW = SystemParameters.WorkArea.Width;
+            double workH = SystemParameters.WorkArea.Height;
+            double workLeft = SystemParameters.WorkArea.Left;
+            double workTop = SystemParameters.WorkArea.Top;
+
+            if (Owner != null && Owner.WindowState != WindowState.Maximized && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
-                screenW    = Owner.ActualWidth;
-                screenH    = Owner.ActualHeight;
-                screenLeft = Owner.Left;
-                screenTop  = Owner.Top;
+                screenW    = Math.Min(Owner.ActualWidth, workW);
+                screenH    = Math.Min(Owner.ActualHeight, workH);
+                screenLeft = Math.Max(workLeft, Owner.Left);
+                screenTop  = Math.Max(workTop, Owner.Top);
             }
             else
             {
-                screenW    = SystemParameters.WorkArea.Width;
-                screenH    = SystemParameters.WorkArea.Height;
-                screenLeft = SystemParameters.WorkArea.Left;
-                screenTop  = SystemParameters.WorkArea.Top;
+                screenW    = workW;
+                screenH    = workH;
+                screenLeft = workLeft;
+                screenTop  = workTop;
             }
 
             if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
@@ -63,8 +106,11 @@ namespace SOLUM_UI.Views.Dialogs
             if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
             if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
 
-            DialogShell.MaxHeight = screenH * 0.90;
-            DialogShell.Width     = Math.Min(screenW * 0.70, 940);
+            if (DialogShell != null)
+            {
+                DialogShell.MaxHeight = Math.Max(500, Math.Min(screenH - 40, 840));
+                DialogShell.Width     = Math.Min(Math.Max(screenW * 0.74, 950), 1040);
+            }
         }
 
         // ── Programmatic card-builders ────────────────────────────────────────

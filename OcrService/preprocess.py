@@ -184,7 +184,7 @@ def suppress_horizontal_lines(image: np.ndarray) -> np.ndarray:
     except Exception:
         return image
 
-def resize_for_ocr(image: np.ndarray, max_dim: int = 1800) -> np.ndarray:
+def resize_for_ocr(image: np.ndarray, max_dim: int = 1350) -> np.ndarray:
     """
     Resizes scans uniformly to max_dim, strictly preserving aspect ratio
     so normalized coordinates (0.0 to 1.0) remain 100% invariant.
@@ -197,18 +197,19 @@ def resize_for_ocr(image: np.ndarray, max_dim: int = 1800) -> np.ndarray:
         return cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
     return image
 
-def preprocess_pipeline(image_bytes: bytes):
+def preprocess_pipeline(image_bytes: bytes, return_full: bool = False):
     """
     Decodes raw image bytes:
     1. Straightens document tilt if skewed (preserving exact geometry and aspect ratio).
     2. Resizes proportionally (preserving exact aspect ratio so UI canvas coordinates match 1:1).
     3. Contrast-enhances with CLAHE and bilateral filtering.
-    Returns: (color_optimized_image, enhanced_grayscale_image)
+    Returns: (color_optimized_image, enhanced_grayscale_image) or
+             (color_optimized_image, enhanced_grayscale_image, deskewed_full) if return_full=True.
     """
     nparr = np.frombuffer(image_bytes, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     if image is None:
-        return None, None
+        return (None, None, None) if return_full else (None, None)
 
     # 0. Auto-detect paper boundaries and dewarp if photo contains desk/margins
     cropped_doc = crop_document_contour(image)
@@ -217,12 +218,88 @@ def preprocess_pipeline(image_bytes: bytes):
     deskewed = deskew(cropped_doc)
         
     # 2. Resize proportionally (preserves exact aspect ratio and normalized coords)
-    optimized = resize_for_ocr(deskewed, max_dim=1800)
+    optimized = resize_for_ocr(deskewed, max_dim=1350)
     
     # 3. Contrast enhancement for OCR reading
     enhanced = enhance_contrast(optimized)
     
+    if return_full:
+        return optimized, enhanced, deskewed
     return optimized, enhanced
+
+def detect_form_grid_lines(image_gray: np.ndarray) -> tuple:
+    """
+    Extracts binary masks of physical horizontal and vertical table lines printed on the form.
+    Returns: (h_lines_mask, v_lines_mask)
+    """
+    if image_gray is None or image_gray.size == 0:
+        return None, None
+    try:
+        thresh = cv2.adaptiveThreshold(image_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 8)
+        h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (40, 1))
+        v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 40))
+        h_lines = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, h_kernel)
+        v_lines = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, v_kernel)
+        return h_lines, v_lines
+    except Exception:
+        return None, None
+
+def snap_box_to_grid(bbox: list, h_lines_mask: np.ndarray, v_lines_mask: np.ndarray, img_w: int, img_h: int, max_search_px: int = 12, has_top_label: bool = False) -> list:
+    """
+    Snaps a bounding box [bx, by, bw, bh] directly within physical printed cell boundaries,
+    ensuring that query crops never cross adjacent rows or table headers.
+    If has_top_label=True (e.g. Address or Emergency fields), offsets the top down to exclude
+    the printed header banner and focus strictly on the handwriting line.
+    """
+    if h_lines_mask is None or img_w <= 0 or img_h <= 0:
+        return bbox
+
+    bx, by, bw, bh = bbox
+    px1 = int(bx * img_w)
+    py1 = int(by * img_h)
+    px2 = int((bx + bw) * img_w)
+    py2 = int((by + bh) * img_h)
+
+    # Search for top horizontal boundary across the middle 60% of the box width
+    mid_x1 = px1 + int((px2 - px1) * 0.20)
+    mid_x2 = px2 - int((px2 - px1) * 0.20)
+
+    if mid_x2 > mid_x1:
+        sub_h = h_lines_mask[:, mid_x1:mid_x2]
+
+        # Top line search
+        t_start = max(0, py1 - max_search_px)
+        t_end = min(img_h, py1 + max_search_px)
+        if t_end > t_start:
+            t_prof = np.mean(sub_h[t_start:t_end, :], axis=1)
+            if len(t_prof) > 0 and np.max(t_prof) > 40:
+                best_t = int(np.argmax(t_prof))
+                py1 = t_start + best_t + 2  # 2px clearance inside cell
+
+        # Bottom line search
+        b_start = max(0, py2 - max_search_px)
+        b_end = min(img_h, py2 + max_search_px)
+        if b_end > b_start:
+            b_prof = np.mean(sub_h[b_start:b_end, :], axis=1)
+            if len(b_prof) > 0 and np.max(b_prof) > 40:
+                best_b = int(np.argmax(b_prof))
+                py2 = b_start + best_b - 2  # 2px clearance inside cell
+
+    # If the cell has a printed header inside it (like Address or Emergency Contact),
+    # offset py1 downwards by 30% of cell height so the crop starts below the printed header
+    if has_top_label and py2 > py1 + 10:
+        cell_h = py2 - py1
+        py1 = py1 + int(cell_h * 0.30)
+
+    if py2 <= py1 + 4:
+        return bbox
+
+    return [
+        round(float(px1) / float(img_w), 4),
+        round(float(py1) / float(img_h), 4),
+        round(float(px2 - px1) / float(img_w), 4),
+        round(float(py2 - py1) / float(img_h), 4)
+    ]
 
 def image_to_base64(image: np.ndarray, format: str = ".jpg") -> str:
     """

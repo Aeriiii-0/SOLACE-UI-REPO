@@ -739,7 +739,7 @@
         </Grid>
 
         <components:DashboardSkeletonLoader x:Name="DashboardSkeleton"
-                                            Margin="28,92,28,22"
+                                            Margin="28,22,28,22"
                                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
                                             Panel.ZIndex="50"/>
 

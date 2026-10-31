@@ -27,7 +27,8 @@
                 </Grid.RowDefinitions>
 
                 <!-- HEADER -->
-                <Border Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="24,0">
+                <Border Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="24,0"
+                        Cursor="SizeAll" MouseLeftButtonDown="Header_MouseLeftButtonDown">
                     <Grid VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

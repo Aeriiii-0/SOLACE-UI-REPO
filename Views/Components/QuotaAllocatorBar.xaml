@@ -53,6 +53,28 @@
                         </Button>
                     </Border>
 
+                    <!-- Export Queue Button -->
+                    <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Margin="0,0,8,0">
+                        <Button Background="Transparent" BorderThickness="0" Cursor="Hand" Height="30" Padding="10,0" Command="{Binding ExportAllQueueCommand}" ToolTip="Export all recommendation queue records to CSV">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                        <TextBlock Text="Export Queue" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="BtnBorder" Property="Background" Value="#FDF2F4"/>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="BtnBorder" Property="Opacity" Value="0.45"/>
+                                            <Setter Property="Cursor" Value="Wait"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Border>
+
                     <!-- Run ML Evaluations Button -->
                     <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Margin="0,0,8,0"
                             Visibility="{Binding CanModifyGrantees, Converter={StaticResource BoolToVis}}">

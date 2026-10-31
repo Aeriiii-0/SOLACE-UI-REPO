@@ -23,6 +23,9 @@
                 <Border x:Name="DialogShell" Grid.Column="0"
                         Background="#FDFBFC" CornerRadius="14"
                         VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Border.RenderTransform>
+                        <TranslateTransform x:Name="DialogShellTransform"/>
+                    </Border.RenderTransform>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -31,7 +34,11 @@
                         </Grid.RowDefinitions>
 
                         <!-- Header -->
-                        <Border Grid.Row="0" Background="#702943" CornerRadius="14,14,0,0" Padding="24,13">
+                        <Border Grid.Row="0" Background="#702943" CornerRadius="14,14,0,0" Padding="24,13"
+                                Cursor="SizeAll"
+                                MouseLeftButtonDown="Header_MouseLeftButtonDown"
+                                MouseMove="Header_MouseMove"
+                                MouseLeftButtonUp="Header_MouseLeftButtonUp">
                             <Grid>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="Profile Details"

@@ -111,7 +111,7 @@ namespace SOLUM_UI.Views.Components
                 TxtLastName.Text = OcrService.CleanPersonName(GetVal(resp, "last_name"));
                 TxtFirstName.Text = OcrService.CleanPersonName(GetVal(resp, "first_name"));
                 TxtMiddleName.Text = OcrService.CleanPersonName(GetVal(resp, "middle_name"));
-                TxtExtension.Text = OcrService.FuzzyMatchExtension(GetVal(resp, "ext_name"));
+                TxtExtension.Text = OcrService.FuzzyMatchExtension(GetVal(resp, "ext_name"))?.ToUpperInvariant() ?? string.Empty;
 
                 string dobRaw = GetVal(resp, "birthdate");
                 if (OcrService.TryParseOcrDate(dobRaw, out DateTime parsedDob))

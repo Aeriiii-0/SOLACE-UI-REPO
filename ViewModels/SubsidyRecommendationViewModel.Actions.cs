@@ -82,6 +82,37 @@ namespace SOLUM_UI.ViewModels
             }
         }
 
+        public async Task ExportRecommendationsQueueAsync()
+        {
+            IsLoading = true;
+            try
+            {
+                var resp = await _apiService.GetAllRecommendationsAsync(new GetSubsidyRecommendationsRequest { CycleId = _activeCycleId });
+                if (resp?.Data == null || resp.Data.Count == 0)
+                {
+                    ToastNotification.Show("No Records", "No recommendations found to export.", ToastType.Info);
+                    return;
+                }
+                var items = resp.Data.Select((d, idx) =>
+                {
+                    var item = SubsidyModelMapper.ToItem(d);
+                    item.Rank = idx + 1;
+                    return item;
+                }).ToList();
+
+                int yr = SelectedFiscalCycle?.FiscalYear ?? ActiveCycleFiscalYear;
+                await ExportCsvAsync($"Recommendations_Queue_FY{yr}_{DateTime.Now:yyyyMMdd}", _apiService.ExportAllQueueCsvAsync(items), $"{items.Count} candidate recommendations exported successfully.");
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show("Export Error", ex.Message, ToastType.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
         private async Task OpenFullRecordViewAsync(SubsidyItem item)
         {
             if (item == null) return;

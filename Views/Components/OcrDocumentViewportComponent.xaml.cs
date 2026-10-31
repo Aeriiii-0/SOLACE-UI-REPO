@@ -38,6 +38,8 @@ namespace SOLUM_UI.Views.Components
         private CancellationTokenSource _dismissCts;
         private bool _isSpinning = false;
         private ScannerSettings _scannerSettings = ScannerSettings.Load();
+        private string _lastFocusedFieldKey = null;
+        private string _currentDeskewedImagePath = null;
 
         public OcrDocumentViewportComponent()
         {
@@ -217,6 +219,7 @@ namespace SOLUM_UI.Views.Components
         public void FocusOnField(string fieldKey)
         {
             if (string.IsNullOrEmpty(fieldKey)) return;
+            _lastFocusedFieldKey = fieldKey;
 
             if (ImgDocument.Source == null || ImgDocument.ActualWidth <= 0 || ImgDocument.ActualHeight <= 0)
                 return;
@@ -232,13 +235,14 @@ namespace SOLUM_UI.Views.Components
 
             double[] bbox = null;
 
-            if (OcrResponse?.Fields != null && OcrResponse.Fields.TryGetValue(key, out var fieldRes) && fieldRes.Bbox != null && fieldRes.Bbox.Length == 4)
-            {
-                bbox = fieldRes.Bbox;
-            }
-            else if (_fieldBBoxes.TryGetValue(key, out var defBbox) && defBbox != null && defBbox.Length == 4)
+            // Prioritize calibrated template bounding box so Picture Preview matches Adjustable Boxes 1:1
+            if (_fieldBBoxes.TryGetValue(key, out var defBbox) && defBbox != null && defBbox.Length == 4)
             {
                 bbox = defBbox;
+            }
+            else if (OcrResponse?.Fields != null && OcrResponse.Fields.TryGetValue(key, out var fieldRes) && fieldRes.Bbox != null && fieldRes.Bbox.Length == 4)
+            {
+                bbox = fieldRes.Bbox;
             }
             else if ((key == "is_employed" || key == "is_self_employed" || key == "is_not_employed") && _fieldBBoxes.TryGetValue("employment_status", out var empParent))
             {
@@ -259,19 +263,20 @@ namespace SOLUM_UI.Views.Components
             double boxW = bbox[2] * imgW;
             double boxH = bbox[3] * imgH;
 
+            // Exact 1:1 scope match with OcrTemplateConfigWindow without artificial offsets or padding
             var rect = new System.Windows.Shapes.Rectangle
             {
-                Width = Math.Max(24, boxW + 8),
-                Height = Math.Max(18, boxH + 6),
-                Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943")),
-                StrokeThickness = 3.0,
+                Width = Math.Max(4, boxW),
+                Height = Math.Max(4, boxH),
+                Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E91E63")),
+                StrokeThickness = 2.5,
                 StrokeDashArray = new DoubleCollection { 4, 2 },
-                Fill = new SolidColorBrush(Color.FromArgb(40, 112, 41, 67)),
-                RadiusX = 4,
-                RadiusY = 4
+                Fill = new SolidColorBrush(Color.FromArgb(35, 233, 30, 99)),
+                RadiusX = 2,
+                RadiusY = 2
             };
-            Canvas.SetLeft(rect, Math.Max(0, boxX - 4));
-            Canvas.SetTop(rect, Math.Max(0, boxY - 3));
+            Canvas.SetLeft(rect, boxX);
+            Canvas.SetTop(rect, boxY);
             HighlightCanvas.Children.Add(rect);
 
             _zoomFactor = 2.8;
@@ -385,13 +390,31 @@ namespace SOLUM_UI.Views.Components
         private async void AdjustTemplate_Click(object sender, RoutedEventArgs e)
         {
             var window = Window.GetWindow(this);
-            var configWin = new OcrTemplateConfigWindow(CurrentImagePath) { Owner = window };
-            if (configWin.ShowDialog() == true)
+            string imgToPass = !string.IsNullOrEmpty(_currentDeskewedImagePath) && File.Exists(_currentDeskewedImagePath)
+                ? _currentDeskewedImagePath
+                : CurrentImagePath;
+            var configWin = new OcrTemplateConfigWindow(imgToPass, _lastFocusedFieldKey) { Owner = window };
+            bool? res = configWin.ShowDialog();
+            if (res == true || configWin.TemplateSaved)
             {
                 _fieldBBoxes = OcrService.GetTemplateBoundingBoxes();
+                if (OcrResponse?.Fields != null)
+                {
+                    foreach (var kvp in _fieldBBoxes)
+                    {
+                        if (OcrResponse.Fields.TryGetValue(kvp.Key, out var fld))
+                        {
+                            fld.Bbox = kvp.Value;
+                        }
+                    }
+                }
                 if (!string.IsNullOrEmpty(CurrentImagePath) && File.Exists(CurrentImagePath))
                 {
                     await ProcessDocumentAsync(CurrentImagePath);
+                }
+                else if (!string.IsNullOrEmpty(_lastFocusedFieldKey))
+                {
+                    FocusOnField(_lastFocusedFieldKey);
                 }
             }
         }
@@ -497,6 +520,13 @@ namespace SOLUM_UI.Views.Components
                         deskewedBitmap.EndInit();
                         ImgDocument.Source = deskewedBitmap;
                     }
+                    try
+                    {
+                        string deskewedTemp = Path.Combine(Path.GetTempPath(), "solace_last_deskewed_preview.jpg");
+                        File.WriteAllBytes(deskewedTemp, bytes);
+                        _currentDeskewedImagePath = deskewedTemp;
+                    }
+                    catch { }
                 }
 
                 DocumentProcessed?.Invoke(OcrResponse, imagePath);
@@ -584,26 +614,60 @@ namespace SOLUM_UI.Views.Components
             var window = Window.GetWindow(this);
             try
             {
-                string ocrDir = OcrService.FindOcrDirectory();
-                string debugPath0 = Path.Combine(ocrDir, "debug_detections.jpg");
-                string appDir = AppDomain.CurrentDomain.BaseDirectory;
-                string debugPath1 = Path.Combine(appDir, "debug_detections.jpg");
-                string debugPath2 = Path.GetFullPath(Path.Combine(appDir, @"..\..\OcrService\debug_detections.jpg"));
-
                 string targetPath = null;
-                if (File.Exists(debugPath0)) targetPath = debugPath0;
-                else if (File.Exists(debugPath1)) targetPath = debugPath1;
-                else if (File.Exists(debugPath2)) targetPath = debugPath2;
+                // 1. Prefer the explicit debug image from the current scan response
+                if (OcrResponse != null && !string.IsNullOrEmpty(OcrResponse.DebugImagePath) && File.Exists(OcrResponse.DebugImagePath))
+                {
+                    targetPath = OcrResponse.DebugImagePath;
+                }
+
+                // 2. Check %TEMP%/solace_last_scan_detections.jpg and project directories
+                if (targetPath == null)
+                {
+                    var candidates = new List<string>();
+                    string tempScan = Path.Combine(Path.GetTempPath(), "solace_last_scan_detections.jpg");
+                    candidates.Add(tempScan);
+
+                    string ocrDir = OcrService.FindOcrDirectory();
+                    if (!string.IsNullOrEmpty(ocrDir))
+                    {
+                        candidates.Add(Path.Combine(ocrDir, "debug_detections.jpg"));
+                    }
+                    string appDir = AppDomain.CurrentDomain.BaseDirectory;
+                    candidates.Add(Path.Combine(appDir, "debug_detections.jpg"));
+                    try
+                    {
+                        candidates.Add(Path.GetFullPath(Path.Combine(appDir, @"..\..\OcrService\debug_detections.jpg")));
+                    }
+                    catch { }
+
+                    DateTime bestTime = DateTime.MinValue;
+                    foreach (var path in candidates)
+                    {
+                        if (File.Exists(path))
+                        {
+                            var wt = File.GetLastWriteTime(path);
+                            if (wt > bestTime || targetPath == null)
+                            {
+                                bestTime = wt;
+                                targetPath = path;
+                            }
+                        }
+                    }
+                }
 
                 if (targetPath != null && File.Exists(targetPath))
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(targetPath) { UseShellExecute = true });
+                    // Copy to a uniquely named file in temp to force Windows Photos to NEVER display a cached previous image
+                    string uniquePath = Path.Combine(Path.GetTempPath(), $"solace_ai_detections_{DateTime.Now:yyyyMMdd_HHmmss}_{DateTime.Now.Ticks % 1000}.jpg");
+                    File.Copy(targetPath, uniquePath, true);
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(uniquePath) { UseShellExecute = true });
                 }
                 else
                 {
                     ActionConfirmDialog.Info(
                         "Debug Overlay",
-                        "No debug detection overlay found yet. Please run an OCR scan first using the Global Spatial Engine!",
+                        "No AI detection overlay found for this document yet. Please click 'Scan Document' or 'Upload File' to run the OCR engine first!",
                         window);
                 }
             }

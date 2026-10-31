@@ -88,6 +88,7 @@
                             </Grid>
                             <TextBox x:Name="TxtPlaceOfBirth" Style="{StaticResource FormBox}"
                                      Tag="birthplace" GotFocus="Field_GotFocus"
+                                     CharacterCasing="Upper"
                                      MaxLength="100"
                                      TextChanged="TxtPlaceOfBirth_TextChanged"/>
                             <TextBlock x:Name="ErrPlaceOfBirth" Text="Required." Style="{StaticResource ErrorText}"/>
@@ -115,6 +116,7 @@
                             </Grid>
                             <TextBox x:Name="TxtAddress" Style="{StaticResource FormBox}"
                                      Tag="address" GotFocus="Field_GotFocus"
+                                     CharacterCasing="Upper"
                                      MaxLength="200"
                                      TextChanged="TxtAddress_TextChanged"/>
                             <TextBlock x:Name="ErrAddress" Text="Required." Style="{StaticResource ErrorText}"/>
@@ -240,6 +242,7 @@
                             </Grid>
                             <TextBox x:Name="TxtReligion" Style="{StaticResource FormBox}"
                                      Tag="religion" GotFocus="Field_GotFocus"
+                                     CharacterCasing="Upper"
                                      MaxLength="60"
                                      TextChanged="TxtReligion_TextChanged"/>
                         </StackPanel>
@@ -266,6 +269,7 @@
                             </Grid>
                             <TextBox x:Name="TxtOccupation" Style="{StaticResource FormBox}"
                                      Tag="occupation" GotFocus="Field_GotFocus"
+                                     CharacterCasing="Upper"
                                      MaxLength="80"
                                      TextChanged="TxtOccupation_TextChanged"/>
                         </StackPanel>
@@ -341,6 +345,7 @@
                             </Grid>
                             <TextBox x:Name="TxtEmergencyContact" Style="{StaticResource FormBox}"
                                      Tag="emergency_name" GotFocus="Field_GotFocus"
+                                     CharacterCasing="Upper"
                                      MaxLength="50"
                                      PreviewTextInput="NameOnly_PreviewTextInput"
                                      TextChanged="TxtEmergencyContact_TextChanged"/>
@@ -359,6 +364,7 @@
                             </Grid>
                             <TextBox x:Name="TxtRelationship" Style="{StaticResource FormBox}"
                                      Tag="emergency_relationship" GotFocus="Field_GotFocus"
+                                     CharacterCasing="Upper"
                                      MaxLength="50"
                                      PreviewTextInput="NameOnly_PreviewTextInput"/>
                         </StackPanel>
@@ -398,6 +404,7 @@
                             </Grid>
                             <TextBox x:Name="TxtEmergencyAddress" Style="{StaticResource FormBox}"
                                      Tag="emergency_address" GotFocus="Field_GotFocus"
+                                     CharacterCasing="Upper"
                                      MaxLength="200"
                                      TextChanged="TxtEmergencyAddress_TextChanged"/>
                             <CheckBox x:Name="ChkSameAsApplicant" Content="Same as Applicant"

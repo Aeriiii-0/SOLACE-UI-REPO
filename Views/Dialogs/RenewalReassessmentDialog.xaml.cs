@@ -348,23 +348,61 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e) => ApplySize();
 
+        private Point _dragStartPoint;
+        private bool _isDraggingShell = false;
+
+        private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                _isDraggingShell = true;
+                _dragStartPoint = e.GetPosition(this);
+                ((UIElement)sender).CaptureMouse();
+            }
+        }
+
+        private void Header_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDraggingShell && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Point currentPos = e.GetPosition(this);
+                double deltaX = currentPos.X - _dragStartPoint.X;
+                double deltaY = currentPos.Y - _dragStartPoint.Y;
+
+                DialogShellTransform.X += deltaX;
+                DialogShellTransform.Y += deltaY;
+
+                _dragStartPoint = currentPos;
+            }
+        }
+
+        private void Header_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isDraggingShell)
+            {
+                _isDraggingShell = false;
+                ((UIElement)sender).ReleaseMouseCapture();
+            }
+        }
+
         private void ApplySize()
         {
-            double screenW, screenH, screenLeft, screenTop;
+            double workW = SystemParameters.WorkArea.Width;
+            double workH = SystemParameters.WorkArea.Height;
+            double workLeft = SystemParameters.WorkArea.Left;
+            double workTop = SystemParameters.WorkArea.Top;
 
-            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
+            double screenW = workW;
+            double screenH = workH;
+            double screenLeft = workLeft;
+            double screenTop = workTop;
+
+            if (Owner != null && Owner.WindowState != WindowState.Maximized && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
-                screenW    = Owner.ActualWidth;
-                screenH    = Owner.ActualHeight;
-                screenLeft = Owner.Left;
-                screenTop  = Owner.Top;
-            }
-            else
-            {
-                screenW    = SystemParameters.WorkArea.Width;
-                screenH    = SystemParameters.WorkArea.Height;
-                screenLeft = SystemParameters.WorkArea.Left;
-                screenTop  = SystemParameters.WorkArea.Top;
+                screenW    = Math.Min(Owner.ActualWidth, workW);
+                screenH    = Math.Min(Owner.ActualHeight, workH);
+                screenLeft = Math.Max(workLeft, Owner.Left);
+                screenTop  = Math.Max(workTop, Owner.Top);
             }
 
             if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
@@ -374,7 +412,7 @@ namespace SOLUM_UI.Views.Dialogs
 
             if (DialogShell != null)
             {
-                DialogShell.MaxHeight = screenH * 0.90;
+                DialogShell.MaxHeight = Math.Max(500, Math.Min(screenH - 40, 840));
                 DialogShell.Width     = Math.Min(screenW * 0.88, 1320);
                 DialogShell.MinWidth  = Math.Max(screenW * 0.60, 680);
             }

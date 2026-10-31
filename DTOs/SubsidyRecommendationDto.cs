@@ -46,6 +46,7 @@ namespace SOLUM_UI.DTOs
         public int Children23Plus { get; set; }
         public string HousingTenure { get; set; } = "Rented";
         public string Circumstance { get; set; } = string.Empty;
+        public string ProblemPresented { get; set; } = string.Empty;
         public string CivilStatus { get; set; }
         public string Sex { get; set; } = "Female";
         public string OtherIncomeSource { get; set; } = string.Empty;
@@ -65,6 +66,8 @@ namespace SOLUM_UI.DTOs
         public bool HasCollegeDependent { get; set; }
         public int CollegeDependentsCount { get; set; }
         public bool IsPantawidBeneficiary { get; set; }
+        public bool HasSpecialNeedsDependent { get; set; }
+        public int SpecialNeedsDependentsCount { get; set; }
         public string AuditStatus { get; set; }
         public string RejectionReason { get; set; }
         public string RejectionNotes { get; set; }

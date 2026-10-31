@@ -61,6 +61,10 @@ namespace SOLUM_UI.Models
         public int MinorDependentsCount { get; set; }
         public int ToddlersUnder5Count { get; set; }
         public int CollegeAgeDependentsCount { get; set; }
+        public bool HasSpecialNeedsDependent { get; set; }
+        public int SpecialNeedsDependentsCount { get; set; }
+        public string SpecialNeedsBadgeText => HasSpecialNeedsDependent ? $"{SpecialNeedsDependentsCount} Special Needs Dependent(s)" : "None";
+        public string ProblemPresented { get; set; } = string.Empty;
         private string _circumstance = string.Empty;
         public string Circumstance { get => _circumstance; set { if (SetProperty(ref _circumstance, value)) { OnPropertyChanged(nameof(DepSecondaryMetric)); OnPropertyChanged(nameof(CircumstanceDisplay)); } } }
         private string _otherIncomeSource = string.Empty;

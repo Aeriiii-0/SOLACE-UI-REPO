@@ -59,6 +59,7 @@
                             </Grid>
                             <TextBox x:Name="TxtLastName" Style="{StaticResource FormBox}"
                                      Tag="last_name" GotFocus="Field_GotFocus"
+                                     CharacterCasing="Upper"
                                      MaxLength="50"
                                      PreviewTextInput="NameOnly_PreviewTextInput"
                                      TextChanged="TxtLastName_TextChanged"/>
@@ -78,6 +79,7 @@
                             </Grid>
                             <TextBox x:Name="TxtFirstName" Style="{StaticResource FormBox}"
                                      Tag="first_name" GotFocus="Field_GotFocus"
+                                     CharacterCasing="Upper"
                                      MaxLength="50"
                                      PreviewTextInput="NameOnly_PreviewTextInput"
                                      TextChanged="TxtFirstName_TextChanged"/>
@@ -97,6 +99,7 @@
                             </Grid>
                             <TextBox x:Name="TxtMiddleName" Style="{StaticResource FormBox}"
                                      Tag="middle_name" GotFocus="Field_GotFocus"
+                                     CharacterCasing="Upper"
                                      MaxLength="50"
                                      PreviewTextInput="NameOnly_PreviewTextInput"
                                      TextChanged="TxtMiddleName_TextChanged"/>
@@ -115,6 +118,7 @@
                             </Grid>
                             <TextBox x:Name="TxtExtension" Style="{StaticResource FormBox}"
                                      Tag="ext_name" GotFocus="Field_GotFocus"
+                                     CharacterCasing="Upper"
                                      MaxLength="10"
                                      PreviewTextInput="NameOnly_PreviewTextInput"
                                      TextChanged="TxtExtension_TextChanged"/>

@@ -88,7 +88,7 @@ namespace SOLUM_UI.ViewModels
                         var active = AvailableFiscalCycles.FirstOrDefault(c => c.IsActive);
                         if (active != null) SelectedFiscalCycle = active;
                     }
-                    if (value == 0) UpdateQueuePaged();
+                    if (value == 0) _ = LoadQueuePageAsync(QueueCurrentPage);
                     else if (value == 1) FilterShortlistRows();
                     else if (value == 2) UpdateFinalPaged();
                 }
@@ -181,7 +181,7 @@ namespace SOLUM_UI.ViewModels
         public ICommand DrawerShortlistCommand { get; private set; } public ICommand OpenOutlierModalCommand { get; private set; } public ICommand CloseOutlierModalCommand { get; private set; } public ICommand ConfirmOutlierRejectionCommand { get; private set; }
         public ICommand ConfirmGranteeCommand { get; private set; } public ICommand RevokeGranteeCommand { get; private set; } public ICommand ConfirmShortlistCandidateCommand { get; private set; } public ICommand RevokeShortlistCandidateCommand { get; private set; } public ICommand BatchConfirmShortlistCommand { get; private set; } public ICommand BatchRevokeShortlistCommand { get; private set; } public ICommand SelectAllShortlistCommand { get; private set; }
         public ICommand ExportCityEducCommand { get; private set; } public ICommand ExportPantawid4PsCommand { get; private set; } public ICommand ExportFinalLedgerCommand { get; private set; } public ICommand ViewFullRecordCommand { get; private set; }
-        public ICommand RefreshCommand { get; private set; } public ICommand GenerateRecommendationsCommand { get; private set; } public ICommand ToggleRosterLockCommand { get; private set; } public ICommand StartNewCycleCommand { get; private set; } public ICommand ToggleShortlistBatchModeCommand { get; private set; } public ICommand SaveQuotaCommand { get; private set; }
+        public ICommand RefreshCommand { get; private set; } public ICommand GenerateRecommendationsCommand { get; private set; } public ICommand ToggleRosterLockCommand { get; private set; } public ICommand StartNewCycleCommand { get; private set; } public ICommand ToggleShortlistBatchModeCommand { get; private set; } public ICommand SaveQuotaCommand { get; private set; } public ICommand ExportAllQueueCommand { get; private set; }
 
         private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
         private DateTime _lastRefreshTime = DateTime.MinValue;

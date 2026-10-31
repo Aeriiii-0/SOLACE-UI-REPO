@@ -1,9 +1,12 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using SOLUM_UI.Core;
+using SOLUM_UI.DTOs;
 using SOLUM_UI.Models;
+using SOLUM_UI.Services;
 
 namespace SOLUM_UI.ViewModels
 {
@@ -15,29 +18,69 @@ namespace SOLUM_UI.ViewModels
 
         private const int PageSize = 10;
 
-        // Tab 0: Recommendations Queue Pagination
+        // Tab 0: Recommendations Queue Pagination (Server-Side)
         private int _queueCurrentPage = 1;
         public int QueueCurrentPage
         {
             get => _queueCurrentPage;
-            set { if (SetProperty(ref _queueCurrentPage, value)) UpdateQueuePaged(); }
+            set
+            {
+                if (SetProperty(ref _queueCurrentPage, value))
+                {
+                    OnPropertyChanged(nameof(CanQueuePrevPage));
+                    OnPropertyChanged(nameof(CanQueueNextPage));
+                    OnPropertyChanged(nameof(QueuePageNumberLabel));
+                    OnPropertyChanged(nameof(QueuePageSummary));
+                }
+            }
         }
-        public int QueueTotalPages { get; private set; } = 1;
+
+        private int _queueTotalPages = 1;
+        public int QueueTotalPages
+        {
+            get => _queueTotalPages;
+            private set
+            {
+                if (SetProperty(ref _queueTotalPages, value))
+                {
+                    OnPropertyChanged(nameof(CanQueuePrevPage));
+                    OnPropertyChanged(nameof(CanQueueNextPage));
+                    OnPropertyChanged(nameof(QueuePageNumberLabel));
+                }
+            }
+        }
+
+        private int _queueTotalCount = 0;
+        public int QueueTotalCount
+        {
+            get => _queueTotalCount;
+            set
+            {
+                if (SetProperty(ref _queueTotalCount, value))
+                {
+                    OnPropertyChanged(nameof(QueuePageSummary));
+                    OnPropertyChanged(nameof(RecommendationsSummary));
+                }
+            }
+        }
+
         public bool CanQueuePrevPage => QueueCurrentPage > 1;
         public bool CanQueueNextPage => QueueCurrentPage < QueueTotalPages;
+
         public string QueuePageSummary
         {
             get
             {
-                int total = FilteredRecommendations?.Count ?? 0;
+                int total = QueueTotalCount;
                 if (total == 0) return "No candidate records found";
                 int start = (QueueCurrentPage - 1) * PageSize + 1;
                 int end = Math.Min(QueueCurrentPage * PageSize, total);
                 return $"Showing {start}–{end} of {total} records";
             }
         }
+
         public string QueuePageNumberLabel => $"{QueueCurrentPage} / {QueueTotalPages}";
-        public string RecommendationsSummary => $"{FilteredRecommendations?.Count ?? 0} Candidates Evaluated ({Math.Min(GranteeSlots, FilteredRecommendations?.Count ?? 0)} Within Quota)";
+        public string RecommendationsSummary => $"{QueueTotalCount} Candidates Evaluated ({Math.Min(GranteeSlots, QueueTotalCount)} Within Quota)";
 
         public ICommand QueuePrevPageCommand { get; private set; }
         public ICommand QueueNextPageCommand { get; private set; }
@@ -100,14 +143,86 @@ namespace SOLUM_UI.ViewModels
             PagedShortlistRows = new ObservableCollection<SelectionRow>();
             PagedFinalGrantees = new ObservableCollection<SelectionRow>();
 
-            QueuePrevPageCommand = new RelayCommand(_ => { if (CanQueuePrevPage) QueueCurrentPage--; });
-            QueueNextPageCommand = new RelayCommand(_ => { if (CanQueueNextPage) QueueCurrentPage++; });
+            QueuePrevPageCommand = new RelayCommand(async _ => { if (CanQueuePrevPage) await LoadQueuePageAsync(QueueCurrentPage - 1); });
+            QueueNextPageCommand = new RelayCommand(async _ => { if (CanQueueNextPage) await LoadQueuePageAsync(QueueCurrentPage + 1); });
 
             ShortlistPrevPageCommand = new RelayCommand(_ => { if (CanShortlistPrevPage) ShortlistCurrentPage--; });
             ShortlistNextPageCommand = new RelayCommand(_ => { if (CanShortlistNextPage) ShortlistCurrentPage++; });
 
             FinalPrevPageCommand = new RelayCommand(_ => { if (CanFinalPrevPage) FinalCurrentPage--; });
             FinalNextPageCommand = new RelayCommand(_ => { if (CanFinalNextPage) FinalCurrentPage++; });
+        }
+
+        public async Task LoadQueuePageAsync(int page)
+        {
+            if (page < 1) page = 1;
+            IsLoading = true;
+            try
+            {
+                var req = new GetSubsidyRecommendationsRequest
+                {
+                    CycleId = _activeCycleId,
+                    Page = page,
+                    PageSize = PageSize,
+                    SortBy = "PriorityScore",
+                    SortOrder = "desc"
+                };
+                if (_auditFilter == "CollegeAge") req.NeedsCloserReview = true;
+
+                var resp = await _apiService.GetRecommendationsPagedAsync(req);
+                if (resp?.Data != null)
+                {
+                    QueueTotalCount = resp.Data.TotalCount;
+                    QueueTotalPages = Math.Max(1, resp.Data.TotalPages);
+                    _queueCurrentPage = resp.Data.Page;
+                    OnPropertyChanged(nameof(QueueCurrentPage));
+                    OnPropertyChanged(nameof(CanQueuePrevPage));
+                    OnPropertyChanged(nameof(CanQueueNextPage));
+                    OnPropertyChanged(nameof(QueuePageNumberLabel));
+                    OnPropertyChanged(nameof(QueuePageSummary));
+                    OnPropertyChanged(nameof(RecommendationsSummary));
+
+                    PagedRecommendations.Clear();
+                    FilteredRecommendations.Clear();
+
+                    int startIndex = (resp.Data.Page - 1) * resp.Data.PageSize;
+                    if (resp.Data.Items != null)
+                    {
+                        for (int i = 0; i < resp.Data.Items.Count; i++)
+                        {
+                            var item = SubsidyModelMapper.ToItem(resp.Data.Items[i]);
+                            item.Rank = startIndex + i + 1;
+                            item.IsWithinQuota = (item.Rank <= _granteeSlots);
+                            PagedRecommendations.Add(item);
+                            FilteredRecommendations.Add(item);
+                        }
+                    }
+                    RecalculateSelectionCounts();
+                }
+                else
+                {
+                    PagedRecommendations.Clear();
+                    FilteredRecommendations.Clear();
+                    QueueTotalCount = 0;
+                    QueueTotalPages = 1;
+                    _queueCurrentPage = 1;
+                    OnPropertyChanged(nameof(QueueCurrentPage));
+                    OnPropertyChanged(nameof(CanQueuePrevPage));
+                    OnPropertyChanged(nameof(CanQueueNextPage));
+                    OnPropertyChanged(nameof(QueuePageNumberLabel));
+                    OnPropertyChanged(nameof(QueuePageSummary));
+                    OnPropertyChanged(nameof(RecommendationsSummary));
+                    RecalculateSelectionCounts();
+                }
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show("Queue Load Error", ex.Message, ToastType.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         public void UpdateQueuePaged()
@@ -124,6 +239,7 @@ namespace SOLUM_UI.ViewModels
                 foreach (var item in slice) PagedRecommendations.Add(item);
             }
 
+            QueueTotalCount = total;
             OnPropertyChanged(nameof(QueueCurrentPage));
             OnPropertyChanged(nameof(QueueTotalPages));
             OnPropertyChanged(nameof(CanQueuePrevPage));

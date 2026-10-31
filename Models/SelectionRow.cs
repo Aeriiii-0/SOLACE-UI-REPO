@@ -68,6 +68,9 @@ namespace SOLUM_UI.Models
         public SolidColorBrush ToddlersFg => Children0To6Count >= 2 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Children0To6Count == 1 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")));
 
         public bool HasCollegeAgeDependent { get; set; }
+        public bool HasSpecialNeedsDependent { get; set; }
+        public int SpecialNeedsDependentsCount { get; set; }
+        public string ProblemPresented { get; set; } = string.Empty;
         public int CollegeAgeDependentsCount { get; set; }
         public bool IsPantawidBeneficiary { get; set; }
         private int _children0To6Count;

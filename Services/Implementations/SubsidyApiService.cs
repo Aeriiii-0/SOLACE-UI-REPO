@@ -105,10 +105,21 @@ namespace SOLUM_UI.Services.Implementations
             return await ApiClient.Instance.PostAsync<object, int>(url, new { });
         }
 
+        public async Task<BaseResponse<PagedResult<SubsidyRecommendationDto>>> GetRecommendationsPagedAsync(GetSubsidyRecommendationsRequest request)
+        {
+            string url = "api/subsidy/recommendations" + BuildRecommendationsQueryParams(request);
+            return await ApiClient.Instance.GetAsync<PagedResult<SubsidyRecommendationDto>>(url);
+        }
+
+        public async Task<BaseResponse<List<SubsidyRecommendationDto>>> GetAllRecommendationsAsync(GetSubsidyRecommendationsRequest request = null)
+        {
+            string url = "api/subsidy/recommendations/all" + BuildRecommendationsQueryParams(request);
+            return await ApiClient.Instance.GetAsync<List<SubsidyRecommendationDto>>(url);
+        }
+
         public async Task<BaseResponse<List<SubsidyRecommendationDto>>> GetRecommendationsAsync(Guid? cycleId = null)
         {
-            string url = "api/subsidy/recommendations" + (cycleId.HasValue ? $"?cycleId={cycleId.Value}" : "");
-            return await ApiClient.Instance.GetAsync<List<SubsidyRecommendationDto>>(url);
+            return await GetAllRecommendationsAsync(new GetSubsidyRecommendationsRequest { CycleId = cycleId });
         }
 
         public async Task<BaseResponse<List<SubsidyRecommendationDto>>> GetShortlistAsync(Guid? cycleId = null)
@@ -121,6 +132,59 @@ namespace SOLUM_UI.Services.Implementations
         {
             var req = new ShortlistRequest { CycleId = cycleId, EvaluationIds = evaluationIds ?? new List<Guid>() };
             return await ApiClient.Instance.PostAsync<ShortlistRequest, bool>("api/subsidy/shortlist", req);
+        }
+
+        public async Task<BaseResponse<int>> ShortlistTopQuotaAsync(Guid? cycleId, int? topCount = null)
+        {
+            var req = new ShortlistTopQuotaRequest { CycleId = cycleId, TopCount = topCount };
+            return await ApiClient.Instance.PostAsync<ShortlistTopQuotaRequest, int>("api/subsidy/shortlist-quota", req);
+        }
+
+        private string BuildRecommendationsQueryParams(GetSubsidyRecommendationsRequest request)
+        {
+            if (request == null) return string.Empty;
+            var queryParams = new List<string>();
+
+            if (request.CycleId.HasValue)
+                queryParams.Add($"cycleId={request.CycleId.Value}");
+
+            if (request.Page > 0)
+                queryParams.Add($"page={request.Page}");
+
+            if (request.PageSize > 0)
+                queryParams.Add($"pageSize={request.PageSize}");
+
+            if (!string.IsNullOrWhiteSpace(request.SortBy))
+                queryParams.Add($"sortBy={Uri.EscapeDataString(request.SortBy.Trim())}");
+
+            if (!string.IsNullOrWhiteSpace(request.SortOrder))
+                queryParams.Add($"sortOrder={Uri.EscapeDataString(request.SortOrder.Trim())}");
+
+            if (!string.IsNullOrWhiteSpace(request.Search))
+                queryParams.Add($"search={Uri.EscapeDataString(request.Search.Trim())}");
+
+            if (!string.IsNullOrWhiteSpace(request.Barangay) && !request.Barangay.Equals("All", StringComparison.OrdinalIgnoreCase))
+                queryParams.Add($"barangay={Uri.EscapeDataString(request.Barangay.Trim())}");
+
+            if (!string.IsNullOrWhiteSpace(request.PriorityLevel) && !request.PriorityLevel.Equals("All", StringComparison.OrdinalIgnoreCase))
+                queryParams.Add($"priorityLevel={Uri.EscapeDataString(request.PriorityLevel.Trim())}");
+
+            if (request.NeedsCloserReview.HasValue)
+                queryParams.Add($"needsCloserReview={request.NeedsCloserReview.Value.ToString().ToLowerInvariant()}");
+
+            if (!string.IsNullOrWhiteSpace(request.EmploymentStatus) && !request.EmploymentStatus.Equals("All", StringComparison.OrdinalIgnoreCase))
+                queryParams.Add($"employmentStatus={Uri.EscapeDataString(request.EmploymentStatus.Trim())}");
+
+            if (request.HasSpecialNeeds.HasValue)
+                queryParams.Add($"hasSpecialNeeds={request.HasSpecialNeeds.Value.ToString().ToLowerInvariant()}");
+
+            if (request.MinIncome.HasValue)
+                queryParams.Add($"minIncome={request.MinIncome.Value}");
+
+            if (request.MaxIncome.HasValue)
+                queryParams.Add($"maxIncome={request.MaxIncome.Value}");
+
+            return queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : string.Empty;
         }
 
         public async Task<BaseResponse<SubsidyRecommendationDto>> RejectOutlierAsync(RejectOutlierRequest request)
