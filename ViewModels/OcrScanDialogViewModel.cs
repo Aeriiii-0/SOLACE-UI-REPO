@@ -19,7 +19,7 @@ namespace SOLUM_UI.ViewModels
         private string _stepHintText = "Step 1 of 3 — Primary Information";
         private string _modeStripeHintText = " — Scanned CSWDO-066-2 form. Review fields on the right, synchronized with the scan preview.";
         private string _overallConfidenceText = "Overall AI Confidence: 0%";
-        private string _engineStatusHeader = "AI Engine: Checking...";
+        private string _engineStatusHeader = "OCR: Checking...";
         private string _engineStatusTooltip = "Click to check OCR engine status or restart server";
         private SolidColorBrush _engineStatusDotBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFA500"));
         private SolidColorBrush _engineStatusGlowBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFA500"));

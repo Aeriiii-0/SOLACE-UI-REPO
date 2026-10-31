@@ -22,7 +22,7 @@ namespace SOLUM_UI.Services
 
     {
 
-        public static async Task<OcrFormResponse> ExtractFormAsync(string imagePath, string mode = "global")
+        public static async Task<OcrFormResponse> ExtractFormAsync(string imagePath, string mode = "global", System.Threading.CancellationToken cancellationToken = default)
 
         {
 
@@ -70,7 +70,7 @@ namespace SOLUM_UI.Services
 
                 {
 
-                    response = await _http.PostAsync($"{ServerUrl}/extract-form?mode={Uri.EscapeDataString(mode)}&include_preview=true", form);
+                    response = await _http.PostAsync($"{ServerUrl}/extract-form?mode={Uri.EscapeDataString(mode)}&include_preview=true", form, cancellationToken);
 
                 }
 

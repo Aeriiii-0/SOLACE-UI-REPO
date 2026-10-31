@@ -47,6 +47,22 @@ namespace SOLUM_UI.Views.Components
         private ScannerSettings _scannerSettings = ScannerSettings.Load();
         private string _lastFocusedFieldKey = null;
         private string _currentDeskewedImagePath = null;
+        private CancellationTokenSource _processCts;
+
+        public void CancelActiveProcessing()
+        {
+            try
+            {
+                _processCts?.Cancel();
+            }
+            catch { }
+            OverlayProcessing.Visibility = Visibility.Collapsed;
+        }
+
+        private void CancelOcr_Click(object sender, RoutedEventArgs e)
+        {
+            CancelActiveProcessing();
+        }
 
         public OcrDocumentViewportComponent()
         {
@@ -132,12 +148,12 @@ namespace SOLUM_UI.Views.Components
             bool online = await OcrService.IsServerOnlineAsync();
             if (online)
             {
-                ServerStatusChanged?.Invoke(true, "AI Engine: Ready");
+                ServerStatusChanged?.Invoke(true, "OCR: Ready");
                 OcrWarmupBanner.Visibility = Visibility.Collapsed;
                 return;
             }
 
-            ServerStatusChanged?.Invoke(false, "AI Engine: Warming up...");
+            ServerStatusChanged?.Invoke(false, "OCR: Warming up...");
             OcrWarmupBanner.Visibility = Visibility.Visible;
             await OcrService.EnsureServerRunningAsync(25);
         }
@@ -493,8 +509,13 @@ namespace SOLUM_UI.Views.Components
 
             try
             {
-                using (var cts = new CancellationTokenSource())
+                _processCts?.Cancel();
+                _processCts = new CancellationTokenSource();
+                var token = _processCts.Token;
+
+                using (var ctsLinked = CancellationTokenSource.CreateLinkedTokenSource(token))
                 {
+                    var linkedToken = ctsLinked.Token;
                     var progressTask = Task.Run(async () =>
                     {
                         var steps = new[]
@@ -508,10 +529,10 @@ namespace SOLUM_UI.Views.Components
                         };
 
                         int stepIdx = 0;
-                        while (!cts.Token.IsCancellationRequested)
+                        while (!linkedToken.IsCancellationRequested)
                         {
-                            await Task.Delay(100, cts.Token).ConfigureAwait(false);
-                            if (cts.Token.IsCancellationRequested) break;
+                            await Task.Delay(100, linkedToken).ConfigureAwait(false);
+                            if (linkedToken.IsCancellationRequested) break;
 
                             int idx = Math.Min(stepIdx / 4, steps.Length - 1);
                             var curStep = steps[idx];
@@ -525,10 +546,10 @@ namespace SOLUM_UI.Views.Components
                                 TxtLiveElapsedTime.Text = $"{stopwatch.Elapsed.TotalSeconds:F1}s";
                             });
                         }
-                    }, cts.Token);
+                    }, linkedToken);
 
-                    OcrResponse = await OcrService.ExtractFormAsync(imagePath, "global");
-                    cts.Cancel();
+                    OcrResponse = await OcrService.ExtractFormAsync(imagePath, "global", token);
+                    ctsLinked.Cancel();
                 }
 
                 stopwatch.Stop();
@@ -564,8 +585,14 @@ namespace SOLUM_UI.Views.Components
 
                 DocumentProcessed?.Invoke(OcrResponse, imagePath);
             }
+            catch (OperationCanceledException)
+            {
+                // OCR scan cancelled by user force stop
+                System.Diagnostics.Debug.WriteLine("[OcrDocumentViewport] OCR processing cancelled by user.");
+            }
             catch (Exception ex)
             {
+                if (_processCts != null && _processCts.IsCancellationRequested) return;
                 ActionConfirmDialog.Error("OCR Error", "Failed to process document: " + ex.Message, window);
             }
             finally

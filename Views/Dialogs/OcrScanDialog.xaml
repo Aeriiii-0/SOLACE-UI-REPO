@@ -68,14 +68,6 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel VerticalAlignment="Center">
-                                <!-- Mode badge pill -->
-                                <Border CornerRadius="20" Padding="10,4" Background="#E8F5E9" HorizontalAlignment="Left" Margin="0,0,0,6">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Path Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
-                                              Fill="#2E7D32" Stretch="Uniform" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <TextBlock Text="OCR Auto-Ingestion &amp; Verification" FontSize="11" FontWeight="Bold" Foreground="#2E7D32" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Border>
                                 <TextBlock x:Name="FormSubtitle" Text="Solo Parent Application Form" FontSize="19" FontWeight="Bold" Foreground="#111111"/>
                                 <TextBlock x:Name="FormStepHint" Text="{Binding StepHintText}" FontSize="13" Foreground="#666666" Margin="0,3,0,0"/>
                             </StackPanel>
@@ -84,9 +76,12 @@
                                 <!-- Engine Status Badge Pill -->
                                 <Border x:Name="PillEngineStatus"
                                         Background="#FBF5F7" BorderBrush="#EDE0E5" BorderThickness="1"
-                                        CornerRadius="14" Padding="10,5" Margin="0,0,14,0"
+                                        CornerRadius="14" Padding="12,5" Margin="0,0,14,0"
                                         Cursor="Hand" VerticalAlignment="Center"
+                                        PreviewMouseLeftButtonDown="PillEngineStatus_PreviewMouseLeftButtonDown"
                                         MouseLeftButtonUp="ServerStatusBadge_MouseLeftButtonUp"
+                                        MouseEnter="PillEngineStatus_MouseEnter"
+                                        MouseLeave="PillEngineStatus_MouseLeave"
                                         ToolTipService.InitialShowDelay="150"
                                         ToolTip="{Binding EngineStatusTooltip}">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -275,6 +270,20 @@
                                         <TextBlock x:Name="TxtOverallConfBadge"
                                                    Text="{Binding OverallConfidenceText}"
                                                    FontSize="11" Foreground="#702943" FontWeight="SemiBold"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- OCR Duration Badge -->
+                                <Border x:Name="BadgeOcrDuration" Background="#F0F4F8" CornerRadius="12" Padding="10,4"
+                                        BorderBrush="#D9E2EC" BorderThickness="1" Margin="8,0,0,0" Visibility="Collapsed"
+                                        ToolTip="Total processing time taken by the OCR engine">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
+                                              Fill="#334E68" Stretch="Uniform" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock x:Name="TxtOcrDuration"
+                                                   Text="0.0s"
+                                                   FontSize="11" Foreground="#334E68" FontWeight="SemiBold"
                                                    VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>

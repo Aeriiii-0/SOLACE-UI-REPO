@@ -399,6 +399,33 @@
                             <TextBlock x:Name="TxtCurrentExtractingField" Grid.Column="1" Text="Deskewing and enhancing scan..." FontSize="10" Foreground="#555" TextTrimming="CharacterEllipsis"/>
                         </Grid>
                     </Border>
+
+                    <!-- Cancel / Force Exit Scan Button -->
+                    <Button x:Name="BtnCancelOcr" Margin="0,14,0,0"
+                            Height="32" Padding="16,0"
+                            Background="#FFF0F2" BorderBrush="#F8D7DA" BorderThickness="1"
+                            Cursor="Hand" HorizontalAlignment="Center"
+                            Click="CancelOcr_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="BtnBorder" Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="✕" FontSize="11" FontWeight="Bold" Foreground="#DC3545" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Cancel Scan" FontSize="11" FontWeight="SemiBold" Foreground="#DC3545" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="BtnBorder" Property="Background" Value="#FCE4E6"/>
+                                        <Setter TargetName="BtnBorder" Property="BorderBrush" Value="#E57373"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                 </StackPanel>
             </Border>
         </Grid>

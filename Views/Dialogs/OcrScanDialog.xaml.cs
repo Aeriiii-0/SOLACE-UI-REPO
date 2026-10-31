@@ -146,6 +146,14 @@ namespace SOLUM_UI.Views.Dialogs
 
             ViewModel.SetConfidence(resp.OverallConfidence, resp.OverallRating);
 
+            if (resp.ExecutionTimeSeconds > 0 && BadgeOcrDuration != null && TxtOcrDuration != null)
+            {
+                TxtOcrDuration.Text = $"{resp.ExecutionTimeSeconds:F1}s";
+                BadgeOcrDuration.Visibility = Visibility.Visible;
+            }
+
+            ViewModel.EngineStatusTooltip = "Click to re-scan document (1-min cooldown)";
+
             PrimaryInfoSection.Populate(resp);
             SecondaryInfoSection.Populate(resp);
             FamilyMembersSection.Populate(resp);
@@ -155,7 +163,8 @@ namespace SOLUM_UI.Views.Dialogs
         {
             Dispatcher.InvokeAsync(() =>
             {
-                ViewModel.EngineStatusHeader = message;
+                string cleanMsg = message?.Replace("AI Engine:", "OCR:") ?? "OCR: Ready";
+                ViewModel.EngineStatusHeader = cleanMsg;
                 Color dotColor = isReady ? (Color)ColorConverter.ConvertFromString("#22C55E") : (Color)ColorConverter.ConvertFromString("#FFA500");
                 ViewModel.EngineStatusDotBrush = new SolidColorBrush(dotColor);
                 if (BadgeGlow != null)
@@ -168,14 +177,44 @@ namespace SOLUM_UI.Views.Dialogs
         private DateTime _lastManualRescanTime = DateTime.MinValue;
         private static readonly TimeSpan RescanCooldown = TimeSpan.FromSeconds(60);
 
-        private async void ServerStatusBadge_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void PillEngineStatus_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Intercept mouse down so HeaderBorder does not capture window drag
+            e.Handled = true;
+            ExecuteBadgeClick();
+        }
+
+        private void ServerStatusBadge_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void PillEngineStatus_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (PillEngineStatus != null)
+            {
+                PillEngineStatus.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F3E5EB"));
+                PillEngineStatus.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4B5C1"));
+            }
+        }
+
+        private void PillEngineStatus_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (PillEngineStatus != null)
+            {
+                PillEngineStatus.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FBF5F7"));
+                PillEngineStatus.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EDE0E5"));
+            }
+        }
+
+        private async void ExecuteBadgeClick()
         {
             if (DocumentViewport == null) return;
 
             // 1. Guard against clicks while OCR processing is already actively running
             if (DocumentViewport.IsProcessingDocument)
             {
-                ViewModel.EngineStatusHeader = "Scan in progress...";
+                ViewModel.EngineStatusHeader = "OCR: Scanning...";
                 return;
             }
 
@@ -188,13 +227,13 @@ namespace SOLUM_UI.Views.Dialogs
                 if (elapsed < RescanCooldown)
                 {
                     int remainingSec = (int)Math.Ceiling((RescanCooldown - elapsed).TotalSeconds);
-                    ViewModel.EngineStatusHeader = $"Wait {remainingSec}s to re-scan";
+                    ViewModel.EngineStatusHeader = $"OCR: Wait {remainingSec}s";
                     ViewModel.EngineStatusTooltip = $"Safety cooldown active to prevent system overload ({remainingSec}s remaining).";
                     return;
                 }
 
                 _lastManualRescanTime = DateTime.UtcNow;
-                ViewModel.EngineStatusHeader = "Re-scanning document...";
+                ViewModel.EngineStatusHeader = "OCR: Re-scanning...";
                 ViewModel.EngineStatusTooltip = "Re-scanning current document with latest template layout...";
                 try
                 {
