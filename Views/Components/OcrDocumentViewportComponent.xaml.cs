@@ -20,6 +20,7 @@ namespace SOLUM_UI.Views.Components
     {
         public OcrFormResponse OcrResponse { get; private set; }
         public string CurrentImagePath { get; private set; } = string.Empty;
+        public bool IsProcessingDocument => OverlayProcessing?.Visibility == Visibility.Visible;
 
         public event Action<OcrFormResponse, string> DocumentProcessed;
         public event Action<OcrWarmupProgress> WarmupProgressChanged;

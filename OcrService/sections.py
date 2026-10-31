@@ -171,6 +171,26 @@ def measure_checkbox_ink(image: np.ndarray, bbox: list) -> float:
     ink_mask = inner < thresh_val
     return float(np.sum(ink_mask)) / float(inner.size)
 
+def measure_checkbox_ink_neighborhood(image: np.ndarray, bbox: list, max_shift_px: int = 2) -> float:
+    """Measures maximum checkbox ink across a small +/- max_shift_px window to handle minor scanning jitter."""
+    if image is None or image.size == 0 or not bbox or len(bbox) < 4:
+        return 0.0
+    h, w = image.shape[:2]
+    best_ink = measure_checkbox_ink(image, bbox)
+    if best_ink >= 0.15:
+        return best_ink
+
+    bx, by, bw, bh = bbox
+    dx_norm = float(max_shift_px) / float(max(1, w))
+    dy_norm = float(max_shift_px) / float(max(1, h))
+    for shift_x in [-dx_norm, dx_norm]:
+        for shift_y in [-dy_norm, dy_norm]:
+            cand_box = [max(0.0, bx + shift_x), max(0.0, by + shift_y), bw, bh]
+            cand_ink = measure_checkbox_ink(image, cand_box)
+            if cand_ink > best_ink:
+                best_ink = cand_ink
+    return best_ink
+
 def detect_employment_status(enhanced_image, ocr_engine, fields_config: dict, all_detections: list = None, raw_text: str = "") -> tuple:
     """
     Detects which employment status checkbox is marked exclusively from the 3 checkbox ROIs:
@@ -186,9 +206,9 @@ def detect_employment_status(enhanced_image, ocr_engine, fields_config: dict, al
         box_self = fields_config.get("is_self_employed", {}).get("bbox") or [0.7056, 0.2347, 0.0084, 0.0056]
         box_not = fields_config.get("is_not_employed", {}).get("bbox") or [0.8256, 0.2347, 0.0084, 0.0056]
 
-        ink_emp = measure_checkbox_ink(enhanced_image, box_emp)
-        ink_self = measure_checkbox_ink(enhanced_image, box_self)
-        ink_not = measure_checkbox_ink(enhanced_image, box_not)
+        ink_emp = measure_checkbox_ink_neighborhood(enhanced_image, box_emp)
+        ink_self = measure_checkbox_ink_neighborhood(enhanced_image, box_self)
+        ink_not = measure_checkbox_ink_neighborhood(enhanced_image, box_not)
 
         rec_emp, _ = recognize_crop(ocr_engine, crop_roi(enhanced_image, box_emp)) if ocr_engine else ("", 0.0)
         rec_self, _ = recognize_crop(ocr_engine, crop_roi(enhanced_image, box_self)) if ocr_engine else ("", 0.0)

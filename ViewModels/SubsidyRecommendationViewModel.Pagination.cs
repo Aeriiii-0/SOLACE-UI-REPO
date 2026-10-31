@@ -16,7 +16,87 @@ namespace SOLUM_UI.ViewModels
         public ObservableCollection<SelectionRow> PagedShortlistRows { get; private set; }
         public ObservableCollection<SelectionRow> PagedFinalGrantees { get; private set; }
 
-        private const int PageSize = 10;
+        // Dynamic page sizes
+        private int _queuePageSize = 10;
+        public int QueuePageSize
+        {
+            get => _queuePageSize;
+            set
+            {
+                if (value >= 1 && SetProperty(ref _queuePageSize, value))
+                {
+                    OnPropertyChanged(nameof(QueuePageSummary));
+                }
+            }
+        }
+
+        private int _shortlistPageSize = 10;
+        public int ShortlistPageSize
+        {
+            get => _shortlistPageSize;
+            set
+            {
+                if (value >= 1 && SetProperty(ref _shortlistPageSize, value))
+                {
+                    UpdateShortlistPaged();
+                }
+            }
+        }
+
+        private int _finalPageSize = 10;
+        public int FinalPageSize
+        {
+            get => _finalPageSize;
+            set
+            {
+                if (value >= 1 && SetProperty(ref _finalPageSize, value))
+                {
+                    UpdateFinalPaged();
+                }
+            }
+        }
+
+        public async Task UpdateQueuePageSizeAsync(int newSize)
+        {
+            if (newSize < 1 || newSize == _queuePageSize) return;
+
+            int oldPageSize = _queuePageSize;
+            _queuePageSize = newSize;
+            OnPropertyChanged(nameof(QueuePageSize));
+            OnPropertyChanged(nameof(QueuePageSummary));
+
+            if (!_activeCycleId.HasValue || _activeCycleId.Value == Guid.Empty) return;
+
+            int firstVisibleItem = (_queueCurrentPage - 1) * oldPageSize + 1;
+            int newPage = Math.Max(1, (int)Math.Ceiling(firstVisibleItem / (double)_queuePageSize));
+            await LoadQueuePageAsync(newPage);
+        }
+
+        public void UpdateShortlistPageSize(int newSize)
+        {
+            if (newSize < 1 || newSize == _shortlistPageSize) return;
+
+            int oldPageSize = _shortlistPageSize;
+            _shortlistPageSize = newSize;
+            OnPropertyChanged(nameof(ShortlistPageSize));
+
+            int firstVisibleItem = (_shortlistCurrentPage - 1) * oldPageSize + 1;
+            _shortlistCurrentPage = Math.Max(1, (int)Math.Ceiling(firstVisibleItem / (double)_shortlistPageSize));
+            UpdateShortlistPaged();
+        }
+
+        public void UpdateFinalPageSize(int newSize)
+        {
+            if (newSize < 1 || newSize == _finalPageSize) return;
+
+            int oldPageSize = _finalPageSize;
+            _finalPageSize = newSize;
+            OnPropertyChanged(nameof(FinalPageSize));
+
+            int firstVisibleItem = (_finalCurrentPage - 1) * oldPageSize + 1;
+            _finalCurrentPage = Math.Max(1, (int)Math.Ceiling(firstVisibleItem / (double)_finalPageSize));
+            UpdateFinalPaged();
+        }
 
         // Tab 0: Recommendations Queue Pagination (Server-Side)
         private int _queueCurrentPage = 1;
@@ -73,8 +153,8 @@ namespace SOLUM_UI.ViewModels
             {
                 int total = QueueTotalCount;
                 if (total == 0) return "No candidate records found";
-                int start = (QueueCurrentPage - 1) * PageSize + 1;
-                int end = Math.Min(QueueCurrentPage * PageSize, total);
+                int start = (QueueCurrentPage - 1) * QueuePageSize + 1;
+                int end = Math.Min(QueueCurrentPage * QueuePageSize, total);
                 return $"Showing {start}–{end} of {total} records";
             }
         }
@@ -101,8 +181,8 @@ namespace SOLUM_UI.ViewModels
             {
                 int total = FilteredShortlistRows?.Count ?? 0;
                 if (total == 0) return "No shortlist records found";
-                int start = (ShortlistCurrentPage - 1) * PageSize + 1;
-                int end = Math.Min(ShortlistCurrentPage * PageSize, total);
+                int start = (ShortlistCurrentPage - 1) * ShortlistPageSize + 1;
+                int end = Math.Min(ShortlistCurrentPage * ShortlistPageSize, total);
                 return $"Showing {start}–{end} of {total} records";
             }
         }
@@ -127,8 +207,8 @@ namespace SOLUM_UI.ViewModels
             {
                 int total = FinalGranteesList?.Count ?? 0;
                 if (total == 0) return "No grantee records found";
-                int start = (FinalCurrentPage - 1) * PageSize + 1;
-                int end = Math.Min(FinalCurrentPage * PageSize, total);
+                int start = (FinalCurrentPage - 1) * FinalPageSize + 1;
+                int end = Math.Min(FinalCurrentPage * FinalPageSize, total);
                 return $"Showing {start}–{end} of {total} records";
             }
         }
@@ -163,7 +243,7 @@ namespace SOLUM_UI.ViewModels
                 {
                     CycleId = _activeCycleId,
                     Page = page,
-                    PageSize = PageSize,
+                    PageSize = QueuePageSize,
                     SortBy = "PriorityScore",
                     SortOrder = "desc"
                 };
@@ -228,14 +308,14 @@ namespace SOLUM_UI.ViewModels
         public void UpdateQueuePaged()
         {
             int total = FilteredRecommendations?.Count ?? 0;
-            QueueTotalPages = Math.Max(1, (int)Math.Ceiling(total / (double)PageSize));
+            QueueTotalPages = Math.Max(1, (int)Math.Ceiling(total / (double)QueuePageSize));
             if (_queueCurrentPage > QueueTotalPages) _queueCurrentPage = QueueTotalPages;
             if (_queueCurrentPage < 1) _queueCurrentPage = 1;
 
             PagedRecommendations.Clear();
             if (FilteredRecommendations != null)
             {
-                var slice = FilteredRecommendations.Skip((_queueCurrentPage - 1) * PageSize).Take(PageSize);
+                var slice = FilteredRecommendations.Skip((_queueCurrentPage - 1) * QueuePageSize).Take(QueuePageSize);
                 foreach (var item in slice) PagedRecommendations.Add(item);
             }
 
@@ -252,14 +332,14 @@ namespace SOLUM_UI.ViewModels
         public void UpdateShortlistPaged()
         {
             int total = FilteredShortlistRows?.Count ?? 0;
-            ShortlistTotalPages = Math.Max(1, (int)Math.Ceiling(total / (double)PageSize));
+            ShortlistTotalPages = Math.Max(1, (int)Math.Ceiling(total / (double)ShortlistPageSize));
             if (_shortlistCurrentPage > ShortlistTotalPages) _shortlistCurrentPage = ShortlistTotalPages;
             if (_shortlistCurrentPage < 1) _shortlistCurrentPage = 1;
 
             PagedShortlistRows.Clear();
             if (FilteredShortlistRows != null)
             {
-                var slice = FilteredShortlistRows.Skip((_shortlistCurrentPage - 1) * PageSize).Take(PageSize);
+                var slice = FilteredShortlistRows.Skip((_shortlistCurrentPage - 1) * ShortlistPageSize).Take(ShortlistPageSize);
                 foreach (var item in slice) PagedShortlistRows.Add(item);
             }
 
@@ -274,14 +354,14 @@ namespace SOLUM_UI.ViewModels
         public void UpdateFinalPaged()
         {
             int total = FinalGranteesList?.Count ?? 0;
-            FinalTotalPages = Math.Max(1, (int)Math.Ceiling(total / (double)PageSize));
+            FinalTotalPages = Math.Max(1, (int)Math.Ceiling(total / (double)FinalPageSize));
             if (_finalCurrentPage > FinalTotalPages) _finalCurrentPage = FinalTotalPages;
             if (_finalCurrentPage < 1) _finalCurrentPage = 1;
 
             PagedFinalGrantees.Clear();
             if (FinalGranteesList != null)
             {
-                var slice = FinalGranteesList.Skip((_finalCurrentPage - 1) * PageSize).Take(PageSize);
+                var slice = FinalGranteesList.Skip((_finalCurrentPage - 1) * FinalPageSize).Take(FinalPageSize);
                 foreach (var item in slice) PagedFinalGrantees.Add(item);
             }
 

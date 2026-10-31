@@ -2,17 +2,42 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using SOLUM_UI.ViewModels;
 
 namespace SOLUM_UI.Views.Components
 {
     public partial class RecommendationQueueGrid : UserControl
     {
+        private readonly DispatcherTimer _resizeDebounceTimer;
+
         public RecommendationQueueGrid()
         {
             InitializeComponent();
+            _resizeDebounceTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(250)
+            };
+            _resizeDebounceTimer.Tick += (s, e) =>
+            {
+                _resizeDebounceTimer.Stop();
+                UpdateDynamicPageSize();
+            };
+
             DataContextChanged += OnDataContextChanged;
-            Loaded += (s, e) => AdjustColumnWidths();
+            Loaded += (s, e) =>
+            {
+                AdjustColumnWidths();
+                UpdateDynamicPageSize();
+            };
+            IsVisibleChanged += (s, e) =>
+            {
+                if (IsVisible)
+                {
+                    AdjustColumnWidths();
+                    UpdateDynamicPageSize();
+                }
+            };
         }
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -23,6 +48,7 @@ namespace SOLUM_UI.Views.Components
             {
                 newVm.PropertyChanged += OnViewModelPropertyChanged;
                 UpdateBatchColumn(newVm.IsBatchMode);
+                UpdateDynamicPageSize();
             }
         }
 
@@ -47,7 +73,33 @@ namespace SOLUM_UI.Views.Components
                 vm.RecalculateSelectionCounts();
         }
 
-        private void QueueListView_SizeChanged(object sender, SizeChangedEventArgs e) => AdjustColumnWidths();
+        private void QueueListView_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.WidthChanged)
+                AdjustColumnWidths();
+
+            if (e.HeightChanged)
+            {
+                _resizeDebounceTimer.Stop();
+                _resizeDebounceTimer.Start();
+            }
+        }
+
+        private void UpdateDynamicPageSize()
+        {
+            double availableHeight = QueueListView.ActualHeight;
+            if (availableHeight <= 100) return;
+
+            // GridViewColumnHeader is 46px, each candidate row is ~58px
+            double rowsHeight = availableHeight - 46.0;
+            int calculated = (int)Math.Floor(rowsHeight / 58.0);
+            int optimal = Math.Max(4, Math.Min(35, calculated));
+
+            if (DataContext is SubsidyRecommendationViewModel vm && optimal != vm.QueuePageSize && !vm.IsLoading)
+            {
+                _ = vm.UpdateQueuePageSizeAsync(optimal);
+            }
+        }
 
         private void AdjustColumnWidths()
         {

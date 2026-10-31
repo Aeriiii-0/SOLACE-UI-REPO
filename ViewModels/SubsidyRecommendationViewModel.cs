@@ -258,7 +258,17 @@ namespace SOLUM_UI.ViewModels
         public string OutlierTargetNameAndId { get => _outlierTargetNameAndId ?? $"Candidate: {_outlierTarget?.Name}"; set { _outlierTargetNameAndId = value; OnPropertyChanged(); } }
         public string OutlierRejectionReason { get => _outlierRejectionReason; set => SetProperty(ref _outlierRejectionReason, value); } public string OutlierNotes { get => _outlierNotes; set => SetProperty(ref _outlierNotes, value); }
         public bool OutlierAutoPromote { get => _outlierAutoPromote; set => SetProperty(ref _outlierAutoPromote, value); }
-        public bool IsLoading { get => _isLoading; set => SetProperty(ref _isLoading, value); }
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set
+            {
+                if (SetProperty(ref _isLoading, value))
+                {
+                    System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+                }
+            }
+        }
         public int SelectedFiscalYearIndex { get => _selectedFiscalYearIndex; set { if (SetProperty(ref _selectedFiscalYearIndex, value)) { OnPropertyChanged(nameof(CanModifyGrantees)); } } }
 
         private bool _isRosterLocked; private int _activeCycleFiscalYear = 2026;
@@ -295,6 +305,20 @@ namespace SOLUM_UI.ViewModels
         public bool IsDataFresh => (DateTime.UtcNow - _lastSuccessfulLoadTime) < DataFreshnessTtl;
         public void InvalidateCache() => _lastSuccessfulLoadTime = DateTime.MinValue;
 
+        private string _lastRefreshedText = "Updated: Just now";
+        public string LastRefreshedText
+        {
+            get => _lastRefreshedText;
+            set => SetProperty(ref _lastRefreshedText, value);
+        }
+
+        private string _refreshTooltip = "Refresh subsidy recommendations";
+        public string RefreshTooltip
+        {
+            get => _refreshTooltip;
+            set => SetProperty(ref _refreshTooltip, value);
+        }
+
         public async Task RefreshDataAsync(bool forceReloadCycles = false)
         {
             if (IsLoading) return;
@@ -309,6 +333,8 @@ namespace SOLUM_UI.ViewModels
                 {
                     await LoadCycleDataInternalAsync(SelectedFiscalCycle);
                     _lastSuccessfulLoadTime = DateTime.UtcNow;
+                    LastRefreshedText = $"Updated: {DateTime.Now:h:mm tt}";
+                    RefreshTooltip = $"Refresh subsidy recommendations (Last refreshed: {DateTime.Now:h:mm:ss tt})";
                     return;
                 }
 
@@ -347,6 +373,8 @@ namespace SOLUM_UI.ViewModels
                     if (!target.IsActive) ActiveTabIndex = 2;
                     await LoadCycleDataInternalAsync(target);
                     _lastSuccessfulLoadTime = DateTime.UtcNow;
+                    LastRefreshedText = $"Updated: {DateTime.Now:h:mm tt}";
+                    RefreshTooltip = $"Refresh subsidy recommendations (Last refreshed: {DateTime.Now:h:mm:ss tt})";
                 }
             }
             catch (Exception ex) { ToastNotification.Show("API Error", ex.Message, ToastType.Error); } finally { IsLoading = false; }

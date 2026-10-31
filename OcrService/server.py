@@ -24,12 +24,31 @@ except Exception:
     pass
 
 from preprocess import preprocess_pipeline, crop_roi, image_to_base64
+import importlib
+import cleaners
+import inference
+import labels
+import sections
+import pipeline
+import parser
 from parser import (
     parse_form_with_ocr, clean_text, get_confidence_rating, load_template,
     recognize_crop, get_ov_recognizer, get_v5_recognizer,
     clean_field_value, is_printed_label_word, measure_checkbox_ink,
     detect_employment_status
 )
+
+def reload_engine_modules():
+    """Dynamically reloads engine modules so disk edits take effect without restarting the server."""
+    try:
+        importlib.reload(cleaners)
+        importlib.reload(inference)
+        importlib.reload(labels)
+        importlib.reload(sections)
+        importlib.reload(pipeline)
+        importlib.reload(parser)
+    except Exception as e:
+        print(f"[HotReload Note] {e}")
 
 app = FastAPI(title="Solace OCR Engine", version="2.0")
 
@@ -131,6 +150,7 @@ def extract_form(file: UploadFile = File(...), mode: str = "global", include_pre
     mode='crop': Legacy field-by-field crop loop (Fallback)
     include_preview: Whether to return Base64 image in JSON (default True for live UI parity)
     """
+    reload_engine_modules()
     print(f"\n=======================================================")
     print(f"[Server] >>> New Document Ingestion Request Received: {file.filename} (mode: {mode})")
     
@@ -198,6 +218,7 @@ def extract_roi(
     Uses DBNet text polygon detection inside the crop and applies the exact same domain
     cleaning/filters as full document processing.
     """
+    reload_engine_modules()
     try:
         t_start = time.time()
         contents = file.file.read()
@@ -225,22 +246,18 @@ def extract_roi(
 
         # Handle Employment Checkbox fields
         if field_key in ["is_employed", "is_self_employed", "is_not_employed"]:
-            emp_val, emp_conf = detect_employment_status(enhanced_gray, ocr, fields_config)
-            if field_key == "is_employed":
-                val = "True" if emp_val == "Employed" else "False"
-            elif field_key == "is_self_employed":
-                val = "True" if emp_val == "Self-Employed" else "False"
-            elif field_key == "is_not_employed":
-                val = "True" if emp_val == "Not Employed" else "False"
-            else:
-                val = "False"
+            ink = measure_checkbox_ink(enhanced_gray, bbox)
+            is_checked = ink >= 0.08
+            cleaned = "True" if is_checked else "False"
+            raw_value = f"Checkbox Ink: {ink:.1%}"
+            final_conf = 0.95 if is_checked else 0.85
             elapsed = round(time.time() - t_start, 3)
             return sanitize_for_json({
                 "status": "success",
-                "value": val,
-                "raw_value": f"Status: {emp_val}",
-                "confidence": round(emp_conf, 2),
-                "rating": get_confidence_rating(emp_conf),
+                "value": cleaned,
+                "raw_value": raw_value,
+                "confidence": round(final_conf, 2),
+                "rating": get_confidence_rating(final_conf),
                 "bbox": bbox,
                 "execution_time_seconds": elapsed
             })

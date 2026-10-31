@@ -269,6 +269,20 @@ namespace SOLUM_UI.Services
             return false;
         }
 
+        public static void KillStaleServerProcesses()
+        {
+            try
+            {
+                if (_serverProcess != null && !_serverProcess.HasExited)
+                {
+                    _serverProcess.Kill();
+                    _serverProcess.Dispose();
+                    _serverProcess = null;
+                }
+            }
+            catch { }
+        }
+
         public static (bool Success, string ErrorMessage) StartLocalServerProcess()
         {
             if (_serverProcess != null && !_serverProcess.HasExited) return (true, null);

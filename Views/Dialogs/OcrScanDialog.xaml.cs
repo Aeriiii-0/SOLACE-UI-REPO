@@ -165,8 +165,49 @@ namespace SOLUM_UI.Views.Dialogs
             });
         }
 
-        private void ServerStatusBadge_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private DateTime _lastManualRescanTime = DateTime.MinValue;
+        private static readonly TimeSpan RescanCooldown = TimeSpan.FromSeconds(60);
+
+        private async void ServerStatusBadge_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            if (DocumentViewport == null) return;
+
+            // 1. Guard against clicks while OCR processing is already actively running
+            if (DocumentViewport.IsProcessingDocument)
+            {
+                ViewModel.EngineStatusHeader = "Scan in progress...";
+                return;
+            }
+
+            // 2. Check if an image is loaded for re-scanning
+            string currentImg = DocumentViewport.CurrentImagePath;
+            if (!string.IsNullOrEmpty(currentImg) && System.IO.File.Exists(currentImg))
+            {
+                // Enforce 60-second safety cooldown to prevent system overload
+                var elapsed = DateTime.UtcNow - _lastManualRescanTime;
+                if (elapsed < RescanCooldown)
+                {
+                    int remainingSec = (int)Math.Ceiling((RescanCooldown - elapsed).TotalSeconds);
+                    ViewModel.EngineStatusHeader = $"Wait {remainingSec}s to re-scan";
+                    ViewModel.EngineStatusTooltip = $"Safety cooldown active to prevent system overload ({remainingSec}s remaining).";
+                    return;
+                }
+
+                _lastManualRescanTime = DateTime.UtcNow;
+                ViewModel.EngineStatusHeader = "Re-scanning document...";
+                ViewModel.EngineStatusTooltip = "Re-scanning current document with latest template layout...";
+                try
+                {
+                    await DocumentViewport.ProcessDocumentAsync(currentImg);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("[OcrScanDialog] Manual rescan error: " + ex.Message);
+                }
+                return;
+            }
+
+            // If no document is loaded, perform standard server health check
             DocumentViewport.CheckServerHealth();
         }
 

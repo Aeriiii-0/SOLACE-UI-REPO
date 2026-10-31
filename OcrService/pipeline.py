@@ -459,22 +459,32 @@ def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template:
         c_cfg = dict(cfg)
         if "bbox" in c_cfg:
             bx, by, bw, bh = c_cfg["bbox"]
-            aligned_by = dyn_ty + dyn_sy * by
-            aligned_bh = dyn_sy * bh
-            aligned_bx = bx + dyn_dx
-            transformed_box = [
-                max(0.0, min(0.98, round(aligned_bx, 4))),
-                max(0.0, min(0.98, round(aligned_by, 4))),
-                bw,
-                max(0.005, min(0.98, round(aligned_bh, 4)))
-            ]
-            # Snap box inside the physical printed table lines for Section I data fields
-            if fk not in ["needs", "other_income"] and not fk.startswith("circ_") and not fk.startswith("fam_row"):
-                has_top = fk in ["address", "emergency_name", "emergency_relationship", "emergency_address", "emergency_number"]
-                snapped_box = snap_box_to_grid(transformed_box, h_lines_mask, v_lines_mask, full_w, full_h, max_search_px=15, has_top_label=has_top)
-                c_cfg["bbox"] = snapped_box
+            is_checkbox = (
+                fk in ["is_employed", "is_self_employed", "is_not_employed"] or
+                fk.endswith("_checkbox") or
+                fk.startswith("circ_")
+            )
+            if is_checkbox:
+                # Checkboxes are micro-ROIs calibrated directly on deskewed coordinates.
+                # Never distort them with grid snapping or macro translation shifts.
+                c_cfg["bbox"] = [bx, by, bw, bh]
             else:
-                c_cfg["bbox"] = transformed_box
+                aligned_by = dyn_ty + dyn_sy * by
+                aligned_bh = dyn_sy * bh
+                aligned_bx = bx + dyn_dx
+                transformed_box = [
+                    max(0.0, min(0.98, round(aligned_bx, 4))),
+                    max(0.0, min(0.98, round(aligned_by, 4))),
+                    bw,
+                    max(0.005, min(0.98, round(aligned_bh, 4)))
+                ]
+                # Snap box inside the physical printed table lines for Section I data fields
+                if fk not in ["needs", "other_income"] and not fk.startswith("fam_row"):
+                    has_top = fk in ["address", "emergency_name", "emergency_relationship", "emergency_address", "emergency_number"]
+                    snapped_box = snap_box_to_grid(transformed_box, h_lines_mask, v_lines_mask, full_w, full_h, max_search_px=15, has_top_label=has_top)
+                    c_cfg["bbox"] = snapped_box
+                else:
+                    c_cfg["bbox"] = transformed_box
         aligned_fields[fk] = c_cfg
     fields_config = aligned_fields
 
@@ -493,11 +503,12 @@ def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template:
             emp_val = extracted_fields.get("employment_status", {}).get("value", "")
             if not emp_val:
                 emp_val, emp_conf = detect_employment_status(enhanced_image, ocr_engine, fields_config, all_detections=all_detections)
+                winning_key = "is_not_employed" if emp_val == "Not Employed" else ("is_self_employed" if emp_val == "Self-Employed" else "is_employed")
                 extracted_fields["employment_status"] = {
                     "value": emp_val,
                     "confidence": round(emp_conf, 2),
                     "rating": get_confidence_rating(emp_conf) if emp_val else "Low",
-                    "bbox": fields_config.get("employment_status", {}).get("bbox", bbox),
+                    "bbox": fields_config.get(winning_key, {}).get("bbox", bbox),
                     "category": "Section I"
                 }
             if f_key == "is_employed":
