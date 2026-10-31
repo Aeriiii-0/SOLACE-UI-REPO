@@ -54,11 +54,13 @@ namespace SOLUM_UI
         private readonly Stack<string> _undoStack = new Stack<string>();
         private readonly Stack<string> _redoStack = new Stack<string>();
         private TemplateFieldItem _selectedField;
+        private readonly HashSet<TemplateFieldItem> _selectedFields = new HashSet<TemplateFieldItem>();
+        private class BoxCoordSnapshot { public double X; public double Y; public double W; public double H; }
+        private readonly Dictionary<TemplateFieldItem, BoxCoordSnapshot> _origCoords = new Dictionary<TemplateFieldItem, BoxCoordSnapshot>();
         private ResizeHandleType _activeHandle = ResizeHandleType.Move;
         private double _currentZoom = 1.0;
         private bool _isDragging = false;
         private Point _dragStartPoint;
-        private double _origX, _origY, _origW, _origH;
         private List<OcrWordToken> _activeRoiTokens = new List<OcrWordToken>();
 
         // Canvas Panning State
@@ -340,6 +342,8 @@ namespace SOLUM_UI
                 _fields.Clear();
                 ParseTemplateJson(prevJson);
                 PopulateFieldCombo();
+                _selectedFields.Clear();
+                if (_selectedField != null) _selectedFields.Add(_selectedField);
                 RedrawAllCanvasBoxes();
                 UpdateUndoRedoButtons();
                 TxtStatusMessage.Text = "↩ Undid last change.";
@@ -355,6 +359,8 @@ namespace SOLUM_UI
                 _fields.Clear();
                 ParseTemplateJson(nextJson);
                 PopulateFieldCombo();
+                _selectedFields.Clear();
+                if (_selectedField != null) _selectedFields.Add(_selectedField);
                 RedrawAllCanvasBoxes();
                 UpdateUndoRedoButtons();
                 TxtStatusMessage.Text = "↪ Redid change.";
@@ -384,7 +390,7 @@ namespace SOLUM_UI
                 }
             }
 
-            if (_selectedField != null)
+            if (_selectedFields.Count > 0 || _selectedField != null)
             {
                 double step = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift ? 0.005 : 0.001;
 
@@ -433,41 +439,63 @@ namespace SOLUM_UI
 
         private void ApplyNudge(double dx, double dy)
         {
-            if (_selectedField == null) return;
+            if (_selectedFields.Count == 0 && _selectedField != null) _selectedFields.Add(_selectedField);
+            if (_selectedFields.Count == 0) return;
+
             PushUndoState();
 
-            _selectedField.X = Math.Max(0.0, Math.Min(0.98, Math.Round(_selectedField.X + dx, 4)));
-            _selectedField.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(_selectedField.Y + dy, 4)));
+            foreach (var sf in _selectedFields)
+            {
+                sf.X = Math.Max(0.0, Math.Min(0.98, Math.Round(sf.X + dx, 4)));
+                sf.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(sf.Y + dy, 4)));
+            }
 
-            UpdateSidebarFromField(_selectedField);
+            if (_selectedField != null) UpdateSidebarFromField(_selectedField);
             RedrawAllCanvasBoxes();
+            TxtStatusMessage.Text = $"🎯 Nudged {_selectedFields.Count} box{(_selectedFields.Count > 1 ? "es" : "")}.";
         }
 
         private void ExpandBox_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedField == null) return;
+            if (_selectedFields.Count == 0 && _selectedField != null) _selectedFields.Add(_selectedField);
+            if (_selectedFields.Count == 0) return;
+
             PushUndoState();
             double step = (RbStepNormal?.IsChecked == true) ? 0.004 : 0.001;
-            _selectedField.X = Math.Max(0.0, Math.Round(_selectedField.X - step / 2.0, 4));
-            _selectedField.Y = Math.Max(0.0, Math.Round(_selectedField.Y - step / 2.0, 4));
-            _selectedField.W = Math.Min(1.0 - _selectedField.X, Math.Round(_selectedField.W + step, 4));
-            _selectedField.H = Math.Min(1.0 - _selectedField.Y, Math.Round(_selectedField.H + step, 4));
-            UpdateSidebarFromField(_selectedField);
+
+            foreach (var sf in _selectedFields)
+            {
+                sf.X = Math.Max(0.0, Math.Round(sf.X - step / 2.0, 4));
+                sf.Y = Math.Max(0.0, Math.Round(sf.Y - step / 2.0, 4));
+                sf.W = Math.Min(1.0 - sf.X, Math.Round(sf.W + step, 4));
+                sf.H = Math.Min(1.0 - sf.Y, Math.Round(sf.H + step, 4));
+            }
+
+            if (_selectedField != null) UpdateSidebarFromField(_selectedField);
             RedrawAllCanvasBoxes();
+            TxtStatusMessage.Text = $"➕ Expanded {_selectedFields.Count} box{(_selectedFields.Count > 1 ? "es" : "")}.";
         }
 
         private void ShrinkBox_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedField == null) return;
+            if (_selectedFields.Count == 0 && _selectedField != null) _selectedFields.Add(_selectedField);
+            if (_selectedFields.Count == 0) return;
+
             PushUndoState();
             double step = (RbStepNormal?.IsChecked == true) ? 0.004 : 0.001;
-            if (_selectedField.W <= 0.004 || _selectedField.H <= 0.004) return;
-            _selectedField.X = Math.Min(0.98, Math.Round(_selectedField.X + step / 2.0, 4));
-            _selectedField.Y = Math.Min(0.98, Math.Round(_selectedField.Y + step / 2.0, 4));
-            _selectedField.W = Math.Max(0.002, Math.Round(_selectedField.W - step, 4));
-            _selectedField.H = Math.Max(0.002, Math.Round(_selectedField.H - step, 4));
-            UpdateSidebarFromField(_selectedField);
+
+            foreach (var sf in _selectedFields)
+            {
+                if (sf.W <= 0.004 || sf.H <= 0.004) continue;
+                sf.X = Math.Min(0.98, Math.Round(sf.X + step / 2.0, 4));
+                sf.Y = Math.Min(0.98, Math.Round(sf.Y + step / 2.0, 4));
+                sf.W = Math.Max(0.002, Math.Round(sf.W - step, 4));
+                sf.H = Math.Max(0.002, Math.Round(sf.H - step, 4));
+            }
+
+            if (_selectedField != null) UpdateSidebarFromField(_selectedField);
             RedrawAllCanvasBoxes();
+            TxtStatusMessage.Text = $"➖ Shrunk {_selectedFields.Count} box{(_selectedFields.Count > 1 ? "es" : "")}.";
         }
 
         private void PopulateFieldCombo()
@@ -481,11 +509,17 @@ namespace SOLUM_UI
                     var match = _fields.FirstOrDefault(f => string.Equals(f.Key, _initialFieldKey, StringComparison.OrdinalIgnoreCase));
                     if (match != null)
                     {
+                        _selectedField = match;
+                        _selectedFields.Clear();
+                        _selectedFields.Add(match);
                         CmbFields.SelectedItem = match;
                         ScrollToField(match);
                         return;
                     }
                 }
+                _selectedField = _fields[0];
+                _selectedFields.Clear();
+                _selectedFields.Add(_selectedField);
                 CmbFields.SelectedIndex = 0;
             }
         }
@@ -535,7 +569,7 @@ namespace SOLUM_UI
 
             foreach (var f in _fields)
             {
-                bool isSelected = (_selectedField != null && _selectedField.Key == f.Key);
+                bool isSelected = _selectedFields.Contains(f) || (_selectedField != null && _selectedField.Key == f.Key);
 
                 double left = f.X * cW;
                 double top = f.Y * cH;
@@ -660,6 +694,8 @@ namespace SOLUM_UI
             if (CmbFields.SelectedItem is TemplateFieldItem item)
             {
                 _selectedField = item;
+                _selectedFields.Clear();
+                _selectedFields.Add(item);
                 _activeRoiTokens.Clear();
                 UpdateSidebarFromField(item);
                 RedrawAllCanvasBoxes();
@@ -670,8 +706,16 @@ namespace SOLUM_UI
         private void UpdateSidebarFromField(TemplateFieldItem f)
         {
             if (f == null) return;
-            TxtFieldKey.Text = f.Key;
-            TxtFieldCategory.Text = f.Category;
+            if (_selectedFields.Count > 1)
+            {
+                TxtFieldKey.Text = $"{_selectedFields.Count} boxes selected";
+                TxtFieldCategory.Text = "Multi-Select (Shift)";
+            }
+            else
+            {
+                TxtFieldKey.Text = f.Key;
+                TxtFieldCategory.Text = f.Category;
+            }
             TxtValX.Text = f.X.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
             TxtValY.Text = f.Y.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
             TxtValW.Text = f.W.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
@@ -715,17 +759,59 @@ namespace SOLUM_UI
                 if (fieldItem != null)
                 {
                     PushUndoState();
-                    _selectedField = fieldItem;
+                    bool isShift = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
+
+                    if (isShift)
+                    {
+                        // Shift+Click: Toggle field in multi-selection
+                        if (_selectedFields.Contains(fieldItem))
+                        {
+                            if (_selectedFields.Count > 1)
+                            {
+                                _selectedFields.Remove(fieldItem);
+                                _selectedField = _selectedFields.FirstOrDefault();
+                            }
+                        }
+                        else
+                        {
+                            _selectedFields.Add(fieldItem);
+                            _selectedField = fieldItem;
+                        }
+                    }
+                    else
+                    {
+                        // Standard Click: If clicking an unselected box, select only this box.
+                        // If clicking an already selected box, retain multi-selection for simultaneous dragging/resizing.
+                        if (!_selectedFields.Contains(fieldItem))
+                        {
+                            _selectedFields.Clear();
+                            _selectedFields.Add(fieldItem);
+                            _selectedField = fieldItem;
+                        }
+                        else
+                        {
+                            _selectedField = fieldItem;
+                        }
+                    }
+
                     _activeHandle = handleType;
-                    CmbFields.SelectedItem = fieldItem;
+                    CmbFields.SelectedItem = _selectedField;
+
+                    // Snapshot starting coordinates for all selected fields for simultaneous resizing/dragging
+                    _origCoords.Clear();
+                    foreach (var sf in _selectedFields)
+                    {
+                        _origCoords[sf] = new BoxCoordSnapshot { X = sf.X, Y = sf.Y, W = sf.W, H = sf.H };
+                    }
+
                     _isDragging = true;
                     _dragStartPoint = e.GetPosition(OverlayCanvas);
-                    _origX = fieldItem.X;
-                    _origY = fieldItem.Y;
-                    _origW = fieldItem.W;
-                    _origH = fieldItem.H;
                     OverlayCanvas.CaptureMouse();
                     e.Handled = true;
+
+                    UpdateSidebarFromField(_selectedField);
+                    RedrawAllCanvasBoxes();
+                    TxtStatusMessage.Text = $"● {_selectedFields.Count} box{(_selectedFields.Count > 1 ? "es" : "")} selected. Hold Shift to add/remove.";
                 }
                 else
                 {
@@ -754,69 +840,75 @@ namespace SOLUM_UI
                 return;
             }
 
-            if (_isDragging && _selectedField != null)
+            if (_isDragging && _origCoords.Count > 0)
             {
                 var curPos = e.GetPosition(OverlayCanvas);
                 double dx = (curPos.X - _dragStartPoint.X) / OverlayCanvas.Width;
                 double dy = (curPos.Y - _dragStartPoint.Y) / OverlayCanvas.Height;
 
-                switch (_activeHandle)
+                foreach (var kvp in _origCoords)
                 {
-                    case ResizeHandleType.Move:
-                        _selectedField.X = Math.Max(0, Math.Min(0.98, Math.Round(_origX + dx, 3)));
-                        _selectedField.Y = Math.Max(0, Math.Min(0.98, Math.Round(_origY + dy, 3)));
-                        break;
+                    var sf = kvp.Key;
+                    var orig = kvp.Value;
 
-                    case ResizeHandleType.BottomRight:
-                        _selectedField.W = Math.Max(0.005, Math.Min(1.0 - _selectedField.X, Math.Round(_origW + dx, 3)));
-                        _selectedField.H = Math.Max(0.005, Math.Min(1.0 - _selectedField.Y, Math.Round(_origH + dy, 3)));
-                        break;
+                    switch (_activeHandle)
+                    {
+                        case ResizeHandleType.Move:
+                            sf.X = Math.Max(0.0, Math.Min(0.98, Math.Round(orig.X + dx, 4)));
+                            sf.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(orig.Y + dy, 4)));
+                            break;
 
-                    case ResizeHandleType.BottomLeft:
-                        double newX_bl = Math.Max(0, Math.Min(_origX + _origW - 0.005, Math.Round(_origX + dx, 3)));
-                        _selectedField.W = Math.Max(0.005, Math.Round(_origW - (newX_bl - _origX), 3));
-                        _selectedField.X = newX_bl;
-                        _selectedField.H = Math.Max(0.005, Math.Min(1.0 - _selectedField.Y, Math.Round(_origH + dy, 3)));
-                        break;
+                        case ResizeHandleType.BottomRight:
+                            sf.W = Math.Max(0.003, Math.Min(1.0 - sf.X, Math.Round(orig.W + dx, 4)));
+                            sf.H = Math.Max(0.003, Math.Min(1.0 - sf.Y, Math.Round(orig.H + dy, 4)));
+                            break;
 
-                    case ResizeHandleType.TopRight:
-                        double newY_tr = Math.Max(0, Math.Min(_origY + _origH - 0.005, Math.Round(_origY + dy, 3)));
-                        _selectedField.H = Math.Max(0.005, Math.Round(_origH - (newY_tr - _origY), 3));
-                        _selectedField.Y = newY_tr;
-                        _selectedField.W = Math.Max(0.005, Math.Min(1.0 - _selectedField.X, Math.Round(_origW + dx, 3)));
-                        break;
+                        case ResizeHandleType.BottomLeft:
+                            double newX_bl = Math.Max(0.0, Math.Min(orig.X + orig.W - 0.003, Math.Round(orig.X + dx, 4)));
+                            sf.W = Math.Max(0.003, Math.Round(orig.W - (newX_bl - orig.X), 4));
+                            sf.X = newX_bl;
+                            sf.H = Math.Max(0.003, Math.Min(1.0 - sf.Y, Math.Round(orig.H + dy, 4)));
+                            break;
 
-                    case ResizeHandleType.TopLeft:
-                        double newX_tl = Math.Max(0, Math.Min(_origX + _origW - 0.005, Math.Round(_origX + dx, 3)));
-                        double newY_tl = Math.Max(0, Math.Min(_origY + _origH - 0.005, Math.Round(_origY + dy, 3)));
-                        _selectedField.W = Math.Max(0.005, Math.Round(_origW - (newX_tl - _origX), 3));
-                        _selectedField.H = Math.Max(0.005, Math.Round(_origH - (newY_tl - _origY), 3));
-                        _selectedField.X = newX_tl;
-                        _selectedField.Y = newY_tl;
-                        break;
+                        case ResizeHandleType.TopRight:
+                            double newY_tr = Math.Max(0.0, Math.Min(orig.Y + orig.H - 0.003, Math.Round(orig.Y + dy, 4)));
+                            sf.H = Math.Max(0.003, Math.Round(orig.H - (newY_tr - orig.Y), 4));
+                            sf.Y = newY_tr;
+                            sf.W = Math.Max(0.003, Math.Min(1.0 - sf.X, Math.Round(orig.W + dx, 4)));
+                            break;
 
-                    case ResizeHandleType.Right:
-                        _selectedField.W = Math.Max(0.005, Math.Min(1.0 - _selectedField.X, Math.Round(_origW + dx, 3)));
-                        break;
+                        case ResizeHandleType.TopLeft:
+                            double newX_tl = Math.Max(0.0, Math.Min(orig.X + orig.W - 0.003, Math.Round(orig.X + dx, 4)));
+                            double newY_tl = Math.Max(0.0, Math.Min(orig.Y + orig.H - 0.003, Math.Round(orig.Y + dy, 4)));
+                            sf.W = Math.Max(0.003, Math.Round(orig.W - (newX_tl - orig.X), 4));
+                            sf.H = Math.Max(0.003, Math.Round(orig.H - (newY_tl - orig.Y), 4));
+                            sf.X = newX_tl;
+                            sf.Y = newY_tl;
+                            break;
 
-                    case ResizeHandleType.Left:
-                        double newX_l = Math.Max(0, Math.Min(_origX + _origW - 0.005, Math.Round(_origX + dx, 3)));
-                        _selectedField.W = Math.Max(0.005, Math.Round(_origW - (newX_l - _origX), 3));
-                        _selectedField.X = newX_l;
-                        break;
+                        case ResizeHandleType.Right:
+                            sf.W = Math.Max(0.003, Math.Min(1.0 - sf.X, Math.Round(orig.W + dx, 4)));
+                            break;
 
-                    case ResizeHandleType.Bottom:
-                        _selectedField.H = Math.Max(0.005, Math.Min(1.0 - _selectedField.Y, Math.Round(_origH + dy, 3)));
-                        break;
+                        case ResizeHandleType.Left:
+                            double newX_l = Math.Max(0.0, Math.Min(orig.X + orig.W - 0.003, Math.Round(orig.X + dx, 4)));
+                            sf.W = Math.Max(0.003, Math.Round(orig.W - (newX_l - orig.X), 4));
+                            sf.X = newX_l;
+                            break;
 
-                    case ResizeHandleType.Top:
-                        double newY_t = Math.Max(0, Math.Min(_origY + _origH - 0.005, Math.Round(_origY + dy, 3)));
-                        _selectedField.H = Math.Max(0.005, Math.Round(_origH - (newY_t - _origY), 3));
-                        _selectedField.Y = newY_t;
-                        break;
+                        case ResizeHandleType.Bottom:
+                            sf.H = Math.Max(0.003, Math.Min(1.0 - sf.Y, Math.Round(orig.H + dy, 4)));
+                            break;
+
+                        case ResizeHandleType.Top:
+                            double newY_t = Math.Max(0.0, Math.Min(orig.Y + orig.H - 0.003, Math.Round(orig.Y + dy, 4)));
+                            sf.H = Math.Max(0.003, Math.Round(orig.H - (newY_t - orig.Y), 4));
+                            sf.Y = newY_t;
+                            break;
+                    }
                 }
 
-                UpdateSidebarFromField(_selectedField);
+                if (_selectedField != null) UpdateSidebarFromField(_selectedField);
                 RedrawAllCanvasBoxes();
             }
         }
