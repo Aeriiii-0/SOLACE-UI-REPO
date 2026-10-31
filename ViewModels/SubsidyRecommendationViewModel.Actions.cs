@@ -148,6 +148,18 @@ namespace SOLUM_UI.ViewModels
                 return;
             }
 
+            if (_reassessmentCooldowns.TryGetValue(targetId, out var lastTime))
+            {
+                var elapsed = DateTime.UtcNow - lastTime;
+                var cd = ReassessmentCooldown;
+                if (elapsed < cd)
+                {
+                    int rem = (int)Math.Ceiling((cd - elapsed).TotalSeconds);
+                    ToastNotification.Show("Re-assessment Cooldown", $"Please wait {rem}s before re-assessing {item.Name} again.", ToastType.Warning);
+                    return;
+                }
+            }
+
             try
             {
                 var resp = await _apiService.PredictCandidateAsync(targetId);
@@ -163,6 +175,9 @@ namespace SOLUM_UI.ViewModels
                     {
                         OnPropertyChanged(nameof(ActiveCandidate));
                     }
+
+                    // Record cooldown timestamp
+                    RecordReassessment(targetId);
 
                     // Recalculate quota & sort to update queue order and badges
                     RecalculateQuotaAndFilter();
@@ -188,6 +203,18 @@ namespace SOLUM_UI.ViewModels
             if (item == null) return;
             Guid targetId = item.SoloParentId != Guid.Empty ? item.SoloParentId : (Guid.TryParse(item.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
             if (targetId == Guid.Empty) return;
+
+            if (_reassessmentCooldowns.TryGetValue(targetId, out var lastTime))
+            {
+                var elapsed = DateTime.UtcNow - lastTime;
+                var cd = ReassessmentCooldown;
+                if (elapsed < cd)
+                {
+                    int rem = (int)Math.Ceiling((cd - elapsed).TotalSeconds);
+                    ToastNotification.Show("Re-assessment Cooldown", $"Please wait {rem}s before re-assessing {item.Name} again.", ToastType.Warning);
+                    return;
+                }
+            }
 
             try
             {

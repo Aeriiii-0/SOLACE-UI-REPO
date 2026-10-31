@@ -45,7 +45,9 @@
                             <Button HorizontalAlignment="Right" VerticalAlignment="Top"
                                     Width="30" Height="30" Cursor="Hand"
                                     BorderThickness="0" Background="White"
-                                    ToolTip="Re-assess &amp; re-score applicant via live ML model (Right-click to edit circumstances)"
+                                    ToolTip="{Binding ActiveCandidateReassessmentTooltip}"
+                                    ToolTipService.ShowOnDisabled="True"
+                                    IsEnabled="{Binding CanReassessActiveCandidate}"
                                     Command="{Binding QuickPredictCandidateCommand}"
                                     CommandParameter="{Binding ActiveCandidate}">
                                 <Button.Template>

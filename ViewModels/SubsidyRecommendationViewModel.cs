@@ -149,7 +149,109 @@ namespace SOLUM_UI.ViewModels
         public string ShortlistBatchModeButtonText => IsShortlistBatchMode ? "Batch Mode: ON" : "Batch Select";
         public void RecalculateShortlistSelectionCounts() { OnPropertyChanged(nameof(IsAllShortlistSelected)); OnPropertyChanged(nameof(ShortlistSelectedCount)); OnPropertyChanged(nameof(HasShortlistSelection)); OnPropertyChanged(nameof(ShortlistBatchActionLabel)); OnPropertyChanged(nameof(SelectAllShortlistButtonText)); }
 
-        public SubsidyItem ActiveCandidate { get => _activeCandidate; set => SetProperty(ref _activeCandidate, value); }
+                public SubsidyItem ActiveCandidate
+        {
+            get => _activeCandidate;
+            set
+            {
+                if (SetProperty(ref _activeCandidate, value))
+                {
+                    OnPropertyChanged(nameof(CanReassessActiveCandidate));
+                    OnPropertyChanged(nameof(ActiveCandidateReassessmentTooltip));
+                    if (!CanReassessActiveCandidate)
+                    {
+                        EnsureCooldownTickerStarted();
+                    }
+                }
+            }
+        }
+
+        public static TimeSpan ReassessmentCooldown => TimeSpan.FromSeconds(
+            (int.TryParse(System.Configuration.ConfigurationManager.AppSettings["SubsidyReassessmentCooldownSeconds"], out int v) && v > 0) ? v : 30);
+
+        private readonly Dictionary<Guid, DateTime> _reassessmentCooldowns = new Dictionary<Guid, DateTime>();
+        private System.Windows.Threading.DispatcherTimer _cooldownTicker;
+
+        public bool CanReassessActiveCandidate
+        {
+            get
+            {
+                if (IsLoading || ActiveCandidate == null) return false;
+                Guid targetId = ActiveCandidate.SoloParentId != Guid.Empty ? ActiveCandidate.SoloParentId : (Guid.TryParse(ActiveCandidate.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
+                if (targetId != Guid.Empty && _reassessmentCooldowns.TryGetValue(targetId, out var lastTime))
+                {
+                    return (DateTime.UtcNow - lastTime) >= ReassessmentCooldown;
+                }
+                return true;
+            }
+        }
+
+        public string ActiveCandidateReassessmentTooltip
+        {
+            get
+            {
+                if (ActiveCandidate != null)
+                {
+                    Guid targetId = ActiveCandidate.SoloParentId != Guid.Empty ? ActiveCandidate.SoloParentId : (Guid.TryParse(ActiveCandidate.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
+                    if (targetId != Guid.Empty && _reassessmentCooldowns.TryGetValue(targetId, out var lastTime))
+                    {
+                        var elapsed = DateTime.UtcNow - lastTime;
+                        var cd = ReassessmentCooldown;
+                        if (elapsed < cd)
+                        {
+                            int rem = (int)Math.Ceiling((cd - elapsed).TotalSeconds);
+                            return $"Re-assessment cooldown active: please wait {rem}s before re-scoring again.";
+                        }
+                    }
+                }
+                return "Re-assess & re-score applicant via live ML model (Right-click to edit circumstances)";
+            }
+        }
+
+        public void RecordReassessment(Guid candidateId)
+        {
+            if (candidateId == Guid.Empty) return;
+            _reassessmentCooldowns[candidateId] = DateTime.UtcNow;
+            OnPropertyChanged(nameof(CanReassessActiveCandidate));
+            OnPropertyChanged(nameof(ActiveCandidateReassessmentTooltip));
+            EnsureCooldownTickerStarted();
+        }
+
+        public void EnsureCooldownTickerStarted()
+        {
+            if (_cooldownTicker == null)
+            {
+                _cooldownTicker = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(1)
+                };
+                _cooldownTicker.Tick += (s, e) =>
+                {
+                    OnPropertyChanged(nameof(CanReassessActiveCandidate));
+                    OnPropertyChanged(nameof(ActiveCandidateReassessmentTooltip));
+
+                    bool anyActive = false;
+                    var now = DateTime.UtcNow;
+                    var cd = ReassessmentCooldown;
+                    foreach (var kvp in _reassessmentCooldowns)
+                    {
+                        if ((now - kvp.Value) < cd)
+                        {
+                            anyActive = true;
+                            break;
+                        }
+                    }
+                    if (!anyActive && _cooldownTicker.IsEnabled)
+                    {
+                        _cooldownTicker.Stop();
+                    }
+                };
+            }
+            if (!_cooldownTicker.IsEnabled)
+            {
+                _cooldownTicker.Start();
+            }
+        }
         public bool IsDrawerOpen { get => _isDrawerOpen; set => SetProperty(ref _isDrawerOpen, value); } public bool IsOutlierModalOpen { get => _isOutlierModalOpen; set => SetProperty(ref _isOutlierModalOpen, value); }
         public string OutlierModalTitle { get => _outlierModalTitle; set => SetProperty(ref _outlierModalTitle, value); } public string OutlierModalConfirmButtonText => (_shortlistRevokeTargets != null && _shortlistRevokeTargets.Count > 0) ? "Confirm Revocation" : "Confirm Rejection";
         public SubsidyItem OutlierTarget { get => _outlierTarget; set { SetProperty(ref _outlierTarget, value); OnPropertyChanged(nameof(OutlierTargetNameAndId)); } }
