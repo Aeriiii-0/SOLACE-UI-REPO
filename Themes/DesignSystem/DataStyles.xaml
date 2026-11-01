@@ -1,0 +1,234 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Colors.xaml"/>
+        <ResourceDictionary Source="Typography.xaml"/>
+        <ResourceDictionary Source="Effects.xaml"/>
+        <ResourceDictionary Source="ScrollStyles.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- ===================== ListView / GridView ===================== -->
+
+    <!-- Column header: hover tint, resize gripper, auto-collapses when its column is null (matches legacy GvHeader behaviour) -->
+    <Style x:Key="DsGridViewColumnHeader" TargetType="GridViewColumnHeader">
+        <Setter Property="FontFamily" Value="{StaticResource DsFontFamily}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource DsTextMutedBrush}"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="GridViewColumnHeader">
+                    <Grid>
+                        <Border x:Name="HeaderBg"
+                                Background="{StaticResource DsTableHeaderBrush}"
+                                BorderBrush="{StaticResource DsBorderBrush}"
+                                BorderThickness="0,0,0,1">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"
+                                              TextBlock.Foreground="{TemplateBinding Foreground}"
+                                              TextBlock.FontFamily="{TemplateBinding FontFamily}"
+                                              TextBlock.FontSize="{TemplateBinding FontSize}"
+                                              TextBlock.FontWeight="{TemplateBinding FontWeight}"/>
+                        </Border>
+                        <Rectangle HorizontalAlignment="Right" Width="1" Margin="0,12"
+                                   Fill="{StaticResource DsBorderBrush}" IsHitTestVisible="False"/>
+                        <Thumb x:Name="PART_HeaderGripper" HorizontalAlignment="Right" Width="6" Cursor="SizeWE" Opacity="0">
+                            <Thumb.Template>
+                                <ControlTemplate TargetType="Thumb">
+                                    <Border Background="Transparent"/>
+                                </ControlTemplate>
+                            </Thumb.Template>
+                        </Thumb>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="HeaderBg" Property="Background" Value="{StaticResource DsPrimaryTintBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DsPrimaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="Column" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="DsGridViewColumnHeaderCenter" TargetType="GridViewColumnHeader" BasedOn="{StaticResource DsGridViewColumnHeader}">
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Row: hairline divider, hover tint, selected tint with a brand accent bar, subtle zebra via AlternationCount=2 -->
+    <Style x:Key="DsListViewItem" TargetType="ListViewItem">
+        <Setter Property="Background" Value="{StaticResource DsSurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DsDividerBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListViewItem">
+                    <Border x:Name="RowBg"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Rectangle x:Name="AccentBar" Width="3" HorizontalAlignment="Left"
+                                       Fill="{StaticResource DsPrimaryBrush}" Visibility="Collapsed"/>
+                            <GridViewRowPresenter VerticalAlignment="Stretch" Margin="2,0,2,0"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                            <Setter TargetName="RowBg" Property="Background" Value="{StaticResource DsSurfaceSubtleBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="RowBg" Property="Background" Value="{StaticResource DsSurfaceHoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="RowBg" Property="Background" Value="{StaticResource DsSurfaceSelectedBrush}"/>
+                            <Setter TargetName="AccentBar" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===================== DataGrid ===================== -->
+
+    <Style x:Key="DsDataGridColumnHeader" TargetType="DataGridColumnHeader">
+        <Setter Property="FontFamily" Value="{StaticResource DsFontFamily}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource DsTextMutedBrush}"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridColumnHeader">
+                    <Grid>
+                        <Border x:Name="HeaderBg"
+                                Background="{StaticResource DsTableHeaderBrush}"
+                                BorderBrush="{StaticResource DsBorderBrush}"
+                                BorderThickness="0,0,0,1">
+                            <Grid Margin="{TemplateBinding Padding}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter VerticalAlignment="Center"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                                <Path x:Name="SortArrowAsc" Grid.Column="1" Margin="6,0,0,0"
+                                      Data="M0,4 L4,0 L8,4" Stroke="{StaticResource DsPrimaryBrush}" StrokeThickness="1.6"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      VerticalAlignment="Center" Visibility="Collapsed"/>
+                                <Path x:Name="SortArrowDesc" Grid.Column="1" Margin="6,0,0,0"
+                                      Data="M0,0 L4,4 L8,0" Stroke="{StaticResource DsPrimaryBrush}" StrokeThickness="1.6"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      VerticalAlignment="Center" Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                        <Rectangle HorizontalAlignment="Right" Width="1" Margin="0,12"
+                                   Fill="{StaticResource DsBorderBrush}" IsHitTestVisible="False"/>
+                        <Thumb x:Name="PART_RightHeaderGripper" HorizontalAlignment="Right" Width="6" Cursor="SizeWE" Opacity="0">
+                            <Thumb.Template>
+                                <ControlTemplate TargetType="Thumb">
+                                    <Border Background="Transparent"/>
+                                </ControlTemplate>
+                            </Thumb.Template>
+                        </Thumb>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="HeaderBg" Property="Background" Value="{StaticResource DsPrimaryTintBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DsPrimaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="SortDirection" Value="Ascending">
+                            <Setter TargetName="SortArrowAsc" Property="Visibility" Value="Visible"/>
+                            <Setter Property="Foreground" Value="{StaticResource DsPrimaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="SortDirection" Value="Descending">
+                            <Setter TargetName="SortArrowDesc" Property="Visibility" Value="Visible"/>
+                            <Setter Property="Foreground" Value="{StaticResource DsPrimaryBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Row: keeps the stock row template (virtualization-safe), only colours change through triggers -->
+    <Style x:Key="DsDataGridRow" TargetType="DataGridRow">
+        <Setter Property="Background" Value="{StaticResource DsSurfaceBrush}"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="MinHeight" Value="44"/>
+        <Style.Triggers>
+            <Trigger Property="AlternationIndex" Value="1">
+                <Setter Property="Background" Value="{StaticResource DsSurfaceSubtleBrush}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource DsSurfaceHoverBrush}"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource DsSurfaceSelectedBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource DsTextHeadingBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Cell: no focus rectangle, vertically centered content -->
+    <Style x:Key="DsDataGridCell" TargetType="DataGridCell">
+        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Border Background="Transparent" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                        <ContentPresenter VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="DsDataGrid" TargetType="DataGrid">
+        <Setter Property="Background" Value="{StaticResource DsSurfaceBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource DsTextBodyBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource DsFontFamily}"/>
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource DsDividerBrush}"/>
+        <Setter Property="RowHeaderWidth" Value="0"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+        <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="CanUserResizeRows" Value="False"/>
+        <Setter Property="SelectionUnit" Value="FullRow"/>
+        <Setter Property="AlternationCount" Value="2"/>
+        <Setter Property="ColumnHeaderStyle" Value="{StaticResource DsDataGridColumnHeader}"/>
+        <Setter Property="RowStyle" Value="{StaticResource DsDataGridRow}"/>
+        <Setter Property="CellStyle" Value="{StaticResource DsDataGridCell}"/>
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+        <Style.Resources>
+            <Style TargetType="ScrollBar" BasedOn="{StaticResource DsScrollBar}"/>
+        </Style.Resources>
+    </Style>
+
+</ResourceDictionary>
