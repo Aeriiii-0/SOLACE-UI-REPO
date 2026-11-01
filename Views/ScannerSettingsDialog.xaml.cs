@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using SOLUM_UI.Models;
 using SOLUM_UI.Services;
 
@@ -13,6 +15,12 @@ namespace SOLUM_UI
     {
         public ScannerSettings Settings { get; private set; }
         private List<ScannerDeviceInfo> _availableScanners = new List<ScannerDeviceInfo>();
+
+        // Smooth header dragging fields
+        private Point _dragStartPoint;
+        private bool _isDragging = false;
+        private double _startTransformX = 0;
+        private double _startTransformY = 0;
 
         public ScannerSettingsDialog(ScannerSettings currentSettings = null)
         {
@@ -25,7 +33,6 @@ namespace SOLUM_UI
                 ApplySize();
                 await RefreshDevicesListAsync();
             };
-            SizeChanged += (s, e) => ApplySize();
         }
 
         private void ApplySize()
@@ -53,7 +60,7 @@ namespace SOLUM_UI
             if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
         }
 
-        private void Backdrop_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void Backdrop_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.OriginalSource == BackdropBorder)
             {
@@ -61,6 +68,42 @@ namespace SOLUM_UI
                 Close();
             }
         }
+
+        #region Header Dragging
+        private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Do not initiate drag if user clicked a child Button (such as the Close X button)
+            var dep = e.OriginalSource as DependencyObject;
+            while (dep != null && dep != HeaderBorder)
+            {
+                if (dep is Button) return;
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            _isDragging = true;
+            _dragStartPoint = e.GetPosition(this);
+            _startTransformX = DialogShellTransform.X;
+            _startTransformY = DialogShellTransform.Y;
+            HeaderBorder.CaptureMouse();
+        }
+
+        private void Header_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!_isDragging) return;
+            Point current = e.GetPosition(this);
+            DialogShellTransform.X = _startTransformX + (current.X - _dragStartPoint.X);
+            DialogShellTransform.Y = _startTransformY + (current.Y - _dragStartPoint.Y);
+        }
+
+        private void Header_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isDragging)
+            {
+                _isDragging = false;
+                HeaderBorder.ReleaseMouseCapture();
+            }
+        }
+        #endregion
 
         private void ApplySettingsToUI()
         {
