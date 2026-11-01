@@ -115,6 +115,15 @@ namespace SOLUM_UI.Models.Api
 
         [JsonProperty("role")]
         public string Role { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("email")]
+        public string Email { get; set; }
+
+        [JsonProperty("username")]
+        public string Username { get; set; }
     }
 
     public class AuditLogTarget

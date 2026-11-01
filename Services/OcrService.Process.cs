@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace SOLUM_UI.Services
 {
@@ -12,6 +15,43 @@ namespace SOLUM_UI.Services
         private static Process _serverProcess;
         private static readonly SemaphoreSlim _warmupLock = new SemaphoreSlim(1, 1);
         private static Task<bool> _ongoingWarmupTask = null;
+        private static readonly ConcurrentQueue<string> _recentServerLogs = new ConcurrentQueue<string>();
+
+        private static void AppendServerLog(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line)) return;
+            _recentServerLogs.Enqueue(line);
+            while (_recentServerLogs.Count > 60)
+            {
+                _recentServerLogs.TryDequeue(out _);
+            }
+        }
+
+        private static void ClearServerLogs()
+        {
+            while (_recentServerLogs.TryDequeue(out _)) { }
+        }
+
+        public static string GetRecentServerErrors()
+        {
+            var logs = _recentServerLogs.ToArray();
+            if (logs.Length == 0) return string.Empty;
+
+            var errorLines = logs.Where(l =>
+                l.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                l.IndexOf("fatal", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                l.IndexOf("exception", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                l.IndexOf("traceback", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                l.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0
+            ).ToList();
+
+            if (errorLines.Count > 0)
+            {
+                return string.Join(Environment.NewLine, errorLines);
+            }
+
+            return string.Join(Environment.NewLine, logs.Skip(Math.Max(0, logs.Length - 10)));
+        }
 
         private static void ReportWarmup(string stage, string detail, int percent, double elapsed, double remaining, bool isReady = false, bool hasFailed = false, string error = null)
         {
@@ -39,16 +79,43 @@ namespace SOLUM_UI.Services
 
         public static async Task<bool> IsServerOnlineAsync()
         {
+            var health = await GetServerHealthAsync();
+            return health.Online && health.EngineLoaded;
+        }
+
+        public static async Task<(bool Online, bool EngineLoaded, string InitError)> GetServerHealthAsync()
+        {
             try
             {
                 using (var response = await _http.GetAsync(ServerUrl + "/health"))
                 {
-                    return response.IsSuccessStatusCode;
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return (false, false, $"HTTP {(int)response.StatusCode} {response.ReasonPhrase}");
+                    }
+
+                    string body = await response.Content.ReadAsStringAsync();
+                    if (!string.IsNullOrWhiteSpace(body))
+                    {
+                        try
+                        {
+                            var jObj = JObject.Parse(body);
+                            bool engineLoaded = jObj["ocr_engine_loaded"]?.Value<bool>() ?? false;
+                            string initErr = jObj["ocr_init_error"]?.ToString();
+                            return (true, engineLoaded, initErr);
+                        }
+                        catch
+                        {
+                            return (true, true, null);
+                        }
+                    }
+
+                    return (true, true, null);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                return (false, false, ex.Message);
             }
         }
 
@@ -128,7 +195,7 @@ namespace SOLUM_UI.Services
         private static async Task<bool> RunWarmupCoreAsync(int timeoutSeconds)
         {
             var sw = Stopwatch.StartNew();
-            const double targetExpectedDuration = 7.0;
+            const double targetExpectedDuration = 8.0;
 
             try
             {
@@ -147,7 +214,7 @@ namespace SOLUM_UI.Services
                     "Starting background Python / OpenVINO process...",
                     25,
                     sw.Elapsed.TotalSeconds,
-                    8.0
+                    targetExpectedDuration
                 );
 
                 var startResult = StartLocalServerProcess();
@@ -180,8 +247,7 @@ namespace SOLUM_UI.Services
                     if (_serverProcess != null && _serverProcess.HasExited)
                     {
                         sw.Stop();
-                        string err = "";
-                        try { err = _serverProcess.StandardError.ReadToEnd(); } catch { }
+                        string err = GetRecentServerErrors();
                         if (string.IsNullOrWhiteSpace(err))
                             err = $"Process terminated unexpectedly with exit code {_serverProcess.ExitCode}.";
 
@@ -221,18 +287,37 @@ namespace SOLUM_UI.Services
 
                     ReportWarmup(stage, detail, pct, elapsed, remaining);
 
-                    if (await IsServerOnlineAsync())
+                    var health = await GetServerHealthAsync();
+                    if (health.Online)
                     {
-                        sw.Stop();
-                        ReportWarmup(
-                            "OCR Engine Ready",
-                            $"AI models loaded successfully ({sw.Elapsed.TotalSeconds:F1}s). Ready for instant scanning.",
-                            100,
-                            sw.Elapsed.TotalSeconds,
-                            0,
-                            isReady: true
-                        );
-                        return true;
+                        if (!health.EngineLoaded && !string.IsNullOrEmpty(health.InitError))
+                        {
+                            sw.Stop();
+                            ReportWarmup(
+                                "OCR Engine Error",
+                                $"AI OCR engine initialization failed: {health.InitError}",
+                                0,
+                                elapsed,
+                                0,
+                                hasFailed: true,
+                                error: health.InitError
+                            );
+                            return false;
+                        }
+
+                        if (health.EngineLoaded)
+                        {
+                            sw.Stop();
+                            ReportWarmup(
+                                "OCR Engine Ready",
+                                $"AI models loaded successfully ({sw.Elapsed.TotalSeconds:F1}s). Ready for instant scanning.",
+                                100,
+                                sw.Elapsed.TotalSeconds,
+                                0,
+                                isReady: true
+                            );
+                            return true;
+                        }
                     }
                 }
             }
@@ -242,8 +327,8 @@ namespace SOLUM_UI.Services
             }
 
             sw.Stop();
-            bool finalCheck = await IsServerOnlineAsync();
-            if (finalCheck)
+            var finalHealth = await GetServerHealthAsync();
+            if (finalHealth.Online && finalHealth.EngineLoaded)
             {
                 ReportWarmup(
                     "OCR Engine Ready",
@@ -256,6 +341,13 @@ namespace SOLUM_UI.Services
                 return true;
             }
 
+            string finalErr = !string.IsNullOrEmpty(finalHealth.InitError)
+                ? finalHealth.InitError
+                : GetRecentServerErrors();
+
+            if (string.IsNullOrEmpty(finalErr))
+                finalErr = "Server did not respond on " + ServerUrl;
+
             ReportWarmup(
                 "OCR Engine Offline",
                 "The local engine could not be contacted after " + timeoutSeconds + "s. Click Retry or verify Python setup.",
@@ -263,7 +355,7 @@ namespace SOLUM_UI.Services
                 sw.Elapsed.TotalSeconds,
                 0,
                 hasFailed: true,
-                error: "Server did not respond on " + ServerUrl
+                error: finalErr
             );
 
             return false;
@@ -300,11 +392,18 @@ namespace SOLUM_UI.Services
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     UseShellExecute = false,
-                    RedirectStandardError = true
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true
                 };
                 try
                 {
-                    _serverProcess = Process.Start(psi);
+                    ClearServerLogs();
+                    _serverProcess = new Process { StartInfo = psi, EnableRaisingEvents = true };
+                    _serverProcess.OutputDataReceived += (s, e) => { if (!string.IsNullOrEmpty(e.Data)) AppendServerLog(e.Data); };
+                    _serverProcess.ErrorDataReceived += (s, e) => { if (!string.IsNullOrEmpty(e.Data)) AppendServerLog(e.Data); };
+                    _serverProcess.Start();
+                    _serverProcess.BeginOutputReadLine();
+                    _serverProcess.BeginErrorReadLine();
                     return (true, null);
                 }
                 catch (Exception ex)
@@ -334,12 +433,33 @@ namespace SOLUM_UI.Services
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 UseShellExecute = false,
-                RedirectStandardError = true
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
             };
 
             try
             {
-                _serverProcess = Process.Start(pyPsi);
+                ClearServerLogs();
+                _serverProcess = new Process { StartInfo = pyPsi, EnableRaisingEvents = true };
+                _serverProcess.OutputDataReceived += (s, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        Debug.WriteLine("[OCR Server] " + e.Data);
+                        AppendServerLog(e.Data);
+                    }
+                };
+                _serverProcess.ErrorDataReceived += (s, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        Debug.WriteLine("[OCR Server stderr] " + e.Data);
+                        AppendServerLog(e.Data);
+                    }
+                };
+                _serverProcess.Start();
+                _serverProcess.BeginOutputReadLine();
+                _serverProcess.BeginErrorReadLine();
                 return (true, null);
             }
             catch (Exception ex)

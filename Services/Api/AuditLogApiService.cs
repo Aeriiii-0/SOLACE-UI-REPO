@@ -33,13 +33,20 @@ namespace SOLUM_UI.Services.Api
             DateTimeOffset? startDate       = null,
             DateTimeOffset? endDate         = null,
             DateTimeOffset? cursorTimestamp = null,
-            string          cursorId        = null)
+            string          cursorId        = null,
+            string          name            = null)
         {
             var sb = new StringBuilder("api/AuditLogs?");
             sb.Append($"pageSize={pageSize}");
 
             if (!string.IsNullOrWhiteSpace(userId))
                 sb.Append($"&userId={Uri.EscapeDataString(userId.Trim())}");
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                sb.Append($"&name={Uri.EscapeDataString(name.Trim())}");
+                sb.Append($"&targetName={Uri.EscapeDataString(name.Trim())}");
+            }
 
             if (!string.IsNullOrWhiteSpace(actionType) &&
                 !actionType.Equals("All", StringComparison.OrdinalIgnoreCase))
