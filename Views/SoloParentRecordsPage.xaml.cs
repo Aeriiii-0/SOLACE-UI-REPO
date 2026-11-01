@@ -636,15 +636,16 @@ namespace SOLUM_UI
                 {
 
                     if (string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase) ||
-
-                        string.Equals(_statusFilter, "Active (Valid)", StringComparison.OrdinalIgnoreCase))
-
+                        string.Equals(_statusFilter, "Active (Valid)", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(_statusFilter, "Active", StringComparison.OrdinalIgnoreCase))
                     {
-
                         isActive = true;
-
                         isDeleted = false;
-
+                    }
+                    else if (string.Equals(_statusFilter, "ExpiringSoon", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isActive = true;
+                        isDeleted = false;
                     }
 
                     else if (string.Equals(_statusFilter, "Inactive", StringComparison.OrdinalIgnoreCase) ||
@@ -860,11 +861,13 @@ namespace SOLUM_UI
 
 
                 if (SortControl != null)
-
                 {
-
                     _allRecords = RecordSortingHelper.Sort(_allRecords, SortControl.SelectedField, SortControl.IsAscending);
+                }
 
+                if (!IsEncoder && !IsBasicUser && _statusFilter == "ExpiringSoon")
+                {
+                    _allRecords = _allRecords.Where(r => r.IsExpiringSoon).ToList();
                 }
 
 
@@ -1055,7 +1058,7 @@ namespace SOLUM_UI
 
                 int end = Math.Min(_totalCount, _currentPage * _pageSize);
 
-                TxtRecordsPageSummary.Text = $"Showing {start}–{end} of {_totalCount:N0}";
+                TxtRecordsPageSummary.Text = $"Showing {start}–{end} of {_totalCount:N0} records";
 
             }
 
@@ -1370,7 +1373,7 @@ namespace SOLUM_UI
 
 
             FilterPopup.IsOpen = false;
-
+            UpdateFilterBadge();
             ApplyFiltersAndPage();
 
         }
@@ -1408,7 +1411,7 @@ namespace SOLUM_UI
 
 
             FilterPopup.IsOpen = false;
-
+            UpdateFilterBadge();
             ApplyFiltersAndPage();
 
         }
@@ -2484,66 +2487,35 @@ namespace SOLUM_UI
 
 
         private void ResizeNameColumn()
-
         {
-
             if (RecordsList.View is GridView gv && gv.Columns.Count >= 9)
-
             {
-
-                // Fixed columns (px)
-
-                const double sex      = 80;
-
-                const double civil    = 110;
-
-                const double dob      = 108;
-
-                const double lastUpd  = 108;
-
-                const double validUntil = 108;
-
-                const double status   = 90;
-
-                const double actions  = 220;  // wider to fit view/edit/renew/export/delete
-
-
+                // Fixed columns for 5-column streamlined layout (px)
+                const double validUntil = 145;
+                const double status     = 115;
+                const double actions    = 135;
 
                 double available = RecordsList.ActualWidth - 2;
-
                 if (available <= 0) return;
 
+                // Hidden columns kept at 0px for code-behind compatibility
+                gv.Columns[2].Width = 0; // ColSex
+                gv.Columns[3].Width = 0; // ColCivilStatus
+                gv.Columns[4].Width = 0; // ColDob
+                gv.Columns[5].Width = 0; // ColLastUpdated
 
+                double totalFixed = validUntil + status + actions;
+                double flex = Math.Max(280, available - totalFixed);
 
-                double totalFixed = sex + civil + dob + lastUpd + validUntil + status + actions;
-
-                double flex = Math.Max(220, available - totalFixed);
-
-
-
-                // Col 0 = NAME  (wider), Col 1 = BARANGAY  (narrower)
-
-                gv.Columns[0].Width = Math.Max(140, flex * 0.58);
-
-                gv.Columns[1].Width = Math.Max(80,  flex * 0.42);
-
-                gv.Columns[2].Width = sex;
-
-                gv.Columns[3].Width = civil;
-
-                gv.Columns[4].Width = dob;
-
-                gv.Columns[5].Width = lastUpd;
-
+                // Col 0 = NAME (62%), Col 1 = BARANGAY (38%)
+                gv.Columns[0].Width = Math.Max(200, flex * 0.62);
+                gv.Columns[1].Width = Math.Max(120, flex * 0.38);
                 gv.Columns[6].Width = validUntil;
-
                 gv.Columns[7].Width = status;
-
                 gv.Columns[8].Width = actions;
-
             }
-
         }
+
 
 
 
@@ -2933,6 +2905,82 @@ namespace SOLUM_UI
 
         }
 
-    }
 
+        // ==================== Status Tabs & Filter Badges ====================
+
+        private void QuickStatusTab_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is RadioButton rb && rb.Tag != null)
+            {
+                string tag = rb.Tag.ToString();
+                _statusFilter = tag;
+                _currentPage = 1;
+                _ = LoadRecordsAsync();
+            }
+        }
+
+        private void RemoveBarangayFilter_Click(object sender, RoutedEventArgs e)
+        {
+            _barangayFilter = "All";
+            if (CmbFilterBarangay != null) CmbFilterBarangay.SelectedIndex = 0;
+            UpdateFilterBadge();
+            ApplyFiltersAndPage();
+        }
+
+        private void RemoveSexFilter_Click(object sender, RoutedEventArgs e)
+        {
+            _sexFilter = "All";
+            if (CmbFilterSex != null) CmbFilterSex.SelectedIndex = 0;
+            UpdateFilterBadge();
+            ApplyFiltersAndPage();
+        }
+
+        private void ClearAllFilters_Click(object sender, RoutedEventArgs e)
+        {
+            FilterReset_Click(sender, e);
+        }
+
+        private void UpdateFilterBadge()
+        {
+            int activeCount = 0;
+            bool hasSex = !string.IsNullOrEmpty(_sexFilter) && _sexFilter != "All";
+            bool hasBarangay = !string.IsNullOrEmpty(_barangayFilter) && _barangayFilter != "All";
+
+            if (hasSex) activeCount++;
+            if (hasBarangay) activeCount++;
+
+            if (FilterDropLabel != null)
+            {
+                FilterDropLabel.Text = activeCount > 0 ? $"Filter ({activeCount})" : "Filter";
+            }
+
+            if (ActiveFiltersPanel != null)
+            {
+                ActiveFiltersPanel.Visibility = activeCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            if (BadgeFilterSex != null)
+            {
+                BadgeFilterSex.Visibility = hasSex ? Visibility.Visible : Visibility.Collapsed;
+                if (TxtBadgeSex != null) TxtBadgeSex.Text = $"Sex: {_sexFilter}";
+            }
+
+            if (BadgeFilterBarangay != null)
+            {
+                BadgeFilterBarangay.Visibility = hasBarangay ? Visibility.Visible : Visibility.Collapsed;
+                if (TxtBadgeBarangay != null) TxtBadgeBarangay.Text = $"Barangay: {_barangayFilter}";
+            }
+        }
+
+        private void RenewRecord_Click(object sender, RoutedEventArgs e)
+        {
+            string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
+            SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
+            if (vm == null) return;
+
+            AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
+            OpenViewDialog(vm);
+        }
+
+    }
 }
