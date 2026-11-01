@@ -10,3 +10,4 @@ namespace SOLUM_UI.Views.Components
         }
     }
 }
+
