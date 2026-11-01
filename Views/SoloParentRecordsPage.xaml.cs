@@ -241,9 +241,9 @@ namespace SOLUM_UI
 
             // GridView column header is 46px, each row is ~44px
 
-            double rowsHeight = availableHeight - 46;
+            double rowsHeight = availableHeight - 44;
 
-            int calculated = (int)Math.Floor(rowsHeight / 44.0);
+            int calculated = (int)Math.Floor(rowsHeight / 42.0);
 
             int optimal = Math.Max(4, Math.Min(50, calculated));
 

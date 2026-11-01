@@ -1787,29 +1787,10 @@
 
 
         <Grid.RowDefinitions>
-
-
-
             <RowDefinition x:Name="PageTitleRow" Height="Auto"/>
-
-
-
             <RowDefinition Height="Auto"/>
-
-
-
             <RowDefinition Height="Auto"/>
-
-
-
             <RowDefinition Height="*"/>
-
-
-
-            <RowDefinition Height="Auto"/>
-
-
-
         </Grid.RowDefinitions>
 
 
@@ -2547,37 +2528,12 @@
 
 
         <Border Grid.Row="3"
-
-
-
-                Margin="24,4,24,14"
-
-
-
-                MinHeight="220"
-
-
-
+                Margin="24,4,24,20"
                 CornerRadius="14"
-
-
-
                 BorderBrush="#E8D4DA"
-
-
-
                 BorderThickness="1.5"
-
-
-
                 Background="White"
-
-
-
                 HorizontalAlignment="Stretch"
-
-
-
                 VerticalAlignment="Stretch">
 
 
@@ -2631,6 +2587,13 @@
 
 
                 </Grid.OpacityMask>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Table Content & States -->
+                <Grid Grid.Row="0">
 
 
 
@@ -3846,6 +3809,258 @@
 
 
 
+                </Grid>
+
+                <!-- Integrated Card Footer for Pagination -->
+                <Border Grid.Row="1" Background="#FAF6F8" BorderBrush="#EFE4E8" BorderThickness="0,1.2,0,0" Padding="18,10">
+        <!-- Paging row (Row 4, hidden for Encoder) -->
+
+
+
+        <Grid x:Name="PagingRow"  >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Dynamic Record Count Summary on Left -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Ellipse Width="6" Height="6" Fill="#22C55E" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <TextBlock x:Name="TxtRecordsPageSummary" Text="Showing 0 of 0 records" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TxtRecordsSummary" Visibility="Collapsed"/>
+            </StackPanel>
+
+            <!-- Centered Navigation Controls (Centered across entire width) -->
+            <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+
+
+                <Button x:Name="BtnBack" Width="105" Height="34" Cursor="Hand"
+
+
+
+                        Click="BtnBack_Click" Margin="0,0,10,0">
+
+
+
+                    <Button.Template>
+
+
+
+                        <ControlTemplate TargetType="Button">
+
+
+
+                            <Border x:Name="Bg" Background="White" CornerRadius="17"
+
+
+
+                                    BorderBrush="#E0D0D5" BorderThickness="1.5">
+
+
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+
+
+                                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
+
+
+
+                                          Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
+
+
+
+                                    <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+
+
+
+                                </StackPanel>
+
+
+
+                            </Border>
+
+
+
+                            <ControlTemplate.Triggers>
+
+
+
+                                <Trigger Property="IsMouseOver" Value="True">
+
+
+
+                                    <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
+
+
+
+                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+
+
+
+                                </Trigger>
+
+
+
+                                <Trigger Property="IsEnabled" Value="False">
+
+
+
+                                    <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+
+
+
+                                </Trigger>
+
+
+
+                            </ControlTemplate.Triggers>
+
+
+
+                        </ControlTemplate>
+
+
+
+                    </Button.Template>
+
+
+
+                </Button>
+
+
+
+
+
+
+
+                <Border Background="#FAF2F5" CornerRadius="14" Padding="14,6"
+
+
+
+                        BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
+
+
+
+                    <TextBlock x:Name="PageInfoText" Text="Page 1 of 1" FontFamily="Segoe UI" FontSize="12"
+
+
+
+                               FontWeight="SemiBold" Foreground="#702943"/>
+
+
+
+                </Border>
+
+
+
+
+
+
+
+                <Button x:Name="BtnNext" Width="105" Height="34" Cursor="Hand"
+
+
+
+                        Click="BtnNext_Click">
+
+
+
+                    <Button.Template>
+
+
+
+                        <ControlTemplate TargetType="Button">
+
+
+
+                            <Border x:Name="Bg" Background="White" CornerRadius="17"
+
+
+
+                                    BorderBrush="#E0D0D5" BorderThickness="1.5">
+
+
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+
+
+                                    <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+
+
+
+                                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
+
+
+
+                                          Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
+
+
+
+                                </StackPanel>
+
+
+
+                            </Border>
+
+
+
+                            <ControlTemplate.Triggers>
+
+
+
+                                <Trigger Property="IsMouseOver" Value="True">
+
+
+
+                                    <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
+
+
+
+                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+
+
+
+                                </Trigger>
+
+
+
+                                <Trigger Property="IsEnabled" Value="False">
+
+
+
+                                    <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+
+
+
+                                </Trigger>
+
+
+
+                            </ControlTemplate.Triggers>
+
+
+
+                        </ControlTemplate>
+
+
+
+                    </Button.Template>
+
+
+
+                </Button>
+
+
+
+            </StackPanel>
+
+
+
+        </Grid>
+                </Border>
             </Grid>
 
 
@@ -4762,261 +4977,14 @@
 
 
 
-        <!-- Paging row (Row 4, hidden for Encoder) -->
 
 
 
-        <Grid x:Name="PagingRow" Grid.Row="4" Margin="24,4,24,18">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
 
-            <!-- Dynamic Record Count Summary on Left -->
-            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <Ellipse Width="6" Height="6" Fill="#22C55E" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                <TextBlock x:Name="TxtRecordsPageSummary" Text="Showing 0 of 0 records" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
-                <TextBlock x:Name="TxtRecordsSummary" Visibility="Collapsed"/>
-            </StackPanel>
 
-            <!-- Centered Navigation Controls (Centered across entire width) -->
-            <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
 
 
-
-                <Button x:Name="BtnBack" Width="105" Height="34" Cursor="Hand"
-
-
-
-                        Click="BtnBack_Click" Margin="0,0,10,0">
-
-
-
-                    <Button.Template>
-
-
-
-                        <ControlTemplate TargetType="Button">
-
-
-
-                            <Border x:Name="Bg" Background="White" CornerRadius="17"
-
-
-
-                                    BorderBrush="#E0D0D5" BorderThickness="1.5">
-
-
-
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-
-
-
-                                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
-
-
-
-                                          Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
-
-
-
-                                    <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
-
-
-
-                                </StackPanel>
-
-
-
-                            </Border>
-
-
-
-                            <ControlTemplate.Triggers>
-
-
-
-                                <Trigger Property="IsMouseOver" Value="True">
-
-
-
-                                    <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
-
-
-
-                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
-
-
-
-                                </Trigger>
-
-
-
-                                <Trigger Property="IsEnabled" Value="False">
-
-
-
-                                    <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
-
-
-
-                                </Trigger>
-
-
-
-                            </ControlTemplate.Triggers>
-
-
-
-                        </ControlTemplate>
-
-
-
-                    </Button.Template>
-
-
-
-                </Button>
-
-
-
-
-
-
-
-                <Border Background="#FAF2F5" CornerRadius="14" Padding="14,6"
-
-
-
-                        BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
-
-
-
-                    <TextBlock x:Name="PageInfoText" Text="Page 1 of 1" FontFamily="Segoe UI" FontSize="12"
-
-
-
-                               FontWeight="SemiBold" Foreground="#702943"/>
-
-
-
-                </Border>
-
-
-
-
-
-
-
-                <Button x:Name="BtnNext" Width="105" Height="34" Cursor="Hand"
-
-
-
-                        Click="BtnNext_Click">
-
-
-
-                    <Button.Template>
-
-
-
-                        <ControlTemplate TargetType="Button">
-
-
-
-                            <Border x:Name="Bg" Background="White" CornerRadius="17"
-
-
-
-                                    BorderBrush="#E0D0D5" BorderThickness="1.5">
-
-
-
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-
-
-
-                                    <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
-
-
-
-                                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
-
-
-
-                                          Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
-
-
-
-                                </StackPanel>
-
-
-
-                            </Border>
-
-
-
-                            <ControlTemplate.Triggers>
-
-
-
-                                <Trigger Property="IsMouseOver" Value="True">
-
-
-
-                                    <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
-
-
-
-                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
-
-
-
-                                </Trigger>
-
-
-
-                                <Trigger Property="IsEnabled" Value="False">
-
-
-
-                                    <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
-
-
-
-                                </Trigger>
-
-
-
-                            </ControlTemplate.Triggers>
-
-
-
-                        </ControlTemplate>
-
-
-
-                    </Button.Template>
-
-
-
-                </Button>
-
-
-
-            </StackPanel>
-
-
-
-        </Grid>
-
-
-
-
-
-
-
-        <components:LoadingOverlay Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" Grid.ColumnSpan="99"
+        <components:LoadingOverlay Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="99"
 
 
 
