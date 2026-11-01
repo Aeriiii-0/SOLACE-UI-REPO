@@ -2493,7 +2493,7 @@ namespace SOLUM_UI
                 // Fixed columns for 5-column streamlined layout (px)
                 const double validUntil = 145;
                 const double status     = 115;
-                const double actions    = 135;
+                const double actions    = 105;
 
                 double available = RecordsList.ActualWidth - 2;
                 if (available <= 0) return;
