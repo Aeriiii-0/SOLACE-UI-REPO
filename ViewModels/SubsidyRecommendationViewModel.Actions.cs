@@ -39,12 +39,28 @@ namespace SOLUM_UI.ViewModels
                     if (orig != null) { orig.IsDisqualified = true; orig.DisqualificationReason = OutlierRejectionReason; orig.Status = "Rejected"; }
                     if (r.EvaluationId != Guid.Empty)
                         _ = _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = r.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = false });
+
+                    AddDisqualifiedCandidateRecord(
+                        r.EvaluationId,
+                        r.SoloParentId,
+                        r.SpId,
+                        r.Name,
+                        r.Barangay,
+                        r.MonthlyIncome,
+                        r.Score,
+                        r.Priority,
+                        r.MinorDependentsCount,
+                        OutlierRejectionReason,
+                        OutlierNotes,
+                        "Admin / Reviewer"
+                    );
                 }
                 _shortlistRevokeTargets = null;
                 IsOutlierModalOpen = false;
                 UpdateShortlistAndFinalCollections();
                 RecalculateQuotaAndFilter();
                 RecalculateShortlistSelectionCounts();
+                NotifyDisqualifiedMetricsChanged();
                 ToastNotification.Show("Revocation Complete", $"{count} candidate(s) revoked ({OutlierRejectionReason}).", ToastType.Warning);
             }
             else if (OutlierTarget != null)
@@ -55,9 +71,192 @@ namespace SOLUM_UI.ViewModels
                 target.Status = "Rejected";
                 if (target.EvaluationId != Guid.Empty)
                     await _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = target.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = false });
+
+                AddDisqualifiedCandidateRecord(
+                    target.EvaluationId,
+                    target.SoloParentId,
+                    target.SpId,
+                    target.Name,
+                    target.Barangay,
+                    target.MonthlyIncome,
+                    target.Score,
+                    target.Priority,
+                    target.Dependants,
+                    OutlierRejectionReason,
+                    OutlierNotes,
+                    "Admin / Reviewer"
+                );
+
+                PagedRecommendations.Remove(target);
+                FilteredRecommendations.Remove(target);
+                if (QueueTotalCount > 0) QueueTotalCount--;
+
                 IsOutlierModalOpen = false;
                 RecalculateQuotaAndFilter();
+                NotifyDisqualifiedMetricsChanged();
                 ToastNotification.Show("Candidate Disqualified", $"{target.Name} disqualified from queue ({OutlierRejectionReason}).", ToastType.Warning);
+            }
+        }
+
+        public void AddDisqualifiedCandidateRecord(
+            Guid evalId, Guid spId, string spNum, string name, string bar,
+            double income, double score, string pri, int dep,
+            string reason, string notes, string by)
+        {
+            var existing = DisqualifiedCandidates.FirstOrDefault(x => (!string.IsNullOrEmpty(spNum) && x.SpId == spNum) || (evalId != Guid.Empty && x.EvaluationId == evalId));
+            if (existing != null)
+            {
+                existing.RejectionReason = reason;
+                existing.RejectionNotes = notes;
+                existing.DisqualifiedBy = by;
+                existing.DisqualifiedAt = DateTime.Now;
+            }
+            else
+            {
+                var item = new DisqualifiedCandidateItem
+                {
+                    EvaluationId = evalId,
+                    SoloParentId = spId,
+                    SpId = spNum,
+                    FullName = name,
+                    Barangay = bar,
+                    MonthlyIncome = income,
+                    PriorityScore = score,
+                    Priority = pri ?? "Medium",
+                    Dependents = dep,
+                    RejectionReason = reason,
+                    RejectionNotes = notes,
+                    DisqualifiedBy = by,
+                    DisqualifiedAt = DateTime.Now
+                };
+                DisqualifiedCandidates.Insert(0, item);
+            }
+            FilterDisqualifiedCandidates();
+        }
+
+        public void FilterDisqualifiedCandidates()
+        {
+            if (DisqualifiedCandidates == null || FilteredDisqualifiedCandidates == null) return;
+
+            var q = DisqualifiedCandidates.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(_disqualifiedReasonFilter) && _disqualifiedReasonFilter != "All Reasons")
+            {
+                q = q.Where(x => string.Equals(x.RejectionReason, _disqualifiedReasonFilter, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(_disqualifiedSearchText))
+            {
+                string t = _disqualifiedSearchText.Trim().ToLowerInvariant();
+                q = q.Where(x => (x.FullName != null && x.FullName.ToLowerInvariant().Contains(t))
+                              || (x.SpId != null && x.SpId.ToLowerInvariant().Contains(t))
+                              || (x.Barangay != null && x.Barangay.ToLowerInvariant().Contains(t))
+                              || (x.RejectionNotes != null && x.RejectionNotes.ToLowerInvariant().Contains(t)));
+            }
+
+            FilteredDisqualifiedCandidates.Clear();
+            foreach (var item in q)
+            {
+                FilteredDisqualifiedCandidates.Add(item);
+            }
+            OnPropertyChanged(nameof(HasFilteredDisqualifiedCandidates));
+            OnPropertyChanged(nameof(HasNoDisqualifiedCandidates));
+        }
+
+        public async Task ReinstateCandidateAsync(DisqualifiedCandidateItem item)
+        {
+            if (item == null) return;
+
+            bool ok = ActionConfirmDialog.Show(
+                "Reinstate Candidate",
+                $"Are you sure you want to reinstate {item.FullName} ({item.SpId})?\n\nThis will remove their statutory disqualification and restore them to the active recommendations queue.",
+                "Reinstate Candidate",
+                "Cancel",
+                ConfirmThemeType.Primary);
+
+            if (!ok) return;
+
+            try
+            {
+                if (item.EvaluationId != Guid.Empty)
+                {
+                    _ = _apiService.ReinstateCandidateAsync(item.EvaluationId);
+                }
+
+                DisqualifiedCandidates.Remove(item);
+                FilteredDisqualifiedCandidates.Remove(item);
+                NotifyDisqualifiedMetricsChanged();
+
+                var orig = _allItems.FirstOrDefault(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId) || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId));
+                if (orig != null)
+                {
+                    orig.IsDisqualified = false;
+                    orig.DisqualificationReason = null;
+                    orig.Status = "Pending";
+                    if (!PagedRecommendations.Contains(orig))
+                        PagedRecommendations.Add(orig);
+                    if (!FilteredRecommendations.Contains(orig))
+                        FilteredRecommendations.Add(orig);
+                }
+                else
+                {
+                    var newItem = new SubsidyItem
+                    {
+                        EvaluationId = item.EvaluationId,
+                        SoloParentId = item.SoloParentId,
+                        SpId = item.SpId,
+                        Name = item.FullName,
+                        Barangay = item.Barangay,
+                        MonthlyIncome = item.MonthlyIncome,
+                        Score = item.PriorityScore,
+                        Priority = item.Priority,
+                        Dependants = item.Dependents,
+                        Status = "Pending",
+                        IsDisqualified = false
+                    };
+                    _allItems.Add(newItem);
+                    PagedRecommendations.Add(newItem);
+                    FilteredRecommendations.Add(newItem);
+                }
+
+                QueueTotalCount++;
+                RecalculateQuotaAndFilter();
+
+                ToastNotification.Show("Candidate Reinstated", $"{item.FullName} has been restored to the recommendations queue.", ToastType.Success);
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show("Reinstatement Error", ex.Message, ToastType.Error);
+            }
+        }
+
+        public async Task ExportDisqualifiedCsvAsync()
+        {
+            var itemsToExport = FilteredDisqualifiedCandidates.ToList();
+            if (itemsToExport.Count == 0)
+            {
+                ToastNotification.Show("No Records", "No disqualified candidate records match the current filter.", ToastType.Info);
+                return;
+            }
+
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                FileName = $"Disqualified_Candidates_Audit_FY{_activeCycleFiscalYear}_{DateTime.Now:yyyyMMdd}.csv",
+                DefaultExt = ".csv",
+                Filter = "CSV file (*.csv)|*.csv"
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("Solo Parent ID,Full Name,Barangay,Monthly Income,Vulnerability Score,Priority Level,Dependents,Disqualification Reason,Audit Justification Notes,Disqualified By,Timestamp");
+                foreach (var c in itemsToExport)
+                {
+                    string cleanNotes = (c.RejectionNotes ?? string.Empty).Replace("\"", "\"\"");
+                    sb.AppendLine($"\"{c.SpId}\",\"{c.FullName}\",\"{c.Barangay}\",\"{c.MonthlyIncome:F2}\",\"{c.PriorityScore:F2}\",\"{c.Priority}\",\"{c.Dependents}\",\"{c.RejectionReason}\",\"{cleanNotes}\",\"{c.DisqualifiedBy}\",\"{c.FormattedDisqualifiedAt}\"");
+                }
+                System.IO.File.WriteAllText(dlg.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
+                ToastNotification.Show("Export Complete", $"Exported {itemsToExport.Count} disqualified candidate record(s) to CSV.", ToastType.Success);
             }
         }
 

@@ -1,0 +1,326 @@
+<UserControl x:Class="SOLUM_UI.Views.Components.ModalDisqualifiedCandidates"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="950">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <Style x:Key="AuditSearchBox" TargetType="TextBox">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Foreground" Value="#111111"/>
+            <Setter Property="BorderBrush" Value="#D0B8C0"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="BorderBrush" Value="#A08090"/></Trigger>
+                            <Trigger Property="IsFocused" Value="True"><Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/><Setter TargetName="Bg" Property="BorderThickness" Value="1.5"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AuditCombo" TargetType="ComboBox">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#111111"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D0B8C0"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid HorizontalAlignment="Stretch">
+                            <Border x:Name="ComboBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                                <Grid Margin="10,0,24,0">
+                                    <ContentPresenter x:Name="ContentSite" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                </Grid>
+                            </Border>
+                            <ToggleButton HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" BorderThickness="0" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Focusable="False" Opacity="0"/>
+                            <Path HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" Data="M7,10L12,15L17,10H7Z" Fill="#702943" Stretch="Uniform" Width="9" Height="9" IsHitTestVisible="False"/>
+                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                                <Border Background="White" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="220" Margin="0,3,0,0">
+                                    <Border.Effect><DropShadowEffect Color="#702943" BlurRadius="12" ShadowDepth="3" Opacity="0.12"/></Border.Effect>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto"><ItemsPresenter/></ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ComboBorder" Property="BorderBrush" Value="#702943"/></Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True"><Setter TargetName="ComboBorder" Property="BorderBrush" Value="#702943"/><Setter TargetName="ComboBorder" Property="BorderThickness" Value="1.5"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ReinstateSmallBtn" TargetType="Button">
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="Background" Value="#FDF2F4"/>
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="BorderBrush" Value="#E0B8C4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#702943"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- Modal Scrim Overlay -->
+    <Grid Background="#7F000000" Visibility="{Binding IsDisqualifiedModalOpen, Converter={StaticResource BoolToVis}}" Panel.ZIndex="1000">
+        <!-- Centered Fixed Modal Dialog Card -->
+        <Border Background="White" CornerRadius="12" BorderBrush="#E0D0D5" BorderThickness="1"
+                Width="900" MaxHeight="660" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="26">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="6" Opacity="0.25"/>
+            </Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Header -->
+                    <RowDefinition Height="Auto"/> <!-- Search & Filter Bar -->
+                    <RowDefinition Height="Auto"/> <!-- Table Column Headers -->
+                    <RowDefinition Height="*"/>    <!-- Candidate Rows List -->
+                    <RowDefinition Height="Auto"/> <!-- Footer -->
+                </Grid.RowDefinitions>
+
+                <!-- Row 0: Header -->
+                <Grid Grid.Row="0" Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,13.85 19.38,15.55 18.32,16.91L7.09,5.68C8.45,4.62 10.15,4 12,4M4,12C4,10.15 4.62,8.45 5.68,7.09L16.91,18.32C15.55,19.38 13.85,20 12,20A8,8 0 0,1 4,12Z"
+                                  Fill="#B91C1C" Width="18" Height="18" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Disqualified &amp; Rejected Candidates Audit Log" FontSize="16" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="Review statutory disqualifications, reviewer justifications, and audit trails for this cycle." FontSize="12" Foreground="#666666" Margin="26,3,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="#FEE2E2" CornerRadius="12" Padding="10,4" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding DisqualifiedButtonText}" FontSize="11" FontWeight="Bold" Foreground="#991B1B"/>
+                        </Border>
+                        <Button Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="4" VerticalAlignment="Center" Command="{Binding CloseDisqualifiedModalCommand}">
+                            <TextBlock Text="✕" FontSize="16" Foreground="#888888" FontWeight="Bold"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 1: Search, Filter & CSV Export Toolbar -->
+                <Grid Grid.Row="1" Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Search Input -->
+                    <TextBox Grid.Column="0"
+                             Text="{Binding DisqualifiedSearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource AuditSearchBox}"
+                             Margin="0,0,10,0"/>
+
+                    <!-- Reason Filter ComboBox -->
+                    <ComboBox Grid.Column="1"
+                              SelectedValue="{Binding DisqualifiedReasonFilter, Mode=TwoWay}"
+                              SelectedValuePath="Content"
+                              Style="{StaticResource AuditCombo}"
+                              Width="230" Margin="0,0,10,0">
+                        <ComboBoxItem Content="All Reasons" IsSelected="True"/>
+                        <ComboBoxItem Content="Ineligible Income / Undisclosed Assets"/>
+                        <ComboBoxItem Content="City Educ Scholarship Overlap / Conflict"/>
+                        <ComboBoxItem Content="Duplicate / Existing Government Grantee"/>
+                        <ComboBoxItem Content="Child Over Age / No Qualified Minor Dependents"/>
+                        <ComboBoxItem Content="Falsified Circumstance or Documentation"/>
+                        <ComboBoxItem Content="Voluntary Withdrawal by Applicant"/>
+                        <ComboBoxItem Content="Other Statutory Disqualification"/>
+                    </ComboBox>
+
+                    <!-- Export CSV Button -->
+                    <Button Grid.Column="2"
+                            Command="{Binding ExportDisqualifiedCsvCommand}"
+                            Height="36" Padding="12,0" Cursor="Hand"
+                            Background="White" BorderBrush="#D0C0C8" BorderThickness="1"
+                            ToolTip="Export all matching disqualified candidate records to CSV">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,19L8,15H10.5V12H13.5V15H16L12,19Z"
+                                              Fill="#444444" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0"/>
+                                        <TextBlock Text="Export CSV" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444"/>
+                                    </StackPanel>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+
+                <!-- Row 2: Table Column Headers -->
+                <Border Grid.Row="2" Background="#F9F5F7" BorderBrush="#EADCE1" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/> <!-- Candidate & SP-ID -->
+                            <ColumnDefinition Width="150"/> <!-- Demographics -->
+                            <ColumnDefinition Width="70"/>  <!-- Score -->
+                            <ColumnDefinition Width="170"/> <!-- Rejection Reason -->
+                            <ColumnDefinition Width="*"/>   <!-- Justification Notes & Reviewer -->
+                            <ColumnDefinition Width="80"/>  <!-- Action -->
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="CANDIDATE &amp; ID" FontSize="10" FontWeight="Bold" Foreground="#702943"/>
+                        <TextBlock Grid.Column="1" Text="DEMOGRAPHICS" FontSize="10" FontWeight="Bold" Foreground="#702943"/>
+                        <TextBlock Grid.Column="2" Text="SCORE" FontSize="10" FontWeight="Bold" Foreground="#702943"/>
+                        <TextBlock Grid.Column="3" Text="DISQUALIFICATION REASON" FontSize="10" FontWeight="Bold" Foreground="#702943"/>
+                        <TextBlock Grid.Column="4" Text="JUSTIFICATION &amp; AUDIT TRAIL" FontSize="10" FontWeight="Bold" Foreground="#702943"/>
+                        <TextBlock Grid.Column="5" Text="ACTION" FontSize="10" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- Row 3: Candidate Rows List & Empty State -->
+                <Grid Grid.Row="3" MinHeight="180" MaxHeight="320">
+                    <!-- Scrollable Items List -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{Binding FilteredDisqualifiedCandidates}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#F0E5EA" BorderThickness="0,0,0,1" Padding="10,10" Background="Transparent">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="180"/> <!-- Candidate & SP-ID -->
+                                                <ColumnDefinition Width="150"/> <!-- Demographics -->
+                                                <ColumnDefinition Width="70"/>  <!-- Score -->
+                                                <ColumnDefinition Width="170"/> <!-- Rejection Reason -->
+                                                <ColumnDefinition Width="*"/>   <!-- Justification Notes & Reviewer -->
+                                                <ColumnDefinition Width="80"/>  <!-- Action -->
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Candidate Name & SP ID -->
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,0">
+                                                <TextBlock Text="{Binding FullName}" FontSize="12.5" FontWeight="SemiBold" Foreground="#111111" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding SpId}" FontSize="10.5" FontFamily="Consolas" Foreground="#888888" Margin="0,2,0,0"/>
+                                            </StackPanel>
+
+                                            <!-- Demographics (Barangay, Income, Dependents) -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0">
+                                                <TextBlock Text="{Binding Barangay}" FontSize="11.5" Foreground="#333333" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock FontSize="10.5" Foreground="#666666" Margin="0,2,0,0">
+                                                    <Run Text="{Binding FormattedIncome}"/>
+                                                    <Run Text=" • "/>
+                                                    <Run Text="{Binding Dependents}"/>
+                                                    <Run Text=" dep."/>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- Score & Priority Badge -->
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,10,0">
+                                                <TextBlock Text="{Binding PriorityScore, StringFormat='{}{0:F1}'}" FontSize="12" FontWeight="Bold" Foreground="#333333"/>
+                                                <Border Background="{Binding PriorityBadgeBg}" CornerRadius="4" Padding="4,1" Margin="0,2,0,0" HorizontalAlignment="Left">
+                                                    <TextBlock Text="{Binding Priority}" FontSize="9.5" FontWeight="Bold" Foreground="{Binding PriorityBadgeFg}"/>
+                                                </Border>
+                                            </StackPanel>
+
+                                            <!-- Disqualification Reason Badge -->
+                                            <Border Grid.Column="3" Background="{Binding ReasonBadgeBg}" BorderBrush="{Binding ReasonBadgeBorder}" BorderThickness="1"
+                                                    CornerRadius="6" Padding="7,4" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,10,0">
+                                                <TextBlock Text="{Binding RejectionReason}" FontSize="10.5" FontWeight="SemiBold" Foreground="{Binding ReasonBadgeFg}" TextWrapping="Wrap"/>
+                                            </Border>
+
+                                            <!-- Justification Notes & Audit Trail -->
+                                            <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,10,0">
+                                                <TextBlock Text="{Binding DisplayNotes}" FontSize="11" Foreground="#222222" TextWrapping="Wrap" MaxHeight="32" TextTrimming="CharacterEllipsis" ToolTip="{Binding DisplayNotes}"/>
+                                                <TextBlock FontSize="10" Foreground="#888888" Margin="0,3,0,0">
+                                                    <Run Text="By: "/>
+                                                    <Run Text="{Binding DisqualifiedBy}"/>
+                                                    <Run Text=" • "/>
+                                                    <Run Text="{Binding FormattedDisqualifiedAt}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- Action: Reinstate Button -->
+                                            <Button Grid.Column="5"
+                                                    Style="{StaticResource ReinstateSmallBtn}"
+                                                    Content="↺ Reinstate"
+                                                    ToolTip="Restore candidate to active recommendations queue"
+                                                    Command="{Binding DataContext.ReinstateCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Empty State (Shown when FilteredDisqualifiedCandidates is empty) -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,32"
+                                Visibility="{Binding HasNoDisqualifiedCandidates, Converter={StaticResource BoolToVis}}">
+                        <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,22A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,13.85 19.38,15.55 18.32,16.91L7.09,5.68C8.45,4.62 10.15,4 12,4M4,12C4,10.15 4.62,8.45 5.68,7.09L16.91,18.32C15.55,19.38 13.85,20 12,20A8,8 0 0,1 4,12Z"
+                              Fill="#CBD5E1" Width="36" Height="36" Stretch="Uniform" Margin="0,0,0,10"/>
+                        <TextBlock Text="No Disqualified Candidates Found" FontSize="13.5" FontWeight="SemiBold" Foreground="#475569" HorizontalAlignment="Center"/>
+                        <TextBlock Text="No candidate records match the current search or rejection filter for this cycle." FontSize="11" Foreground="#94A3B8" Margin="0,4,0,0" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 4: Footer Bar -->
+                <Grid Grid.Row="4" Margin="0,18,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"
+                              Fill="#888888" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Disqualified candidates are excluded from quota allocations and disbursement in accordance with Solum Subsidy Governance Rules."
+                                   FontSize="11" Foreground="#777777" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Command="{Binding CloseDisqualifiedModalCommand}"
+                            Height="36" Padding="24,0" Cursor="Hand"
+                            Background="#702943" BorderThickness="0">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                    <TextBlock Text="Close" FontSize="12.5" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

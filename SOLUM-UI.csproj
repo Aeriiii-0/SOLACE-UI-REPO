@@ -323,6 +323,9 @@
     <Compile Include="Views\Components\ModalOutlierRejection.xaml.cs">
       <DependentUpon>ModalOutlierRejection.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Components\ModalDisqualifiedCandidates.xaml.cs">
+      <DependentUpon>ModalDisqualifiedCandidates.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Components\SubsidyCycleControlBar.xaml.cs">
       <DependentUpon>SubsidyCycleControlBar.xaml</DependentUpon>
     </Compile>
@@ -341,6 +344,7 @@
     <Compile Include="DTOs\SubsidyRequests.cs" />
     <Compile Include="Models\SubsidyItem.cs" />
     <Compile Include="Models\SelectionRow.cs" />
+    <Compile Include="Models\DisqualifiedCandidateItem.cs" />
     <Compile Include="Models\FiscalCycleOption.cs" />
     <Compile Include="Services\Interfaces\ISubsidyApiService.cs" />
     <Compile Include="Services\Implementations\SubsidyApiService.cs" />
@@ -595,6 +599,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Components\ModalOutlierRejection.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\ModalDisqualifiedCandidates.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

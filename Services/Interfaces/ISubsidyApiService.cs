@@ -22,6 +22,8 @@ namespace SOLUM_UI.Services.Interfaces
         Task<BaseResponse<bool>> ShortlistCandidatesAsync(Guid? cycleId, List<Guid> evaluationIds);
         Task<BaseResponse<int>> ShortlistTopQuotaAsync(Guid? cycleId, int? topCount = null);
         Task<BaseResponse<SubsidyRecommendationDto>> RejectOutlierAsync(RejectOutlierRequest request);
+        Task<BaseResponse<List<SubsidyRecommendationDto>>> GetRejectedCandidatesAsync(Guid? cycleId = null);
+        Task<BaseResponse<bool>> ReinstateCandidateAsync(Guid evaluationId);
         Task<BaseResponse<int>> ConfirmGranteesAsync(Guid? cycleId, List<Guid> evaluationIds);
         Task<BaseResponse<List<GranteeDto>>> GetGranteesByFiscalYearAsync(int fiscalYear);
         Task<BaseResponse<bool>> RevokeGrantAsync(Guid evaluationId, string reason = null, string notes = null);

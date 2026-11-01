@@ -60,12 +60,40 @@ namespace SOLUM_UI.ViewModels
                     SortBy = "PriorityScore",
                     SortOrder = "desc"
                 });
+                var rejTask = _apiService.GetRejectedCandidatesAsync(cycle.CycleId);
 
-                await Task.WhenAll(granteesTask, shortlistTask, recsTask);
+                await Task.WhenAll(granteesTask, shortlistTask, recsTask, rejTask);
 
                 var grResp = await granteesTask;
                 var slResp = await shortlistTask;
                 var dtos = await recsTask;
+                var rejResp = await rejTask;
+
+                DisqualifiedCandidates.Clear();
+                if (rejResp?.Data != null && rejResp.Data.Count > 0)
+                {
+                    foreach (var r in rejResp.Data)
+                    {
+                        DisqualifiedCandidates.Add(new DisqualifiedCandidateItem
+                        {
+                            EvaluationId = r.EvaluationId,
+                            SoloParentId = r.SoloParentId,
+                            SpId = r.SpId,
+                            FullName = r.Name,
+                            Barangay = r.Barangay,
+                            MonthlyIncome = (double)r.MonthlyIncome,
+                            PriorityScore = r.Score,
+                            Priority = r.Priority,
+                            Dependents = r.Dependants,
+                            RejectionReason = !string.IsNullOrEmpty(r.RejectionReason) ? r.RejectionReason : "Administrative Disqualification",
+                            RejectionNotes = r.RejectionNotes,
+                            DisqualifiedBy = !string.IsNullOrEmpty(r.ReviewedBy) ? r.ReviewedBy : "Admin / Reviewer",
+                            DisqualifiedAt = r.ConfirmedAt ?? DateTime.Now
+                        });
+                    }
+                }
+                FilterDisqualifiedCandidates();
+                NotifyDisqualifiedMetricsChanged();
 
                 FinalGranteesList.Clear();
                 int rk = 1;

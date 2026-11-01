@@ -33,6 +33,8 @@ namespace SOLUM_UI.ViewModels
             FilteredShortlistRows = new ObservableCollection<SelectionRow>();
             FinalGranteesList = new ObservableCollection<SelectionRow>();
             AvailableFiscalCycles = new ObservableCollection<FiscalCycleOption>();
+            DisqualifiedCandidates = new ObservableCollection<DisqualifiedCandidateItem>();
+            FilteredDisqualifiedCandidates = new ObservableCollection<DisqualifiedCandidateItem>();
             InitCommands();
             InitPagination();
             if (!AuthApiService.Instance.IsAdmin)
@@ -48,6 +50,28 @@ namespace SOLUM_UI.ViewModels
         public ObservableCollection<SelectionRow> FilteredShortlistRows { get; }
         public ObservableCollection<SelectionRow> FinalGranteesList { get; }
         public ObservableCollection<FiscalCycleOption> AvailableFiscalCycles { get; }
+        public ObservableCollection<DisqualifiedCandidateItem> DisqualifiedCandidates { get; }
+        public ObservableCollection<DisqualifiedCandidateItem> FilteredDisqualifiedCandidates { get; }
+
+        private bool _isDisqualifiedModalOpen;
+        public bool IsDisqualifiedModalOpen { get => _isDisqualifiedModalOpen; set => SetProperty(ref _isDisqualifiedModalOpen, value); }
+        private string _disqualifiedSearchText = string.Empty;
+        public string DisqualifiedSearchText { get => _disqualifiedSearchText; set { if (SetProperty(ref _disqualifiedSearchText, value)) FilterDisqualifiedCandidates(); } }
+        private string _disqualifiedReasonFilter = "All Reasons";
+        public string DisqualifiedReasonFilter { get => _disqualifiedReasonFilter; set { if (SetProperty(ref _disqualifiedReasonFilter, value)) FilterDisqualifiedCandidates(); } }
+        public int DisqualifiedCount => DisqualifiedCandidates?.Count ?? 0;
+        public bool HasDisqualifiedCandidates => DisqualifiedCount > 0;
+        public bool HasFilteredDisqualifiedCandidates => FilteredDisqualifiedCandidates != null && FilteredDisqualifiedCandidates.Count > 0;
+        public bool HasNoDisqualifiedCandidates => !HasFilteredDisqualifiedCandidates;
+        public string DisqualifiedButtonText => $"Disqualified ({DisqualifiedCount})";
+        public void NotifyDisqualifiedMetricsChanged()
+        {
+            OnPropertyChanged(nameof(DisqualifiedCount));
+            OnPropertyChanged(nameof(HasDisqualifiedCandidates));
+            OnPropertyChanged(nameof(HasFilteredDisqualifiedCandidates));
+            OnPropertyChanged(nameof(HasNoDisqualifiedCandidates));
+            OnPropertyChanged(nameof(DisqualifiedButtonText));
+        }
 
         private FiscalCycleOption _selectedFiscalCycle;
         public FiscalCycleOption SelectedFiscalCycle
@@ -291,6 +315,7 @@ namespace SOLUM_UI.ViewModels
         public ICommand SwitchTabCommand { get; private set; } public ICommand ToggleBatchModeCommand { get; private set; } public ICommand SelectTopNCommand { get; private set; } public ICommand ShortlistSelectedCommand { get; private set; }
         public ICommand QuickAcceptRowCommand { get; private set; } public ICommand QuickShortlistCandidateCommand { get; private set; } public ICommand ApproveCandidateCommand { get; private set; } public ICommand QuickRejectRowCommand { get; private set; } public ICommand OpenExplainDrawerCommand { get; private set; } public ICommand CloseExplainDrawerCommand { get; private set; }
         public ICommand DrawerShortlistCommand { get; private set; } public ICommand OpenOutlierModalCommand { get; private set; } public ICommand CloseOutlierModalCommand { get; private set; } public ICommand ConfirmOutlierRejectionCommand { get; private set; }
+        public ICommand OpenDisqualifiedModalCommand { get; private set; } public ICommand CloseDisqualifiedModalCommand { get; private set; } public ICommand ExportDisqualifiedCsvCommand { get; private set; } public ICommand ReinstateCandidateCommand { get; private set; } public ICommand ApplyDisqualifiedReasonFilterCommand { get; private set; }
         public ICommand ConfirmGranteeCommand { get; private set; } public ICommand RevokeGranteeCommand { get; private set; } public ICommand ConfirmShortlistCandidateCommand { get; private set; } public ICommand RevokeShortlistCandidateCommand { get; private set; } public ICommand BatchConfirmShortlistCommand { get; private set; } public ICommand BatchRevokeShortlistCommand { get; private set; } public ICommand SelectAllShortlistCommand { get; private set; }
         public ICommand ExportCityEducCommand { get; private set; } public ICommand ExportPantawid4PsCommand { get; private set; } public ICommand ExportFinalLedgerCommand { get; private set; } public ICommand ViewFullRecordCommand { get; private set; }
         public ICommand QuickPredictCandidateCommand { get; private set; }

@@ -138,6 +138,16 @@
                                             <TextBlock Text="Remaining Open Slots:" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
                                             <TextBlock Text="{Binding RemainingSlots}" FontSize="12" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right"/>
                                         </Grid>
+                                        <Separator Margin="0,6" Background="#F0E2E7"/>
+                                        <Button Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0,2"
+                                                HorizontalAlignment="Left"
+                                                Command="{Binding OpenDisqualifiedModalCommand}">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="Disqualified Outliers: " FontSize="11" Foreground="#555555"/>
+                                                <TextBlock Text="{Binding DisqualifiedCount}" FontSize="11" FontWeight="Bold" Foreground="#B91C1C" Margin="0,0,4,0"/>
+                                                <TextBlock Text="(View Log →)" FontSize="10.5" Foreground="#702943" TextDecorations="Underline"/>
+                                            </StackPanel>
+                                        </Button>
                                     </StackPanel>
                                 </Border>
                             </Popup>
@@ -234,6 +244,39 @@
                     </StackPanel>
                 </Grid>
             </Border>
+
+                <!-- Disqualified Candidates Audit Button -->
+                <Button x:Name="DisqualifiedListBtn"
+                        Command="{Binding OpenDisqualifiedModalCommand}"
+                        Height="46" Margin="10,0,0,0" Padding="14,0"
+                        Background="#FFF8F9" BorderBrush="#F8D7DA" BorderThickness="1"
+                        Cursor="Hand" VerticalAlignment="Center"
+                        ToolTip="View audit log of disqualified and rejected candidates for this cycle">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bg" Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10" Padding="{TemplateBinding Padding}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,13.85 19.38,15.55 18.32,16.91L7.09,5.68C8.45,4.62 10.15,4 12,4M4,12C4,10.15 4.62,8.45 5.68,7.09L16.91,18.32C15.55,19.38 13.85,20 12,20A8,8 0 0,1 4,12Z"
+                                          Fill="#B91C1C" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Disqualified" FontSize="11.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                                    <Border Background="#FEE2E2" CornerRadius="10" Padding="6,1" Margin="6,0,0,0" VerticalAlignment="Center"
+                                            Visibility="{Binding HasDisqualifiedCandidates, Converter={StaticResource BoolToVis}}">
+                                        <TextBlock Text="{Binding DisqualifiedCount}" FontSize="10.5" FontWeight="Bold" Foreground="#991B1B"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bg" Property="Background" Value="#FCE8EC"/>
+                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#E5AAB5"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
 
                 <!-- Last Refreshed Timestamp Pill -->
                 <Border VerticalAlignment="Center" Background="#FAF2F5" CornerRadius="12" Padding="10,6" BorderBrush="#EBD8DE" BorderThickness="1" Margin="10,0,0,0">
@@ -363,6 +406,9 @@
 
         <!-- Outlier Rejection Modal Overlay (Spans all rows) -->
         <c:ModalOutlierRejection Grid.RowSpan="4"/>
+
+        <!-- Disqualified Candidates Audit Log Modal Overlay (Spans all rows) -->
+        <c:ModalDisqualifiedCandidates Grid.RowSpan="4"/>
 
         <!-- Loading Overlay (Disabled in favor of modern Skeleton Loader) -->
         <c:LoadingOverlay Grid.RowSpan="4" IsLoading="False" Visibility="Collapsed" Panel.ZIndex="9999"/>
