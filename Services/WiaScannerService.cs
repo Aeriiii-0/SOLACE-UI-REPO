@@ -26,14 +26,15 @@ namespace SOLUM_UI.Services
         private const int WIA_VERTICAL_SCAN_START_PIXEL     = 6150;
         private const int WIA_HORIZONTAL_SCAN_SIZE_PIXELS    = 6151;
         private const int WIA_VERTICAL_SCAN_SIZE_PIXELS      = 6152;
-        private const int WIA_SCAN_BRIGHTNESS_PERCENTS       = 6154;
-        private const int WIA_SCAN_CONTRAST_PERCENTS         = 6155;
         private const int WIA_DPS_DOCUMENT_HANDLING_SELECT   = 3088; // 1 = Flatbed, 2 = Feeder
+        private const int WIA_DPS_PAGES                      = 3096; // Number of pages to scan
+        private const int WIA_DPS_HORIZONTAL_BED_SIZE        = 3074; // Thousandths of an inch
+        private const int WIA_DPS_VERTICAL_BED_SIZE          = 3075; // Thousandths of an inch
 
         // WIA Format GUIDs
-        public const string WIA_FORMAT_JPEG = "{B96B3CAE-0728-11D3-9D7B-0000F81EF32E}";
-        public const string WIA_FORMAT_PNG  = "{B96B3CAF-0728-11D3-9D7B-0000F81EF32E}";
+        public const string WIA_FORMAT_PNG  = "{B96B3CAE-0728-11D3-9D7B-0000F81EF32E}";
         public const string WIA_FORMAT_BMP  = "{B96B3CAB-0728-11D3-9D7B-0000F81EF32E}";
+        public const string WIA_FORMAT_JPEG = "{B96B3CAF-0728-11D3-9D7B-0000F81EF32E}";
 
         // WIA Device Types
         private const int WIA_DEVICE_TYPE_SCANNER = 1;
@@ -94,7 +95,32 @@ namespace SOLUM_UI.Services
         }
 
         /// <summary>
-        /// Acquires a document from the specified or default scanner using WIA.
+        /// Purges legacy temporary scans from previous sessions to prevent PII accumulation in %TEMP%.
+        /// </summary>
+        public static void CleanupOrphanedTempScans(string currentScanFile = null)
+        {
+            try
+            {
+                string tempDir = Path.GetTempPath();
+                var files = Directory.GetFiles(tempDir, "SOLUM_SCAN_*.*");
+                foreach (var f in files)
+                {
+                    if (currentScanFile != null && string.Equals(f, currentScanFile, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    try
+                    {
+                        File.Delete(f);
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Acquires a document from the specified or default scanner using WIA silent transfer (Option A).
+        /// Calibrated for 8.5 x 13 inch CSWDO application forms.
         /// </summary>
         public static Task<string> ScanDocumentAsync(ScannerSettings settings, Action<string> onStatusUpdate = null)
         {
@@ -154,67 +180,90 @@ namespace SOLUM_UI.Services
                     throw new InvalidOperationException("No compatible scanner found. Please verify that your scanner driver (WIA) is installed and the device is powered on.");
 
                 // Connect to scanner device
-                onStatusUpdate?.Invoke($"Initializing {GetPropertyValue(targetInfo.Properties, "Name") ?? "Scanner"}...");
+                string scannerName = GetPropertyValue(targetInfo.Properties, "Name") ?? "Scanner";
+                onStatusUpdate?.Invoke($"Initializing {scannerName}...");
                 dynamic device = targetInfo.Connect();
 
                 if (device == null || device.Items.Count < 1)
                     throw new InvalidOperationException("Unable to establish communication with the scanner head.");
 
-                dynamic scanItem = device.Items[1];
-
-                // Configure properties for full-resolution, high-quality capture
-                ConfigureScanItem(scanItem, settings);
-
-                // Set Document Handling (Flatbed vs Feeder) if supported on device level
+                // Set Document Handling (Flatbed vs Feeder) BEFORE configuring item properties
+                // so the driver doesn't revert item resolution and extent
                 try
                 {
                     int handling = settings?.PaperSource == ScanPaperSource.Feeder ? 2 : 1;
                     SetProperty(device.Properties, WIA_DPS_DOCUMENT_HANDLING_SELECT, handling);
+                    if (settings?.PaperSource == ScanPaperSource.Feeder)
+                    {
+                        SetProperty(device.Properties, WIA_DPS_PAGES, 1);
+                    }
                 }
                 catch { }
 
+                dynamic scanItem = device.Items[1];
+
+                // Configure properties: calibrated for 8.5 x 13 CSWDO form with hardware bed clamping
+                ConfigureScanItem(scanItem, settings, device);
+
                 onStatusUpdate?.Invoke("Acquiring document scan from hardware...");
 
-                Type dialogType = Type.GetTypeFromProgID("WIA.CommonDialog");
-                if (dialogType == null)
-                    throw new InvalidOperationException("WIA CommonDialog interface is not available.");
-
-                dynamic dialog = Activator.CreateInstance(dialogType);
-                dynamic imageFile = null;
-
-                // Try acquiring in lossless PNG format first for maximum sharpness, fallback to BMP then JPEG if driver requires
-                string[] formatGuids = new[] { WIA_FORMAT_PNG, WIA_FORMAT_BMP, WIA_FORMAT_JPEG };
+                // Determine best supported image format (prefer PNG for lossless sharpness, then BMP, then JPEG)
+                string chosenFormat = WIA_FORMAT_PNG;
                 string chosenExt = ".png";
-                COMException lastComEx = null;
 
-                foreach (string fmt in formatGuids)
+                try
                 {
-                    try
+                    var supportedFormats = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    if (scanItem.Formats != null)
                     {
-                        imageFile = dialog.ShowTransfer(scanItem, fmt, false);
-                        if (imageFile != null)
+                        int fCount = (int)scanItem.Formats.Count;
+                        for (int f = 1; f <= fCount; f++)
                         {
-                            if (fmt == WIA_FORMAT_BMP) chosenExt = ".bmp";
-                            else if (fmt == WIA_FORMAT_JPEG) chosenExt = ".jpg";
-                            else chosenExt = ".png";
-                            break;
+                            string fg = scanItem.Formats[f]?.ToString();
+                            if (!string.IsNullOrEmpty(fg)) supportedFormats.Add(fg);
                         }
                     }
-                    catch (COMException ex)
+
+                    if (supportedFormats.Count > 0)
                     {
-                        lastComEx = ex;
+                        if (supportedFormats.Contains(WIA_FORMAT_PNG))
+                        {
+                            chosenFormat = WIA_FORMAT_PNG;
+                            chosenExt = ".png";
+                        }
+                        else if (supportedFormats.Contains(WIA_FORMAT_BMP))
+                        {
+                            chosenFormat = WIA_FORMAT_BMP;
+                            chosenExt = ".bmp";
+                        }
+                        else if (supportedFormats.Contains(WIA_FORMAT_JPEG))
+                        {
+                            chosenFormat = WIA_FORMAT_JPEG;
+                            chosenExt = ".jpg";
+                        }
                     }
+                }
+                catch { }
+
+                // Execute transfer directly via scanItem.Transfer() (Option A: Silent in-app transfer)
+                dynamic imageFile = null;
+                try
+                {
+                    imageFile = scanItem.Transfer(chosenFormat);
+                }
+                catch (COMException ex)
+                {
+                    uint hr = (uint)ex.ErrorCode;
+                    if (hr == 0x80210064) // WIA_ERROR_CANCELLED
+                    {
+                        throw new OperationCanceledException("The scan operation was cancelled.", ex);
+                    }
+                    string friendly = GetFriendlyComErrorMessage(ex);
+                    throw new InvalidOperationException(friendly, ex);
                 }
 
                 if (imageFile == null)
-                {
-                    if (lastComEx != null)
-                    {
-                        string friendly = GetFriendlyComErrorMessage(lastComEx);
-                        throw new InvalidOperationException(friendly, lastComEx);
-                    }
-                    throw new OperationCanceledException("The scan operation was cancelled.");
-                }
+                    throw new InvalidOperationException("Scanner hardware did not return an image buffer.");
 
                 onStatusUpdate?.Invoke("Saving scanned image...");
 
@@ -233,30 +282,32 @@ namespace SOLUM_UI.Services
             });
         }
 
-        private static void ConfigureScanItem(dynamic scanItem, ScannerSettings settings)
+        private static void ConfigureScanItem(dynamic scanItem, ScannerSettings settings, dynamic device)
         {
             if (scanItem == null || scanItem.Properties == null) return;
 
-            int dpi = settings?.Dpi ?? 300;
-            if (dpi <= 0) dpi = 300;
+            int dpi = settings?.Dpi ?? 200;
+            if (dpi <= 0) dpi = 200;
+
+#pragma warning disable CS0618
             ScanColorMode colorMode = settings?.ColorMode ?? ScanColorMode.Color;
+            if (colorMode == ScanColorMode.BlackAndWhite) colorMode = ScanColorMode.Grayscale;
+#pragma warning restore CS0618
 
-            // 1. Set Intent / Color Mode
-            int intentValue = 1; // Color
-            if (colorMode == ScanColorMode.Grayscale) intentValue = 2;
-            else if (colorMode == ScanColorMode.BlackAndWhite) intentValue = 4;
-
+            // 1. Set Color Mode / Intent
+            // 1 = Color, 2 = Grayscale
+            int intentValue = colorMode == ScanColorMode.Grayscale ? 2 : 1;
             SetProperty(scanItem.Properties, WIA_SCAN_COLOR_MODE, intentValue);
 
-            // 2. Set Data Type & Bit Depth directly (ensures 24-bit RGB or 8-bit Gray without driver downsampling)
-            // 4103 = WIA_IPA_DATATYPE: 0 = Threshold, 1 = Grayscale, 2 = Color
-            // 4104 = WIA_IPA_DEPTH: 1, 8, 24
-            int dataType = colorMode == ScanColorMode.Grayscale ? 1 : (colorMode == ScanColorMode.BlackAndWhite ? 0 : 3);
-            int bitDepth = colorMode == ScanColorMode.Color ? 24 : (colorMode == ScanColorMode.Grayscale ? 8 : 1);
+            // 2. Set Data Type & Bit Depth
+            // 4103 = WIA_IPA_DATATYPE: 2 = Grayscale, 3 = Color (1 is Dither - avoid!)
+            // 4104 = WIA_IPA_DEPTH: 8 (Gray), 24 (Color)
+            int dataType = colorMode == ScanColorMode.Grayscale ? 2 : 3;
+            int bitDepth = colorMode == ScanColorMode.Grayscale ? 8 : 24;
             SetProperty(scanItem.Properties, 4103, dataType);
             SetProperty(scanItem.Properties, 4104, bitDepth);
 
-            // 3. Set Resolution DPI (Both Horizontal and Vertical)
+            // 3. Set Resolution DPI (Horizontal and Vertical)
             SetProperty(scanItem.Properties, WIA_HORIZONTAL_SCAN_RESOLUTION_DPI, dpi);
             SetProperty(scanItem.Properties, WIA_VERTICAL_SCAN_RESOLUTION_DPI, dpi);
 
@@ -264,11 +315,30 @@ namespace SOLUM_UI.Services
             SetProperty(scanItem.Properties, WIA_HORIZONTAL_SCAN_START_PIXEL, 0);
             SetProperty(scanItem.Properties, WIA_VERTICAL_SCAN_START_PIXEL, 0);
 
-            // 5. Calculate and Set Extent in Pixels for the requested DPI
-            // An A4 / Letter page is approx 8.5" x 11.7". At 300 DPI: 2550 x 3510 pixels.
-            // If Extent is not updated, scanner drivers default to low-res preview dimensions!
-            int widthPixels = (int)Math.Round(8.5 * dpi);
-            int heightPixels = (int)Math.Round(11.7 * dpi);
+            // 5. Calculate Extent in Pixels for 8.5 x 13 inch CSWDO Form
+            // Check hardware bed size limits if flatbed glass is smaller than 13"
+            double targetWidthInches = 8.5;
+            double targetHeightInches = 13.0;
+
+            if (settings?.PaperSource != ScanPaperSource.Feeder && device != null)
+            {
+                try
+                {
+                    string bedHStr = GetPropertyById(device.Properties, WIA_DPS_VERTICAL_BED_SIZE);
+                    if (int.TryParse(bedHStr, out int bedHMilli) && bedHMilli > 0)
+                    {
+                        double bedH = bedHMilli / 1000.0;
+                        if (bedH > 0 && bedH < targetHeightInches)
+                        {
+                            targetHeightInches = bedH;
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            int widthPixels = (int)Math.Round(targetWidthInches * dpi);
+            int heightPixels = (int)Math.Round(targetHeightInches * dpi);
 
             SetProperty(scanItem.Properties, WIA_HORIZONTAL_SCAN_SIZE_PIXELS, widthPixels);
             SetProperty(scanItem.Properties, WIA_VERTICAL_SCAN_SIZE_PIXELS, heightPixels);
@@ -311,6 +381,23 @@ namespace SOLUM_UI.Services
             return null;
         }
 
+        private static string GetPropertyById(dynamic properties, int propertyId)
+        {
+            if (properties == null) return null;
+            try
+            {
+                foreach (dynamic prop in properties)
+                {
+                    if ((int)prop.PropertyID == propertyId)
+                    {
+                        return prop.get_Value()?.ToString();
+                    }
+                }
+            }
+            catch { }
+            return null;
+        }
+
         private static string GetFriendlyComErrorMessage(COMException ex)
         {
             uint hr = (uint)ex.ErrorCode;
@@ -322,9 +409,9 @@ namespace SOLUM_UI.Services
                 case 0x80210002: // WIA_ERROR_PAPER_JAM
                     return "Paper jam detected in the scanner. Please clear the paper path.";
                 case 0x80210003: // WIA_ERROR_PAPER_EMPTY
-                    return "The document feeder is empty. Please place the form on the scanner glass or feeder tray.";
+                    return "The document feeder tray is empty. Please place the CSWDO form in the feeder or on the flatbed glass.";
                 case 0x80210004: // WIA_ERROR_PAPER_PROBLEM
-                    return "An issue was detected with the document paper feeding.";
+                    return "An issue was detected with document feeding. Please check the alignment in the feeder tray.";
                 case 0x80210005: // WIA_ERROR_OFFLINE
                     return "The scanner is currently offline or in sleep mode. Please wake or turn on the device.";
                 case 0x80210006: // WIA_ERROR_BUSY
@@ -333,8 +420,14 @@ namespace SOLUM_UI.Services
                     return "The scanner lamp is currently warming up. Please try again in a few seconds.";
                 case 0x80210008: // WIA_ERROR_USER_INTERVENTION
                     return "The scanner requires manual intervention (e.g. lid open or cover ajar).";
-                case 0x80210064: // WIA_S_NO_DEVICE_AVAILABLE
-                    return "No scanner hardware was detected. Please verify your USB/Network connection.";
+                case 0x8021000A: // WIA_ERROR_DEVICE_COMMUNICATION
+                    return "Lost communication with scanner hardware. Please verify the USB or network cable.";
+                case 0x80210015: // WIA_S_NO_DEVICE_AVAILABLE
+                    return "No scanner hardware was detected. Please ensure your device is powered on and connected.";
+                case 0x80210016: // WIA_ERROR_COVER_OPEN
+                    return "The scanner document cover or lid is open. Please close it and try again.";
+                case 0x80210064: // WIA_ERROR_CANCELLED
+                    return "The scan operation was cancelled.";
                 default:
                     return $"Scanner communication failed (Error: 0x{hr:X8}): {ex.Message}";
             }

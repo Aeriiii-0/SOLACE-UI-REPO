@@ -81,21 +81,19 @@
                         <Grid Margin="0,0,0,18">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="12"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- 300 DPI -->
-                            <RadioButton x:Name="Rb300Dpi" Grid.Column="0" GroupName="DpiGroup" IsChecked="True" Cursor="Hand">
+                            <!-- 200 DPI (Recommended / Fast) -->
+                            <RadioButton x:Name="Rb200Dpi" Grid.Column="0" GroupName="DpiGroup" IsChecked="True" Cursor="Hand">
                                 <RadioButton.Template>
                                     <ControlTemplate TargetType="RadioButton">
-                                        <Border x:Name="Card" Background="White" BorderBrush="#D0B8C0" BorderThickness="1.5" CornerRadius="8" Padding="10,10">
+                                        <Border x:Name="Card" Background="White" BorderBrush="#D0B8C0" BorderThickness="1.5" CornerRadius="8" Padding="12,10">
                                             <StackPanel HorizontalAlignment="Center">
-                                                <TextBlock Text="300 DPI" FontWeight="Bold" FontSize="13" Foreground="#702943" HorizontalAlignment="Center"/>
-                                                <TextBlock Text="Recommended" FontSize="10" Foreground="#27AE60" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0"/>
-                                                <TextBlock Text="Highest OCR accuracy" FontSize="9" Foreground="#888888" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                                <TextBlock Text="200 DPI" FontWeight="Bold" FontSize="13" Foreground="#702943" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="Recommended (Fast ~4s)" FontSize="10" Foreground="#27AE60" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                                <TextBlock Text="Optimal speed &amp; high accuracy" FontSize="9.5" Foreground="#888888" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                                             </StackPanel>
                                         </Border>
                                         <ControlTemplate.Triggers>
@@ -108,36 +106,15 @@
                                 </RadioButton.Template>
                             </RadioButton>
 
-                            <!-- 200 DPI -->
-                            <RadioButton x:Name="Rb200Dpi" Grid.Column="2" GroupName="DpiGroup" Cursor="Hand">
+                            <!-- 300 DPI (High Detail) -->
+                            <RadioButton x:Name="Rb300Dpi" Grid.Column="2" GroupName="DpiGroup" Cursor="Hand">
                                 <RadioButton.Template>
                                     <ControlTemplate TargetType="RadioButton">
-                                        <Border x:Name="Card" Background="White" BorderBrush="#D0B8C0" BorderThickness="1.5" CornerRadius="8" Padding="10,10">
+                                        <Border x:Name="Card" Background="White" BorderBrush="#D0B8C0" BorderThickness="1.5" CornerRadius="8" Padding="12,10">
                                             <StackPanel HorizontalAlignment="Center">
-                                                <TextBlock Text="200 DPI" FontWeight="Bold" FontSize="13" Foreground="#333333" HorizontalAlignment="Center"/>
-                                                <TextBlock Text="Balanced" FontSize="10" Foreground="#2980B9" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0"/>
-                                                <TextBlock Text="Fast ~4s scan" FontSize="9" Foreground="#888888" HorizontalAlignment="Center" Margin="0,2,0,0"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsChecked" Value="True">
-                                                <Setter TargetName="Card" Property="BorderBrush" Value="#702943"/>
-                                                <Setter TargetName="Card" Property="Background" Value="#FBF6F8"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </RadioButton.Template>
-                            </RadioButton>
-
-                            <!-- 150 DPI -->
-                            <RadioButton x:Name="Rb150Dpi" Grid.Column="4" GroupName="DpiGroup" Cursor="Hand">
-                                <RadioButton.Template>
-                                    <ControlTemplate TargetType="RadioButton">
-                                        <Border x:Name="Card" Background="White" BorderBrush="#D0B8C0" BorderThickness="1.5" CornerRadius="8" Padding="10,10">
-                                            <StackPanel HorizontalAlignment="Center">
-                                                <TextBlock Text="150 DPI" FontWeight="Bold" FontSize="13" Foreground="#333333" HorizontalAlignment="Center"/>
-                                                <TextBlock Text="Draft" FontSize="10" Foreground="#7F8C8D" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0"/>
-                                                <TextBlock Text="Quick scan ~2s" FontSize="9" Foreground="#888888" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                                <TextBlock Text="300 DPI" FontWeight="Bold" FontSize="13" Foreground="#333333" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="High Detail (~12s)" FontSize="10" Foreground="#2980B9" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                                <TextBlock Text="Best for faint handwriting" FontSize="9.5" Foreground="#888888" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                                             </StackPanel>
                                         </Border>
                                         <ControlTemplate.Triggers>
@@ -152,7 +129,7 @@
                         </Grid>
 
                         <!-- Color Mode & Paper Source -->
-                        <Grid Margin="0,0,0,8">
+                        <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="14"/>
@@ -165,8 +142,7 @@
                                 <ComboBox x:Name="CmbColorMode" Height="34" VerticalContentAlignment="Center"
                                           Padding="10,0" FontSize="12" BorderBrush="#D0B8C0" Background="White">
                                     <ComboBoxItem Content="Full Color (24-bit)" IsSelected="True"/>
-                                    <ComboBoxItem Content="Grayscale (8-bit)"/>
-                                    <ComboBoxItem Content="Black and White (1-bit)"/>
+                                    <ComboBoxItem Content="Grayscale (8-bit) - Recommended"/>
                                 </ComboBox>
                             </StackPanel>
 
@@ -180,6 +156,22 @@
                                 </ComboBox>
                             </StackPanel>
                         </Grid>
+
+                        <!-- Form Dimensions Banner -->
+                        <Border Background="#F9F6F7" BorderBrush="#E8D8DE" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,0,0,4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="📄" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Calibrated Form Size: 8.5 × 13 in (CSWDO Long Bond)" FontSize="12" FontWeight="Bold" Foreground="#702943" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="Automatic hardware alignment is locked to official 8.5 × 13 in sheets. Note: standard flatbed glass supports up to 11.7 in; use Document Feeder (ADF) if scanning full 13 in sheets on legal-capable hardware."
+                                               FontSize="11" Foreground="#666666" FontFamily="Segoe UI" TextWrapping="Wrap" Margin="0,2,0,0" LineHeight="15"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </StackPanel>
                 </ScrollViewer>
 

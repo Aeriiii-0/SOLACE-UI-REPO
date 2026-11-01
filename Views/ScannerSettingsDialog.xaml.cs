@@ -64,20 +64,15 @@ namespace SOLUM_UI
 
         private void ApplySettingsToUI()
         {
-            if (Settings.Dpi <= 150)
-                Rb150Dpi.IsChecked = true;
-            else if (Settings.Dpi <= 200)
-                Rb200Dpi.IsChecked = true;
-            else
+            if (Settings.Dpi > 200)
                 Rb300Dpi.IsChecked = true;
+            else
+                Rb200Dpi.IsChecked = true;
 
             switch (Settings.ColorMode)
             {
                 case ScanColorMode.Grayscale:
                     CmbColorMode.SelectedIndex = 1;
-                    break;
-                case ScanColorMode.BlackAndWhite:
-                    CmbColorMode.SelectedIndex = 2;
                     break;
                 default:
                     CmbColorMode.SelectedIndex = 0;
@@ -141,31 +136,20 @@ namespace SOLUM_UI
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             // DPI
-            if (Rb150Dpi.IsChecked == true)
-                Settings.Dpi = 150;
-            else if (Rb200Dpi.IsChecked == true)
-                Settings.Dpi = 200;
-            else
-                Settings.Dpi = 300;
+            Settings.Dpi = (Rb300Dpi.IsChecked == true) ? 300 : 200;
 
             // Color Mode
-            switch (CmbColorMode.SelectedIndex)
-            {
-                case 1:
-                    Settings.ColorMode = ScanColorMode.Grayscale;
-                    break;
-                case 2:
-                    Settings.ColorMode = ScanColorMode.BlackAndWhite;
-                    break;
-                default:
-                    Settings.ColorMode = ScanColorMode.Color;
-                    break;
-            }
+            Settings.ColorMode = (CmbColorMode.SelectedIndex == 1)
+                ? ScanColorMode.Grayscale
+                : ScanColorMode.Color;
 
             // Paper Source
             Settings.PaperSource = CmbPaperSource.SelectedIndex == 1
                 ? ScanPaperSource.Feeder
                 : ScanPaperSource.Flatbed;
+
+            // Paper Size locked to official 8.5x13 Long Bond dimension
+            Settings.PaperSize = "8.5x13";
 
             // Selected Device
             if (CmbDevices.SelectedItem is ComboBoxItem selectedItem)

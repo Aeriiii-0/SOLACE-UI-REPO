@@ -45,6 +45,7 @@ namespace SOLUM_UI.Views.Components
         private CancellationTokenSource _dismissCts;
         private bool _isSpinning = false;
         private ScannerSettings _scannerSettings = ScannerSettings.Load();
+        private readonly List<string> _sessionScannedFiles = new List<string>();
         private string _lastFocusedFieldKey = null;
         private string _currentDeskewedImagePath = null;
         private CancellationTokenSource _processCts;
@@ -78,12 +79,20 @@ namespace SOLUM_UI.Views.Components
             UpdateScannerStatusBadge();
             OcrService.WarmupProgressChanged += OnOcrWarmupProgressChanged;
             CheckServerHealth();
+            Task.Run(() => WiaScannerService.CleanupOrphanedTempScans());
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             OcrService.WarmupProgressChanged -= OnOcrWarmupProgressChanged;
             _dismissCts?.Cancel();
+
+            // Purge any temporary scans created during this session
+            foreach (var f in _sessionScannedFiles)
+            {
+                try { if (File.Exists(f)) File.Delete(f); } catch { }
+            }
+            _sessionScannedFiles.Clear();
         }
 
         #region Server Health Check & Engine Warmup
@@ -396,13 +405,14 @@ namespace SOLUM_UI.Views.Components
         private void UpdateScannerStatusBadge()
         {
             string dev = string.IsNullOrWhiteSpace(_scannerSettings.DeviceName) ? "Auto-detect" : _scannerSettings.DeviceName;
+            string paper = string.IsNullOrWhiteSpace(_scannerSettings.PaperSize) ? "8.5x13" : _scannerSettings.PaperSize;
             if (TxtScannerStatusBadge != null)
             {
-                TxtScannerStatusBadge.Text = $"Status: {dev} ({_scannerSettings.Dpi} DPI - {_scannerSettings.ColorMode})";
+                TxtScannerStatusBadge.Text = $"Status: {dev} ({_scannerSettings.Dpi} DPI - {_scannerSettings.ColorMode} - {paper})";
             }
             if (TxtMenuScannerSub != null)
             {
-                TxtMenuScannerSub.Text = $"{dev} • {_scannerSettings.Dpi} DPI • {_scannerSettings.ColorMode}";
+                TxtMenuScannerSub.Text = $"{dev} • {_scannerSettings.Dpi} DPI • {_scannerSettings.ColorMode} • {paper}";
             }
         }
 
@@ -417,7 +427,7 @@ namespace SOLUM_UI.Views.Components
 
                 OverlayProcessing.Visibility = Visibility.Visible;
                 OcrStageProgressBar.Value = 5;
-                TxtProcessingStep.Text = "Step 1 of 4: Scanner Hardware Acquisition";
+                TxtProcessingStep.Text = "Acquiring Scanner Hardware Feed...";
                 TxtCurrentExtractingField.Text = "Connecting to scanner device...";
                 TxtLiveElapsedTime.Text = "0.0s";
 
@@ -436,6 +446,7 @@ namespace SOLUM_UI.Views.Components
 
                 if (!string.IsNullOrEmpty(scannedFile) && File.Exists(scannedFile))
                 {
+                    _sessionScannedFiles.Add(scannedFile);
                     await ProcessDocumentAsync(scannedFile);
                 }
             }
