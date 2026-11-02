@@ -1267,7 +1267,7 @@ namespace SOLUM_UI
 
             if (TxtPageInfo != null)
 
-                TxtPageInfo.Text = $"{_currentPage} of {_totalPages}";
+                TxtPageInfo.Text = _totalPages > 0 ? $"Page {_currentPage} of {_totalPages}" : "Page 1 of 1";
 
 
 
