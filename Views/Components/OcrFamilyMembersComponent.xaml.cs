@@ -307,10 +307,15 @@ namespace SOLUM_UI.Views.Components
                         ocrRow.Relationship = matchedRel;
                         ocrRow.EducationEmployment = matchedEdu;
                         ocrRow.Income = OcrService.IsOcrNotApplicable(m.Income) ? "0" : OcrService.FuzzyMatchIncome(m.Income);
-                        if (dt.HasValue && dt.Value != DateTime.MinValue)
+                        if (dt.HasValue && dt.Value != DateTime.MinValue && dt.Value.Year >= 1900 && dt.Value.Date <= DateTime.Today)
                             ocrRow.BirthdateDate = dt.Value;
-                        else if (!string.IsNullOrWhiteSpace(normDob))
-                            ocrRow.Birthdate = normDob;
+                        else if (!string.IsNullOrWhiteSpace(normDob) && OcrService.TryParseOcrDate(normDob, out DateTime dtParsed) && dtParsed.Year >= 1900 && dtParsed.Date <= DateTime.Today)
+                            ocrRow.BirthdateDate = dtParsed;
+                        else
+                        {
+                            ocrRow.BirthdateDate = null;
+                            ocrRow.Birthdate = string.Empty;
+                        }
                         _familyRowData.Add(ocrRow);
                     }
                 }
@@ -429,40 +434,59 @@ namespace SOLUM_UI.Views.Components
             TxtMemberName.Focus();
         }
 
+        public void OpenEditMember(FamilyMemberRow row, string focusField = null)
+        {
+            if (row == null) return;
+            _editingFamilyMember = row;
+            TxtAddMemberTitle.Text = $"Edit Household Member: {row.MemberName}";
+            BtnSaveMember.Content = "Update Member";
+
+            TxtMemberName.Text = row.MemberName;
+            SetComboByContent(CmbMemberRel, row.Relationship);
+            SetComboByContent(CmbMemberSex, row.Sex);
+            SetComboByContent(CmbMemberCivil, row.CivilStatus);
+            if (row.BirthdateDate.HasValue && row.BirthdateDate.Value != DateTime.MinValue && row.BirthdateDate.Value.Year >= 1900)
+                DpMemberDob.SelectedDate = row.BirthdateDate;
+            else if (!string.IsNullOrWhiteSpace(row.Birthdate) && OcrService.TryParseOcrDate(row.Birthdate, out DateTime dtParsed) && dtParsed.Year >= 1900)
+                DpMemberDob.SelectedDate = dtParsed;
+            else
+                DpMemberDob.SelectedDate = null;
+            TxtMemberAge.Text = row.Age;
+            TxtMemberEdu.Text = row.EducationEmployment;
+            TxtMemberIncome.Text = row.Income;
+
+            bool hasSn = row.HasSpecialNeeds;
+            ChkMemberSpecialNeeds.IsChecked = hasSn;
+            if (PnlSpecialNeedsDetails != null)
+            {
+                PnlSpecialNeedsDetails.IsEnabled = hasSn;
+                PnlSpecialNeedsDetails.Opacity = hasSn ? 1.0 : 0.5;
+            }
+            SetComboByContent(CmbSpecialNeedsCategory, row.SpecialNeedsCategory);
+            TxtSpecialNeedsDescription.Text = row.SpecialNeedsDescription ?? string.Empty;
+
+            AddMemberSubCard.Visibility = Visibility.Visible;
+            AddMemberSubCard.BringIntoView();
+
+            switch (focusField?.ToLowerInvariant())
+            {
+                case "name": TxtMemberName.Focus(); break;
+                case "rel": case "relationship": CmbMemberRel.Focus(); break;
+                case "sex": CmbMemberSex.Focus(); break;
+                case "civil": case "civil status": CmbMemberCivil.Focus(); break;
+                case "dob": case "birthdate": DpMemberDob.Focus(); break;
+                case "edu": case "education": TxtMemberEdu.Focus(); break;
+                case "income": TxtMemberIncome.Focus(); break;
+                case "special": case "special needs": CmbSpecialNeedsCategory.Focus(); break;
+                default: TxtMemberName.Focus(); break;
+            }
+        }
+
         private void BtnEditFamilyMember_Click(object sender, RoutedEventArgs e)
         {
             if ((sender as FrameworkElement)?.Tag is FamilyMemberRow row)
             {
-                _editingFamilyMember = row;
-                TxtAddMemberTitle.Text = $"Edit Household Member: {row.MemberName}";
-                BtnSaveMember.Content = "Update Member";
-
-                TxtMemberName.Text = row.MemberName;
-                SetComboByContent(CmbMemberRel, row.Relationship);
-                SetComboByContent(CmbMemberSex, row.Sex);
-                SetComboByContent(CmbMemberCivil, row.CivilStatus);
-                if (row.BirthdateDate.HasValue && row.BirthdateDate.Value != DateTime.MinValue)
-                    DpMemberDob.SelectedDate = row.BirthdateDate;
-                else if (!string.IsNullOrWhiteSpace(row.Birthdate) && OcrService.TryParseOcrDate(row.Birthdate, out DateTime dtParsed))
-                    DpMemberDob.SelectedDate = dtParsed;
-                else
-                    DpMemberDob.SelectedDate = null;
-                TxtMemberAge.Text = row.Age;
-                TxtMemberEdu.Text = row.EducationEmployment;
-                TxtMemberIncome.Text = row.Income;
-
-                bool hasSn = row.HasSpecialNeeds;
-                ChkMemberSpecialNeeds.IsChecked = hasSn;
-                if (PnlSpecialNeedsDetails != null)
-                {
-                    PnlSpecialNeedsDetails.IsEnabled = hasSn;
-                    PnlSpecialNeedsDetails.Opacity = hasSn ? 1.0 : 0.5;
-                }
-                SetComboByContent(CmbSpecialNeedsCategory, row.SpecialNeedsCategory);
-                TxtSpecialNeedsDescription.Text = row.SpecialNeedsDescription ?? string.Empty;
-
-                AddMemberSubCard.Visibility = Visibility.Visible;
-                TxtMemberName.Focus();
+                OpenEditMember(row);
             }
         }
 
@@ -532,8 +556,20 @@ namespace SOLUM_UI.Views.Components
             }
 
             DateTime dob = DpMemberDob.SelectedDate.Value;
+            if (dob.Year < 1900 || dob.Date > DateTime.Today)
+            {
+                ActionConfirmDialog.Warning("Validation", "Please enter a valid birthdate between year 1900 and today.", window);
+                DpMemberDob.Focus();
+                return;
+            }
+
             int age = OcrService.CalculateAge(dob);
-            if (age < 0 || age > 120) age = 0;
+            if (age < 0 || age > 120)
+            {
+                ActionConfirmDialog.Warning("Validation", "Please enter a valid birthdate (age cannot exceed 120 years).", window);
+                DpMemberDob.Focus();
+                return;
+            }
 
             string civil = (CmbMemberCivil.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (string.IsNullOrWhiteSpace(civil)) civil = "Single";
@@ -744,7 +780,7 @@ namespace SOLUM_UI.Views.Components
 
                 var rowMissing = new List<string>();
                 if (string.IsNullOrWhiteSpace(row.Sex)) rowMissing.Add("Sex");
-                if (!row.BirthdateDate.HasValue) rowMissing.Add("Birthdate");
+                if (!row.BirthdateDate.HasValue || row.BirthdateDate.Value.Year < 1900 || row.BirthdateDate.Value.Date > DateTime.Today) rowMissing.Add("Birthdate");
                 if (string.IsNullOrWhiteSpace(row.CivilStatus)) rowMissing.Add("Civil Status");
                 if (string.IsNullOrWhiteSpace(row.Relationship)) rowMissing.Add("Relationship");
                 if (string.IsNullOrWhiteSpace(row.EducationEmployment)) rowMissing.Add("Education/Employment");
@@ -758,9 +794,24 @@ namespace SOLUM_UI.Views.Components
                 }
             }
 
-
-
             return ok;
+        }
+
+        public void FocusFirstInvalidField()
+        {
+            foreach (var item in _familyRowData)
+            {
+                if (item is FamilyMemberRow row && !string.IsNullOrWhiteSpace(row.MemberName))
+                {
+                    if (string.IsNullOrWhiteSpace(row.Sex)) { OpenEditMember(row, "sex"); return; }
+                    if (!row.BirthdateDate.HasValue || row.BirthdateDate.Value.Year < 1900 || row.BirthdateDate.Value.Date > DateTime.Today) { OpenEditMember(row, "dob"); return; }
+                    if (string.IsNullOrWhiteSpace(row.CivilStatus)) { OpenEditMember(row, "civil"); return; }
+                    if (string.IsNullOrWhiteSpace(row.Relationship)) { OpenEditMember(row, "rel"); return; }
+                    if (string.IsNullOrWhiteSpace(row.EducationEmployment)) { OpenEditMember(row, "edu"); return; }
+                    if (string.IsNullOrWhiteSpace(row.Income)) { OpenEditMember(row, "income"); return; }
+                    if (row.HasSpecialNeeds && string.IsNullOrWhiteSpace(row.SpecialNeedsCategory)) { OpenEditMember(row, "special"); return; }
+                }
+            }
         }
 
         private void MarkError(Control ctrl, TextBlock lbl, string msg)

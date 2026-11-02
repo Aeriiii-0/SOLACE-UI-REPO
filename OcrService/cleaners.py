@@ -465,6 +465,8 @@ def clean_date(raw_text: str) -> str:
         else:
             yr = int(p3) if len(p3) == 4 else (2000 + int(p3) if int(p3) < 40 else 1900 + int(p3))
             yr = normalize_handwritten_year(yr)
+            if yr < 1900 or yr > date.today().year:
+                return ""
             if int(p1) > 12 and int(p2) <= 12 and int(p1) <= 31:
                 return f"{yr:04d}-{int(p2):02d}-{int(p1):02d}"
             elif int(p2) > 12 and int(p1) <= 12 and int(p2) <= 31:

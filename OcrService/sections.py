@@ -360,7 +360,7 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
 
         # 4. Birthdate
         raw_dob, dob_conf = get_cell_text("dob", 3)
-        clean_m_dob = "" if is_ocr_na(raw_dob) else (clean_date(raw_dob) or raw_dob)
+        clean_m_dob = "" if is_ocr_na(raw_dob) else (clean_date(raw_dob) or "")
         if is_ocr_na(clean_m_dob): clean_m_dob = ""
 
         # If Birthdate is valid, compute Age automatically if missing or misread

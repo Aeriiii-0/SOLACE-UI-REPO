@@ -440,6 +440,8 @@ namespace SOLUM_UI.Views.Components
             { MarkDateError(DpBirthdate, ErrBirthdate, "Required."); missing.Add("Birthdate"); ok = false; }
             else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today)
             { MarkDateError(DpBirthdate, ErrBirthdate, "Cannot be in the future."); missing.Add("Birthdate (future date)"); ok = false; }
+            else if (DpBirthdate.SelectedDate.Value.Year < 1900)
+            { MarkDateError(DpBirthdate, ErrBirthdate, "Year must be 1900 or later."); missing.Add("Birthdate (year 1900+)"); ok = false; }
             else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today.AddYears(-15))
             { MarkDateError(DpBirthdate, ErrBirthdate, "Must be at least 15 years old."); missing.Add("Birthdate (must be 15+)"); ok = false; }
 
@@ -548,7 +550,30 @@ namespace SOLUM_UI.Views.Components
                 StopCheckingSpinner();
             }
 
+            DuplicateCheckPassed = true;
             return true;
+        }
+
+        public void FocusFirstInvalidField()
+        {
+            if (string.IsNullOrWhiteSpace(TxtLastName.Text)) { TxtLastName.Focus(); TxtLastName.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(TxtFirstName.Text)) { TxtFirstName.Focus(); TxtFirstName.BringIntoView(); return; }
+            if (!DpBirthdate.SelectedDate.HasValue ||
+                DpBirthdate.SelectedDate.Value.Date > DateTime.Today ||
+                DpBirthdate.SelectedDate.Value.Year < 1900 ||
+                DpBirthdate.SelectedDate.Value.Date > DateTime.Today.AddYears(-15))
+            {
+                DpBirthdate.Focus();
+                DpBirthdate.BringIntoView();
+                return;
+            }
+            string philsysRaw = Regex.Replace(TxtPhilSys.Text ?? "", @"\D", "");
+            if (!string.IsNullOrWhiteSpace(philsysRaw) && philsysRaw.Length != 16)
+            {
+                TxtPhilSys.Focus();
+                TxtPhilSys.BringIntoView();
+                return;
+            }
         }
 
         private void ViewExistingRecord_Click(object sender, RoutedEventArgs e)

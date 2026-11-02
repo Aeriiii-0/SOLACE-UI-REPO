@@ -1437,7 +1437,29 @@ namespace SOLUM_UI.Services
 
             if (DateTime.TryParse(s, out result))
 
-                return true;
+            {
+
+                if (result.Year >= 1900 && result.Year <= DateTime.Today.Year && result.Date <= DateTime.Today)
+
+                    return true;
+
+                result = DateTime.MinValue;
+
+                return false;
+
+            }
+
+
+
+            if (result != DateTime.MinValue && (result.Year < 1900 || result.Year > DateTime.Today.Year || result.Date > DateTime.Today))
+
+            {
+
+                result = DateTime.MinValue;
+
+                return false;
+
+            }
 
 
 
@@ -1585,7 +1607,7 @@ namespace SOLUM_UI.Services
 
 
 
-            if (TryParseOcrDate(s, out DateTime dt))
+            if (TryParseOcrDate(s, out DateTime dt) && dt.Year >= 1900 && dt.Date <= DateTime.Today)
 
             {
 
@@ -1597,7 +1619,7 @@ namespace SOLUM_UI.Services
 
 
 
-            return s;
+            return string.Empty;
 
         }
 

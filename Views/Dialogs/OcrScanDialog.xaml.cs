@@ -307,6 +307,12 @@ namespace SOLUM_UI.Views.Dialogs
             ValidationMessage.Visibility = Visibility.Collapsed;
             if (ViewModel.CurrentStep == 1)
             {
+                if (!PrimaryInfoSection.Validate(out var missing))
+                {
+                    SetValidationMessage(missing);
+                    PrimaryInfoSection.FocusFirstInvalidField();
+                    return;
+                }
                 if (!await VerifyPrimaryStepAsync()) return;
                 GoToStep(2);
             }
@@ -315,6 +321,7 @@ namespace SOLUM_UI.Views.Dialogs
                 if (!SecondaryInfoSection.Validate(out var missing))
                 {
                     SetValidationMessage(missing);
+                    SecondaryInfoSection.FocusFirstInvalidField();
                     return;
                 }
                 GoToStep(3);
@@ -475,25 +482,40 @@ namespace SOLUM_UI.Views.Dialogs
         private async void Save_Click(object sender, RoutedEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
+
+            // 1. Validate Step 1 (Primary Info)
             if (!PrimaryInfoSection.Validate(out var missingPrimary))
             {
                 GoToStep(1);
                 SetValidationMessage(missingPrimary);
+                PrimaryInfoSection.FocusFirstInvalidField();
                 return;
             }
 
             if (!PrimaryInfoSection.DuplicateCheckPassed)
             {
-                GoToStep(1);
                 if (!await VerifyPrimaryStepAsync())
                 {
+                    GoToStep(1);
                     return;
                 }
             }
 
-            if (!ValidateAll(out var missing))
+            // 2. Validate Step 2 (Secondary Info)
+            if (!SecondaryInfoSection.Validate(out var missingSecondary))
             {
-                SetValidationMessage(missing);
+                GoToStep(2);
+                SetValidationMessage(missingSecondary);
+                SecondaryInfoSection.FocusFirstInvalidField();
+                return;
+            }
+
+            // 3. Validate Step 3 (Family Composition & Circumstances)
+            if (!FamilyMembersSection.Validate(out var missingFamily))
+            {
+                GoToStep(3);
+                SetValidationMessage(missingFamily);
+                FamilyMembersSection.FocusFirstInvalidField();
                 return;
             }
 

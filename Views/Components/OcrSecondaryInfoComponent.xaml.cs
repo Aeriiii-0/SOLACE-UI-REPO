@@ -498,6 +498,17 @@ namespace SOLUM_UI.Views.Components
             return ok;
         }
 
+        public void FocusFirstInvalidField()
+        {
+            if (CmbCivilStatus.SelectedItem == null) { CmbCivilStatus.Focus(); CmbCivilStatus.BringIntoView(); return; }
+            if (CmbSex.SelectedItem == null) { CmbSex.Focus(); CmbSex.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(TxtPlaceOfBirth.Text)) { TxtPlaceOfBirth.Focus(); TxtPlaceOfBirth.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(TxtAddress.Text)) { TxtAddress.Focus(); TxtAddress.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(GetComboValue(CmbBarangay))) { CmbBarangay.Focus(); CmbBarangay.BringIntoView(); return; }
+            string contactDigits = Regex.Replace(TxtContact.Text ?? "", @"\D", "");
+            if (string.IsNullOrWhiteSpace(contactDigits) || contactDigits.Length != 11) { TxtContact.Focus(); TxtContact.BringIntoView(); return; }
+        }
+
         private void MarkError(Control ctrl, TextBlock lbl, string msg)
         {
             if (ctrl != null)
