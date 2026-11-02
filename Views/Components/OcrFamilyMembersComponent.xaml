@@ -303,7 +303,7 @@
 
                                         <StackPanel Grid.Column="0">
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
-                                                Birthdate <Run Text="*" Foreground="#E53935"/>
+                                                Birthdate (MM/DD/YYYY) <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
                                             <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Height="32"
                                                     Tag="fam_row_dob" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
@@ -438,10 +438,6 @@
                                                            Foreground="#111827" TextTrimming="CharacterEllipsis" MaxWidth="190"
                                                            Cursor="Hand" ToolTip="Click to view Name on document preview"
                                                            Tag="fam_row_name" PreviewMouseDown="Field_PreviewMouseDown"/>
-                                                <Border Visibility="{Binding NewBadgeVisibility}" Background="#702943" CornerRadius="4"
-                                                        Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                                    <TextBlock Text="NEW" FontSize="9" FontWeight="Bold" Foreground="White"/>
-                                                </Border>
                                             </StackPanel>
                                             <TextBlock Text="{Binding Relationship}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"
                                                        Cursor="Hand" ToolTip="Click to view Relationship on document preview"

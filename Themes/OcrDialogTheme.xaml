@@ -194,7 +194,7 @@
                                     </Style>
                                 </DatePickerTextBox.Style>
                             </DatePickerTextBox>
-                            <TextBlock Text="DD/MM/YYYY" Foreground="#999999" FontSize="13"
+                            <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="13"
                                        Padding="12,0" VerticalAlignment="Center"
                                        IsHitTestVisible="False" Opacity="0.7">
                                 <TextBlock.Style>

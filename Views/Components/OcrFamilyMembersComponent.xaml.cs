@@ -441,7 +441,12 @@ namespace SOLUM_UI.Views.Components
                 SetComboByContent(CmbMemberRel, row.Relationship);
                 SetComboByContent(CmbMemberSex, row.Sex);
                 SetComboByContent(CmbMemberCivil, row.CivilStatus);
-                DpMemberDob.SelectedDate = row.BirthdateDate;
+                if (row.BirthdateDate.HasValue && row.BirthdateDate.Value != DateTime.MinValue)
+                    DpMemberDob.SelectedDate = row.BirthdateDate;
+                else if (!string.IsNullOrWhiteSpace(row.Birthdate) && OcrService.TryParseOcrDate(row.Birthdate, out DateTime dtParsed))
+                    DpMemberDob.SelectedDate = dtParsed;
+                else
+                    DpMemberDob.SelectedDate = null;
                 TxtMemberAge.Text = row.Age;
                 TxtMemberEdu.Text = row.EducationEmployment;
                 TxtMemberIncome.Text = row.Income;
@@ -566,7 +571,7 @@ namespace SOLUM_UI.Views.Components
             else
             {
                 var row = MakeFamilyRow();
-                row.IsNew = true;
+                row.IsNew = false;
                 row.MemberName = name;
                 row.Relationship = rel;
                 row.Sex = sex;

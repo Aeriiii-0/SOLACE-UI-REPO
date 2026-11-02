@@ -13,6 +13,7 @@ using System.Windows.Media;
 using SOLUM_UI.Models;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services.Api;
+using SOLUM_UI.Services;
 using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
@@ -266,7 +267,11 @@ namespace SOLUM_UI
                 if (BirthdateDate.HasValue && BirthdateDate.Value != DateTime.MinValue)
                     return BirthdateDate.Value.ToString("MM/dd/yyyy");
                 if (!string.IsNullOrWhiteSpace(Birthdate))
+                {
+                    if (OcrService.TryParseOcrDate(Birthdate, out DateTime dt) && dt != DateTime.MinValue)
+                        return dt.ToString("MM/dd/yyyy");
                     return Birthdate;
+                }
                 return "—";
             }
         }

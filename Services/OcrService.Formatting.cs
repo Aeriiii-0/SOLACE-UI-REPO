@@ -1245,9 +1245,19 @@ namespace SOLUM_UI.Services
 
                 }
 
-                // Both <= 12: In Philippine context, default to DD/MM/YYYY
+                // Both <= 12: On CSWDO application form, date format is MM/DD/YYYY (or MM/DD/YY)
 
-                if (p2 <= 12 && p1 <= DateTime.DaysInMonth(yr, p2))
+                if (p1 <= 12 && p2 <= DateTime.DaysInMonth(yr, p1))
+
+                {
+
+                    result = new DateTime(yr, p1, p2);
+
+                    return true;
+
+                }
+
+                else if (p2 <= 12 && p1 <= DateTime.DaysInMonth(yr, p2))
 
                 {
 
@@ -1581,7 +1591,7 @@ namespace SOLUM_UI.Services
 
                 parsedDate = dt;
 
-                return dt.ToString("dd/MM/yyyy");
+                return dt.ToString("MM/dd/yyyy");
 
             }
 
