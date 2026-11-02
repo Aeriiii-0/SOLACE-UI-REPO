@@ -248,7 +248,7 @@
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Relationship <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
-                                            <ComboBox x:Name="CmbMemberRel" Style="{StaticResource FormCombo}" Height="32" FontSize="12"
+                                            <ComboBox x:Name="CmbMemberRel" Style="{StaticResource FormComboSm}"
                                                       Tag="fam_row_rel" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
                                                 <ComboBoxItem Content="Child"/>
                                                 <ComboBoxItem Content="Spouse"/>
@@ -266,7 +266,7 @@
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Sex <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
-                                            <ComboBox x:Name="CmbMemberSex" Style="{StaticResource FormCombo}" Height="32" FontSize="12"
+                                            <ComboBox x:Name="CmbMemberSex" Style="{StaticResource FormComboSm}"
                                                       Tag="fam_row_sex" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
                                                 <ComboBoxItem Content="Female"/>
                                                 <ComboBoxItem Content="Male"/>
@@ -277,7 +277,7 @@
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Civil Status <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
-                                            <ComboBox x:Name="CmbMemberCivil" Style="{StaticResource FormCombo}" Height="32" FontSize="12"
+                                            <ComboBox x:Name="CmbMemberCivil" Style="{StaticResource FormComboSm}"
                                                       Tag="fam_row_civ" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
                                                 <ComboBoxItem Content="Single"/>
                                                 <ComboBoxItem Content="Married"/>
@@ -360,7 +360,7 @@
 
                                                 <StackPanel Grid.Column="0">
                                                     <TextBlock Text="Special Needs Category" Style="{StaticResource FieldLabelSm}"/>
-                                                    <ComboBox x:Name="CmbSpecialNeedsCategory" Style="{StaticResource FormCombo}" Height="32" FontSize="12">
+                                                    <ComboBox x:Name="CmbSpecialNeedsCategory" Style="{StaticResource FormComboSm}">
                                                         <ComboBoxItem Content="Visual Impairment"/>
                                                         <ComboBoxItem Content="Hearing Impairment"/>
                                                         <ComboBoxItem Content="Mobility / Physical Disability"/>

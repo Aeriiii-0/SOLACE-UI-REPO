@@ -19,7 +19,7 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <TextBlock Text="Date of Application:" FontSize="11" FontWeight="SemiBold"
                                            Foreground="#222222" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <Border BorderBrush="#7B1426" BorderThickness="1.5" CornerRadius="6" Background="White" Width="180" Height="44" Padding="8,0,8,0">
+                                <Border BorderBrush="#7B1426" BorderThickness="1.5" CornerRadius="8" Background="White" Width="180" Height="44">
                                     <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDateSm}"
                                                 Tag="application_date" GotFocus="Field_GotFocus"
                                                 GotKeyboardFocus="Field_GotFocus"
@@ -144,7 +144,7 @@
                                     <TextBlock x:Name="TxtConf_Birthdate" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
-                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                            <Border x:Name="Border_Birthdate" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="8" Background="White">
                                 <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
                                             Tag="birthdate" GotFocus="Field_GotFocus"
                                             GotKeyboardFocus="Field_GotFocus"

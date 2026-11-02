@@ -585,13 +585,42 @@ namespace SOLUM_UI.Views.Components
         {
             if (dp != null)
             {
-                dp.BorderBrush = ErrorBrush;
-                dp.BorderThickness = new Thickness(1.5);
+                if (dp.Parent is Border border)
+                {
+                    border.BorderBrush = ErrorBrush;
+                    border.BorderThickness = new Thickness(1.5);
+                }
+                else
+                {
+                    dp.BorderBrush = ErrorBrush;
+                    dp.BorderThickness = new Thickness(1.5);
+                }
             }
             if (lbl != null)
             {
                 lbl.Text = msg;
                 lbl.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void ClearDateError(DatePicker dp, TextBlock lbl)
+        {
+            if (lbl != null && lbl.Visibility != Visibility.Collapsed)
+            {
+                lbl.Visibility = Visibility.Collapsed;
+                if (dp != null)
+                {
+                    if (dp.Parent is Border border)
+                    {
+                        border.BorderBrush = DefaultBrush;
+                        border.BorderThickness = DefaultThickness;
+                    }
+                    else
+                    {
+                        dp.BorderBrush = DefaultBrush;
+                        dp.BorderThickness = DefaultThickness;
+                    }
+                }
             }
         }
 
@@ -608,18 +637,7 @@ namespace SOLUM_UI.Views.Components
             }
         }
 
-        private void ClearDateError(DatePicker dp, TextBlock lbl)
-        {
-            if (dp != null)
-            {
-                dp.BorderBrush = DefaultBrush;
-                dp.BorderThickness = DefaultThickness;
-            }
-            if (lbl != null)
-            {
-                lbl.Visibility = Visibility.Collapsed;
-            }
-        }
+
 
         #endregion
     }

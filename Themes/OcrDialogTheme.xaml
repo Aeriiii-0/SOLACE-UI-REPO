@@ -20,7 +20,7 @@
         <Setter Property="Padding" Value="12,0"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Foreground" Value="#111111"/>
-        <Setter Property="BorderBrush" Value="#D0B8C0"/>
+        <Setter Property="BorderBrush" Value="#C0A0AA"/>
         <Setter Property="BorderThickness" Value="1.2"/>
         <Setter Property="Background" Value="White"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -57,7 +57,7 @@
         <Setter Property="Background" Value="White"/>
         <Setter Property="BorderBrush" Value="#C0A0AA"/>
         <Setter Property="BorderThickness" Value="1.2"/>
-        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="Padding" Value="14,0,28,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -68,14 +68,14 @@
                         <Border x:Name="ComboBg" Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6">
-                            <Grid Margin="12,0,28,0">
+                                CornerRadius="8">
+                            <Grid Margin="{TemplateBinding Padding}">
                                 <ContentPresenter x:Name="ContentSite"
                                                   Content="{TemplateBinding SelectionBoxItem}"
                                                   ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                                   VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                 <TextBlock x:Name="Placeholder" Text="Select..."
-                                           Foreground="#BBBBBB" FontSize="14"
+                                           Foreground="#BBBBBB" FontSize="{TemplateBinding FontSize}"
                                            VerticalAlignment="Center" IsHitTestVisible="False"
                                            Visibility="Collapsed"/>
                             </Grid>
@@ -86,13 +86,13 @@
                                           RelativeSource={RelativeSource TemplatedParent}}"
                                       Focusable="False" Opacity="0"/>
                         <Path HorizontalAlignment="Right" VerticalAlignment="Center"
-                              Margin="0,0,10,0" Data="M7,10L12,15L17,10H7Z"
+                              Margin="0,0,12,0" Data="M7,10L12,15L17,10H7Z"
                               Fill="#702943" Stretch="Uniform" Width="12" Height="12"
                               IsHitTestVisible="False"/>
                         <Popup x:Name="Popup" Placement="Bottom"
                                IsOpen="{TemplateBinding IsDropDownOpen}"
                                AllowsTransparency="True" Focusable="False" PopupAnimation="None">
-                            <Border Background="White" CornerRadius="10" BorderBrush="#C0A0AA"
+                            <Border Background="White" CornerRadius="8" BorderBrush="#C0A0AA"
                                     BorderThickness="1.2" MinWidth="{TemplateBinding ActualWidth}"
                                     MaxHeight="200" Margin="0,2,0,0">
                                 <Border.Effect>
@@ -330,6 +330,12 @@
         <Setter Property="Height" Value="32"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="Padding" Value="10,0"/>
+    </Style>
+
+    <Style x:Key="FormComboSm" TargetType="ComboBox" BasedOn="{StaticResource FormCombo}">
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Padding" Value="12,0,24,0"/>
     </Style>
 
     <Style x:Key="FormDateSm" TargetType="DatePicker" BasedOn="{StaticResource FormDate}">
