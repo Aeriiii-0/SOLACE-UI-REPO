@@ -910,7 +910,7 @@
 
         <Style x:Key="QuickFilterTab" TargetType="RadioButton">
 
-            <Setter Property="Height" Value="32"/>
+            <Setter Property="Height" Value="34"/>
 
             <Setter Property="Cursor" Value="Hand"/>
 
@@ -932,7 +932,7 @@
 
                     <ControlTemplate TargetType="RadioButton">
 
-                        <Border x:Name="TabBg" Background="Transparent" CornerRadius="16" Padding="13,0">
+                        <Border x:Name="TabBg" Background="Transparent" CornerRadius="17" Padding="14,0" Height="34">
 
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
@@ -942,7 +942,7 @@
 
                             <Trigger Property="IsMouseOver" Value="True">
 
-                                <Setter TargetName="TabBg" Property="Background" Value="#F0E4E8"/>
+                                <Setter Property="Foreground" Value="#702943"/>
 
                                 <Setter Property="Foreground" Value="#702943"/>
 
@@ -952,9 +952,17 @@
 
                                 <Setter TargetName="TabBg" Property="Background" Value="#FFFFFF"/>
 
-                                <Setter TargetName="TabBg" Property="BorderBrush" Value="#E0D0D5"/>
+                                <Setter TargetName="TabBg" Property="Effect">
 
-                                <Setter TargetName="TabBg" Property="BorderThickness" Value="1"/>
+                                    <Setter.Value>
+
+                                        <DropShadowEffect Color="#000000" BlurRadius="5" ShadowDepth="1" Opacity="0.08"/>
+
+                                    </Setter.Value>
+
+                                </Setter>
+
+                                <Setter TargetName="TabBg" Property="BorderThickness" Value="0"/>
 
                                 <Setter Property="Foreground" Value="#702943"/>
 
@@ -1062,7 +1070,7 @@
 
             <Setter Property="Width" Value="32"/>
 
-            <Setter Property="Height" Value="32"/>
+            <Setter Property="Height" Value="34"/>
 
             <Setter Property="BorderThickness" Value="1"/>
 
@@ -1815,719 +1823,347 @@
 
             <!-- Left: Title & Subtitle -->
 
-            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
 
                 <TextBlock Text="Record Management" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
 
-                <TextBlock Text="Registry database of registered solo parents and validity term statuses." FontFamily="Segoe UI" FontSize="12" Foreground="#8C6573" Margin="0,3,0,0"/>
+                <Border Background="#FAF2F5" CornerRadius="11" Padding="10,3" Margin="14,0,8,0" VerticalAlignment="Center">
+
+                    <TextBlock x:Name="TxtHeaderRecordCount" Text="0 Records" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+
+                </Border>
+
+                <TextBlock x:Name="TxtLastRefreshed" Text="• Updated just now" FontFamily="Segoe UI" FontSize="11.5" Foreground="#8C6573" VerticalAlignment="Center"/>
 
             </StackPanel>
 
 
 
-            <!-- Right: Unified Refresh Timestamp & Primary CTA -->
-
+            <!-- Right: Primary CTA -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-
-                <!-- Unified Refresh Button with Last Updated Timestamp -->
-
-                <Button x:Name="BtnRefreshRecords"
-
-                        Height="38" Margin="0,0,10,0"
-
-                        Cursor="Hand" ToolTip="Click to refresh records"
-
-                        Click="BtnRefreshRecords_Click"
-
-                        Background="#FAF2F5" BorderBrush="#EBD8DE" BorderThickness="1.2">
-
-                    <Button.Template>
-
-                        <ControlTemplate TargetType="Button">
-
-                            <Border x:Name="RefreshPill"
-
-                                    Background="{TemplateBinding Background}" CornerRadius="19"
-
-                                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
-
-                                    Padding="14,0" Height="38">
-
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
-                            </Border>
-
-                            <ControlTemplate.Triggers>
-
-                                <Trigger Property="IsMouseOver" Value="True">
-
-                                    <Setter TargetName="RefreshPill" Property="Background" Value="#F2E4E8"/>
-
-                                    <Setter TargetName="RefreshPill" Property="BorderBrush" Value="#702943"/>
-
-                                </Trigger>
-
-                                <Trigger Property="IsEnabled" Value="False">
-
-                                    <Setter TargetName="RefreshPill" Property="Opacity" Value="0.5"/>
-
-                                </Trigger>
-
-                            </ControlTemplate.Triggers>
-
-                        </ControlTemplate>
-
-                    </Button.Template>
-
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-
-                        <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
-
-                              Fill="#702943" Stretch="Uniform" Width="13" Height="13" Margin="0,0,7,0"/>
-
-                        <TextBlock x:Name="TxtLastRefreshed" Text="Updated: Just now"
-
-                                   FontSize="11.5" FontFamily="Segoe UI" FontWeight="SemiBold"
-
-                                   Foreground="#702943" VerticalAlignment="Center"/>
-
-                    </StackPanel>
-
-                </Button>
-
-
-
                 <!-- Primary Action: + Add New Record -->
-
                 <Button Height="38" Padding="18,0" Cursor="Hand" Click="AddNewRecord_Click">
-
                     <Button.Template>
-
                         <ControlTemplate TargetType="Button">
-
                             <Border x:Name="AddBg" Background="#702943" CornerRadius="19" Padding="{TemplateBinding Padding}">
-
                                 <Border.Effect>
-
                                     <DropShadowEffect Color="#702943" BlurRadius="10" ShadowDepth="2" Opacity="0.22"/>
-
                                 </Border.Effect>
-
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-
                                     <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"
-
                                           Fill="White" Stretch="Uniform" Width="11.5" Height="11.5" Margin="0,0,7,0" VerticalAlignment="Center"/>
-
                                     <TextBlock Text="Add New Record" FontSize="12.5" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
-
                                 </StackPanel>
-
                             </Border>
-
                             <ControlTemplate.Triggers>
-
                                 <Trigger Property="IsMouseOver" Value="True">
-
                                     <Setter TargetName="AddBg" Property="Opacity" Value="0.9"/>
-
                                 </Trigger>
-
                             </ControlTemplate.Triggers>
-
                         </ControlTemplate>
-
                     </Button.Template>
-
                 </Button>
-
             </StackPanel>
-
         </Grid>
 
-
-
-        <!-- Row 1: Command Toolbar (Status Segmented Navigation + Search & Filter) -->
-
+        <!-- Row 1: Command Toolbar (Option 3: Search Box on Left, Inline Segment Control & Filter on Right) -->
         <Grid x:Name="AdminToolbar" Grid.Row="1" Margin="24,4,24,10">
-
             <Grid.ColumnDefinitions>
-
-                <!-- Left: Status Tabs Segmented Control -->
-
-                <ColumnDefinition Width="Auto"/>
-
-                <!-- Middle: Active Filter Chips -->
-
+                <!-- Left: Full stretch Search Box -->
                 <ColumnDefinition Width="*"/>
-
-                <!-- Right: Search Box & Filter Dropdown -->
-
+                <!-- Right: Segmented Status Tabs + Filter + Refresh -->
                 <ColumnDefinition Width="Auto"/>
-
             </Grid.ColumnDefinitions>
 
+            <!-- Search Box (Full stretch on left) -->
+            <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="21"
+                    BorderBrush="#E0D0D5" BorderThickness="1.2"
+                    Height="42" Margin="0,0,12,0" VerticalAlignment="Center">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
+                    <!-- Search Icon -->
+                    <Path Grid.Column="0"
+                          Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"
+                          Fill="#8C6573" Stretch="Uniform" Width="13" Height="13" Margin="14,0,8,0" VerticalAlignment="Center"/>
 
-            <!-- Left: Segmented Status Tabs in Neutral Pill Container -->
+                    <!-- Search Input -->
+                    <TextBox x:Name="SearchName" Grid.Column="1"
+                             BorderThickness="0" Background="Transparent"
+                             FontSize="12.5" Foreground="#1F2937" VerticalAlignment="Center"
+                             TextChanged="SearchFields_TextChanged"
+                             KeyDown="SearchBox_KeyDown">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TextBox">
+                                            <Grid>
+                                                <TextBlock Text="Search by name, ID, PhilSys..."
+                                                           Foreground="#B098A0" FontSize="12.5"
+                                                           VerticalAlignment="Center" IsHitTestVisible="False">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
 
-            <Border Grid.Column="0" Background="#F5EEF1" CornerRadius="19" Padding="3"
-
-                    BorderBrush="#E8D8DE" BorderThickness="1" Height="38" VerticalAlignment="Center">
-
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-
-                    <RadioButton x:Name="TabStatusAll" Content="All" IsChecked="True" Style="{StaticResource QuickFilterTab}" Click="QuickStatusTab_Click" Tag="All"/>
-
-                    
-
-                    <RadioButton x:Name="TabStatusActive" Style="{StaticResource QuickFilterTab}" Click="QuickStatusTab_Click" Tag="Active">
-
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-
-                            <Ellipse Width="6" Height="6" Fill="#22C55E" Margin="0,0,6,0" VerticalAlignment="Center"/>
-
-                            <TextBlock Text="Active" VerticalAlignment="Center"/>
-
-                        </StackPanel>
-
-                    </RadioButton>
-
-                    
-
-                    <RadioButton x:Name="TabStatusExpiring" Style="{StaticResource QuickFilterTab}" Click="QuickStatusTab_Click" Tag="ExpiringSoon">
-
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-
-                            <Ellipse Width="6" Height="6" Fill="#F59E0B" Margin="0,0,6,0" VerticalAlignment="Center"/>
-
-                            <TextBlock Text="Expiring in 30 Days" VerticalAlignment="Center"/>
-
-                        </StackPanel>
-
-                    </RadioButton>
-
-                    
-
-                    <RadioButton x:Name="TabStatusExpired" Style="{StaticResource QuickFilterTab}" Click="QuickStatusTab_Click" Tag="Expired">
-
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-
-                            <Ellipse Width="6" Height="6" Fill="#EF4444" Margin="0,0,6,0" VerticalAlignment="Center"/>
-
-                            <TextBlock Text="Expired" VerticalAlignment="Center"/>
-
-                        </StackPanel>
-
-                    </RadioButton>
-
-                </StackPanel>
-
+                    <!-- Clear (X) Button -->
+                    <Button x:Name="ClearSearchBtn" Grid.Column="2"
+                            Width="22" Height="22" Margin="2,0,10,0"
+                            Cursor="Hand" Visibility="Collapsed"
+                            Click="ClearSearch_Click" ToolTip="Clear search (Esc)">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="ClearBg" Background="#F0E6EA" CornerRadius="11">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="ClearBg" Property="Background" Value="#E2D0D7"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"
+                              Fill="#702943" Stretch="Uniform" Width="8.5" Height="8.5"/>
+                    </Button>
+                </Grid>
             </Border>
 
-
-
-            <!-- Middle: Active Filter Chips -->
-
-            <StackPanel x:Name="ActiveFiltersPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0" Visibility="Collapsed">
-
-                <TextBlock Text="Filters:" FontSize="11.5" FontWeight="SemiBold" Foreground="#8C6573" VerticalAlignment="Center" Margin="0,0,8,0"/>
-
-
-
-                <Border x:Name="BadgeFilterBarangay" Background="#FAF2F5" BorderBrush="#E0D0D5" BorderThickness="1" CornerRadius="12" Padding="9,3" Margin="0,0,6,0" Visibility="Collapsed">
-
+            <!-- Right Controls: Status Tabs + Filter Dropdown + Refresh -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- Status Segmented Control (Option 3 low-profile inline capsule) -->
+                <Border Background="#F7F2F4" BorderBrush="#E8D8DE" BorderThickness="1"
+                        CornerRadius="21" Height="42" Padding="4" VerticalAlignment="Center" Margin="0,0,10,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-
-                        <TextBlock x:Name="TxtBadgeBarangay" Text="Barangay: All" FontSize="11" Foreground="#702943" VerticalAlignment="Center"/>
-
-                        <Button Style="{StaticResource RemoveFilterBadgeBtn}" Click="RemoveBarangayFilter_Click" ToolTip="Remove Barangay filter"/>
-
+                        <RadioButton x:Name="TabStatusAll" Content="All" IsChecked="True" Style="{StaticResource QuickFilterTab}" Click="QuickStatusTab_Click" Tag="All"/>
+                        <RadioButton x:Name="TabStatusActive" Content="Active" Style="{StaticResource QuickFilterTab}" Click="QuickStatusTab_Click" Tag="Active"/>
+                        <RadioButton x:Name="TabStatusExpiring" Content="Expiring" Style="{StaticResource QuickFilterTab}" Click="QuickStatusTab_Click" Tag="ExpiringSoon"/>
+                        <RadioButton x:Name="TabStatusExpired" Content="Expired" Style="{StaticResource QuickFilterTab}" Click="QuickStatusTab_Click" Tag="Expired"/>
                     </StackPanel>
-
                 </Border>
-
-
-
-                <Border x:Name="BadgeFilterSex" Background="#FAF2F5" BorderBrush="#E0D0D5" BorderThickness="1" CornerRadius="12" Padding="9,3" Margin="0,0,6,0" Visibility="Collapsed">
-
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-
-                        <TextBlock x:Name="TxtBadgeSex" Text="Sex: All" FontSize="11" Foreground="#702943" VerticalAlignment="Center"/>
-
-                        <Button Style="{StaticResource RemoveFilterBadgeBtn}" Click="RemoveSexFilter_Click" ToolTip="Remove Sex filter"/>
-
-                    </StackPanel>
-
-                </Border>
-
-
-
-                <Button Style="{StaticResource ClearAllFiltersLinkBtn}" Click="ClearAllFilters_Click"/>
-
-            </StackPanel>
-
-
-
-            <!-- Right: Search Box + Filter Button -->
-
-            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
-
-                <!-- Search Box -->
-
-                <Border Background="#FFFFFF" CornerRadius="19"
-
-                        BorderBrush="#E0D0D5" BorderThickness="1.2"
-
-                        Height="38" Width="260" Margin="0,0,8,0" VerticalAlignment="Center">
-
-                    <Grid>
-
-                        <Grid.ColumnDefinitions>
-
-                            <ColumnDefinition Width="Auto"/>
-
-                            <ColumnDefinition Width="*"/>
-
-                            <ColumnDefinition Width="Auto"/>
-
-                        </Grid.ColumnDefinitions>
-
-
-
-                        <!-- Search Icon -->
-
-                        <Path Grid.Column="0"
-
-                              Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"
-
-                              Fill="#8C6573" Stretch="Uniform" Width="13" Height="13" Margin="12,0,6,0" VerticalAlignment="Center"/>
-
-
-
-                        <!-- Search Input -->
-
-                        <TextBox x:Name="SearchName" Grid.Column="1"
-
-                                 BorderThickness="0" Background="Transparent"
-
-                                 FontSize="12.5" Foreground="#1F2937" VerticalAlignment="Center"
-
-                                 TextChanged="SearchFields_TextChanged"
-
-                                 KeyDown="SearchBox_KeyDown">
-
-                            <TextBox.Style>
-
-                                <Style TargetType="TextBox">
-
-                                    <Setter Property="Template">
-
-                                        <Setter.Value>
-
-                                            <ControlTemplate TargetType="TextBox">
-
-                                                <Grid>
-
-                                                    <TextBlock Text="Search name, ID, PhilSys..."
-
-                                                               Foreground="#B098A0" FontSize="12.5"
-
-                                                               VerticalAlignment="Center" IsHitTestVisible="False">
-
-                                                        <TextBlock.Style>
-
-                                                            <Style TargetType="TextBlock">
-
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-
-                                                                <Style.Triggers>
-
-                                                                    <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
-
-                                                                        <Setter Property="Visibility" Value="Visible"/>
-
-                                                                    </DataTrigger>
-
-                                                                </Style.Triggers>
-
-                                                            </Style>
-
-                                                        </TextBlock.Style>
-
-                                                    </TextBlock>
-
-                                                    <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-
-                                                </Grid>
-
-                                            </ControlTemplate>
-
-                                        </Setter.Value>
-
-                                    </Setter>
-
-                                </Style>
-
-                            </TextBox.Style>
-
-                        </TextBox>
-
-
-
-                        <!-- Clear (X) Button -->
-
-                        <Button x:Name="ClearSearchBtn" Grid.Column="2"
-
-                                Width="22" Height="22" Margin="2,0,8,0"
-
-                                Cursor="Hand" Visibility="Collapsed"
-
-                                Click="ClearSearch_Click" ToolTip="Clear search (Esc)">
-
-                            <Button.Template>
-
-                                <ControlTemplate TargetType="Button">
-
-                                    <Border x:Name="ClearBg" Background="#F0E6EA" CornerRadius="11">
-
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
-                                    </Border>
-
-                                    <ControlTemplate.Triggers>
-
-                                        <Trigger Property="IsMouseOver" Value="True">
-
-                                            <Setter TargetName="ClearBg" Property="Background" Value="#E2D0D7"/>
-
-                                        </Trigger>
-
-                                    </ControlTemplate.Triggers>
-
-                                </ControlTemplate>
-
-                            </Button.Template>
-
-                            <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"
-
-                                  Fill="#702943" Stretch="Uniform" Width="8.5" Height="8.5"/>
-
-                        </Button>
-
-                    </Grid>
-
-                </Border>
-
-
 
                 <!-- Filter Button -->
-
-                <Border Background="#FFFFFF" CornerRadius="19"
-
+                <Border Background="#FFFFFF" CornerRadius="21"
                         BorderBrush="#E0D0D5" BorderThickness="1.2"
-
-                        Height="38" VerticalAlignment="Center">
-
+                        Height="42" VerticalAlignment="Center" Margin="0,0,8,0">
                     <Button x:Name="FilterDropBtn"
-
                             Background="Transparent" BorderThickness="0"
-
-                            Cursor="Hand" Height="38" Padding="14,0"
-
+                            Cursor="Hand" Height="42" Padding="16,0"
                             Click="FilterDrop_Click">
-
                         <Button.Template>
-
                             <ControlTemplate TargetType="Button">
-
-                                <Border x:Name="BtnBg" Background="Transparent" CornerRadius="19" Padding="{TemplateBinding Padding}">
-
+                                <Border x:Name="BtnBg" Background="Transparent" CornerRadius="21" Padding="{TemplateBinding Padding}">
                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
                                 </Border>
-
                                 <ControlTemplate.Triggers>
-
                                     <Trigger Property="IsMouseOver" Value="True">
-
                                         <Setter TargetName="BtnBg" Property="Background" Value="#FAF2F5"/>
-
                                     </Trigger>
-
                                 </ControlTemplate.Triggers>
-
                             </ControlTemplate>
-
                         </Button.Template>
-
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-
                             <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z"
-
                                   Fill="#702943" Stretch="Uniform"
-
                                   Width="12" Height="12"
-
-                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
-
+                                  VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <TextBlock x:Name="FilterDropLabel" Text="Filter"
-
                                        FontSize="12.5" FontWeight="SemiBold"
-
                                        Foreground="#702943" VerticalAlignment="Center"/>
-
                         </StackPanel>
-
                     </Button>
-
                 </Border>
 
-
+                <!-- Refresh Button -->
+                <Button x:Name="BtnRefreshRecords"
+                        Width="42" Height="42"
+                        Cursor="Hand" ToolTip="Click to refresh records"
+                        Click="BtnRefreshRecords_Click"
+                        Background="#FFFFFF" BorderBrush="#E0D0D5" BorderThickness="1.2">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="RefreshPill"
+                                    Background="{TemplateBinding Background}" CornerRadius="21"
+                                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                                    Height="42">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="RefreshPill" Property="Background" Value="#FAF2F5"/>
+                                    <Setter TargetName="RefreshPill" Property="BorderBrush" Value="#702943"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="RefreshPill" Property="Opacity" Value="0.5"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
+                          Fill="#702943" Stretch="Uniform" Width="14" Height="14"/>
+                </Button>
 
                 <!-- Filter Popup -->
-
                 <Popup x:Name="FilterPopup"
-
                        PlacementTarget="{Binding ElementName=FilterDropBtn}"
-
                        Placement="Bottom" StaysOpen="False"
-
                        AllowsTransparency="True" PopupAnimation="Fade">
-
                     <Border Background="White" CornerRadius="16"
-
                             BorderBrush="#E8D4DA" BorderThickness="1.5" Padding="22,20,22,20"
-
                             MinWidth="300">
-
                         <Border.Effect>
-
                             <DropShadowEffect Color="#702943" BlurRadius="20" ShadowDepth="4" Opacity="0.12"/>
-
                         </Border.Effect>
-
                         <StackPanel>
-
                             <TextBlock Text="FILTER RECORDS" FontFamily="Segoe UI" FontSize="10"
-
                                        FontWeight="Bold" Foreground="#702943"
-
                                        Margin="0,0,0,16"/>
 
-
-
                             <TextBlock Text="Sex" FontFamily="Segoe UI" FontSize="12"
-
                                        FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
-
                             <ComboBox x:Name="CmbFilterSex"
-
                                       Style="{StaticResource FilterComboBox}"
-
                                       Margin="0,0,0,14"
-
                                       SelectionChanged="FilterCombo_Changed">
-
                                 <ComboBoxItem Content="All" IsSelected="True"/>
-
                                 <ComboBoxItem Content="Male"/>
-
                                 <ComboBoxItem Content="Female"/>
-
                             </ComboBox>
-
-
 
                             <TextBlock Text="Barangay" FontFamily="Segoe UI" FontSize="12"
-
                                        FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
-
                             <ComboBox x:Name="CmbFilterBarangay"
-
                                       Style="{StaticResource FilterComboBox}"
-
                                       Margin="0,0,0,14"
-
                                       SelectionChanged="FilterCombo_Changed">
-
                                 <ComboBoxItem Content="All" IsSelected="True"/>
-
                                 <ComboBoxItem Content="Bi&#241;an (Poblacion)"/>
-
                                 <ComboBoxItem Content="Bungahan"/>
-
                                 <ComboBoxItem Content="Canlalay"/>
-
                                 <ComboBoxItem Content="Casile"/>
-
                                 <ComboBoxItem Content="De La Paz"/>
-
                                 <ComboBoxItem Content="Ganado"/>
-
                                 <ComboBoxItem Content="Langkiwa"/>
-
                                 <ComboBoxItem Content="Loma"/>
-
                                 <ComboBoxItem Content="Malaban"/>
-
                                 <ComboBoxItem Content="Malamig"/>
-
-                                <ComboBoxItem Content="Mambog"/>
-
+                                <ComboBoxItem Content="Mampalasan"/>
                                 <ComboBoxItem Content="Platero"/>
-
                                 <ComboBoxItem Content="Poblacion"/>
-
-                                <ComboBoxItem Content="San Antonio"/>
-
-                                <ComboBoxItem Content="San Francisco (Halang)"/>
-
-                                <ComboBoxItem Content="San Jose"/>
-
-                                <ComboBoxItem Content="San Vicente"/>
-
-                                <ComboBoxItem Content="Santo Domingo"/>
-
                                 <ComboBoxItem Content="Santo Ni&#241;o"/>
-
-                                <ComboBoxItem Content="Santo Tomas (Calabuso)"/>
-
-                                <ComboBoxItem Content="Soro-Soro"/>
-
+                                <ComboBoxItem Content="San Antonio"/>
+                                <ComboBoxItem Content="San Francisco"/>
+                                <ComboBoxItem Content="San Jose"/>
+                                <ComboBoxItem Content="San Vicente"/>
+                                <ComboBoxItem Content="Santo Tomas"/>
+                                <ComboBoxItem Content="Sorrento"/>
                                 <ComboBoxItem Content="Timbao"/>
-
                                 <ComboBoxItem Content="Tubigan"/>
-
                                 <ComboBoxItem Content="Zapote"/>
-
                             </ComboBox>
 
-
-
-                            <Grid>
-
+                            <!-- Action Buttons -->
+                            <Grid Margin="0,6,0,0">
                                 <Grid.ColumnDefinitions>
-
                                     <ColumnDefinition Width="*"/>
-
                                     <ColumnDefinition Width="10"/>
-
                                     <ColumnDefinition Width="*"/>
-
                                 </Grid.ColumnDefinitions>
-
                                 <Button Grid.Column="0" Height="38" Cursor="Hand"
-
                                         Click="FilterReset_Click">
-
                                     <Button.Template>
-
                                         <ControlTemplate TargetType="Button">
-
                                             <Border x:Name="Bg" Background="#F5EEF1" CornerRadius="10"
-
                                                     BorderBrush="#DCC8CE" BorderThickness="1.5">
-
                                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
                                             </Border>
-
                                             <ControlTemplate.Triggers>
-
                                                 <Trigger Property="IsMouseOver" Value="True">
-
                                                     <Setter TargetName="Bg" Property="Background" Value="#EDD8DE"/>
-
                                                 </Trigger>
-
                                             </ControlTemplate.Triggers>
-
                                         </ControlTemplate>
-
                                     </Button.Template>
-
                                     <TextBlock Text="Reset" FontFamily="Segoe UI" FontSize="12.5"
-
                                                FontWeight="SemiBold" Foreground="#702943"/>
-
                                 </Button>
-
                                 <Button Grid.Column="2" Height="38" Cursor="Hand"
-
                                         Click="FilterApply_Click">
-
                                     <Button.Template>
-
                                         <ControlTemplate TargetType="Button">
-
                                             <Border x:Name="Bg" Background="#702943" CornerRadius="10">
-
                                                 <Border.Effect>
-
                                                     <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="2" Opacity="0.25"/>
-
                                                 </Border.Effect>
-
                                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
                                             </Border>
-
                                             <ControlTemplate.Triggers>
-
                                                 <Trigger Property="IsMouseOver" Value="True">
-
                                                     <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
-
                                                 </Trigger>
-
                                             </ControlTemplate.Triggers>
-
                                         </ControlTemplate>
-
                                     </Button.Template>
-
                                     <TextBlock Text="Apply" FontFamily="Segoe UI" FontSize="12.5"
-
                                                FontWeight="SemiBold" Foreground="White"/>
-
                                 </Button>
-
                             </Grid>
-
                         </StackPanel>
-
                     </Border>
-
                 </Popup>
 
-
-
                 <!-- Hidden Controls for Code-Behind Compatibility -->
-
                 <ComboBox x:Name="CmbSearchMode" Visibility="Collapsed">
-
                     <ComboBoxItem Content="All / Auto" Tag="AUTO" IsSelected="True"/>
-
                 </ComboBox>
-
                 <ComboBox x:Name="CmbFilterStatus" Visibility="Collapsed">
-
                     <ComboBoxItem Content="All" IsSelected="True"/>
-
                 </ComboBox>
-
                 <components:RecordSortControl x:Name="SortControl" Visibility="Collapsed"
-
                                               SortChanged="RecordSortControl_SortChanged"/>
-
             </StackPanel>
-
         </Grid>
 
+        <!-- Row 2: Active Filter Chips Bar (shown only when filters active) -->
+        <StackPanel x:Name="ActiveFiltersPanel" Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,24,8" Visibility="Collapsed">
+            <TextBlock Text="Filters:" FontSize="11.5" FontWeight="SemiBold" Foreground="#8C6573" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <Border x:Name="BadgeFilterBarangay" Background="#FAF2F5" BorderBrush="#E0D0D5" BorderThickness="1" CornerRadius="12" Padding="9,3" Margin="0,0,6,0" Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="TxtBadgeBarangay" Text="Barangay: All" FontSize="11" Foreground="#702943" VerticalAlignment="Center"/>
+                    <Button Style="{StaticResource RemoveFilterBadgeBtn}" Click="RemoveBarangayFilter_Click" ToolTip="Remove Barangay filter"/>
+                </StackPanel>
+            </Border>
+            <Border x:Name="BadgeFilterSex" Background="#FAF2F5" BorderBrush="#E0D0D5" BorderThickness="1" CornerRadius="12" Padding="9,3" Margin="0,0,6,0" Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="TxtBadgeSex" Text="Sex: All" FontSize="11" Foreground="#702943" VerticalAlignment="Center"/>
+                    <Button Style="{StaticResource RemoveFilterBadgeBtn}" Click="RemoveSexFilter_Click" ToolTip="Remove Sex filter"/>
+                </StackPanel>
+            </Border>
+            <Button Style="{StaticResource ClearAllFiltersLinkBtn}" Click="ClearAllFilters_Click"/>
+        </StackPanel>
 
 
-        <Border Grid.Row="3"
+                <Border Grid.Row="3"
                 Margin="24,4,24,20"
                 CornerRadius="14"
                 BorderBrush="#E8D4DA"
@@ -4557,7 +4193,7 @@
 
 
 
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
 
 
 

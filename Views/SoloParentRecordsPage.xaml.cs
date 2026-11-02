@@ -650,11 +650,12 @@ namespace SOLUM_UI
 
                     else if (string.Equals(_statusFilter, "Inactive", StringComparison.OrdinalIgnoreCase) ||
 
-                             string.Equals(_statusFilter, "Inactive (Expired)", StringComparison.OrdinalIgnoreCase))
+                             string.Equals(_statusFilter, "Inactive (Expired)", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(_statusFilter, "Expired", StringComparison.OrdinalIgnoreCase))
 
                     {
 
-                        isActive = false;
+                        isActive = string.Equals(_statusFilter, "Expired", StringComparison.OrdinalIgnoreCase) ? (bool?)null : false;
 
                         isDeleted = false;
 
@@ -865,9 +866,31 @@ namespace SOLUM_UI
                     _allRecords = RecordSortingHelper.Sort(_allRecords, SortControl.SelectedField, SortControl.IsAscending);
                 }
 
-                if (!IsEncoder && !IsBasicUser && _statusFilter == "ExpiringSoon")
+                if (!IsEncoder && !IsBasicUser && !string.Equals(_statusFilter, "All", StringComparison.OrdinalIgnoreCase))
                 {
-                    _allRecords = _allRecords.Where(r => r.IsExpiringSoon).ToList();
+                    if (string.Equals(_statusFilter, "ExpiringSoon", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _allRecords = _allRecords.Where(r => r.IsExpiringSoon).ToList();
+                    }
+                    else if (string.Equals(_statusFilter, "Expired", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(_statusFilter, "Inactive", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(_statusFilter, "Inactive (Expired)", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _allRecords = _allRecords.Where(r => r.IsExpired).ToList();
+                    }
+                    else if (string.Equals(_statusFilter, "Active", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(_statusFilter, "Active (Valid)", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _allRecords = _allRecords.Where(r => !r.IsExpired && !r.IsExpiringSoon).ToList();
+                    }
+
+                    _totalCount = _allRecords.Count;
+                    _totalPages = Math.Max(1, (int)Math.Ceiling((double)_totalCount / Math.Max(1, _pageSize)));
+                }
+
+                {
+
                 }
 
 
@@ -926,7 +949,7 @@ namespace SOLUM_UI
 
                 if (TxtLastRefreshed != null)
 
-                    TxtLastRefreshed.Text = $"Updated: {DateTime.Now:h:mm tt}";
+                    TxtLastRefreshed.Text = $"• Updated {DateTime.Now:h:mm tt}";
 
                 if (BtnRefreshRecords != null)
 
@@ -1040,13 +1063,15 @@ namespace SOLUM_UI
 
             if (PageInfoText != null)
 
-                PageInfoText.Text = $"{_currentPage} of {TotalPages}";
+                PageInfoText.Text = TotalPages > 0 ? $"Page {_currentPage} of {TotalPages}" : "Page 1 of 1";
 
 
 
             if (TxtRecordsSummary != null)
 
                 TxtRecordsSummary.Text = $"{_totalCount:N0} total records";
+            if (TxtHeaderRecordCount != null)
+                TxtHeaderRecordCount.Text = $"{_totalCount:N0} Records";
 
 
 
