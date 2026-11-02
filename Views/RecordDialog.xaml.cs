@@ -275,7 +275,7 @@ namespace SOLUM_UI
                 return "—";
             }
         }
-        public string EducationDisplay => !string.IsNullOrWhiteSpace(EducationEmployment) ? EducationEmployment : "Not specified";
+        public string EducationDisplay => !string.IsNullOrWhiteSpace(EducationEmployment) ? EducationEmployment : "None";
         public string IncomeDisplay
         {
             get
@@ -1685,7 +1685,6 @@ namespace SOLUM_UI
                 if (!row.BirthdateDate.HasValue && string.IsNullOrWhiteSpace(row.Birthdate)) rowMissing.Add("Birthdate");
                 if (string.IsNullOrWhiteSpace(row.CivilStatus))                              rowMissing.Add("Civil Status");
                 if (string.IsNullOrWhiteSpace(row.Relationship))                             rowMissing.Add("Relationship");
-                if (string.IsNullOrWhiteSpace(row.EducationEmployment)) rowMissing.Add("Education/Employment");
                 if (string.IsNullOrWhiteSpace(row.Income))              rowMissing.Add("Income");
 
                 if (rowMissing.Count > 0)

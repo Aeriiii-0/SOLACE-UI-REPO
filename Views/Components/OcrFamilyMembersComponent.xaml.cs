@@ -783,7 +783,6 @@ namespace SOLUM_UI.Views.Components
                 if (!row.BirthdateDate.HasValue || row.BirthdateDate.Value.Year < 1900 || row.BirthdateDate.Value.Date > DateTime.Today) rowMissing.Add("Birthdate");
                 if (string.IsNullOrWhiteSpace(row.CivilStatus)) rowMissing.Add("Civil Status");
                 if (string.IsNullOrWhiteSpace(row.Relationship)) rowMissing.Add("Relationship");
-                if (string.IsNullOrWhiteSpace(row.EducationEmployment)) rowMissing.Add("Education/Employment");
                 if (string.IsNullOrWhiteSpace(row.Income)) rowMissing.Add("Income");
                 if (row.HasSpecialNeeds && string.IsNullOrWhiteSpace(row.SpecialNeedsCategory)) rowMissing.Add("Special Needs Category");
 
@@ -807,7 +806,6 @@ namespace SOLUM_UI.Views.Components
                     if (!row.BirthdateDate.HasValue || row.BirthdateDate.Value.Year < 1900 || row.BirthdateDate.Value.Date > DateTime.Today) { OpenEditMember(row, "dob"); return; }
                     if (string.IsNullOrWhiteSpace(row.CivilStatus)) { OpenEditMember(row, "civil"); return; }
                     if (string.IsNullOrWhiteSpace(row.Relationship)) { OpenEditMember(row, "rel"); return; }
-                    if (string.IsNullOrWhiteSpace(row.EducationEmployment)) { OpenEditMember(row, "edu"); return; }
                     if (string.IsNullOrWhiteSpace(row.Income)) { OpenEditMember(row, "income"); return; }
                     if (row.HasSpecialNeeds && string.IsNullOrWhiteSpace(row.SpecialNeedsCategory)) { OpenEditMember(row, "special"); return; }
                 }
