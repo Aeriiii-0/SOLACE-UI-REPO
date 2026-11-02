@@ -452,33 +452,55 @@
 
         <!-- OCR PROCESSING MODAL OVERLAY -->
         <Grid x:Name="OverlayProcessing" Visibility="Collapsed" Background="#77000000">
-            <Border Background="White" CornerRadius="16" Width="420" Padding="24,20" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border Background="White" CornerRadius="16" Width="430" Padding="26,22" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border.Effect>
                     <DropShadowEffect Color="#000000" BlurRadius="25" ShadowDepth="4" Opacity="0.3"/>
                 </Border.Effect>
-                <StackPanel HorizontalAlignment="Center">
-                    <Border Width="50" Height="50" CornerRadius="25" Background="#F9F2F4" HorizontalAlignment="Center" Margin="0,0,0,12">
+                <StackPanel HorizontalAlignment="Stretch">
+                    <!-- Top Icon & Phase Pill Badge -->
+                    <Border Width="52" Height="52" CornerRadius="26" Background="#F9F2F4" BorderBrush="#EAD8DF" BorderThickness="1" HorizontalAlignment="Center" Margin="0,0,0,10">
                         <Viewbox Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <Canvas Width="24" Height="24">
-                                <Path Fill="#702943" Data="M19,8H5C3.34,8 2,9.34 2,11V17H6V21H18V17H22V11C22,9.34 20.66,8 19,8M16,19H8V15H16V19M19,12C18.45,12 18,11.55 18,11C18,10.45 18.45,10 19,10C19.55,10 20,10.45 20,11C20,11.55 19.55,12 19,12M18,3H6V7H18V3Z"/>
+                                <Path x:Name="PathProcessingIcon" Fill="#702943" Data="M19,8H5C3.34,8 2,9.34 2,11V17H6V21H18V17H22V11C22,9.34 20.66,8 19,8M16,19H8V15H16V19M19,12C18.45,12 18,11.55 18,11C18,10.45 18.45,10 19,10C19.55,10 20,10.45 20,11C20,11.55 19.55,12 19,12M18,3H6V7H18V3Z"/>
                             </Canvas>
                         </Viewbox>
                     </Border>
-                    <TextBlock Text="Ingesting Application Form..." FontSize="15" FontWeight="Bold" Foreground="#333333" HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                    <TextBlock x:Name="TxtProcessingStep" Text="Analyzing document structure..." FontSize="11" Foreground="#702943" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,14"/>
-                    <ProgressBar x:Name="OcrStageProgressBar" Height="6" Minimum="0" Maximum="100" Value="10" Foreground="#702943" Background="#F0E8EA" BorderThickness="0" Margin="0,0,0,8"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                        <TextBlock Text="⏱ Elapsed: " FontSize="10" FontWeight="SemiBold" Foreground="#888888"/>
-                        <TextBlock x:Name="TxtLiveElapsedTime" Text="0.0s" FontSize="10" FontWeight="Bold" Foreground="#702943"/>
-                    </StackPanel>
-                    <Border Background="#FAF7F8" CornerRadius="6" Padding="10,6" BorderBrush="#EADCE0" BorderThickness="1">
+
+                    <Border x:Name="ProcessingPhaseBadge" Background="#FDF3F6" BorderBrush="#E5C8D2" BorderThickness="1" CornerRadius="10" Padding="10,3" HorizontalAlignment="Center" Margin="0,0,0,8">
+                        <TextBlock x:Name="TxtProcessingPhaseBadge" Text="PHASE 1 OF 2 • OPTICAL HARDWARE SCAN" FontSize="9.5" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
+                    </Border>
+
+                    <TextBlock x:Name="TxtProcessingTitle" Text="Scanning Document from Printer..." FontSize="15" FontWeight="Bold" Foreground="#222222" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+
+                    <!-- Animated Step Subtitle Container (Slide Left / Slide Right) -->
+                    <Grid ClipToBounds="True" Height="20" Margin="0,0,0,12">
+                        <TextBlock x:Name="TxtProcessingStep" Text="Acquiring Scanner Hardware Feed..." FontSize="11.5" Foreground="#702943" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock.RenderTransform>
+                                <TranslateTransform x:Name="StepTextTransform" X="0"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </Grid>
+
+                    <ProgressBar x:Name="OcrStageProgressBar" Height="6" Minimum="0" Maximum="100" Value="15" Foreground="#702943" Background="#F0E8EA" BorderThickness="0" Margin="0,0,0,14"/>
+
+                    <!-- Animated Active Status Message Ticker (Slide Out Left / Slide In Right) -->
+                    <Border Background="#FAF7F8" CornerRadius="8" Padding="12,9" BorderBrush="#EADCE0" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Active Task:" FontSize="10" FontWeight="Bold" Foreground="#702943" Margin="0,0,6,0"/>
-                            <TextBlock x:Name="TxtCurrentExtractingField" Grid.Column="1" Text="Deskewing and enhancing scan..." FontSize="10" Foreground="#555" TextTrimming="CharacterEllipsis"/>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
+                                <Ellipse Width="6" Height="6" Fill="#702943" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="Status:" FontSize="10.5" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <Grid Grid.Column="1" ClipToBounds="True" VerticalAlignment="Center">
+                                <TextBlock x:Name="TxtCurrentExtractingField" Text="Connecting to scanner device..." FontSize="10.5" FontWeight="Medium" Foreground="#444444" TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
+                                    <TextBlock.RenderTransform>
+                                        <TranslateTransform x:Name="TaskTextTransform" X="0"/>
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+                            </Grid>
                         </Grid>
                     </Border>
 

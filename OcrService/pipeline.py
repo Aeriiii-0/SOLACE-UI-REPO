@@ -72,10 +72,10 @@ def calculate_dynamic_page_transform(all_detections: list) -> tuple:
     shifts_x = []
     for name, (cx, cy, rx, ry) in landmarks_found.items():
         dx = cx - rx
-        if abs(dx) <= 0.045:
+        if abs(dx) <= 0.025:
             shifts_x.append(dx)
 
-    med_dx = float(np.median(shifts_x)) if len(shifts_x) >= 2 else (shifts_x[0] if (len(shifts_x) == 1 and abs(shifts_x[0]) <= 0.015) else 0.0)
+    med_dx = float(np.median(shifts_x)) if len(shifts_x) >= 2 else (shifts_x[0] if (len(shifts_x) == 1 and abs(shifts_x[0]) <= 0.012) else 0.0)
     if abs(med_dx) < 0.002:
         med_dx = 0.0
 
@@ -92,14 +92,16 @@ def calculate_dynamic_page_transform(all_detections: list) -> tuple:
         meas_dist = meas_y2 - meas_y1
         if ref_dist > 0.15:
             scale_est = meas_dist / ref_dist
-            if 0.90 <= scale_est <= 1.10:
+            if 0.97 <= scale_est <= 1.03:
                 s_y = float(scale_est)
                 t_y = float(meas_y1 - s_y * ref_y1)
-                if abs(s_y - 1.0) < 0.003:
+                t_y = max(-0.025, min(0.025, t_y))
+                if abs(s_y - 1.0) < 0.004:
                     s_y = 1.0
                     t_y = float(np.median([cy - ry for _, cy, _, ry in landmarks_found.values()]))
+                    t_y = max(-0.025, min(0.025, t_y))
     elif landmarks_found:
-        shifts_y = [cy - ry for _, cy, _, ry in landmarks_found.values() if abs(cy - ry) <= 0.045]
+        shifts_y = [cy - ry for _, cy, _, ry in landmarks_found.values() if abs(cy - ry) <= 0.025]
         if shifts_y:
             t_y = float(np.median(shifts_y))
             s_y = 1.0
@@ -481,7 +483,7 @@ def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template:
                 # Snap box inside the physical printed table lines for Section I data fields
                 if fk not in ["needs", "other_income"] and not fk.startswith("fam_row"):
                     has_top = fk in ["address", "emergency_name", "emergency_relationship", "emergency_address", "emergency_number"]
-                    snapped_box = snap_box_to_grid(transformed_box, h_lines_mask, v_lines_mask, full_w, full_h, max_search_px=15, has_top_label=has_top)
+                    snapped_box = snap_box_to_grid(transformed_box, h_lines_mask, v_lines_mask, full_w, full_h, max_search_px=10, has_top_label=has_top)
                     c_cfg["bbox"] = snapped_box
                 else:
                     c_cfg["bbox"] = transformed_box

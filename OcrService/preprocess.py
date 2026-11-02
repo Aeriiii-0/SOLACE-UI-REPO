@@ -3,16 +3,56 @@ import cv2
 import numpy as np
 import base64
 
-def crop_document_contour(image: np.ndarray) -> np.ndarray:
+def suppress_scanner_margins(image: np.ndarray) -> np.ndarray:
     """
-    Detects the 4-corner boundary of a paper document in a photo
-    and warps it to fit the frame, eliminating desk/camera borders.
-    If no clear paper boundary exists (e.g. flatbed scan), returns original image unchanged.
+    Removes thin dark shadow/border artifacts along the extreme outer edges (5px)
+    commonly produced by flatbed glass frames or ADF rollers, without altering dimensions.
     """
     if image is None or image.size == 0:
         return image
     try:
         h, w = image.shape[:2]
+        if h < 100 or w < 100:
+            return image
+        cleaned = image.copy()
+        border_px = 5
+        white_val = [255, 255, 255] if len(cleaned.shape) == 3 else 255
+        cleaned[0:border_px, :] = white_val
+        cleaned[h - border_px:h, :] = white_val
+        cleaned[:, 0:border_px] = white_val
+        cleaned[:, w - border_px:w] = white_val
+        return cleaned
+    except Exception:
+        return image
+
+
+def crop_document_contour(image: np.ndarray) -> np.ndarray:
+    """
+    Detects the 4-corner boundary of a paper document in a photo
+    and warps it to fit the frame, eliminating desk/camera borders.
+    If no clear paper boundary exists (e.g. flatbed/ADF scan), returns original image unchanged.
+    """
+    if image is None or image.size == 0:
+        return image
+    try:
+        h, w = image.shape[:2]
+        gray_full = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
+
+        # 1. Flatbed / ADF Scanner Guard:
+        # Check the 4 corners (inset slightly past any 5px border shadow).
+        # If the corners are already bright paper (mean >= 180), this is a direct full-page scan,
+        # NOT a camera photo on a desk. Never crop internal form tables on a direct scan!
+        pad = max(8, int(min(h, w) * 0.015))
+        patch = max(20, int(min(h, w) * 0.04))
+        if h > (pad + patch) * 2 and w > (pad + patch) * 2:
+            c_tl = float(np.mean(gray_full[pad:pad + patch, pad:pad + patch]))
+            c_tr = float(np.mean(gray_full[pad:pad + patch, w - pad - patch:w - pad]))
+            c_bl = float(np.mean(gray_full[h - pad - patch:h - pad, pad:pad + patch]))
+            c_br = float(np.mean(gray_full[h - pad - patch:h - pad, w - pad - patch:w - pad]))
+            bright_corners = sum(1 for c in (c_tl, c_tr, c_bl, c_br) if c >= 180.0)
+            if bright_corners >= 3:
+                return image
+
         scale = 800.0 / float(max(h, w))
         if scale < 1.0:
             small = cv2.resize(image, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
@@ -37,7 +77,7 @@ def crop_document_contour(image: np.ndarray) -> np.ndarray:
 
         for c in contours[:5]:
             area = cv2.contourArea(c)
-            if area < 0.35 * img_area:
+            if area < 0.50 * img_area:
                 continue
             peri = cv2.arcLength(c, True)
             approx = cv2.approxPolyDP(c, 0.02 * peri, True)
@@ -57,6 +97,15 @@ def crop_document_contour(image: np.ndarray) -> np.ndarray:
         pts[3] = doc_pts[np.argmax(diff)]
 
         (tl, tr, br, bl) = pts
+
+        # 2. Internal Table Rejection Guard:
+        # Ensure the contour encompasses the full vertical span of the document (including header)
+        # rather than snapping onto the Section I or Section III internal table borders.
+        min_y_norm = float(min(tl[1], tr[1])) / float(max(1, h))
+        max_y_norm = float(max(bl[1], br[1])) / float(max(1, h))
+        if min_y_norm > 0.10 or (max_y_norm - min_y_norm) < 0.82:
+            return image
+
         width_top = np.linalg.norm(tr - tl)
         width_bot = np.linalg.norm(br - bl)
         max_w = int(max(width_top, width_bot))
@@ -66,7 +115,7 @@ def crop_document_contour(image: np.ndarray) -> np.ndarray:
         max_h = int(max(height_left, height_right))
 
         aspect = float(max_w) / float(max(1, max_h))
-        if not (0.50 <= aspect <= 0.90) or max_w < 300 or max_h < 400:
+        if not (0.55 <= aspect <= 0.80) or max_w < 300 or max_h < 400:
             return image
 
         dst = np.array([
@@ -87,42 +136,104 @@ def crop_document_contour(image: np.ndarray) -> np.ndarray:
 
 def deskew(image: np.ndarray) -> np.ndarray:
     """
-    Detects the tilt angle of the document and rotates it straight (only if between 0.8 and 15 deg).
+    Detects the physical tilt angle of the document using morphological horizontal form rules
+    and Hough line segments, rotating it straight (only if between 0.35 and 12.0 deg).
+    Immune to scanner edge shadows, vertical borders, and text distribution bias.
     Preserves exact document dimensions and aspect ratio.
     """
     try:
+        if image is None or image.size == 0:
+            return image
+
+        (h, w) = image.shape[:2]
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
 
-        # Invert and threshold to find text contours
-        thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-        coords = np.column_stack(np.where(thresh > 0))
-        if len(coords) == 0:
-            return image
-        
-        angle = cv2.minAreaRect(coords)[-1]
-
-        if angle < -45:
-            angle = -(90 + angle)
-        elif angle > 45:
-            angle = -(angle - 90)
+        # Normalize working resolution to ~1200px max dimension for consistent, ultra-fast (<20ms)
+        # line detection across 150 DPI, 200 DPI, 300 DPI, and 600 DPI scans
+        work_scale = 1200.0 / float(max(h, w))
+        if work_scale < 1.0:
+            work_gray = cv2.resize(gray, (int(w * work_scale), int(h * work_scale)), interpolation=cv2.INTER_AREA)
         else:
-            angle = -angle
-        
-        # Only rotate if tilt is between 0.8 and 15 degrees
-        if abs(angle) < 0.8 or abs(angle) > 15:
+            work_gray = gray
+
+        wh, ww = work_gray.shape[:2]
+
+        # Ignore extreme 2% outer border so scanner frame lines never bias angle detection
+        my = max(6, int(wh * 0.02))
+        mx = max(6, int(ww * 0.02))
+        inner_gray = work_gray[my:wh - my, mx:ww - mx]
+        if inner_gray.size == 0:
             return image
-            
-        (h, w) = image.shape[:2]
+
+        # Extract horizontal printed form lines using adaptive thresholding + horizontal kernel
+        thresh = cv2.adaptiveThreshold(
+            inner_gray, 255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV, 15, 8
+        )
+        h_kernel_len = max(25, inner_gray.shape[1] // 18)
+        h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_len, 1))
+        h_lines_mask = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, h_kernel)
+
+        lines = cv2.HoughLinesP(
+            h_lines_mask,
+            rho=1,
+            theta=np.pi / 1800.0,
+            threshold=40,
+            minLineLength=max(35, inner_gray.shape[1] // 10),
+            maxLineGap=15
+        )
+
+        if lines is None or len(lines) == 0:
+            return image
+
+        angles = []
+        weights = []
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            dx = float(x2 - x1)
+            dy = float(y2 - y1)
+            length = np.hypot(dx, dy)
+            if abs(dx) < 30 or length < 30:
+                continue
+            deg = float(np.degrees(np.arctan2(dy, dx)))
+            if -12.0 <= deg <= 12.0:
+                angles.append(deg)
+                weights.append(length)
+
+        if len(angles) < 2:
+            return image
+
+        # Compute length-weighted median / trimmed mean of horizontal rule angles
+        angles_arr = np.array(angles, dtype=np.float64)
+        med_angle = float(np.median(angles_arr))
+        # Filter outliers within 1.5 degrees of median for high precision
+        inliers = [a for a, l in zip(angles, weights) if abs(a - med_angle) <= 1.5]
+        inlier_weights = [l for a, l in zip(angles, weights) if abs(a - med_angle) <= 1.5]
+        if inliers and sum(inlier_weights) > 0:
+            angle = float(np.average(inliers, weights=inlier_weights))
+        else:
+            angle = med_angle
+
+        # Deadband: do not rotate if tilt is negligible (< 0.35 deg) or unrealistic (> 12 deg)
+        if abs(angle) < 0.35 or abs(angle) > 12.0:
+            return image
+
+        print(f"[Deskew] Straightening document tilt of {angle:+.2f} deg (from {len(angles)} horizontal form rules).")
         center = (w // 2, h // 2)
         M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        border_val = (255, 255, 255) if len(image.shape) == 3 else 255
         rotated = cv2.warpAffine(
             image, M, (w, h),
             flags=cv2.INTER_CUBIC,
-            borderMode=cv2.BORDER_REPLICATE
+            borderMode=cv2.BORDER_CONSTANT,
+            borderValue=border_val
         )
         return rotated
-    except Exception:
+    except Exception as e:
+        print(f"[Deskew Note]: {e}")
         return image
+
 
 def enhance_contrast(image: np.ndarray) -> np.ndarray:
     """
@@ -214,8 +325,11 @@ def preprocess_pipeline(image_bytes: bytes, return_full: bool = False):
     # 0. Auto-detect paper boundaries and dewarp if photo contains desk/margins
     cropped_doc = crop_document_contour(image)
 
+    # 0.5 Suppress thin scanner glass/ADF edge shadows
+    margin_cleaned = suppress_scanner_margins(cropped_doc)
+
     # 1. Straighten document tilt if skewed (preserves exact dimensions)
-    deskewed = deskew(cropped_doc)
+    deskewed = deskew(margin_cleaned)
         
     # 2. Resize proportionally (preserves exact aspect ratio and normalized coords)
     optimized = resize_for_ocr(deskewed, max_dim=1350)
@@ -244,7 +358,7 @@ def detect_form_grid_lines(image_gray: np.ndarray) -> tuple:
     except Exception:
         return None, None
 
-def snap_box_to_grid(bbox: list, h_lines_mask: np.ndarray, v_lines_mask: np.ndarray, img_w: int, img_h: int, max_search_px: int = 12, has_top_label: bool = False) -> list:
+def snap_box_to_grid(bbox: list, h_lines_mask: np.ndarray, v_lines_mask: np.ndarray, img_w: int, img_h: int, max_search_px: int = 10, has_top_label: bool = False) -> list:
     """
     Snaps a bounding box [bx, by, bw, bh] directly within physical printed cell boundaries,
     ensuring that query crops never cross adjacent rows or table headers.
@@ -254,6 +368,7 @@ def snap_box_to_grid(bbox: list, h_lines_mask: np.ndarray, v_lines_mask: np.ndar
     if h_lines_mask is None or img_w <= 0 or img_h <= 0:
         return bbox
 
+    max_search_px = min(max_search_px, 10)
     bx, by, bw, bh = bbox
     px1 = int(bx * img_w)
     py1 = int(by * img_h)

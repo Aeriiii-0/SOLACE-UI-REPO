@@ -416,6 +416,59 @@ namespace SOLUM_UI.Views.Components
             }
         }
 
+        private void TransitionStatusText(TextBlock targetTextBlock, string newText, bool animate = true)
+        {
+            if (targetTextBlock == null || string.IsNullOrEmpty(newText)) return;
+
+            var transform = targetTextBlock.RenderTransform as TranslateTransform;
+            if (transform == null)
+            {
+                transform = new TranslateTransform(0, 0);
+                targetTextBlock.RenderTransform = transform;
+            }
+
+            if (!animate || string.Equals(targetTextBlock.Text, newText, StringComparison.Ordinal))
+            {
+                targetTextBlock.BeginAnimation(UIElement.OpacityProperty, null);
+                transform.BeginAnimation(TranslateTransform.XProperty, null);
+                targetTextBlock.Text = newText;
+                targetTextBlock.Opacity = 1.0;
+                transform.X = 0;
+                return;
+            }
+
+            // 1. Outbound Animation: Slide to the left (-28px) while fading out
+            var fadeOut = new DoubleAnimation(1.0, 0.0, TimeSpan.FromMilliseconds(150))
+            {
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            };
+            var slideLeft = new DoubleAnimation(0.0, -28.0, TimeSpan.FromMilliseconds(150))
+            {
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            };
+
+            slideLeft.Completed += (s, e) =>
+            {
+                targetTextBlock.Text = newText;
+
+                // 2. Inbound Animation: Enter from the right (+28px) and glide into center (0px)
+                var fadeIn = new DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(220))
+                {
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                };
+                var slideFromRight = new DoubleAnimation(28.0, 0.0, TimeSpan.FromMilliseconds(220))
+                {
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                };
+
+                targetTextBlock.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+                transform.BeginAnimation(TranslateTransform.XProperty, slideFromRight);
+            };
+
+            targetTextBlock.BeginAnimation(UIElement.OpacityProperty, fadeOut);
+            transform.BeginAnimation(TranslateTransform.XProperty, slideLeft);
+        }
+
         private async void ScanHardware_Click(object sender, RoutedEventArgs e)
         {
             var window = Window.GetWindow(this);
@@ -426,36 +479,92 @@ namespace SOLUM_UI.Views.Components
                 if (BtnOcrSettings != null) BtnOcrSettings.IsEnabled = false;
 
                 OverlayProcessing.Visibility = Visibility.Visible;
-                OcrStageProgressBar.Value = 5;
-                TxtProcessingStep.Text = "Acquiring Scanner Hardware Feed...";
-                TxtCurrentExtractingField.Text = "Connecting to scanner device...";
-                TxtLiveElapsedTime.Text = "0.0s";
+                if (TxtProcessingPhaseBadge != null)
+                    TxtProcessingPhaseBadge.Text = "PHASE 1 OF 2 • OPTICAL HARDWARE SCAN";
+                if (TxtProcessingTitle != null)
+                    TxtProcessingTitle.Text = "Scanning Document from Printer...";
 
-                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                OcrStageProgressBar.IsIndeterminate = true;
+                TransitionStatusText(TxtProcessingStep, "Hardware Optical Acquisition", animate: false);
+                TransitionStatusText(TxtCurrentExtractingField, "Connecting to optical scanner feed...", animate: false);
 
-                string scannedFile = await WiaScannerService.ScanDocumentAsync(
-                    _scannerSettings,
-                    status => Dispatcher.Invoke(() =>
+                _processCts?.Cancel();
+                _processCts = new CancellationTokenSource();
+                var scanToken = _processCts.Token;
+
+                string scannedFile = null;
+                using (var scanMsgCts = CancellationTokenSource.CreateLinkedTokenSource(scanToken))
+                {
+                    var msgToken = scanMsgCts.Token;
+                    var scanMessagesTask = Task.Run(async () =>
                     {
-                        TxtCurrentExtractingField.Text = status;
-                        TxtLiveElapsedTime.Text = $"{stopwatch.Elapsed.TotalSeconds:F1}s";
-                    })
-                );
+                        var hwMessages = new[]
+                        {
+                            ("Calibrating Scanner Head", "Positioning optical carriage for 8.5 x 13 form..."),
+                            ("Optical Sensor Sweep", $"Scanning physical document surface at {_scannerSettings.Dpi} DPI..."),
+                            ("Acquiring Image Buffer", "Capturing high-contrast optical scan lines..."),
+                            ("Optimizing Scan Exposure", "Balancing flatbed illumination & paper contrast..."),
+                            ("Reading Hardware Stream", "Buffering full-page document image data..."),
+                            ("Finalizing Hardware Scan", "Transferring scanned image into SOLACE...")
+                        };
 
-                stopwatch.Stop();
+                        int msgIdx = 0;
+                        while (!msgToken.IsCancellationRequested)
+                        {
+                            try
+                            {
+                                await Task.Delay(1450, msgToken).ConfigureAwait(false);
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                break;
+                            }
+                            if (msgToken.IsCancellationRequested) break;
+
+                            var pair = hwMessages[msgIdx % hwMessages.Length];
+                            msgIdx++;
+
+                            await Dispatcher.InvokeAsync(() =>
+                            {
+                                if (!msgToken.IsCancellationRequested)
+                                {
+                                    TransitionStatusText(TxtProcessingStep, pair.Item1, animate: true);
+                                    TransitionStatusText(TxtCurrentExtractingField, pair.Item2, animate: true);
+                                }
+                            });
+                        }
+                    }, msgToken);
+
+                    scannedFile = await WiaScannerService.ScanDocumentAsync(
+                        _scannerSettings,
+                        status => Dispatcher.InvokeAsync(() =>
+                        {
+                            if (!string.IsNullOrWhiteSpace(status))
+                            {
+                                TransitionStatusText(TxtCurrentExtractingField, status, animate: true);
+                            }
+                        })
+                    );
+
+                    scanMsgCts.Cancel();
+                }
+
+                OcrStageProgressBar.IsIndeterminate = false;
 
                 if (!string.IsNullOrEmpty(scannedFile) && File.Exists(scannedFile))
                 {
                     _sessionScannedFiles.Add(scannedFile);
-                    await ProcessDocumentAsync(scannedFile);
+                    await ProcessDocumentAsync(scannedFile, isPhaseTwoOfHardwareScan: true);
                 }
             }
             catch (OperationCanceledException)
             {
+                OcrStageProgressBar.IsIndeterminate = false;
                 OverlayProcessing.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
+                OcrStageProgressBar.IsIndeterminate = false;
                 OverlayProcessing.Visibility = Visibility.Collapsed;
                 ActionConfirmDialog.Warning(
                     "Scanner Notice",
@@ -516,7 +625,7 @@ namespace SOLUM_UI.Views.Components
             }
         }
 
-        public async Task ProcessDocumentAsync(string imagePath)
+        public async Task ProcessDocumentAsync(string imagePath, bool isPhaseTwoOfHardwareScan = false)
         {
             CurrentImagePath = imagePath;
             var window = Window.GetWindow(this);
@@ -525,11 +634,21 @@ namespace SOLUM_UI.Views.Components
                 EmptyCanvasState.Visibility = Visibility.Collapsed;
 
             OverlayProcessing.Visibility = Visibility.Visible;
+            if (TxtProcessingPhaseBadge != null)
+            {
+                TxtProcessingPhaseBadge.Text = isPhaseTwoOfHardwareScan
+                    ? "PHASE 2 OF 2 • AI OCR EXTRACTION"
+                    : "AI OCR EXTRACTION";
+            }
+            if (TxtProcessingTitle != null)
+            {
+                TxtProcessingTitle.Text = "Ingesting Application Form...";
+            }
 
             if (!await OcrService.IsServerOnlineAsync())
             {
-                TxtProcessingStep.Text = "Waiting for AI OCR Engine to finish warming up...";
-                TxtCurrentExtractingField.Text = "Loading OpenVINO neural network models...";
+                TransitionStatusText(TxtProcessingStep, "Warming Up AI OCR Engine...", animate: isPhaseTwoOfHardwareScan);
+                TransitionStatusText(TxtCurrentExtractingField, "Loading OpenVINO neural network models...", animate: isPhaseTwoOfHardwareScan);
                 OcrStageProgressBar.IsIndeterminate = true;
                 bool warm = await OcrService.EnsureServerRunningAsync(25);
                 OcrStageProgressBar.IsIndeterminate = false;
@@ -539,9 +658,10 @@ namespace SOLUM_UI.Views.Components
                 }
             }
 
-            OcrStageProgressBar.Value = 15;
-            TxtProcessingStep.Text = "Step 1 of 4: Preprocessing & Contrast Enhancement";
-            TxtCurrentExtractingField.Text = "Deskewing and enhancing document contrast...";
+            OcrStageProgressBar.IsIndeterminate = false;
+            OcrStageProgressBar.Value = 18;
+            TransitionStatusText(TxtProcessingStep, "Step 1 of 4: Document Alignment & Contrast", animate: isPhaseTwoOfHardwareScan);
+            TransitionStatusText(TxtCurrentExtractingField, "Straightening page tilt & suppressing scanner borders...", animate: isPhaseTwoOfHardwareScan);
 
             var bitmap = new BitmapImage();
             bitmap.BeginInit();
@@ -553,7 +673,6 @@ namespace SOLUM_UI.Views.Components
             ZoomFit_Click(null, null);
 
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            TxtLiveElapsedTime.Text = "0.0s";
 
             try
             {
@@ -568,30 +687,40 @@ namespace SOLUM_UI.Views.Components
                     {
                         var steps = new[]
                         {
-                            (25, "Step 2 of 4: Reading Form Template Bounding Boxes", "Extracting Last Name, First Name, Middle Name..."),
-                            (45, "Step 2 of 4: Reading Form Template Bounding Boxes", "Extracting Demographics & Barangay..."),
-                            (65, "Step 2 of 4: Reading Form Template Bounding Boxes", "Extracting Socioeconomic & Emergency Contact..."),
-                            (80, "Step 3 of 4: Analyzing Encircled Circumstances", "Detecting pen marks in Section II..."),
-                            (90, "Step 3 of 4: Reading Family Dependents Table", "Extracting child records from Section III..."),
-                            (95, "Step 4 of 4: Finalizing Extraction", "Applying confidence scores and normalizations...")
+                            (32, "Step 2 of 4: Form Landmark Registration", "Detecting table grid lines & section anchors..."),
+                            (48, "Step 2 of 4: Reading Section I Demographics", "Extracting Last Name, First Name, Middle Name..."),
+                            (64, "Step 2 of 4: Reading Address & Barangay", "Matching Biñan barangay & residential address..."),
+                            (76, "Step 2 of 4: Reading Socioeconomic Data", "Extracting occupation, income & emergency contact..."),
+                            (86, "Step 3 of 4: Analyzing Encircled Circumstances", "Detecting pen markings in Section II..."),
+                            (93, "Step 3 of 4: Reading Family Dependents Table", "Extracting child records & ages from Section III..."),
+                            (97, "Step 4 of 4: Finalizing Field Extraction", "Computing confidence scores & normalizations...")
                         };
 
                         int stepIdx = 0;
                         while (!linkedToken.IsCancellationRequested)
                         {
-                            await Task.Delay(100, linkedToken).ConfigureAwait(false);
+                            try
+                            {
+                                await Task.Delay(1150, linkedToken).ConfigureAwait(false);
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                break;
+                            }
                             if (linkedToken.IsCancellationRequested) break;
 
-                            int idx = Math.Min(stepIdx / 4, steps.Length - 1);
+                            int idx = Math.Min(stepIdx, steps.Length - 1);
                             var curStep = steps[idx];
                             stepIdx++;
 
                             await Dispatcher.InvokeAsync(() =>
                             {
-                                OcrStageProgressBar.Value = curStep.Item1;
-                                TxtProcessingStep.Text = curStep.Item2;
-                                TxtCurrentExtractingField.Text = curStep.Item3;
-                                TxtLiveElapsedTime.Text = $"{stopwatch.Elapsed.TotalSeconds:F1}s";
+                                if (!linkedToken.IsCancellationRequested)
+                                {
+                                    OcrStageProgressBar.Value = curStep.Item1;
+                                    TransitionStatusText(TxtProcessingStep, curStep.Item2, animate: true);
+                                    TransitionStatusText(TxtCurrentExtractingField, curStep.Item3, animate: true);
+                                }
                             });
                         }
                     }, linkedToken);
@@ -607,8 +736,8 @@ namespace SOLUM_UI.Views.Components
                 }
 
                 OcrStageProgressBar.Value = 100;
-                TxtProcessingStep.Text = "Step 4 of 4: Complete!";
-                TxtCurrentExtractingField.Text = "Extracted all fields with confidence scores.";
+                TransitionStatusText(TxtProcessingStep, "Step 4 of 4: Extraction Complete!", animate: true);
+                TransitionStatusText(TxtCurrentExtractingField, "Extracted all fields with confidence scores.", animate: true);
 
                 if (!string.IsNullOrEmpty(OcrResponse.PreviewImageBase64))
                 {
