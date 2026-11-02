@@ -240,6 +240,7 @@
                                             </TextBlock>
                                             <TextBox x:Name="TxtMemberName" Style="{StaticResource FormBoxSm}" MaxLength="60"
                                                      CharacterCasing="Upper" Tag="fam_row_name" GotFocus="Field_GotFocus"
+                                                     PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
                                                      PreviewTextInput="NameOnly_PreviewTextInput"/>
                                         </StackPanel>
 
@@ -247,7 +248,8 @@
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Relationship <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
-                                            <ComboBox x:Name="CmbMemberRel" Style="{StaticResource FormCombo}" Height="32" FontSize="12" Tag="fam_row_rel" GotFocus="Field_GotFocus">
+                                            <ComboBox x:Name="CmbMemberRel" Style="{StaticResource FormCombo}" Height="32" FontSize="12"
+                                                      Tag="fam_row_rel" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
                                                 <ComboBoxItem Content="Child"/>
                                                 <ComboBoxItem Content="Spouse"/>
                                                 <ComboBoxItem Content="Parent"/>
@@ -264,7 +266,8 @@
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Sex <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
-                                            <ComboBox x:Name="CmbMemberSex" Style="{StaticResource FormCombo}" Height="32" FontSize="12" Tag="fam_row_sex" GotFocus="Field_GotFocus">
+                                            <ComboBox x:Name="CmbMemberSex" Style="{StaticResource FormCombo}" Height="32" FontSize="12"
+                                                      Tag="fam_row_sex" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
                                                 <ComboBoxItem Content="Female"/>
                                                 <ComboBoxItem Content="Male"/>
                                             </ComboBox>
@@ -274,7 +277,8 @@
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Civil Status <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
-                                            <ComboBox x:Name="CmbMemberCivil" Style="{StaticResource FormCombo}" Height="32" FontSize="12" Tag="fam_row_civ" GotFocus="Field_GotFocus">
+                                            <ComboBox x:Name="CmbMemberCivil" Style="{StaticResource FormCombo}" Height="32" FontSize="12"
+                                                      Tag="fam_row_civ" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
                                                 <ComboBoxItem Content="Single"/>
                                                 <ComboBoxItem Content="Married"/>
                                                 <ComboBoxItem Content="Widowed"/>
@@ -301,30 +305,39 @@
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Birthdate <Run Text="*" Foreground="#E53935"/>
                                             </TextBlock>
-                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Height="32">
-                                                <DatePicker x:Name="DpMemberDob" Style="{StaticResource FormDateSm}" Tag="fam_row_dob" GotFocus="Field_GotFocus"
+                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Height="32"
+                                                    Tag="fam_row_dob" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
+                                                <DatePicker x:Name="DpMemberDob" Style="{StaticResource FormDateSm}" Tag="fam_row_dob"
+                                                            GotFocus="Field_GotFocus"
+                                                            GotKeyboardFocus="Field_GotFocus"
+                                                            PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
+                                                            CalendarOpened="Field_GotFocus"
                                                             SelectedDateChanged="DpMemberDob_SelectedDateChanged"/>
                                             </Border>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="2">
                                             <TextBlock Text="Age" Style="{StaticResource FieldLabelSm}"/>
-                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="#F5F5F5" Height="32">
+                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="#F5F5F5" Height="32"
+                                                    Tag="fam_row_age" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
                                                 <TextBox x:Name="TxtMemberAge" Style="{StaticResource FormBoxSm}" IsReadOnly="True"
-                                                         Focusable="False" Cursor="Arrow" BorderThickness="0" Background="Transparent"
+                                                         Focusable="False" Cursor="Hand" BorderThickness="0" Background="Transparent"
                                                          Tag="fam_row_age" GotFocus="Field_GotFocus"
+                                                         PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
                                                          HorizontalContentAlignment="Center" ToolTip="Auto-calculated from Birthdate"/>
                                             </Border>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="4">
                                             <TextBlock Text="Educ. Attainment / Employment" Style="{StaticResource FieldLabelSm}"/>
-                                            <TextBox x:Name="TxtMemberEdu" Style="{StaticResource FormBoxSm}" MaxLength="80" CharacterCasing="Upper" Tag="fam_row_edu" GotFocus="Field_GotFocus"/>
+                                            <TextBox x:Name="TxtMemberEdu" Style="{StaticResource FormBoxSm}" MaxLength="80" CharacterCasing="Upper"
+                                                     Tag="fam_row_edu" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown"/>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="6">
                                             <TextBlock Text="Monthly Income (₱)" Style="{StaticResource FieldLabelSm}"/>
-                                            <TextBox x:Name="TxtMemberIncome" Style="{StaticResource FormBoxSm}" Tag="fam_row_inc" GotFocus="Field_GotFocus"
+                                            <TextBox x:Name="TxtMemberIncome" Style="{StaticResource FormBoxSm}" Tag="fam_row_inc"
+                                                     GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
                                                      PreviewTextInput="NumberOnly_PreviewTextInput"/>
                                         </StackPanel>
                                     </Grid>

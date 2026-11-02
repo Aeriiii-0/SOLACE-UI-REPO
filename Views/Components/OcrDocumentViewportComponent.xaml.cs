@@ -287,10 +287,14 @@ namespace SOLUM_UI.Views.Components
 
             if (key.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase))
             {
+                if (key.StartsWith("fam_row_", StringComparison.OrdinalIgnoreCase))
+                    key = "fam_row1_" + key.Substring("fam_row_".Length);
+
                 if (key.Contains("_civil")) key = key.Replace("_civil", "_civ");
                 else if (key.Contains("_income")) key = key.Replace("_income", "_inc");
                 else if (key.Contains("_education")) key = key.Replace("_education", "_edu");
                 else if (key.Contains("_relationship")) key = key.Replace("_relationship", "_rel");
+                else if (key.Contains("_birthdate")) key = key.Replace("_birthdate", "_dob");
             }
 
             double[] bbox = null;

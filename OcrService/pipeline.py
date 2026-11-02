@@ -75,8 +75,10 @@ def calculate_dynamic_page_transform(all_detections: list) -> tuple:
         if abs(dx) <= 0.025:
             shifts_x.append(dx)
 
-    med_dx = float(np.median(shifts_x)) if len(shifts_x) >= 2 else (shifts_x[0] if (len(shifts_x) == 1 and abs(shifts_x[0]) <= 0.012) else 0.0)
-    if abs(med_dx) < 0.002:
+    # Require >= 3 agreeing landmarks and enforce a 0.008 (~12px) deadband so scanner
+    # stepper-motor / DBNet micro-jitter never shifts the user's calibrated stencil boxes.
+    med_dx = float(np.median(shifts_x)) if len(shifts_x) >= 3 else 0.0
+    if abs(med_dx) < 0.008:
         med_dx = 0.0
 
     s_y = 1.0
@@ -86,10 +88,10 @@ def calculate_dynamic_page_transform(all_detections: list) -> tuple:
     # Locking s_y = 1.0 prevents keyword false-matches from stretching lower-half template boxes.
     if landmarks_found:
         shifts_y = [cy - ry for _, cy, _, ry in landmarks_found.values() if abs(cy - ry) <= 0.025]
-        if shifts_y:
+        if len(shifts_y) >= 3:
             t_y = float(np.median(shifts_y))
             t_y = max(-0.025, min(0.025, t_y))
-            if abs(t_y) < 0.002:
+            if abs(t_y) < 0.008:
                 t_y = 0.0
 
     return med_dx, s_y, t_y
@@ -464,20 +466,29 @@ def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template:
                     bw,
                     max(0.005, min(0.98, round(aligned_bh, 4)))
                 ]
-                # Snap box inside the physical printed table lines for Section I data fields
-                if fk not in ["needs", "other_income"] and not fk.startswith("fam_row"):
-                    has_top = fk in ["address", "emergency_name", "emergency_relationship", "emergency_address", "emergency_number"]
-                    snapped_box = snap_box_to_grid(transformed_box, h_lines_mask, v_lines_mask, full_w, full_h, max_search_px=10, has_top_label=has_top)
-                    c_cfg["bbox"] = snapped_box
-                else:
-                    c_cfg["bbox"] = transformed_box
+                # Option 1 Rigid Stencil: Strictly preserve the user's edited box dimensions and placement
+                # without snapping or deforming individual box edges on each scan.
+                c_cfg["bbox"] = transformed_box
         aligned_fields[fk] = c_cfg
     fields_config = aligned_fields
 
     # 2. Spatial Bucketing into Template Fields
     for f_key, cfg in fields_config.items():
         f_type = cfg.get("type", "text")
-        if f_type in ["table", "circumstance_group"] or f_key.startswith("circ_") or f_key.startswith("fam_row"):
+        if f_type in ["table", "circumstance_group"]:
+            continue
+        if f_key.startswith("circ_") or f_key.startswith("fam_row"):
+            b_box = cfg.get("bbox", [0, 0, 0, 0])
+            orig_b = template.get("fields", {}).get(f_key, {}).get("bbox", b_box)
+            extracted_fields[f_key] = {
+                "value": "",
+                "confidence": 0.95,
+                "rating": "High",
+                "bbox": b_box,
+                "aligned_bbox": b_box,
+                "orig_bbox": orig_b,
+                "category": cfg.get("category", "Section III" if f_key.startswith("fam_row") else "Section II")
+            }
             continue
 
         bbox = cfg.get("bbox", [0, 0, 0, 0])

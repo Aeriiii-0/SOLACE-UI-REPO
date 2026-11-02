@@ -38,6 +38,9 @@ namespace SOLUM_UI.Views.Components
         {
             InitializeComponent();
 
+            DpMemberDob?.AddHandler(UIElement.PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(Field_PreviewMouseDown), true);
+            DpA2Date?.AddHandler(UIElement.PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(Field_PreviewMouseDown), true);
+
             FamilyCardsList.ItemsSource = _familyRowData;
             _familyRowData.CollectionChanged += (s, e) => UpdateFamilyCardsEmptyState();
             UpdateFamilyCardsEmptyState();
@@ -124,6 +127,22 @@ namespace SOLUM_UI.Views.Components
         {
             if (sender is FrameworkElement elem && elem.Tag is string tag && !string.IsNullOrEmpty(tag))
             {
+                // If sender is a container (e.g. family card Border with Tag="fam_row_name") and the click
+                // originated inside a more specific child element with its own fam_row_* Tag, let the child handle it.
+                if (e?.OriginalSource is DependencyObject orig)
+                {
+                    DependencyObject curr = orig;
+                    while (curr != null && !ReferenceEquals(curr, elem))
+                    {
+                        if (curr is FrameworkElement childFe && childFe.Tag is string childTag &&
+                            childTag.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase) &&
+                            !string.Equals(childTag, tag, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return;
+                        }
+                        curr = VisualTreeHelper.GetParent(curr);
+                    }
+                }
                 FieldFocused?.Invoke(ResolveDynamicTag(elem, tag));
             }
         }
@@ -577,6 +596,11 @@ namespace SOLUM_UI.Views.Components
             else
             {
                 TxtMemberAge.Text = string.Empty;
+            }
+
+            if (!_isPopulating && AddMemberSubCard?.Visibility == Visibility.Visible)
+            {
+                FieldFocused?.Invoke(ResolveDynamicTag(DpMemberDob, "fam_row_dob"));
             }
         }
 
