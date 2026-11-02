@@ -49,7 +49,7 @@ namespace SOLUM_UI
 
     public partial class OcrTemplateConfigWindow : Window
     {
-        private readonly string _imagePath;
+        private string _imagePath;
         private readonly List<TemplateFieldItem> _fields = new List<TemplateFieldItem>();
         private readonly Stack<string> _undoStack = new Stack<string>();
         private readonly Stack<string> _redoStack = new Stack<string>();
@@ -321,11 +321,17 @@ namespace SOLUM_UI
             {
                 try
                 {
+                    _imagePath = imgToLoad;
+                    byte[] imgBytes = File.ReadAllBytes(imgToLoad);
                     var bmp = new BitmapImage();
-                    bmp.BeginInit();
-                    bmp.UriSource = new Uri(imgToLoad, UriKind.Absolute);
-                    bmp.CacheOption = BitmapCacheOption.OnLoad;
-                    bmp.EndInit();
+                    using (var ms = new MemoryStream(imgBytes))
+                    {
+                        bmp.BeginInit();
+                        bmp.CacheOption = BitmapCacheOption.OnLoad;
+                        bmp.StreamSource = ms;
+                        bmp.EndInit();
+                    }
+                    bmp.Freeze();
 
                     ImgDocument.Source = bmp;
                     OverlayCanvas.Width = bmp.PixelWidth;

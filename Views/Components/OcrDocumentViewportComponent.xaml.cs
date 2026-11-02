@@ -633,6 +633,7 @@ namespace SOLUM_UI.Views.Components
         public async Task ProcessDocumentAsync(string imagePath, bool isPhaseTwoOfHardwareScan = false)
         {
             CurrentImagePath = imagePath;
+            _currentDeskewedImagePath = null;
             var window = Window.GetWindow(this);
 
             if (EmptyCanvasState != null)
@@ -669,10 +670,14 @@ namespace SOLUM_UI.Views.Components
             TransitionStatusText(TxtCurrentExtractingField, "Straightening page tilt & suppressing scanner borders...", animate: isPhaseTwoOfHardwareScan);
 
             var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.UriSource = new Uri(imagePath);
-            bitmap.EndInit();
+            using (var fs = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.StreamSource = fs;
+                bitmap.EndInit();
+            }
+            bitmap.Freeze();
             ImgDocument.Source = bitmap;
             ImgDocument.Width = DocScrollViewer.ActualWidth > 50 ? DocScrollViewer.ActualWidth - 20 : 440;
             ZoomFit_Click(null, null);
@@ -758,9 +763,13 @@ namespace SOLUM_UI.Views.Components
                     }
                     try
                     {
+                        string uniqueDeskewed = Path.Combine(Path.GetTempPath(), $"solace_deskewed_{DateTime.Now:yyyyMMdd_HHmmss}_{DateTime.Now.Ticks % 10000}.jpg");
+                        File.WriteAllBytes(uniqueDeskewed, bytes);
+                        _currentDeskewedImagePath = uniqueDeskewed;
+                        _sessionScannedFiles.Add(uniqueDeskewed);
+
                         string deskewedTemp = Path.Combine(Path.GetTempPath(), "solace_last_deskewed_preview.jpg");
                         File.WriteAllBytes(deskewedTemp, bytes);
-                        _currentDeskewedImagePath = deskewedTemp;
                     }
                     catch { }
                 }
