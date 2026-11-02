@@ -31,6 +31,33 @@ namespace SOLUM_UI
             
             // Launch local background OCR engine if not already running
             _ = OcrService.EnsureServerRunningAsync();
+
+            // Initialize AutoUpdater in background
+            InitializeAutoUpdater();
+        }
+
+        private void InitializeAutoUpdater()
+        {
+            try
+            {
+                string enable = System.Configuration.ConfigurationManager.AppSettings["EnableAutoUpdate"];
+                if (string.Equals(enable, "false", System.StringComparison.OrdinalIgnoreCase))
+                    return;
+
+                string updateUrl = System.Configuration.ConfigurationManager.AppSettings["UpdateXmlUrl"];
+                if (string.IsNullOrWhiteSpace(updateUrl))
+                    return;
+
+                AutoUpdaterDotNET.AutoUpdater.ShowRemindLaterButton = true;
+                AutoUpdaterDotNET.AutoUpdater.ShowSkipButton = false;
+                AutoUpdaterDotNET.AutoUpdater.ReportErrors = false; // Do not show alert if internet/server is unreachable
+                AutoUpdaterDotNET.AutoUpdater.AppCastURL = updateUrl;
+                AutoUpdaterDotNET.AutoUpdater.Start();
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AutoUpdater] Initialization failed: {ex.Message}");
+            }
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -41,4 +68,3 @@ namespace SOLUM_UI
         }
     }
 }
-
