@@ -415,7 +415,7 @@ namespace SOLUM_UI.Views.Components
                         {
                             dp.SelectedDate = dt;
                         }
-                        tb.Text = dt.ToString("dd/MM/yyyy");
+                        tb.Text = dt.ToString("MM/dd/yyyy");
                     }
                 }
             }

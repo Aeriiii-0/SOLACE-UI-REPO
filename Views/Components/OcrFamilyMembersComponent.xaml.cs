@@ -550,6 +550,15 @@ namespace SOLUM_UI.Views.Components
 
             if (!DpMemberDob.SelectedDate.HasValue)
             {
+                var tb = DpMemberDob.Template?.FindName("PART_TextBox", DpMemberDob) as System.Windows.Controls.Primitives.DatePickerTextBox;
+                if (tb != null && !string.IsNullOrWhiteSpace(tb.Text) && OcrService.TryParseOcrDate(tb.Text, out DateTime dtParsed) && dtParsed.Year >= 1900 && dtParsed.Date <= DateTime.Today)
+                {
+                    DpMemberDob.SelectedDate = dtParsed;
+                }
+            }
+
+            if (!DpMemberDob.SelectedDate.HasValue)
+            {
                 ActionConfirmDialog.Warning("Validation", "Please select a valid birthdate.", window);
                 DpMemberDob.Focus();
                 return;
@@ -642,6 +651,37 @@ namespace SOLUM_UI.Views.Components
             if (!_isPopulating && AddMemberSubCard?.Visibility == Visibility.Visible)
             {
                 FieldFocused?.Invoke(ResolveDynamicTag(DpMemberDob, "fam_row_dob"));
+            }
+        }
+
+        private void DatePicker_DateValidationError(object sender, DatePickerDateValidationErrorEventArgs e)
+        {
+            if (sender is DatePicker dp && !string.IsNullOrWhiteSpace(e.Text))
+            {
+                if (OcrService.TryParseOcrDate(e.Text, out DateTime dt) && dt.Year >= 1900 && dt.Date <= DateTime.Today)
+                {
+                    dp.SelectedDate = dt;
+                    e.ThrowException = false;
+                }
+            }
+        }
+
+        private void DatePicker_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is DatePicker dp)
+            {
+                var tb = dp.Template?.FindName("PART_TextBox", dp) as System.Windows.Controls.Primitives.DatePickerTextBox;
+                if (tb != null && !string.IsNullOrWhiteSpace(tb.Text))
+                {
+                    if (OcrService.TryParseOcrDate(tb.Text, out DateTime dt) && dt.Year >= 1900 && dt.Date <= DateTime.Today)
+                    {
+                        if (dp.SelectedDate != dt)
+                        {
+                            dp.SelectedDate = dt;
+                        }
+                        tb.Text = dt.ToString("MM/dd/yyyy");
+                    }
+                }
             }
         }
 

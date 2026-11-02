@@ -915,6 +915,15 @@ namespace SOLUM_UI
 
             if (!DpMemberDob.SelectedDate.HasValue)
             {
+                var tb = DpMemberDob.Template?.FindName("PART_TextBox", DpMemberDob) as System.Windows.Controls.Primitives.DatePickerTextBox;
+                if (tb != null && !string.IsNullOrWhiteSpace(tb.Text) && SOLUM_UI.Services.OcrService.TryParseOcrDate(tb.Text, out DateTime dtParsed) && dtParsed.Year >= 1900 && dtParsed.Date <= DateTime.Today)
+                {
+                    DpMemberDob.SelectedDate = dtParsed;
+                }
+            }
+
+            if (!DpMemberDob.SelectedDate.HasValue)
+            {
                 ToastNotification.Show("Validation Required", "Please select a valid birthdate.", ToastType.Warning);
                 DpMemberDob.Focus();
                 return;

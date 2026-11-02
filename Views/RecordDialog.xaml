@@ -1432,6 +1432,7 @@
                                                                 </TextBlock>
                                                                 <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Height="34">
                                                                     <DatePicker x:Name="DpMemberDob" Style="{StaticResource FormDateSm}"
+                                                                                DateValidationError="DatePicker_DateValidationError" LostFocus="DatePicker_LostFocus"
                                                                                 SelectedDateChanged="DpMemberDob_SelectedDateChanged"/>
                                                                 </Border>
                                                             </StackPanel>
