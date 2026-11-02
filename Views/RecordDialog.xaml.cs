@@ -114,7 +114,7 @@ namespace SOLUM_UI
                 N(nameof(BirthdateDate));
                 if (value.HasValue && value.Value != DateTime.MinValue)
                 {
-                    _birthdate = value.Value.ToString("dd/MM/yyyy");
+                    _birthdate = value.Value.ToString("MM/dd/yyyy");
                     N(nameof(Birthdate));
                     int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(value.Value);
                     if (calcAge >= 0 && calcAge <= 120) { _age = calcAge.ToString(); N(nameof(Age)); N(nameof(AgeDisplay)); }

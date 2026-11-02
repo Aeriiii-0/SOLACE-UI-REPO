@@ -469,10 +469,10 @@ def clean_date(raw_text: str) -> str:
                 return f"{yr:04d}-{int(p2):02d}-{int(p1):02d}"
             elif int(p2) > 12 and int(p1) <= 12 and int(p2) <= 31:
                 return f"{yr:04d}-{int(p1):02d}-{int(p2):02d}"
-            elif int(p1) <= 31 and int(p2) <= 12:
-                return f"{yr:04d}-{int(p2):02d}-{int(p1):02d}"
             elif int(p1) <= 12 and int(p2) <= 31:
                 return f"{yr:04d}-{int(p1):02d}-{int(p2):02d}"
+            elif int(p2) <= 12 and int(p1) <= 31:
+                return f"{yr:04d}-{int(p2):02d}-{int(p1):02d}"
 
     # 2b. Missing one separator: e.g. '1/252020', '01/252020', '0125/2020'
     m_missing1 = re.search(r'(\d{1,2})[/\-.](\d{1,2})(\d{4})', raw)
