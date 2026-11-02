@@ -351,6 +351,7 @@ def clean_person_name(raw_name: str) -> str:
     t = re.sub(r'(?<=[a-zA-Z])1(?=[a-zA-Z])', 'L', t)
     t = re.sub(r'\bZOR\b', 'ZORA', t, flags=re.IGNORECASE)
     t = re.sub(r"[^a-zA-ZñÑ\s\.\-']", "", t)
+    t = re.sub(r'\b(N/?A|NIA|NONE)\b', '', t, flags=re.IGNORECASE)
     t = re.sub(r'\s+', ' ', t).strip()
     placeholder_labels = {
         'LAST NAME', 'FIRST NAME', 'MIDDLE NAME', 'MIDDLENAME', 'EXT NAME', 'EXTENSION NAME',

@@ -295,14 +295,14 @@ namespace SOLUM_UI.Views.Components
 
             double[] bbox = null;
 
-            // Prioritize calibrated template bounding box so Picture Preview matches Adjustable Boxes 1:1
-            if (_fieldBBoxes.TryGetValue(key, out var defBbox) && defBbox != null && defBbox.Length == 4)
-            {
-                bbox = defBbox;
-            }
-            else if (OcrResponse?.Fields != null && OcrResponse.Fields.TryGetValue(key, out var fieldRes) && fieldRes.Bbox != null && fieldRes.Bbox.Length == 4)
+            // Prefer dynamically aligned bounding box returned by OCR engine for this specific scan
+            if (OcrResponse?.Fields != null && OcrResponse.Fields.TryGetValue(key, out var fieldRes) && fieldRes.Bbox != null && fieldRes.Bbox.Length == 4)
             {
                 bbox = fieldRes.Bbox;
+            }
+            else if (_fieldBBoxes.TryGetValue(key, out var defBbox) && defBbox != null && defBbox.Length == 4)
+            {
+                bbox = defBbox;
             }
             else if (key == "is_employed") bbox = new[] { 0.6167, 0.2347, 0.0084, 0.0056 };
             else if (key == "is_self_employed") bbox = new[] { 0.7056, 0.2347, 0.0084, 0.0056 };
@@ -836,12 +836,24 @@ namespace SOLUM_UI.Views.Components
 
         private void HandleDocumentClick(double nx, double ny)
         {
-            if (_fieldBBoxes == null || _fieldBBoxes.Count == 0) return;
+            var boxesToSearch = new Dictionary<string, double[]>(_fieldBBoxes ?? new Dictionary<string, double[]>());
+            if (OcrResponse?.Fields != null)
+            {
+                foreach (var kvp in OcrResponse.Fields)
+                {
+                    if (kvp.Value?.Bbox != null && kvp.Value.Bbox.Length == 4)
+                    {
+                        boxesToSearch[kvp.Key] = kvp.Value.Bbox;
+                    }
+                }
+            }
+
+            if (boxesToSearch.Count == 0) return;
 
             string bestKey = null;
             double minArea = double.MaxValue;
 
-            foreach (var kvp in _fieldBBoxes)
+            foreach (var kvp in boxesToSearch)
             {
                 var b = kvp.Value;
                 if (b == null || b.Length < 4) continue;

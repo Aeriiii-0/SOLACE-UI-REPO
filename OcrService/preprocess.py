@@ -136,10 +136,12 @@ def crop_document_contour(image: np.ndarray) -> np.ndarray:
 
 def deskew(image: np.ndarray) -> np.ndarray:
     """
-    Detects the physical tilt angle of the document using morphological horizontal form rules
-    and Hough line segments, rotating it straight (only if between 0.35 and 12.0 deg).
-    Immune to scanner edge shadows, vertical borders, and text distribution bias.
-    Preserves exact document dimensions and aspect ratio.
+    Detects the physical tilt angle of the document using a robust 2-stage estimator:
+      1. Macro Stage: Canny edge + Hough segment voting detects macroscopic paper tilts
+         between 0.8 and 12.0 degrees across form boundaries and table outlines.
+      2. Micro Stage: Morphological horizontal rule kernel detects micro-tilts down to 0.10 degrees.
+    Deadband: ignores micro-tilts below 0.10 degrees.
+    Rotates straight, preserving exact document dimensions and aspect ratio.
     """
     try:
         if image is None or image.size == 0:
@@ -165,63 +167,104 @@ def deskew(image: np.ndarray) -> np.ndarray:
         if inner_gray.size == 0:
             return image
 
-        # Extract horizontal printed form lines using adaptive thresholding + horizontal kernel
+        iw_h, iw_w = inner_gray.shape[:2]
+        total_angle = 0.0
+
+        # Stage 1: Macro Tilt Detection (Canny edges + Hough lines)
+        edges = cv2.Canny(inner_gray, 50, 150, apertureSize=3)
+        macro_lines = cv2.HoughLinesP(
+            edges, 1, np.pi / 1800.0,
+            threshold=45,
+            minLineLength=max(35, iw_w // 10),
+            maxLineGap=20
+        )
+
+        macro_angle = 0.0
+        if macro_lines is not None and len(macro_lines) >= 4:
+            m_angles = []
+            m_weights = []
+            for l in macro_lines:
+                x1, y1, x2, y2 = l[0]
+                if x2 < x1:
+                    x1, y1, x2, y2 = x2, y2, x1, y1
+                dx = float(x2 - x1)
+                dy = float(y2 - y1)
+                deg = float(np.degrees(np.arctan2(dy, dx)))
+                if -12.0 <= deg <= 12.0:
+                    m_angles.append(deg)
+                    m_weights.append(np.hypot(dx, dy))
+            if len(m_angles) >= 4:
+                med = float(np.median(m_angles))
+                inliers = [a for a in m_angles if abs(a - med) <= 1.5]
+                inlier_w = [w_ for a, w_ in zip(m_angles, m_weights) if abs(a - med) <= 1.5]
+                if inliers and sum(inlier_w) > 0:
+                    cand_macro = float(np.average(inliers, weights=inlier_w))
+                    if abs(cand_macro) >= 0.80 and abs(cand_macro) <= 12.0:
+                        macro_angle = cand_macro
+
+        curr_inner = inner_gray
+        if abs(macro_angle) >= 0.80:
+            total_angle += macro_angle
+            M_pre = cv2.getRotationMatrix2D((iw_w // 2, iw_h // 2), macro_angle, 1.0)
+            curr_inner = cv2.warpAffine(curr_inner, M_pre, (iw_w, iw_h), borderValue=255)
+
+        # Stage 2: Micro Tilt Detection (Morphological horizontal rule kernel)
         thresh = cv2.adaptiveThreshold(
-            inner_gray, 255,
+            curr_inner, 255,
             cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
             cv2.THRESH_BINARY_INV, 15, 8
         )
-        h_kernel_len = max(25, inner_gray.shape[1] // 18)
+        h_kernel_len = max(25, iw_w // 18)
         h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_len, 1))
         h_lines_mask = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, h_kernel)
 
-        lines = cv2.HoughLinesP(
+        micro_lines = cv2.HoughLinesP(
             h_lines_mask,
             rho=1,
             theta=np.pi / 1800.0,
             threshold=40,
-            minLineLength=max(35, inner_gray.shape[1] // 10),
+            minLineLength=max(35, iw_w // 10),
             maxLineGap=15
         )
 
-        if lines is None or len(lines) == 0:
+        micro_angle = 0.0
+        if micro_lines is not None and len(micro_lines) >= 2:
+            angles = []
+            weights = []
+            for line in micro_lines:
+                x1, y1, x2, y2 = line[0]
+                if x2 < x1:
+                    x1, y1, x2, y2 = x2, y2, x1, y1
+                dx = float(x2 - x1)
+                dy = float(y2 - y1)
+                length = np.hypot(dx, dy)
+                if abs(dx) < 30 or length < 30:
+                    continue
+                deg = float(np.degrees(np.arctan2(dy, dx)))
+                if -8.0 <= deg <= 8.0:
+                    angles.append(deg)
+                    weights.append(length)
+
+            if len(angles) >= 2:
+                angles_arr = np.array(angles, dtype=np.float64)
+                med_angle = float(np.median(angles_arr))
+                inliers = [a for a, l in zip(angles, weights) if abs(a - med_angle) <= 1.0]
+                inlier_weights = [l for a, l in zip(angles, weights) if abs(a - med_angle) <= 1.0]
+                if inliers and sum(inlier_weights) > 0:
+                    micro_angle = float(np.average(inliers, weights=inlier_weights))
+                else:
+                    micro_angle = med_angle
+
+        if abs(micro_angle) >= 0.10:
+            total_angle += micro_angle
+
+        # Deadband check: do not rotate if combined tilt is negligible (< 0.10 deg) or unrealistic (> 12 deg)
+        if abs(total_angle) < 0.10 or abs(total_angle) > 12.0:
             return image
 
-        angles = []
-        weights = []
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
-            dx = float(x2 - x1)
-            dy = float(y2 - y1)
-            length = np.hypot(dx, dy)
-            if abs(dx) < 30 or length < 30:
-                continue
-            deg = float(np.degrees(np.arctan2(dy, dx)))
-            if -12.0 <= deg <= 12.0:
-                angles.append(deg)
-                weights.append(length)
-
-        if len(angles) < 2:
-            return image
-
-        # Compute length-weighted median / trimmed mean of horizontal rule angles
-        angles_arr = np.array(angles, dtype=np.float64)
-        med_angle = float(np.median(angles_arr))
-        # Filter outliers within 1.5 degrees of median for high precision
-        inliers = [a for a, l in zip(angles, weights) if abs(a - med_angle) <= 1.5]
-        inlier_weights = [l for a, l in zip(angles, weights) if abs(a - med_angle) <= 1.5]
-        if inliers and sum(inlier_weights) > 0:
-            angle = float(np.average(inliers, weights=inlier_weights))
-        else:
-            angle = med_angle
-
-        # Deadband: do not rotate if tilt is negligible (< 0.35 deg) or unrealistic (> 12 deg)
-        if abs(angle) < 0.35 or abs(angle) > 12.0:
-            return image
-
-        print(f"[Deskew] Straightening document tilt of {angle:+.2f} deg (from {len(angles)} horizontal form rules).")
+        print(f"[Deskew] Straightening document tilt of {total_angle:+.2f} deg (macro: {macro_angle:+.2f}, micro: {micro_angle:+.2f}).")
         center = (w // 2, h // 2)
-        M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        M = cv2.getRotationMatrix2D(center, total_angle, 1.0)
         border_val = (255, 255, 255) if len(image.shape) == 3 else 255
         rotated = cv2.warpAffine(
             image, M, (w, h),
@@ -233,8 +276,6 @@ def deskew(image: np.ndarray) -> np.ndarray:
     except Exception as e:
         print(f"[Deskew Note]: {e}")
         return image
-
-
 def enhance_contrast(image: np.ndarray) -> np.ndarray:
     """
     Converts to grayscale and applies CLAHE to make handwritten text legible.

@@ -574,8 +574,9 @@ def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template:
             "value": cleaned,
             "confidence": round(conf, 2),
             "rating": get_confidence_rating(conf) if cleaned else "Low",
-            "bbox": orig_box,
+            "bbox": bbox,
             "aligned_bbox": bbox,
+            "orig_bbox": orig_box,
             "category": cfg.get("category", "general")
         }
         if cleaned:
