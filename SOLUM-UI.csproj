@@ -292,6 +292,9 @@
     <Compile Include="Views\RecordDialog.xaml.cs">
       <DependentUpon>RecordDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\UpdateAvailableDialog.xaml.cs">
+      <DependentUpon>UpdateAvailableDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\RecordViewDialog.xaml.cs">
       <DependentUpon>RecordViewDialog.xaml</DependentUpon>
     </Compile>
@@ -554,6 +557,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Dialogs\UpdateAvailableDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Dialogs\RecordViewDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

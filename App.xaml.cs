@@ -1,7 +1,12 @@
+using System;
+using System.Configuration;
+using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
+using AutoUpdaterDotNET;
 using SOLUM_UI.Services;
+using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
 {
@@ -32,7 +37,7 @@ namespace SOLUM_UI
             // Launch local background OCR engine if not already running
             _ = OcrService.EnsureServerRunningAsync();
 
-            // Initialize AutoUpdater in background
+            // Initialize AutoUpdater in background with custom downloading UI
             InitializeAutoUpdater();
         }
 
@@ -40,23 +45,36 @@ namespace SOLUM_UI
         {
             try
             {
-                string enable = System.Configuration.ConfigurationManager.AppSettings["EnableAutoUpdate"];
-                if (string.Equals(enable, "false", System.StringComparison.OrdinalIgnoreCase))
+                string enable = ConfigurationManager.AppSettings["EnableAutoUpdate"];
+                if (string.Equals(enable, "false", StringComparison.OrdinalIgnoreCase))
                     return;
 
-                string updateUrl = System.Configuration.ConfigurationManager.AppSettings["UpdateXmlUrl"];
+                string updateUrl = ConfigurationManager.AppSettings["UpdateXmlUrl"];
                 if (string.IsNullOrWhiteSpace(updateUrl))
                     return;
 
-                AutoUpdaterDotNET.AutoUpdater.ShowRemindLaterButton = true;
-                AutoUpdaterDotNET.AutoUpdater.ShowSkipButton = false;
-                AutoUpdaterDotNET.AutoUpdater.ReportErrors = false; // Do not show alert if internet/server is unreachable
-                AutoUpdaterDotNET.AutoUpdater.AppCastURL = updateUrl;
-                AutoUpdaterDotNET.AutoUpdater.Start();
+                AutoUpdater.ReportErrors = false; // Do not show error alert if internet/server is unreachable
+                AutoUpdater.AppCastURL = updateUrl;
+
+                // Hook custom update & downloading interface
+                AutoUpdater.CheckForUpdateEvent += AutoUpdater_CheckForUpdateEvent;
+                AutoUpdater.Start();
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[AutoUpdater] Initialization failed: {ex.Message}");
+                Debug.WriteLine($"[AutoUpdater] Initialization failed: {ex.Message}");
+            }
+        }
+
+        private static void AutoUpdater_CheckForUpdateEvent(UpdateInfoEventArgs args)
+        {
+            if (args != null && args.Error == null && args.IsUpdateAvailable)
+            {
+                Current.Dispatcher.Invoke(() =>
+                {
+                    var dlg = new UpdateAvailableDialog(args);
+                    dlg.ShowDialog();
+                });
             }
         }
 

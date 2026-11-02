@@ -52,3 +52,4 @@ OcrService/dist/
 *.pyc
 
 *.zip
+Output/
