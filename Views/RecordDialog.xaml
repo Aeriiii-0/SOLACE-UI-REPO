@@ -655,15 +655,36 @@
                                     <StackPanel>
                                         <Border Style="{StaticResource CardSectionHeader}">
                                             <Grid>
-                                                <TextBlock Text="I. IDENTIFYING INFORMATION" Style="{StaticResource SectionLabel}" VerticalAlignment="Center"/>
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                    <TextBlock Text="Date of Application:" FontSize="12" FontWeight="SemiBold"
-                                                               Foreground="#555555" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                                    <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Width="180">
-                                                        <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDate}" Height="32"
-                                                                    DateValidationError="DatePicker_DateValidationError"
-                                                                    LostFocus="DatePicker_LostFocus"/>
-                                                    </Border>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="I. IDENTIFYING INFORMATION" Style="{StaticResource SectionLabel}" VerticalAlignment="Center"/>
+                                                <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                        <TextBlock Text="Date of Application:" FontSize="12" FontWeight="SemiBold"
+                                                                   Foreground="#555555" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Width="160">
+                                                            <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDate}" Height="32"
+                                                                        SelectedDateChanged="DpDateOfApplication_SelectedDateChanged"
+                                                                        DateValidationError="DatePicker_DateValidationError"
+                                                                        LostFocus="DatePicker_LostFocus"/>
+                                                        </Border>
+                                                        <!-- Live Validity Preview Badge -->
+                                                        <Border x:Name="BadgeValidityPreview" Margin="8,0,0,0" Padding="8,4" CornerRadius="4"
+                                                                Background="#E8F5E9" BorderBrush="#81C784" BorderThickness="1"
+                                                                VerticalAlignment="Center">
+                                                            <TextBlock x:Name="TxtValidityPreview" Text="Valid until YYYY-MM-DD (Active)"
+                                                                       FontSize="11" FontWeight="SemiBold" Foreground="#2E7D32"/>
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <!-- Helper Text and Validation Message -->
+                                                    <TextBlock Text="Defaults to today. For backfilling older paper applications, select the original filing date. Validity will calculate from this date."
+                                                               FontSize="10.5" Foreground="#777777" HorizontalAlignment="Right" Margin="0,4,0,0"
+                                                               TextWrapping="Wrap" MaxWidth="520" TextAlignment="Right"/>
+                                                    <TextBlock x:Name="ErrDateOfApplication" Visibility="Collapsed"
+                                                               FontSize="10.5" Foreground="#D32F2F" FontWeight="SemiBold"
+                                                               HorizontalAlignment="Right" Margin="0,2,0,0"/>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>

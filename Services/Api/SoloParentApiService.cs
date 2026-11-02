@@ -421,6 +421,8 @@ namespace SOLUM_UI.Services.Api
 
             {
 
+                ApplicationDate = r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("yyyy-MM-dd") : null,
+
                 PersonalInfo = MapPersonalInfo(r),
 
                 Employment = MapEmploymentInfo(r),
@@ -492,6 +494,8 @@ namespace SOLUM_UI.Services.Api
             {
 
                 Id = id,
+
+                ApplicationDate = r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("yyyy-MM-dd") : null,
 
                 PersonalInfo = MapPersonalInfo(r),
 
@@ -695,7 +699,7 @@ namespace SOLUM_UI.Services.Api
 
 
 
-        public RenewSoloParentRequest MapToRenewRequest(Guid id, SoloParentRecord r, SoloParentDto existingEntity = null)
+        public RenewSoloParentRequest MapToRenewRequest(Guid id, SoloParentRecord r, SoloParentDto existingEntity = null, DateTime? renewalDate = null)
 
         {
 
@@ -708,9 +712,8 @@ namespace SOLUM_UI.Services.Api
 
 
             var req = new RenewSoloParentRequest
-
             {
-
+                RenewalDate = renewalDate.HasValue ? renewalDate.Value.ToString("yyyy-MM-dd") : (r.RenewalFilingDate.HasValue ? r.RenewalFilingDate.Value.ToString("yyyy-MM-dd") : null),
                 CivilStatus = !string.IsNullOrWhiteSpace(r.CivilStatus) ? r.CivilStatus.Trim() : "Single",
 
                 Employment = MapEmploymentInfo(r),
@@ -999,11 +1002,19 @@ namespace SOLUM_UI.Services.Api
 
 
 
-            DateTime dateOfApplication = dto.CreatedAt.HasValue && dto.CreatedAt.Value != DateTime.MinValue
-
-                ? dto.CreatedAt.Value
-
-                : (dto.DateCreated != DateTime.MinValue ? dto.DateCreated : DateTime.MinValue);
+                        DateTime dateOfApplication = DateTime.MinValue;
+            if (!string.IsNullOrWhiteSpace(dto.ApplicationDate) && DateTime.TryParse(dto.ApplicationDate, out var parsedAppDate))
+            {
+                dateOfApplication = parsedAppDate;
+            }
+            else if (dto.CreatedAt.HasValue && dto.CreatedAt.Value != DateTime.MinValue)
+            {
+                dateOfApplication = dto.CreatedAt.Value;
+            }
+            else if (dto.DateCreated != DateTime.MinValue)
+            {
+                dateOfApplication = dto.DateCreated;
+            }
 
 
 
@@ -1042,6 +1053,7 @@ namespace SOLUM_UI.Services.Api
                 Status = computedStatus,
 
                 DateOfApplication = dateOfApplication,
+                DateCreated = dto.DateCreated != DateTime.MinValue ? dto.DateCreated : (dto.CreatedAt ?? DateTime.MinValue),
 
                 IsNewApplicant = isNewApplicant,
 
@@ -1354,6 +1366,7 @@ namespace SOLUM_UI.Services.Api
                 IsIndigenous          = dto.IsIndigenous,
 
                 DateCreated           = dto.DateCreated,
+                ApplicationDate       = dto.ApplicationDate,
 
                 IsActive              = dto.IsActive,
 

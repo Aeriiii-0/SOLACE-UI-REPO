@@ -320,6 +320,8 @@ namespace SOLUM_UI.Views.Dialogs
             _isReassessmentMode = isReassessmentMode;
 
             DependentsList.ItemsSource = _dependents;
+            DpRenewalDate.SelectedDate = _original.RenewalFilingDate ?? DateTime.Today;
+            DpRenewalDate.DisplayDateEnd = DateTime.Today;
 
             Loaded += (s, e) =>
             {
@@ -1473,6 +1475,7 @@ namespace SOLUM_UI.Views.Dialogs
 
             RenewRequest = new RenewSoloParentRequest
             {
+                RenewalDate = DpRenewalDate.SelectedDate.HasValue ? DpRenewalDate.SelectedDate.Value.ToString("yyyy-MM-dd") : null,
                 CivilStatus = civ,
                 Employment = new EmploymentInfo
                 {
@@ -1489,6 +1492,7 @@ namespace SOLUM_UI.Views.Dialogs
             // Build UpdatedRecord model (copy all immutable fields to avoid false positive changes in audit trail)
             UpdatedRecord = new SoloParentRecord
             {
+                RenewalFilingDate = DpRenewalDate.SelectedDate,
                 Id = _original.Id,
                 CreatedBy = _original.CreatedBy,
                 LastUpdated = DateTime.Now,

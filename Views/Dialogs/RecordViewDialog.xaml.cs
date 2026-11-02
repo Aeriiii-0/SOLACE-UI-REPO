@@ -434,7 +434,8 @@ namespace SOLUM_UI.Views.Dialogs
 
                 ("Application Type",     r.ApplicationType),
 
-                ("Date of Application",  r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("MMMM d, yyyy") : "Not applicable"),
+                ("Application Date",     r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("yyyy-MM-dd") : "-"),
+                ("Date Encoded",         r.DateCreated != DateTime.MinValue ? r.DateCreated.ToString("yyyy-MM-dd") : (r.LastUpdated != DateTime.MinValue ? r.LastUpdated.ToString("yyyy-MM-dd") : "-")),
 
                 ("Current Term Expiry",  validUntil),
 

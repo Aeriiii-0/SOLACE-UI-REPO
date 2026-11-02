@@ -56,8 +56,8 @@ namespace SOLUM_UI.Views.Components
                 else
                 {
                     SelectedField = field;
-                    // Default to ascending, except LastUpdated where newest (descending) is natural
-                    IsAscending = field != RecordSortField.LastUpdated;
+                    // Default to ascending, except date fields where newest (descending) is natural
+                    IsAscending = (field != RecordSortField.LastUpdated && field != RecordSortField.ApplicationDate);
                 }
 
                 UpdateUI();
@@ -85,16 +85,22 @@ namespace SOLUM_UI.Views.Components
                 TxtBarangaySubtitle.Text = IsAscending ? "A to Z" : "Z to A (Reversed)";
             if (TxtLastUpdatedSubtitle != null)
                 TxtLastUpdatedSubtitle.Text = IsAscending ? "Oldest created first (Reversed)" : "Recently created first (Newest)";
+            if (TxtApplicationDateSubtitle != null)
+                TxtApplicationDateSubtitle.Text = IsAscending ? "Oldest filed first (Reversed)" : "Latest filed first (Newest)";
 
             // Update Field Item Selection
             UpdateOptionRow(OptBarangay, IndBarangay, SelectedField == RecordSortField.Barangay);
             UpdateOptionRow(OptLastUpdated, IndLastUpdated, SelectedField == RecordSortField.LastUpdated);
+            UpdateOptionRow(OptApplicationDate, IndApplicationDate, SelectedField == RecordSortField.ApplicationDate);
 
             // Update Trigger Label
             string arrow = IsAscending ? "▲" : "▼";
             string fieldName;
             switch (SelectedField)
             {
+                case RecordSortField.ApplicationDate:
+                    fieldName = "Application Date";
+                    break;
                 case RecordSortField.LastUpdated:
                     fieldName = "Date Created";
                     break;

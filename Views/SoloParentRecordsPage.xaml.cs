@@ -1488,9 +1488,10 @@ namespace SOLUM_UI
                         break;
 
                     case "LAST UPDATED":
-
                         targetField = RecordSortField.LastUpdated;
-
+                        break;
+                    case "APPLICATION DATE":
+                        targetField = RecordSortField.ApplicationDate;
                         break;
 
                 }
@@ -1505,7 +1506,7 @@ namespace SOLUM_UI
 
                         ? !SortControl.IsAscending
 
-                        : (targetField.Value != RecordSortField.LastUpdated);
+                        : (targetField.Value != RecordSortField.LastUpdated && targetField.Value != RecordSortField.ApplicationDate);
 
                     SortControl.SetSort(targetField.Value, isAsc);
 

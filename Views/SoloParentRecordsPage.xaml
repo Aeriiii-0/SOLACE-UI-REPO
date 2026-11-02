@@ -2365,6 +2365,17 @@
 
 
 
+                                                        <!-- Col: APPLICATION DATE -->
+                            <GridViewColumn x:Name="ColApplicationDate" Header="APPLICATION DATE" Width="140" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Width="{Binding ActualWidth, ElementName=ColApplicationDate}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
+                                            <TextBlock Text="{Binding ApplicationDateFormatted}" Style="{StaticResource CellText}" HorizontalAlignment="Center" Margin="0"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
                             <!-- Col 6: VALID UNTIL -->
 
                             <GridViewColumn x:Name="ColChildren" Header="VALID UNTIL" Width="145" HeaderContainerStyle="{StaticResource GvHeaderCenter}">

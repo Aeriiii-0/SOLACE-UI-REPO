@@ -36,6 +36,10 @@ namespace SOLUM_UI.ViewModels
         public string Status => _model.Status;
         public string LastUpdatedFormatted => _model.LastUpdatedFormatted;
         public string DateOfBirthFormatted => _model.DateOfBirthFormatted;
+        public DateTime DateOfApplication => _model.DateOfApplication;
+        public string ApplicationDateFormatted => _model.ApplicationDateFormatted;
+        public string ApplicationDateIso => _model.ApplicationDateIso;
+        public string DateCreatedIso => _model.DateCreatedIso;
         public string ValidUntilFormatted =>
             _model.CurrentTermExpiresAt.HasValue
                 ? _model.CurrentTermExpiresAt.Value.ToString("yyyy-MM-dd")
