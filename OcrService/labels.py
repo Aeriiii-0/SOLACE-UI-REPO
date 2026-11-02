@@ -52,6 +52,11 @@ GLOBAL_PRINTED_LABEL_PATTERNS = [
     re.compile(r"^\s*age:?\s*$|^\s*edad:?\s*$", re.IGNORECASE),
     re.compile(r"^\s*(identif[a-z]*\s*information|application\s*form\s*for\s*solo\s*parent)$", re.IGNORECASE),
     re.compile(r"^\s*(needs\s*(and|&)\s*problems|other\s*sources?\s*of\s*income)$", re.IGNORECASE),
+    re.compile(r"(v\.\s*)?other\s*sources?\s*o?f?\s*income", re.IGNORECASE),
+    re.compile(r"(iv\.\s*)?needs\s*(and|&)?\s*problems?", re.IGNORECASE),
+    re.compile(r"data\s*privacy\s*statement", re.IGNORECASE),
+    re.compile(r"pahayag\s*sa\s*pagka[bp]ribado", re.IGNORECASE),
+    re.compile(r"sp\s*id\s*no", re.IGNORECASE),
     re.compile(r"^\s*(mm/dd/yy|dd/mm/yyyy|yyyy|member\s*name|kasarian|edad)$", re.IGNORECASE),
     re.compile(r"^\s*\(?\s*([iIvVxX]+|[0-9]+)\s*[\.\)]\s*$", re.IGNORECASE),
 ]
@@ -72,10 +77,10 @@ FORM_LABEL_PREFIXES = {
         r"^\s*([0-9]+\.?)?\s*(date\s*of\s*(this\s*)?application|application\s*date|petsa(\s*ng\s*aplikasyon)?|date)\s*[:\-_.]*"
     ],
     "needs": [
-        r"^\s*(iv\.?\s*)?(needs\s*(and|&)\s*problems?|mga\s*pangangailangan(\s*at\s*suliranin)?)\s*[:\-_.]*"
+        r"^\s*(iv\.?\s*)?(needs\s*(and|&)?\s*problems?|mga\s*pangangailangan(\s*at\s*suliranin)?)\s*[:\-_.]*"
     ],
     "other_income": [
-        r"^\s*(v\.?\s*)?(other\s*sources?\s*of\s*income|iba\s*pang\s*pinagkukunang?\s*yaman|pinagkakakitaan)\s*[:\-_.]*"
+        r"^\s*(v\.?\s*)?(other\s*sources?\s*o?f?\s*income|iba\s*pang\s*pinagkukunang?\s*yaman|pinagkakakitaan)\s*[:\-_.]*"
     ],
     "last_name": [
         r"^\s*([iIvVxX]+|[0-9]+)\s*[\.\)]\s*",
@@ -473,9 +478,13 @@ def assign_detections_to_field(field_key: str, cfg: dict, all_detections: list) 
     bbox = cfg.get("bbox", [0, 0, 0, 0])
     bx, by, bw, bh = bbox
     if field_key.startswith("fam_row"):
+        pad_x = 0.002
+        pad_y_top = 0.003
+        pad_y_bot = 0.003
+    elif field_key in ["needs", "other_income"]:
         pad_x = 0.008
-        pad_y_top = 0.004
-        pad_y_bot = 0.004
+        pad_y_top = 0.000
+        pad_y_bot = 0.000
     elif field_key.startswith("circ_") or field_key.startswith("is_"):
         pad_x = 0.010
         pad_y_top = 0.006

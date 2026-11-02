@@ -437,28 +437,29 @@ namespace SOLUM_UI.Views.Components
                 return;
             }
 
-            // 1. Outbound Animation: Slide to the left (-28px) while fading out
-            var fadeOut = new DoubleAnimation(1.0, 0.0, TimeSpan.FromMilliseconds(150))
+            // 1. Outbound Animation: Slide to the left (-14px) with smooth cubic easing while fading out
+            var fadeOut = new DoubleAnimation(1.0, 0.0, TimeSpan.FromMilliseconds(160))
             {
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
             };
-            var slideLeft = new DoubleAnimation(0.0, -28.0, TimeSpan.FromMilliseconds(150))
+            var slideLeft = new DoubleAnimation(0.0, -14.0, TimeSpan.FromMilliseconds(160))
             {
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
             };
 
             slideLeft.Completed += (s, e) =>
             {
                 targetTextBlock.Text = newText;
+                transform.X = 14.0;
 
-                // 2. Inbound Animation: Enter from the right (+28px) and glide into center (0px)
+                // 2. Inbound Animation: Glide in from the right (+14px) into center (0px) with smooth cubic easing
                 var fadeIn = new DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(220))
                 {
-                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
-                var slideFromRight = new DoubleAnimation(28.0, 0.0, TimeSpan.FromMilliseconds(220))
+                var slideFromRight = new DoubleAnimation(14.0, 0.0, TimeSpan.FromMilliseconds(220))
                 {
-                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
 
                 targetTextBlock.BeginAnimation(UIElement.OpacityProperty, fadeIn);
@@ -513,7 +514,7 @@ namespace SOLUM_UI.Views.Components
                         {
                             try
                             {
-                                await Task.Delay(1450, msgToken).ConfigureAwait(false);
+                                await Task.Delay(3500, msgToken).ConfigureAwait(false);
                             }
                             catch (OperationCanceledException)
                             {
@@ -701,7 +702,7 @@ namespace SOLUM_UI.Views.Components
                         {
                             try
                             {
-                                await Task.Delay(1150, linkedToken).ConfigureAwait(false);
+                                await Task.Delay(3500, linkedToken).ConfigureAwait(false);
                             }
                             catch (OperationCanceledException)
                             {

@@ -254,13 +254,15 @@ namespace SOLUM_UI.Views.Components
 
                         string matchedSex = OcrService.IsOcrNotApplicable(m.Sex) ? string.Empty : OcrService.FuzzyMatchSex(m.Sex);
                         string matchedRel = OcrService.IsOcrNotApplicable(m.Relationship) ? string.Empty : (OcrService.FuzzyMatchRelationship(m.Relationship)?.ToUpperInvariant() ?? string.Empty);
+                        string rawRelUpper = (m.Relationship ?? string.Empty).ToUpperInvariant();
 
                         // Cross-field semantic inference: Infer Sex from Relationship if Sex was blank or ambiguous
-                        if (string.IsNullOrEmpty(matchedSex) && !string.IsNullOrEmpty(matchedRel))
+                        // Checks both raw relationship (e.g. "Daughter", "Darght") and dropdown-normalized relationship ("Child")
+                        if (string.IsNullOrEmpty(matchedSex) && (!string.IsNullOrEmpty(matchedRel) || !string.IsNullOrEmpty(rawRelUpper)))
                         {
-                            if (matchedRel == "SON" || matchedRel.Contains("BOY") || matchedRel == "BROTHER" || matchedRel == "FATHER" || matchedRel == "NEPHEW" || matchedRel == "GRANDSON")
+                            if (matchedRel == "SON" || rawRelUpper.Contains("SON") || rawRelUpper.Contains("BOY") || matchedRel == "BROTHER" || rawRelUpper.Contains("BROTHER") || matchedRel == "FATHER" || matchedRel == "NEPHEW" || matchedRel == "GRANDSON")
                                 matchedSex = "Male";
-                            else if (matchedRel == "DAUGHTER" || matchedRel.Contains("GIRL") || matchedRel == "SISTER" || matchedRel == "MOTHER" || matchedRel == "NIECE" || matchedRel == "GRANDDAUGHTER")
+                            else if (matchedRel == "DAUGHTER" || rawRelUpper.Contains("DAUGHTER") || rawRelUpper.Contains("DARGHTER") || rawRelUpper.Contains("DAUGHT") || rawRelUpper.Contains("GIRL") || matchedRel == "SISTER" || rawRelUpper.Contains("SISTER") || matchedRel == "MOTHER" || matchedRel == "NIECE" || matchedRel == "GRANDDAUGHTER")
                                 matchedSex = "Female";
                         }
 

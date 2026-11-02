@@ -334,13 +334,26 @@ namespace SOLUM_UI.Services
 
 
 
-            if (clean == "f" || clean == "female" || clean == "fem" || clean == "b" || clean == "babae" || clean == "w" || clean == "woman")
+            // Visual confusion in table cells: F often misread as E, P, T, EF, FE
+
+            if (clean == "f" || clean == "female" || clean == "fem" || clean == "b" || clean == "babae" || clean == "w" || clean == "woman" || clean == "e" || clean == "p" || clean == "t" || clean == "ef" || clean == "fe")
 
                 return "Female";
 
             if (clean == "m" || clean == "male" || clean == "mas" || clean == "masc" || clean == "l" || clean == "lalaki" || clean == "man")
 
                 return "Male";
+
+            // Check space-delimited tokens if multiple characters
+            var tokens = norm.Split(new[] { ' ', ',', '/', '-' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var tok in tokens)
+            {
+                var tokClean = Regex.Replace(tok, @"[^a-z]", "");
+                if (tokClean == "f" || tokClean == "female" || tokClean == "fem" || tokClean == "babae" || tokClean == "e" || tokClean == "p" || tokClean == "t")
+                    return "Female";
+                if (tokClean == "m" || tokClean == "male" || tokClean == "masc" || tokClean == "lalaki")
+                    return "Male";
+            }
 
 
 

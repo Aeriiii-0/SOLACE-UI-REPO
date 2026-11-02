@@ -45,7 +45,7 @@ ANCHOR_REGISTRATION_TARGETS = [
     # (name, search_box [x, y, w, h], keywords, ref_y, ref_x)
     ("header_office", [0.05, 0.050, 0.50, 0.060], ["binan", "social", "welfare", "dev", "office", "cswdo"], 0.083, 0.221),
     ("sec1_identifying", [0.02, 0.130, 0.45, 0.060], ["identifying", "information", "personal"], 0.166, 0.138),
-    ("sec3_composition", [0.02, 0.400, 0.55, 0.060], ["composition", "household", "family"], 0.429, 0.386),
+    ("sec3_composition", [0.02, 0.450, 0.55, 0.050], ["family composition", "iii. family", "composition"], 0.468, 0.386),
 ]
 
 def calculate_dynamic_page_transform(all_detections: list) -> tuple:
@@ -82,29 +82,13 @@ def calculate_dynamic_page_transform(all_detections: list) -> tuple:
     s_y = 1.0
     t_y = 0.0
 
-    top_pt = landmarks_found.get("sec1_identifying") or landmarks_found.get("header_office")
-    bot_pt = landmarks_found.get("sec3_composition")
-
-    if top_pt and bot_pt:
-        meas_y1, ref_y1 = top_pt[1], top_pt[3]
-        meas_y2, ref_y2 = bot_pt[1], bot_pt[3]
-        ref_dist = ref_y2 - ref_y1
-        meas_dist = meas_y2 - meas_y1
-        if ref_dist > 0.15:
-            scale_est = meas_dist / ref_dist
-            if 0.97 <= scale_est <= 1.03:
-                s_y = float(scale_est)
-                t_y = float(meas_y1 - s_y * ref_y1)
-                t_y = max(-0.025, min(0.025, t_y))
-                if abs(s_y - 1.0) < 0.004:
-                    s_y = 1.0
-                    t_y = float(np.median([cy - ry for _, cy, _, ry in landmarks_found.values()]))
-                    t_y = max(-0.025, min(0.025, t_y))
-    elif landmarks_found:
+    # Hardware flatbed scanning on 8.5x13 paper has fixed 1:1 scale (no optical zoom distortion).
+    # Locking s_y = 1.0 prevents keyword false-matches from stretching lower-half template boxes.
+    if landmarks_found:
         shifts_y = [cy - ry for _, cy, _, ry in landmarks_found.values() if abs(cy - ry) <= 0.025]
         if shifts_y:
             t_y = float(np.median(shifts_y))
-            s_y = 1.0
+            t_y = max(-0.025, min(0.025, t_y))
             if abs(t_y) < 0.002:
                 t_y = 0.0
 
@@ -527,9 +511,11 @@ def parse_form_with_global_ocr(ocr_engine, enhanced_image: np.ndarray, template:
                 print(f'  [Template Bbox Match] [{f_key}]: "{raw_text}" (conf: {conf:.2f})')
             else:
                 # 2. Fallback: Label-Relative Dynamic Extraction (if bbox was empty or shifted)
-                raw_text, conf = extract_by_anchor_label(f_key, all_detections, fields_config)
-                if raw_text:
-                    print(f'  [Label-Relative Fallback] [{f_key}]: "{raw_text}" (conf: {conf:.2f})')
+                # Bounded sections (needs, other_income) should remain empty rather than wandering outside their box
+                if f_key not in ["needs", "other_income"]:
+                    raw_text, conf = extract_by_anchor_label(f_key, all_detections, fields_config)
+                    if raw_text:
+                        print(f'  [Label-Relative Fallback] [{f_key}]: "{raw_text}" (conf: {conf:.2f})')
 
             # 3. Fallback to crop OCR if still not captured
             if not raw_text:

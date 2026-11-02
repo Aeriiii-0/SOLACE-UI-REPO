@@ -529,9 +529,17 @@ def clean_sex(raw_text: str) -> str:
     # Visual confusion mappings for handwriting in single-letter table cells:
     # Male: M often misread as H, N, IV, U, 11, 1 (due to table border lines or vertical strokes)
     # Female: F often misread as P, PL, E, T, 7 (due to horizontal crossbars or curved top)
+    # Check space-delimited tokens if multiple characters or merged cells
+    tokens = [re.sub(r'[^a-z0-9]', '', tok) for tok in t.split()]
+    for tok in tokens:
+        if tok in ["f", "female", "babae", "fem", "girl", "daughter", "mother", "sister", "b", "woman", "p", "pl", "e", "t", "7"]:
+            return "Female"
+        if tok in ["m", "male", "lalaki", "boy", "son", "father", "brother", "l", "masc", "mas", "man", "h", "n"]:
+            return "Male"
+
     if t_alpha in ["m", "male", "lalaki", "boy", "son", "father", "brother", "l", "masc", "mas", "man", "h", "n", "iv", "u", "11", "1"]:
         return "Male"
-    if t_alpha in ["f", "female", "babae", "fem", "girl", "daughter", "mother", "sister", "b", "woman", "p", "pl", "e", "t", "7"]:
+    if t_alpha in ["f", "female", "babae", "fem", "girl", "daughter", "mother", "sister", "b", "woman", "p", "pl", "e", "t", "7", "ef", "fe"]:
         return "Female"
     if t_alpha.startswith("fem") or re.search(r'\b(female|babae|fem)\b', t):
         return "Female"
