@@ -121,6 +121,9 @@ namespace SOLUM_UI.Views.Dialogs
             PrimaryInfoSection.Populate(resp);
             SecondaryInfoSection.Populate(resp);
             FamilyMembersSection.Populate(resp);
+
+            ValidationMessage.Visibility = Visibility.Collapsed;
+            GoToStep(1);
         }
 
         private void OnServerStatusChanged(bool isReady, string message)
@@ -216,6 +219,59 @@ namespace SOLUM_UI.Views.Dialogs
 
         #region Step Navigation
 
+        private bool _isVerifyingPrimary = false;
+        private DateTime _lastPrimaryCheckTime = DateTime.MinValue;
+        private static readonly TimeSpan PrimaryCheckCooldown = TimeSpan.FromSeconds(2.5);
+
+        private async Task<bool> VerifyPrimaryStepAsync()
+        {
+            if (_isVerifyingPrimary) return false;
+
+            if (!PrimaryInfoSection.Validate(out var missing))
+            {
+                SetValidationMessage(missing);
+                return false;
+            }
+
+            if (PrimaryInfoSection.DuplicateCheckPassed)
+            {
+                return true;
+            }
+
+            var elapsed = DateTime.UtcNow - _lastPrimaryCheckTime;
+            if (elapsed < PrimaryCheckCooldown)
+            {
+                return false;
+            }
+
+            _isVerifyingPrimary = true;
+            _lastPrimaryCheckTime = DateTime.UtcNow;
+
+            bool prevEnabled = BtnNext != null ? BtnNext.IsEnabled : true;
+            object prevContent = BtnNext != null ? BtnNext.Content : "Next →";
+
+            if (BtnNext != null && ViewModel.CurrentStep == 1)
+            {
+                BtnNext.IsEnabled = false;
+                BtnNext.Content = "Checking...";
+            }
+
+            try
+            {
+                bool passed = await PrimaryInfoSection.CheckDuplicateAsync();
+                return passed;
+            }
+            finally
+            {
+                _isVerifyingPrimary = false;
+                if (BtnNext != null && ViewModel.CurrentStep == 1)
+                {
+                    BtnNext.IsEnabled = prevEnabled;
+                    BtnNext.Content = prevContent;
+                }
+            }
+        }
+
         private void Step1Header_Click(object sender, MouseButtonEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
@@ -225,25 +281,14 @@ namespace SOLUM_UI.Views.Dialogs
         private async void Step2Header_Click(object sender, MouseButtonEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
-            if (!PrimaryInfoSection.Validate(out var missing))
-            {
-                SetValidationMessage(missing);
-                return;
-            }
-            if (!await PrimaryInfoSection.CheckDuplicateAsync()) return;
+            if (!await VerifyPrimaryStepAsync()) return;
             GoToStep(2);
         }
 
         private async void Step3Header_Click(object sender, MouseButtonEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
-            if (!PrimaryInfoSection.Validate(out var missing1))
-            {
-                SetValidationMessage(missing1);
-                GoToStep(1);
-                return;
-            }
-            if (!await PrimaryInfoSection.CheckDuplicateAsync())
+            if (!await VerifyPrimaryStepAsync())
             {
                 GoToStep(1);
                 return;
@@ -262,12 +307,7 @@ namespace SOLUM_UI.Views.Dialogs
             ValidationMessage.Visibility = Visibility.Collapsed;
             if (ViewModel.CurrentStep == 1)
             {
-                if (!PrimaryInfoSection.Validate(out var missing))
-                {
-                    SetValidationMessage(missing);
-                    return;
-                }
-                if (!await PrimaryInfoSection.CheckDuplicateAsync()) return;
+                if (!await VerifyPrimaryStepAsync()) return;
                 GoToStep(2);
             }
             else if (ViewModel.CurrentStep == 2)
@@ -321,6 +361,15 @@ namespace SOLUM_UI.Views.Dialogs
 
             if (ViewModel.CurrentStep != targetStep)
             {
+                if (ViewModel.CurrentStep == 1 && targetStep > 1)
+                {
+                    if (!PrimaryInfoSection.Validate(out var missing) || !PrimaryInfoSection.DuplicateCheckPassed)
+                    {
+                        // Stay on step 1 to complete required identity verification
+                        PrimaryInfoSection.FocusField(fieldKey);
+                        return;
+                    }
+                }
                 GoToStep(targetStep);
             }
 
@@ -423,9 +472,25 @@ namespace SOLUM_UI.Views.Dialogs
             ValidationMessage.Visibility = Visibility.Visible;
         }
 
-        private void Save_Click(object sender, RoutedEventArgs e)
+        private async void Save_Click(object sender, RoutedEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
+            if (!PrimaryInfoSection.Validate(out var missingPrimary))
+            {
+                GoToStep(1);
+                SetValidationMessage(missingPrimary);
+                return;
+            }
+
+            if (!PrimaryInfoSection.DuplicateCheckPassed)
+            {
+                GoToStep(1);
+                if (!await VerifyPrimaryStepAsync())
+                {
+                    return;
+                }
+            }
+
             if (!ValidateAll(out var missing))
             {
                 SetValidationMessage(missing);
@@ -615,7 +680,6 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
             Close();
         }
 

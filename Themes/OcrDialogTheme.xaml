@@ -17,7 +17,7 @@
 
     <Style x:Key="FormBox" TargetType="TextBox">
         <Setter Property="Height" Value="44"/>
-        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="Padding" Value="12,0"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Foreground" Value="#111111"/>
         <Setter Property="BorderBrush" Value="#D0B8C0"/>
@@ -57,7 +57,7 @@
         <Setter Property="Background" Value="White"/>
         <Setter Property="BorderBrush" Value="#C0A0AA"/>
         <Setter Property="BorderThickness" Value="1.2"/>
-        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="Padding" Value="12,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -69,7 +69,7 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="6">
-                            <Grid Margin="10,0,28,0">
+                            <Grid Margin="12,0,28,0">
                                 <ContentPresenter x:Name="ContentSite"
                                                   Content="{TemplateBinding SelectionBoxItem}"
                                                   ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
@@ -172,7 +172,7 @@
                                                VerticalContentAlignment="Center"
                                                FontSize="13" Foreground="#111111"
                                                BorderThickness="0" Background="Transparent"
-                                               Padding="8,0"
+                                               Padding="12,0"
                                                FocusVisualStyle="{x:Null}"
                                                SelectionBrush="#702943"
                                                Focusable="True">
@@ -195,7 +195,7 @@
                                 </DatePickerTextBox.Style>
                             </DatePickerTextBox>
                             <TextBlock Text="DD/MM/YYYY" Foreground="#999999" FontSize="13"
-                                       Padding="8,0" VerticalAlignment="Center"
+                                       Padding="12,0" VerticalAlignment="Center"
                                        IsHitTestVisible="False" Opacity="0.7">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">

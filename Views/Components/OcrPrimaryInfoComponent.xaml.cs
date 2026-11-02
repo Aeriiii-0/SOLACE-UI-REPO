@@ -186,7 +186,7 @@ namespace SOLUM_UI.Views.Components
         {
             if (resp?.Fields != null && resp.Fields.TryGetValue(key, out var f))
             {
-                string val = f.Value ?? string.Empty;
+                string val = f.Value?.Trim() ?? string.Empty;
                 if (OcrService.IsOcrNotApplicable(val))
                     return string.Empty;
                 return val;
@@ -386,6 +386,8 @@ namespace SOLUM_UI.Views.Components
         {
             UpdateAge(DpBirthdate.SelectedDate);
             ClearDateError(DpBirthdate, ErrBirthdate);
+            DuplicateCheckPassed = false;
+            if (DuplicateBannerPanel != null) DuplicateBannerPanel.Visibility = Visibility.Collapsed;
         }
 
         private void DatePicker_DateValidationError(object sender, DatePickerDateValidationErrorEventArgs e)
@@ -452,10 +454,34 @@ namespace SOLUM_UI.Views.Components
             return ok;
         }
 
+        private void StartCheckingSpinner()
+        {
+            if (CheckingBannerPanel != null) CheckingBannerPanel.Visibility = Visibility.Visible;
+            if (CheckingSpinnerRotate != null)
+            {
+                var anim = new System.Windows.Media.Animation.DoubleAnimation(0, 360, TimeSpan.FromSeconds(1.2))
+                {
+                    RepeatBehavior = System.Windows.Media.Animation.RepeatBehavior.Forever
+                };
+                CheckingSpinnerRotate.BeginAnimation(RotateTransform.AngleProperty, anim);
+            }
+        }
+
+        private void StopCheckingSpinner()
+        {
+            if (CheckingSpinnerRotate != null)
+            {
+                CheckingSpinnerRotate.BeginAnimation(RotateTransform.AngleProperty, null);
+                CheckingSpinnerRotate.Angle = 0;
+            }
+            if (CheckingBannerPanel != null) CheckingBannerPanel.Visibility = Visibility.Collapsed;
+        }
+
         public async Task<bool> CheckDuplicateAsync()
         {
             if (DuplicateCheckPassed) return true;
 
+            StartCheckingSpinner();
             try
             {
                 string fName = TxtFirstName.Text.Trim();
@@ -516,6 +542,10 @@ namespace SOLUM_UI.Views.Components
             catch
             {
                 // If API/database check fails, allow user to proceed
+            }
+            finally
+            {
+                StopCheckingSpinner();
             }
 
             return true;

@@ -193,6 +193,33 @@
                 </StackPanel>
             </Border>
 
+            <!-- Subtle Verification Loading Banner -->
+            <Border x:Name="CheckingBannerPanel" Visibility="Collapsed" CornerRadius="8"
+                    Background="#FBF5F7" BorderBrush="#E2C6D0" BorderThickness="1.2"
+                    Padding="14,10" Margin="0,8,0,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Width="20" Height="20" CornerRadius="10" Background="#702943"
+                            RenderTransformOrigin="0.5,0.5" Margin="0,0,10,0" VerticalAlignment="Center">
+                        <Border.RenderTransform>
+                            <RotateTransform x:Name="CheckingSpinnerRotate" Angle="0"/>
+                        </Border.RenderTransform>
+                        <Viewbox Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Canvas Width="24" Height="24">
+                                <Path Fill="White" Data="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+                            </Canvas>
+                        </Viewbox>
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="Verifying primary information..." FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                        <TextBlock Text="Checking database records and verifying identity..." FontSize="11" Foreground="#886673"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
             <!-- Duplicate Banner in Step 1 -->
             <Border x:Name="DuplicateBannerPanel" Visibility="Collapsed" CornerRadius="10"
                     Background="#B71C1C" Padding="16,12" Margin="0,8,0,4">

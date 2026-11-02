@@ -335,7 +335,7 @@ namespace SOLUM_UI.Views.Components
         {
             if (resp?.Fields != null && resp.Fields.TryGetValue(key, out var f))
             {
-                string val = f.Value ?? string.Empty;
+                string val = f.Value?.Trim() ?? string.Empty;
                 if (OcrService.IsOcrNotApplicable(val))
                     return string.Empty;
                 return val;
