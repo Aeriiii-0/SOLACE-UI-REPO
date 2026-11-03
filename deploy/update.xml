@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <item>
     <!-- Bump this version number whenever you publish a new update on GitHub -->
-    <version>0.0.2</version>
+    <version>0.0.1</version>
 
     <!-- Direct download URL to the Release ZIP attached to the GitHub Release -->
-    <url>https://github.com/Aeriiii-0/SOLACE-UI-REPO/releases/download/v0.0.2/SOLUM-UI-v0.0.2.zip</url>
+    <url>https://github.com/Aeriiii-0/SOLACE-UI-REPO/releases/download/v0.0.1-beta/SOLUM-UI-v0.0.1-beta.zip</url>
 
     <!-- URL to the changelog HTML in your GitHub repository -->
     <changelog>https://raw.githubusercontent.com/Aeriiii-0/SOLACE-UI-REPO/master/deploy/changelog.html</changelog>
 
     <!-- Set to true if this update is mandatory and cannot be skipped -->
-    <mandatory mode="2">false</mandatory>
+    <mandatory mode="2">true</mandatory>
 </item>

@@ -15,6 +15,7 @@ namespace SOLUM_UI.Views.Dialogs
         private readonly UpdateInfoEventArgs _args;
         private WebClient _webClient;
         private string _downloadedFilePath;
+        private bool _isUpdateInitiated = false;
 
         public UpdateAvailableDialog(UpdateInfoEventArgs args)
         {
@@ -70,12 +71,23 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
-            CancelAndClose();
+            ExitApplication();
         }
 
-        private void BtnRemindLater_Click(object sender, RoutedEventArgs e)
+        private void BtnExitApp_Click(object sender, RoutedEventArgs e)
         {
-            Close();
+            ExitApplication();
+        }
+
+        private void ExitApplication()
+        {
+            if (_webClient != null && _webClient.IsBusy)
+            {
+                _webClient.CancelAsync();
+            }
+            CleanTempFile();
+            Application.Current.Shutdown();
+            Environment.Exit(0);
         }
 
         private void BtnDownloadNow_Click(object sender, RoutedEventArgs e)
@@ -90,8 +102,8 @@ namespace SOLUM_UI.Views.Dialogs
         {
             if (string.IsNullOrWhiteSpace(_args.DownloadURL))
             {
-                MessageBox.Show("Unable to find download package for this update.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                Close();
+                MessageBox.Show("Unable to find download package for this update. SOLUM UI will now exit.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ExitApplication();
                 return;
             }
 
@@ -113,8 +125,8 @@ namespace SOLUM_UI.Views.Dialogs
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to begin download: {ex.Message}", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                MessageBox.Show($"Failed to begin download: {ex.Message}. SOLUM UI will now exit.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                ExitApplication();
             }
         }
 
@@ -153,9 +165,20 @@ namespace SOLUM_UI.Views.Dialogs
 
                 if (e.Error != null)
                 {
-                    MessageBox.Show($"Failed to download update: {e.Error.Message}", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    CleanTempFile();
-                    Close();
+                    var retry = MessageBox.Show(
+                        $"Failed to download the mandatory update: {e.Error.Message}\n\nWould you like to retry the download?\n(Selecting 'No' will exit SOLUM UI)",
+                        "Update Error",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Error);
+
+                    if (retry == MessageBoxResult.Yes)
+                    {
+                        StartDownload();
+                    }
+                    else
+                    {
+                        ExitApplication();
+                    }
                     return;
                 }
 
@@ -173,20 +196,46 @@ namespace SOLUM_UI.Views.Dialogs
         {
             try
             {
+                _isUpdateInitiated = true;
                 string appDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
-                string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                var currentProc = Process.GetCurrentProcess();
+                string exePath = currentProc.MainModule.FileName;
+                int currentPid = currentProc.Id;
                 string extension = Path.GetExtension(_downloadedFilePath).ToLowerInvariant();
 
                 if (extension == ".zip")
                 {
-                    // Create an atomic background apply-and-restart batch script
+                    // Create an atomic background apply-and-restart batch script that waits for PID exit
                     string batPath = Path.Combine(Path.GetTempPath(), $"solum_apply_{Guid.NewGuid():N}.bat");
                     string batContent = $@"@echo off
+setlocal
+set ""TARGET_PID={currentPid}""
+
+:: Wait for application process to completely terminate and release file locks
+:wait_loop
+tasklist /fi ""PID eq %TARGET_PID%"" 2>nul | findstr /i ""%TARGET_PID%"" >nul
+if not errorlevel 1 (
+    timeout /t 1 /nobreak >nul
+    goto wait_loop
+)
 timeout /t 1 /nobreak >nul
+
+:: Extract update package with retry in case DLL locks linger
+set RETRY_COUNT=0
+:extract_loop
 powershell -NoProfile -ExecutionPolicy Bypass -Command ""Expand-Archive -Path '{_downloadedFilePath}' -DestinationPath '{appDir}' -Force""
+if %ERRORLEVEL% neq 0 (
+    set /a RETRY_COUNT+=1
+    if %RETRY_COUNT% leq 5 (
+        timeout /t 1 /nobreak >nul
+        goto extract_loop
+    )
+)
+
+:: Relaunch updated application
 start """" ""{exePath}""
-del ""{_downloadedFilePath}""
-del ""%~f0""
+del ""{_downloadedFilePath}"" 2>nul
+del ""%~f0"" 2>nul
 ";
                     File.WriteAllText(batPath, batContent);
 
@@ -213,27 +262,27 @@ del ""%~f0""
 
                 // Shutdown cleanly to release file locks on the running executable and DLLs
                 Application.Current.Shutdown();
+                Environment.Exit(0);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Could not apply update: {ex.Message}", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
+                MessageBox.Show($"Could not apply update: {ex.Message}. SOLUM UI will now exit.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                ExitApplication();
             }
         }
 
         private void BtnCancelDownload_Click(object sender, RoutedEventArgs e)
         {
-            CancelAndClose();
-        }
+            var result = MessageBox.Show(
+                "Cancelling the update will close SOLUM UI, as this update is mandatory to continue.\n\nAre you sure you want to exit?",
+                "Mandatory Update",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
 
-        private void CancelAndClose()
-        {
-            if (_webClient != null && _webClient.IsBusy)
+            if (result == MessageBoxResult.Yes)
             {
-                _webClient.CancelAsync();
+                ExitApplication();
             }
-            CleanTempFile();
-            Close();
         }
 
         private void CleanTempFile()
@@ -250,9 +299,10 @@ del ""%~f0""
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            if (_webClient != null && _webClient.IsBusy)
+            if (!_isUpdateInitiated)
             {
-                _webClient.CancelAsync();
+                // Prevent bypassing the mandatory update dialog via Alt+F4 or window closing
+                ExitApplication();
             }
             base.OnClosing(e);
         }

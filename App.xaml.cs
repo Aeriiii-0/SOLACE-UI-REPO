@@ -53,6 +53,12 @@ namespace SOLUM_UI
                 if (string.IsNullOrWhiteSpace(updateUrl))
                     return;
 
+                // Cache-buster for GitHub raw CDN so clients get instant update detection without waiting 5 minutes
+                if (updateUrl.Contains("raw.githubusercontent.com"))
+                {
+                    updateUrl += (updateUrl.Contains("?") ? "&" : "?") + "t=" + DateTime.UtcNow.Ticks;
+                }
+
                 AutoUpdater.ReportErrors = false; // Do not show error alert if internet/server is unreachable
                 AutoUpdater.AppCastURL = updateUrl;
 
@@ -73,6 +79,10 @@ namespace SOLUM_UI
                 Current.Dispatcher.Invoke(() =>
                 {
                     var dlg = new UpdateAvailableDialog(args);
+                    if (Current.MainWindow != null && Current.MainWindow.IsVisible)
+                    {
+                        dlg.Owner = Current.MainWindow;
+                    }
                     dlg.ShowDialog();
                 });
             }
