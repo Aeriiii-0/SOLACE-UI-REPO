@@ -1,4 +1,4 @@
-﻿<Page x:Class="SOLUM_UI.SoloParentRecordsPage"
+<Page x:Class="SOLUM_UI.SoloParentRecordsPage"
 
 
 
@@ -1234,63 +1234,7 @@
 
 
 
-                            <Thumb x:Name="PART_HeaderGripper"
-
-
-
-                                   HorizontalAlignment="Right"
-
-
-
-                                   Width="6" Cursor="SizeWE" Opacity="0">
-
-
-
-                                <Thumb.Style>
-
-
-
-                                    <Style TargetType="Thumb">
-
-
-
-                                        <Setter Property="Template">
-
-
-
-                                            <Setter.Value>
-
-
-
-                                                <ControlTemplate TargetType="Thumb">
-
-
-
-                                                    <Border Background="Transparent"/>
-
-
-
-                                                </ControlTemplate>
-
-
-
-                                            </Setter.Value>
-
-
-
-                                        </Setter>
-
-
-
-                                    </Style>
-
-
-
-                                </Thumb.Style>
-
-
-
-                            </Thumb>
+                            
 
 
 
@@ -2297,11 +2241,11 @@
 
 
 
-                                                <GridView ColumnHeaderContainerStyle="{StaticResource GvHeader}">
+                                                <GridView AllowsColumnReorder="False" ColumnHeaderContainerStyle="{StaticResource GvHeader}">
 
                             <!-- Col 0: NAME (primary bold, subtitle with ID) -->
 
-                            <GridViewColumn x:Name="ColName" Header="NAME" Width="240">
+                            <GridViewColumn x:Name="ColName" Header="NAME" Width="220">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="12,11">
@@ -2378,7 +2322,7 @@
 
 
                                                         <!-- Col: APPLICATION DATE -->
-                            <GridViewColumn x:Name="ColApplicationDate" Header="APPLICATION DATE" Width="140" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
+                            <GridViewColumn x:Name="ColApplicationDate" Header="APPLICATION DATE" Width="135" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColApplicationDate}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,11">
@@ -2390,7 +2334,7 @@
 
                             <!-- Col 6: VALID UNTIL -->
 
-                            <GridViewColumn x:Name="ColChildren" Header="VALID UNTIL" Width="145" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
+                            <GridViewColumn x:Name="ColChildren" Header="VALID UNTIL" Width="135" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
 
                                 <GridViewColumn.CellTemplate>
 
@@ -2412,7 +2356,7 @@
 
                             <!-- Col 7: STATUS (semantic pill badge with status dot) -->
 
-                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="115" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
+                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="120" HeaderContainerStyle="{StaticResource GvHeaderCenter}">
 
                                 <GridViewColumn.CellTemplate>
 
@@ -2444,7 +2388,7 @@
 
                             <!-- Col 8: ACTIONS -->
 
-                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="105" HeaderContainerStyle="{StaticResource GvHeaderActions}">
+                            <GridViewColumn x:Name="ColActions" Header="ACTIONS" Width="110" HeaderContainerStyle="{StaticResource GvHeaderActions}">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColActions}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,7">
