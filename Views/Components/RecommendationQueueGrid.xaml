@@ -109,7 +109,7 @@
                 </Grid.OpacityMask>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="42"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- ListView (Row 0: Column headers start immediately at top) -->
@@ -171,25 +171,68 @@
                     </ListView.View>
                 </ListView>
 
-                <!-- Pagination Footer (Row 1: Combined live stats with page numbers) -->
-                <Border Grid.Row="1" Background="#FAFAFA" BorderBrush="#EBD8DE" BorderThickness="0,1,0,0" Height="42" Padding="14,0">
+                <!-- Integrated Card Footer for Pagination -->
+                <Border Grid.Row="1" Background="#FAF6F8" BorderBrush="#EFE4E8" BorderThickness="0,1.2,0,0" Padding="18,10">
                     <Grid VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Ellipse Width="7" Height="7" Fill="#27AE60" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="{Binding RecommendationsSummary}" FontSize="11" Foreground="#334155" VerticalAlignment="Center"/>
-                            <TextBlock Text=" • " FontSize="11" Foreground="#CBD5E1" Margin="4,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding QueuePageSummary}" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
+                            <Ellipse Width="6" Height="6" Fill="#22C55E" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="{Binding RecommendationsSummary}" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
+                            <TextBlock Text=" • " FontFamily="Segoe UI" FontSize="12" Foreground="#CBD5E1" Margin="4,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding QueuePageSummary}" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Style="{StaticResource PagerBtn}" Margin="0,0,6,0" Command="{Binding QueuePrevPageCommand}" IsEnabled="{Binding CanQueuePrevPage}" ToolTip="Previous page">
-                                <TextBlock Text="‹ Previous" FontSize="10.5" FontWeight="SemiBold"/>
+                        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Button Width="105" Height="34" Cursor="Hand" Command="{Binding QueuePrevPageCommand}" IsEnabled="{Binding CanQueuePrevPage}" ToolTip="Previous page" Margin="0,0,10,0">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="White" CornerRadius="17" BorderBrush="#E0D0D5" BorderThickness="1.5">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
+                                                      Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
+                                                <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
+                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
                             </Button>
-                            <Border Background="#F1F5F9" CornerRadius="6" Padding="8,4" Margin="0,0,6,0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding QueuePageNumberLabel}" FontSize="10.5" FontWeight="Bold" Foreground="#702943"/>
+                            <Border Background="#FAF2F5" CornerRadius="14" Padding="14,6"
+                                    BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding QueuePageNumberLabel}" FontFamily="Segoe UI" FontSize="12"
+                                           FontWeight="SemiBold" Foreground="#702943"/>
                             </Border>
-                            <Button Style="{StaticResource PagerBtn}" Command="{Binding QueueNextPageCommand}" IsEnabled="{Binding CanQueueNextPage}" ToolTip="Next page">
-                                <TextBlock Text="Next ›" FontSize="10.5" FontWeight="SemiBold"/>
+                            <Button Width="105" Height="34" Cursor="Hand" Command="{Binding QueueNextPageCommand}" IsEnabled="{Binding CanQueueNextPage}" ToolTip="Next page">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="White" CornerRadius="17" BorderBrush="#E0D0D5" BorderThickness="1.5">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                                <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
+                                                      Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
+                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
                             </Button>
                         </StackPanel>
                     </Grid>

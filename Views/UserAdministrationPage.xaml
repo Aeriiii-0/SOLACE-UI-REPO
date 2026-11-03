@@ -609,11 +609,20 @@
             <!-- Row 2: Unified Modern Table Card -->
             <Border Grid.Row="2" Margin="24,4,24,20" Background="White"
                     BorderBrush="#E8D4DA" BorderThickness="1.5" CornerRadius="14"
-                    ClipToBounds="True" VerticalAlignment="Stretch">
+                    VerticalAlignment="Stretch">
                 <Border.Effect>
                     <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="2" Opacity="0.06"/>
                 </Border.Effect>
-                <Grid>
+                <Grid x:Name="UsersClipGrid">
+                    <Grid.OpacityMask>
+                        <VisualBrush Stretch="None" AlignmentX="Left" AlignmentY="Top">
+                            <VisualBrush.Visual>
+                                <Border Background="Black" CornerRadius="12.5"
+                                        Width="{Binding ActualWidth, ElementName=UsersClipGrid}"
+                                        Height="{Binding ActualHeight, ElementName=UsersClipGrid}"/>
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </Grid.OpacityMask>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
@@ -639,22 +648,22 @@
                                 <ColumnDefinition Width="110"/>
                                 <ColumnDefinition Width="130"/>
                             </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Padding="20,0,12,0">
+                            <Border Grid.Column="0" Padding="20,0,12,0" BorderBrush="#EBD8DE" BorderThickness="0,0,1,0">
                                 <TextBlock Text="USER" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Left"/>
                             </Border>
-                            <Border Grid.Column="1" Padding="12,0">
+                            <Border Grid.Column="1" Padding="12,0" BorderBrush="#EBD8DE" BorderThickness="0,0,1,0">
                                 <TextBlock Text="ROLE" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Left"/>
                             </Border>
-                            <Border Grid.Column="2" Padding="12,0">
+                            <Border Grid.Column="2" Padding="12,0" BorderBrush="#EBD8DE" BorderThickness="0,0,1,0">
                                 <TextBlock Text="ASSIGNED JURISDICTION" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Left"/>
                             </Border>
-                            <Border Grid.Column="3" Padding="12,0">
+                            <Border Grid.Column="3" Padding="12,0" BorderBrush="#EBD8DE" BorderThickness="0,0,1,0">
                                 <TextBlock Text="CONTACT" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Left"/>
                             </Border>
-                            <Border Grid.Column="4" Padding="8,0">
+                            <Border Grid.Column="4" Padding="8,0" BorderBrush="#EBD8DE" BorderThickness="0,0,1,0">
                                 <TextBlock Text="STATUS" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
                             </Border>
-                            <Border Grid.Column="5" Padding="8,0">
+                            <Border Grid.Column="5" Padding="8,0" BorderThickness="0">
                                 <TextBlock Text="ACTIONS" Style="{StaticResource TableHeaderText}" HorizontalAlignment="Center"/>
                             </Border>
                         </Grid>
@@ -687,7 +696,7 @@
                                                         <Setter TargetName="Bg" Property="Background" Value="#FDF6F8"/>
                                                     </Trigger>
                                                     <Trigger Property="IsSelected" Value="True">
-                                                        <Setter TargetName="Bg" Property="Background" Value="#FAF0F3"/>
+                                                        <Setter TargetName="Bg" Property="Background" Value="#F5E2E8"/>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
@@ -708,7 +717,7 @@
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Col 0: User Identity -->
-                                        <Border Grid.Column="0" Padding="20,10,12,10">
+                                        <Border Grid.Column="0" Padding="20,10,12,10" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0">
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                 <Border Width="38" Height="38" CornerRadius="19"
                                                         Background="#FAF0F3" BorderBrush="#E8D4DA" BorderThickness="1.5"
@@ -726,7 +735,7 @@
                                         </Border>
 
                                         <!-- Col 1: Role Badge -->
-                                        <Border Grid.Column="1" Padding="12,10">
+                                        <Border Grid.Column="1" Padding="12,10" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0">
                                             <Border CornerRadius="12" Background="{Binding RoleBadgeColor}"
                                                     BorderBrush="{Binding RoleBadgeBorder}" BorderThickness="1"
                                                     Padding="9,4" VerticalAlignment="Center" HorizontalAlignment="Left">
@@ -742,7 +751,7 @@
                                         </Border>
 
                                         <!-- Col 2: Assigned Jurisdiction / Area -->
-                                        <Border Grid.Column="2" Padding="12,10">
+                                        <Border Grid.Column="2" Padding="12,10" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0">
                                             <Border CornerRadius="6" Background="{Binding ScopeBadgeBackground}"
                                                     BorderBrush="{Binding ScopeBadgeBorder}" BorderThickness="1"
                                                     Padding="8,4" VerticalAlignment="Center" HorizontalAlignment="Left">
@@ -759,7 +768,7 @@
                                         </Border>
 
                                         <!-- Col 3: Contact Number -->
-                                        <Border Grid.Column="3" Padding="12,10">
+                                        <Border Grid.Column="3" Padding="12,10" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0">
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                 <Path Data="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z"
                                                       Fill="#94A3B8" Stretch="Uniform" Width="11" Height="11" Margin="0,0,6,0" VerticalAlignment="Center"
@@ -771,7 +780,7 @@
                                         </Border>
 
                                         <!-- Col 4: Status Badge -->
-                                        <Border Grid.Column="4" Padding="8,10">
+                                        <Border Grid.Column="4" Padding="8,10" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0">
                                             <Border CornerRadius="12" Background="{Binding StatusBadgeColor}"
                                                     BorderBrush="{Binding StatusBadgeBorder}" BorderThickness="1"
                                                     Padding="9,3.5" VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -784,7 +793,7 @@
                                         </Border>
 
                                         <!-- Col 5: Row Actions -->
-                                        <Border Grid.Column="5" Padding="8,10">
+                                        <Border Grid.Column="5" Padding="8,10" BorderThickness="0">
                                             <StackPanel Orientation="Horizontal"
                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <!-- Edit User Primary Button -->
@@ -803,7 +812,7 @@
                                                             </Border>
                                                             <ControlTemplate.Triggers>
                                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter TargetName="Bg" Property="Background" Value="#FAF0F3"/>
+                                                                    <Setter TargetName="Bg" Property="Background" Value="#F5E2E8"/>
                                                                     <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
                                                                 </Trigger>
                                                                 <Trigger Property="IsEnabled" Value="False">
@@ -835,7 +844,7 @@
                                                             </Border>
                                                             <ControlTemplate.Triggers>
                                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter TargetName="Bg" Property="Background" Value="#FAF0F3"/>
+                                                                    <Setter TargetName="Bg" Property="Background" Value="#F5E2E8"/>
                                                                     <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
                                                                 </Trigger>
                                                                 <Trigger Property="IsEnabled" Value="False">
@@ -944,13 +953,14 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                                                        <!-- Dynamic Record Count on Left (Hidden) -->
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Visibility="Collapsed">
+                            <!-- Dynamic Record Count Summary on Left -->
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Ellipse Width="6" Height="6" Fill="#22C55E" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock x:Name="TxtUsersPageSummary" Text="Showing 0 of 0" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="TxtUsersSummary" Visibility="Collapsed"/>
-                                <TextBlock x:Name="TxtUsersPageSummary" Visibility="Collapsed"/>
                             </StackPanel>
 
-                            <!-- Dead-Center Navigation Across the Full Width -->
+                            <!-- Centered Navigation Controls (Centered across entire width) -->
                             <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Button x:Name="BtnPrevPage" Width="105" Height="34" Cursor="Hand" Click="BtnPrevPage_Click" Margin="0,0,10,0">
                                     <Button.Template>
@@ -974,10 +984,10 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                                <Border Background="#FAF2F5" CornerRadius="17" Height="34" Padding="18,0"
-                                        BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="0,0,10,0" VerticalAlignment="Center">
+                                <Border Background="#FAF2F5" CornerRadius="14" Padding="14,6"
+                                        BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
                                     <TextBlock x:Name="TxtPageInfo" Text="Page 1 of 1" FontFamily="Segoe UI" FontSize="12"
-                                               FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                                               FontWeight="SemiBold" Foreground="#702943"/>
                                 </Border>
                                 <Button x:Name="BtnNextPage" Width="105" Height="34" Cursor="Hand" Click="BtnNextPage_Click">
                                     <Button.Template>
