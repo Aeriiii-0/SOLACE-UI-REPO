@@ -1,4 +1,4 @@
-import os
+﻿import os
 os.environ["PADDLE_PDX_ENABLE_MKLDNN_BYDEFAULT"] = "False"
 os.environ["PADDLE_PDX_USE_PIR_TRT"] = "False"
 os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
@@ -20,6 +20,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 try:
     paddle.set_flags({"FLAGS_enable_pir_api": 0, "FLAGS_use_mkldnn": 0})
+except Exception:
+    pass
+
+try:
+    import paddlex.utils.deps
+    paddlex.utils.deps.is_extra_available = lambda *args, **kwargs: True
+    paddlex.utils.deps.require_extra = lambda *args, **kwargs: None
+    paddlex.utils.deps.is_dep_available = lambda *args, **kwargs: True
 except Exception:
     pass
 
