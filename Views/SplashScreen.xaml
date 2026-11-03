@@ -1,4 +1,4 @@
-<Window x:Class="SOLUM_UI.SplashScreenWindow"
+﻿<Window x:Class="SOLUM_UI.SplashScreenWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None"
@@ -86,7 +86,7 @@
                 </StackPanel>
                 
                 <!-- Version Info -->
-                <TextBlock Text="Version 1.0.0" FontFamily="Segoe UI" FontSize="10"
+                <TextBlock x:Name="TxtAppVersion" Text="Version 0.0.1-beta" FontFamily="Segoe UI" FontSize="10"
                           Foreground="#999999" TextAlignment="Center" Margin="0,40,0,0"/>
             </StackPanel>
         </Border>

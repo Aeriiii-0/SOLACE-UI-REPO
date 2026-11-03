@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <item>
     <!-- Bump this version number whenever you publish a new update on GitHub -->
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 
     <!-- Direct download URL to the Release ZIP attached to the GitHub Release -->
-    <url>https://github.com/Aeriiii-0/SOLACE-UI-REPO/releases/download/v0.0.1-beta/SOLUM-UI-v0.0.1-beta.zip</url>
+    <url>https://github.com/Aeriiii-0/SOLACE-UI-REPO/releases/download/v0.0.2-beta/SOLUM-UI-v0.0.2-beta.zip</url>
 
     <!-- URL to the changelog HTML in your GitHub repository -->
     <changelog>https://raw.githubusercontent.com/Aeriiii-0/SOLACE-UI-REPO/master/deploy/changelog.html</changelog>

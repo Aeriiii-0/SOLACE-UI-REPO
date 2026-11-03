@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Reflection;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
 
@@ -42,6 +43,9 @@ namespace SOLUM_UI
             TxtInitial.Text = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "U";
 
             TxtSessionStart.Text = _sessionStart.ToString("MMM d, yyyy  h:mm tt");
+            var infoVersion = Assembly.GetExecutingAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            string appVersion = !string.IsNullOrWhiteSpace(infoVersion) ? ("v" + infoVersion) : ("v" + Assembly.GetExecutingAssembly().GetName().Version);
+            TxtSystemVersion.Text = "SOLUM UI " + appVersion;
         }
 
         /// <summary>Show the change password form when button is clicked.</summary>
