@@ -13,6 +13,7 @@ using System.Windows.Media;
 using SOLUM_UI.Models;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services.Api;
+using SOLUM_UI.Services;
 using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
@@ -113,7 +114,7 @@ namespace SOLUM_UI
                 N(nameof(BirthdateDate));
                 if (value.HasValue && value.Value != DateTime.MinValue)
                 {
-                    _birthdate = value.Value.ToString("dd/MM/yyyy");
+                    _birthdate = value.Value.ToString("MM/dd/yyyy");
                     N(nameof(Birthdate));
                     int calcAge = SOLUM_UI.Services.OcrService.CalculateAge(value.Value);
                     if (calcAge >= 0 && calcAge <= 120) { _age = calcAge.ToString(); N(nameof(Age)); N(nameof(AgeDisplay)); }
@@ -266,11 +267,15 @@ namespace SOLUM_UI
                 if (BirthdateDate.HasValue && BirthdateDate.Value != DateTime.MinValue)
                     return BirthdateDate.Value.ToString("MM/dd/yyyy");
                 if (!string.IsNullOrWhiteSpace(Birthdate))
+                {
+                    if (OcrService.TryParseOcrDate(Birthdate, out DateTime dt) && dt != DateTime.MinValue)
+                        return dt.ToString("MM/dd/yyyy");
                     return Birthdate;
+                }
                 return "—";
             }
         }
-        public string EducationDisplay => !string.IsNullOrWhiteSpace(EducationEmployment) ? EducationEmployment : "Not specified";
+        public string EducationDisplay => !string.IsNullOrWhiteSpace(EducationEmployment) ? EducationEmployment : "None";
         public string IncomeDisplay
         {
             get
@@ -721,6 +726,66 @@ namespace SOLUM_UI
             {
                 PnlNoFamilyMembers.Visibility = _familyRowData.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             }
+            if (PnlAgeThresholdWarning != null)
+            {
+                PnlAgeThresholdWarning.Visibility = (_familyRowData.Count > 0 && AreAllDependentsOverAge())
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
+        /// Checks whether all registered dependents/children are aged 23 or older without declared special needs.
+        /// Under RA 11861, qualifying dependents must be under 23, or of any age if living with disability/special needs.
+        /// </summary>
+        public bool AreAllDependentsOverAge()
+        {
+            if (_familyRowData == null || _familyRowData.Count == 0) return false;
+
+            var dependents = _familyRowData
+                .Where(r => r != null && !string.IsNullOrWhiteSpace(r.MemberName) && IsChildOrDependent(r.Relationship))
+                .ToList();
+
+            if (dependents.Count == 0) return false;
+
+            // A dependent is qualifying if they are <= 22 or have declared special needs/disability
+            bool hasQualifyingDependent = dependents.Any(r =>
+            {
+                if (r.HasSpecialNeeds) return true;
+                int age = GetMemberAge(r);
+                return age >= 0 && age <= 22;
+            });
+
+            return !hasQualifyingDependent;
+        }
+
+        private static int GetMemberAge(FamilyMemberRow r)
+        {
+            if (r == null) return 0;
+            if (r.BirthdateDate.HasValue && r.BirthdateDate.Value != DateTime.MinValue)
+            {
+                int calc = SOLUM_UI.Services.OcrService.CalculateAge(r.BirthdateDate.Value);
+                if (calc >= 0 && calc <= 120) return calc;
+            }
+            if (int.TryParse(r.Age, out int parsedAge))
+            {
+                return parsedAge;
+            }
+            return 0;
+        }
+
+        public static bool IsChildOrDependent(string relationship)
+        {
+            if (string.IsNullOrWhiteSpace(relationship)) return true; // Default assumed dependent
+            string r = relationship.Trim().ToLowerInvariant();
+            if (r.Contains("parent") || r.Contains("mother") || r.Contains("father") ||
+                r.Contains("grandparent") || r.Contains("grandfather") || r.Contains("grandmother") ||
+                r.Contains("spouse") || r.Contains("husband") || r.Contains("wife") ||
+                r.Contains("sibling") || r.Contains("brother") || r.Contains("sister"))
+            {
+                return false;
+            }
+            return true;
         }
 
         private void BtnAddFamilyMember_Click(object sender, RoutedEventArgs e)
@@ -848,6 +913,15 @@ namespace SOLUM_UI
                 ToastNotification.Show("Validation Required", "Please select the member's sex.", ToastType.Warning);
                 CmbMemberSex.Focus();
                 return;
+            }
+
+            if (!DpMemberDob.SelectedDate.HasValue)
+            {
+                var tb = DpMemberDob.Template?.FindName("PART_TextBox", DpMemberDob) as System.Windows.Controls.Primitives.DatePickerTextBox;
+                if (tb != null && !string.IsNullOrWhiteSpace(tb.Text) && SOLUM_UI.Services.OcrService.TryParseOcrDate(tb.Text, out DateTime dtParsed) && dtParsed.Year >= 1900 && dtParsed.Date <= DateTime.Today)
+                {
+                    DpMemberDob.SelectedDate = dtParsed;
+                }
             }
 
             if (!DpMemberDob.SelectedDate.HasValue)
@@ -1687,7 +1761,6 @@ namespace SOLUM_UI
                 if (!row.BirthdateDate.HasValue && string.IsNullOrWhiteSpace(row.Birthdate)) rowMissing.Add("Birthdate");
                 if (string.IsNullOrWhiteSpace(row.CivilStatus))                              rowMissing.Add("Civil Status");
                 if (string.IsNullOrWhiteSpace(row.Relationship))                             rowMissing.Add("Relationship");
-                if (string.IsNullOrWhiteSpace(row.EducationEmployment)) rowMissing.Add("Education/Employment");
                 if (string.IsNullOrWhiteSpace(row.Income))              rowMissing.Add("Income");
 
                 if (rowMissing.Count > 0)
@@ -1997,6 +2070,25 @@ namespace SOLUM_UI
             }
 
             if (!ValidateFields()) return;
+
+            // Dependent age threshold warning (Option C: alert admin if all dependents are 23+)
+            if (AreAllDependentsOverAge())
+            {
+                bool proceed = ActionConfirmDialog.Show(
+                    title: "Dependent Age Threshold Warning",
+                    message: "All registered dependents are 23 or older without declared special needs.\n\nUnder the Solo Parents Welfare Act (RA 11861), a solo parent must have at least one qualifying dependent (under 23, or of any age if living with a disability).\n\nThis parent may no longer qualify for subsidy assistance. Consider updating their eligibility status in the Subsidy module.\n\nDo you want to proceed with saving this record?",
+                    confirmText: "Proceed & Save",
+                    cancelText: "Review Dependents",
+                    theme: ConfirmThemeType.Warning,
+                    owner: this
+                );
+
+                if (!proceed)
+                {
+                    GoToStep(3); // Navigate straight to family composition step
+                    return;
+                }
+            }
 
             var preview = BuildRecord();
             var fields  = BuildConfirmFields(preview);
@@ -2427,6 +2519,17 @@ namespace SOLUM_UI
             }
             else
             {
+                if (AreAllDependentsOverAge())
+                {
+                    list.Add(new ConfirmField
+                    {
+                        Section   = sec,
+                        Label     = "Eligibility Notice",
+                        NewValue  = "All registered dependents are 23 or older. May no longer qualify for subsidy assistance under RA 11861.",
+                        OldValue  = null,
+                        IsChanged = false
+                    });
+                }
                 for (int i = 0; i < newCount; i++)
                 {
                     var m = r.FamilyMembers[i];

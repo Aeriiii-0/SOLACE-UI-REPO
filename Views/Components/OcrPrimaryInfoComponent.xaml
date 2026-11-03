@@ -19,7 +19,7 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <TextBlock Text="Date of Application:" FontSize="11" FontWeight="SemiBold"
                                            Foreground="#222222" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <Border BorderBrush="#7B1426" BorderThickness="1.5" CornerRadius="6" Background="White" Width="180" Height="44" Padding="8,0,8,0">
+                                <Border BorderBrush="#7B1426" BorderThickness="1.5" CornerRadius="8" Background="White" Width="180" Height="44">
                                     <DatePicker x:Name="DpDateOfApplication" Style="{StaticResource FormDateSm}"
                                                 Tag="application_date" GotFocus="Field_GotFocus"
                                                 GotKeyboardFocus="Field_GotFocus"
@@ -144,7 +144,7 @@
                                     <TextBlock x:Name="TxtConf_Birthdate" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
-                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
+                            <Border x:Name="Border_Birthdate" BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="8" Background="White">
                                 <DatePicker x:Name="DpBirthdate" Style="{StaticResource FormDate}"
                                             Tag="birthdate" GotFocus="Field_GotFocus"
                                             GotKeyboardFocus="Field_GotFocus"
@@ -191,6 +191,33 @@
                         </StackPanel>
                     </Grid>
                 </StackPanel>
+            </Border>
+
+            <!-- Subtle Verification Loading Banner -->
+            <Border x:Name="CheckingBannerPanel" Visibility="Collapsed" CornerRadius="8"
+                    Background="#FBF5F7" BorderBrush="#E2C6D0" BorderThickness="1.2"
+                    Padding="14,10" Margin="0,8,0,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Width="20" Height="20" CornerRadius="10" Background="#702943"
+                            RenderTransformOrigin="0.5,0.5" Margin="0,0,10,0" VerticalAlignment="Center">
+                        <Border.RenderTransform>
+                            <RotateTransform x:Name="CheckingSpinnerRotate" Angle="0"/>
+                        </Border.RenderTransform>
+                        <Viewbox Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Canvas Width="24" Height="24">
+                                <Path Fill="White" Data="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+                            </Canvas>
+                        </Viewbox>
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="Verifying primary information..." FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                        <TextBlock Text="Checking database records and verifying identity..." FontSize="11" Foreground="#886673"/>
+                    </StackPanel>
+                </Grid>
             </Border>
 
             <!-- Duplicate Banner in Step 1 -->

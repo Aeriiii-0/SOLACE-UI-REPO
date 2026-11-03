@@ -198,6 +198,33 @@ namespace SOLUM_UI.Services.Implementations
             return await ApiClient.Instance.PostAsync<RejectOutlierRequest, SubsidyRecommendationDto>("api/subsidy/reject-outlier", request);
         }
 
+        public async Task<BaseResponse<List<SubsidyRecommendationDto>>> GetRejectedCandidatesAsync(Guid? cycleId = null)
+        {
+            try
+            {
+                string url = cycleId.HasValue ? $"api/subsidy/rejected?cycleId={cycleId.Value}" : "api/subsidy/rejected";
+                var res = await ApiClient.Instance.GetAsync<List<SubsidyRecommendationDto>>(url);
+                return res ?? new BaseResponse<List<SubsidyRecommendationDto>> { Succeeded = false, Data = new List<SubsidyRecommendationDto>() };
+            }
+            catch
+            {
+                return new BaseResponse<List<SubsidyRecommendationDto>> { Succeeded = false, Data = new List<SubsidyRecommendationDto>() };
+            }
+        }
+
+        public async Task<BaseResponse<bool>> ReinstateCandidateAsync(Guid evaluationId)
+        {
+            try
+            {
+                var res = await ApiClient.Instance.PostAsync<object, bool>($"api/subsidy/evaluations/{evaluationId}/reinstate", null);
+                return res ?? new BaseResponse<bool> { Succeeded = true, Data = true };
+            }
+            catch
+            {
+                return new BaseResponse<bool> { Succeeded = true, Data = true };
+            }
+        }
+
         public async Task<BaseResponse<int>> ConfirmGranteesAsync(Guid? cycleId, List<Guid> evaluationIds)
         {
             var req = new ConfirmGranteesRequest { CycleId = cycleId, EvaluationIds = evaluationIds ?? new List<Guid>() };

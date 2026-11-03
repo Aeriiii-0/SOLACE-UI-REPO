@@ -31,7 +31,6 @@ namespace SOLUM_UI.ViewModels
         private double _warmupProgressPercent = 15;
         private bool _canRetryWarmup = false;
         private bool _canDismissWarmup = false;
-        private string _scannerStatusText = "Status: Scanner Ready (300 DPI)";
 
         public OcrScanDialogViewModel()
         {
@@ -253,18 +252,6 @@ namespace SOLUM_UI.ViewModels
             }
         }
 
-        public string ScannerStatusText
-        {
-            get => _scannerStatusText;
-            set
-            {
-                if (_scannerStatusText != value)
-                {
-                    _scannerStatusText = value;
-                    OnPropertyChanged(nameof(ScannerStatusText));
-                }
-            }
-        }
 
         public void SetConfidence(double confidence, string rating)
         {

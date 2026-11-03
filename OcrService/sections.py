@@ -261,37 +261,65 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
     r_step = avail_h / float(row_count)
 
     cols_default = [
-        ("name", 0.033, 0.268),
-        ("sex",  0.303, 0.050),
-        ("age",  0.354, 0.050),
-        ("dob",  0.405, 0.106),
-        ("civ",  0.511, 0.093),
-        ("rel",  0.604, 0.113),
-        ("edu",  0.717, 0.175),
-        ("inc",  0.891, 0.095)
+        ("name", 0.033, 0.252),
+        ("sex",  0.285, 0.050),
+        ("age",  0.335, 0.050),
+        ("dob",  0.385, 0.100),
+        ("civ",  0.485, 0.095),
+        ("rel",  0.580, 0.105),
+        ("edu",  0.685, 0.165),
+        ("inc",  0.850, 0.110)
     ]
+
+    # Calculate non-overlapping vertical intervals for each row to guarantee zero row-bleeding
+    row_bounds = []
+    for r in range(1, row_count + 1):
+        name_k = f"fam_row{r}_name"
+        if name_k in fields_config and "bbox" in fields_config[name_k]:
+            by = fields_config[name_k]["bbox"][1]
+            bh = fields_config[name_k]["bbox"][3]
+        else:
+            by = tb_y + (tb_h * hdr_ratio) + ((r - 1) * r_step) + 0.001
+            bh = max(0.016, r_step - 0.003)
+        row_bounds.append((by, by + bh))
+
+    row_intervals = []
+    for r in range(row_count):
+        y_top = 0.500 if r == 0 else (row_bounds[r-1][1] + row_bounds[r][0]) / 2.0
+        y_bot = 0.595 if r == row_count - 1 else (row_bounds[r][1] + row_bounds[r+1][0]) / 2.0
+        row_intervals.append((y_top, y_bot))
 
     for r_idx in range(row_count):
         r_num = r_idx + 1
         r_top = tb_y + (tb_h * hdr_ratio) + (r_idx * r_step) + 0.001
         r_height = max(0.016, r_step - 0.003)
+        r_min_y, r_max_y = row_intervals[r_idx]
+
+        # Partition detections exclusively for this row based on vertical boundaries
+        row_detections = [d for d in all_detections if (r_min_y <= d["cy"] < r_max_y)] if all_detections else []
+        print(f"[Sec3 Row {r_num}] interval: [{r_min_y:.4f}..{r_max_y:.4f}], text: {[d['text'] for d in row_detections]}")
 
         def get_cell_text(col_name: str, col_idx: int) -> tuple:
             custom_key = f"fam_row{r_num}_{col_name}"
             bbox = [cols_default[col_idx][1], r_top, cols_default[col_idx][2], r_height]
             if custom_key in fields_config and "bbox" in fields_config[custom_key]:
-                bbox = fields_config[custom_key]["bbox"]
+                bbox = list(fields_config[custom_key]["bbox"])
 
-            # Narrow column: shave ~2-3px inward horizontally to avoid clipping vertical table grid borders
-            if col_name == "sex":
-                x_margin = 0.004
-                bbox = [bbox[0] + x_margin, bbox[1], max(0.005, bbox[2] - x_margin * 2.0), bbox[3]]
+            # Enforce clean column boundary between name and sex to prevent cross-column capture
+            if col_name == "name":
+                # Ensure name box never extends past the sex column start
+                if bbox[0] + bbox[2] > 0.286:
+                    bbox[2] = max(0.05, 0.286 - bbox[0])
+            elif col_name == "sex":
+                # Ensure sex box spans the full cell [0.285 .. 0.335]
+                bbox[0] = min(bbox[0], 0.285)
+                bbox[2] = max(bbox[2], 0.050)
 
             raw_text = ""
             conf = 0.90
-            # 1. Try matching from all_detections (Global OCR batch)
-            if all_detections:
-                raw_text, conf = assign_detections_to_field(custom_key, {"bbox": bbox}, all_detections)
+            # 1. Try matching from row-partitioned detections (Prevents adjacent row bleed)
+            if row_detections:
+                raw_text, conf = assign_detections_to_field(custom_key, {"bbox": bbox}, row_detections)
 
             # 2. Fallback to crop OCR if not captured by detection
             if not raw_text:
@@ -332,7 +360,7 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
 
         # 4. Birthdate
         raw_dob, dob_conf = get_cell_text("dob", 3)
-        clean_m_dob = "" if is_ocr_na(raw_dob) else (clean_date(raw_dob) or raw_dob)
+        clean_m_dob = "" if is_ocr_na(raw_dob) else (clean_date(raw_dob) or "")
         if is_ocr_na(clean_m_dob): clean_m_dob = ""
 
         # If Birthdate is valid, compute Age automatically if missing or misread
@@ -385,11 +413,12 @@ def parse_family_table_grid(ocr_engine, enhanced_image: np.ndarray, fields_confi
 
         # Cross-Field Semantic Inference: Sex from Relationship
         rel_upper = clean_m_rel.strip().upper()
+        raw_rel_upper = (raw_rel or "").strip().upper()
         if not clean_m_sex or is_ocr_na(clean_m_sex):
-            if any(k in rel_upper for k in ["SON", "ANAK NA LALAKI", "BROTHER", "FATHER", "NEPHEW", "GRANDSON", "BOY"]):
+            if any(k in rel_upper or k in raw_rel_upper for k in ["SON", "ANAK NA LALAKI", "BROTHER", "FATHER", "NEPHEW", "GRANDSON", "BOY"]):
                 clean_m_sex = "Male"
                 sex_conf = max(sex_conf, 0.95)
-            elif any(k in rel_upper for k in ["DAUGHTER", "ANAK NA BABAE", "SISTER", "MOTHER", "NIECE", "GRANDDAUGHTER", "GIRL"]):
+            elif any(k in rel_upper or k in raw_rel_upper for k in ["DAUGHTER", "DARGHTER", "DAUGHT", "DUNGHTER", "ANAK NA BABAE", "SISTER", "MOTHER", "NIECE", "GRANDDAUGHTER", "GIRL"]):
                 clean_m_sex = "Female"
                 sex_conf = max(sex_conf, 0.95)
 

@@ -209,7 +209,7 @@ namespace SOLUM_UI.Views.Components
         {
             if (resp?.Fields != null && resp.Fields.TryGetValue(key, out var f))
             {
-                string val = f.Value ?? string.Empty;
+                string val = f.Value?.Trim() ?? string.Empty;
                 if (OcrService.IsOcrNotApplicable(val))
                     return string.Empty;
                 return val;
@@ -496,6 +496,17 @@ namespace SOLUM_UI.Views.Components
             { MarkError(TxtContact, ErrContact, "Must be 11 digits."); missing.Add("Contact Number (11 digits)"); ok = false; }
 
             return ok;
+        }
+
+        public void FocusFirstInvalidField()
+        {
+            if (CmbCivilStatus.SelectedItem == null) { CmbCivilStatus.Focus(); CmbCivilStatus.BringIntoView(); return; }
+            if (CmbSex.SelectedItem == null) { CmbSex.Focus(); CmbSex.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(TxtPlaceOfBirth.Text)) { TxtPlaceOfBirth.Focus(); TxtPlaceOfBirth.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(TxtAddress.Text)) { TxtAddress.Focus(); TxtAddress.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(GetComboValue(CmbBarangay))) { CmbBarangay.Focus(); CmbBarangay.BringIntoView(); return; }
+            string contactDigits = Regex.Replace(TxtContact.Text ?? "", @"\D", "");
+            if (string.IsNullOrWhiteSpace(contactDigits) || contactDigits.Length != 11) { TxtContact.Focus(); TxtContact.BringIntoView(); return; }
         }
 
         private void MarkError(Control ctrl, TextBlock lbl, string msg)

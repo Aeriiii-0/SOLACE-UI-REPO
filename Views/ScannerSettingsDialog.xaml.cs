@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using SOLUM_UI.Models;
 using SOLUM_UI.Services;
 
@@ -13,6 +15,12 @@ namespace SOLUM_UI
     {
         public ScannerSettings Settings { get; private set; }
         private List<ScannerDeviceInfo> _availableScanners = new List<ScannerDeviceInfo>();
+
+        // Smooth header dragging fields
+        private Point _dragStartPoint;
+        private bool _isDragging = false;
+        private double _startTransformX = 0;
+        private double _startTransformY = 0;
 
         public ScannerSettingsDialog(ScannerSettings currentSettings = null)
         {
@@ -25,7 +33,6 @@ namespace SOLUM_UI
                 ApplySize();
                 await RefreshDevicesListAsync();
             };
-            SizeChanged += (s, e) => ApplySize();
         }
 
         private void ApplySize()
@@ -53,7 +60,7 @@ namespace SOLUM_UI
             if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
         }
 
-        private void Backdrop_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void Backdrop_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.OriginalSource == BackdropBorder)
             {
@@ -62,22 +69,53 @@ namespace SOLUM_UI
             }
         }
 
+        #region Header Dragging
+        private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Do not initiate drag if user clicked a child Button (such as the Close X button)
+            var dep = e.OriginalSource as DependencyObject;
+            while (dep != null && dep != HeaderBorder)
+            {
+                if (dep is Button) return;
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            _isDragging = true;
+            _dragStartPoint = e.GetPosition(this);
+            _startTransformX = DialogShellTransform.X;
+            _startTransformY = DialogShellTransform.Y;
+            HeaderBorder.CaptureMouse();
+        }
+
+        private void Header_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!_isDragging) return;
+            Point current = e.GetPosition(this);
+            DialogShellTransform.X = _startTransformX + (current.X - _dragStartPoint.X);
+            DialogShellTransform.Y = _startTransformY + (current.Y - _dragStartPoint.Y);
+        }
+
+        private void Header_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isDragging)
+            {
+                _isDragging = false;
+                HeaderBorder.ReleaseMouseCapture();
+            }
+        }
+        #endregion
+
         private void ApplySettingsToUI()
         {
-            if (Settings.Dpi <= 150)
-                Rb150Dpi.IsChecked = true;
-            else if (Settings.Dpi <= 200)
-                Rb200Dpi.IsChecked = true;
-            else
+            if (Settings.Dpi > 200)
                 Rb300Dpi.IsChecked = true;
+            else
+                Rb200Dpi.IsChecked = true;
 
             switch (Settings.ColorMode)
             {
                 case ScanColorMode.Grayscale:
                     CmbColorMode.SelectedIndex = 1;
-                    break;
-                case ScanColorMode.BlackAndWhite:
-                    CmbColorMode.SelectedIndex = 2;
                     break;
                 default:
                     CmbColorMode.SelectedIndex = 0;
@@ -141,31 +179,20 @@ namespace SOLUM_UI
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             // DPI
-            if (Rb150Dpi.IsChecked == true)
-                Settings.Dpi = 150;
-            else if (Rb200Dpi.IsChecked == true)
-                Settings.Dpi = 200;
-            else
-                Settings.Dpi = 300;
+            Settings.Dpi = (Rb300Dpi.IsChecked == true) ? 300 : 200;
 
             // Color Mode
-            switch (CmbColorMode.SelectedIndex)
-            {
-                case 1:
-                    Settings.ColorMode = ScanColorMode.Grayscale;
-                    break;
-                case 2:
-                    Settings.ColorMode = ScanColorMode.BlackAndWhite;
-                    break;
-                default:
-                    Settings.ColorMode = ScanColorMode.Color;
-                    break;
-            }
+            Settings.ColorMode = (CmbColorMode.SelectedIndex == 1)
+                ? ScanColorMode.Grayscale
+                : ScanColorMode.Color;
 
             // Paper Source
             Settings.PaperSource = CmbPaperSource.SelectedIndex == 1
                 ? ScanPaperSource.Feeder
                 : ScanPaperSource.Flatbed;
+
+            // Paper Size locked to official 8.5x13 Long Bond dimension
+            Settings.PaperSize = "8.5x13";
 
             // Selected Device
             if (CmbDevices.SelectedItem is ComboBoxItem selectedItem)

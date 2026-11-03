@@ -36,19 +36,16 @@
                                     <TextBlock x:Name="TxtConf_CivilStatus" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
-                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
-                                          Tag="civil_status" GotFocus="Field_GotFocus"
-                                          SelectionChanged="CmbCivilStatus_SelectionChanged"
-                                          BorderThickness="0" Background="Transparent">
-                                    <ComboBoxItem Content="Single"/>
-                                    <ComboBoxItem Content="Married"/>
-                                    <ComboBoxItem Content="Widowed"/>
-                                    <ComboBoxItem Content="Separated"/>
-                                    <ComboBoxItem Content="Divorced"/>
-                                    <ComboBoxItem Content="Annulled"/>
-                                </ComboBox>
-                            </Border>
+                            <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
+                                      Tag="civil_status" GotFocus="Field_GotFocus"
+                                      SelectionChanged="CmbCivilStatus_SelectionChanged">
+                                <ComboBoxItem Content="Single"/>
+                                <ComboBoxItem Content="Married"/>
+                                <ComboBoxItem Content="Widowed"/>
+                                <ComboBoxItem Content="Separated"/>
+                                <ComboBoxItem Content="Divorced"/>
+                                <ComboBoxItem Content="Annulled"/>
+                            </ComboBox>
                             <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
 
@@ -63,15 +60,12 @@
                                     <TextBlock x:Name="TxtConf_Sex" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
-                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                <ComboBox x:Name="CmbSex" Style="{StaticResource FormCombo}"
-                                          Tag="sex" GotFocus="Field_GotFocus"
-                                          SelectionChanged="CmbSex_SelectionChanged"
-                                          BorderThickness="0" Background="Transparent">
-                                    <ComboBoxItem Content="Male"/>
-                                    <ComboBoxItem Content="Female"/>
-                                </ComboBox>
-                            </Border>
+                            <ComboBox x:Name="CmbSex" Style="{StaticResource FormCombo}"
+                                      Tag="sex" GotFocus="Field_GotFocus"
+                                      SelectionChanged="CmbSex_SelectionChanged">
+                                <ComboBoxItem Content="Male"/>
+                                <ComboBoxItem Content="Female"/>
+                            </ComboBox>
                             <TextBlock x:Name="ErrSex" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
 
@@ -133,11 +127,9 @@
                                     <TextBlock x:Name="TxtConf_Barangay" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
-                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
-                                          BorderThickness="0" Background="Transparent"
-                                          Tag="barangay" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
-                                          SelectionChanged="CmbBarangay_SelectionChanged">
+                            <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
+                                      Tag="barangay" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
+                                      SelectionChanged="CmbBarangay_SelectionChanged">
                                     <ComboBoxItem Content=""/>
                                     <ComboBoxItem Content="Bi&#241;an (Poblacion)"/>
                                     <ComboBoxItem Content="Bungahan"/>
@@ -163,8 +155,7 @@
                                     <ComboBoxItem Content="Timbao"/>
                                     <ComboBoxItem Content="Tubigan"/>
                                     <ComboBoxItem Content="Zapote"/>
-                                </ComboBox>
-                            </Border>
+                            </ComboBox>
                             <TextBlock x:Name="ErrBarangay" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
 
@@ -216,17 +207,14 @@
                                     <TextBlock x:Name="TxtConf_Education" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
-                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                <ComboBox x:Name="CmbEducation" Style="{StaticResource FormCombo}"
-                                          Tag="educational_attainment" GotFocus="Field_GotFocus"
-                                          BorderThickness="0" Background="Transparent">
-                                    <ComboBoxItem Content="Elementary"/>
-                                    <ComboBoxItem Content="High School"/>
-                                    <ComboBoxItem Content="Vocational"/>
-                                    <ComboBoxItem Content="College"/>
-                                    <ComboBoxItem Content="Post Graduate"/>
-                                </ComboBox>
-                            </Border>
+                            <ComboBox x:Name="CmbEducation" Style="{StaticResource FormCombo}"
+                                      Tag="educational_attainment" GotFocus="Field_GotFocus">
+                                <ComboBoxItem Content="Elementary"/>
+                                <ComboBoxItem Content="High School"/>
+                                <ComboBoxItem Content="Vocational"/>
+                                <ComboBoxItem Content="College"/>
+                                <ComboBoxItem Content="Post Graduate"/>
+                            </ComboBox>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1">
@@ -302,16 +290,13 @@
                                     <TextBlock x:Name="TxtConf_EmploymentStatus" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
-                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                <ComboBox x:Name="CmbEmploymentStatus" Style="{StaticResource FormCombo}"
-                                          BorderThickness="0" Background="Transparent"
-                                          Tag="employment_status" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
-                                    <ComboBoxItem Content=""/>
-                                    <ComboBoxItem Content="Employed"/>
-                                    <ComboBoxItem Content="Self-Employed"/>
-                                    <ComboBoxItem Content="Not Employed"/>
-                                </ComboBox>
-                            </Border>
+                            <ComboBox x:Name="CmbEmploymentStatus" Style="{StaticResource FormCombo}"
+                                      Tag="employment_status" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown">
+                                <ComboBoxItem Content=""/>
+                                <ComboBoxItem Content="Employed"/>
+                                <ComboBoxItem Content="Self-Employed"/>
+                                <ComboBoxItem Content="Not Employed"/>
+                            </ComboBox>
                         </StackPanel>
                     </Grid>
                 </StackPanel>

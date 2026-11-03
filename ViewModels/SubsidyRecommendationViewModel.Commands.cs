@@ -48,6 +48,21 @@ namespace SOLUM_UI.ViewModels
             OpenOutlierModalCommand = new RelayCommand(p => { OutlierTarget = p as SubsidyItem ?? ActiveCandidate; if (OutlierTarget != null) { _shortlistRevokeTargets = null; OutlierModalTitle = "Disqualify Candidate"; OutlierTargetNameAndId = null; IsOutlierModalOpen = true; } });
             CloseOutlierModalCommand = new RelayCommand(_ => { IsOutlierModalOpen = false; _shortlistRevokeTargets = null; });
             ConfirmOutlierRejectionCommand = new RelayCommand(_ => _ = ConfirmOutlierRejectionAsync());
+            OpenDisqualifiedModalCommand = new RelayCommand(_ => {
+                DisqualifiedSearchText = string.Empty;
+                DisqualifiedReasonFilter = "All Reasons";
+                FilterDisqualifiedCandidates();
+                IsDisqualifiedModalOpen = true;
+            });
+            CloseDisqualifiedModalCommand = new RelayCommand(_ => IsDisqualifiedModalOpen = false);
+            ExportDisqualifiedCsvCommand = new RelayCommand(async _ => await ExportDisqualifiedCsvAsync());
+            ReinstateCandidateCommand = new RelayCommand(p => {
+                if (p is DisqualifiedCandidateItem item)
+                    _ = ReinstateCandidateAsync(item);
+            });
+            ApplyDisqualifiedReasonFilterCommand = new RelayCommand(p => {
+                DisqualifiedReasonFilter = p?.ToString() ?? "All Reasons";
+            });
             ConfirmGranteeCommand = new RelayCommand(p => ToggleGrantee(p as SelectionRow, true));
             RevokeGranteeCommand = new RelayCommand(p => ToggleGrantee(p as SelectionRow, false));
             ConfirmShortlistCandidateCommand = new RelayCommand(p => { if (p is SelectionRow r) ToggleGrantee(r, !r.IsFinalGrantee); });

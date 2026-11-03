@@ -805,6 +805,47 @@ namespace SOLUM_UI.Views.Dialogs
 
             inner.Children.Add(MakeSectionHeader($"Family Composition ({countText})"));
 
+            if (members != null && members.Count > 0)
+            {
+                var dependents = members
+                    .Where(m => RecordDialog.IsChildOrDependent(m.Relationship))
+                    .ToList();
+
+                if (dependents.Count > 0 && !dependents.Any(m => (int.TryParse(m.Age, out int a) && a <= 22) || m.HasSpecialNeeds))
+                {
+                    var overAgeBanner = new Border
+                    {
+                        Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xFB, 0xEB)),
+                        BorderBrush = new SolidColorBrush(Color.FromRgb(0xF5, 0x9E, 0x0B)),
+                        BorderThickness = new Thickness(1.2),
+                        CornerRadius = new CornerRadius(8),
+                        Padding = new Thickness(12, 8, 12, 8),
+                        Margin = new Thickness(0, 4, 0, 10)
+                    };
+                    var bannerSp = new StackPanel { Orientation = Orientation.Horizontal };
+                    bannerSp.Children.Add(new TextBlock
+                    {
+                        Text = "⚠",
+                        FontSize = 13,
+                        Foreground = new SolidColorBrush(Color.FromRgb(0xB4, 0x53, 0x09)),
+                        FontWeight = FontWeights.Bold,
+                        Margin = new Thickness(0, 0, 6, 0),
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+                    bannerSp.Children.Add(new TextBlock
+                    {
+                        Text = "All dependents are 23 or older (Over Age Threshold) — subsidy eligibility may be impacted.",
+                        FontSize = 11.5,
+                        FontWeight = FontWeights.SemiBold,
+                        Foreground = new SolidColorBrush(Color.FromRgb(0xB4, 0x53, 0x09)),
+                        FontFamily = new FontFamily("Segoe UI"),
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+                    overAgeBanner.Child = bannerSp;
+                    inner.Children.Add(overAgeBanner);
+                }
+            }
+
 
 
             if (totalMembers == 0)

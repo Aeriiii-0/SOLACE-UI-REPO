@@ -8,6 +8,7 @@ namespace SOLUM_UI.Models
     {
         Color = 1,
         Grayscale = 2,
+        [Obsolete("Black and White 1-bit thresholding degrades OCR accuracy. Use Grayscale instead.")]
         BlackAndWhite = 4
     }
 
@@ -21,10 +22,10 @@ namespace SOLUM_UI.Models
     {
         public string DeviceId { get; set; } = string.Empty;
         public string DeviceName { get; set; } = "Auto-detect Default";
-        public int Dpi { get; set; } = 300;
+        public int Dpi { get; set; } = 200;
         public ScanColorMode ColorMode { get; set; } = ScanColorMode.Color;
         public ScanPaperSource PaperSource { get; set; } = ScanPaperSource.Flatbed;
-        public string PaperSize { get; set; } = "A4";
+        public string PaperSize { get; set; } = "8.5x13";
 
         private static string SettingsFilePath
         {
@@ -55,7 +56,12 @@ namespace SOLUM_UI.Models
                     var loaded = serializer.Deserialize<ScannerSettings>(json);
                     if (loaded != null)
                     {
-                        if (loaded.Dpi <= 0) loaded.Dpi = 300;
+                        // Migrate legacy or unsupported settings
+                        if (loaded.Dpi <= 150) loaded.Dpi = 200;
+#pragma warning disable CS0618 // Type or member is obsolete
+                        if (loaded.ColorMode == ScanColorMode.BlackAndWhite) loaded.ColorMode = ScanColorMode.Grayscale;
+#pragma warning restore CS0618
+                        loaded.PaperSize = "8.5x13";
                         return loaded;
                     }
                 }

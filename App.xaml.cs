@@ -16,9 +16,9 @@ namespace SOLUM_UI
         {
             base.OnStartup(e);
 
-            // Configure en-PH culture so that all WPF controls (DatePicker, formatting) use standard dd/MM/yyyy
+            // Configure en-PH culture so that all WPF controls (DatePicker, formatting) use form standard MM/dd/yyyy
             var culture = new CultureInfo("en-PH");
-            culture.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
+            culture.DateTimeFormat.ShortDatePattern = "MM/dd/yyyy";
             culture.DateTimeFormat.DateSeparator = "/";
             CultureInfo.DefaultThreadCurrentCulture = culture;
             CultureInfo.DefaultThreadCurrentUICulture = culture;

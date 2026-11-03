@@ -278,6 +278,23 @@ namespace SOLUM_UI
                         {
                             cardStack.Children.Add(CreateChangedRow(sf));
                         }
+                        else if (sf.Label.IndexOf("Notice", System.StringComparison.OrdinalIgnoreCase) >= 0 || sf.Label.IndexOf("Eligibility", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            var row = new Border
+                            {
+                                Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xFB, 0xEB)),
+                                BorderBrush = new SolidColorBrush(Color.FromRgb(0xF5, 0x9E, 0x0B)),
+                                BorderThickness = new Thickness(1.2),
+                                CornerRadius = new CornerRadius(8),
+                                Padding = new Thickness(14, 10, 14, 10),
+                                Margin = new Thickness(0, 0, 0, 8)
+                            };
+                            var rowStack = new StackPanel();
+                            rowStack.Children.Add(new TextBlock { Text = sf.Label, FontSize = 11.5, FontWeight = FontWeights.Bold, Foreground = new SolidColorBrush(Color.FromRgb(0xB4, 0x53, 0x09)), FontFamily = new FontFamily("Segoe UI"), Margin = new Thickness(0, 0, 0, 3) });
+                            rowStack.Children.Add(new TextBlock { Text = string.IsNullOrWhiteSpace(sf.NewValue) ? "—" : sf.NewValue, FontSize = 12.5, FontWeight = FontWeights.SemiBold, Foreground = new SolidColorBrush(Color.FromRgb(0x92, 0x40, 0x0E)), FontFamily = new FontFamily("Segoe UI"), TextWrapping = TextWrapping.Wrap });
+                            row.Child = rowStack;
+                            cardStack.Children.Add(row);
+                        }
                         else
                         {
                             var row = new Border

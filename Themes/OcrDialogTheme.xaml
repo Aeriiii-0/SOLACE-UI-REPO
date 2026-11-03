@@ -17,10 +17,10 @@
 
     <Style x:Key="FormBox" TargetType="TextBox">
         <Setter Property="Height" Value="44"/>
-        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="Padding" Value="12,0"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Foreground" Value="#111111"/>
-        <Setter Property="BorderBrush" Value="#D0B8C0"/>
+        <Setter Property="BorderBrush" Value="#C0A0AA"/>
         <Setter Property="BorderThickness" Value="1.2"/>
         <Setter Property="Background" Value="White"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -57,7 +57,7 @@
         <Setter Property="Background" Value="White"/>
         <Setter Property="BorderBrush" Value="#C0A0AA"/>
         <Setter Property="BorderThickness" Value="1.2"/>
-        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="Padding" Value="14,0,28,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -68,14 +68,14 @@
                         <Border x:Name="ComboBg" Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6">
-                            <Grid Margin="10,0,28,0">
+                                CornerRadius="8">
+                            <Grid Margin="{TemplateBinding Padding}">
                                 <ContentPresenter x:Name="ContentSite"
                                                   Content="{TemplateBinding SelectionBoxItem}"
                                                   ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                                   VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                 <TextBlock x:Name="Placeholder" Text="Select..."
-                                           Foreground="#BBBBBB" FontSize="14"
+                                           Foreground="#BBBBBB" FontSize="{TemplateBinding FontSize}"
                                            VerticalAlignment="Center" IsHitTestVisible="False"
                                            Visibility="Collapsed"/>
                             </Grid>
@@ -86,13 +86,13 @@
                                           RelativeSource={RelativeSource TemplatedParent}}"
                                       Focusable="False" Opacity="0"/>
                         <Path HorizontalAlignment="Right" VerticalAlignment="Center"
-                              Margin="0,0,10,0" Data="M7,10L12,15L17,10H7Z"
+                              Margin="0,0,12,0" Data="M7,10L12,15L17,10H7Z"
                               Fill="#702943" Stretch="Uniform" Width="12" Height="12"
                               IsHitTestVisible="False"/>
                         <Popup x:Name="Popup" Placement="Bottom"
                                IsOpen="{TemplateBinding IsDropDownOpen}"
                                AllowsTransparency="True" Focusable="False" PopupAnimation="None">
-                            <Border Background="White" CornerRadius="10" BorderBrush="#C0A0AA"
+                            <Border Background="White" CornerRadius="8" BorderBrush="#C0A0AA"
                                     BorderThickness="1.2" MinWidth="{TemplateBinding ActualWidth}"
                                     MaxHeight="200" Margin="0,2,0,0">
                                 <Border.Effect>
@@ -172,7 +172,7 @@
                                                VerticalContentAlignment="Center"
                                                FontSize="13" Foreground="#111111"
                                                BorderThickness="0" Background="Transparent"
-                                               Padding="8,0"
+                                               Padding="12,0"
                                                FocusVisualStyle="{x:Null}"
                                                SelectionBrush="#702943"
                                                Focusable="True">
@@ -194,8 +194,8 @@
                                     </Style>
                                 </DatePickerTextBox.Style>
                             </DatePickerTextBox>
-                            <TextBlock Text="DD/MM/YYYY" Foreground="#999999" FontSize="13"
-                                       Padding="8,0" VerticalAlignment="Center"
+                            <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="13"
+                                       Padding="12,0" VerticalAlignment="Center"
                                        IsHitTestVisible="False" Opacity="0.7">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
@@ -330,6 +330,12 @@
         <Setter Property="Height" Value="32"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="Padding" Value="10,0"/>
+    </Style>
+
+    <Style x:Key="FormComboSm" TargetType="ComboBox" BasedOn="{StaticResource FormCombo}">
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Padding" Value="12,0,24,0"/>
     </Style>
 
     <Style x:Key="FormDateSm" TargetType="DatePicker" BasedOn="{StaticResource FormDate}">

@@ -1453,6 +1453,7 @@
                                                                 </TextBlock>
                                                                 <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Height="34">
                                                                     <DatePicker x:Name="DpMemberDob" Style="{StaticResource FormDateSm}"
+                                                                                DateValidationError="DatePicker_DateValidationError" LostFocus="DatePicker_LostFocus"
                                                                                 SelectedDateChanged="DpMemberDob_SelectedDateChanged"/>
                                                                 </Border>
                                                             </StackPanel>
@@ -1668,6 +1669,25 @@
                                                 <TextBlock Text="Click '+ Add Member' above to add qualified children or other household dependents."
                                                            FontSize="11" Foreground="#9CA3AF" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                                             </StackPanel>
+                                        </Border>
+
+                                        <!-- Age Threshold Alert banner: when all dependents are 23+ -->
+                                        <Border x:Name="PnlAgeThresholdWarning" Background="#FFFBEB" BorderBrush="#F59E0B" BorderThickness="1.2"
+                                                CornerRadius="8" Padding="14,12" Margin="0,6,0,0" Visibility="Collapsed">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="#FEF3C7" Margin="0,0,12,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="&#x26A0;" FontSize="15" Foreground="#B45309" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="Dependent Age Threshold Notice" FontSize="12.5" FontWeight="Bold" Foreground="#B45309" FontFamily="Segoe UI"/>
+                                                    <TextBlock Text="All registered dependents are 23 or older without declared special needs. Under the Solo Parents Welfare Act (RA 11861), a solo parent must have at least one qualifying dependent (under 23, or of any age if living with a disability). This parent may no longer qualify for subsidy assistance."
+                                                               FontSize="11.5" Foreground="#92400E" FontFamily="Segoe UI" TextWrapping="Wrap" Margin="0,3,0,0" LineHeight="16"/>
+                                                </StackPanel>
+                                            </Grid>
                                         </Border>
                                     </StackPanel>
                                 </Border>

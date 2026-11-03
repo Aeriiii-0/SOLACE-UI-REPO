@@ -204,7 +204,7 @@ namespace SOLUM_UI.Services
 
                     double conf = fToken["confidence"]?.Value<double>() ?? 0.0;
                     string rating = fToken["rating"]?.ToString() ?? "Low";
-                    double[] bbox = fToken["bbox"]?.ToObject<double[]>() ?? new double[4];
+                    double[] bbox = fToken["aligned_bbox"]?.ToObject<double[]>() ?? fToken["bbox"]?.ToObject<double[]>() ?? new double[4];
                     string category = fToken["category"]?.ToString() ?? "General";
 
                     resp.Fields[key] = new OcrFieldResult

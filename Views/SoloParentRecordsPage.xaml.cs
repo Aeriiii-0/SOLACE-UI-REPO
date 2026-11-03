@@ -239,11 +239,17 @@ namespace SOLUM_UI
 
 
 
-            // GridView column header is 46px, each row is ~44px
+            // GridView column header is 46px + 1px border. Leave 4px safety buffer.
 
-            double rowsHeight = availableHeight - 44;
+            double rowsAvailable = availableHeight - 51;
 
-            int calculated = (int)Math.Floor(rowsHeight / 42.0);
+            if (rowsAvailable <= 0) return;
+
+
+
+            // Each row is locked to 48px height.
+
+            int calculated = (int)Math.Floor(rowsAvailable / 48.0);
 
             int optimal = Math.Max(4, Math.Min(50, calculated));
 
@@ -2514,31 +2520,40 @@ namespace SOLUM_UI
 
         private void ResizeNameColumn()
         {
-            if (RecordsList.View is GridView gv && gv.Columns.Count >= 9)
+            if (RecordsList?.View is GridView gv && gv.Columns.Count >= 10)
             {
-                // Fixed columns for 5-column streamlined layout (px)
-                const double validUntil = 145;
-                const double status     = 115;
-                const double actions    = 105;
+                // Fixed columns for streamlined layout (px)
+                const double appDate    = 135;
+                const double validUntil = 135;
+                const double status     = 120;
+                const double actions    = 110;
 
                 double available = RecordsList.ActualWidth - 2;
                 if (available <= 0) return;
 
                 // Hidden columns kept at 0px for code-behind compatibility
-                gv.Columns[2].Width = 0; // ColSex
-                gv.Columns[3].Width = 0; // ColCivilStatus
-                gv.Columns[4].Width = 0; // ColDob
-                gv.Columns[5].Width = 0; // ColLastUpdated
+                if (ColSex != null) ColSex.Width = 0;
+                if (ColCivilStatus != null) ColCivilStatus.Width = 0;
+                if (ColDob != null) ColDob.Width = 0;
+                if (ColLastUpdated != null) ColLastUpdated.Width = 0;
 
-                double totalFixed = validUntil + status + actions;
+                double totalFixed = appDate + validUntil + status + actions;
                 double flex = Math.Max(280, available - totalFixed);
 
-                // Col 0 = NAME (62%), Col 1 = BARANGAY (38%)
-                gv.Columns[0].Width = Math.Max(200, flex * 0.62);
-                gv.Columns[1].Width = Math.Max(120, flex * 0.38);
-                gv.Columns[6].Width = validUntil;
-                gv.Columns[7].Width = status;
-                gv.Columns[8].Width = actions;
+                if (ColBarangay != null && ColBarangay.Width == 0)
+                {
+                    if (ColName != null) ColName.Width = flex;
+                }
+                else
+                {
+                    if (ColName != null) ColName.Width = Math.Max(180, flex * 0.60);
+                    if (ColBarangay != null) ColBarangay.Width = Math.Max(120, flex * 0.40);
+                }
+
+                if (ColApplicationDate != null) ColApplicationDate.Width = appDate;
+                if (ColChildren != null) ColChildren.Width = validUntil;
+                if (ColStatus != null) ColStatus.Width = status;
+                if (ColActions != null) ColActions.Width = actions;
             }
         }
 

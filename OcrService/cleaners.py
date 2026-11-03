@@ -1,5 +1,6 @@
 import re
 import difflib
+from datetime import date, datetime
 
 # Official list of 24 Barangays of the City of Biñan
 BINAN_BARANGAYS = [
@@ -351,6 +352,7 @@ def clean_person_name(raw_name: str) -> str:
     t = re.sub(r'(?<=[a-zA-Z])1(?=[a-zA-Z])', 'L', t)
     t = re.sub(r'\bZOR\b', 'ZORA', t, flags=re.IGNORECASE)
     t = re.sub(r"[^a-zA-ZñÑ\s\.\-']", "", t)
+    t = re.sub(r'\b(N/?A|NIA|NONE)\b', '', t, flags=re.IGNORECASE)
     t = re.sub(r'\s+', ' ', t).strip()
     placeholder_labels = {
         'LAST NAME', 'FIRST NAME', 'MIDDLE NAME', 'MIDDLENAME', 'EXT NAME', 'EXTENSION NAME',
@@ -464,14 +466,16 @@ def clean_date(raw_text: str) -> str:
         else:
             yr = int(p3) if len(p3) == 4 else (2000 + int(p3) if int(p3) < 40 else 1900 + int(p3))
             yr = normalize_handwritten_year(yr)
+            if yr < 1900 or yr > date.today().year:
+                return ""
             if int(p1) > 12 and int(p2) <= 12 and int(p1) <= 31:
                 return f"{yr:04d}-{int(p2):02d}-{int(p1):02d}"
             elif int(p2) > 12 and int(p1) <= 12 and int(p2) <= 31:
                 return f"{yr:04d}-{int(p1):02d}-{int(p2):02d}"
-            elif int(p1) <= 31 and int(p2) <= 12:
-                return f"{yr:04d}-{int(p2):02d}-{int(p1):02d}"
             elif int(p1) <= 12 and int(p2) <= 31:
                 return f"{yr:04d}-{int(p1):02d}-{int(p2):02d}"
+            elif int(p2) <= 12 and int(p1) <= 31:
+                return f"{yr:04d}-{int(p2):02d}-{int(p1):02d}"
 
     # 2b. Missing one separator: e.g. '1/252020', '01/252020', '0125/2020'
     m_missing1 = re.search(r'(\d{1,2})[/\-.](\d{1,2})(\d{4})', raw)
@@ -529,9 +533,17 @@ def clean_sex(raw_text: str) -> str:
     # Visual confusion mappings for handwriting in single-letter table cells:
     # Male: M often misread as H, N, IV, U, 11, 1 (due to table border lines or vertical strokes)
     # Female: F often misread as P, PL, E, T, 7 (due to horizontal crossbars or curved top)
+    # Check space-delimited tokens if multiple characters or merged cells
+    tokens = [re.sub(r'[^a-z0-9]', '', tok) for tok in t.split()]
+    for tok in tokens:
+        if tok in ["f", "female", "babae", "fem", "girl", "daughter", "mother", "sister", "b", "woman", "p", "pl", "e", "t", "7"]:
+            return "Female"
+        if tok in ["m", "male", "lalaki", "boy", "son", "father", "brother", "l", "masc", "mas", "man", "h", "n"]:
+            return "Male"
+
     if t_alpha in ["m", "male", "lalaki", "boy", "son", "father", "brother", "l", "masc", "mas", "man", "h", "n", "iv", "u", "11", "1"]:
         return "Male"
-    if t_alpha in ["f", "female", "babae", "fem", "girl", "daughter", "mother", "sister", "b", "woman", "p", "pl", "e", "t", "7"]:
+    if t_alpha in ["f", "female", "babae", "fem", "girl", "daughter", "mother", "sister", "b", "woman", "p", "pl", "e", "t", "7", "ef", "fe"]:
         return "Female"
     if t_alpha.startswith("fem") or re.search(r'\b(female|babae|fem)\b', t):
         return "Female"

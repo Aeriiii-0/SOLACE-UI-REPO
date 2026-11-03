@@ -334,13 +334,26 @@ namespace SOLUM_UI.Services
 
 
 
-            if (clean == "f" || clean == "female" || clean == "fem" || clean == "b" || clean == "babae" || clean == "w" || clean == "woman")
+            // Visual confusion in table cells: F often misread as E, P, T, EF, FE
+
+            if (clean == "f" || clean == "female" || clean == "fem" || clean == "b" || clean == "babae" || clean == "w" || clean == "woman" || clean == "e" || clean == "p" || clean == "t" || clean == "ef" || clean == "fe")
 
                 return "Female";
 
             if (clean == "m" || clean == "male" || clean == "mas" || clean == "masc" || clean == "l" || clean == "lalaki" || clean == "man")
 
                 return "Male";
+
+            // Check space-delimited tokens if multiple characters
+            var tokens = norm.Split(new[] { ' ', ',', '/', '-' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var tok in tokens)
+            {
+                var tokClean = Regex.Replace(tok, @"[^a-z]", "");
+                if (tokClean == "f" || tokClean == "female" || tokClean == "fem" || tokClean == "babae" || tokClean == "e" || tokClean == "p" || tokClean == "t")
+                    return "Female";
+                if (tokClean == "m" || tokClean == "male" || tokClean == "masc" || tokClean == "lalaki")
+                    return "Male";
+            }
 
 
 
@@ -1232,9 +1245,19 @@ namespace SOLUM_UI.Services
 
                 }
 
-                // Both <= 12: In Philippine context, default to DD/MM/YYYY
+                // Both <= 12: On CSWDO application form, date format is MM/DD/YYYY (or MM/DD/YY)
 
-                if (p2 <= 12 && p1 <= DateTime.DaysInMonth(yr, p2))
+                if (p1 <= 12 && p2 <= DateTime.DaysInMonth(yr, p1))
+
+                {
+
+                    result = new DateTime(yr, p1, p2);
+
+                    return true;
+
+                }
+
+                else if (p2 <= 12 && p1 <= DateTime.DaysInMonth(yr, p2))
 
                 {
 
@@ -1414,7 +1437,29 @@ namespace SOLUM_UI.Services
 
             if (DateTime.TryParse(s, out result))
 
-                return true;
+            {
+
+                if (result.Year >= 1900 && result.Year <= DateTime.Today.Year && result.Date <= DateTime.Today)
+
+                    return true;
+
+                result = DateTime.MinValue;
+
+                return false;
+
+            }
+
+
+
+            if (result != DateTime.MinValue && (result.Year < 1900 || result.Year > DateTime.Today.Year || result.Date > DateTime.Today))
+
+            {
+
+                result = DateTime.MinValue;
+
+                return false;
+
+            }
 
 
 
@@ -1562,19 +1607,19 @@ namespace SOLUM_UI.Services
 
 
 
-            if (TryParseOcrDate(s, out DateTime dt))
+            if (TryParseOcrDate(s, out DateTime dt) && dt.Year >= 1900 && dt.Date <= DateTime.Today)
 
             {
 
                 parsedDate = dt;
 
-                return dt.ToString("dd/MM/yyyy");
+                return dt.ToString("MM/dd/yyyy");
 
             }
 
 
 
-            return s;
+            return string.Empty;
 
         }
 

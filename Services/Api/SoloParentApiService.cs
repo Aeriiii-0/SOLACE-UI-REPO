@@ -577,7 +577,7 @@ namespace SOLUM_UI.Services.Api
 
                             Relationship = string.IsNullOrWhiteSpace(fm.Relationship) ? "Child" : fm.Relationship,
 
-                            EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "Student" : fm.EducationEmployment,
+                            EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "None" : fm.EducationEmployment,
 
                             Income = ParseDecimal(fm.Income),
 
@@ -619,7 +619,7 @@ namespace SOLUM_UI.Services.Api
 
                             Relationship = string.IsNullOrWhiteSpace(fm.Relationship) ? "Child" : fm.Relationship,
 
-                            EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "Student" : fm.EducationEmployment,
+                            EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "None" : fm.EducationEmployment,
 
                             Income = ParseDecimal(fm.Income),
 
@@ -782,7 +782,7 @@ namespace SOLUM_UI.Services.Api
 
                             Relationship = string.IsNullOrWhiteSpace(fm.Relationship) ? "Child" : fm.Relationship,
 
-                            EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "Student" : fm.EducationEmployment,
+                            EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "None" : fm.EducationEmployment,
 
                             Income = ParseDecimal(fm.Income),
 
@@ -824,7 +824,7 @@ namespace SOLUM_UI.Services.Api
 
                             Relationship = string.IsNullOrWhiteSpace(fm.Relationship) ? "Child" : fm.Relationship,
 
-                            EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "Student" : fm.EducationEmployment,
+                            EducationalLevel = string.IsNullOrWhiteSpace(fm.EducationEmployment) ? "None" : fm.EducationEmployment,
 
                             Income = ParseDecimal(fm.Income),
 
@@ -1888,7 +1888,7 @@ namespace SOLUM_UI.Services.Api
 
                 Relationship = !string.IsNullOrWhiteSpace(fm.Relationship) ? fm.Relationship.Trim() : "Child",
 
-                EducationalLevel = !string.IsNullOrWhiteSpace(fm.EducationEmployment) ? fm.EducationEmployment.Trim() : "Student",
+                EducationalLevel = !string.IsNullOrWhiteSpace(fm.EducationEmployment) ? fm.EducationEmployment.Trim() : "None",
 
                 Income = ParseDecimal(fm.Income),
 

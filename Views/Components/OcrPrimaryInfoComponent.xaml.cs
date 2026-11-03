@@ -186,7 +186,7 @@ namespace SOLUM_UI.Views.Components
         {
             if (resp?.Fields != null && resp.Fields.TryGetValue(key, out var f))
             {
-                string val = f.Value ?? string.Empty;
+                string val = f.Value?.Trim() ?? string.Empty;
                 if (OcrService.IsOcrNotApplicable(val))
                     return string.Empty;
                 return val;
@@ -386,6 +386,8 @@ namespace SOLUM_UI.Views.Components
         {
             UpdateAge(DpBirthdate.SelectedDate);
             ClearDateError(DpBirthdate, ErrBirthdate);
+            DuplicateCheckPassed = false;
+            if (DuplicateBannerPanel != null) DuplicateBannerPanel.Visibility = Visibility.Collapsed;
         }
 
         private void DatePicker_DateValidationError(object sender, DatePickerDateValidationErrorEventArgs e)
@@ -413,7 +415,7 @@ namespace SOLUM_UI.Views.Components
                         {
                             dp.SelectedDate = dt;
                         }
-                        tb.Text = dt.ToString("dd/MM/yyyy");
+                        tb.Text = dt.ToString("MM/dd/yyyy");
                     }
                 }
             }
@@ -438,6 +440,8 @@ namespace SOLUM_UI.Views.Components
             { MarkDateError(DpBirthdate, ErrBirthdate, "Required."); missing.Add("Birthdate"); ok = false; }
             else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today)
             { MarkDateError(DpBirthdate, ErrBirthdate, "Cannot be in the future."); missing.Add("Birthdate (future date)"); ok = false; }
+            else if (DpBirthdate.SelectedDate.Value.Year < 1900)
+            { MarkDateError(DpBirthdate, ErrBirthdate, "Year must be 1900 or later."); missing.Add("Birthdate (year 1900+)"); ok = false; }
             else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today.AddYears(-15))
             { MarkDateError(DpBirthdate, ErrBirthdate, "Must be at least 15 years old."); missing.Add("Birthdate (must be 15+)"); ok = false; }
 
@@ -452,10 +456,34 @@ namespace SOLUM_UI.Views.Components
             return ok;
         }
 
+        private void StartCheckingSpinner()
+        {
+            if (CheckingBannerPanel != null) CheckingBannerPanel.Visibility = Visibility.Visible;
+            if (CheckingSpinnerRotate != null)
+            {
+                var anim = new System.Windows.Media.Animation.DoubleAnimation(0, 360, TimeSpan.FromSeconds(1.2))
+                {
+                    RepeatBehavior = System.Windows.Media.Animation.RepeatBehavior.Forever
+                };
+                CheckingSpinnerRotate.BeginAnimation(RotateTransform.AngleProperty, anim);
+            }
+        }
+
+        private void StopCheckingSpinner()
+        {
+            if (CheckingSpinnerRotate != null)
+            {
+                CheckingSpinnerRotate.BeginAnimation(RotateTransform.AngleProperty, null);
+                CheckingSpinnerRotate.Angle = 0;
+            }
+            if (CheckingBannerPanel != null) CheckingBannerPanel.Visibility = Visibility.Collapsed;
+        }
+
         public async Task<bool> CheckDuplicateAsync()
         {
             if (DuplicateCheckPassed) return true;
 
+            StartCheckingSpinner();
             try
             {
                 string fName = TxtFirstName.Text.Trim();
@@ -517,8 +545,35 @@ namespace SOLUM_UI.Views.Components
             {
                 // If API/database check fails, allow user to proceed
             }
+            finally
+            {
+                StopCheckingSpinner();
+            }
 
+            DuplicateCheckPassed = true;
             return true;
+        }
+
+        public void FocusFirstInvalidField()
+        {
+            if (string.IsNullOrWhiteSpace(TxtLastName.Text)) { TxtLastName.Focus(); TxtLastName.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(TxtFirstName.Text)) { TxtFirstName.Focus(); TxtFirstName.BringIntoView(); return; }
+            if (!DpBirthdate.SelectedDate.HasValue ||
+                DpBirthdate.SelectedDate.Value.Date > DateTime.Today ||
+                DpBirthdate.SelectedDate.Value.Year < 1900 ||
+                DpBirthdate.SelectedDate.Value.Date > DateTime.Today.AddYears(-15))
+            {
+                DpBirthdate.Focus();
+                DpBirthdate.BringIntoView();
+                return;
+            }
+            string philsysRaw = Regex.Replace(TxtPhilSys.Text ?? "", @"\D", "");
+            if (!string.IsNullOrWhiteSpace(philsysRaw) && philsysRaw.Length != 16)
+            {
+                TxtPhilSys.Focus();
+                TxtPhilSys.BringIntoView();
+                return;
+            }
         }
 
         private void ViewExistingRecord_Click(object sender, RoutedEventArgs e)
@@ -555,13 +610,42 @@ namespace SOLUM_UI.Views.Components
         {
             if (dp != null)
             {
-                dp.BorderBrush = ErrorBrush;
-                dp.BorderThickness = new Thickness(1.5);
+                if (dp.Parent is Border border)
+                {
+                    border.BorderBrush = ErrorBrush;
+                    border.BorderThickness = new Thickness(1.5);
+                }
+                else
+                {
+                    dp.BorderBrush = ErrorBrush;
+                    dp.BorderThickness = new Thickness(1.5);
+                }
             }
             if (lbl != null)
             {
                 lbl.Text = msg;
                 lbl.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void ClearDateError(DatePicker dp, TextBlock lbl)
+        {
+            if (lbl != null && lbl.Visibility != Visibility.Collapsed)
+            {
+                lbl.Visibility = Visibility.Collapsed;
+                if (dp != null)
+                {
+                    if (dp.Parent is Border border)
+                    {
+                        border.BorderBrush = DefaultBrush;
+                        border.BorderThickness = DefaultThickness;
+                    }
+                    else
+                    {
+                        dp.BorderBrush = DefaultBrush;
+                        dp.BorderThickness = DefaultThickness;
+                    }
+                }
             }
         }
 
@@ -578,18 +662,7 @@ namespace SOLUM_UI.Views.Components
             }
         }
 
-        private void ClearDateError(DatePicker dp, TextBlock lbl)
-        {
-            if (dp != null)
-            {
-                dp.BorderBrush = DefaultBrush;
-                dp.BorderThickness = DefaultThickness;
-            }
-            if (lbl != null)
-            {
-                lbl.Visibility = Visibility.Collapsed;
-            }
-        }
+
 
         #endregion
     }
