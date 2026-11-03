@@ -1,0 +1,42 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Colors.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- Corner radii -->
+    <CornerRadius x:Key="DsRadiusSm">6</CornerRadius>
+    <CornerRadius x:Key="DsRadiusMd">8</CornerRadius>
+    <CornerRadius x:Key="DsRadiusLg">12</CornerRadius>
+    <CornerRadius x:Key="DsRadiusPill">18</CornerRadius>
+
+    <!-- Elevation: keep opacity low, depth comes from blur not darkness -->
+    <DropShadowEffect x:Key="DsShadowSm" Color="#1D1619" BlurRadius="8" ShadowDepth="1" Direction="270" Opacity="0.06"/>
+    <DropShadowEffect x:Key="DsShadowMd" Color="#1D1619" BlurRadius="16" ShadowDepth="3" Direction="270" Opacity="0.08"/>
+    <DropShadowEffect x:Key="DsShadowLg" Color="#1D1619" BlurRadius="28" ShadowDepth="8" Direction="270" Opacity="0.14"/>
+    <DropShadowEffect x:Key="DsShadowBrand" Color="#702943" BlurRadius="12" ShadowDepth="3" Direction="270" Opacity="0.22"/>
+
+    <!-- Keyboard focus visual: a rounded accent ring instead of the default dotted rectangle -->
+    <Style x:Key="DsFocusVisual">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Rectangle Margin="-3" RadiusX="11" RadiusY="11"
+                               Stroke="{StaticResource DsFocusRingBrush}" StrokeThickness="2"
+                               SnapsToDevicePixels="True" IsHitTestVisible="False"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Card surface -->
+    <Style x:Key="DsCard" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource DsSurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DsBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource DsRadiusLg}"/>
+        <Setter Property="Effect" Value="{StaticResource DsShadowSm}"/>
+    </Style>
+
+</ResourceDictionary>

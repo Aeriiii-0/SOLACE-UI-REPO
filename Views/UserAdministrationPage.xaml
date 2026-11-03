@@ -87,7 +87,7 @@
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="#111111"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D0D0D0"/>
+            <Setter Property="BorderBrush" Value="#E0D0D5"/>
             <Setter Property="BorderThickness" Value="1.5"/>
             <Setter Property="Padding" Value="12,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -96,7 +96,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid>
-                            <Border x:Name="CmbBg" Background="White" BorderBrush="#D0D0D0" BorderThickness="1.5" CornerRadius="8">
+                            <Border x:Name="CmbBg" Background="White" BorderBrush="#E0D0D5" BorderThickness="1.5" CornerRadius="8">
                                 <Grid Margin="12,0,36,0">
                                     <ContentPresenter x:Name="ContentSite" Content="{TemplateBinding SelectionBoxItem}"
                                                       ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
@@ -111,10 +111,10 @@
                                   Data="M7,10L12,15L17,10H7Z" Fill="#702943" Stretch="Uniform" Width="12" Height="12" IsHitTestVisible="False"/>
                             <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
                                    AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                                <Border Background="White" CornerRadius="8" BorderBrush="#D0D0D0" BorderThickness="1"
+                                <Border Background="White" CornerRadius="8" BorderBrush="#E0D0D5" BorderThickness="1"
                                         MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200" Margin="0,2,0,0">
                                     <Border.Effect>
-                                        <DropShadowEffect Color="#000000" BlurRadius="10" ShadowDepth="2" Opacity="0.08"/>
+                                        <DropShadowEffect Color="#702943" BlurRadius="12" ShadowDepth="2" Opacity="0.10"/>
                                     </Border.Effect>
                                     <ScrollViewer VerticalScrollBarVisibility="Auto"><ItemsPresenter/></ScrollViewer>
                                 </Border>
@@ -122,10 +122,12 @@
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="CmbBg" Property="BorderBrush" Value="#BDBDBD"/>
+                                <Setter TargetName="CmbBg" Property="BorderBrush" Value="#702943"/>
+                                <Setter TargetName="CmbBg" Property="Background" Value="#FAF2F5"/>
                             </Trigger>
                             <Trigger Property="IsDropDownOpen" Value="True">
                                 <Setter TargetName="CmbBg" Property="BorderBrush" Value="#702943"/>
+                                <Setter TargetName="CmbBg" Property="Background" Value="#FAF2F5"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -138,15 +140,16 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ComboBoxItem">
-                                <Border x:Name="ItemBg" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="5" Margin="3,1">
+                                <Border x:Name="ItemBg" Background="Transparent" Padding="{TemplateBinding Padding}" CornerRadius="6" Margin="3,1">
                                     <ContentPresenter/>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="ItemBg" Property="Background" Value="#FDF0F3"/>
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#FAF2F5"/>
+                                        <Setter Property="Foreground" Value="#702943"/>
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="ItemBg" Property="Background" Value="#F0E4E8"/>
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#F3E5EB"/>
                                         <Setter Property="Foreground" Value="#702943"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </Trigger>
@@ -156,6 +159,129 @@
                     </Setter>
                 </Style>
             </Style.Resources>
+        </Style>
+
+        <!-- On-Theme Filter ComboBox (Matching Search Box Pill Styling) -->
+        <Style x:Key="FilterComboBox" TargetType="ComboBox">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E0D0D5"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="22">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="2" Opacity="0.06"/>
+                                </Border.Effect>
+                                <Grid Margin="16,0,14,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="20"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter x:Name="ContentSite"
+                                                      Grid.Column="0"
+                                                      Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                      ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                      IsHitTestVisible="False"
+                                                      VerticalAlignment="Center"/>
+                                    <Path Grid.Column="1"
+                                          Data="M7,10L12,15L17,10H7Z"
+                                          Fill="#702943" Stretch="Uniform"
+                                          Width="11" Height="11"
+                                          HorizontalAlignment="Right" VerticalAlignment="Center"
+                                          IsHitTestVisible="False"/>
+                                    <ToggleButton Grid.ColumnSpan="2"
+                                                  Focusable="False"
+                                                  IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                                  ClickMode="Press"
+                                                  Cursor="Hand">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent"/>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
+
+                            <Popup x:Name="PART_Popup"
+                                   Placement="Bottom"
+                                   VerticalOffset="4"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Border Background="White" CornerRadius="14"
+                                        BorderBrush="#E0D0D5" BorderThickness="1.5"
+                                        MinWidth="{TemplateBinding ActualWidth}"
+                                        MaxHeight="240" Padding="4">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#702943" BlurRadius="14" ShadowDepth="3" Opacity="0.12"/>
+                                    </Border.Effect>
+                                    <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Auto">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#702943"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#FAF2F5"/>
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#702943"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#FAF2F5"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="FontSize" Value="13"/>
+                        <Setter Property="FontFamily" Value="Segoe UI"/>
+                        <Setter Property="Foreground" Value="#333333"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ComboBoxItem">
+                                    <Border x:Name="ItemBg" Background="Transparent"
+                                            CornerRadius="6" Margin="2,1" Padding="14,8">
+                                        <ContentPresenter VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsHighlighted" Value="True">
+                                            <Setter TargetName="ItemBg" Property="Background" Value="#FAF2F5"/>
+                                            <Setter Property="Foreground" Value="#702943"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="ItemBg" Property="Background" Value="#F3E5EB"/>
+                                            <Setter Property="Foreground" Value="#702943"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="ErrorText" TargetType="TextBlock">
@@ -308,7 +434,6 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- Row 0: Page Title & Header -->
@@ -458,38 +583,44 @@
                     </Grid>
                 </Border>
 
-                                <!-- Role Filter -->
-                <Border Grid.Column="1" Margin="12,0,0,0" Height="44">
-                    <ComboBox x:Name="CmbRoleFilter" Width="170" Height="44"
-                              Style="{StaticResource FormCombo}"
-                              SelectionChanged="CmbRoleFilter_SelectionChanged">
-                        <ComboBoxItem Content="All Roles" Tag="ALL" IsSelected="True"/>
-                        <ComboBoxItem x:Name="CmbFilterRoleAdmin" Content="Admin" Tag="Admin"/>
-                        <ComboBoxItem Content="Caseworker" Tag="Encoder"/>
-                        <ComboBoxItem Content="Barangay Secretary" Tag="BarangaySecretary"/>
-                        <ComboBoxItem x:Name="CmbFilterRoleSuperAdmin" Content="SuperAdmin" Tag="SuperAdmin"/>
-                    </ComboBox>
-                </Border>
+                                <!-- Role Filter (On-Theme) -->
+                <ComboBox x:Name="CmbRoleFilter" Grid.Column="1" Width="175" Height="44"
+                          Margin="12,0,0,0"
+                          Style="{StaticResource FilterComboBox}"
+                          SelectionChanged="CmbRoleFilter_SelectionChanged">
+                    <ComboBoxItem Content="All Roles" Tag="ALL" IsSelected="True"/>
+                    <ComboBoxItem x:Name="CmbFilterRoleAdmin" Content="Admin" Tag="Admin"/>
+                    <ComboBoxItem Content="Caseworker" Tag="Encoder"/>
+                    <ComboBoxItem Content="Barangay Secretary" Tag="BarangaySecretary"/>
+                    <ComboBoxItem x:Name="CmbFilterRoleSuperAdmin" Content="SuperAdmin" Tag="SuperAdmin"/>
+                </ComboBox>
 
-                <!-- Status Filter -->
-                <Border Grid.Column="2" Margin="12,0,0,0" Height="44">
-                    <ComboBox x:Name="CmbUserStatus" Width="140" Height="44"
-                              Style="{StaticResource FormCombo}"
-                              SelectionChanged="CmbUserStatus_SelectionChanged">
-                        <ComboBoxItem Content="All Status" Tag="ALL" IsSelected="True"/>
-                        <ComboBoxItem Content="Active" Tag="ACTIVE"/>
-                        <ComboBoxItem Content="Disabled" Tag="DISABLED"/>
-                    </ComboBox>
-                </Border>
+                <!-- Status Filter (On-Theme) -->
+                <ComboBox x:Name="CmbUserStatus" Grid.Column="2" Width="145" Height="44"
+                          Margin="12,0,0,0"
+                          Style="{StaticResource FilterComboBox}"
+                          SelectionChanged="CmbUserStatus_SelectionChanged">
+                    <ComboBoxItem Content="All Status" Tag="ALL" IsSelected="True"/>
+                    <ComboBoxItem Content="Active" Tag="ACTIVE"/>
+                    <ComboBoxItem Content="Disabled" Tag="DISABLED"/>
+                </ComboBox>
             </Grid>
 
             <!-- Row 2: Unified Modern Table Card -->
-            <Border Grid.Row="2" Margin="24,6,24,14" Background="White"
+            <Border Grid.Row="2" Margin="24,4,24,20" Background="White"
                     BorderBrush="#E8D4DA" BorderThickness="1.5" CornerRadius="14"
-                    ClipToBounds="True">
+                    ClipToBounds="True" VerticalAlignment="Stretch">
                 <Border.Effect>
                     <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="2" Opacity="0.06"/>
                 </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Table Content (Header + Body) -->
+                    <Grid Grid.Row="0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="46"/>
@@ -803,33 +934,76 @@
                                                             Panel.ZIndex="10"/>
                     </Grid>
                 </Grid>
-            </Border>
+                    </Grid>
 
-            <!-- Row 3: Modern Pagination Footer (Subsidy Recco Style) -->
-            <Border Grid.Row="3" Margin="24,0,24,20" Background="#FAFAFA" BorderBrush="#EBD8DE" BorderThickness="1" CornerRadius="8" Height="42" Padding="14,0">
-                <Grid VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Ellipse Width="7" Height="7" Fill="#27AE60" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <TextBlock x:Name="TxtUsersSummary" Text="0 total users registered" FontSize="11" Foreground="#334155" VerticalAlignment="Center"/>
-                        <TextBlock Text=" • " FontSize="11" Foreground="#CBD5E1" Margin="4,0" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="TxtUsersPageSummary" Text="Showing 0–0 of 0" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button x:Name="BtnPrevPage" Style="{StaticResource PagerBtn}" Margin="0,0,6,0" Click="BtnPrevPage_Click" ToolTip="Previous page">
-                            <TextBlock Text="‹ Previous" FontSize="10.5" FontWeight="SemiBold"/>
-                        </Button>
-                        <Border Background="#F1F5F9" CornerRadius="6" Padding="8,4" Margin="0,0,6,0" VerticalAlignment="Center">
-                            <TextBlock x:Name="TxtPageInfo" Text="1 of 1" FontSize="10.5" FontWeight="Bold" Foreground="#702943"/>
-                        </Border>
-                        <Button x:Name="BtnNextPage" Style="{StaticResource PagerBtn}" Click="BtnNextPage_Click" ToolTip="Next page">
-                            <TextBlock Text="Next ›" FontSize="10.5" FontWeight="SemiBold"/>
-                        </Button>
-                    </StackPanel>
+                    <!-- Integrated Card Footer for Pagination -->
+                    <Border Grid.Row="1" Background="#FAF6F8" BorderBrush="#EFE4E8" BorderThickness="0,1.2,0,0" Padding="18,10">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                                                        <!-- Dynamic Record Count on Left (Hidden) -->
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Visibility="Collapsed">
+                                <TextBlock x:Name="TxtUsersSummary" Visibility="Collapsed"/>
+                                <TextBlock x:Name="TxtUsersPageSummary" Visibility="Collapsed"/>
+                            </StackPanel>
+
+                            <!-- Dead-Center Navigation Across the Full Width -->
+                            <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Button x:Name="BtnPrevPage" Width="105" Height="34" Cursor="Hand" Click="BtnPrevPage_Click" Margin="0,0,10,0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bg" Background="White" CornerRadius="17" BorderBrush="#E0D0D5" BorderThickness="1.5">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
+                                                          Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
+                                                    <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
+                                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Border Background="#FAF2F5" CornerRadius="17" Height="34" Padding="18,0"
+                                        BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="0,0,10,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="TxtPageInfo" Text="Page 1 of 1" FontFamily="Segoe UI" FontSize="12"
+                                               FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                                </Border>
+                                <Button x:Name="BtnNextPage" Width="105" Height="34" Cursor="Hand" Click="BtnNextPage_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bg" Background="White" CornerRadius="17" BorderBrush="#E0D0D5" BorderThickness="1.5">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                                    <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
+                                                          Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
+                                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Border>
         </Grid>

@@ -50,3 +50,6 @@ OcrService/__pycache__/
 OcrService/build/
 OcrService/dist/
 *.pyc
+
+*.zip
+Output/

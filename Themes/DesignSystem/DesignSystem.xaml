@@ -1,0 +1,24 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        SOLUM Design System - single entry point.
+        Merge THIS file (not the individual files) wherever the system is needed:
+
+            <ResourceDictionary Source="Themes/DesignSystem/DesignSystem.xaml"/>
+
+        Styles are opt-in (keyed). Nothing here restyles a control implicitly, so merging it
+        cannot change the look of any existing view until that view references a Ds* style.
+    -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Colors.xaml"/>
+        <ResourceDictionary Source="Typography.xaml"/>
+        <ResourceDictionary Source="Effects.xaml"/>
+        <ResourceDictionary Source="ScrollStyles.xaml"/>
+        <ResourceDictionary Source="ButtonStyles.xaml"/>
+        <ResourceDictionary Source="TextBoxStyles.xaml"/>
+        <ResourceDictionary Source="ComboBoxStyles.xaml"/>
+        <ResourceDictionary Source="DataStyles.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>

@@ -604,6 +604,32 @@
                                 <TextBlock Text="Step 1: Civil Status &amp; Livelihood" Style="{StaticResource SectionHeading}" Margin="0,0,0,4"/>
                                 <TextBlock Text="Verify or update marital status and current household income. These factors determine ongoing subsidy eligibility." Style="{StaticResource HelperText}" Margin="0,0,0,16"/>
 
+                                                                <!-- Optional Renewal Filing Date Section -->
+                                <Border Style="{StaticResource CardSection}" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <Border Style="{StaticResource CardSectionHeader}">
+                                            <TextBlock Text="RENEWAL FILING DATE" Style="{StaticResource SectionLabel}"/>
+                                        </Border>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="220"/>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Renewal Filing Date" Style="{StaticResource FieldLabel}"/>
+                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White" Height="34">
+                                                    <DatePicker x:Name="DpRenewalDate" Style="{StaticResource FormDateSm}"/>
+                                                </Border>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,18,0,0">
+                                                <TextBlock Text="For backfilling previous renewals, enter the date the renewal was physically filed."
+                                                           Style="{StaticResource HelperText}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
                                         <Border Style="{StaticResource CardSectionHeader}">

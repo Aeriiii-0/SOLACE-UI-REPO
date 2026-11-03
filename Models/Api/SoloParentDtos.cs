@@ -160,16 +160,19 @@ namespace SOLUM_UI.Models.Api
         EmergencyContactInfo EmergencyContact { get; set; }
         ProblemPresentedDetails ProblemPresented { get; set; }
 
-         bool IsLGBT { get; set; }
-         bool IsPantawidBeneficiary { get; set; }
-         bool IsIndigenous { get; set; }
+        bool IsLGBT { get; set; }
+        bool IsPantawidBeneficiary { get; set; }
+        bool IsIndigenous { get; set; }
 
-         string NeedsAndProblems { get; set; }
-         string OtherSourcesOfIncome { get; set; }
+        string NeedsAndProblems { get; set; }
+        string OtherSourcesOfIncome { get; set; }
     }
 
     public class CreateSoloParentRequest : ISoloParentRequest
     {
+        /// <summary>Original application filing date (YYYY-MM-DD). If omitted, backend defaults to today.</summary>
+        public string ApplicationDate { get; set; }
+
         public PersonalInfo PersonalInfo { get; set; } = new PersonalInfo();
         public EmploymentInfo Employment { get; set; } = new EmploymentInfo();
         public ContactInfo ContactDetails { get; set; } = new ContactInfo();
@@ -189,6 +192,10 @@ namespace SOLUM_UI.Models.Api
     public class UpdateSoloParentRequest : ISoloParentRequest
     {
         public Guid Id { get; set; }
+
+        /// <summary>Corrected application filing date (YYYY-MM-DD).</summary>
+        public string ApplicationDate { get; set; }
+
         public PersonalInfo PersonalInfo { get; set; } = new PersonalInfo();
         public EmploymentInfo Employment { get; set; } = new EmploymentInfo();
         public ContactInfo ContactDetails { get; set; } = new ContactInfo();
@@ -240,6 +247,10 @@ namespace SOLUM_UI.Models.Api
         public bool IsPantawidBeneficiary { get; set; }
         public bool IsIndigenous { get; set; }
         public string SubsidyEligibility { get; set; }
+
+        /// <summary>Original application filing date (YYYY-MM-DD).</summary>
+        public string ApplicationDate { get; set; }
+
         public DateTime DateCreated { get; set; }
         public DateTime? CreatedAt { get; set; }
         public string CreatedBy { get; set; }
@@ -269,6 +280,9 @@ namespace SOLUM_UI.Models.Api
         public string NeedsAndProblems { get; set; }
         public string OtherSourcesOfIncome { get; set; }
 
+        /// <summary>Original application filing date (YYYY-MM-DD).</summary>
+        public string ApplicationDate { get; set; }
+
         public DateTime DateCreated { get; set; }
         public DateTime? CreatedAt { get; set; }
         public string CreatedBy { get; set; }
@@ -290,6 +304,10 @@ namespace SOLUM_UI.Models.Api
         public AddressInfo AddressDetails { get; set; } = new AddressInfo();
         public EmergencyContactInfo EmergencyContact { get; set; } = new EmergencyContactInfo();
         public ProblemPresentedDetails ProblemPresented { get; set; } = new ProblemPresentedDetails();
+
+        /// <summary>Original application filing date (YYYY-MM-DD).</summary>
+        public string ApplicationDate { get; set; }
+
         public DateTime DateCreated { get; set; }
         public DateTime? CreatedAt { get; set; }
         public string CreatedBy { get; set; }
@@ -330,6 +348,9 @@ namespace SOLUM_UI.Models.Api
     /// </summary>
     public class RenewSoloParentRequest
     {
+        /// <summary>Physical renewal filing date (YYYY-MM-DD). If omitted, defaults to today.</summary>
+        public string RenewalDate { get; set; }
+
         public string CivilStatus { get; set; }
         public EmploymentInfo Employment { get; set; }
         public RenewFamilyMembersRequest FamilyMembers { get; set; }

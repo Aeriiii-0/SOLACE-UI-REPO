@@ -25,6 +25,6 @@ namespace SOLUM_UI.Services.Interfaces
         SoloParentRecord MapToRecord(SoloParentDto dto);
         CreateSoloParentRequest MapToCreateRequest(SoloParentRecord record);
         UpdateSoloParentRequest MapToUpdateRequest(Guid id, SoloParentRecord record, SoloParentDto existingDto = null);
-        RenewSoloParentRequest MapToRenewRequest(Guid id, SoloParentRecord record, SoloParentDto existingDto = null);
+        RenewSoloParentRequest MapToRenewRequest(Guid id, SoloParentRecord record, SoloParentDto existingDto = null, DateTime? renewalDate = null);
     }
 }

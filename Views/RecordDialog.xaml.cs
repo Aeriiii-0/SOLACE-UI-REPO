@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -430,6 +430,8 @@ namespace SOLUM_UI
             _familyRowData.CollectionChanged += (s, e) => ScheduleUpdateSaveButtonState();
 
             SOLUM_UI.Services.FormHelper.BindSameAsApplicantAddress(ChkSameAsApplicant, TxtAddress, TxtEmergencyAddress);
+            DpDateOfApplication.DisplayDateEnd = DateTime.Today;
+            UpdateValidityPreview();
         }
 
         /// <summary>
@@ -1054,6 +1056,7 @@ namespace SOLUM_UI
 
             if (r.DateOfBirth != DateTime.MinValue) DpBirthdate.SelectedDate = r.DateOfBirth;
             DpDateOfApplication.SelectedDate = r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication : DateTime.Today;
+            UpdateValidityPreview();
 
             SetComboByContent(CmbSex,         r.Sex);
             SetComboByContent(CmbCivilStatus, r.CivilStatus);
@@ -1607,10 +1610,74 @@ namespace SOLUM_UI
             }
         }
 
+                private void DpDateOfApplication_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateValidityPreview();
+            if (DpDateOfApplication.SelectedDate.HasValue)
+            {
+                if (DpDateOfApplication.SelectedDate.Value.Date > DateTime.Today)
+                {
+                    MarkDateError(DpDateOfApplication, ErrDateOfApplication, "Cannot be in the future.");
+                }
+                else if (DpBirthdate.SelectedDate.HasValue && DpDateOfApplication.SelectedDate.Value.Date < DpBirthdate.SelectedDate.Value.Date)
+                {
+                    MarkDateError(DpDateOfApplication, ErrDateOfApplication, "Cannot precede applicant's birthdate.");
+                }
+                else
+                {
+                    ClearDateError(DpDateOfApplication, ErrDateOfApplication);
+                }
+            }
+        }
+
+        private void UpdateValidityPreview()
+        {
+            if (BadgeValidityPreview == null || TxtValidityPreview == null) return;
+
+            DateTime appDate = DpDateOfApplication?.SelectedDate ?? DateTime.Today;
+            DateTime expiresAt = appDate.AddYears(1);
+            DateTime today = DateTime.Today;
+
+            if (expiresAt < today)
+            {
+                BadgeValidityPreview.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xEB, 0xEE));
+                BadgeValidityPreview.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xEF, 0x9A, 0x9A));
+                TxtValidityPreview.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xC6, 0x28, 0x28));
+                TxtValidityPreview.Text = $"Backlog Record (Validity expired on {expiresAt:yyyy-MM-dd} - will require renewal)";
+            }
+            else
+            {
+                BadgeValidityPreview.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE8, 0xF5, 0xE9));
+                BadgeValidityPreview.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x81, 0xC7, 0x84));
+                TxtValidityPreview.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x2E, 0x7D, 0x32));
+                TxtValidityPreview.Text = $"Valid until {expiresAt:yyyy-MM-dd} (Active)";
+            }
+        }
+
         private bool ValidateStep1()
         {
             bool ok = true;
             var missing = new List<string>();
+
+            ClearDateError(DpDateOfApplication, ErrDateOfApplication);
+            if (!DpDateOfApplication.SelectedDate.HasValue)
+            {
+                MarkDateError(DpDateOfApplication, ErrDateOfApplication, "Required.");
+                missing.Add("Date of Application");
+                ok = false;
+            }
+            else if (DpDateOfApplication.SelectedDate.Value.Date > DateTime.Today)
+            {
+                MarkDateError(DpDateOfApplication, ErrDateOfApplication, "Cannot be in the future.");
+                missing.Add("Date of Application (future date)");
+                ok = false;
+            }
+            else if (DpBirthdate.SelectedDate.HasValue && DpDateOfApplication.SelectedDate.Value.Date < DpBirthdate.SelectedDate.Value.Date)
+            {
+                MarkDateError(DpDateOfApplication, ErrDateOfApplication, "Cannot precede applicant's birthdate.");
+                missing.Add("Date of Application (precedes birthdate)");
+                ok = false;
+            }
 
             if (string.IsNullOrWhiteSpace(TxtLastName.Text))
             { MarkError(TxtLastName, ErrLastName, "Required."); missing.Add("Last Name"); ok = false; }

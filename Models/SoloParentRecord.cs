@@ -68,6 +68,8 @@ namespace SOLUM_UI.Models
         public bool     IsNewApplicant    { get; set; }
         public bool     IsRenewal         { get; set; }
         public DateTime DateOfApplication { get; set; }
+        public DateTime DateCreated { get; set; }
+        public DateTime? RenewalFilingDate { get; set; }
         public DateTime? CurrentTermExpiresAt { get; set; }
         public List<SOLUM_UI.Models.Api.RecordTermDto> RecordTerms { get; set; } = new List<SOLUM_UI.Models.Api.RecordTermDto>();
 
@@ -158,6 +160,9 @@ namespace SOLUM_UI.Models
         // helper
         public string LastUpdatedFormatted => LastUpdated != DateTime.MinValue ? LastUpdated.ToString("yyyy-MM-dd") : "—";
         public string DateOfBirthFormatted => DateOfBirth != DateTime.MinValue ? DateOfBirth.ToString("yyyy-MM-dd") : "—";
+        public string ApplicationDateFormatted => DateOfApplication != DateTime.MinValue ? DateOfApplication.ToString("MMM dd, yyyy") : "—";
+        public string ApplicationDateIso => DateOfApplication != DateTime.MinValue ? DateOfApplication.ToString("yyyy-MM-dd") : "—";
+        public string DateCreatedIso => DateCreated != DateTime.MinValue ? DateCreated.ToString("yyyy-MM-dd") : (LastUpdated != DateTime.MinValue ? LastUpdated.ToString("yyyy-MM-dd") : "—");
         public string FullName             => $"{Surname}, {FirstName} {MiddleName}".Trim();
 
         public string EmploymentStatusDisplay

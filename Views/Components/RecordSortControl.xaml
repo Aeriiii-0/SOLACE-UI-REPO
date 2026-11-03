@@ -94,7 +94,7 @@
                         </Border>
 
                         <!-- Last Updated / Date Created -->
-                        <Border x:Name="OptLastUpdated" CornerRadius="8" Cursor="Hand" Padding="10,7"
+                        <Border x:Name="OptLastUpdated" CornerRadius="8" Cursor="Hand" Padding="10,7" Margin="0,0,0,2"
                                 MouseLeftButtonDown="SortOpt_Click" Tag="LastUpdated">
                             <Grid>
                                 <StackPanel>
@@ -102,6 +102,19 @@
                                     <TextBlock x:Name="TxtLastUpdatedSubtitle" Text="Recently created first" FontSize="10.5" Foreground="#777777"/>
                                 </StackPanel>
                                 <TextBlock x:Name="IndLastUpdated" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Application Date -->
+                        <Border x:Name="OptApplicationDate" CornerRadius="8" Cursor="Hand" Padding="10,7"
+                                MouseLeftButtonDown="SortOpt_Click" Tag="ApplicationDate">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Application Date" FontSize="12.5" FontWeight="SemiBold" Foreground="#222222"/>
+                                    <TextBlock x:Name="TxtApplicationDateSubtitle" Text="Latest filed first" FontSize="10.5" Foreground="#777777"/>
+                                </StackPanel>
+                                <TextBlock x:Name="IndApplicationDate" Text="✓" FontSize="13" FontWeight="Bold" Foreground="#702943"
                                            HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed"/>
                             </Grid>
                         </Border>

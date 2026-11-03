@@ -8,7 +8,8 @@ namespace SOLUM_UI.Services
     public enum RecordSortField
     {
         Barangay,
-        LastUpdated
+        LastUpdated,
+        ApplicationDate
     }
 
     public class RecordSortEventArgs : EventArgs
@@ -57,6 +58,12 @@ namespace SOLUM_UI.Services
                         : records.OrderByDescending(GetLastUpdatedDate).ThenBy(r => r.Surname);
                     break;
 
+                case RecordSortField.ApplicationDate:
+                    ordered = isAscending
+                        ? records.OrderBy(r => r.DateOfApplication).ThenBy(r => r.Surname)
+                        : records.OrderByDescending(r => r.DateOfApplication).ThenBy(r => r.Surname);
+                    break;
+
                 case RecordSortField.Barangay:
                 default:
                     ordered = isAscending
@@ -76,6 +83,8 @@ namespace SOLUM_UI.Services
                 case RecordSortField.LastUpdated:
                     // In backend API, "datecreated" is used for record timestamp
                     return ("datecreated", order);
+                case RecordSortField.ApplicationDate:
+                    return ("applicationdate", order);
                 case RecordSortField.Barangay:
                 default:
                     return ("barangay", order);
