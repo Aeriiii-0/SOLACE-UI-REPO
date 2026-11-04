@@ -87,9 +87,21 @@ namespace SOLUM_UI
             // Ensure proper cleanup when window closes
             this.Closed += (s, e) =>
             {
-                this.DataContext = null;
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                try
+                {
+                    // Clear all data bindings and content
+                    this.DataContext = null;
+                    this.Content = null;
+                    
+                    // Unsubscribe from all events
+                    this.KeyDown -= Window_KeyDown;
+                    this.MouseLeftButtonDown -= TitleBar_MouseLeftButtonDown;
+                    
+                    // Force garbage collection
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized);
+                    GC.WaitForPendingFinalizers();
+                }
+                catch { }
             };
 
 
@@ -1235,9 +1247,20 @@ namespace SOLUM_UI
 
 
                 // Close and dispose the login window to free resources
-                this.Close();
-                System.GC.Collect();
-                System.GC.WaitForPendingFinalizers();
+                progressTimer?.Stop();
+                progressTimer?.Dispose();
+                
+                // Clear all visual elements and event handlers
+                this.DataContext = null;
+                this.Content = null;
+                
+                // Schedule window close on dispatcher
+                this.Dispatcher.InvokeAsync(() =>
+                {
+                    this.Close();
+                    System.GC.Collect();
+                    System.GC.WaitForPendingFinalizers();
+                }, System.Windows.Threading.DispatcherPriority.Background);
 
 
 
@@ -1305,15 +1328,16 @@ namespace SOLUM_UI
 
 
 
-                progressTimer.Stop();
+                if (progressTimer != null)
+                {
+                    progressTimer.Stop();
+                    progressTimer.Dispose();
+                    progressTimer = null;
+                }
 
 
 
-                progressTimer.Dispose();
-
-
-
-                _isLoggingIn = false;          // NEW
+                _isLoggingIn = false;
 
 
 
@@ -2009,6 +2033,35 @@ namespace SOLUM_UI
 
 
 
+        }
+
+        
+        /// <summary>
+        /// Override OnClosed to ensure complete resource cleanup when the login window is closed.
+        /// </summary>
+        protected override void OnClosed(EventArgs e)
+        {
+            try
+            {
+                // Clear event handlers
+                this.KeyDown -= Window_KeyDown;
+                this.MouseLeftButtonDown -= TitleBar_MouseLeftButtonDown;
+                
+                // Clear all visual content
+                this.Content = null;
+                this.DataContext = null;
+                
+                // Remove all child elements
+                if (this.Content is Grid grid)
+                {
+                    grid.Children.Clear();
+                }
+            }
+            catch { }
+            finally
+            {
+                base.OnClosed(e);
+            }
         }
 
 
