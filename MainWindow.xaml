@@ -334,47 +334,35 @@
             </Border>
         </Grid>
 
-        <Grid x:Name="LogoutLoadingOverlay" Visibility="Collapsed" Panel.ZIndex="60">
-            <Rectangle Fill="#AA1A0A14"/>
-            <!-- Progress Bar with Percentage Indicator -->
+        <Grid x:Name="LogoutLoadingOverlay" Visibility="Collapsed" Panel.ZIndex="60" Background="Transparent">
+            <Rectangle Fill="#CC000000" Opacity="0.6"/>
+            <!-- Glassmorphic Effect -->
+            <Border Background="#4D1A1A1A" CornerRadius="0" />
+            
+            <!-- Circle Spinner Animation -->
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Grid Width="240" Margin="0,0,0,20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="8"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                <!-- Spinning Circle with Percentage in Middle -->
+                <Grid Width="70" Height="70" HorizontalAlignment="Center" Margin="0,0,0,20">
+                    <!-- Maroon Arc Spinner -->
+                    <Ellipse x:Name="ProgressCircle" Stroke="#702943" StrokeThickness="5" 
+                             Width="70" Height="70"
+                             RenderTransformOrigin="0.5,0.5">
+                        <Ellipse.RenderTransform>
+                            <RotateTransform x:Name="ProgressRotate" Angle="0"/>
+                        </Ellipse.RenderTransform>
+                        <Ellipse.StrokeDashArray>
+                            <DoubleCollection>55,164</DoubleCollection>
+                        </Ellipse.StrokeDashArray>
+                    </Ellipse>
                     
-                    <!-- Progress Bar Background -->
-                    <Border Grid.Row="0" Background="#E0E0E0" CornerRadius="8" Height="12">
-                        <!-- Progress Bar Fill -->
-                        <Border x:Name="LogoutProgressBarFill" Background="#702943" CornerRadius="8" 
-                                HorizontalAlignment="Left" Width="0" Height="12">
-                            <Border.RenderTransform>
-                                <ScaleTransform ScaleX="1"/>
-                            </Border.RenderTransform>
-                            <Border.Triggers>
-                                <EventTrigger RoutedEvent="Loaded">
-                                    <BeginStoryboard>
-                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                            <DoubleAnimation Storyboard.TargetName="LogoutProgressBarFill" 
-                                                           Storyboard.TargetProperty="(Border.Width)"
-                                                           From="0" To="240" Duration="0:0:3"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </EventTrigger>
-                            </Border.Triggers>
-                        </Border>
-                    </Border>
-                    
-                    <!-- Percentage Text -->
-                    <TextBlock Grid.Row="2" x:Name="LogoutProgressPercentage" Text="0%" 
-                              FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
-                              Foreground="#702943" HorizontalAlignment="Center"/>
+                    <!-- Percentage Text in Center -->
+                    <TextBlock x:Name="LogoutProgressPercentage" Text="0%" 
+                              FontFamily="Segoe UI" FontSize="18" FontWeight="Light" Foreground="White"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
                 
-                <TextBlock Text="Signing out..." FontFamily="Segoe UI" FontSize="12"
-                           Foreground="White" HorizontalAlignment="Center"/>
+                <TextBlock Text="Signing out..." FontFamily="Segoe UI" FontSize="14"
+                           FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center"/>
             </StackPanel>
         </Grid>
 

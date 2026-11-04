@@ -5,7 +5,9 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
 using AutoUpdaterDotNET;
+using PdfSharp.Fonts;
 using SOLUM_UI.Services;
+using SOLUM_UI.Views;
 using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
@@ -15,6 +17,9 @@ namespace SOLUM_UI
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // Enable PDFsharp to use Windows fonts (Arial, etc.)
+            GlobalFontSettings.UseWindowsFontsUnderWindows = true;
 
             // Configure en-PH culture so that all WPF controls (DatePicker, formatting) use form standard MM/dd/yyyy
             var culture = new CultureInfo("en-PH");
@@ -39,6 +44,13 @@ namespace SOLUM_UI
 
             // Initialize AutoUpdater in background with custom downloading UI
             InitializeAutoUpdater();
+
+            // Show login page as startup screen
+            var loginPage = new LoginPage();
+            loginPage.Show();
+            
+            // Set shutdown mode so app closes when login closes
+            ShutdownMode = ShutdownMode.OnLastWindowClose;
         }
 
         private void InitializeAutoUpdater()

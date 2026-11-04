@@ -13,431 +13,418 @@
         ResizeMode="CanResize"
         WindowStyle="None"
         AllowsTransparency="True"
+        Background="#FBEFF3"
         KeyDown="Window_KeyDown">
 
+    <Window.Resources>
+        <!-- Feature chip (maroon border) -->
+        <Style x:Key="FeatureChip" TargetType="Border">
+            <Setter Property="Background" Value="#E6FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#6D1F40"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="14,11"/>
+            <Setter Property="Margin" Value="0,0,14,0"/>
+            <Setter Property="Width" Value="172"/>
+        </Style>
+    </Window.Resources>
+
     <Grid MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="3*"/>
-        </Grid.ColumnDefinitions>
 
-        <!-- Left decorative panel — always 40% of window -->
-        <Grid Grid.Column="0" ClipToBounds="True">
-            <Image Source="pack://application:,,,/Assets/LoginDesign.png"
-                   Stretch="UniformToFill"
-                   HorizontalAlignment="Center"
+        <!-- Full background (circles / boxes are already baked into the image) -->
+        <Image Source="pack://application:,,,/Assets/login.png"
+               Stretch="UniformToFill"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"/>
+
+        <!-- Brand (top-left, shifted right to align with the footer) -->
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="88,71,0,0">
+            <Image Source="pack://application:,,,/Assets/SidebarLogo.png"
+                   Width="44" Height="44"
+                   Stretch="Uniform"
+                   RenderOptions.BitmapScalingMode="HighQuality"
                    VerticalAlignment="Center"/>
-        </Grid>
-
-        <!-- Right login panel — Viewbox scales all content with window size -->
-        <Grid Grid.Column="1" Background="White">
-            <Viewbox Stretch="Uniform"
-                     HorizontalAlignment="Center"
-                     VerticalAlignment="Center"
-                     MaxWidth="420"
-                     MaxHeight="520">
-                <StackPanel Width="300" VerticalAlignment="Center">
-
-                    <!-- Logo circle -->
-                    <Border Width="90" Height="90"
-                            CornerRadius="45"
-                            Background="White"
-                            HorizontalAlignment="Center"
-                            Margin="0,0,0,10">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#CCCCCC" BlurRadius="12" ShadowDepth="2" Opacity="0.4"/>
-                        </Border.Effect>
-                        <Image Source="pack://application:,,,/Assets/Logo.png"
-                               Width="70" Height="70"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Stretch="Uniform"
-                               RenderOptions.BitmapScalingMode="HighQuality"/>
-                    </Border>
-
-                    <!-- App name -->
-                    <TextBlock Text="SOLACE"
-                               FontFamily="Segoe UI Semibold"
-                               FontSize="20"
-                               FontWeight="Bold"
-                               Foreground="#8B1A4A"
-                               HorizontalAlignment="Center"
-                               Margin="0,0,0,24"/>
-
-                    <!-- Email label -->
-                    <TextBlock Text="EMAIL ADDRESS"
-                               FontFamily="Segoe UI"
-                               FontSize="10"
-                               FontWeight="Bold"
-                               Foreground="#222222"
-                               Margin="0,0,0,4"/>
-
-                    <!-- Email field -->
-                    <Grid Margin="0,0,0,4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border x:Name="BorderEmail" Grid.ColumnSpan="2" BorderBrush="#CCCCCC" BorderThickness="0,0,0,1"/>
-                        <TextBlock Grid.Column="0"
-                                   Text="&#xE77B;"
-                                   FontFamily="Segoe MDL2 Assets"
-                                   FontSize="16"
-                                   Foreground="#888888"
-                                   VerticalAlignment="Center"
-                                   Margin="0,6,8,6"/>
-                        <Grid Grid.Column="1">
-                            <TextBlock x:Name="PlaceholderEmail"
-                                       Text="name@example.com"
-                                       Foreground="#AAAAAA"
-                                       FontFamily="Segoe UI"
-                                       FontSize="13"
-                                       VerticalAlignment="Center"
-                                       Margin="2,0,0,0"
-                                       IsHitTestVisible="False"/>
-                            <TextBox x:Name="TxtEmail"
-                                     FontFamily="Segoe UI"
-                                     FontSize="13"
-                                     Foreground="#444444"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     VerticalAlignment="Center"
-                                     Padding="0,6"
-                                     TextChanged="TxtEmail_TextChanged"/>
-                        </Grid>
-                    </Grid>
-
-                    <!-- Email inline validation error -->
-                    <TextBlock x:Name="ErrEmail"
-                               FontFamily="Segoe UI"
-                               FontSize="11"
-                               Foreground="#DC3545"
-                               Margin="0,2,0,8"
-                               TextWrapping="Wrap"
-                               Visibility="Collapsed"/>
-
-                    <!-- Password label -->
-                    <TextBlock Text="PASSWORD"
-                               FontFamily="Segoe UI"
-                               FontSize="10"
-                               FontWeight="Bold"
-                               Foreground="#222222"
-                               Margin="0,6,0,4"/>
-
-                    <!-- Password field -->
-                    <Grid Margin="0,0,0,4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Border x:Name="BorderPassword" Grid.ColumnSpan="3" BorderBrush="#CCCCCC" BorderThickness="0,0,0,1"/>
-                        <TextBlock Grid.Column="0"
-                                   Text="&#xE72E;"
-                                   FontFamily="Segoe MDL2 Assets"
-                                   FontSize="16"
-                                   Foreground="#888888"
-                                   VerticalAlignment="Center"
-                                   Margin="0,6,8,6"/>
-                        <Grid Grid.Column="1">
-                            <TextBlock x:Name="PlaceholderPassword"
-                                       Text="Password"
-                                       Foreground="#AAAAAA"
-                                       FontFamily="Segoe UI"
-                                       FontSize="13"
-                                       VerticalAlignment="Center"
-                                       Margin="2,0,0,0"
-                                       IsHitTestVisible="False"/>
-                            <PasswordBox x:Name="TxtPassword"
-                                         FontFamily="Segoe UI"
-                                         FontSize="13"
-                                         Foreground="#444444"
-                                         Background="Transparent"
-                                         BorderThickness="0"
-                                         VerticalAlignment="Center"
-                                         Padding="0,6"
-                                         PasswordChanged="TxtPassword_PasswordChanged"/>
-                            <TextBox x:Name="TxtPasswordVisible"
-                                     FontFamily="Segoe UI"
-                                     FontSize="13"
-                                     Foreground="#444444"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     VerticalAlignment="Center"
-                                     Padding="0,6"
-                                     Visibility="Collapsed"
-                                     TextChanged="TxtPasswordVisible_TextChanged"/>
-                        </Grid>
-                        <Button x:Name="BtnTogglePassword"
-                                Grid.Column="2"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Cursor="Hand"
-                                VerticalAlignment="Center"
-                                Padding="4,0"
-                                Click="BtnTogglePassword_Click">
-                            <TextBlock x:Name="TxtToggleIcon"
-                                       Text="&#xED1A;"
-                                       FontFamily="Segoe MDL2 Assets"
-                                       FontSize="16"
-                                       Foreground="#888888"/>
-                        </Button>
-                    </Grid>
-
-                    <!-- Password inline validation error -->
-                    <TextBlock x:Name="ErrPassword"
-                               FontFamily="Segoe UI"
-                               FontSize="11"
-                               Foreground="#DC3545"
-                               Margin="0,2,0,8"
-                               TextWrapping="Wrap"
-                               Visibility="Collapsed"/>
-
-                    <!-- Forgot password -->
-                    <TextBlock HorizontalAlignment="Right"
-                               Margin="0,2,0,20">
-                        <Hyperlink x:Name="LinkForgotPassword"
-                                   Foreground="#8B1A4A"
-                                   TextDecorations="None"
-                                   FontFamily="Segoe UI"
-                                   FontSize="12"
-                                   Click="LinkForgotPassword_Click">
-                            Forgot Password?
-                        </Hyperlink>
-                    </TextBlock>
-
-                    <!-- Terms and Conditions -->
-                    <TextBlock HorizontalAlignment="Center"
-                               Margin="0,0,0,8">
-                        <Run Text="By signing in you agree to our " Foreground="#888888" FontFamily="Segoe UI" FontSize="11"/>
-                        <Hyperlink x:Name="LinkTerms"
-                                   Foreground="#8B1A4A"
-                                   TextDecorations="Underline"
-                                   FontFamily="Segoe UI"
-                                   FontSize="11"
-                                   Click="LinkTerms_Click">
-                            Terms and Conditions
-                        </Hyperlink>
-                    </TextBlock>
-
-                    <!-- Login button -->
-                    <Button x:Name="BtnLogin"
-                            Content="LOGIN"
-                            Height="42"
-                            FontFamily="Segoe UI"
-                            FontSize="14"
-                            FontWeight="Bold"
-                            Foreground="White"
-                            Cursor="Hand"
-                            BorderThickness="0"
-                            Click="BtnLogin_Click">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="ButtonBorder"
-                                        Background="#A03060"
-                                        CornerRadius="21"
-                                        Padding="0">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="ButtonBorder" Property="Background" Value="#8B1A4A"/>
-                                    </Trigger>
-                                    <Trigger Property="IsPressed" Value="True">
-                                        <Setter TargetName="ButtonBorder" Property="Background" Value="#6D1039"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-
-                </StackPanel>
-            </Viewbox>
-        </Grid>
-
-        <Grid Grid.ColumnSpan="2" x:Name="LoadingOverlay" Visibility="Collapsed" Panel.ZIndex="30">
-            <Rectangle Fill="#AA1A0A14"/>
-            <!-- Progress Bar with Percentage Indicator -->
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Grid Width="240" Margin="0,0,0,20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="8"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    
-                    <!-- Progress Bar Background -->
-                    <Border Grid.Row="0" Background="#E0E0E0" CornerRadius="8" Height="12">
-                        <!-- Progress Bar Fill -->
-                        <Border x:Name="ProgressBarFill" Background="#702943" CornerRadius="8" 
-                                HorizontalAlignment="Left" Width="0" Height="12">
-                            <Border.RenderTransform>
-                                <ScaleTransform ScaleX="1"/>
-                            </Border.RenderTransform>
-                            <Border.Triggers>
-                                <EventTrigger RoutedEvent="Loaded">
-                                    <BeginStoryboard>
-                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                            <DoubleAnimation Storyboard.TargetName="ProgressBarFill" 
-                                                           Storyboard.TargetProperty="(Border.Width)"
-                                                           From="0" To="240" Duration="0:0:3"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </EventTrigger>
-                            </Border.Triggers>
-                        </Border>
-                    </Border>
-                    
-                    <!-- Percentage Text -->
-                    <TextBlock Grid.Row="2" x:Name="ProgressPercentage" Text="0%" 
-                              FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
-                              Foreground="#702943" HorizontalAlignment="Center"/>
-                </Grid>
-                
-                <TextBlock Text="Signing in..." FontFamily="Segoe UI" FontSize="12"
-                           Foreground="White" HorizontalAlignment="Center"/>
+            <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="SOLACE"
+                           FontFamily="Segoe UI"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Foreground="#6D1F40"/>
+                <TextBlock Text="Solo Parent Management"
+                           FontFamily="Segoe UI"
+                           FontSize="12"
+                           Foreground="#8A5068"/>
             </StackPanel>
-        </Grid>
+        </StackPanel>
 
-        <!-- Error Modal Overlay -->
-        <Grid Grid.Column="1" x:Name="ErrorModalOverlay" Visibility="Collapsed" Panel.ZIndex="20">
-            <Rectangle Fill="#66000000"/>
-            <Border Background="White" CornerRadius="12" Padding="28,24" Width="320"
-                    HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Border.Effect>
-                    <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="3" Opacity="0.22"/>
-                </Border.Effect>
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                        <TextBlock Text="&#xE783;"
-                                   FontFamily="Segoe MDL2 Assets"
-                                   FontSize="20"
-                                   Foreground="#C0392B"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,10,0"/>
-                        <TextBlock x:Name="TxtErrorModalTitle" Text="Sign In Failed" FontFamily="Segoe UI" FontSize="16"
-                                   FontWeight="Bold" Foreground="#8B1A4A" VerticalAlignment="Center"/>
-                    </StackPanel>
-                    <TextBlock x:Name="TxtErrorModal" Text="" FontFamily="Segoe UI" FontSize="12.5"
-                               Foreground="#444444" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,20"/>
-                    <Button Content="Close" Height="38" Cursor="Hand" Click="BtnErrorClose_Click">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Background="#8B1A4A" CornerRadius="8" Padding="0,10">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                      TextElement.Foreground="White"
-                                                      TextElement.FontFamily="Segoe UI"
-                                                      TextElement.FontSize="13"
-                                                      TextElement.FontWeight="SemiBold"/>
+        <!-- Main content, scales with window size -->
+        <Viewbox Stretch="Uniform"
+                 HorizontalAlignment="Center"
+                 VerticalAlignment="Center"
+                 Margin="78,96,190,64">
+            <Grid Width="1280" Height="920">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="540"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- LEFT: hero text -->
+                <StackPanel Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Margin="90,0,40,0">
+
+                    <!-- Authorized pill -->
+                    <Border HorizontalAlignment="Left"
+                            Background="#66FFFFFF"
+                            BorderBrush="#6D1F40"
+                            BorderThickness="1.2"
+                            CornerRadius="18"
+                            Padding="12,6"
+                            Margin="0,0,0,26">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center">
+                                <Ellipse Stroke="#6D1F40" StrokeThickness="1.6"/>
+                                <Ellipse Width="5" Height="5" Fill="#6D1F40"/>
+                            </Grid>
+                            <TextBlock Text="Authorized Personnel Access"
+                                       FontFamily="Segoe UI"
+                                       FontSize="12.5"
+                                       FontWeight="Bold"
+                                       Foreground="#6D1F40"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Headline -->
+                    <TextBlock Text="A secure gateway to"
+                               FontFamily="Georgia"
+                               FontSize="42"
+                               FontWeight="ExtraBold"
+                               Foreground="#2B0D1A"
+                               LineHeight="50"/>
+                    <TextBlock Text="solo parent records."
+                               FontFamily="Georgia"
+                               FontSize="42"
+                               FontWeight="ExtraBold"
+                               Foreground="#7A2650"
+                               LineHeight="50"
+                               Margin="0,0,0,20"/>
+
+                    <!-- Description -->
+                    <TextBlock Text="Sign in to manage solo parent records, monitor program operations, and access beneficiary data through the unified management system of the Biñan City Social Welfare and Development Office."
+                               FontFamily="Segoe UI"
+                               FontSize="15"
+                               Foreground="#6B4256"
+                               TextWrapping="Wrap"
+                               LineHeight="24"
+                               MaxWidth="560"
+                               HorizontalAlignment="Left"
+                               Margin="0,0,0,34"/>
+
+                    <!-- Feature chips -->
+                    <StackPanel Orientation="Horizontal">
+                        <Border Style="{StaticResource FeatureChip}">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="34" Height="34" CornerRadius="17" Background="#F6DCE6" Margin="0,0,10,0">
+                                    <TextBlock Text="&#xEA18;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                               Foreground="#6D1F40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Opacity" Value="0.85"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Role-Based" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold" Foreground="#2B0D1A"/>
+                                    <TextBlock Text="Access" FontFamily="Segoe UI" FontSize="11.5" Foreground="#8A5068"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource FeatureChip}">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="34" Height="34" CornerRadius="17" Background="#F6DCE6" Margin="0,0,10,0">
+                                    <TextBlock Text="&#xE8FD;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                               Foreground="#6D1F40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Audit" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold" Foreground="#2B0D1A"/>
+                                    <TextBlock Text="Logged" FontFamily="Segoe UI" FontSize="11.5" Foreground="#8A5068"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource FeatureChip}">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="34" Height="34" CornerRadius="17" Background="#F6DCE6" Margin="0,0,10,0">
+                                    <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                               Foreground="#6D1F40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Encrypted" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold" Foreground="#2B0D1A"/>
+                                    <TextBlock Text="Data" FontFamily="Segoe UI" FontSize="11.5" Foreground="#8A5068"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
                 </StackPanel>
-            </Border>
-        </Grid>
 
-        <!-- Terms and Conditions Overlay -->
-        <Grid Grid.Column="1" x:Name="TermsOverlay" Visibility="Collapsed" Panel.ZIndex="20">
-            <Rectangle Fill="#66000000"/>
-            <Border Background="White" CornerRadius="12" Padding="0" Width="360" MaxHeight="460"
-                    HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Border.Effect>
-                    <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="3" Opacity="0.22"/>
-                </Border.Effect>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Border Grid.Row="0" CornerRadius="12,12,0,0" Padding="24,18,24,14"
-                            BorderBrush="#EEEEEE" BorderThickness="0,0,0,1">
-                        <Grid>
-                            <TextBlock Text="Terms and Conditions" FontFamily="Segoe UI"
-                                       FontSize="14" FontWeight="Bold" Foreground="#8B1A4A"/>
-                            <Button HorizontalAlignment="Right" Width="28" Height="28"
-                                    Background="Transparent" BorderThickness="0" Cursor="Hand"
-                                    Click="BtnTermsClose_Click">
+                <!-- RIGHT: login card -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+
+                    <!-- Opaque background + soft, low-opacity shadow = clean edges -->
+                    <Border Background="White"
+                            BorderBrush="#6D1F40"
+                            BorderThickness="1.5"
+                            CornerRadius="20"
+                            Padding="48,60,48,48"
+                            SnapsToDevicePixels="True">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#6D1F40" BlurRadius="32" ShadowDepth="6" Direction="270" Opacity="0.14" RenderingBias="Quality"/>
+                        </Border.Effect>
+
+                        <StackPanel>
+
+                            <!-- Card header: title only (removed icon) -->
+                            <Grid Margin="0,0,0,36" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="Welcome back"
+                                               FontFamily="Georgia"
+                                               FontSize="35"
+                                               FontWeight="SemiBold"
+                                               Foreground="#2B0D1A"
+                                               TextAlignment="Center"/>
+                                    <TextBlock Text="Sign in to your SOLACE account"
+                                               FontFamily="Segoe UI"
+                                               FontSize="18"
+                                               Foreground="#8A5068"
+                                               Margin="0,7,0,0"
+                                               TextAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Divider -->
+                            <Rectangle Height="1" Fill="#EBD3DC" Margin="0,0,0,20"/>
+
+                            <!-- Email label -->
+                            <TextBlock Text="Email"
+                                       FontFamily="Segoe UI"
+                                       FontSize="17"
+                                       FontWeight="SemiBold"
+                                       Foreground="#2B0D1A"
+                                       Margin="0,0,0,9"/>
+
+                            <!-- Email field -->
+                            <Border x:Name="BorderEmail"
+                                    Background="White"
+                                    BorderBrush="#6D1F40"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Padding="18,0">
+                                <Grid Height="62">
+                                    <TextBlock x:Name="PlaceholderEmail"
+                                               Text="Enter your email address"
+                                               Foreground="#B08A9C"
+                                               FontFamily="Segoe UI"
+                                               FontSize="17"
+                                               VerticalAlignment="Center"
+                                               IsHitTestVisible="False"/>
+                                    <TextBox x:Name="TxtEmail"
+                                             FontFamily="Segoe UI"
+                                             FontSize="17"
+                                             Foreground="#2B0D1A"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             VerticalContentAlignment="Center"
+                                             VerticalAlignment="Center"
+                                             TextChanged="TxtEmail_TextChanged"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Email inline validation error -->
+                            <TextBlock x:Name="ErrEmail"
+                                       FontFamily="Segoe UI"
+                                       FontSize="11.5"
+                                       Foreground="#DC3545"
+                                       Margin="4,4,0,0"
+                                       TextWrapping="Wrap"
+                                       Visibility="Collapsed"/>
+
+                            <!-- Password label -->
+                            <TextBlock Text="Password"
+                                       FontFamily="Segoe UI"
+                                       FontSize="17"
+                                       FontWeight="SemiBold"
+                                       Foreground="#2B0D1A"
+                                       Margin="0,22,0,9"/>
+
+                            <!-- Password field -->
+                            <Border x:Name="BorderPassword"
+                                    Background="White"
+                                    BorderBrush="#6D1F40"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Padding="18,0,12,0">
+                                <Grid Height="62">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Grid.Column="0">
+                                        <TextBlock x:Name="PlaceholderPassword"
+                                                   Text="Enter your password"
+                                                   Foreground="#B08A9C"
+                                                   FontFamily="Segoe UI"
+                                                   FontSize="17"
+                                                   VerticalAlignment="Center"
+                                                   IsHitTestVisible="False"/>
+                                        <PasswordBox x:Name="TxtPassword"
+                                                     FontFamily="Segoe UI"
+                                                     FontSize="17"
+                                                     Foreground="#2B0D1A"
+                                                     Background="Transparent"
+                                                     BorderThickness="0"
+                                                     VerticalContentAlignment="Center"
+                                                     VerticalAlignment="Center"
+                                                     PasswordChanged="TxtPassword_PasswordChanged"/>
+                                        <TextBox x:Name="TxtPasswordVisible"
+                                                 FontFamily="Segoe UI"
+                                                 FontSize="17"
+                                                 Foreground="#2B0D1A"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 VerticalContentAlignment="Center"
+                                                 VerticalAlignment="Center"
+                                                 Visibility="Collapsed"
+                                                 TextChanged="TxtPasswordVisible_TextChanged"/>
+                                    </Grid>
+                                    <Button x:Name="BtnTogglePassword"
+                                            Grid.Column="1"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Cursor="Hand"
+                                            VerticalAlignment="Center"
+                                            Padding="10,8"
+                                            Click="BtnTogglePassword_Click">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <TextBlock x:Name="TxtToggleIcon"
+                                                   Text="&#xED1A;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="20"
+                                                   Foreground="#6D1F40"/>
+                                    </Button>
+                                </Grid>
+                            </Border>
+
+                            <!-- Password inline validation error -->
+                            <TextBlock x:Name="ErrPassword"
+                                       FontFamily="Segoe UI"
+                                       FontSize="11.5"
+                                       Foreground="#DC3545"
+                                       Margin="4,4,0,0"
+                                       TextWrapping="Wrap"
+                                       Visibility="Collapsed"/>
+
+                            <!-- Forgot password -->
+                            <TextBlock HorizontalAlignment="Right" Margin="0,12,0,18">
+                                <Hyperlink x:Name="LinkForgotPassword"
+                                           Foreground="#7A2650"
+                                           TextDecorations="None"
+                                           FontFamily="Segoe UI"
+                                           FontSize="12.5"
+                                           FontWeight="SemiBold"
+                                           Click="LinkForgotPassword_Click">Forgot password?</Hyperlink>
+                            </TextBlock>
+
+                            <!-- Login button -->
+                            <Button x:Name="BtnLogin"
+                                    Content="Sign in securely"
+                                    Height="64"
+                                    FontFamily="Segoe UI"
+                                    FontSize="19"
+                                    FontWeight="SemiBold"
+                                    Foreground="White"
+                                    Cursor="Hand"
+                                    BorderThickness="0"
+                                    Margin="0,27,0,0"
+                                    Click="BtnLogin_Click">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Cbg" Background="Transparent" CornerRadius="14">
-                                            <TextBlock Text="✕" FontSize="13" Foreground="#AAAAAA"
-                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Border x:Name="ButtonBorder" CornerRadius="10"
+                                                BorderBrush="#4A1229" BorderThickness="1">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                    <GradientStop Color="#8A2D58" Offset="0"/>
+                                                    <GradientStop Color="#6D1F40" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Cbg" Property="Background" Value="#F0F0F0"/>
+                                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.9"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.8"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.55"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                        </Grid>
-                    </Border>
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled" Padding="24,16,24,8">
-                        <StackPanel>
-                            <TextBlock FontFamily="Segoe UI" FontSize="11" Foreground="#444444"
-                                       TextWrapping="Wrap" LineHeight="18">
-                                <Run FontWeight="Bold">1. Acceptance of Terms</Run>
-                                <LineBreak/>
-                                By accessing and using the SOLACE Solo Parent Information System, you agree to be bound by these Terms and Conditions.
-                                <LineBreak/><LineBreak/>
-                                <Run FontWeight="Bold">2. Data Privacy</Run>
-                                <LineBreak/>
-                                All personal information collected is governed by the Data Privacy Act of 2012 (RA 10173). Information is collected solely for the administration of the Solo Parent Welfare Program.
-                                <LineBreak/><LineBreak/>
-                                <Run FontWeight="Bold">3. Authorized Use</Run>
-                                <LineBreak/>
-                                Access is restricted to authorized personnel only. Unauthorized access, disclosure, or misuse of data is strictly prohibited and may be subject to legal action.
-                                <LineBreak/><LineBreak/>
-                                <Run FontWeight="Bold">4. Account Responsibility</Run>
-                                <LineBreak/>
-                                Users are responsible for maintaining the confidentiality of their credentials. Any activity performed under your account is your responsibility.
-                                <LineBreak/><LineBreak/>
-                                <Run FontWeight="Bold">5. System Use</Run>
-                                <LineBreak/>
-                                This system must only be used for official duties related to the Solo Parent Welfare Program. Misuse may result in account suspension and disciplinary action.
+
+                            <!-- Terms -->
+                            <TextBlock HorizontalAlignment="Center" Margin="0,14,0,0">
+                                <Run Text="By signing in you agree to our " Foreground="#8A5068" FontFamily="Segoe UI" FontSize="11"/>
+                                <Hyperlink x:Name="LinkTerms"
+                                           Foreground="#7A2650"
+                                           TextDecorations="Underline"
+                                           FontFamily="Segoe UI"
+                                           FontSize="11"
+                                           Click="LinkTerms_Click">Terms and Conditions</Hyperlink>
                             </TextBlock>
+
+                            <TextBlock Text="Accounts are issued by the system administrator."
+                                       FontFamily="Segoe UI"
+                                       FontSize="11"
+                                       Foreground="#8A5068"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,6,0,0"/>
                         </StackPanel>
-                    </ScrollViewer>
-                    <Border Grid.Row="2" CornerRadius="0,0,12,12" Padding="24,14"
-                            BorderBrush="#EEEEEE" BorderThickness="0,1,0,0">
-                        <Button Content="Close" Height="36" Cursor="Hand" Click="BtnTermsClose_Click">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="#8B1A4A" CornerRadius="8" Padding="0,8">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                          TextElement.Foreground="White"
-                                                          TextElement.FontFamily="Segoe UI"
-                                                          TextElement.FontSize="12"
-                                                          TextElement.FontWeight="SemiBold"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Opacity" Value="0.85"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
                     </Border>
-                </Grid>
-            </Border>
-        </Grid>
+
+                    <!-- Below-card notice -->
+                    <TextBlock HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               FontFamily="Segoe UI"
+                               FontSize="12.5"
+                               Foreground="#6B4256"
+                               LineHeight="22"
+                               Margin="0,24,0,0">
+                        Access is restricted to authorized CSWDO personnel.<LineBreak/>Unauthorized use is monitored and logged.
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </Viewbox>
+
+        <!-- Copyright (bottom-left) -->
+        <TextBlock Text="© 2026 Biñan City Social Welfare and Development Office. All rights reserved."
+                   FontFamily="Segoe UI"
+                   FontSize="12"
+                   Foreground="#6B4256"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Bottom"
+                   Margin="88,0,0,28"/>
 
         <!-- Title bar controls -->
-        <StackPanel Grid.Column="1"
-                    Orientation="Horizontal"
+        <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
-                    Margin="0,12,16,0"
+                    Margin="0,16,20,0"
                     Panel.ZIndex="10">
             <Button x:Name="BtnMinimize"
                     Width="16" Height="16"
@@ -493,6 +480,182 @@
                 </Button.Template>
             </Button>
         </StackPanel>
+
+        <!-- Loading overlay (unchanged) -->
+        <Grid x:Name="LoadingOverlay" Visibility="Collapsed" Panel.ZIndex="30">
+            <Rectangle Fill="#AA1A0A14"/>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid Width="240" Margin="0,0,0,20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="8"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="#E0E0E0" CornerRadius="8" Height="12">
+                        <Border x:Name="ProgressBarFill" Background="#702943" CornerRadius="8"
+                                HorizontalAlignment="Left" Width="0" Height="12">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1"/>
+                            </Border.RenderTransform>
+                            <Border.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetName="ProgressBarFill"
+                                                             Storyboard.TargetProperty="(Border.Width)"
+                                                             From="0" To="240" Duration="0:0:3"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Border.Triggers>
+                        </Border>
+                    </Border>
+
+                    <TextBlock Grid.Row="2" x:Name="ProgressPercentage" Text="0%"
+                               FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
+                               Foreground="#702943" HorizontalAlignment="Center"/>
+                </Grid>
+
+                <TextBlock Text="Signing in..." FontFamily="Segoe UI" FontSize="12"
+                           Foreground="White" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Error Modal Overlay -->
+        <Grid x:Name="ErrorModalOverlay" Visibility="Collapsed" Panel.ZIndex="20">
+            <Rectangle Fill="#66000000"/>
+            <Border Background="White" CornerRadius="14" Padding="28,24" Width="360"
+                    BorderBrush="#6D1F40" BorderThickness="1.5"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="4" Opacity="0.18" RenderingBias="Quality"/>
+                </Border.Effect>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <TextBlock Text="&#xE783;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="20"
+                                   Foreground="#C0392B"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,10,0"/>
+                        <TextBlock x:Name="TxtErrorModalTitle" Text="Sign In Failed" FontFamily="Segoe UI" FontSize="16"
+                                   FontWeight="Bold" Foreground="#6D1F40" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock x:Name="TxtErrorModal" Text="" FontFamily="Segoe UI" FontSize="13"
+                               Foreground="#444444" TextWrapping="Wrap" LineHeight="19" Margin="0,0,0,20"/>
+                    <Button Content="Close" Height="40" Cursor="Hand" Click="BtnErrorClose_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="#6D1F40" CornerRadius="10" Padding="0,10">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                      TextElement.Foreground="White"
+                                                      TextElement.FontFamily="Segoe UI"
+                                                      TextElement.FontSize="13"
+                                                      TextElement.FontWeight="SemiBold"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.85"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Terms and Conditions Overlay -->
+        <Grid x:Name="TermsOverlay" Visibility="Collapsed" Panel.ZIndex="20">
+            <Rectangle Fill="#66000000"/>
+            <Border Background="White" CornerRadius="14" Padding="0" Width="400" MaxHeight="480"
+                    BorderBrush="#6D1F40" BorderThickness="1.5"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="4" Opacity="0.18" RenderingBias="Quality"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" CornerRadius="14,14,0,0" Padding="24,18,24,14"
+                            BorderBrush="#EBD3DC" BorderThickness="0,0,0,1">
+                        <Grid>
+                            <TextBlock Text="Terms and Conditions" FontFamily="Segoe UI"
+                                       FontSize="14" FontWeight="Bold" Foreground="#6D1F40"/>
+                            <Button HorizontalAlignment="Right" Width="28" Height="28"
+                                    Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                    Click="BtnTermsClose_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Cbg" Background="Transparent" CornerRadius="14">
+                                            <TextBlock Text="✕" FontSize="13" Foreground="#AAAAAA"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Cbg" Property="Background" Value="#F0F0F0"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled" Padding="24,16,24,8">
+                        <StackPanel>
+                            <TextBlock FontFamily="Segoe UI" FontSize="11.5" Foreground="#444444"
+                                       TextWrapping="Wrap" LineHeight="18">
+                                <Run FontWeight="Bold">1. Acceptance of Terms</Run>
+                                <LineBreak/>
+                                By accessing and using the SOLACE Solo Parent Information System, you agree to be bound by these Terms and Conditions.
+                                <LineBreak/><LineBreak/>
+                                <Run FontWeight="Bold">2. Data Privacy</Run>
+                                <LineBreak/>
+                                All personal information collected is governed by the Data Privacy Act of 2012 (RA 10173). Information is collected solely for the administration of the Solo Parent Welfare Program.
+                                <LineBreak/><LineBreak/>
+                                <Run FontWeight="Bold">3. Authorized Use</Run>
+                                <LineBreak/>
+                                Access is restricted to authorized personnel only. Unauthorized access, disclosure, or misuse of data is strictly prohibited and may be subject to legal action.
+                                <LineBreak/><LineBreak/>
+                                <Run FontWeight="Bold">4. Account Responsibility</Run>
+                                <LineBreak/>
+                                Users are responsible for maintaining the confidentiality of their credentials. Any activity performed under your account is your responsibility.
+                                <LineBreak/><LineBreak/>
+                                <Run FontWeight="Bold">5. System Use</Run>
+                                <LineBreak/>
+                                This system must only be used for official duties related to the Solo Parent Welfare Program. Misuse may result in account suspension and disciplinary action.
+                            </TextBlock>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Border Grid.Row="2" CornerRadius="0,0,14,14" Padding="24,14"
+                            BorderBrush="#EBD3DC" BorderThickness="0,1,0,0">
+                        <Button Content="Close" Height="38" Cursor="Hand" Click="BtnTermsClose_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="#6D1F40" CornerRadius="10" Padding="0,8">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                          TextElement.Foreground="White"
+                                                          TextElement.FontFamily="Segoe UI"
+                                                          TextElement.FontSize="12"
+                                                          TextElement.FontWeight="SemiBold"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="0.85"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
 
     </Grid>
 </Window>

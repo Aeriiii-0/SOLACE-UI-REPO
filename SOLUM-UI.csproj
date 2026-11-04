@@ -745,8 +745,13 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\LoginDesign.png" />
-    <Resource Include="Assets\Logo.png" />
+    <Resource Include="Assets\logo.png" />
+    <Resource Include="Assets\login.png" />
     <Resource Include="Assets\SidebarLogo.png" />
+    <Resource Include="Assets\cswdo.png" />
+    <Resource Include="Assets\solace.png" />
+    <Resource Include="Assets\binan.png" />
+    <Resource Include="Assets\bg.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Templates\SOLO-PARENTS-APPLICATION-FORM-TEMPLATE.pdf">

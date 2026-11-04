@@ -186,6 +186,9 @@ namespace SOLUM_UI.Views.Dialogs
             var colorBrush = (SolidColorBrush)new BrushConverter().ConvertFrom(primaryColor);
             var circleBrush = (SolidColorBrush)new BrushConverter().ConvertFrom(circleBg);
 
+            // Store the theme color in window Tag for binding
+            this.Tag = colorBrush;
+
             IconCircle.Background = circleBrush;
             IconPath.Fill = colorBrush;
             IconPath.Data = Geometry.Parse(iconData);

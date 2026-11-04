@@ -4,7 +4,7 @@
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Width="460" SizeToContent="Height">
+        Width="520" SizeToContent="Height">
 
     <Border Background="Transparent" Padding="16">
         <Border x:Name="Shell" Background="White" CornerRadius="16"
@@ -30,16 +30,16 @@
                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <TextBlock x:Name="TxtTitle" Text="Confirm Action" FontFamily="Segoe UI"
-                               FontSize="20" FontWeight="Bold" Foreground="#111111"
+                               FontSize="22" FontWeight="Bold" Foreground="#111111"
                                HorizontalAlignment="Center" TextAlignment="Center"/>
                 </StackPanel>
 
                 <!-- Message Body -->
-                <StackPanel Grid.Row="1" Margin="32,14,32,24">
+                <StackPanel Grid.Row="1" Margin="32,16,32,28">
                     <TextBlock x:Name="TxtMessage"
                                Text="Are you sure you want to proceed with this action?"
-                               FontFamily="Segoe UI" FontSize="13.5" Foreground="#666666"
-                               TextWrapping="Wrap" TextAlignment="Center" LineHeight="20"/>
+                               FontFamily="Segoe UI" FontSize="14" Foreground="#666666"
+                               TextWrapping="Wrap" TextAlignment="Center" LineHeight="22"/>
                 </StackPanel>
 
                 <!-- Action Buttons Footer -->
@@ -53,29 +53,30 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Cancel Button -->
-                        <Button x:Name="BtnCancel" Grid.Column="0" Height="42" Cursor="Hand" Click="BtnCancel_Click">
+                        <Button x:Name="BtnCancel" Grid.Column="0" Height="48" Cursor="Hand" Click="BtnCancel_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="White" CornerRadius="8"
-                                            BorderBrush="#DDDDDD" BorderThickness="1.5">
+                                    <Border x:Name="Bg" Background="White" CornerRadius="10"
+                                            BorderBrush="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Tag, FallbackValue=#702943}" BorderThickness="2">
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/>
+                                            <Setter TargetName="Bg" Property="Background" Value="#F5EEF1"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
-                            <TextBlock x:Name="TxtCancelBtn" Text="Cancel" FontFamily="Segoe UI" FontSize="13"
-                                       FontWeight="SemiBold" Foreground="#555555"/>
+                            <TextBlock x:Name="TxtCancelBtn" Text="Cancel" FontFamily="Segoe UI" FontSize="14"
+                                       FontWeight="SemiBold" Foreground="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Tag, FallbackValue=#702943}"/>
                         </Button>
 
                         <!-- Confirm Action Button -->
-                        <Button x:Name="BtnConfirm" Grid.Column="2" Height="42" Cursor="Hand" Click="BtnConfirm_Click">
+                        <Button x:Name="BtnConfirm" Grid.Column="2" Height="48" Cursor="Hand" Click="BtnConfirm_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="8">
+                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="10"
+                                            BorderBrush="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Tag, FallbackValue=#702943}" BorderThickness="2">
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
@@ -85,7 +86,7 @@
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
-                            <TextBlock x:Name="TxtConfirmBtn" Text="Confirm" FontFamily="Segoe UI" FontSize="13"
+                            <TextBlock x:Name="TxtConfirmBtn" Text="Confirm" FontFamily="Segoe UI" FontSize="14"
                                        FontWeight="Bold" Foreground="White"/>
                         </Button>
                     </Grid>

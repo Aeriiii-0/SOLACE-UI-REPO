@@ -1,94 +1,197 @@
 ﻿<Window x:Class="SOLUM_UI.SplashScreenWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SOLUM_UI"
         WindowStyle="None"
-        AllowsTransparency="True"
-        Background="Transparent"
-        Width="400" Height="500"
-        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        ResizeMode="NoResize"
+        Background="White"
         ShowInTaskbar="False"
-        Topmost="True">
-    <Grid Background="Transparent">
-        <!-- Main Container -->
-        <Border Background="White" CornerRadius="16" Padding="40,60">
-            <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="5" Opacity="0.3"/>
-            </Border.Effect>
-            
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <!-- Logo / Icon -->
-                <TextBlock Text="SOLACE" FontFamily="Segoe UI" FontSize="36" FontWeight="Bold"
-                          Foreground="#702943" TextAlignment="Center" Margin="0,0,0,20"/>
-                
-                <!-- Title -->
-                <TextBlock Text="Solo Parent Management System" FontFamily="Segoe UI" FontSize="16" FontWeight="SemiBold"
-                          Foreground="#333333" TextAlignment="Center" Margin="0,0,0,12"/>
-                
-                <!-- Subtitle -->
-                <TextBlock Text="Loading your application..." FontFamily="Segoe UI" FontSize="12"
-                          Foreground="#666666" TextAlignment="Center" Margin="0,0,0,30"/>
-                
-                <!-- Animated Dots -->
-                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Height="20">
-                    <Border Width="8" Height="8" CornerRadius="4" Background="#702943" Margin="2,0">
-                        <Border.RenderTransform>
-                            <ScaleTransform ScaleX="1" ScaleY="1"/>
-                        </Border.RenderTransform>
-                        <Border.Triggers>
-                            <EventTrigger RoutedEvent="Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard RepeatBehavior="Forever">
-                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
-                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
-                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Border.Triggers>
-                    </Border>
-                    
-                    <Border Width="8" Height="8" CornerRadius="4" Background="#702943" Margin="2,0">
-                        <Border.RenderTransform>
-                            <ScaleTransform ScaleX="1" ScaleY="1"/>
-                        </Border.RenderTransform>
-                        <Border.Triggers>
-                            <EventTrigger RoutedEvent="Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard RepeatBehavior="Forever">
-                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
-                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0.2"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
-                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0.2"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Border.Triggers>
-                    </Border>
-                    
-                    <Border Width="8" Height="8" CornerRadius="4" Background="#702943" Margin="2,0">
-                        <Border.RenderTransform>
-                            <ScaleTransform ScaleX="1" ScaleY="1"/>
-                        </Border.RenderTransform>
-                        <Border.Triggers>
-                            <EventTrigger RoutedEvent="Loaded">
-                                <BeginStoryboard>
-                                    <Storyboard RepeatBehavior="Forever">
-                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
-                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0.4"/>
-                                        <DoubleAnimation Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
-                                                       From="0.5" To="1.2" Duration="0:0:0.6" BeginTime="0:0:0.4"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </Border.Triggers>
+        Topmost="True"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="Maroon" Color="#702943"/>
+        <SolidColorBrush x:Key="MaroonDark" Color="#4E1A2F"/>
+        <SolidColorBrush x:Key="MaroonSoft" Color="#F3ECEB"/>
+        <SolidColorBrush x:Key="Charcoal" Color="#2A2229"/>
+        <SolidColorBrush x:Key="TrackBrush" Color="#99FFFFFF"/>
+
+        <FontFamily x:Key="DisplayFont">pack://application:,,,/Fonts/#Nunito, Segoe UI</FontFamily>
+
+        <DropShadowEffect x:Key="TextShadow" Color="White" Opacity="0.35" BlurRadius="22" ShadowDepth="0"/>
+        <DropShadowEffect x:Key="PopShadow" Color="#4E1A2F" Opacity="0.35" BlurRadius="10" ShadowDepth="3" Direction="270"/>
+
+        <Style x:Key="LogoLabel" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource DisplayFont}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{StaticResource MaroonDark}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="LabelChip" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Maroon}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Padding" Value="16,4"/>
+            <Setter Property="Margin" Value="0,16,0,0"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid ClipToBounds="True">
+
+        <Image Stretch="UniformToFill">
+            <Image.Source>
+                <BitmapImage UriSource="pack://application:,,,/Assets/bg.png"/>
+            </Image.Source>
+        </Image>
+
+        <Canvas IsHitTestVisible="False" ClipToBounds="False">
+            <Path x:Name="WaveT2" Fill="#12702943" IsHitTestVisible="False"/>
+            <Path x:Name="WaveT1" Fill="#1E702943" IsHitTestVisible="False"/>
+            <Path x:Name="WaveB1" Fill="#26702943" IsHitTestVisible="False"/>
+            <Path x:Name="WaveB2" Fill="#3F702943" IsHitTestVisible="False"/>
+            <Path x:Name="WaveB3" Fill="#66702943" IsHitTestVisible="False"/>
+        </Canvas>
+
+        <Grid Margin="0,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel x:Name="TitleBlock" Grid.Row="0" Opacity="0" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,90,0,0">
+                <StackPanel.RenderTransform>
+                    <TranslateTransform x:Name="TitleShift" Y="-14"/>
+                </StackPanel.RenderTransform>
+                <local:OutlinedTextBlock Text="SOLACE" FontFamily="{StaticResource DisplayFont}" FontSize="44" FontWeight="Bold"
+                                         Fill="{StaticResource Maroon}" Stroke="White" StrokeThickness="3"
+                                         HorizontalAlignment="Center" Effect="{StaticResource PopShadow}"/>
+                <local:OutlinedTextBlock Text="Solo Parent Record Management System" FontFamily="{StaticResource DisplayFont}"
+                                         FontSize="17" FontWeight="SemiBold" Fill="{StaticResource Maroon}"
+                                         Stroke="White" StrokeThickness="2.5"
+                                         HorizontalAlignment="Center" Margin="0,2,0,0" Effect="{StaticResource PopShadow}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel x:Name="Card1" Opacity="0" RenderTransformOrigin="0.5,0.5">
+                    <StackPanel.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="Scale1" ScaleX="0.88" ScaleY="0.88"/>
+                            <TranslateTransform x:Name="Wave1" Y="18"/>
+                        </TransformGroup>
+                    </StackPanel.RenderTransform>
+                    <Grid Width="200" Height="200">
+                        <Ellipse Stroke="{StaticResource Maroon}" StrokeThickness="3"/>
+                        <Ellipse Margin="-14" Stroke="{StaticResource Maroon}" StrokeThickness="2"
+                                 StrokeDashArray="2 5" Opacity="0.75" RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <RotateTransform x:Name="Ring1"/>
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                        <Ellipse Margin="8" Fill="White">
+                            <Ellipse.Effect>
+                                <DropShadowEffect Color="#702943" Opacity="0.2" BlurRadius="26" ShadowDepth="8"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
+                        <Ellipse Margin="42">
+                            <Ellipse.Fill>
+                                <ImageBrush x:Name="Logo1" Stretch="Uniform"/>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                    </Grid>
+                    <Border Style="{StaticResource LabelChip}">
+                        <TextBlock x:Name="Label1" Text="CSWDO" Style="{StaticResource LogoLabel}"/>
                     </Border>
                 </StackPanel>
-                
-                <!-- Version Info -->
-                <TextBlock x:Name="TxtAppVersion" Text="Version 0.0.1-beta" FontFamily="Segoe UI" FontSize="10"
-                          Foreground="#999999" TextAlignment="Center" Margin="0,40,0,0"/>
+                <Border Width="150"/>
+                <StackPanel x:Name="Card2" Opacity="0" RenderTransformOrigin="0.5,0.5">
+                    <StackPanel.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="Scale2" ScaleX="0.88" ScaleY="0.88"/>
+                            <TranslateTransform x:Name="Wave2" Y="68"/>
+                        </TransformGroup>
+                    </StackPanel.RenderTransform>
+                    <Grid Width="200" Height="200">
+                        <Ellipse Stroke="{StaticResource Maroon}" StrokeThickness="3"/>
+                        <Ellipse Margin="-14" Stroke="{StaticResource Maroon}" StrokeThickness="2"
+                                 StrokeDashArray="2 5" Opacity="0.75" RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <RotateTransform x:Name="Ring2"/>
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                        <Ellipse Margin="8" Fill="White">
+                            <Ellipse.Effect>
+                                <DropShadowEffect Color="#702943" Opacity="0.2" BlurRadius="26" ShadowDepth="8"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
+                        <Ellipse Margin="42">
+                            <Ellipse.Fill>
+                                <ImageBrush x:Name="Logo2" Stretch="Uniform"/>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                    </Grid>
+                    <Border Style="{StaticResource LabelChip}">
+                        <TextBlock x:Name="Label2" Text="SOLACE" Style="{StaticResource LogoLabel}"/>
+                    </Border>
+                </StackPanel>
+                <Border Width="150"/>
+                <StackPanel x:Name="Card3" Opacity="0" RenderTransformOrigin="0.5,0.5">
+                    <StackPanel.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="Scale3" ScaleX="0.88" ScaleY="0.88"/>
+                            <TranslateTransform x:Name="Wave3" Y="18"/>
+                        </TransformGroup>
+                    </StackPanel.RenderTransform>
+                    <Grid Width="200" Height="200">
+                        <Ellipse Stroke="{StaticResource Maroon}" StrokeThickness="3"/>
+                        <Ellipse Margin="-14" Stroke="{StaticResource Maroon}" StrokeThickness="2"
+                                 StrokeDashArray="2 5" Opacity="0.75" RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <RotateTransform x:Name="Ring3"/>
+                            </Ellipse.RenderTransform>
+                        </Ellipse>
+                        <Ellipse Margin="8" Fill="White">
+                            <Ellipse.Effect>
+                                <DropShadowEffect Color="#702943" Opacity="0.2" BlurRadius="26" ShadowDepth="8"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
+                        <Ellipse Margin="42">
+                            <Ellipse.Fill>
+                                <ImageBrush x:Name="Logo3" Stretch="Uniform"/>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                    </Grid>
+                    <Border Style="{StaticResource LabelChip}">
+                        <TextBlock x:Name="Label3" Text="BIÑAN" Style="{StaticResource LogoLabel}"/>
+                    </Border>
+                </StackPanel>
             </StackPanel>
-        </Border>
+
+            <StackPanel x:Name="LoadingBlock" Grid.Row="2" Opacity="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border Width="424" Height="10" CornerRadius="5" Background="{StaticResource TrackBrush}"
+                        BorderBrush="White" BorderThickness="2" ClipToBounds="False">
+                    <Border.Effect>
+                        <DropShadowEffect Color="White" Opacity="0.35" BlurRadius="22" ShadowDepth="3" Direction="270"/>
+                    </Border.Effect>
+                    <Border Width="420" Height="6" CornerRadius="3" Background="{StaticResource Maroon}"
+                            HorizontalAlignment="Left" RenderTransformOrigin="0,0.5">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="BarScale" ScaleX="0"/>
+                        </Border.RenderTransform>
+                    </Border>
+                </Border>
+                <Grid Width="424" Margin="0,12,0,0">
+                    <TextBlock x:Name="TxtStatus" Text="Loading resources..." FontFamily="{StaticResource DisplayFont}" FontSize="14"
+                               FontWeight="SemiBold" Foreground="{StaticResource Maroon}" HorizontalAlignment="Left" Effect="{StaticResource TextShadow}"/>
+                    <TextBlock x:Name="TxtPercent" Text="0%" FontFamily="{StaticResource DisplayFont}" FontSize="14" FontWeight="Bold"
+                               Foreground="{StaticResource Maroon}" HorizontalAlignment="Right" Effect="{StaticResource TextShadow}"/>
+                </Grid>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

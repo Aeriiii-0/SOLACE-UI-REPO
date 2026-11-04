@@ -11,16 +11,17 @@
         Scale: Display 24 / Title 18 / Subtitle 14 / Body 13 / Caption 11.5 / Overline 10.5
     -->
     <FontFamily x:Key="DsFontFamily">Segoe UI Variable Text, Segoe UI</FontFamily>
+    <FontFamily x:Key="DsHeadingFont">Georgia</FontFamily>
 
     <Style x:Key="DsDisplayText" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource DsFontFamily}"/>
+        <Setter Property="FontFamily" Value="{StaticResource DsHeadingFont}"/>
         <Setter Property="FontSize" Value="24"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{StaticResource DsTextHeadingBrush}"/>
     </Style>
 
     <Style x:Key="DsTitleText" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource DsFontFamily}"/>
+        <Setter Property="FontFamily" Value="{StaticResource DsHeadingFont}"/>
         <Setter Property="FontSize" Value="18"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{StaticResource DsTextHeadingBrush}"/>

@@ -21,10 +21,6 @@ namespace SOLUM_UI
         private List<ChartPoint> _points = new List<ChartPoint>();
         private bool _ready;
 
-        private DateTime _calMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        private DateTime? _selectedDay;
-        private readonly HashSet<DateTime> _markedDates = new HashSet<DateTime>();
-
         private static readonly Brush Maroon = Frozen("#702943");
 
         public DashboardPage()
@@ -42,7 +38,6 @@ namespace SOLUM_UI
             LogsOverlay.DataContext = _logsVm;
 
             _ready = true;
-            BuildCalendar();
 
             Loaded += async (s, e) =>
             {
@@ -482,100 +477,7 @@ namespace SOLUM_UI
 
         public void SetMarkedDates(IEnumerable<DateTime> dates)
         {
-            _markedDates.Clear();
-            if (dates != null)
-                foreach (var d in dates) _markedDates.Add(d.Date);
-            BuildCalendar();
-        }
-
-        private void CalPrev_Click(object sender, RoutedEventArgs e)
-        {
-            _calMonth = _calMonth.AddMonths(-1);
-            BuildCalendar();
-        }
-
-        private void CalNext_Click(object sender, RoutedEventArgs e)
-        {
-            _calMonth = _calMonth.AddMonths(1);
-            BuildCalendar();
-        }
-
-        private void BuildCalendar()
-        {
-            if (CalDays == null) return;
-
-            CalDays.Children.Clear();
-            TxtCalendarMonth.Text = _calMonth.ToString("MMMM yyyy");
-
-            int lead = (int)_calMonth.DayOfWeek;
-            int days = DateTime.DaysInMonth(_calMonth.Year, _calMonth.Month);
-            int cells = (int)Math.Ceiling((lead + days) / 7.0) * 7;
-
-            for (int i = 0; i < cells; i++)
-            {
-                int d = i - lead + 1;
-                if (d < 1 || d > days)
-                    CalDays.Children.Add(new Grid { Height = 34 });
-                else
-                    CalDays.Children.Add(CreateDayCell(new DateTime(_calMonth.Year, _calMonth.Month, d)));
-            }
-        }
-
-        private UIElement CreateDayCell(DateTime day)
-        {
-            bool isToday = day.Date == DateTime.Today;
-            bool isSelected = _selectedDay.HasValue && _selectedDay.Value == day.Date;
-            bool isMarked = _markedDates.Contains(day.Date);
-
-            var text = new TextBlock
-            {
-                Text = day.Day.ToString(),
-                FontFamily = new FontFamily("Segoe UI"),
-                FontSize = 12.5,
-                FontWeight = isToday ? FontWeights.Bold : FontWeights.Medium,
-                Foreground = isToday ? Brushes.White : Frozen("#2B1D23"),
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                VerticalAlignment = System.Windows.VerticalAlignment.Center
-            };
-
-            Brush normalBg = isToday ? Maroon : Brushes.Transparent;
-            var circle = new Border
-            {
-                Width = 30,
-                Height = 30,
-                CornerRadius = new CornerRadius(15),
-                Background = normalBg,
-                BorderBrush = isSelected && !isToday ? Frozen("#D9A3B2") : Brushes.Transparent,
-                BorderThickness = new Thickness(1.5),
-                Child = text
-            };
-
-            var cell = new Grid { Height = 34, Background = Brushes.Transparent, Cursor = Cursors.Hand };
-            cell.Children.Add(circle);
-
-            if (isMarked)
-            {
-                cell.Children.Add(new Ellipse
-                {
-                    Width = 4,
-                    Height = 4,
-                    Fill = isToday ? Brushes.White : Frozen("#E8960C"),
-                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                    VerticalAlignment = System.Windows.VerticalAlignment.Bottom,
-                    Margin = new Thickness(0, 0, 0, 3),
-                    IsHitTestVisible = false
-                });
-            }
-
-            cell.MouseEnter += (s, e) => { if (!isToday) circle.Background = Frozen("#F8E6EC"); };
-            cell.MouseLeave += (s, e) => { circle.Background = normalBg; };
-            cell.MouseLeftButtonUp += (s, e) =>
-            {
-                _selectedDay = day.Date;
-                BuildCalendar();
-            };
-
-            return cell;
+            // Calendar removed from dashboard
         }
 
         private void ViewAllLogs_Click(object sender, RoutedEventArgs e)
@@ -592,18 +494,39 @@ namespace SOLUM_UI
 
         private void ReviewExpiring_Click(object sender, RoutedEventArgs e)
         {
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow == null) return;
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Starting navigation");
+                
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                if (mainWindow == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: MainWindow is null!");
+                    return;
+                }
 
-            // Clear cache to force fresh page load
-            mainWindow.ClearPageCache("SoloParentRecords");
-            
-            // Set the filter
-            SoloParentRecordsPage.RequestedStatusFilter = "ExpiringSoon";
-            
-            // Navigate
-            mainWindow.ActivateButton("SoloParentRecords");
-            mainWindow.NavigateTo("SoloParentRecords");
+                System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: MainWindow found");
+                
+                // Clear cache to force fresh page load
+                mainWindow.ClearPageCache("SoloParentRecords");
+                System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Cache cleared");
+                
+                // Set the filter to ExpiringSoon
+                SoloParentRecordsPage.RequestedStatusFilter = "ExpiringSoon";
+                System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Filter set to ExpiringSoon");
+                
+                // Activate the SoloParentRecords button and navigate
+                mainWindow.ActivateButton("SoloParentRecords");
+                System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Button activated");
+                
+                mainWindow.NavigateTo("SoloParentRecords");
+                System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Navigation called");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ReviewExpiring_Click: Exception - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"ReviewExpiring_Click: StackTrace - {ex.StackTrace}");
+            }
         }
 
         private static Color Frozenless(string hex) => (Color)ColorConverter.ConvertFromString(hex);

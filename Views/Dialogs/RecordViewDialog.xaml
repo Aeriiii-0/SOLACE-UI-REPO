@@ -311,60 +311,58 @@
                         <Grid Grid.Row="0" Grid.RowSpan="3" x:Name="DeleteConfirmOverlay"
                               Visibility="{Binding IsDeleteOverlayVisible, Converter={StaticResource BoolToVisibilityConverter}}"
                               Panel.ZIndex="99">
-                            <Rectangle Fill="#88000000" RadiusX="14" RadiusY="14"/>
-                            <Border Background="White" CornerRadius="14"
-                                    Padding="32,28" Width="360"
+                            <Rectangle Fill="#88000000" RadiusX="16" RadiusY="16"/>
+                            <Border Background="White" CornerRadius="16" BorderBrush="#C62828" BorderThickness="1.5"
+                                    Padding="32,28" Width="520"
                                     HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Border.Effect>
-                                    <DropShadowEffect Color="#000000" BlurRadius="30" ShadowDepth="0" Opacity="0.22"/>
+                                    <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="4" Opacity="0.18"/>
                                 </Border.Effect>
                                 <StackPanel>
-                                    <Border Width="48" Height="48" CornerRadius="24"
-                                            Background="#FFF0EE" HorizontalAlignment="Center" Margin="0,0,0,16">
+                                    <Border Width="54" Height="54" CornerRadius="27"
+                                            Background="#FFEBEE" HorizontalAlignment="Center" Margin="0,0,0,16">
                                         <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
-                                              Fill="#E74C3C" Stretch="Uniform" Width="22" Height="22"
+                                              Fill="#C62828" Stretch="Uniform" Width="24" Height="24"
                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
-                                    <TextBlock Text="Danger: Are you sure?"
-                                               FontFamily="Segoe UI" FontSize="16" FontWeight="Bold"
-                                               Foreground="#E74C3C" HorizontalAlignment="Center"
-                                               Margin="0,0,0,8"/>
+                                    <TextBlock Text="Delete Record"
+                                               FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+                                               Foreground="#111111" HorizontalAlignment="Center"
+                                               Margin="0,0,0,0"/>
                                     <TextBlock Text="Are you sure you want to delete this record? This action is permanent and cannot be undone."
-                                               FontFamily="Segoe UI" FontSize="12" Foreground="#666666"
+                                               FontFamily="Segoe UI" FontSize="14" Foreground="#666666"
                                                TextWrapping="Wrap" TextAlignment="Center"
-                                               HorizontalAlignment="Center" Margin="0,0,0,24"/>
+                                               HorizontalAlignment="Center" Margin="0,16,0,28" LineHeight="22"/>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="12"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Button Grid.Column="0" Height="40" Cursor="Hand"
+                                        <Button Grid.Column="0" Height="48" Cursor="Hand"
                                                 Click="DeleteCancel_Click">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
-                                                    <Border x:Name="Bg" Background="#F5F0F2" CornerRadius="10"
-                                                            BorderBrush="#DCC8CE" BorderThickness="1.2">
+                                                    <Border x:Name="Bg" Background="White" CornerRadius="10"
+                                                            BorderBrush="#C62828" BorderThickness="2">
                                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                     </Border>
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="Bg" Property="Background" Value="#EDD8DE"/>
+                                                            <Setter TargetName="Bg" Property="Background" Value="#FFF0F1"/>
                                                         </Trigger>
                                                     </ControlTemplate.Triggers>
                                                 </ControlTemplate>
                                             </Button.Template>
-                                            <TextBlock Text="Cancel" FontFamily="Segoe UI" FontSize="13"
-                                                       FontWeight="SemiBold" Foreground="#702943"/>
+                                            <TextBlock Text="Cancel" FontFamily="Segoe UI" FontSize="14"
+                                                       FontWeight="SemiBold" Foreground="#C62828"/>
                                         </Button>
-                                        <Button Grid.Column="2" Height="40" Cursor="Hand"
-                                                Click="DeleteConfirm_Click">
+                                        <Button Grid.Column="2" Height="48" Cursor="Hand"
+                                                Click="DeleteConfirm_Click" Background="#C62828">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
-                                                    <Border x:Name="Bg" Background="#E74C3C" CornerRadius="10">
-                                                        <Border.Effect>
-                                                            <DropShadowEffect Color="#E74C3C" BlurRadius="8" ShadowDepth="2" Opacity="0.25"/>
-                                                        </Border.Effect>
+                                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="10"
+                                                            BorderBrush="#C62828" BorderThickness="2">
                                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                     </Border>
                                                     <ControlTemplate.Triggers>
@@ -374,8 +372,8 @@
                                                     </ControlTemplate.Triggers>
                                                 </ControlTemplate>
                                             </Button.Template>
-                                            <TextBlock Text="Yes, Delete" FontFamily="Segoe UI" FontSize="13"
-                                                       FontWeight="SemiBold" Foreground="White"/>
+                                            <TextBlock Text="Yes, Delete" FontFamily="Segoe UI" FontSize="14"
+                                                       FontWeight="Bold" Foreground="White"/>
                                         </Button>
                                     </Grid>
                                 </StackPanel>
