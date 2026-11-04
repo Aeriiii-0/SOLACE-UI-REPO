@@ -119,11 +119,82 @@ namespace SOLUM_UI.Models
             {
                 var diff = DateTime.Now - Timestamp;
                 if (diff.TotalMinutes < 1)  return "Just now";
-                if (diff.TotalMinutes < 60) return (int)diff.TotalMinutes + " mins ago";
-                if (diff.TotalHours   < 24) return (int)diff.TotalHours   + " hours ago";
-                return (int)diff.TotalDays + " days ago";
+                if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} min ago";
+                if (diff.TotalHours   < 24) return $"{(int)diff.TotalHours} hr ago";
+                if (diff.TotalDays    < 2)  return "Yesterday";
+                return $"{(int)diff.TotalDays} days ago";
             }
             set { }
+        }
+
+        public string RecentActionTitle
+        {
+            get
+            {
+                string raw = (RawActionType ?? string.Empty).ToUpperInvariant();
+                if (raw.Contains("CREATE") || Action == AuditAction.Create) return "Record created";
+                if (raw.Contains("UPDATE") || raw.Contains("EDIT") || Action == AuditAction.Update) return "Record edited";
+                if (raw.Contains("CONFIRM") || raw.Contains("APPROVE") || raw.Contains("SHORTLIST")) return "Record approved";
+                if (raw.Contains("RENEW")) return "Record renewed";
+                if (raw.Contains("DELETE") || raw.Contains("REVOKE") || Action == AuditAction.Delete) return "Record deleted";
+                if (raw.Contains("LOGIN") || Action == AuditAction.Login) return "User login";
+                if (raw.Contains("LOGOUT") || Action == AuditAction.Logout) return "User logout";
+                return !string.IsNullOrWhiteSpace(ActionTitle) ? ActionTitle : "Record updated";
+            }
+        }
+
+        private static readonly Brush RecentBgGreen = FreezeBrush("#E2F8F2");
+        private static readonly Brush RecentBgAmber = FreezeBrush("#FEF3DC");
+        private static readonly Brush RecentBgPlum  = FreezeBrush("#F5E8ED");
+
+        private static readonly Brush RecentFgGreen = FreezeBrush("#0F9D76");
+        private static readonly Brush RecentFgAmber = FreezeBrush("#D98A12");
+        private static readonly Brush RecentFgPlum  = FreezeBrush("#651C32");
+
+        private static Brush FreezeBrush(string hex)
+        {
+            var b = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
+            b.Freeze();
+            return b;
+        }
+
+        public Brush RecentIconBackground
+        {
+            get
+            {
+                string title = RecentActionTitle.ToLowerInvariant();
+                if (title.Contains("created")) return RecentBgGreen;
+                if (title.Contains("edited")) return RecentBgAmber;
+                if (title.Contains("approved") || title.Contains("renewed")) return RecentBgPlum;
+                return RecentBgAmber;
+            }
+        }
+
+        public Brush RecentIconForeground
+        {
+            get
+            {
+                string title = RecentActionTitle.ToLowerInvariant();
+                if (title.Contains("created")) return RecentFgGreen;
+                if (title.Contains("edited")) return RecentFgAmber;
+                if (title.Contains("approved") || title.Contains("renewed")) return RecentFgPlum;
+                return RecentFgAmber;
+            }
+        }
+
+        public string RecentIconData
+        {
+            get
+            {
+                string title = RecentActionTitle.ToLowerInvariant();
+                if (title.Contains("created"))
+                    return "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z";
+                if (title.Contains("edited"))
+                    return "M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z";
+                if (title.Contains("approved") || title.Contains("renewed"))
+                    return "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M10,17L5,12L6.41,10.59L10,14.17L17.59,6.58L19,8L10,17Z";
+                return "M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z";
+            }
         }
 
         public string TimestampFormatted

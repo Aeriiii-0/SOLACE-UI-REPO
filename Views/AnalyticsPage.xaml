@@ -14,7 +14,7 @@
         <SolidColorBrush x:Key="BluePrimary" Color="#4FB0C6"/>
         <SolidColorBrush x:Key="GrayPrimary" Color="#A89AA0"/>
         <SolidColorBrush x:Key="SecondaryText" Color="#8A6A75"/>
-        <SolidColorBrush x:Key="PageBackground" Color="#FBF9FE"/>
+        <SolidColorBrush x:Key="PageBackground" Color="#FFFFFF"/>
 
         <SolidColorBrush x:Key="StatCard1Bg" Color="#FCE4E8"/>
         <SolidColorBrush x:Key="StatCard1Border" Color="#9C2F55"/>

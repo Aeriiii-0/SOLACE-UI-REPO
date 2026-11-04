@@ -189,7 +189,7 @@ namespace SOLUM_UI
             NavigateTo(tag);
         }
 
-        private void ActivateButton(string tag)
+        public void ActivateButton(string tag)
         {
             foreach (Button b in _navButtons.Values)
                 SetIsNavActive(b, false);
@@ -272,7 +272,7 @@ namespace SOLUM_UI
                 : WindowState.Maximized;
         }
 
-        private void NavigateTo(string tag)
+        public void NavigateTo(string tag)
         {
             switch (tag)
             {
@@ -423,6 +423,37 @@ namespace SOLUM_UI
             var page = (SoloParentRecordsPage)GetOrCreatePage("SoloParentRecords", () => new SoloParentRecordsPage()); // CHANGED
             page.HighlightRecord(spId);
             NavigatePage(page);
+        }
+
+        public void NavigateToSoloParentRecordsWithFilter(string statusFilter)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"NavigateToSoloParentRecordsWithFilter START - statusFilter: {statusFilter}");
+                
+                ActivateButton("SoloParentRecords");
+                SoloParentRecordsPage.CurrentUserName = CurrentUserName;
+                SoloParentRecordsPage.CurrentUserRole = CurrentUserRole;
+                SoloParentRecordsPage.CurrentUserBarangay = CurrentUserBarangay;
+                TopBarControl.PageTitle = "Solo Parent Records";
+                
+                // Set the filter FIRST
+                SoloParentRecordsPage.RequestedStatusFilter = statusFilter;
+                System.Diagnostics.Debug.WriteLine($"Set RequestedStatusFilter to: {statusFilter}");
+                
+                ClearPageCache("SoloParentRecords"); // Clear cache to ensure fresh page with new filter
+                System.Diagnostics.Debug.WriteLine("Cleared page cache");
+                
+                var page = new SoloParentRecordsPage();
+                System.Diagnostics.Debug.WriteLine($"Created new SoloParentRecordsPage instance. RequestedStatusFilter now: {SoloParentRecordsPage.RequestedStatusFilter}");
+                
+                NavigatePage(page);
+                System.Diagnostics.Debug.WriteLine("NavigatePage called successfully");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"NavigateToSoloParentRecordsWithFilter ERROR: {ex.Message}\n{ex.StackTrace}");
+            }
         }
     }
 }

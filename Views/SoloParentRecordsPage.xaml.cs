@@ -43,6 +43,8 @@ namespace SOLUM_UI
 
         public static string CurrentUserBarangay { get; set; } = string.Empty;
 
+        public static string RequestedStatusFilter { get; set; } = null;
+
 
 
         private List<SoloParentRecordViewModel> _allRecords;
@@ -142,23 +144,42 @@ namespace SOLUM_UI
             Loaded += (s, e) =>
 
             {
-
                 ApplyRoleView();
-
                 ResizeNameColumn();
 
-
-
-                bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
-
-                if (isStale)
-
+                // Apply requested status filter from navigation
+                if (!string.IsNullOrEmpty(RequestedStatusFilter))
                 {
-
-                    if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
-
-                    _ = LoadRecordsAsync();
-
+                    _statusFilter = RequestedStatusFilter;
+                    RequestedStatusFilter = null; // Clear for next navigation
+                    
+                    // Select the corresponding radio button (will trigger Click event and load records)
+                    if (_statusFilter == "ExpiringSoon")
+                    {
+                        TabStatusExpiring.IsChecked = true;
+                    }
+                    else if (_statusFilter == "Active")
+                    {
+                        TabStatusActive.IsChecked = true;
+                    }
+                    else if (_statusFilter == "Expired")
+                    {
+                        TabStatusExpired.IsChecked = true;
+                    }
+                    else
+                    {
+                        TabStatusAll.IsChecked = true;
+                    }
+                }
+                else
+                {
+                    // No filter requested, load records normally
+                    bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
+                    if (isStale)
+                    {
+                        if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
+                        _ = LoadRecordsAsync();
+                    }
                 }
 
                 _ = Task.Run(() => OcrService.EnsureServerRunningAsync(25));
