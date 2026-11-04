@@ -90,6 +90,8 @@ namespace SOLUM_UI.ViewModels
         }
 
         private int _renewalsDueThisMonth;
+        private int _pendingReviewCount;
+        public int PendingReviewCount { get => _pendingReviewCount; private set { _pendingReviewCount = value; OnPropertyChanged(); } }
         public int RenewalsDueThisMonth
         {
             get => _renewalsDueThisMonth;
@@ -431,6 +433,7 @@ namespace SOLUM_UI.ViewModels
             RegisteredSoloParents = d.TotalRegistered;
             ActiveSoloParents     = d.ActiveRecords;
             RenewalsDueThisMonth  = d.RenewalsDueThisMonth;
+            PendingReviewCount    = d.PendingReviewCount;
             InactiveRecordsCount  = d.InactiveRecords;
 
             // Record health percentage

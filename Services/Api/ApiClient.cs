@@ -165,6 +165,7 @@ namespace SOLUM_UI.Services.Api
 
                     if (baseResp != null && baseResp.Data != null)
                     {
+                        baseResp.StatusCode = (int)response.StatusCode;
                         return baseResp;
                     }
 
@@ -233,7 +234,7 @@ namespace SOLUM_UI.Services.Api
                 }
             }
 
-            var errorResult = new BaseResponse<T> { Succeeded = false };
+            var errorResult = new BaseResponse<T> { Succeeded = false, StatusCode = (int)response.StatusCode };
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {

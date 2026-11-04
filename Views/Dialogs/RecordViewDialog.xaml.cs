@@ -298,7 +298,8 @@ namespace SOLUM_UI.Views.Dialogs
 
             TxtValidUntil.Text = "Valid until: " + validUntil;
 
-            TxtSpId.Text = !string.IsNullOrWhiteSpace(r.Id) ? $"ID: {r.Id}" : string.Empty;
+            TxtSpId.Text = string.Empty;
+            TxtSpId.Visibility = Visibility.Collapsed;
 
 
 
@@ -429,8 +430,6 @@ namespace SOLUM_UI.Views.Dialogs
             AddCard("System Information", new[]
 
             {
-
-                ("Record ID",            r.Id),
 
                 ("Application Type",     r.ApplicationType),
 

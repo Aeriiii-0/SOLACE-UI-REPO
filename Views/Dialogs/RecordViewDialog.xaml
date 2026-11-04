@@ -280,7 +280,7 @@
                         <Border Grid.Row="2" Background="White" BorderBrush="#D0B8C0"
                                 BorderThickness="0,1,0,0" CornerRadius="0,0,14,14" Padding="22,12">
                             <Grid>
-                                <TextBlock x:Name="TxtSpId"
+                                <TextBlock x:Name="TxtSpId" Visibility="Collapsed"
                                            FontSize="12" Foreground="#A06080"
                                            FontFamily="Segoe UI" VerticalAlignment="Center"
                                            FontWeight="SemiBold" HorizontalAlignment="Left"/>

@@ -38,6 +38,15 @@ namespace SOLUM_UI.Models.Api
 
         public string Barangay { get; set; } = string.Empty;
 
+        [Newtonsoft.Json.JsonProperty("mustChangePassword")]
+        public bool MustChangePassword { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("isPasswordChanged")]
+        public bool IsPasswordChanged { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("lastPasswordChangedDate")]
+        public System.DateTime? LastPasswordChangedDate { get; set; }
+
         public string PrimaryRole
         {
             get

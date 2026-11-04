@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -372,6 +373,7 @@ namespace SOLUM_UI
     public partial class RecordDialog : Window
     {
         public SoloParentRecord Result { get; private set; }
+        public Func<SoloParentRecord, Task<BaseResponse<object>>> SaveAsyncHandler { get; set; }
         private readonly SoloParentRecord _existing;
         private readonly bool _isRenewal;
         private int _currentStep = 1;
@@ -1810,25 +1812,45 @@ namespace SOLUM_UI
                     string philsys = TxtPhilSys.Text.Trim();
 
                     var matches = new List<SoloParentRecord>();
+                    SoloParentRecord philsysDuplicate = null;
+                    string rawInputPhilsys = System.Text.RegularExpressions.Regex.Replace(philsys ?? "", @"\D", "");
 
-                    // 1. Check PhilSys if provided
-                    if (!string.IsNullOrWhiteSpace(philsys))
+                    // 1. Check PhilSys if provided (STRICTLY UNIQUE)
+                    if (!string.IsNullOrWhiteSpace(rawInputPhilsys))
                     {
                         var philsysResp = await SoloParentApiService.Instance.GetSoloParentsAsync(new GetSoloParentRequest { PhilsysId = philsys, PageSize = 5 });
                         if (philsysResp.Succeeded && philsysResp.Data?.Items != null)
                         {
                             foreach (var item in philsysResp.Data.Items)
                             {
-                                if (!matches.Any(m => m.Id == item.Id.ToString()))
+                                if (_existing != null && item.Id.ToString() == _existing.Id)
+                                    continue;
+
+                                var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
+                                if (detailResp.Succeeded && detailResp.Data != null)
                                 {
-                                    var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
-                                    if (detailResp.Succeeded && detailResp.Data != null)
+                                    var rec = SoloParentApiService.Instance.MapToRecord(detailResp.Data);
+                                    string recPhilsys = System.Text.RegularExpressions.Regex.Replace(rec.PhilSysNumber ?? "", @"\D", "");
+                                    if (rawInputPhilsys == recPhilsys || (rawInputPhilsys.Length >= 12 && recPhilsys.Contains(rawInputPhilsys)))
                                     {
-                                        matches.Add(SoloParentApiService.Instance.MapToRecord(detailResp.Data));
+                                        philsysDuplicate = rec;
+                                        break;
                                     }
                                 }
                             }
                         }
+                    }
+
+                    if (philsysDuplicate != null)
+                    {
+                        _foundRecord = philsysDuplicate;
+                        MarkError(TxtPhilSys, ErrPhilSys, $"PhilSys ID is already registered to '{_foundRecord.Name}'. PhilSys ID must be unique.");
+                        DuplicateBannerTitle.Text = "Duplicate PhilSys ID — Registration Blocked";
+                        DuplicateBannerText.Text = $"The PhilSys Card Number '{philsys}' is already assigned to '{_foundRecord.Name}'. PhilSys ID must be strictly unique. You cannot proceed with a duplicate PhilSys ID.";
+                        DuplicateBannerPanel.Visibility = Visibility.Visible;
+                        if (BtnContinueAnyway != null) BtnContinueAnyway.Visibility = Visibility.Collapsed;
+                        TxtPhilSys.Focus();
+                        return;
                     }
 
                     // 2. Check First Name and Last Name
@@ -1839,6 +1861,9 @@ namespace SOLUM_UI
                         {
                             foreach (var item in nameResp.Data.Items)
                             {
+                                if (_existing != null && item.Id.ToString() == _existing.Id)
+                                    continue;
+
                                 if (!matches.Any(m => m.Id == item.Id.ToString()))
                                 {
                                     var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
@@ -1859,6 +1884,7 @@ namespace SOLUM_UI
                             (!string.IsNullOrWhiteSpace(_foundRecord.PhilSysNumber) ? $" with PhilSys ID {_foundRecord.PhilSysNumber}." : ".") +
                             " You can view the existing record or continue adding this record.";
                         DuplicateBannerPanel.Visibility = Visibility.Visible;
+                        if (BtnContinueAnyway != null) BtnContinueAnyway.Visibility = Visibility.Visible;
                         return;
                     }
                 }
@@ -2056,7 +2082,19 @@ namespace SOLUM_UI
             }
         }
 
-        private void Save_Click(object sender, RoutedEventArgs e)
+        
+        public void SetPhilSysError(string msg)
+        {
+            GoToStep(1);
+            MarkError(TxtPhilSys, ErrPhilSys, msg);
+            DuplicateBannerTitle.Text = "Duplicate PhilSys ID — Registration Blocked";
+            DuplicateBannerText.Text = msg;
+            DuplicateBannerPanel.Visibility = Visibility.Visible;
+            if (BtnContinueAnyway != null) BtnContinueAnyway.Visibility = Visibility.Collapsed;
+            TxtPhilSys.Focus();
+        }
+
+        private async void Save_Click(object sender, RoutedEventArgs e)
         {
             _dirtyCheckTimer?.Stop();
             UpdateSaveButtonState();
@@ -2115,6 +2153,36 @@ namespace SOLUM_UI
             {
                 DialogShell.Visibility = Visibility.Visible;
                 return;
+            }
+
+            if (SaveAsyncHandler != null)
+            {
+                try
+                {
+                    var saveResult = await SaveAsyncHandler(preview);
+                    if (saveResult != null && !saveResult.Succeeded)
+                    {
+                        DialogShell.Visibility = Visibility.Visible;
+                        if (saveResult.StatusCode == 409 || (saveResult.Errors != null && saveResult.Errors.Any(err => err.IndexOf("PhilSys", StringComparison.OrdinalIgnoreCase) >= 0)))
+                        {
+                            string err = (saveResult.Errors != null && saveResult.Errors.Count > 0) ? saveResult.Errors[0] : "PhilSys ID is already registered to an existing record.";
+                            SetPhilSysError(err);
+                            return;
+                        }
+                        else
+                        {
+                            string err = (saveResult.Errors != null && saveResult.Errors.Count > 0) ? string.Join("\n", saveResult.Errors) : "Failed to save record on the server.";
+                            Views.Dialogs.ActionConfirmDialog.Error("Save Failed", err);
+                            return;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    DialogShell.Visibility = Visibility.Visible;
+                    Views.Dialogs.ActionConfirmDialog.Error("Save Error", "An error occurred while saving: " + ex.Message);
+                    return;
+                }
             }
 
             try

@@ -2263,8 +2263,7 @@
 
                                                         <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="13" Foreground="#702943"/>
 
-                                                        <TextBlock Text="{Binding Id, StringFormat='Record ID: {0}'}" FontSize="11" Foreground="#555555" Margin="0,2,0,0"/>
-
+                                                        
                                                         <TextBlock Text="{Binding Barangay, StringFormat='Barangay: {0}'}" FontSize="11" Foreground="#555555"/>
 
                                                         <TextBlock Text="{Binding Sex, StringFormat='Sex: {0}'}" FontSize="11" Foreground="#555555"/>

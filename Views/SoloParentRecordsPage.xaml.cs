@@ -162,7 +162,7 @@ namespace SOLUM_UI
                     {
                         TabStatusActive.IsChecked = true;
                     }
-                    else if (_statusFilter == "Expired")
+                    else if (_statusFilter == "Expired" || _statusFilter == "Inactive")
                     {
                         TabStatusExpired.IsChecked = true;
                     }
@@ -728,7 +728,7 @@ namespace SOLUM_UI
 
                     ? RecordSortingHelper.MapToApiParams(SortControl.SelectedField, SortControl.IsAscending)
 
-                    : ("LastName", "asc");
+                    : ("datecreated", "desc");
 
 
 
@@ -1720,15 +1720,34 @@ namespace SOLUM_UI
             // Manual entry — open 3-step wizard (Step 1 performs validation & duplicate check)
 
             RecordDialog dialog = new RecordDialog { Owner = Window.GetWindow(this) };
+            dialog.SaveAsyncHandler = async (rec) =>
+            {
+                rec.CreatedBy = CurrentUserName;
+                rec.Barangay = string.IsNullOrWhiteSpace(rec.Barangay)
+                    ? (!string.IsNullOrWhiteSpace(CurrentUserBarangay) ? CurrentUserBarangay : "ALL")
+                    : rec.Barangay;
 
-
+                var createReq = SoloParentApiService.Instance.MapToCreateRequest(rec);
+                var createResp = await SoloParentApiService.Instance.CreateSoloParentAsync(createReq);
+                if (!createResp.Succeeded)
+                {
+                    return BaseResponse<object>.FailWithStatus(createResp.StatusCode, createResp.Errors != null ? createResp.Errors.ToArray() : new string[0]);
+                }
+                rec.Id = createResp.Data.ToString();
+                return BaseResponse<object>.Success(createResp.Data);
+            };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
-
             {
+                ToastNotification.Show("Record Added", dialog.Result.Name + " was added successfully.", ToastType.Success);
+                AuditLogService.Instance.LogCreate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole);
 
-                await SaveNewRecordAsync(dialog.Result);
-
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
+                if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
+                _currentPage = 1;
+                await LoadRecordsAsync();
             }
 
         }
@@ -1768,23 +1787,15 @@ namespace SOLUM_UI
 
 
                 if (!createResp.Succeeded)
-
                 {
-
                     string err = createResp.Errors != null && createResp.Errors.Count > 0
-
                         ? string.Join("\n", createResp.Errors)
-
                         : "Failed to create record on the server.";
-
-                    Views.Dialogs.ActionConfirmDialog.Error(
-
-                        "Creation Failed",
-
-                        err);
-
+                    string title = (createResp.StatusCode == 409 || (createResp.Errors != null && createResp.Errors.Any(e => e.IndexOf("PhilSys", StringComparison.OrdinalIgnoreCase) >= 0)))
+                        ? "Duplicate PhilSys ID"
+                        : "Creation Failed";
+                    Views.Dialogs.ActionConfirmDialog.Error(title, err);
                     return;
-
                 }
 
 
@@ -1796,6 +1807,10 @@ namespace SOLUM_UI
                 AuditLogService.Instance.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
 
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
+                if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
+                _currentPage = 1;
 
                 await LoadRecordsAsync();
 
@@ -1944,6 +1959,10 @@ namespace SOLUM_UI
                     AuditLogService.Instance.LogUpdate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole, $"Record quick renewed. Valid until {newExpiry}.");
 
                     (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
+                if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
+                _currentPage = 1;
 
                     await LoadRecordsAsync();
 
@@ -2108,6 +2127,10 @@ namespace SOLUM_UI
 
 
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
+                if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
+                _currentPage = 1;
 
                 await LoadRecordsAsync();
 
@@ -2152,77 +2175,31 @@ namespace SOLUM_UI
 
 
             RecordDialog dialog = new RecordDialog(rawRecord) { Owner = Window.GetWindow(this) };
-
-
+            dialog.SaveAsyncHandler = async (rec) =>
+            {
+                if (Guid.TryParse(rawRecord.Id, out var guid))
+                {
+                    var updateReq = SoloParentApiService.Instance.MapToUpdateRequest(guid, rec, existingDto);
+                    var updateResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(guid, updateReq);
+                    if (!updateResp.Succeeded)
+                    {
+                        return BaseResponse<object>.FailWithStatus(updateResp.StatusCode, updateResp.Errors != null ? updateResp.Errors.ToArray() : new string[0]);
+                    }
+                }
+                return BaseResponse<object>.Success(true);
+            };
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
-
             {
+                ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
+                var changeList = BuildChangeList(rawRecord, dialog.Result);
+                AuditLogService.Instance.LogUpdateWithChanges(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole, changeList);
 
-                // Show loading indicator
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
 
-                PageLoadingOverlay.Visibility = Visibility.Visible;
-
-
-
-                try
-
-                {
-
-                    if (Guid.TryParse(rawRecord.Id, out var guid))
-
-                    {
-
-                        var updateReq = SoloParentApiService.Instance.MapToUpdateRequest(guid, dialog.Result, existingDto);
-
-                        var updateResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(guid, updateReq);
-
-                        if (!updateResp.Succeeded)
-
-                        {
-
-                            string err = updateResp.Errors != null && updateResp.Errors.Count > 0
-
-                                ? string.Join("\n", updateResp.Errors)
-
-                                : "Failed to update record on the server.";
-
-                            Views.Dialogs.ActionConfirmDialog.Error(
-
-                                "Update Failed",
-
-                                err);
-
-                            return;
-
-                        }
-
-                    }
-
-
-
-                    ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
-
-                    var changeList = BuildChangeList(rawRecord, dialog.Result);
-
-                    AuditLogService.Instance.LogUpdateWithChanges(dialog.Result.Id, dialog.Result.Name,
-
-                        GetCurrentUser(), CurrentUserRole, changeList);
-
-                    await LoadRecordsAsync();
-
-                }
-
-                finally
-
-                {
-
-                    // Hide loading indicator
-
-                    PageLoadingOverlay.Visibility = Visibility.Collapsed;
-
-                }
-
+                await LoadRecordsAsync();
             }
 
         }

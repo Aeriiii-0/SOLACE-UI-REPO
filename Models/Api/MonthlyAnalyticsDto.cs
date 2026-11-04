@@ -13,6 +13,7 @@ namespace SOLUM_UI.Models.Api
         public int InactiveSoloParents { get; set; }
         public int NewRegistrations { get; set; }
         public int Renewals { get; set; }
+        public PreviousYearComparisonDto PreviousYearComparison { get; set; }
 
         public Dictionary<string, int> Sex { get; set; } = new Dictionary<string, int>();
         public Dictionary<string, int> CivilStatus { get; set; } = new Dictionary<string, int>();
@@ -61,9 +62,19 @@ namespace SOLUM_UI.Models.Api
         public int ActiveRecords { get; set; }
         public int InactiveRecords { get; set; }
         public int RenewalsDueThisMonth { get; set; }
+        public int PendingReviewCount { get; set; }
         public int RegisteredThisMonth { get; set; }
         public int RenewalsThisMonth { get; set; }
         public int RenewalsCompletedToday { get; set; }
         public int ActiveChangeFromLastMonth { get; set; }
     }
+
+    public class PreviousYearComparisonDto
+    {
+        public int PreviousYear { get; set; }
+        public int PreviousYearTotal { get; set; }
+        public int PreviousYearActive { get; set; }
+        public double GrowthPercentage { get; set; }
+    }
+
 }

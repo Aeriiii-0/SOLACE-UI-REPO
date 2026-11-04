@@ -15,6 +15,9 @@ namespace SOLUM_UI.Models.Api
         public string Email { get; set; } = string.Empty;
         public string Barangay { get; set; } = string.Empty;
         public IEnumerable<string> Roles { get; set; } = new List<string>();
+        public bool MustChangePassword { get; set; }
+        public bool IsPasswordChanged { get; set; }
+        public System.DateTime? LastPasswordChangedDate { get; set; }
     }
 
     public class RegisterResponse : BaseResponse

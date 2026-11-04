@@ -11,8 +11,8 @@ namespace SOLUM_UI.Views.Components
     {
         public event EventHandler<RecordSortEventArgs> SortChanged;
 
-        public RecordSortField SelectedField { get; private set; } = RecordSortField.Barangay;
-        public bool IsAscending { get; private set; } = true;
+        public RecordSortField SelectedField { get; private set; } = RecordSortField.LastUpdated;
+        public bool IsAscending { get; private set; } = false;
 
         private static readonly SolidColorBrush ActiveBg = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
         private static readonly SolidColorBrush SelectedItemBg = new SolidColorBrush(Color.FromRgb(0xFD, 0xF0, 0xF3));

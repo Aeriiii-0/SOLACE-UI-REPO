@@ -6,14 +6,16 @@ namespace SOLUM_UI.Models.Api
     public class BaseResponse
     {
         public bool Succeeded { get; set; }
+        public int StatusCode { get; set; }
         public List<string> Errors { get; set; } = new List<string>();
     }
 
     public class BaseResponse<T> : BaseResponse
     {
         public T Data { get; set; }
-        public static BaseResponse<T> Success(T data) => new BaseResponse<T> { Succeeded = true, Data = data };
-        public static BaseResponse<T> Fail(params string[] errors) => new BaseResponse<T> { Succeeded = false, Errors = new List<string>(errors) };
+        public static BaseResponse<T> Success(T data) => new BaseResponse<T> { Succeeded = true, StatusCode = 200, Data = data };
+        public static BaseResponse<T> Fail(params string[] errors) => new BaseResponse<T> { Succeeded = false, StatusCode = 400, Errors = new List<string>(errors) };
+        public static BaseResponse<T> FailWithStatus(int statusCode, params string[] errors) => new BaseResponse<T> { Succeeded = false, StatusCode = statusCode, Errors = new List<string>(errors) };
     }
 
     public class PagedResult<T>

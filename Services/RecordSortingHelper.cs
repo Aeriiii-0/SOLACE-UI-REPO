@@ -33,6 +33,8 @@ namespace SOLUM_UI.Services
         public static DateTime GetLastUpdatedDate(SoloParentRecordViewModel vm)
         {
             if (vm?.RawModel == null) return DateTime.MinValue;
+            if (vm.RawModel.DateCreated != DateTime.MinValue)
+                return vm.RawModel.DateCreated;
             if (vm.RawModel.LastUpdated != DateTime.MinValue)
                 return vm.RawModel.LastUpdated;
             if (vm.RawModel.DateOfApplication != DateTime.MinValue)

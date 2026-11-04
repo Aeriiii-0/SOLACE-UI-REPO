@@ -491,24 +491,42 @@ namespace SOLUM_UI.Views.Components
                 string philsys = TxtPhilSys.Text.Trim();
 
                 var matches = new List<SoloParentRecord>();
+                SoloParentRecord philsysDuplicate = null;
+                string rawInputPhilsys = System.Text.RegularExpressions.Regex.Replace(philsys ?? "", @"\D", "");
 
-                if (!string.IsNullOrWhiteSpace(philsys))
+                // 1. Strict PhilSys uniqueness check
+                if (!string.IsNullOrWhiteSpace(rawInputPhilsys))
                 {
                     var philsysResp = await SoloParentApiService.Instance.GetSoloParentsAsync(new GetSoloParentRequest { PhilsysId = philsys, PageSize = 5 });
                     if (philsysResp.Succeeded && philsysResp.Data?.Items != null)
                     {
                         foreach (var item in philsysResp.Data.Items)
                         {
-                            if (!matches.Any(m => m.Id == item.Id.ToString()))
+                            var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
+                            if (detailResp.Succeeded && detailResp.Data != null)
                             {
-                                var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
-                                if (detailResp.Succeeded && detailResp.Data != null)
+                                var rec = SoloParentApiService.Instance.MapToRecord(detailResp.Data);
+                                string recPhilsys = System.Text.RegularExpressions.Regex.Replace(rec.PhilSysNumber ?? "", @"\D", "");
+                                if (rawInputPhilsys == recPhilsys || (rawInputPhilsys.Length >= 12 && recPhilsys.Contains(rawInputPhilsys)))
                                 {
-                                    matches.Add(SoloParentApiService.Instance.MapToRecord(detailResp.Data));
+                                    philsysDuplicate = rec;
+                                    break;
                                 }
                             }
                         }
                     }
+                }
+
+                if (philsysDuplicate != null)
+                {
+                    FoundRecord = philsysDuplicate;
+                    MarkError(TxtPhilSys, ErrPhilSys, $"PhilSys ID is already registered to '{FoundRecord.Name}'. PhilSys ID must be unique.");
+                    DuplicateBannerTitle.Text = "Duplicate PhilSys ID — Registration Blocked";
+                    DuplicateBannerText.Text = $"The PhilSys Card Number '{philsys}' is already assigned to '{FoundRecord.Name}'. PhilSys ID must be strictly unique. You cannot proceed with a duplicate PhilSys ID.";
+                    DuplicateBannerPanel.Visibility = Visibility.Visible;
+                    if (BtnContinueAnyway != null) BtnContinueAnyway.Visibility = Visibility.Collapsed;
+                    TxtPhilSys.Focus();
+                    return false;
                 }
 
                 if (!string.IsNullOrWhiteSpace(fName) && !string.IsNullOrWhiteSpace(lName))
@@ -538,6 +556,7 @@ namespace SOLUM_UI.Views.Components
                         (!string.IsNullOrWhiteSpace(FoundRecord.PhilSysNumber) ? $" with PhilSys ID {FoundRecord.PhilSysNumber}." : ".") +
                         " You can view the existing record or continue ingesting this scanned document.";
                     DuplicateBannerPanel.Visibility = Visibility.Visible;
+                    if (BtnContinueAnyway != null) BtnContinueAnyway.Visibility = Visibility.Visible;
                     return false;
                 }
             }
