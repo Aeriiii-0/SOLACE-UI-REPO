@@ -131,7 +131,15 @@ namespace SOLUM_UI
                 PlayAnimations();
                 StartProgress();
             };
-            Closed += (s, e) => CompositionTarget.Rendering -= OnRender;
+            
+            // Ensure proper cleanup when splash screen closes
+            Closed += (s, e) =>
+            {
+                CompositionTarget.Rendering -= OnRender;
+                this.DataContext = null;
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            };
         }
 
         private static void LoadLogo(ImageBrush brush, string fileName)

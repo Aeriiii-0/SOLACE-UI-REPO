@@ -83,6 +83,14 @@ namespace SOLUM_UI
 
 
             InitializeComponent();
+            
+            // Ensure proper cleanup when window closes
+            this.Closed += (s, e) =>
+            {
+                this.DataContext = null;
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            };
 
 
 
@@ -1226,7 +1234,10 @@ namespace SOLUM_UI
 
 
 
+                // Close and dispose the login window to free resources
                 this.Close();
+                System.GC.Collect();
+                System.GC.WaitForPendingFinalizers();
 
 
 
