@@ -276,7 +276,7 @@ namespace SOLUM_UI
 
 
 
-                BorderEmail.BorderThickness = new Thickness(0, 0, 0, 1);
+                BorderEmail.BorderThickness = new Thickness(1);
 
 
 
