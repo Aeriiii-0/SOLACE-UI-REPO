@@ -250,16 +250,27 @@ namespace SOLUM_UI.Services.Api
                     bool lockAcquired = false;
                     try
                     {
-                        lockAcquired = await _refreshLock.WaitAsync(TimeSpan.FromSeconds(10));
-                        var refreshResult = await AuthApiService.Instance.RefreshTokenAsync();
-                        if (refreshResult != null && refreshResult.Succeeded && refreshResult.Data != null && !string.IsNullOrWhiteSpace(refreshResult.Data.Token))
+                        // Use a longer timeout to avoid race conditions that trigger false session expirations
+                        lockAcquired = await _refreshLock.WaitAsync(TimeSpan.FromSeconds(30));
+                        
+                        if (lockAcquired)
                         {
-                            return await retryFunc();
+                            var refreshResult = await AuthApiService.Instance.RefreshTokenAsync();
+                            if (refreshResult != null && refreshResult.Succeeded && refreshResult.Data != null && !string.IsNullOrWhiteSpace(refreshResult.Data.Token))
+                            {
+                                return await retryFunc();
+                            }
+                            else
+                            {
+                                // Only notify session expired if refresh explicitly failed (not a timeout)
+                                AuthApiService.Instance.NotifySessionExpired("Session expired or revoked. Please log in again.");
+                                return BaseResponse<T>.Fail("Session expired or revoked. Please log in again.");
+                            }
                         }
                         else
                         {
-                            AuthApiService.Instance.NotifySessionExpired("Session expired or revoked. Please log in again.");
-                            return BaseResponse<T>.Fail("Session expired or revoked. Please log in again.");
+                            // Lock timeout - don't trigger session expiration, just fail gracefully
+                            return errorResult;
                         }
                     }
                     catch (Exception ex)
@@ -275,8 +286,9 @@ namespace SOLUM_UI.Services.Api
                         }
                     }
                 }
-                else if (!isAuthEndpoint)
+                else if (!isAuthEndpoint && response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
+                    // Only notify session expired on actual 401, not on every error
                     AuthApiService.Instance.NotifySessionExpired("Session expired or revoked. Please log in again.");
                 }
 
