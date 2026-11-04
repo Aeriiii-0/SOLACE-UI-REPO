@@ -21,6 +21,8 @@ namespace SOLUM_UI.Models
         public string SubsidyType { get; set; } = "Allowance";
         public string Priority { get; set; }
         public double Score { get; set; }
+        public double Confidence { get; set; } = 0.85;
+        public bool IsLowConfidence => !IsFallbackScore && Confidence > 0 && Confidence < 0.60;
         public bool IsWaitlisted { get; set; }
         public string StatusText => IsFinalGrantee ? "Confirmed" : (IsWaitlisted ? "Waitlisted" : "Pending");
 
@@ -89,17 +91,38 @@ namespace SOLUM_UI.Models
         public List<ChildDetailItem> CollegeAgeDependents { get; set; } = new List<ChildDetailItem>();
 
         public string CrossCheckText =>
-            HasCollegeAgeDependent ? "City Educ Check" : "Cleared";
+            HasCollegeAgeDependent ? "College Scholarship" : "Cleared";
 
         public SolidColorBrush CrossCheckFg =>
             HasCollegeAgeDependent
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309"))
                 : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#16A34A"));
 
+                public string AuditFlagsSummary
+        {
+            get
+            {
+                var flags = new List<string>();
+                if (IsCardExpired) flags.Add("ID Expired");
+                if (HasCollegeAgeDependent) flags.Add($"College Scholarship ({CollegeStudentSummary})");
+                if (HasSpecialNeedsDependent) flags.Add(SpecialNeedsDependentsCount > 1 ? $"{SpecialNeedsDependentsCount} Special Needs Dependents" : "Special Needs Dependent");
+                if (IsPantawidBeneficiary) flags.Add("4Ps Beneficiary");
+                return flags.Count > 0 ? string.Join(" • ", flags) : "—";
+            }
+        }
+        public bool HasAuditFlags => IsCardExpired || HasCollegeAgeDependent || HasSpecialNeedsDependent || IsPantawidBeneficiary;
+        public SolidColorBrush AuditFlagsFg => IsCardExpired
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626"))
+            : (HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")));
+
         public string ComplianceRemark
         {
             get
             {
+                if (IsCardExpired)
+                {
+                    return "⚠️ Renewal Required • Solo Parent ID is Expired. Must renew before final confirmation.";
+                }
                 string depWord = Dependants == 1 ? "1 Dependent" : $"{Dependants} Dependents";
                 if (HasCollegeAgeDependent)
                 {
@@ -113,12 +136,12 @@ namespace SOLUM_UI.Models
             }
         }
 
-        public SolidColorBrush ComplianceRemarkFg =>
+        public SolidColorBrush ComplianceRemarkFg => IsCardExpired ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#991B1B")) :
             HasCollegeAgeDependent
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#92400E"))
                 : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#166534"));
 
-        public SolidColorBrush ComplianceRemarkBg =>
+        public SolidColorBrush ComplianceRemarkBg => IsCardExpired ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEE2E2")) :
             HasCollegeAgeDependent
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7"))
                 : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DCFCE7"));
@@ -142,12 +165,75 @@ namespace SOLUM_UI.Models
         {
             get
             {
+                if (CardExpiresAt.HasValue) return CardExpiresAt.Value.ToString("yyyy-MM-dd");
                 if (!string.IsNullOrEmpty(_validUntilFormatted)) return _validUntilFormatted;
                 int hash = Math.Abs((SpId ?? Name ?? "0").GetHashCode());
                 return $"2027-{((hash % 12) + 1):D2}-{((hash % 25) + 1):D2}";
             }
             set => _validUntilFormatted = value;
         }
+        private DateTime? _cardExpiresAt;
+        public DateTime? CardExpiresAt
+        {
+            get => _cardExpiresAt;
+            set
+            {
+                if (SetProperty(ref _cardExpiresAt, value))
+                {
+                    OnPropertyChanged(nameof(IsCardExpired));
+                    OnPropertyChanged(nameof(IsCardExpiringSoon));
+                    OnPropertyChanged(nameof(CardStatusText));
+                    OnPropertyChanged(nameof(CardStatusBg));
+                    OnPropertyChanged(nameof(CardStatusFg));
+                    OnPropertyChanged(nameof(CardStatusBorder));
+                    OnPropertyChanged(nameof(CardValidityDisplay));
+                    OnPropertyChanged(nameof(ValidUntilFormatted));
+                    OnPropertyChanged(nameof(ComplianceRemark));
+                    OnPropertyChanged(nameof(ComplianceRemarkFg));
+                    OnPropertyChanged(nameof(ComplianceRemarkBg));
+                }
+            }
+        }
+
+        public bool IsCardExpired => CardExpiresAt.HasValue && CardExpiresAt.Value.Date < DateTime.Today;
+        public bool IsCardExpiringSoon => CardExpiresAt.HasValue && !IsCardExpired && (CardExpiresAt.Value.Date - DateTime.Today).TotalDays <= 30;
+
+        public string CardStatusText =>
+            !CardExpiresAt.HasValue ? "ACTIVE" :
+            IsCardExpired ? "EXPIRED" :
+            IsCardExpiringSoon ? "EXPIRING SOON" : "ACTIVE";
+
+        public SolidColorBrush CardStatusBg =>
+            !CardExpiresAt.HasValue ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DCFCE7")) :
+            IsCardExpired ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEE2E2")) :
+            IsCardExpiringSoon ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7")) :
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DCFCE7"));
+
+        public SolidColorBrush CardStatusFg =>
+            !CardExpiresAt.HasValue ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#166534")) :
+            IsCardExpired ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626")) :
+            IsCardExpiringSoon ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) :
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#166534"));
+
+        public SolidColorBrush CardStatusBorder =>
+            !CardExpiresAt.HasValue ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BBF7D0")) :
+            IsCardExpired ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FECACA")) :
+            IsCardExpiringSoon ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FDE68A")) :
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BBF7D0"));
+
+        public string CardValidityDisplay => CardExpiresAt.HasValue ? CardExpiresAt.Value.ToString("yyyy-MM-dd") : "—";
+
+                public string SubsidyStatusText => IsFinalGrantee ? "Confirmed" : (IsWaitlisted ? "Waitlisted" : "Shortlisted");
+        public SolidColorBrush SubsidyStatusBg => IsFinalGrantee
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DCFCE7"))
+            : (IsWaitlisted ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FDF4F6")));
+        public SolidColorBrush SubsidyStatusFg => IsFinalGrantee
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#166534"))
+            : (IsWaitlisted ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943")));
+        public SolidColorBrush SubsidyStatusBorder => IsFinalGrantee
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BBF7D0"))
+            : (IsWaitlisted ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FDE68A")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F1D4DC")));
+
         public string RecordStatus { get; set; } = "Active";
         public SolidColorBrush RecordStatusBg => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
         public SolidColorBrush RecordStatusFg => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
@@ -178,13 +264,13 @@ namespace SOLUM_UI.Models
         public string ConfirmButtonToolTip => IsFinalGrantee ? "Revert candidate back to pending shortlist" : "Confirm candidate as final grantee for FY 2026";
         public SolidColorBrush ConfirmButtonBg => IsFinalGrantee
             ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F8FAFC"))
-            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
+            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943"));
         public SolidColorBrush ConfirmButtonFg => IsFinalGrantee
             ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#475569"))
             : new SolidColorBrush(Colors.White);
         public SolidColorBrush ConfirmButtonBorder => IsFinalGrantee
             ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CBD5E1"))
-            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
+            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943"));
 
         public SolidColorBrush RankBg =>
             IsFinalGrantee
@@ -208,12 +294,35 @@ namespace SOLUM_UI.Models
         public string FinalBadgeText => IsFinalGrantee ? "Granted" : "Pending";
         public SolidColorBrush FinalBadgeTextColor => IsFinalGrantee ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#999999"));
 
+                        public SolidColorBrush ScoreCellBg => new SolidColorBrush(Colors.Transparent);
+        public SolidColorBrush ScoreCellBorder => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F2EAEF"));
+        public string ScoreCellTooltip => IsLowConfidence
+            ? $"⚠ Low Model Confidence ({(Confidence * 100):0}%): AI prediction is below 60% threshold. Manual caseworker verification recommended."
+            : $"Vulnerability Score: {Score:0}% • Model: {ModelVersion} ({(Confidence * 100):0}% Confidence)";
+        public bool HasAlertSignal => IsLowConfidence || IsFallbackScore;
+        public SolidColorBrush AlertSignalBg => IsLowConfidence
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943"))
+            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D97706"));
+        public SolidColorBrush AlertSignalFg => new SolidColorBrush(Colors.White);
+        public string AlertSignalTooltip => IsLowConfidence
+            ? $"Low Model Confidence ({(Confidence * 100):0}%): AI prediction is below 60% threshold. Manual caseworker verification recommended."
+            : "Deterministic Rule-Based Fallback: Estimated via statutory income rules because the ML microservice was offline.";
         public string ModelVersion { get; set; } = "v0.3.2-development";
         public bool IsFallbackScore => !string.IsNullOrEmpty(ModelVersion) && ModelVersion.IndexOf("fallback", StringComparison.OrdinalIgnoreCase) >= 0;
         public string ModelSourceBadge => IsFallbackScore ? "Fallback" : "ML";
-        public string ModelSourceTooltip => IsFallbackScore ? "Rule-Based Fallback: Estimated via statutory income rules because the ML microservice was offline." : $"SOLUM ML Model ({ModelVersion})";
-        public SolidColorBrush ModelSourceBg => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E0F2FE"));
-        public SolidColorBrush ModelSourceFg => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0369A1"));
-        public SolidColorBrush ModelSourceBorder => IsFallbackScore ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FCD34D")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BAE6FD"));
+        public string ModelSourceTooltip => IsFallbackScore
+            ? "Rule-Based Fallback: Estimated via statutory income rules because the ML microservice was offline."
+            : (IsLowConfidence
+                ? $"⚠ Low Model Confidence ({(Confidence * 100):0}%): AI model prediction is below 60% confidence threshold. Manual casework verification recommended."
+                : $"SOLUM ML Model ({ModelVersion}) • {(Confidence * 100):0}% Confidence");
+        public SolidColorBrush ModelSourceBg => IsFallbackScore
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7"))
+            : (IsLowConfidence ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF2F2")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E0F2FE")));
+        public SolidColorBrush ModelSourceFg => IsFallbackScore
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309"))
+            : (IsLowConfidence ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0369A1")));
+        public SolidColorBrush ModelSourceBorder => IsFallbackScore
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FCD34D"))
+            : (IsLowConfidence ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FCA5A5")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BAE6FD")));
     }
 }

@@ -13,6 +13,8 @@ namespace SOLUM_UI.Services.Interfaces
         Task<BaseResponse<List<SubsidyCycleDto>>> GetCyclesAsync();
         Task<BaseResponse<SubsidyCycleDto>> CreateCycleAsync(CreateSubsidyCycleRequest request);
         Task<BaseResponse<SubsidyCycleDto>> UpdateCycleAsync(Guid cycleId, UpdateSubsidyCycleRequest request);
+        Task<BaseResponse<bool>> FinalizeCycleAsync(Guid cycleId);
+        Task<BaseResponse<bool>> UnlockCycleAsync(Guid cycleId);
         Task<BaseResponse<int>> GenerateRecommendationsAsync(Guid? cycleId = null);
         Task<BaseResponse<SubsidyRecommendationDto>> PredictCandidateAsync(Guid soloParentId);
         Task<BaseResponse<PagedResult<SubsidyRecommendationDto>>> GetRecommendationsPagedAsync(GetSubsidyRecommendationsRequest request);
@@ -22,7 +24,7 @@ namespace SOLUM_UI.Services.Interfaces
         Task<BaseResponse<bool>> ShortlistCandidatesAsync(Guid? cycleId, List<Guid> evaluationIds);
         Task<BaseResponse<int>> ShortlistTopQuotaAsync(Guid? cycleId, int? topCount = null);
         Task<BaseResponse<SubsidyRecommendationDto>> RejectOutlierAsync(RejectOutlierRequest request);
-        Task<BaseResponse<List<SubsidyRecommendationDto>>> GetRejectedCandidatesAsync(Guid? cycleId = null);
+        Task<BaseResponse<List<SubsidyRecommendationDto>>> GetRejectedCandidatesAsync(Guid? cycleId = null, string search = null, string reason = null);
         Task<BaseResponse<bool>> ReinstateCandidateAsync(Guid evaluationId);
         Task<BaseResponse<int>> ConfirmGranteesAsync(Guid? cycleId, List<Guid> evaluationIds);
         Task<BaseResponse<List<GranteeDto>>> GetGranteesByFiscalYearAsync(int fiscalYear);

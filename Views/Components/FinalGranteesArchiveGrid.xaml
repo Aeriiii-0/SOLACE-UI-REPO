@@ -31,7 +31,6 @@
                     <ControlTemplate TargetType="ListViewItem">
                         <Grid>
                             <Border x:Name="RowBg" Background="White" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
-                            <Rectangle x:Name="AccentIndicator" HorizontalAlignment="Left" Width="3" Fill="#27AE60" VerticalAlignment="Stretch"/>
                             <GridViewRowPresenter VerticalAlignment="Stretch" Margin="2,0,2,0"/>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -53,29 +52,27 @@
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
 
-        <!-- Top Banner: Title, Summary & Export Final Ledger -->
-        <Border Grid.Row="0" MinHeight="98" Background="#FBF5F7" CornerRadius="12" BorderBrush="#D4A0B0" BorderThickness="1" Padding="16,12" Margin="0,0,0,6">
+        <!-- Single Compact Ribbon: Summary & Export Final Ledger -->
+        <Border Grid.Row="0" Background="#FBF5F7" MinHeight="48" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="14,8" Margin="0,0,0,6">
             <Grid VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="Final Grantees Ledger" FontSize="13" FontWeight="Bold" Foreground="#702943"/>
-                        <Border Background="{Binding RosterStatusBadgeBg}" CornerRadius="6" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding RosterStatusBadgeText}" FontSize="10" FontWeight="Bold" Foreground="{Binding RosterStatusBadgeFg}"/>
-                        </Border>
-                    </StackPanel>
-                    <TextBlock Text="{Binding FinalSummaryText}" FontSize="11" Foreground="#A06080" Margin="0,4,0,0"/>
+                
+                <!-- Left: Summary Counter -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="#FFF0F5" CornerRadius="6" BorderBrush="#D4A0B0" BorderThickness="1" Padding="10,4">
+                        <TextBlock Text="{Binding FinalSummaryText}" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                    </Border>
                 </StackPanel>
 
-                <!-- Export Final Ledger -->
-                <Button Grid.Column="1" Height="32" Padding="16,0" Cursor="Hand" Command="{Binding ExportFinalLedgerCommand}">
+                <!-- Right: Export Final Ledger -->
+                <Button Grid.Column="1" Height="30" Padding="14,0" Cursor="Hand" Command="{Binding ExportFinalLedgerCommand}">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border Background="#702943" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                                <TextBlock Text="Export Final Ledger" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                <TextBlock Text="Export Final List" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True"><Setter Property="Opacity" Value="0.88"/></Trigger>
@@ -150,7 +147,6 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Ellipse Width="6" Height="6" Fill="#22C55E" VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <TextBlock Text="{Binding FinalSummaryText}" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
                             <TextBlock Text=" • " FontFamily="Segoe UI" FontSize="12" Foreground="#CBD5E1" Margin="4,0" VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding FinalPageSummary}" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>

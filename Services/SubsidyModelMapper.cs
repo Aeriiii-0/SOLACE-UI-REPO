@@ -67,7 +67,7 @@ namespace SOLUM_UI.Services
         public static SelectionRow ToRow(SubsidyRecommendationDto d, int rk) => new SelectionRow
         {
             Rank = rk, EvaluationId = d.EvaluationId, CycleId = d.CycleId, SoloParentId = d.SoloParentId,
-            SpId = d.SpId, Name = d.Name, Barangay = d.Barangay, Priority = NormPrio(d.Priority), Score = d.Score,
+            SpId = d.SpId, Name = d.Name, Barangay = d.Barangay, Priority = NormPrio(d.Priority), Score = d.Score, Confidence = d.Confidence,
             MonthlyIncome = d.MonthlyIncome, IncomePerCapita = CalcCapita(d.MonthlyIncome, d.Dependants, d.IncomePerCapita), Dependants = d.Dependants,
             MinorDependentsCount = d.MinorDependentsCount, ToddlersUnder5Count = d.ToddlersUnder5Count,
             Circumstance = !string.IsNullOrEmpty(d.Circumstance) ? d.Circumstance : d.ProblemPresented,
@@ -141,13 +141,29 @@ namespace SOLUM_UI.Services
             return string.Empty;
         }
 
+                private static DateTime? ExtractCardExpiresAt(SOLUM_UI.Models.Api.SoloParentDto dto)
+        {
+            if (dto == null) return null;
+            if (dto.CurrentTermExpiresAt.HasValue) return dto.CurrentTermExpiresAt.Value;
+            if (dto.RecordTerms != null && dto.RecordTerms.Count > 0)
+            {
+                var term = dto.RecordTerms.LastOrDefault();
+                if (term != null && DateTime.TryParse(term.ExpiresAt, out var dt)) return dt;
+            }
+            return null;
+        }
         public static void EnrichItemFromRecord(SubsidyItem item, SOLUM_UI.Models.Api.SoloParentDto dto)
         {
             if (item == null || dto == null) return;
             string circ = ResolveCircumstance(dto.ProblemPresented);
             if (!string.IsNullOrEmpty(circ)) item.Circumstance = circ;
-            string needs = ResolveNeedsAndProblems(dto.ProblemPresented);
-            if (!string.IsNullOrEmpty(needs)) item.NeedsAndProblems = needs;
+            if (!string.IsNullOrWhiteSpace(dto.NeedsAndProblems))
+                item.NeedsAndProblems = dto.NeedsAndProblems.Trim();
+            else
+            {
+                string needs = ResolveNeedsAndProblems(dto.ProblemPresented);
+                if (!string.IsNullOrEmpty(needs)) item.NeedsAndProblems = needs;
+            }
 
             if (dto.FamilyMembers != null && dto.FamilyMembers.Count > 0)
             {
@@ -168,6 +184,8 @@ namespace SOLUM_UI.Services
                 item.EmploymentStatus = dto.Employment.EmploymentStatus;
             if (!string.IsNullOrWhiteSpace(dto.PersonalInfo?.CivilStatus) && string.IsNullOrWhiteSpace(item.CivilStatus))
                 item.CivilStatus = dto.PersonalInfo.CivilStatus;
+            var cardExp = ExtractCardExpiresAt(dto);
+            if (cardExp.HasValue) item.CardExpiresAt = cardExp.Value;
         }
 
         public static void EnrichRowFromRecord(SelectionRow row, SOLUM_UI.Models.Api.SoloParentDto dto)
@@ -175,8 +193,13 @@ namespace SOLUM_UI.Services
             if (row == null || dto == null) return;
             string circ = ResolveCircumstance(dto.ProblemPresented);
             if (!string.IsNullOrEmpty(circ)) row.Circumstance = circ;
-            string needs = ResolveNeedsAndProblems(dto.ProblemPresented);
-            if (!string.IsNullOrEmpty(needs)) row.NeedsAndProblems = needs;
+            if (!string.IsNullOrWhiteSpace(dto.NeedsAndProblems))
+                row.NeedsAndProblems = dto.NeedsAndProblems.Trim();
+            else
+            {
+                string needs = ResolveNeedsAndProblems(dto.ProblemPresented);
+                if (!string.IsNullOrEmpty(needs)) row.NeedsAndProblems = needs;
+            }
 
             if (dto.PersonalInfo?.Birthdate != null && dto.PersonalInfo.Birthdate != DateTime.MinValue)
                 row.DateOfBirthFormatted = dto.PersonalInfo.Birthdate.ToString("yyyy-MM-dd");
@@ -202,6 +225,8 @@ namespace SOLUM_UI.Services
                     if (college.Count > 0) { row.CollegeAgeDependents = college; row.CollegeAgeDependentsCount = college.Count; row.HasCollegeAgeDependent = true; }
                 }
             }
+            var rowCardExp = ExtractCardExpiresAt(dto);
+            if (rowCardExp.HasValue) row.CardExpiresAt = rowCardExp.Value;
         }
     }
 }

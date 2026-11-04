@@ -7,14 +7,31 @@ namespace SOLUM_UI.Models
     {
         public Guid? CycleId { get; set; }
         public int FiscalYear { get; set; }
-        public string Status { get; set; } = "Archived";
+        private string _status = "Archived";
+        public string Status
+        {
+            get => _status;
+            set
+            {
+                if (SetProperty(ref _status, value))
+                {
+                    OnPropertyChanged(nameof(IsActive));
+                    OnPropertyChanged(nameof(IsFinalized));
+                    OnPropertyChanged(nameof(DisplayName));
+                }
+            }
+        }
         public int AllocatedSlots { get; set; }
         public decimal TotalBudget { get; set; }
         public decimal PerGranteeAmount { get; set; } = 1000m;
 
         public bool IsActive => string.Equals(Status, "Active", StringComparison.OrdinalIgnoreCase);
+        public bool IsFinalized => string.Equals(Status, "Finalized", StringComparison.OrdinalIgnoreCase);
 
-        public string DisplayName => IsActive ? $"{FiscalYear} (Active Cycle)" : $"{FiscalYear} (Archived)";
+        public string DisplayName =>
+            IsActive ? $"{FiscalYear} (Active Cycle)" :
+            IsFinalized ? $"{FiscalYear} (Finalized)" :
+            $"{FiscalYear} (Archived)";
 
         public override string ToString() => DisplayName;
 

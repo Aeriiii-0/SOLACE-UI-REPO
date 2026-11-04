@@ -37,6 +37,7 @@ namespace SOLUM_UI
 
     {
 
+        private bool _isSavingRecord = false;
         public static string CurrentUserName { get; set; } = string.Empty;
 
         public static string CurrentUserRole { get; set; } = string.Empty;
@@ -1758,9 +1759,14 @@ namespace SOLUM_UI
 
         {
 
-            // Show loading indicator
+            if (_isSavingRecord)
+            {
+                ToastNotification.Show("Please Wait", "A record is currently being saved.", ToastType.Warning);
+                return;
+            }
 
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            _isSavingRecord = true;
+            ToastNotification.Show("Adding Record...", $"Saving record for {record.Name}...", ToastType.Info);
 
 
 
@@ -1820,10 +1826,7 @@ namespace SOLUM_UI
 
             {
 
-                // Hide loading indicator
-
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
-
+                _isSavingRecord = false;
             }
 
         }
@@ -1934,7 +1937,7 @@ namespace SOLUM_UI
 
 
 
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            ToastNotification.Show("Renewing Record...", $"Renewing ID card for {record.Name}...", ToastType.Info);
 
             try
 
@@ -1992,9 +1995,7 @@ namespace SOLUM_UI
 
             {
 
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
-
-            }
+                }
 
         }
 
@@ -2038,7 +2039,7 @@ namespace SOLUM_UI
 
 
 
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            ToastNotification.Show("Renewing Record...", $"Saving renewal for {original.Name}...", ToastType.Info);
 
             try
 
@@ -2140,9 +2141,7 @@ namespace SOLUM_UI
 
             {
 
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
-
-            }
+                }
 
         }
 
@@ -2240,32 +2239,11 @@ namespace SOLUM_UI
 
 
 
-            PageLoadingOverlay.Visibility = Visibility.Visible;
-
-            try
-
+            var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
+            if (fetch.Succeeded && fetch.Data != null)
             {
-
-                var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
-
-                if (fetch.Succeeded && fetch.Data != null)
-
-                {
-
-                    existingDto = fetch.Data;
-
-                    rawRecord = SoloParentApiService.Instance.MapToRecord(existingDto);
-
-                }
-
-            }
-
-            finally
-
-            {
-
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
-
+                existingDto = fetch.Data;
+                rawRecord = SoloParentApiService.Instance.MapToRecord(existingDto);
             }
 
 
@@ -2388,9 +2366,7 @@ namespace SOLUM_UI
 
 
 
-            // Show loading indicator
-
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            ToastNotification.Show("Deleting Record...", $"Removing record for {recordName}...", ToastType.Info);
 
 
 
@@ -2434,11 +2410,7 @@ namespace SOLUM_UI
 
             {
 
-                // Hide loading indicator
-
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
-
-            }
+                }
 
         }
 
