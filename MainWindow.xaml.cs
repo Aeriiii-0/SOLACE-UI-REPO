@@ -102,7 +102,7 @@ namespace SOLUM_UI
                 ApplyRoleNavVisibility();
                 ActivateButton("Dashboard");
                 NavigatePage(GetOrCreatePage("Dashboard", () => new DashboardPage())); // CHANGED
-                await CheckAdminReviewsOnStartupAsync();
+                // await CheckAdminReviewsOnStartupAsync(); // Disabled: review prompt on login
             };
             SetCurrentUser(user);
         }
