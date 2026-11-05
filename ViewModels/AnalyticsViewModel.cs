@@ -180,7 +180,7 @@ namespace SOLUM_UI.ViewModels
             get
             {
                 if (IsFilterActive)
-                    return _totalSoloParents > 0 ? _totalSoloParents : _totalRegistered;
+                    return _totalSoloParents;
                 return _totalRegistered > 0 ? _totalRegistered : _totalSoloParents;
 
             }
@@ -241,7 +241,7 @@ namespace SOLUM_UI.ViewModels
             get
             {
                 if (IsFilterActive)
-                    return _filteredActiveRecords > 0 ? _filteredActiveRecords : _activeRecords;
+                    return _filteredActiveRecords;
                 return _activeRecords > 0 ? _activeRecords : _filteredActiveRecords;
 
             }
@@ -269,7 +269,7 @@ namespace SOLUM_UI.ViewModels
             get
             {
                 if (IsFilterActive)
-                    return _filteredInactiveRecords > 0 ? _filteredInactiveRecords : _inactiveRecords;
+                    return _filteredInactiveRecords;
                 return _inactiveRecords > 0 ? _inactiveRecords : _filteredInactiveRecords;
 
             }
@@ -403,7 +403,7 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-        public bool HasPreviousYearComparison => _previousYearComparison != null && _previousYearComparison.PreviousYear > 0;
+        public bool HasPreviousYearComparison => _previousYearComparison != null && _previousYearComparison.PreviousYear > 0 && (!IsFilterActive || TotalRegisteredCount > 0);
 
         public Visibility PreviousYearComparisonVisibility => HasPreviousYearComparison ? Visibility.Visible : Visibility.Collapsed;
 
@@ -1366,7 +1366,7 @@ namespace SOLUM_UI.ViewModels
             RenewalsCompletedToday = dto.RenewalsCompletedToday;
             RenewalsThisMonth = dto.RenewalsThisMonth;
             RegisteredThisMonth = dto.RegisteredThisMonth;
-            if (TotalSoloParents <= 0 && dto.TotalRegistered > 0)
+            if (!IsFilterActive && TotalSoloParents <= 0 && dto.TotalRegistered > 0)
                 TotalSoloParents = dto.TotalRegistered;
 
         }
@@ -1559,16 +1559,11 @@ namespace SOLUM_UI.ViewModels
             // If not in a custom filter, synchronize the real-time card numbers and KPIs from monthly DTO
             if (!IsFilterActive)
             {
-                if (dto.TotalSoloParents > 0 || TotalSoloParents <= 0)
-                    TotalSoloParents = dto.TotalSoloParents;
-                if (dto.ActiveSoloParents > 0 || FilteredActiveRecords <= 0)
-                    FilteredActiveRecords = dto.ActiveSoloParents;
-                if (dto.InactiveSoloParents > 0 || FilteredInactiveRecords <= 0)
-                    FilteredInactiveRecords = dto.InactiveSoloParents;
-                if (dto.NewRegistrations > 0 || FilteredNewRegistrations <= 0)
-                    FilteredNewRegistrations = dto.NewRegistrations;
-                if (dto.Renewals > 0 || FilteredRenewals <= 0)
-                    FilteredRenewals = dto.Renewals;
+                TotalSoloParents = dto.TotalSoloParents;
+                FilteredActiveRecords = dto.ActiveSoloParents;
+                FilteredInactiveRecords = dto.InactiveSoloParents;
+                FilteredNewRegistrations = dto.NewRegistrations;
+                FilteredRenewals = dto.Renewals;
                 if (dto.NewRegistrations > 0 || RegisteredThisMonth == 0)
                     RegisteredThisMonth = dto.NewRegistrations;
                 if (dto.ActiveSoloParents > 0)
@@ -1579,17 +1574,12 @@ namespace SOLUM_UI.ViewModels
             }
             else
             {
-                // When filter is active, ensure filtered active/inactive records reflect this specific date/period
-                if (dto.ActiveSoloParents > 0 || FilteredActiveRecords <= 0)
-                    FilteredActiveRecords = dto.ActiveSoloParents;
-                if (dto.InactiveSoloParents > 0 || FilteredInactiveRecords <= 0)
-                    FilteredInactiveRecords = dto.InactiveSoloParents;
-                if (dto.TotalSoloParents > 0 || TotalSoloParents <= 0)
-                    TotalSoloParents = dto.TotalSoloParents;
-                if (dto.NewRegistrations > 0 || FilteredNewRegistrations <= 0)
-                    FilteredNewRegistrations = dto.NewRegistrations;
-                if (dto.Renewals > 0 || FilteredRenewals <= 0)
-                    FilteredRenewals = dto.Renewals;
+                // When filter is active, strictly reflect the specific date/period (set to 0 if no records)
+                TotalSoloParents = dto.TotalSoloParents;
+                FilteredActiveRecords = dto.ActiveSoloParents;
+                FilteredInactiveRecords = dto.InactiveSoloParents;
+                FilteredNewRegistrations = dto.NewRegistrations;
+                FilteredRenewals = dto.Renewals;
 
             }
             System.Diagnostics.Debug.WriteLine($"  TotalSoloParents: {TotalSoloParents}, Active: {dto.ActiveSoloParents}, Inactive: {dto.InactiveSoloParents}, New: {dto.NewRegistrations}");

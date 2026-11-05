@@ -280,6 +280,15 @@ namespace SOLUM_UI
                 SyncFilterValuesFromUi();
                 _vm.UpdateActiveFilterSummary();
 
+                if (_vm.IsFilterActive)
+                {
+                    _vm.TotalSoloParents = 0;
+                    _vm.FilteredActiveRecords = 0;
+                    _vm.FilteredInactiveRecords = 0;
+                    _vm.FilteredNewRegistrations = 0;
+                    _vm.FilteredRenewals = 0;
+                }
+
                 string barangay = _vm.SelectedBarangay ?? "ALL";
                 if (string.IsNullOrWhiteSpace(barangay) || barangay.Equals("All", StringComparison.OrdinalIgnoreCase))
                     barangay = "ALL";
@@ -387,6 +396,14 @@ namespace SOLUM_UI
                 {
                     // Clear demographics gracefully if not returned for this custom/aggregated period
                     _vm.ClearDemographicCharts();
+                    if (_vm.IsFilterActive)
+                    {
+                        _vm.TotalSoloParents = 0;
+                        _vm.FilteredActiveRecords = 0;
+                        _vm.FilteredInactiveRecords = 0;
+                        _vm.FilteredNewRegistrations = 0;
+                        _vm.FilteredRenewals = 0;
+                    }
                 }
                 if (showErrors)
                 {

@@ -5,7 +5,7 @@
         Background="Transparent" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         FontFamily="Segoe UI"
-        Width="580" SizeToContent="Height">
+        Width="520" SizeToContent="Height">
     <Border Background="Transparent" Padding="16">
         <!-- Main Card with Rounded Corners -->
         <Border Background="White" CornerRadius="18"
@@ -13,148 +13,91 @@
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="4" Opacity="0.20"/>
             </Border.Effect>
+
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <!-- Top Header Banner (Rounded Top Corners) -->
+
+                <!-- Top Header Banner (No Exit Icon) -->
                 <Border Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="22,18">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Records Requiring Your Attention" FontSize="17" FontWeight="Bold"
-                                   Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
-                        <!-- Close Button -->
-                        <Button Grid.Column="1" Width="28" Height="28" Background="#25FFFFFF" BorderThickness="0"
-                                Cursor="Hand" Click="Dismiss_Click" VerticalAlignment="Center" Margin="8,0,0,0">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}" CornerRadius="14">
-                                        <TextBlock Text="✕" FontSize="12" Foreground="White" FontWeight="Bold"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                    </Grid>
+                    <TextBlock Text="Subsidy Recommendation Notice" FontSize="17" FontWeight="Bold"
+                               Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
                 </Border>
+
                 <!-- Main Content Body -->
-                <StackPanel Grid.Row="1" Margin="22,18,22,16">
+                <StackPanel Grid.Row="1" Margin="22,20,22,18">
                     <TextBlock Text="The following items currently require your attention:"
                                FontFamily="Segoe UI" FontSize="12.5" Foreground="#475569" Margin="0,0,0,14"/>
-                    <!-- Card 1: Pending Subsidy Reviews -->
+
+                    <!-- Card: Pending Subsidy Reviews -->
                     <Border x:Name="CardPendingReview" Background="#FDF8F9" CornerRadius="12" BorderBrush="#E8D4DA" BorderThickness="1.5"
-                            Padding="16,14" Margin="0,0,0,12">
+                            Padding="18,16">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Width="38" Height="38" CornerRadius="9" Background="#F5E1E8" Margin="0,0,12,0" VerticalAlignment="Center">
-                                <TextBlock Text="🎯" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                            <Border Grid.Column="0" Width="42" Height="42" CornerRadius="10" Background="#F5E1E8" Margin="0,0,14,0" VerticalAlignment="Center">
+                                <TextBlock Text="🎯" FontSize="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock x:Name="TxtPendingCount" Text="0" FontSize="17" FontWeight="Bold" Foreground="#702943" Margin="0,0,6,0"/>
-                                    <TextBlock Text="records pending subsidy review" FontSize="13.5" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtPendingCount" Text="0" FontSize="18" FontWeight="Bold" Foreground="#702943" Margin="0,0,6,0"/>
+                                    <TextBlock Text="records pending subsidy review" FontSize="14" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </StackPanel>
-                            <Button Grid.Column="2" x:Name="BtnReviewSubsidy" Click="ReviewSubsidy_Click"
-                                    Height="30" Padding="16,0" Background="#702943" BorderThickness="0" Cursor="Hand" VerticalAlignment="Center">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                            <TextBlock Text="Review" FontSize="11.5" FontWeight="SemiBold" Foreground="White"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </Grid>
-                    </Border>
-                    <!-- Card 2: Expiring This Month -->
-                    <Border x:Name="CardExpiring" Background="#FFFDF7" CornerRadius="12" BorderBrush="#FCD34D" BorderThickness="1.5"
-                            Padding="16,14" Margin="0,0,0,12">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Width="38" Height="38" CornerRadius="9" Background="#FEF3C7" Margin="0,0,12,0" VerticalAlignment="Center">
-                                <TextBlock Text="⏳" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock x:Name="TxtExpiringCount" Text="0" FontSize="17" FontWeight="Bold" Foreground="#B45309" Margin="0,0,6,0"/>
-                                    <TextBlock Text="records expiring this month" FontSize="13.5" FontWeight="Bold" Foreground="#78350F" VerticalAlignment="Center"/>
-                                </StackPanel>
-                                <TextBlock Text="Solo parent IDs reaching their 1-year annual expiration." FontSize="11" Foreground="#92400E" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
-                            </StackPanel>
-                            <Button Grid.Column="2" x:Name="BtnReviewExpiring" Click="ReviewExpiring_Click"
-                                    Height="30" Padding="14,0" Background="#B45309" BorderThickness="0" Cursor="Hand" VerticalAlignment="Center">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                            <TextBlock Text="Review Expiring IDs →" FontSize="11" FontWeight="SemiBold" Foreground="White"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </Grid>
-                    </Border>
-                    <!-- Card 3: Inactive Records -->
-                    <Border x:Name="CardInactive" Background="#FDF8F9" CornerRadius="12" BorderBrush="#E8D2DA" BorderThickness="1.5"
-                            Padding="16,14">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Width="38" Height="38" CornerRadius="9" Background="#FDE8EF" Margin="0,0,12,0" VerticalAlignment="Center">
-                                <TextBlock Text="⏸" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock x:Name="TxtInactiveCount" Text="0" FontSize="17" FontWeight="Bold" Foreground="#702943" Margin="0,0,6,0"/>
-                                    <TextBlock Text="inactive records need review" FontSize="13.5" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
-                                </StackPanel>
-                                <TextBlock Text="Deactivated or paused profiles awaiting status reassessment." FontSize="11" Foreground="#64748B" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
-                            </StackPanel>
-                            <Button Grid.Column="2" x:Name="BtnReviewInactive" Click="ReviewInactive_Click"
-                                    Height="30" Padding="14,0" Background="#702943" BorderThickness="0" Cursor="Hand" VerticalAlignment="Center">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                            <TextBlock Text="Review Inactive →" FontSize="11" FontWeight="SemiBold" Foreground="White"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
                         </Grid>
                     </Border>
                 </StackPanel>
-                <!-- Footer Actions (Rounded Bottom Corners) -->
-                <Border Grid.Row="2" Background="#F8FAFC" CornerRadius="0,0,16,16" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="22,12">
+
+                <!-- Footer Actions: Only "Dismiss" and "Review" -->
+                <Border Grid.Row="2" Background="#F8FAFC" CornerRadius="0,0,16,16" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="22,14">
                     <Grid>
-                        <Button HorizontalAlignment="Right" Height="32" Padding="18,0"
-                                Background="#E2E8F0" BorderThickness="0" Cursor="Hand" Click="Dismiss_Click">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Dismiss Button -->
+                        <Button x:Name="BtnDismiss" Grid.Column="0" Height="38" Cursor="Hand" Click="Dismiss_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                        <TextBlock Text="Dismiss" FontSize="11.5" FontWeight="SemiBold" Foreground="#475569"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Border x:Name="Bg" Background="White" CornerRadius="8" BorderBrush="#CBD5E1" BorderThickness="1.5">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#F1F5F9"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
+                            <TextBlock Text="Dismiss" FontSize="12.5" FontWeight="SemiBold" Foreground="#475569"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Button>
+
+                        <!-- Review Button -->
+                        <Button x:Name="BtnReviewSubsidy" Grid.Column="2" Height="38" Background="#702943" Cursor="Hand" Click="ReviewSubsidy_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="8">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock Text="Review" FontSize="12.5" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Button>
                     </Grid>
                 </Border>

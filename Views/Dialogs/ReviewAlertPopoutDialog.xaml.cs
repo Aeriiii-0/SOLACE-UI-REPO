@@ -7,25 +7,17 @@ namespace SOLUM_UI.Views.Dialogs
     {
         private MainWindow _mainWindow;
 
-        public ReviewAlertPopoutDialog(int expiringCount, int inactiveCount, int pendingCount = 0, MainWindow mainWindow = null)
+        public ReviewAlertPopoutDialog(int pendingCount = 0, MainWindow mainWindow = null)
         {
             InitializeComponent();
             _mainWindow = mainWindow;
-            TxtExpiringCount.Text = expiringCount.ToString("N0");
-            TxtInactiveCount.Text = inactiveCount.ToString("N0");
             TxtPendingCount.Text = pendingCount.ToString("N0");
-            if (expiringCount <= 0 && CardExpiring != null)
-            {
-                CardExpiring.Visibility = Visibility.Collapsed;
-            }
-            if (inactiveCount <= 0 && CardInactive != null)
-            {
-                CardInactive.Visibility = Visibility.Collapsed;
-            }
-            if (pendingCount <= 0 && CardPendingReview != null)
-            {
-                CardPendingReview.Visibility = Visibility.Collapsed;
-            }
+        }
+
+        // Backwards compatibility constructor when callers pass (expiring, inactive, pending, mainWin)
+        public ReviewAlertPopoutDialog(int expiringCount, int inactiveCount, int pendingCount = 0, MainWindow mainWindow = null)
+            : this(pendingCount > 0 ? pendingCount : (expiringCount > 0 ? expiringCount : inactiveCount), mainWindow)
+        {
         }
 
         private MainWindow GetMainWindow()
@@ -58,40 +50,27 @@ namespace SOLUM_UI.Views.Dialogs
             }
         }
 
-        private void ReviewExpiring_Click(object sender, RoutedEventArgs e)
-        {
-            var main = GetMainWindow();
-            Close();
-            if (main != null)
-            {
-                main.NavigateToSoloParentRecordsWithFilter("ExpiringSoon");
-            }
-        }
-
-        private void ReviewInactive_Click(object sender, RoutedEventArgs e)
-        {
-            var main = GetMainWindow();
-            Close();
-            if (main != null)
-            {
-                main.NavigateToSoloParentRecordsWithFilter("Expired");
-            }
-        }
-
         private void Dismiss_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
 
-        public static void ShowIfReviewsNeeded(Window owner, int expiringCount, int inactiveCount, int pendingCount = 0)
+        public static void ShowIfReviewsNeeded(Window owner, int pendingCount)
         {
-            if (expiringCount <= 0 && inactiveCount <= 0 && pendingCount <= 0) return;
+            if (pendingCount <= 0) return;
             var mainWin = owner as MainWindow;
-            var dlg = new ReviewAlertPopoutDialog(expiringCount, inactiveCount, pendingCount, mainWin)
+            var dlg = new ReviewAlertPopoutDialog(pendingCount, mainWin)
             {
                 Owner = owner
             };
             dlg.ShowDialog();
+        }
+
+        public static void ShowIfReviewsNeeded(Window owner, int expiringCount, int inactiveCount, int pendingCount = 0)
+        {
+            int count = pendingCount > 0 ? pendingCount : (expiringCount > 0 ? expiringCount : inactiveCount);
+            if (count <= 0) return;
+            ShowIfReviewsNeeded(owner, count);
         }
     }
 }

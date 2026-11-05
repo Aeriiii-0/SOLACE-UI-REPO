@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
@@ -102,7 +102,7 @@ namespace SOLUM_UI
                 ApplyRoleNavVisibility();
                 ActivateButton("Dashboard");
                 NavigatePage(GetOrCreatePage("Dashboard", () => new DashboardPage())); // CHANGED
-                // await CheckAdminReviewsOnStartupAsync(); // Disabled: review prompt on login
+                await CheckAdminReviewsOnStartupAsync();
             };
             SetCurrentUser(user);
         }
@@ -131,12 +131,10 @@ namespace SOLUM_UI
                 var dashRes = await AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
                 if (dashRes != null && dashRes.Succeeded && dashRes.Data != null)
                 {
-                    int expiring = dashRes.Data.RenewalsDueThisMonth;
-                    int inactive = dashRes.Data.InactiveRecords;
                     int pending = dashRes.Data.PendingReviewCount;
-                    if (expiring > 0 || inactive > 0 || pending > 0)
+                    if (pending > 0)
                     {
-                        ReviewAlertPopoutDialog.ShowIfReviewsNeeded(this, expiring, inactive, pending);
+                        ReviewAlertPopoutDialog.ShowIfReviewsNeeded(this, pending);
                     }
                 }
             }

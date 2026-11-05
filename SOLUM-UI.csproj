@@ -304,6 +304,9 @@
     <Compile Include="Views\Dialogs\AccountCreatedDialog.xaml.cs">
       <DependentUpon>AccountCreatedDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\ConfirmCreateUserDialog.xaml.cs">
+      <DependentUpon>ConfirmCreateUserDialog.xaml</DependentUpon>
+    </Compile>
         <Compile Include="Views\Dialogs\ForceChangePasswordDialog.xaml.cs">
       <DependentUpon>ForceChangePasswordDialog.xaml</DependentUpon>
     </Compile>
@@ -580,6 +583,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\AccountCreatedDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\ConfirmCreateUserDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

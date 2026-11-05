@@ -98,14 +98,14 @@ namespace SOLUM_UI.ViewModels
             private set { _renewalsDueThisMonth = value; OnPropertyChanged(); }
         }
 
-        private string _registeredDelta = "-9 added this quarter";
+        private string _registeredDelta = "+9 added this quarter";
         public string RegisteredDelta
         {
             get => _registeredDelta;
             private set { _registeredDelta = value; OnPropertyChanged(); }
         }
 
-        private string _registeredQuarterDelta = "-9 added this quarter";
+        private string _registeredQuarterDelta = "+9 added this quarter";
         public string RegisteredQuarterDelta
         {
             get => _registeredQuarterDelta;
@@ -253,8 +253,8 @@ namespace SOLUM_UI.ViewModels
             RenewalsDueThisMonth = 0;
             RecordHealthText = "78%";
             ExpiringThisMonthCount = "0";
-            RegisteredDelta = "-9 added this quarter";
-            RegisteredQuarterDelta = "-9 added this quarter";
+            RegisteredDelta = "+9 added this quarter";
+            RegisteredQuarterDelta = "+9 added this quarter";
             CalendarTitle = DateTime.Now.ToString("MMMM yyyy");
             if (RecentLogs.Count == 0)
             {
@@ -431,8 +431,8 @@ namespace SOLUM_UI.ViewModels
             }
             OnPropertyChanged(nameof(ExpiringBannerText));
             // Card 1: Added this month
-            RegisteredDelta = $"-{d.RegisteredThisMonth:N0} added this quarter";
-            RegisteredQuarterDelta = $"-{d.RegisteredThisMonth:N0} added this quarter";
+            RegisteredDelta = $"+{d.RegisteredThisMonth:N0} added this quarter";
+            RegisteredQuarterDelta = $"+{d.RegisteredThisMonth:N0} added this quarter";
             // Card 2: Expiring this month (using RenewalsDueThisMonth as proxy for expiring)
             ExpiringThisMonthCount = $"⚠ {d.RenewalsDueThisMonth:N0} expiring this month";
             // Card 3: Inactive subtext
