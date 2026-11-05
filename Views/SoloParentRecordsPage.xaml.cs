@@ -1,4 +1,4 @@
-using System.Windows.Threading;
+﻿using System.Windows.Threading;
 using SOLUM_UI.Models;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
@@ -121,9 +121,9 @@ namespace SOLUM_UI
                 }
                 else
                 {
-                    // No filter requested, load records normally
+                    // No filter requested, load records normally (but not for Encoders — they must search first)
                     bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
-                    if (isStale)
+                    if (isStale && !IsEncoder)
                     {
                         if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
                         _ = LoadRecordsAsync();
@@ -278,6 +278,17 @@ namespace SOLUM_UI
         private async Task LoadRecordsAsync()
         {
             if (_isLoading) return;
+            // Encoders must search first — don't load records without a search query
+            if (IsEncoder && string.IsNullOrWhiteSpace(EncSearchQuery?.Text?.Trim()))
+            {
+                SetEncoderResultsVisible(false);
+                _allRecords = new List<SoloParentRecordViewModel>();
+                _filteredRecords = new List<SoloParentRecordViewModel>();
+                RecordsList.ItemsSource = null;
+                if (NoResultsPanel != null) NoResultsPanel.Visibility = Visibility.Visible;
+                UpdatePagingUI();
+                return;
+            }
             // For all users: automatically hydrate initial records (scoped to user's barangay for BasicUser / Caseworker / Barangay Secretary)
             _isLoading = true;
             if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = false;
