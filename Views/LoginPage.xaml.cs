@@ -355,8 +355,9 @@ namespace SOLUM_UI
                 // Clear all visual elements and event handlers
                 this.DataContext = null;
                 this.Content = null;
-                // Close the login window immediately after successful authentication
-                this.Close();
+                // Hide the login window immediately and schedule close
+                this.Hide();
+                this.Dispatcher.InvokeAsync(this.Close, System.Windows.Threading.DispatcherPriority.Send);
                 System.GC.Collect();
                 System.GC.WaitForPendingFinalizers();
 
