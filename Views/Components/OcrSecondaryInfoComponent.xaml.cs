@@ -26,7 +26,6 @@ namespace SOLUM_UI.Views.Components
         private static readonly Regex NameRegex = new Regex(@"^[a-zA-ZñÑ\s\.\-']+$", RegexOptions.Compiled);
         private static readonly Regex PhoneRegex = new Regex(@"^[\d\-]+$", RegexOptions.Compiled);
         private static readonly Regex NumberOnlyRegex = new Regex(@"^\d+$", RegexOptions.Compiled);
-
         static OcrSecondaryInfoComponent()
         {
             ErrorBrush.Freeze();
@@ -62,7 +61,6 @@ namespace SOLUM_UI.Views.Components
         public bool IsPantawidBeneficiary => ChkPantawid.IsChecked == true;
         public bool IsIndigenous => ChkIndigenous.IsChecked == true;
         public bool IsLGBT => ChkLGBTQ.IsChecked == true;
-
         #region Focus & Navigation Handling
 
         public bool FocusField(string tag)
@@ -123,9 +121,7 @@ namespace SOLUM_UI.Views.Components
                 FieldFocused?.Invoke(tag);
             }
         }
-
         #endregion
-
         #region Data Population & Confidence Badges
 
         public void Populate(OcrFormResponse resp)
@@ -138,7 +134,6 @@ namespace SOLUM_UI.Views.Components
                 SetComboByContent(CmbCivilStatus, OcrService.FuzzyMatchCivilStatus(GetVal(resp, "civil_status")));
                 SetComboByContent(CmbSex, OcrService.FuzzyMatchSex(GetVal(resp, "sex")));
                 SetComboByContent(CmbEducation, OcrService.FuzzyMatchEducation(GetVal(resp, "educational_attainment")));
-
                 TxtReligion.Text = OcrService.FuzzyMatchReligion(GetVal(resp, "religion"))?.ToUpperInvariant() ?? string.Empty;
                 TxtOccupation.Text = GetVal(resp, "occupation")?.ToUpperInvariant() ?? string.Empty;
                 TxtMonthlyIncome.Text = OcrService.FuzzyMatchIncome(GetVal(resp, "monthly_income"));
@@ -147,16 +142,13 @@ namespace SOLUM_UI.Views.Components
                 string isEmp = GetVal(resp, "is_employed").ToLower();
                 string isSelf = GetVal(resp, "is_self_employed").ToLower();
                 string isNot = GetVal(resp, "is_not_employed").ToLower();
-
                 if (empRaw.Contains("self") || isSelf == "true" || isSelf == "1") SetComboByContent(CmbEmploymentStatus, "Self-Employed");
                 else if (empRaw.Contains("not") || empRaw.Contains("unemployed") || isNot == "true" || isNot == "1") SetComboByContent(CmbEmploymentStatus, "Not Employed");
                 else if (empRaw.Contains("employed") || isEmp == "true" || isEmp == "1") SetComboByContent(CmbEmploymentStatus, "Employed");
                 else CmbEmploymentStatus.SelectedIndex = 0;
-
                 TxtAddress.Text = GetVal(resp, "address")?.ToUpperInvariant() ?? string.Empty;
                 SetComboByContent(CmbBarangay, OcrService.FuzzyMatchBarangay(GetVal(resp, "barangay")));
                 TxtContact.Text = OcrService.FormatPhoneNumber(GetVal(resp, "contact_number"));
-
                 TxtEmergencyContact.Text = OcrService.CleanPersonName(GetVal(resp, "emergency_name"));
                 TxtRelationship.Text = OcrService.FuzzyMatchRelationship(GetVal(resp, "emergency_relationship"))?.ToUpperInvariant() ?? string.Empty;
                 string emAddr = GetVal(resp, "emergency_address");
@@ -182,7 +174,6 @@ namespace SOLUM_UI.Views.Components
                     TxtEmergencyAddress.Text = emAddr?.ToUpperInvariant() ?? string.Empty;
                 }
                 TxtEmergencyNumber.Text = OcrService.FormatPhoneNumber(GetVal(resp, "emergency_number"));
-
                 SetFieldConfidence("civil_status", Badge_CivilStatus, TxtConf_CivilStatus, resp);
                 SetFieldConfidence("sex", Badge_Sex, TxtConf_Sex, resp);
                 SetFieldConfidence("birthplace", Badge_Birthplace, TxtConf_Birthplace, resp);
@@ -220,13 +211,11 @@ namespace SOLUM_UI.Views.Components
         private void SetFieldConfidence(string key, Border badge, TextBlock txtBadge, OcrFormResponse resp)
         {
             if (badge == null || txtBadge == null) return;
-
             if (resp?.Fields != null && resp.Fields.TryGetValue(key, out var f) && f != null && !string.IsNullOrWhiteSpace(f.Value))
             {
                 int confPct = (int)(f.Confidence * 100);
                 txtBadge.Text = $"{confPct}%";
                 badge.Visibility = Visibility.Visible;
-
                 if (confPct >= 80)
                 {
                     badge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
@@ -258,9 +247,7 @@ namespace SOLUM_UI.Views.Components
             txt.Text = "Edited";
             txt.Foreground = EditedBadgeFg;
         }
-
         #endregion
-
         #region TextChanged, Formatting & ComboBox Helpers
 
         private void ToUpperBox(TextBox tb)
@@ -293,7 +280,6 @@ namespace SOLUM_UI.Views.Components
                     formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4)}";
                 else
                     formatted = digits;
-
                 if (raw != formatted)
                 {
                     int caret = tb.SelectionStart;
@@ -399,7 +385,6 @@ namespace SOLUM_UI.Views.Components
         {
             if (string.IsNullOrWhiteSpace(value) || combo == null) return;
             string val = value.Trim();
-
             foreach (ComboBoxItem item in combo.Items)
             {
                 string text = item.Content?.ToString();
@@ -409,7 +394,6 @@ namespace SOLUM_UI.Views.Components
                     return;
                 }
             }
-
             if (combo == CmbSex)
             {
                 string matchedSex = OcrService.FuzzyMatchSex(val);
@@ -425,7 +409,6 @@ namespace SOLUM_UI.Views.Components
                     }
                 }
             }
-
             if (combo == CmbCivilStatus)
             {
                 string matchedCiv = OcrService.FuzzyMatchCivilStatus(val);
@@ -448,7 +431,6 @@ namespace SOLUM_UI.Views.Components
                 string text = item.Content?.ToString() ?? "";
                 string textNorm = Regex.Replace(text.ToLowerInvariant(), @"[^a-z0-9]", "");
                 if (string.IsNullOrEmpty(textNorm)) continue;
-
                 if (valNorm.StartsWith(textNorm) || textNorm.StartsWith(valNorm) ||
                     valNorm.Contains(textNorm) || textNorm.Contains(valNorm))
                 {
@@ -463,25 +445,19 @@ namespace SOLUM_UI.Views.Components
             ComboBoxItem sel = combo?.SelectedItem as ComboBoxItem;
             return sel?.Content?.ToString() ?? string.Empty;
         }
-
         #endregion
-
         #region Validation
 
         public bool Validate(out List<string> missing)
         {
             bool ok = true;
             missing = new List<string>();
-
             if (CmbCivilStatus.SelectedItem == null)
             { MarkError(CmbCivilStatus, ErrCivilStatus, "Required."); missing.Add("Civil Status"); ok = false; }
-
             if (CmbSex.SelectedItem == null)
             { MarkError(CmbSex, ErrSex, "Required."); missing.Add("Sex"); ok = false; }
-
             if (string.IsNullOrWhiteSpace(TxtPlaceOfBirth.Text))
             { MarkError(TxtPlaceOfBirth, ErrPlaceOfBirth, "Required."); missing.Add("Birthplace"); ok = false; }
-
             if (string.IsNullOrWhiteSpace(TxtAddress.Text))
             { MarkError(TxtAddress, ErrAddress, "Required."); missing.Add("Address"); ok = false; }
 
@@ -494,7 +470,6 @@ namespace SOLUM_UI.Views.Components
             { MarkError(TxtContact, ErrContact, "Required."); missing.Add("Contact Number"); ok = false; }
             else if (contactDigits.Length != 11)
             { MarkError(TxtContact, ErrContact, "Must be 11 digits."); missing.Add("Contact Number (11 digits)"); ok = false; }
-
             return ok;
         }
 
@@ -535,7 +510,6 @@ namespace SOLUM_UI.Views.Components
                 }
             }
         }
-
         #endregion
     }
 }

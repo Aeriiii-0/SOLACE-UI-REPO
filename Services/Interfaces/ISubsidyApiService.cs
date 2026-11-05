@@ -29,7 +29,6 @@ namespace SOLUM_UI.Services.Interfaces
         Task<BaseResponse<int>> ConfirmGranteesAsync(Guid? cycleId, List<Guid> evaluationIds);
         Task<BaseResponse<List<GranteeDto>>> GetGranteesByFiscalYearAsync(int fiscalYear);
         Task<BaseResponse<bool>> RevokeGrantAsync(Guid evaluationId, string reason = null, string notes = null);
-
         // CSV Roster Exporters
         Task<string> ExportCityEducRosterCsvAsync(List<SelectionRow> items);
         Task<string> ExportPantawid4PsRosterCsvAsync(List<SelectionRow> items);

@@ -1,7 +1,6 @@
 <UserControl x:Class="SOLUM_UI.Views.Components.ColumnChart"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
     <Border Style="{StaticResource CardContainerStyle}">
         <Grid>
             <Canvas x:Name="ChartCanvas" Background="White"/>

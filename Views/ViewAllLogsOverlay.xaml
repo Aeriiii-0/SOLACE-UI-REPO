@@ -3,12 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:SOLUM_UI"
              xmlns:converters="clr-namespace:SOLUM_UI.Converters">
-
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
         <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
-
         <!-- ── Shared text styles ─────────────────────────────────── -->
         <Style x:Key="MetaLabel" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -24,7 +22,6 @@
             <Setter Property="Foreground" Value="#1A1A1A"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
-
         <!-- ── Nav / action button style ─────────────────────────── -->
         <Style x:Key="NavBtn" TargetType="Button">
             <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -51,7 +48,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <!-- ── Refresh / icon button style ───────────────────────── -->
         <Style x:Key="IconBtn" TargetType="Button">
             <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -79,7 +75,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <!-- ── Shared ComboBox template ──────────────────────────── -->
         <ControlTemplate x:Key="StyledComboTemplate" TargetType="ComboBox">
             <Grid>
@@ -119,7 +114,6 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
-
         <!-- ── Branded DatePicker style ──────────────────────────── -->
         <Style x:Key="BrandDatePicker" TargetType="DatePicker">
             <Setter Property="FontFamily"          Value="Segoe UI"/>
@@ -139,7 +133,6 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="38"/>
                                 </Grid.ColumnDefinitions>
-
                                 <DatePickerTextBox x:Name="PART_TextBox"
                                                    Grid.Column="0"
                                                    Foreground="#333333"
@@ -183,7 +176,6 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
-
                                 <Button x:Name="PART_Button"
                                         Grid.Column="1"
                                         Focusable="False"
@@ -207,7 +199,6 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-
                                 <Popup x:Name="PART_Popup"
                                        AllowsTransparency="True"
                                        Placement="Bottom"
@@ -227,7 +218,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <!-- ── Shared ComboBox item style ────────────────────────── -->
         <Style x:Key="StyledComboItem" TargetType="ComboBoxItem">
             <Setter Property="Padding" Value="12,8"/>
@@ -254,12 +244,10 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-
     <Border Background="White" CornerRadius="16">
         <Border.Effect>
             <DropShadowEffect Color="#000000" BlurRadius="40" ShadowDepth="4" Opacity="0.26" Direction="270"/>
         </Border.Effect>
-
         <Grid>
             <!-- ═══════════════════════ Main content ════════════════════════════ -->
             <Grid x:Name="OverlayContent">
@@ -273,7 +261,6 @@
                     <!-- Pagination footer -->
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-
                 <!-- ── Header ─────────────────────────────────────────────── -->
                 <Border Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="28,20,28,18">
                     <Grid>
@@ -282,14 +269,12 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="{Binding HeaderTitle}"
                                        FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="White"/>
                             <TextBlock Text="{Binding HeaderSubtitle}"
                                        FontFamily="Segoe UI" FontSize="12" Foreground="#E8C0D0" Margin="0,4,0,0"/>
                         </StackPanel>
-
                         <!-- Refresh button -->
                         <Button Grid.Column="1" Command="{Binding RefreshCommand}"
                                 Width="36" Height="36" Cursor="Hand" Margin="0,0,8,0"
@@ -314,7 +299,6 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-
                         <!-- Close button -->
                         <Button Grid.Column="2" x:Name="CloseBtn" Click="CloseBtn_Click"
                                 Width="36" Height="36" Cursor="Hand">
@@ -334,7 +318,6 @@
                         </Button>
                     </Grid>
                 </Border>
-
                 <!-- ── Filter bar ──────────────────────────────────────────── -->
                 <Border Grid.Row="1" Background="White" BorderBrush="#E8D8DE"
                         BorderThickness="0,0,0,1" Padding="22,12">
@@ -350,7 +333,6 @@
                                 <ColumnDefinition Width="8"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-
                             <!-- Search box -->
                             <Border Grid.Column="0" Background="#F7F5F6" CornerRadius="22"
                                     BorderBrush="#D0B8C0" BorderThickness="1.5" Height="40">
@@ -400,7 +382,6 @@
                                     </TextBox>
                                 </Grid>
                             </Border>
-
                             <!-- Action filter -->
                             <ComboBox Grid.Column="2" Height="40"
                                       ItemsSource="{Binding ActionFilters}"
@@ -408,7 +389,6 @@
                                       FontFamily="Segoe UI" FontSize="13"
                                       Template="{StaticResource StyledComboTemplate}"
                                       ItemContainerStyle="{StaticResource StyledComboItem}"/>
-
                             <!-- Search button -->
                             <Button Grid.Column="4" Height="40" Padding="14,0" Cursor="Hand"
                                     Command="{Binding SearchCommand}" Style="{StaticResource IconBtn}"
@@ -416,7 +396,6 @@
                                 <TextBlock Text="Search" FontFamily="Segoe UI" FontSize="13"
                                            FontWeight="SemiBold" Foreground="#702943"/>
                             </Button>
-
                             <!-- Clear button -->
                             <Button Grid.Column="6" Height="40" Padding="14,0" Cursor="Hand"
                                     Command="{Binding ClearFiltersCommand}" Style="{StaticResource IconBtn}"
@@ -425,7 +404,6 @@
                                            FontWeight="SemiBold" Foreground="#702943"/>
                             </Button>
                         </Grid>
-
                         <!-- Row 2: Date range pickers -->
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -437,7 +415,6 @@
                                 <ColumnDefinition Width="6"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
                             <!-- From pill -->
                             <Border Grid.Column="0" Background="#F5ECEE" CornerRadius="6"
                                     Padding="12,0" Height="40" VerticalAlignment="Center">
@@ -445,16 +422,13 @@
                                            FontWeight="SemiBold" Foreground="#702943"
                                            VerticalAlignment="Center"/>
                             </Border>
-
                             <DatePicker Grid.Column="2"
                                         SelectedDate="{Binding StartDate, Mode=TwoWay}"
                                         Style="{StaticResource BrandDatePicker}"/>
-
                             <!-- Arrow separator -->
                             <TextBlock Grid.Column="4" Text="→" FontSize="14"
                                        Foreground="#C0A0AA" VerticalAlignment="Center"
                                        HorizontalAlignment="Center"/>
-
                             <!-- To pill -->
                             <Border Grid.Column="4" Background="#F5ECEE" CornerRadius="6"
                                     Padding="12,0" Height="40" VerticalAlignment="Center"
@@ -463,17 +437,14 @@
                                            FontWeight="SemiBold" Foreground="#702943"
                                            VerticalAlignment="Center"/>
                             </Border>
-
                             <DatePicker Grid.Column="6"
                                         SelectedDate="{Binding EndDate, Mode=TwoWay}"
                                         Style="{StaticResource BrandDatePicker}"/>
                         </Grid>
                      </StackPanel>
                 </Border>
-
                 <!-- ── Content area: loading / error / list ────────────────── -->
                 <Grid Grid.Row="2" Background="#F7F5F6">
-
                     <!-- Loading spinner -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                                 Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -485,7 +456,6 @@
                         <TextBlock Text="Loading logs…" FontFamily="Segoe UI" FontSize="13"
                                    Foreground="#9B3060" HorizontalAlignment="Center"/>
                     </StackPanel>
-
                     <!-- Error panel -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="420"
                                 Visibility="{Binding HasError, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -506,7 +476,6 @@
                             </StackPanel>
                         </Border>
                     </StackPanel>
-
                     <!-- Log list (hidden while loading or error) -->
                     <ScrollViewer VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled"
@@ -541,13 +510,11 @@
                                                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                               CommandParameter="{Binding}"/>
                                             </Border.InputBindings>
-
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="44"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-
                                                 <!-- Action type icon & color -->
                                                 <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" VerticalAlignment="Center"
                                                         Background="{Binding DotColorBrush}">
@@ -556,7 +523,6 @@
                                                         <Path Data="{Binding DotIcon}" Fill="White" Stretch="Uniform"/>
                                                     </Viewbox>
                                                 </Border>
-
                                                 <!-- Content Grid: 2 rows x 2 columns -->
                                                 <Grid Grid.Column="1" Margin="14,0,0,0">
                                                     <Grid.RowDefinitions>
@@ -567,26 +533,22 @@
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="*"/>
                                                     </Grid.ColumnDefinitions>
-
                                                     <!-- Row 0, Col 0: Action -->
                                                     <TextBlock Grid.Row="0" Grid.Column="0" FontFamily="Segoe UI" FontSize="13" TextTrimming="CharacterEllipsis">
                                                         <Run Text="Action: " FontWeight="Bold" Foreground="#222222"/>
                                                         <Run Text="{Binding ActionTitle, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
                                                     </TextBlock>
-
                                                     <!-- Row 0, Col 1: Target ID -->
                                                     <TextBlock Grid.Row="0" Grid.Column="1" FontFamily="Segoe UI" FontSize="13" TextTrimming="CharacterEllipsis" ToolTip="{Binding TargetTooltip}"
                                                                Visibility="{Binding HasTarget, Converter={StaticResource BoolToVisibilityConverter}}">
                                                         <Run Text="Target: " FontWeight="Bold" Foreground="#222222"/>
                                                         <Run Text="{Binding TargetDisplay, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
                                                     </TextBlock>
-
                                                     <!-- Row 1, Col 0: Performed By -->
                                                     <TextBlock Grid.Row="1" Grid.Column="0" FontFamily="Segoe UI" FontSize="12.5" Margin="0,5,0,0" TextTrimming="CharacterEllipsis">
                                                         <Run Text="Performed By: " FontWeight="Bold" Foreground="#222222"/>
                                                         <Run Text="{Binding PerformedByDisplay, Mode=OneWay}" FontWeight="Normal" Foreground="#111111"/>
                                                     </TextBlock>
-
                                                     <!-- Row 1, Col 1: Date -->
                                                     <TextBlock Grid.Row="1" Grid.Column="1" FontFamily="Segoe UI" FontSize="12.5" Margin="0,5,0,0" TextTrimming="CharacterEllipsis">
                                                         <Run Text="Date: " FontWeight="Bold" Foreground="#222222"/>
@@ -598,7 +560,6 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-
                             <!-- Empty state (no error, not loading, no items) -->
                             <StackPanel HorizontalAlignment="Center" Margin="0,32,0,0"
                                         Visibility="{Binding HasNoLogs, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -611,7 +572,6 @@
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
-
                 <!-- ── Pagination footer ───────────────────────────────────── -->
                 <Border Grid.Row="3" Padding="28,16,28,20" Background="White" CornerRadius="0,0,16,16"
                         BorderBrush="#F0E4E8" BorderThickness="0,1,0,0">
@@ -621,36 +581,29 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <Button Grid.Column="0" Content="← Previous" Style="{StaticResource NavBtn}"
                                 Command="{Binding PrevPageCommand}"
                                 IsEnabled="{Binding CanGoPrev}"/>
-
                         <TextBlock Grid.Column="1" Text="{Binding PageInfo}"
                                    FontFamily="Segoe UI" FontSize="13" Foreground="#702943" FontWeight="SemiBold"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
                         <Button Grid.Column="2" Content="Next →" Style="{StaticResource NavBtn}"
                                 Command="{Binding NextPageCommand}"
                                 IsEnabled="{Binding CanGoNext}"/>
                     </Grid>
                 </Border>
             </Grid>
-
             <!-- ═══════════════════════ Detail overlay ══════════════════════════ -->
             <Grid Visibility="{Binding IsDetailVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Rectangle Fill="#66000000"/>
-
                 <Border Background="White" CornerRadius="16" Padding="36,30"
                         Width="600" HorizontalAlignment="Center" VerticalAlignment="Center"
                         MaxHeight="700">
                     <Border.Effect>
                         <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="4" Opacity="0.24" Direction="270"/>
                     </Border.Effect>
-
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel>
-
                             <!-- Title row -->
                             <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
@@ -676,7 +629,6 @@
                                     </Button.Template>
                                 </Button>
                             </Grid>
-
                             <!-- Action type badge + record name -->
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                                 <Border CornerRadius="8" Padding="12,5" Margin="0,0,10,0" Background="{Binding SelectedLog.DotColorBrush}">
@@ -687,9 +639,7 @@
                                            FontFamily="Segoe UI" FontSize="15" FontWeight="Bold"
                                            Foreground="#1A1A1A" VerticalAlignment="Center"/>
                             </StackPanel>
-
                             <Rectangle Height="1" Fill="#F0E4E4" Margin="0,0,0,16"/>
-
                             <!-- ── Who ──────────────────────────────────────────── -->
                             <Grid Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
@@ -714,7 +664,6 @@
                                                Visibility="{Binding SelectedLog.HasPerformedByUserId, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                 </StackPanel>
                             </Grid>
-
                             <!-- ── Target ───────────────────────────────────────── -->
                             <Grid Margin="0,0,0,10"
                                   Visibility="{Binding SelectedLog.HasTarget, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -741,7 +690,6 @@
                                                Visibility="{Binding SelectedLog.HasTargetId, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                 </StackPanel>
                             </Grid>
-
                             <!-- ── Status ───────────────────────────────────────── -->
                             <Grid Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
@@ -782,7 +730,6 @@
                                     </TextBlock>
                                 </Border>
                             </Grid>
-
                             <!-- ── IP Address ────────────────────────────────────── -->
                             <Grid Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
@@ -795,7 +742,6 @@
                                            Foreground="#444444" VerticalAlignment="Center"
                                            TextWrapping="Wrap"/>
                             </Grid>
-
                             <!-- ── Timestamp ──────────────────────────────────────── -->
                             <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
@@ -806,18 +752,15 @@
                                 <TextBlock Grid.Column="1" Text="{Binding SelectedLog.TimestampFormatted}"
                                            Style="{StaticResource MetaValue}"/>
                             </Grid>
-
                             <!-- ── Changes Recorded (diff table) ─────────────────── -->
                             <Border Background="#FDF5F7" CornerRadius="12" Padding="20,16" Margin="0,0,0,4">
                                 <StackPanel>
                                     <TextBlock Text="CHANGES RECORDED"
                                                FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
                                                Foreground="#9B3060" Margin="0,0,0,12"/>
-
                                     <!-- ── Table: has changes ─── -->
                                     <StackPanel Visibility="{Binding SelectedLog.HasChangeDetail,
                                                              Converter={StaticResource BoolToVisibilityConverter}}">
-
                                         <!-- Column headers -->
                                         <Grid Margin="0,0,0,6">
                                             <Grid.ColumnDefinitions>
@@ -836,7 +779,6 @@
                                                        Foreground="#9B3060" Padding="4,0,0,0"/>
                                         </Grid>
                                         <Rectangle Height="1" Fill="#E8D4DC" Margin="0,0,0,6"/>
-
                                         <!-- Multi-field rows (new API format) -->
                                         <ItemsControl ItemsSource="{Binding SelectedLog.Changes}"
                                                       Visibility="{Binding SelectedLog.Changes.Count,
@@ -877,7 +819,6 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-
                                         <!-- Legacy single-field row (backward compat, shown only when Changes list is empty) -->
                                         <Grid Visibility="{Binding SelectedLog.Changes.Count,
                                                            Converter={StaticResource InverseBoolToVisibilityConverter}}"
@@ -909,9 +850,7 @@
                                                            TextWrapping="Wrap" VerticalAlignment="Center"/>
                                             </Border>
                                         </Grid>
-
                                     </StackPanel>
-
                                     <!-- ── Empty state: no changes recorded ─── -->
                                     <TextBlock Visibility="{Binding SelectedLog.HasChangeDetail,
                                                             Converter={StaticResource InverseBoolToVisibilityConverter}}"
@@ -921,7 +860,6 @@
                                                Margin="0,4,0,4"/>
                                 </StackPanel>
                             </Border>
-
                         </StackPanel>
                     </ScrollViewer>
                 </Border>

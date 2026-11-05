@@ -15,13 +15,11 @@ namespace SOLUM_UI.Models
         public int Age20To39 { get; set; } = 118;
         public int Age40To59 { get; set; } = 287;
         public int Age60Plus { get; set; } = 20;
-
         // Civil Status Distribution
         public int CivilStatusSingle { get; set; } = 175;
         public int CivilStatusMarried { get; set; } = 105;
         public int CivilStatusWidowed { get; set; } = 137;
         public int CivilStatusSeparatedAnnulled { get; set; } = 8;
-
         // Top Solo Parent Categories (in descending order)
         public List<CategoryCount> TopCategories { get; set; } = new List<CategoryCount>
         {
@@ -31,16 +29,13 @@ namespace SOLUM_UI.Models
             new CategoryCount { Category = "Spouse of PDL", Count = 5 },
             new CategoryCount { Category = "Spouse of PWD", Count = 4 }
         };
-
         // Number of Children/Dependents
         public int ChildrenBelow6 { get; set; } = 78;
         public int Children7To22 { get; set; } = 630;
         public int ChildrenAbove22 { get; set; } = 71;
-
         // Solo Parents by Sex (2025 Data)
         public int SexFemale { get; set; } = 380;
         public int SexMale { get; set; } = 45;
-
         // Monthly Income vs. Employment (grouped data)
         public List<IncomeEmploymentGroup> IncomeEmploymentData { get; set; } = new List<IncomeEmploymentGroup>
         {
@@ -54,7 +49,6 @@ namespace SOLUM_UI.Models
             new IncomeEmploymentGroup { IncomeRange = "Self-Employed, Min-20k", Count = 110 },
             new IncomeEmploymentGroup { IncomeRange = "Self-Employed, >20k", Count = 125 }
         };
-
         // Yearly Applications (2021-2025) for line chart
         public List<YearlyApplicationCount> YearlyApplications { get; set; } = new List<YearlyApplicationCount>
         {
@@ -64,28 +58,24 @@ namespace SOLUM_UI.Models
             new YearlyApplicationCount { Year = 2024, Count = 290 },
             new YearlyApplicationCount { Year = 2025, Count = 325 }
         };
-
         // Calculated properties
         public int TotalSoloParents => AgeBelow19 + Age20To39 + Age40To59 + Age60Plus;
         public int TotalCivilStatus => CivilStatusSingle + CivilStatusMarried + CivilStatusWidowed + CivilStatusSeparatedAnnulled;
         public int TotalChildren => ChildrenBelow6 + Children7To22 + ChildrenAbove22;
         public int TotalByGender => SexFemale + SexMale;
     }
-
     /// <summary>Category and count pair</summary>
     public class CategoryCount
     {
         public string Category { get; set; }
         public int Count { get; set; }
     }
-
     /// <summary>Income-Employment cross-reference group</summary>
     public class IncomeEmploymentGroup
     {
         public string IncomeRange { get; set; }
         public int Count { get; set; }
     }
-
     /// <summary>Yearly application count for trends</summary>
     public class YearlyApplicationCount
     {

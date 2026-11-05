@@ -27,7 +27,6 @@ namespace SOLUM_UI.Views.Components
 
         private static readonly Regex NameRegex = new Regex(@"^[a-zA-ZñÑ\s\.\-']+$", RegexOptions.Compiled);
         private static readonly Regex NumberOnlyRegex = new Regex(@"^\d+$", RegexOptions.Compiled);
-
         static OcrFamilyMembersComponent()
         {
             ErrorBrush.Freeze();
@@ -37,10 +36,8 @@ namespace SOLUM_UI.Views.Components
         public OcrFamilyMembersComponent()
         {
             InitializeComponent();
-
             DpMemberDob?.AddHandler(UIElement.PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(Field_PreviewMouseDown), true);
             DpA2Date?.AddHandler(UIElement.PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(Field_PreviewMouseDown), true);
-
             FamilyCardsList.ItemsSource = _familyRowData;
             _familyRowData.CollectionChanged += (s, e) => UpdateFamilyCardsEmptyState();
             UpdateFamilyCardsEmptyState();
@@ -71,7 +68,6 @@ namespace SOLUM_UI.Views.Components
         public string NeedsAndProblems => TxtNeeds.Text.Trim();
         public string OtherIncomeSource => TxtOtherIncome.Text.Trim();
         public string ApplicationStatus => "Valid";
-
         #region Focus & Navigation Handling
 
         public bool FocusField(string tag)
@@ -166,9 +162,7 @@ namespace SOLUM_UI.Views.Components
             }
             return tag;
         }
-
         #endregion
-
         #region Population & Data Binding
 
         public void Populate(OcrFormResponse resp)
@@ -200,7 +194,6 @@ namespace SOLUM_UI.Views.Components
                     ChkD.IsChecked = false;
                     ChkE.IsChecked = false;
                     ChkF.IsChecked = false;
-
                     if (code == "A1") ChkA1.IsChecked = true;
                     else if (code == "A2") ChkA2.IsChecked = true;
                     else if (code == "A3") ChkA3.IsChecked = true;
@@ -213,7 +206,6 @@ namespace SOLUM_UI.Views.Components
                     else if (code == "D") ChkD.IsChecked = true;
                     else if (code == "E") ChkE.IsChecked = true;
                     else if (code == "F") ChkF.IsChecked = true;
-
                     if (ChkA2.IsChecked == true)
                     {
                         TxtA2Cause.Text = (resp.Circumstance.SubfieldCause ?? string.Empty).ToUpperInvariant();
@@ -245,7 +237,6 @@ namespace SOLUM_UI.Views.Components
                     if (BadgeCircumstanceDetected != null) BadgeCircumstanceDetected.Visibility = Visibility.Collapsed;
                 }
                 Circumstance_Changed(null, null);
-
                 // Family Composition Table
                 _familyRowData.Clear();
                 if (resp.FamilyMembers != null && resp.FamilyMembers.Count > 0)
@@ -254,7 +245,6 @@ namespace SOLUM_UI.Views.Components
                     {
                         if (string.IsNullOrWhiteSpace(m.MemberName) || OcrService.IsOcrNotApplicable(m.MemberName))
                             continue;
-
                         DateTime? dt = null;
                         string normDob = OcrService.IsOcrNotApplicable(m.Birthdate) ? string.Empty : OcrService.NormalizeDateString(m.Birthdate, out dt);
                         string ageVal = string.Empty;
@@ -274,7 +264,6 @@ namespace SOLUM_UI.Views.Components
                         string matchedSex = OcrService.IsOcrNotApplicable(m.Sex) ? string.Empty : OcrService.FuzzyMatchSex(m.Sex);
                         string matchedRel = OcrService.IsOcrNotApplicable(m.Relationship) ? string.Empty : (OcrService.FuzzyMatchRelationship(m.Relationship)?.ToUpperInvariant() ?? string.Empty);
                         string rawRelUpper = (m.Relationship ?? string.Empty).ToUpperInvariant();
-
                         // Cross-field semantic inference: Infer Sex from Relationship if Sex was blank or ambiguous
                         // Checks both raw relationship (e.g. "Daughter", "Darght") and dropdown-normalized relationship ("Child")
                         if (string.IsNullOrEmpty(matchedSex) && (!string.IsNullOrEmpty(matchedRel) || !string.IsNullOrEmpty(rawRelUpper)))
@@ -284,7 +273,6 @@ namespace SOLUM_UI.Views.Components
                             else if (matchedRel == "DAUGHTER" || rawRelUpper.Contains("DAUGHTER") || rawRelUpper.Contains("DARGHTER") || rawRelUpper.Contains("DAUGHT") || rawRelUpper.Contains("GIRL") || matchedRel == "SISTER" || rawRelUpper.Contains("SISTER") || matchedRel == "MOTHER" || matchedRel == "NIECE" || matchedRel == "GRANDDAUGHTER")
                                 matchedSex = "Female";
                         }
-
                         // Educational Attainment normalization & infant/toddler fallback
                         string matchedEdu = OcrService.IsOcrNotApplicable(m.EducationEmployment) ? string.Empty : m.EducationEmployment.Trim();
                         if (!string.IsNullOrEmpty(matchedEdu))
@@ -299,7 +287,6 @@ namespace SOLUM_UI.Views.Components
                                 matchedEdu = "NONE";
                             }
                         }
-
                         var ocrRow = MakeFamilyRow();
                         ocrRow.MemberName = OcrService.CleanPersonName(m.MemberName);
                         ocrRow.Sex = matchedSex;
@@ -319,9 +306,7 @@ namespace SOLUM_UI.Views.Components
                         _familyRowData.Add(ocrRow);
                     }
                 }
-
                 UpdateFamilyCardsEmptyState();
-
                 // Needs & Other Sources of Income
                 TxtNeeds.Text = GetVal(resp, "needs")?.ToUpperInvariant() ?? string.Empty;
                 TxtOtherIncome.Text = GetVal(resp, "other_income")?.ToUpperInvariant() ?? string.Empty;
@@ -350,13 +335,11 @@ namespace SOLUM_UI.Views.Components
         private void SetFieldConfidence(string key, Border badge, TextBlock txtBadge, OcrFormResponse resp)
         {
             if (badge == null || txtBadge == null) return;
-
             if (resp?.Fields != null && resp.Fields.TryGetValue(key, out var f) && f != null && !string.IsNullOrWhiteSpace(f.Value))
             {
                 int confPct = (int)(f.Confidence * 100);
                 txtBadge.Text = $"{confPct}%";
                 badge.Visibility = Visibility.Visible;
-
                 if (confPct >= 80)
                 {
                     badge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
@@ -378,9 +361,7 @@ namespace SOLUM_UI.Views.Components
                 badge.Visibility = Visibility.Collapsed;
             }
         }
-
         #endregion
-
         #region Circumstances Handling
 
         private void Circumstance_Changed(object sender, RoutedEventArgs e)
@@ -391,9 +372,7 @@ namespace SOLUM_UI.Views.Components
             if (PnlA6 != null) PnlA6.Visibility = ChkA6.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             if (PnlB != null) PnlB.Visibility = ChkB.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         }
-
         #endregion
-
         #region Family Composition Add / Edit / Remove
 
         private void UpdateFamilyCardsEmptyState()
@@ -411,7 +390,6 @@ namespace SOLUM_UI.Views.Components
             _editingFamilyMember = null;
             TxtAddMemberTitle.Text = "Add Household Member";
             BtnSaveMember.Content = "Add Member";
-
             TxtMemberName.Text = string.Empty;
             CmbMemberRel.SelectedIndex = -1;
             CmbMemberSex.SelectedIndex = -1;
@@ -428,7 +406,6 @@ namespace SOLUM_UI.Views.Components
                 PnlSpecialNeedsDetails.IsEnabled = false;
                 PnlSpecialNeedsDetails.Opacity = 0.5;
             }
-
             AddMemberSubCard.Visibility = Visibility.Visible;
             TxtMemberName.Focus();
         }
@@ -439,7 +416,6 @@ namespace SOLUM_UI.Views.Components
             _editingFamilyMember = row;
             TxtAddMemberTitle.Text = $"Edit Household Member: {row.MemberName}";
             BtnSaveMember.Content = "Update Member";
-
             TxtMemberName.Text = row.MemberName;
             SetComboByContent(CmbMemberRel, row.Relationship);
             SetComboByContent(CmbMemberSex, row.Sex);
@@ -463,10 +439,8 @@ namespace SOLUM_UI.Views.Components
             }
             SetComboByContent(CmbSpecialNeedsCategory, row.SpecialNeedsCategory);
             TxtSpecialNeedsDescription.Text = row.SpecialNeedsDescription ?? string.Empty;
-
             AddMemberSubCard.Visibility = Visibility.Visible;
             AddMemberSubCard.BringIntoView();
-
             switch (focusField?.ToLowerInvariant())
             {
                 case "name": TxtMemberName.Focus(); break;
@@ -500,7 +474,6 @@ namespace SOLUM_UI.Views.Components
                     "Keep Member",
                     ConfirmThemeType.Danger,
                     Window.GetWindow(this));
-
                 if (confirm)
                 {
                     _familyRowData.Remove(row);
@@ -546,7 +519,6 @@ namespace SOLUM_UI.Views.Components
                 CmbMemberSex.Focus();
                 return;
             }
-
             if (!DpMemberDob.SelectedDate.HasValue)
             {
                 var tb = DpMemberDob.Template?.FindName("PART_TextBox", DpMemberDob) as System.Windows.Controls.Primitives.DatePickerTextBox;
@@ -555,14 +527,12 @@ namespace SOLUM_UI.Views.Components
                     DpMemberDob.SelectedDate = dtParsed;
                 }
             }
-
             if (!DpMemberDob.SelectedDate.HasValue)
             {
                 ActionConfirmDialog.Warning("Validation", "Please select a valid birthdate.", window);
                 DpMemberDob.Focus();
                 return;
             }
-
             DateTime dob = DpMemberDob.SelectedDate.Value;
             if (dob.Year < 1900 || dob.Date > DateTime.Today)
             {
@@ -595,7 +565,6 @@ namespace SOLUM_UI.Views.Components
                 return;
             }
             string snDesc = hasSn ? (TxtSpecialNeedsDescription.Text?.Trim() ?? string.Empty).ToUpperInvariant() : string.Empty;
-
             if (_editingFamilyMember != null)
             {
                 _editingFamilyMember.MemberName = name;
@@ -629,7 +598,6 @@ namespace SOLUM_UI.Views.Components
                 row.SpecialNeedsDescription = snDesc;
                 _familyRowData.Add(row);
             }
-
             AddMemberSubCard.Visibility = Visibility.Collapsed;
             _editingFamilyMember = null;
             UpdateFamilyCardsEmptyState();
@@ -646,7 +614,6 @@ namespace SOLUM_UI.Views.Components
             {
                 TxtMemberAge.Text = string.Empty;
             }
-
             if (!_isPopulating && AddMemberSubCard?.Visibility == Visibility.Visible)
             {
                 FieldFocused?.Invoke(ResolveDynamicTag(DpMemberDob, "fam_row_dob"));
@@ -728,7 +695,6 @@ namespace SOLUM_UI.Views.Components
                             ageVal = calcAge.ToString();
                         }
                     }
-
                     members.Add(new FamilyMember
                     {
                         MemberName = OcrService.CleanPersonName(row.MemberName),
@@ -747,9 +713,7 @@ namespace SOLUM_UI.Views.Components
             }
             return members;
         }
-
         #endregion
-
         #region Formatters & ComboBox Helpers
 
         private void NameOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -766,7 +730,6 @@ namespace SOLUM_UI.Views.Components
         {
             if (string.IsNullOrWhiteSpace(value) || combo == null) return;
             string val = value.Trim();
-
             foreach (ComboBoxItem item in combo.Items)
             {
                 string text = item.Content?.ToString();
@@ -783,7 +746,6 @@ namespace SOLUM_UI.Views.Components
                 string text = item.Content?.ToString() ?? "";
                 string textNorm = Regex.Replace(text.ToLowerInvariant(), @"[^a-z0-9]", "");
                 if (string.IsNullOrEmpty(textNorm)) continue;
-
                 if (valNorm.StartsWith(textNorm) || textNorm.StartsWith(valNorm) ||
                     valNorm.Contains(textNorm) || textNorm.Contains(valNorm))
                 {
@@ -798,9 +760,7 @@ namespace SOLUM_UI.Views.Components
             ComboBoxItem sel = combo?.SelectedItem as ComboBoxItem;
             return sel?.Content?.ToString() ?? string.Empty;
         }
-
         #endregion
-
         #region Validation
 
         public bool Validate(out List<string> missing)
@@ -814,7 +774,6 @@ namespace SOLUM_UI.Views.Components
                 var row = item as FamilyMemberRow;
                 if (row == null || string.IsNullOrWhiteSpace(row.MemberName)) continue;
                 rowNum++;
-
                 var rowMissing = new List<string>();
                 if (string.IsNullOrWhiteSpace(row.Sex)) rowMissing.Add("Sex");
                 if (!row.BirthdateDate.HasValue || row.BirthdateDate.Value.Year < 1900 || row.BirthdateDate.Value.Date > DateTime.Today) rowMissing.Add("Birthdate");
@@ -822,14 +781,12 @@ namespace SOLUM_UI.Views.Components
                 if (string.IsNullOrWhiteSpace(row.Relationship)) rowMissing.Add("Relationship");
                 if (string.IsNullOrWhiteSpace(row.Income)) rowMissing.Add("Income");
                 if (row.HasSpecialNeeds && string.IsNullOrWhiteSpace(row.SpecialNeedsCategory)) rowMissing.Add("Special Needs Category");
-
                 if (rowMissing.Count > 0)
                 {
                     missing.Add($"Family member #{rowNum} ({row.MemberName}) — missing: {string.Join(", ", rowMissing)}");
                     ok = false;
                 }
             }
-
             return ok;
         }
 
@@ -875,7 +832,6 @@ namespace SOLUM_UI.Views.Components
                 }
             }
         }
-
         #endregion
     }
 }

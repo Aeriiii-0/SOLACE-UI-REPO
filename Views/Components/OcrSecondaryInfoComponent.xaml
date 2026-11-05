@@ -9,14 +9,12 @@
                   HorizontalScrollBarVisibility="Disabled"
                   Background="#F4F6F9">
         <StackPanel Margin="20,12,20,16">
-
             <!-- CARD: II. DEMOGRAPHIC & RESIDENTIAL INFORMATION -->
             <Border Style="{StaticResource CardSection}">
                 <StackPanel>
                     <Border Style="{StaticResource CardSectionHeader}">
                         <TextBlock Text="II. DEMOGRAPHIC &amp; RESIDENTIAL INFORMATION" Style="{StaticResource SectionLabel}"/>
                     </Border>
-
                     <!-- ROW 1: Civil Status | Sex | Place of Birth -->
                     <Grid Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
@@ -24,7 +22,6 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="1.4*"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -48,7 +45,6 @@
                             </ComboBox>
                             <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="1" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -68,7 +64,6 @@
                             </ComboBox>
                             <TextBlock x:Name="ErrSex" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="2">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -88,7 +83,6 @@
                             <TextBlock x:Name="ErrPlaceOfBirth" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
                     </Grid>
-
                     <!-- ROW 2: Address | Barangay | Contact Number -->
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
@@ -96,7 +90,6 @@
                             <ColumnDefinition Width="1.2*"/>
                             <ColumnDefinition Width="1.1*"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -115,7 +108,6 @@
                                      TextChanged="TxtAddress_TextChanged"/>
                             <TextBlock x:Name="ErrAddress" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="1" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -158,7 +150,6 @@
                             </ComboBox>
                             <TextBlock x:Name="ErrBarangay" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="2">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -181,21 +172,18 @@
                     </Grid>
                 </StackPanel>
             </Border>
-
             <!-- CARD: III. SOCIOECONOMIC & EDUCATION -->
             <Border Style="{StaticResource CardSection}">
                 <StackPanel>
                     <Border Style="{StaticResource CardSectionHeader}">
                         <TextBlock Text="III. SOCIOECONOMIC &amp; EDUCATION" Style="{StaticResource SectionLabel}"/>
                     </Border>
-
                     <!-- ROW 1: Educational Attainment | Religion -->
                     <Grid Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1.3*"/>
                             <ColumnDefinition Width="1.3*"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -216,7 +204,6 @@
                                 <ComboBoxItem Content="Post Graduate"/>
                             </ComboBox>
                         </StackPanel>
-
                         <StackPanel Grid.Column="1">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -235,7 +222,6 @@
                                      TextChanged="TxtReligion_TextChanged"/>
                         </StackPanel>
                     </Grid>
-
                     <!-- ROW 2: Occupation | Monthly Income | Employment Status -->
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
@@ -243,7 +229,6 @@
                             <ColumnDefinition Width="1.1*"/>
                             <ColumnDefinition Width="1.2*"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -261,7 +246,6 @@
                                      MaxLength="80"
                                      TextChanged="TxtOccupation_TextChanged"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="1" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -278,7 +262,6 @@
                                      MaxLength="12"
                                      PreviewTextInput="NumberOnly_PreviewTextInput"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="2">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -301,14 +284,12 @@
                     </Grid>
                 </StackPanel>
             </Border>
-
             <!-- CARD: II. EMERGENCY CONTACT -->
             <Border Style="{StaticResource CardSection}">
                 <StackPanel>
                     <Border Style="{StaticResource CardSectionHeader}">
                         <TextBlock Text="II. EMERGENCY CONTACT" Style="{StaticResource SectionLabel}"/>
                     </Border>
-
                     <!-- ROW 1: Contact Person | Relationship | Phone -->
                     <Grid Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
@@ -316,7 +297,6 @@
                             <ColumnDefinition Width="1.1*"/>
                             <ColumnDefinition Width="1.2*"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -335,7 +315,6 @@
                                      PreviewTextInput="NameOnly_PreviewTextInput"
                                      TextChanged="TxtEmergencyContact_TextChanged"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="1" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -353,7 +332,6 @@
                                      MaxLength="50"
                                      PreviewTextInput="NameOnly_PreviewTextInput"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="2">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -373,7 +351,6 @@
                                      TextChanged="TxtEmergencyNumber_TextChanged"/>
                         </StackPanel>
                     </Grid>
-
                     <!-- ROW 2: Emergency Address -->
                     <Grid Margin="0,0,0,14">
                         <StackPanel>
@@ -397,10 +374,8 @@
                                       Cursor="Hand"/>
                         </StackPanel>
                     </Grid>
-
                 </StackPanel>
             </Border>
-
             <!-- CARD: ADDITIONAL INFORMATION & SECTOR CLASSIFICATION -->
             <Border Style="{StaticResource CardSection}">
                 <StackPanel>
@@ -411,7 +386,6 @@
                                        FontSize="11" Foreground="#6B7280" Margin="0,2,0,0"/>
                         </StackPanel>
                     </Border>
-
                     <Grid Margin="0,4,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -420,7 +394,6 @@
                             <ColumnDefinition Width="10"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <!-- Tile 1: Pantawid Beneficiary (4Ps) -->
                         <Border Grid.Column="0" Background="#FFFBFD" BorderBrush="#E5B8C9" BorderThickness="1"
                                 CornerRadius="7" Padding="10,7">
@@ -440,7 +413,6 @@
                                 </StackPanel>
                             </Grid>
                         </Border>
-
                         <!-- Tile 2: Indigenous Person (IP) -->
                         <Border Grid.Column="2" Background="#FFFBFD" BorderBrush="#E5B8C9" BorderThickness="1"
                                 CornerRadius="7" Padding="10,7">
@@ -460,7 +432,6 @@
                                 </StackPanel>
                             </Grid>
                         </Border>
-
                         <!-- Tile 3: LGBTQ+ -->
                         <Border Grid.Column="4" Background="#FFFBFD" BorderBrush="#E5B8C9" BorderThickness="1"
                                 CornerRadius="7" Padding="10,7">

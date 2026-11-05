@@ -63,7 +63,6 @@ namespace SOLUM_UI
         private bool _isDragging = false;
         private Point _dragStartPoint;
         private List<OcrWordToken> _activeRoiTokens = new List<OcrWordToken>();
-
         // Canvas Panning State
         private bool _isPanning = false;
         private Point _panStartMousePoint;
@@ -91,7 +90,6 @@ namespace SOLUM_UI
         private void ApplySize()
         {
             double screenW, screenH, screenLeft, screenTop;
-
             if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
                 screenW    = Owner.ActualWidth;
@@ -106,12 +104,10 @@ namespace SOLUM_UI
                 screenLeft = SystemParameters.WorkArea.Left;
                 screenTop  = SystemParameters.WorkArea.Top;
             }
-
             if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
             if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
             if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
             if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
-
             if (DialogShell != null)
             {
                 double availW = Math.Min(screenW, SystemParameters.WorkArea.Width);
@@ -146,7 +142,6 @@ namespace SOLUM_UI
                 }
                 catch { }
             }
-
             // Fallback default coordinates if file is unavailable
             LoadFactoryDefaults();
         }
@@ -183,7 +178,6 @@ namespace SOLUM_UI
             {
                 System.Diagnostics.Debug.WriteLine("[OcrTemplateConfigWindow] ParseTemplateJson error: " + ex.Message);
             }
-
             if (_fields.Count == 0) LoadFactoryDefaults();
         }
 
@@ -215,7 +209,6 @@ namespace SOLUM_UI
             _fields.Add(new TemplateFieldItem { Key = "emergency_relationship", Name = "Emergency Relationship", Category = "Section I", X = 0.335, Y = 0.286, W = 0.175, H = 0.016 });
             _fields.Add(new TemplateFieldItem { Key = "emergency_address", Name = "Emergency Contact Address", Category = "Section I", X = 0.510, Y = 0.286, W = 0.255, H = 0.016 });
             _fields.Add(new TemplateFieldItem { Key = "emergency_number", Name = "Emergency Contact Number", Category = "Section I", X = 0.770, Y = 0.286, W = 0.205, H = 0.016 });
-
             // Section II: Circumstances
             _fields.Add(new TemplateFieldItem { Key = "circ_a1", Name = "Circumstance A1 (Rape)", Category = "Section II", X = 0.022, Y = 0.320, W = 0.045, H = 0.022 });
             _fields.Add(new TemplateFieldItem { Key = "circ_a2", Name = "Circumstance A2 (Death of Spouse)", Category = "Section II", X = 0.022, Y = 0.344, W = 0.045, H = 0.022 });
@@ -236,7 +229,6 @@ namespace SOLUM_UI
             _fields.Add(new TemplateFieldItem { Key = "circ_d", Name = "Circumstance D (Legal Guardian)", Category = "Section II", X = 0.700, Y = 0.344, W = 0.045, H = 0.022 });
             _fields.Add(new TemplateFieldItem { Key = "circ_e", Name = "Circumstance E (Relative 4th Degree)", Category = "Section II", X = 0.700, Y = 0.370, W = 0.045, H = 0.022 });
             _fields.Add(new TemplateFieldItem { Key = "circ_f", Name = "Circumstance F (Pregnant Woman)", Category = "Section II", X = 0.700, Y = 0.395, W = 0.045, H = 0.022 });
-
             // Section III: Family Composition Row 1
             _fields.Add(new TemplateFieldItem { Key = "fam_row1_name", Name = "Family Row 1: Name", Category = "Section III", X = 0.025, Y = 0.462, W = 0.255, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row1_sex", Name = "Family Row 1: Sex", Category = "Section III", X = 0.285, Y = 0.462, W = 0.055, H = 0.015 });
@@ -246,7 +238,6 @@ namespace SOLUM_UI
             _fields.Add(new TemplateFieldItem { Key = "fam_row1_rel", Name = "Family Row 1: Relationship", Category = "Section III", X = 0.615, Y = 0.462, W = 0.120, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row1_edu", Name = "Family Row 1: Education / Job", Category = "Section III", X = 0.740, Y = 0.462, W = 0.145, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row1_inc", Name = "Family Row 1: Income", Category = "Section III", X = 0.885, Y = 0.462, W = 0.095, H = 0.015 });
-
             // Section III: Family Composition Row 2
             _fields.Add(new TemplateFieldItem { Key = "fam_row2_name", Name = "Family Row 2: Name", Category = "Section III", X = 0.025, Y = 0.476, W = 0.255, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row2_sex", Name = "Family Row 2: Sex", Category = "Section III", X = 0.285, Y = 0.476, W = 0.055, H = 0.015 });
@@ -256,7 +247,6 @@ namespace SOLUM_UI
             _fields.Add(new TemplateFieldItem { Key = "fam_row2_rel", Name = "Family Row 2: Relationship", Category = "Section III", X = 0.615, Y = 0.476, W = 0.120, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row2_edu", Name = "Family Row 2: Education / Job", Category = "Section III", X = 0.740, Y = 0.476, W = 0.145, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row2_inc", Name = "Family Row 2: Income", Category = "Section III", X = 0.885, Y = 0.476, W = 0.095, H = 0.015 });
-
             // Section III: Family Composition Row 3
             _fields.Add(new TemplateFieldItem { Key = "fam_row3_name", Name = "Family Row 3: Name", Category = "Section III", X = 0.025, Y = 0.491, W = 0.255, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row3_sex", Name = "Family Row 3: Sex", Category = "Section III", X = 0.285, Y = 0.491, W = 0.055, H = 0.015 });
@@ -266,7 +256,6 @@ namespace SOLUM_UI
             _fields.Add(new TemplateFieldItem { Key = "fam_row3_rel", Name = "Family Row 3: Relationship", Category = "Section III", X = 0.615, Y = 0.491, W = 0.120, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row3_edu", Name = "Family Row 3: Education / Job", Category = "Section III", X = 0.740, Y = 0.491, W = 0.145, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row3_inc", Name = "Family Row 3: Income", Category = "Section III", X = 0.885, Y = 0.491, W = 0.095, H = 0.015 });
-
             // Section III: Family Composition Row 4
             _fields.Add(new TemplateFieldItem { Key = "fam_row4_name", Name = "Family Row 4: Name", Category = "Section III", X = 0.025, Y = 0.505, W = 0.255, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row4_sex", Name = "Family Row 4: Sex", Category = "Section III", X = 0.285, Y = 0.505, W = 0.055, H = 0.015 });
@@ -276,7 +265,6 @@ namespace SOLUM_UI
             _fields.Add(new TemplateFieldItem { Key = "fam_row4_rel", Name = "Family Row 4: Relationship", Category = "Section III", X = 0.615, Y = 0.505, W = 0.120, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row4_edu", Name = "Family Row 4: Education / Job", Category = "Section III", X = 0.740, Y = 0.505, W = 0.145, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row4_inc", Name = "Family Row 4: Income", Category = "Section III", X = 0.885, Y = 0.505, W = 0.095, H = 0.015 });
-
             // Section III: Family Composition Row 5
             _fields.Add(new TemplateFieldItem { Key = "fam_row5_name", Name = "Family Row 5: Name", Category = "Section III", X = 0.025, Y = 0.520, W = 0.255, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row5_sex", Name = "Family Row 5: Sex", Category = "Section III", X = 0.285, Y = 0.520, W = 0.055, H = 0.015 });
@@ -286,10 +274,8 @@ namespace SOLUM_UI
             _fields.Add(new TemplateFieldItem { Key = "fam_row5_rel", Name = "Family Row 5: Relationship", Category = "Section III", X = 0.615, Y = 0.520, W = 0.120, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row5_edu", Name = "Family Row 5: Education / Job", Category = "Section III", X = 0.740, Y = 0.520, W = 0.145, H = 0.015 });
             _fields.Add(new TemplateFieldItem { Key = "fam_row5_inc", Name = "Family Row 5: Income", Category = "Section III", X = 0.885, Y = 0.520, W = 0.095, H = 0.015 });
-
             // Section IV: Needs and Problems
             _fields.Add(new TemplateFieldItem { Key = "needs", Name = "IV. Needs and Problems", Category = "Section IV", X = 0.025, Y = 0.555, W = 0.940, H = 0.025 });
-
             // Section V: Other Sources of Income
             _fields.Add(new TemplateFieldItem { Key = "other_income", Name = "V. Other Sources of Income", Category = "Section V", X = 0.025, Y = 0.605, W = 0.940, H = 0.025 });
         }
@@ -314,7 +300,6 @@ namespace SOLUM_UI
                     }
                 }
             }
-
             if (!string.IsNullOrEmpty(imgToLoad) && File.Exists(imgToLoad))
             {
                 try
@@ -330,19 +315,16 @@ namespace SOLUM_UI
                         bmp.EndInit();
                     }
                     bmp.Freeze();
-
                     ImgDocument.Source = bmp;
                     OverlayCanvas.Width = bmp.PixelWidth;
                     OverlayCanvas.Height = bmp.PixelHeight;
                     CanvasContainer.Width = bmp.PixelWidth;
                     CanvasContainer.Height = bmp.PixelHeight;
-
                     Dispatcher.BeginInvoke(new Action(ZoomFit), System.Windows.Threading.DispatcherPriority.Loaded);
                     return;
                 }
                 catch { }
             }
-
             // Fallback placeholder dimension if image isn't loaded
             OverlayCanvas.Width = 1000;
             OverlayCanvas.Height = 1350;
@@ -400,10 +382,8 @@ namespace SOLUM_UI
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
-
             // Avoid intercepting arrow keys if typing in a textbox
             if (e.OriginalSource is TextBox) return;
-
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
                 if (e.Key == Key.Z)
@@ -419,11 +399,9 @@ namespace SOLUM_UI
                     return;
                 }
             }
-
             if (_selectedFieldKeys.Count > 0 || _selectedField != null)
             {
                 double step = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift ? 0.005 : 0.001;
-
                 if (e.Key == Key.Up)
                 {
                     ApplyNudge(0, -step);
@@ -462,7 +440,6 @@ namespace SOLUM_UI
                     case "Left":  dx = -step; break;
                     case "Right": dx = +step; break;
                 }
-
                 ApplyNudge(dx, dy);
             }
         }
@@ -476,15 +453,12 @@ namespace SOLUM_UI
                 selectedList.Add(_selectedField);
             }
             if (selectedList.Count == 0) return;
-
             PushUndoState();
-
             foreach (var sf in selectedList)
             {
                 sf.X = Math.Max(0.0, Math.Min(0.98, Math.Round(sf.X + dx, 4)));
                 sf.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(sf.Y + dy, 4)));
             }
-
             if (_selectedField != null) UpdateSidebarFromField(_selectedField);
             RedrawAllCanvasBoxes();
             TxtStatusMessage.Text = $"🎯 Nudged {selectedList.Count} box{(selectedList.Count > 1 ? "es" : "")}.";
@@ -499,10 +473,8 @@ namespace SOLUM_UI
                 selectedList.Add(_selectedField);
             }
             if (selectedList.Count == 0) return;
-
             PushUndoState();
             double step = (RbStepNormal?.IsChecked == true) ? 0.004 : 0.001;
-
             foreach (var sf in selectedList)
             {
                 sf.X = Math.Max(0.0, Math.Round(sf.X - step / 2.0, 4));
@@ -510,7 +482,6 @@ namespace SOLUM_UI
                 sf.W = Math.Min(1.0 - sf.X, Math.Round(sf.W + step, 4));
                 sf.H = Math.Min(1.0 - sf.Y, Math.Round(sf.H + step, 4));
             }
-
             if (_selectedField != null) UpdateSidebarFromField(_selectedField);
             RedrawAllCanvasBoxes();
             TxtStatusMessage.Text = $"➕ Expanded {selectedList.Count} box{(selectedList.Count > 1 ? "es" : "")}.";
@@ -525,10 +496,8 @@ namespace SOLUM_UI
                 selectedList.Add(_selectedField);
             }
             if (selectedList.Count == 0) return;
-
             PushUndoState();
             double step = (RbStepNormal?.IsChecked == true) ? 0.004 : 0.001;
-
             foreach (var sf in selectedList)
             {
                 if (sf.W <= 0.004 || sf.H <= 0.004) continue;
@@ -537,7 +506,6 @@ namespace SOLUM_UI
                 sf.W = Math.Max(0.002, Math.Round(sf.W - step, 4));
                 sf.H = Math.Max(0.002, Math.Round(sf.H - step, 4));
             }
-
             if (_selectedField != null) UpdateSidebarFromField(_selectedField);
             RedrawAllCanvasBoxes();
             TxtStatusMessage.Text = $"➖ Shrunk {selectedList.Count} box{(selectedList.Count > 1 ? "es" : "")}.";
@@ -583,7 +551,6 @@ namespace SOLUM_UI
 
                 double scrollX = targetCenterX - (CanvasScrollViewer.ViewportWidth / 2.0);
                 double scrollY = targetCenterY - (CanvasScrollViewer.ViewportHeight / 2.0);
-
                 CanvasScrollViewer.ScrollToHorizontalOffset(Math.Max(0, scrollX));
                 CanvasScrollViewer.ScrollToVerticalOffset(Math.Max(0, scrollY));
             }), System.Windows.Threading.DispatcherPriority.Loaded);
@@ -594,9 +561,7 @@ namespace SOLUM_UI
             OverlayCanvas.Children.Clear();
             double cW = OverlayCanvas.Width;
             double cH = OverlayCanvas.Height;
-
             if (cW <= 0 || cH <= 0) return;
-
             // Compute zoom-invariant screen dimensions so handles & labels remain compact and consistent at any zoom level
             double z = Math.Max(0.05, _currentZoom);
             double strokeSelected = Math.Max(1.5, 2.5 / z);
@@ -606,12 +571,10 @@ namespace SOLUM_UI
             double labelPadV = Math.Max(1.0, 2.5 / z);
             double labelCorner = Math.Max(2.0, 3.0 / z);
             double labelOffset = Math.Max(14.0, 18.0 / z);
-
             // Compact 10px screen handle size
             double hSize = 10.0 / z;
             double halfH = hSize / 2.0;
             double handleStroke = Math.Max(1.0, 1.5 / z);
-
             foreach (var f in _fields)
             {
                 bool isSelected = _selectedFieldKeys.Contains(f.Key) || (_selectedField != null && _selectedField.Key == f.Key);
@@ -620,7 +583,6 @@ namespace SOLUM_UI
                 double top = f.Y * cH;
                 double width = f.W * cW;
                 double height = f.H * cH;
-
                 // Rectangle border for field
                 var rect = new Rectangle
                 {
@@ -632,11 +594,9 @@ namespace SOLUM_UI
                     Tag = new HandleTagInfo { Field = f, HandleType = ResizeHandleType.Move },
                     Cursor = Cursors.SizeAll
                 };
-
                 Canvas.SetLeft(rect, left);
                 Canvas.SetTop(rect, top);
                 OverlayCanvas.Children.Add(rect);
-
                 // Show Field Name Title ONLY for the selected field to avoid blocking the view of other fields
                 if (isSelected)
                 {
@@ -647,7 +607,6 @@ namespace SOLUM_UI
                         Padding = new Thickness(labelPadH, labelPadV, labelPadH, labelPadV),
                         IsHitTestVisible = false
                     };
-
                     var lblText = new TextBlock
                     {
                         Text = f.Name,
@@ -656,11 +615,9 @@ namespace SOLUM_UI
                         Foreground = Brushes.White
                     };
                     labelBorder.Child = lblText;
-
                     Canvas.SetLeft(labelBorder, left);
                     Canvas.SetTop(labelBorder, Math.Max(0, top - labelOffset));
                     OverlayCanvas.Children.Add(labelBorder);
-
                     // Render 8 compact corner and edge resize handles
                     var handleList = new[]
                     {
@@ -673,7 +630,6 @@ namespace SOLUM_UI
                         new { Type = ResizeHandleType.Left,        Cx = left,            Cy = top + height/2,  Cursor = Cursors.SizeWE },
                         new { Type = ResizeHandleType.Right,       Cx = left + width,    Cy = top + height/2,  Cursor = Cursors.SizeWE }
                     };
-
                     foreach (var h in handleList)
                     {
                         var handleRect = new Rectangle
@@ -686,14 +642,12 @@ namespace SOLUM_UI
                             Cursor = h.Cursor,
                             Tag = new HandleTagInfo { Field = f, HandleType = h.Type }
                         };
-
                         Canvas.SetLeft(handleRect, h.Cx - halfH);
                         Canvas.SetTop(handleRect, h.Cy - halfH);
                         OverlayCanvas.Children.Add(handleRect);
                     }
                 }
             }
-
             // Draw any detected AI words/tokens inside the tested box
             if (_activeRoiTokens != null && _activeRoiTokens.Count > 0)
             {
@@ -704,7 +658,6 @@ namespace SOLUM_UI
                     double tY = tok.Bbox[1] * cH;
                     double tW = tok.Bbox[2] * cW;
                     double tH = tok.Bbox[3] * cH;
-
                     var tokenRect = new Rectangle
                     {
                         Width = Math.Max(4, tW),
@@ -718,7 +671,6 @@ namespace SOLUM_UI
                     Canvas.SetLeft(tokenRect, tX);
                     Canvas.SetTop(tokenRect, tY);
                     OverlayCanvas.Children.Add(tokenRect);
-
                     var tText = new TextBlock
                     {
                         Text = tok.IsLabel ? $"[LBL] {tok.Text}" : $"{tok.Text} ({tok.Confidence:F2})",
@@ -737,7 +689,6 @@ namespace SOLUM_UI
         private void CmbFields_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isUpdatingSelectionFromCanvas) return;
-
             if (CmbFields.SelectedItem is TemplateFieldItem item)
             {
                 _selectedField = item;
@@ -782,13 +733,11 @@ namespace SOLUM_UI
                 e.Handled = true;
                 return;
             }
-
             if (e.ChangedButton == MouseButton.Left)
             {
                 var hit = e.OriginalSource as FrameworkElement;
                 TemplateFieldItem fieldItem = null;
                 ResizeHandleType handleType = ResizeHandleType.Move;
-
                 if (hit != null)
                 {
                     if (hit.Tag is HandleTagInfo hInfo)
@@ -802,14 +751,12 @@ namespace SOLUM_UI
                         handleType = ResizeHandleType.Move;
                     }
                 }
-
                 if (fieldItem != null)
                 {
                     PushUndoState();
                     bool isShift = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift
                                 || Keyboard.IsKeyDown(Key.LeftShift)
                                 || Keyboard.IsKeyDown(Key.RightShift);
-
                     if (isShift)
                     {
                         // Shift+Click: Toggle field in multi-selection
@@ -843,9 +790,7 @@ namespace SOLUM_UI
                             _selectedField = fieldItem;
                         }
                     }
-
                     _activeHandle = handleType;
-
                     _isUpdatingSelectionFromCanvas = true;
                     try
                     {
@@ -855,7 +800,6 @@ namespace SOLUM_UI
                     {
                         _isUpdatingSelectionFromCanvas = false;
                     }
-
                     // Snapshot starting coordinates for all selected fields for simultaneous resizing/dragging
                     _origCoords.Clear();
                     var selectedList = _fields.Where(f => _selectedFieldKeys.Contains(f.Key)).ToList();
@@ -863,12 +807,10 @@ namespace SOLUM_UI
                     {
                         _origCoords[sf] = new BoxCoordSnapshot { X = sf.X, Y = sf.Y, W = sf.W, H = sf.H };
                     }
-
                     _isDragging = true;
                     _dragStartPoint = e.GetPosition(OverlayCanvas);
                     OverlayCanvas.CaptureMouse();
                     e.Handled = true;
-
                     UpdateSidebarFromField(_selectedField);
                     RedrawAllCanvasBoxes();
                     TxtStatusMessage.Text = $"● {_selectedFieldKeys.Count} box{(_selectedFieldKeys.Count > 1 ? "es" : "")} selected. Hold Shift to select multiple.";
@@ -894,49 +836,41 @@ namespace SOLUM_UI
                 Point currentPoint = e.GetPosition(CanvasScrollViewer);
                 double deltaX = _panStartMousePoint.X - currentPoint.X;
                 double deltaY = _panStartMousePoint.Y - currentPoint.Y;
-
                 CanvasScrollViewer.ScrollToHorizontalOffset(_panStartH + deltaX);
                 CanvasScrollViewer.ScrollToVerticalOffset(_panStartV + deltaY);
                 return;
             }
-
             if (_isDragging && _origCoords.Count > 0)
             {
                 var curPos = e.GetPosition(OverlayCanvas);
                 double dx = (curPos.X - _dragStartPoint.X) / OverlayCanvas.Width;
                 double dy = (curPos.Y - _dragStartPoint.Y) / OverlayCanvas.Height;
-
                 foreach (var kvp in _origCoords)
                 {
                     var sf = kvp.Key;
                     var orig = kvp.Value;
-
                     switch (_activeHandle)
                     {
                         case ResizeHandleType.Move:
                             sf.X = Math.Max(0.0, Math.Min(0.98, Math.Round(orig.X + dx, 4)));
                             sf.Y = Math.Max(0.0, Math.Min(0.98, Math.Round(orig.Y + dy, 4)));
                             break;
-
                         case ResizeHandleType.BottomRight:
                             sf.W = Math.Max(0.003, Math.Min(1.0 - sf.X, Math.Round(orig.W + dx, 4)));
                             sf.H = Math.Max(0.003, Math.Min(1.0 - sf.Y, Math.Round(orig.H + dy, 4)));
                             break;
-
                         case ResizeHandleType.BottomLeft:
                             double newX_bl = Math.Max(0.0, Math.Min(orig.X + orig.W - 0.003, Math.Round(orig.X + dx, 4)));
                             sf.W = Math.Max(0.003, Math.Round(orig.W - (newX_bl - orig.X), 4));
                             sf.X = newX_bl;
                             sf.H = Math.Max(0.003, Math.Min(1.0 - sf.Y, Math.Round(orig.H + dy, 4)));
                             break;
-
                         case ResizeHandleType.TopRight:
                             double newY_tr = Math.Max(0.0, Math.Min(orig.Y + orig.H - 0.003, Math.Round(orig.Y + dy, 4)));
                             sf.H = Math.Max(0.003, Math.Round(orig.H - (newY_tr - orig.Y), 4));
                             sf.Y = newY_tr;
                             sf.W = Math.Max(0.003, Math.Min(1.0 - sf.X, Math.Round(orig.W + dx, 4)));
                             break;
-
                         case ResizeHandleType.TopLeft:
                             double newX_tl = Math.Max(0.0, Math.Min(orig.X + orig.W - 0.003, Math.Round(orig.X + dx, 4)));
                             double newY_tl = Math.Max(0.0, Math.Min(orig.Y + orig.H - 0.003, Math.Round(orig.Y + dy, 4)));
@@ -945,21 +879,17 @@ namespace SOLUM_UI
                             sf.X = newX_tl;
                             sf.Y = newY_tl;
                             break;
-
                         case ResizeHandleType.Right:
                             sf.W = Math.Max(0.003, Math.Min(1.0 - sf.X, Math.Round(orig.W + dx, 4)));
                             break;
-
                         case ResizeHandleType.Left:
                             double newX_l = Math.Max(0.0, Math.Min(orig.X + orig.W - 0.003, Math.Round(orig.X + dx, 4)));
                             sf.W = Math.Max(0.003, Math.Round(orig.W - (newX_l - orig.X), 4));
                             sf.X = newX_l;
                             break;
-
                         case ResizeHandleType.Bottom:
                             sf.H = Math.Max(0.003, Math.Min(1.0 - sf.Y, Math.Round(orig.H + dy, 4)));
                             break;
-
                         case ResizeHandleType.Top:
                             double newY_t = Math.Max(0.0, Math.Min(orig.Y + orig.H - 0.003, Math.Round(orig.Y + dy, 4)));
                             sf.H = Math.Max(0.003, Math.Round(orig.H - (newY_t - orig.Y), 4));
@@ -967,7 +897,6 @@ namespace SOLUM_UI
                             break;
                     }
                 }
-
                 if (_selectedField != null) UpdateSidebarFromField(_selectedField);
                 RedrawAllCanvasBoxes();
             }
@@ -981,7 +910,6 @@ namespace SOLUM_UI
                 OverlayCanvas.ReleaseMouseCapture();
                 OverlayCanvas.Cursor = Cursors.Arrow;
             }
-
             if (_isDragging)
             {
                 _isDragging = false;
@@ -1009,7 +937,6 @@ namespace SOLUM_UI
                 Point currentPoint = e.GetPosition(CanvasScrollViewer);
                 double deltaX = _panStartMousePoint.X - currentPoint.X;
                 double deltaY = _panStartMousePoint.Y - currentPoint.Y;
-
                 CanvasScrollViewer.ScrollToHorizontalOffset(_panStartH + deltaX);
                 CanvasScrollViewer.ScrollToVerticalOffset(_panStartV + deltaY);
             }
@@ -1032,10 +959,8 @@ namespace SOLUM_UI
                 TxtLiveOcrResult.Text = "Please select a field and ensure an image scan is uploaded.";
                 return;
             }
-
             TxtLiveOcrResult.Text = "⚡ Running OCR on this box...";
             BtnTestOcr.IsEnabled = false;
-
             try
             {
                 var roiResult = await SOLUM_UI.Services.OcrService.ExtractRoiAsync(
@@ -1046,7 +971,6 @@ namespace SOLUM_UI
                     _selectedField.H,
                     _selectedField.Key
                 );
-
                 if (roiResult != null && roiResult.Status == "success")
                 {
                     _activeRoiTokens = roiResult.Tokens ?? new List<OcrWordToken>();
@@ -1062,7 +986,6 @@ namespace SOLUM_UI
                         roiResult.Value == "True" ||
                         roiResult.Value == "False"
                     );
-
                     if (isCheckbox && (roiResult.Value == "True" || roiResult.Value == "False" || (!string.IsNullOrEmpty(roiResult.RawValue) && roiResult.RawValue.StartsWith("Checkbox Ink:"))))
                     {
                         bool isMarked = (roiResult.Value == "True");
@@ -1090,7 +1013,6 @@ namespace SOLUM_UI
                     {
                         sb.AppendLine($"Extracted{timeInfo}: (empty box, no text detected)");
                     }
-
                     if (roiResult.Tokens != null && roiResult.Tokens.Count > 0)
                     {
                         var wordsList = roiResult.Tokens
@@ -1102,12 +1024,10 @@ namespace SOLUM_UI
                             sb.AppendLine("Tokens: " + wordStr);
                         }
                     }
-
                     if (roiResult.FilteredLabels != null && roiResult.FilteredLabels.Count > 0)
                     {
                         sb.AppendLine("Skipped Labels: " + string.Join(", ", roiResult.FilteredLabels.Select(l => $"\"{l}\"")));
                     }
-
                     TxtLiveOcrResult.Text = sb.ToString().TrimEnd();
                 }
                 else
@@ -1163,9 +1083,7 @@ namespace SOLUM_UI
                 cancelText: "Cancel",
                 theme: ConfirmThemeType.Primary,
                 owner: this);
-
             if (!isConfirmed) return;
-
             await SaveTemplateInternalAsync(showSuccessDialog: true);
         }
 
@@ -1183,7 +1101,6 @@ namespace SOLUM_UI
                 }
             }
             catch { }
-
             if (root == null)
             {
                 root = new Dictionary<string, object>
@@ -1193,7 +1110,6 @@ namespace SOLUM_UI
                     { "version", "2.2" }
                 };
             }
-
             var fieldsDict = new Dictionary<string, object>();
             foreach (var f in _fields)
             {
@@ -1208,7 +1124,6 @@ namespace SOLUM_UI
                 fieldsDict[f.Key] = fieldData;
             }
             root["fields"] = fieldsDict;
-
             return serializer.Serialize(root);
         }
 
@@ -1221,7 +1136,6 @@ namespace SOLUM_UI
                 cancelText: "Cancel",
                 theme: SOLUM_UI.Views.Dialogs.ConfirmThemeType.Warning,
                 owner: this);
-
             if (isConfirmed)
             {
                 PushUndoState();
@@ -1289,7 +1203,6 @@ namespace SOLUM_UI
         {
             if (CanvasContainer.ActualWidth <= 0 || CanvasContainer.ActualHeight <= 0)
                 return;
-
             // Zoom ONLY when Ctrl is held down (cursor-centered zoom)
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
@@ -1298,7 +1211,6 @@ namespace SOLUM_UI
                 double oldZoom = _currentZoom;
                 double zoomDelta = e.Delta > 0 ? 0.15 : -0.15;
                 double newZoom = Math.Max(0.1, Math.Min(5.0, _currentZoom + zoomDelta));
-
                 if (Math.Abs(newZoom - oldZoom) < 0.001)
                 {
                     e.Handled = true;
@@ -1307,20 +1219,16 @@ namespace SOLUM_UI
 
                 double contentX = (CanvasScrollViewer.HorizontalOffset + mousePosInViewer.X) / oldZoom;
                 double contentY = (CanvasScrollViewer.VerticalOffset + mousePosInViewer.Y) / oldZoom;
-
                 _currentZoom = newZoom;
                 ApplyZoom();
 
                 double newHorizontalOffset = (contentX * newZoom) - mousePosInViewer.X;
                 double newVerticalOffset = (contentY * newZoom) - mousePosInViewer.Y;
-
                 CanvasScrollViewer.ScrollToHorizontalOffset(Math.Max(0, newHorizontalOffset));
                 CanvasScrollViewer.ScrollToVerticalOffset(Math.Max(0, newVerticalOffset));
-
                 e.Handled = true;
                 return;
             }
-
             // Normal scroll behavior without Ctrl:
             // Scroll vertically (or Shift+Wheel horizontally) smoothly without zooming
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
@@ -1346,7 +1254,6 @@ namespace SOLUM_UI
             }
             RedrawAllCanvasBoxes();
         }
-
         #region Global Nudge and Scale (All Boxes)
 
         private void GlobalNudgeUp_Click(object sender, RoutedEventArgs e) => GlobalNudge(0.0, -1.0);
@@ -1365,7 +1272,6 @@ namespace SOLUM_UI
             double step = (RbGlobalStepNormal?.IsChecked == true) ? 0.005 : 0.001;
             double dx = dirX * step;
             double dy = dirY * step;
-
             foreach (var f in _fields)
             {
                 f.X = Math.Max(0.0, Math.Min(0.98, Math.Round(f.X + dx, 4)));
@@ -1394,7 +1300,6 @@ namespace SOLUM_UI
             RedrawAllCanvasBoxes();
             TxtStatusMessage.Text = $"🌐 Scaled all boxes (Sx: {(scaleX * 100):0.0}%, Sy: {(scaleY * 100):0.0}%).";
         }
-
         #endregion
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

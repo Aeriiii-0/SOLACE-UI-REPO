@@ -11,25 +11,18 @@ namespace SOLUM_UI.Models
     {
         /// <summary>Human-readable or raw field name (e.g., "MonthlyIncome", "Civil Status")</summary>
         public string FieldName { get; set; }
-
         /// <summary>Human-friendly formatted field name (e.g., "Monthly Income", "PhilSys Card Number")</summary>
         public string DisplayFieldName => FormatFieldNameStatic(FieldName);
-
         /// <summary>Previous value before the change</summary>
         public string OldValue { get; set; }
-
         /// <summary>Display-friendly previous value (e.g., "—", "Yes", "No")</summary>
         public string DisplayOldValue => FormatValueStatic(OldValue);
-
         /// <summary>New value after the change</summary>
         public string NewValue { get; set; }
-
         /// <summary>Display-friendly new value (e.g., "—", "Yes", "No")</summary>
         public string DisplayNewValue => FormatValueStatic(NewValue);
-
         /// <summary>Timestamp when this change was recorded</summary>
         public DateTime ChangedAt { get; set; }
-
         /// <summary>Display-friendly representation: "Field: OldValue → NewValue"</summary>
         public string Display =>
             $"{DisplayFieldName}: \"{DisplayOldValue}\" → \"{DisplayNewValue}\"";
@@ -47,7 +40,6 @@ namespace SOLUM_UI.Models
         public static string FormatFieldNameStatic(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) return "—";
-
             switch (name.Trim())
             {
                 case "PhilsysCardNumber":

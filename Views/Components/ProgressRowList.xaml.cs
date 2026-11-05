@@ -26,19 +26,16 @@ namespace SOLUM_UI.Views.Components
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ProgressRowList)d;
-
             // Unsubscribe from old collection
             if (e.OldValue is ObservableCollection<ProgressItem> oldCollection)
             {
                 oldCollection.CollectionChanged -= control.OnCollectionChanged;
             }
-
             // Subscribe to new collection
             if (e.NewValue is ObservableCollection<ProgressItem> newCollection)
             {
                 newCollection.CollectionChanged += control.OnCollectionChanged;
             }
-
             control.RenderRows();
         }
 
@@ -50,15 +47,12 @@ namespace SOLUM_UI.Views.Components
         private void RenderRows()
         {
             ItemsStackPanel.Children.Clear();
-
             if (Data == null || Data.Count == 0)
             {
                 NoDataPanel.Visibility = Visibility.Visible;
                 return;
             }
-
             NoDataPanel.Visibility = Visibility.Collapsed;
-
             foreach (var item in Data)
             {
                 // Outer row container
@@ -67,14 +61,12 @@ namespace SOLUM_UI.Views.Components
                     Margin = new Thickness(0, 0, 0, 14),
                     Background = new SolidColorBrush(Color.FromArgb(20, 123, 20, 38)) // Subtle background
                 };
-
                 Grid row = new Grid();
                 row.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                 row.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                 row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                 row.Margin = new Thickness(12);
-
                 // Label
                 TextBlock label = new TextBlock
                 {
@@ -87,7 +79,6 @@ namespace SOLUM_UI.Views.Components
                 Grid.SetRow(label, 0);
                 Grid.SetColumn(label, 0);
                 row.Children.Add(label);
-
                 // Value with rounded percentage and tooltip
                 TextBlock value = new TextBlock
                 {
@@ -97,7 +88,6 @@ namespace SOLUM_UI.Views.Components
                     FontWeight = FontWeights.Medium,
                     Margin = new Thickness(0, 0, 0, 6)
                 };
-
                 // Add tooltip with category info
                 value.ToolTip = new ToolTip
                 {
@@ -107,11 +97,9 @@ namespace SOLUM_UI.Views.Components
                     FontSize = 10,
                     Padding = new Thickness(8, 4, 8, 4)
                 };
-
                 Grid.SetRow(value, 0);
                 Grid.SetColumn(value, 1);
                 row.Children.Add(value);
-
                 // Progress Bar with enhanced styling
                 ProgressBar progressBar = new ProgressBar
                 {
@@ -121,7 +109,6 @@ namespace SOLUM_UI.Views.Components
                     Foreground = new SolidColorBrush(Color.FromArgb(255, 123, 20, 38)),
                     Background = new SolidColorBrush(Color.FromArgb(255, 244, 230, 232))
                 };
-
                 // Add tooltip to progress bar
                 progressBar.ToolTip = new ToolTip
                 {
@@ -131,12 +118,10 @@ namespace SOLUM_UI.Views.Components
                     FontSize = 10,
                     Padding = new Thickness(8, 4, 8, 4)
                 };
-
                 Grid.SetRow(progressBar, 1);
                 Grid.SetColumn(progressBar, 0);
                 Grid.SetColumnSpan(progressBar, 2);
                 row.Children.Add(progressBar);
-
                 rowBorder.Child = row;
                 ItemsStackPanel.Children.Add(rowBorder);
             }

@@ -20,29 +20,23 @@ namespace SOLUM_UI.Services.Api
             DateTime? startDate = null, DateTime? endDate = null)
         {
             string url = $"api/analytics/monthly/{year}/{month}";
-
             var queryParams = new List<string>();
-
             if (!string.IsNullOrWhiteSpace(barangay) && !barangay.Equals("ALL", StringComparison.OrdinalIgnoreCase))
             {
                 queryParams.Add($"barangay={Uri.EscapeDataString(barangay.Trim())}");
             }
-
             if (startDate.HasValue)
             {
                 queryParams.Add($"startDate={startDate.Value:yyyy-MM-dd}");
             }
-
             if (endDate.HasValue)
             {
                 queryParams.Add($"endDate={endDate.Value:yyyy-MM-dd}");
             }
-
             if (queryParams.Count > 0)
             {
                 url += "?" + string.Join("&", queryParams);
             }
-
             return await ApiClient.Instance.GetAsync<MonthlyAnalyticsDto>(url);
         }
 
@@ -66,57 +60,46 @@ namespace SOLUM_UI.Services.Api
             DateTime? endDate = null)
         {
             var queryParams = new List<string>();
-
             if (!string.IsNullOrWhiteSpace(type))
             {
                 queryParams.Add($"type={Uri.EscapeDataString(type.Trim())}");
             }
-
             if (year.HasValue)
             {
                 queryParams.Add($"year={year.Value}");
             }
-
             if (quarter.HasValue)
             {
                 queryParams.Add($"quarter={quarter.Value}");
             }
-
             if (month.HasValue)
             {
                 queryParams.Add($"month={month.Value}");
             }
-
             if (startYear.HasValue)
             {
                 queryParams.Add($"startYear={startYear.Value}");
             }
-
             if (startMonth.HasValue)
             {
                 queryParams.Add($"startMonth={startMonth.Value}");
             }
-
             if (endYear.HasValue)
             {
                 queryParams.Add($"endYear={endYear.Value}");
             }
-
             if (endMonth.HasValue)
             {
                 queryParams.Add($"endMonth={endMonth.Value}");
             }
-
             if (startDate.HasValue)
             {
                 queryParams.Add($"startDate={startDate.Value:yyyy-MM-dd}");
             }
-
             if (endDate.HasValue)
             {
                 queryParams.Add($"endDate={endDate.Value:yyyy-MM-dd}");
             }
-
             if (!string.IsNullOrWhiteSpace(barangay) && !barangay.Equals("ALL", StringComparison.OrdinalIgnoreCase))
             {
                 queryParams.Add($"barangay={Uri.EscapeDataString(barangay.Trim())}");

@@ -11,7 +11,6 @@ namespace SOLUM_UI.Services.Interfaces
         string ServerUrl { get; set; }
         OcrWarmupProgress LatestWarmupProgress { get; }
         event Action<OcrWarmupProgress> WarmupProgressChanged;
-
         Task<bool> IsServerOnlineAsync();
         Task<bool> EnsureServerRunningAsync(int timeoutSeconds);
         void EnsureEngineProvisioned();

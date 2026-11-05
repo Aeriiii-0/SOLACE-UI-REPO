@@ -1,4 +1,4 @@
-﻿namespace SOLUM_UI.Models
+namespace SOLUM_UI.Models
 {
     public class HouseholdMember
     {

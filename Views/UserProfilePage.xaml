@@ -3,7 +3,6 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="User Profile"
       Background="#FFFFFF">
-
     <Page.Resources>
         <Style x:Key="SectionCard" TargetType="Border">
             <Setter Property="Background" Value="White"/>
@@ -105,10 +104,8 @@
             </Setter>
         </Style>
     </Page.Resources>
-
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="32,32,32,32">
-
             <!-- Header: User Info Card -->
             <Border Background="#F5E8EC" CornerRadius="16" Padding="28,28" Margin="0,0,0,28" BorderBrush="#E8D4DA" BorderThickness="1.5">
                 <Grid>
@@ -118,7 +115,6 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-
                     <!-- Avatar Circle -->
                     <Border Grid.Column="0" Width="64" Height="64" CornerRadius="32" Background="#702943" Margin="0,0,20,0" VerticalAlignment="Center">
                         <TextBlock x:Name="TxtInitial" Text="U"
@@ -126,7 +122,6 @@
                                    Foreground="White"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
-
                     <!-- User Info: Name, Email, Status -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock x:Name="TxtDisplayName" Text="Full name not set"
@@ -142,7 +137,6 @@
                             <TextBlock Text="ACTIVE" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#27AE60"/>
                         </StackPanel>
                     </StackPanel>
-
                     <!-- Scope info -->
                     <StackPanel Grid.Column="2" Margin="20,0,20,0">
                         <StackPanel HorizontalAlignment="Center">
@@ -152,7 +146,6 @@
                         </StackPanel>
                         <TextBlock Text="All barangays" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="#1F2937" Margin="0,6,0,0"/>
                     </StackPanel>
-
                     <!-- Session info -->
                     <StackPanel Grid.Column="3">
                         <StackPanel HorizontalAlignment="Center">
@@ -164,7 +157,6 @@
                     </StackPanel>
                 </Grid>
             </Border>
-
             <!-- Two Column Layout -->
             <Grid Margin="0,0,0,0">
                 <Grid.ColumnDefinitions>
@@ -172,7 +164,6 @@
                     <ColumnDefinition Width="20"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-
                 <!-- Left Column: Account Details -->
                 <Border Grid.Column="0" Style="{StaticResource SectionCard}">
                     <StackPanel>
@@ -181,39 +172,30 @@
                             <Border Width="4" Height="24" CornerRadius="2" Background="#702943" Margin="0,0,12,0"/>
                             <TextBlock Text="ACCOUNT DETAILS" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
                         </StackPanel>
-
                         <!-- Full Name -->
                         <StackPanel Margin="0,0,0,16">
                             <TextBlock Text="Full name" Style="{StaticResource FieldLabel}"/>
                             <TextBlock x:Name="TxtFullName" Text="Not set" Style="{StaticResource FieldValue}"/>
                         </StackPanel>
-
                         <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,16"/>
-
                         <!-- Role -->
                         <StackPanel Margin="0,0,0,16">
                             <TextBlock Text="Role" Style="{StaticResource FieldLabel}"/>
                             <TextBlock x:Name="TxtRole" Text="ENCODER" Style="{StaticResource FieldValue}"/>
                         </StackPanel>
-
                         <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,16"/>
-
                         <!-- Contact Number -->
                         <StackPanel Margin="0,0,0,16">
                             <TextBlock Text="Contact number" Style="{StaticResource FieldLabel}"/>
                             <TextBlock x:Name="TxtContactNumber" Text="—" Style="{StaticResource FieldValue}"/>
                         </StackPanel>
-
                         <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,16"/>
-
                         <!-- Assigned Barangay -->
                         <StackPanel Margin="0,0,0,16">
                             <TextBlock Text="Assigned barangay" Style="{StaticResource FieldLabel}"/>
                             <TextBlock x:Name="TxtBarangay" Text="ALL BARANGAYS" Style="{StaticResource FieldValue}"/>
                         </StackPanel>
-
                         <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,16"/>
-
                         <!-- Account Status -->
                         <StackPanel>
                             <TextBlock Text="Account status" Style="{StaticResource FieldLabel}"/>
@@ -224,7 +206,6 @@
                         </StackPanel>
                     </StackPanel>
                 </Border>
-
                 <!-- Right Column: Password & Session Info -->
                 <StackPanel Grid.Column="2">
                     <!-- Password Section -->
@@ -235,7 +216,6 @@
                                 <Border Width="4" Height="24" CornerRadius="2" Background="#702943" Margin="0,0,12,0"/>
                                 <TextBlock Text="PASSWORD" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
                             </StackPanel>
-
                             <!-- Change Password Button (Visible by default) -->
                             <StackPanel x:Name="ChangePasswordButtonPanel">
                                 <TextBlock Text="Update your password to keep your account secure."
@@ -247,7 +227,6 @@
                                                FontWeight="SemiBold" Foreground="White"/>
                                 </Button>
                             </StackPanel>
-
                             <!-- Change Password Form (Hidden by default) -->
                             <StackPanel x:Name="ChangePasswordFormPanel" Visibility="Collapsed">
                                 <StackPanel Margin="0,0,0,16">
@@ -257,7 +236,6 @@
                                 <TextBlock x:Name="ErrCurrentPassword" Text=""
                                            FontFamily="Segoe UI" FontSize="11" Foreground="#DC3545"
                                            Margin="0,0,0,16" Visibility="Collapsed"/>
-
                                 <StackPanel Margin="0,0,0,16">
                                     <TextBlock Text="New Password *" Style="{StaticResource FieldLabel}"/>
                                     <PasswordBox x:Name="PwdNewPassword" Style="{StaticResource FormInputPassword}"/>
@@ -265,7 +243,6 @@
                                 <TextBlock x:Name="ErrNewPassword" Text=""
                                            FontFamily="Segoe UI" FontSize="11" Foreground="#DC3545"
                                            Margin="0,0,0,16" Visibility="Collapsed"/>
-
                                 <StackPanel Margin="0,0,0,16">
                                     <TextBlock Text="Confirm Password *" Style="{StaticResource FieldLabel}"/>
                                     <PasswordBox x:Name="PwdConfirmPassword" Style="{StaticResource FormInputPassword}"/>
@@ -273,7 +250,6 @@
                                 <TextBlock x:Name="ErrConfirmPassword" Text=""
                                            FontFamily="Segoe UI" FontSize="11" Foreground="#DC3545"
                                            Margin="0,0,0,20" Visibility="Collapsed"/>
-
                                 <Border x:Name="ChangePasswordSuccessBanner" Visibility="Collapsed"
                                         Background="#E8F5E9" CornerRadius="8" BorderBrush="#A8D5B0"
                                         BorderThickness="1" Padding="16,12" Margin="0,0,0,20">
@@ -286,7 +262,6 @@
                                                    Foreground="#1E7E34" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
-
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,16">
                                     <Button x:Name="BtnCancelChangePassword" Style="{StaticResource PrimaryBtn}"
                                             Background="#FFFFFF" Margin="0,0,10,0" Click="BtnCancelChangePassword_Click">
@@ -316,7 +291,6 @@
                             </StackPanel>
                         </StackPanel>
                     </Border>
-
                     <!-- Session Info Section -->
                     <Border Style="{StaticResource SectionCard}">
                         <StackPanel>
@@ -325,31 +299,24 @@
                                 <Border Width="4" Height="24" CornerRadius="2" Background="#702943" Margin="0,0,12,0"/>
                                 <TextBlock Text="SESSION INFO" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
                             </StackPanel>
-
                             <!-- Session Started -->
                             <StackPanel Margin="0,0,0,14">
                                 <TextBlock Text="Session started" Style="{StaticResource FieldLabel}"/>
                                 <TextBlock x:Name="TxtSessionStart" Text="Oct 26, 2026 11:02 PM" Style="{StaticResource FieldValue}"/>
                             </StackPanel>
-
                             <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,14"/>
-
                             <!-- Last Activity -->
                             <StackPanel Margin="0,0,0,14">
                                 <TextBlock Text="Last activity" Style="{StaticResource FieldLabel}"/>
                                 <TextBlock x:Name="TxtLastActivity" Text="Just now" Style="{StaticResource FieldValue}"/>
                             </StackPanel>
-
                             <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,14"/>
-
                             <!-- System Version -->
                             <StackPanel Margin="0,0,0,14">
                                 <TextBlock Text="System version" Style="{StaticResource FieldLabel}"/>
                                 <TextBlock x:Name="TxtSystemVersion" Text="SOLUM UI v0.0.1-beta" Style="{StaticResource FieldValue}"/>
                             </StackPanel>
-
                             <Rectangle Height="1" Fill="#F0E8EC" Margin="0,0,0,14"/>
-
                             <!-- Environment -->
                             <StackPanel>
                                 <TextBlock Text="Environment" Style="{StaticResource FieldLabel}"/>

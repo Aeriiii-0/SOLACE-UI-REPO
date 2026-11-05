@@ -28,7 +28,6 @@ namespace SOLUM_UI.ViewModels
                     if (cycleId.HasValue) await _apiService.FinalizeCycleAsync(cycleId.Value);
                     IsRosterLocked = true;
                     if (SelectedFiscalCycle != null) SelectedFiscalCycle.Status = "Finalized";
-                    
                     // Switch to Final Grantees tab and clear operational pipeline lists to avoid unwanted re-fetches
                     ActiveTabIndex = 2;
                     PagedRecommendations.Clear();
@@ -37,7 +36,6 @@ namespace SOLUM_UI.ViewModels
                     QueueTotalCount = 0;
                     ShortlistRows.Clear();
                     FilteredShortlistRows.Clear();
-                    
                     NotifyCycleProperties();
                     ToastNotification.Show("Roster Finalized", $"FY {yr} roster locked for official disbursement.", ToastType.Success);
                 }
@@ -78,18 +76,14 @@ namespace SOLUM_UI.ViewModels
             _activeCycleId = cycle.CycleId;
             _activeCycleFiscalYear = cycle.FiscalYear;
             IsRosterLocked = cycle.IsFinalized || string.Equals(cycle.Status, "Finalized", StringComparison.OrdinalIgnoreCase) || !cycle.IsActive;
-
             GranteeSlots = cycle.AllocatedSlots > 0 ? cycle.AllocatedSlots : 100;
             GrantAmountPerRecipient = cycle.PerGranteeAmount > 0 ? (int)cycle.PerGranteeAmount : DefaultGrantAmount;
-
             // Fetch Grantees
             var granteesTask = _apiService.GetGranteesByFiscalYearAsync(cycle.FiscalYear);
-            
             // Only fetch Shortlist, Queue, and Rejections if cycle is NOT locked
             Task<BaseResponse<List<SubsidyRecommendationDto>>> shortlistTask;
             Task<BaseResponse<List<SubsidyRecommendationDto>>> recsTask;
             Task<BaseResponse<List<SubsidyRecommendationDto>>> rejTask;
-
             if (!IsRosterLocked && cycle.CycleId.HasValue)
             {
                 shortlistTask = _apiService.GetShortlistAsync(cycle.CycleId);
@@ -107,14 +101,11 @@ namespace SOLUM_UI.ViewModels
                 recsTask = Task.FromResult<BaseResponse<List<SubsidyRecommendationDto>>>(null);
                 rejTask = Task.FromResult<BaseResponse<List<SubsidyRecommendationDto>>>(null);
             }
-
             await Task.WhenAll(granteesTask, shortlistTask, recsTask, rejTask);
-
             var grResp = await granteesTask;
             var slResp = await shortlistTask;
             var dtos = await recsTask;
             var rejResp = await rejTask;
-
             DisqualifiedCandidates.Clear();
             if (rejResp?.Data != null && rejResp.Data.Count > 0)
             {
@@ -140,7 +131,6 @@ namespace SOLUM_UI.ViewModels
             }
             FilterDisqualifiedCandidates();
             NotifyDisqualifiedMetricsChanged();
-
             FinalGranteesList.Clear();
             int rk = 1;
             if (grResp?.Data != null && grResp.Data.Count > 0)
@@ -148,10 +138,8 @@ namespace SOLUM_UI.ViewModels
                 foreach (var g in grResp.Data.OrderBy(x => x.FullName))
                     FinalGranteesList.Add(SubsidyModelMapper.GranteeToRow(g, rk++));
             }
-
             ShortlistRows.Clear();
             foreach (var g in FinalGranteesList) ShortlistRows.Add(g);
-
             if (slResp?.Data != null && slResp.Data.Count > 0)
             {
                 foreach (var d in slResp.Data)
@@ -164,17 +152,14 @@ namespace SOLUM_UI.ViewModels
                 }
             }
             UpdateShortlistAndFinalCollections(enrich: false);
-
             PagedRecommendations.Clear();
             FilteredRecommendations.Clear();
             _allItems.Clear();
-
             if (dtos?.Data != null && dtos.Data.Count > 0)
             {
                 QueueTotalCount = dtos.Data.Count;
                 QueueTotalPages = 1;
                 _queueCurrentPage = 1;
-
                 for (int i = 0; i < dtos.Data.Count; i++)
                 {
                     var item = SubsidyModelMapper.ToItem(dtos.Data[i]);
@@ -191,7 +176,6 @@ namespace SOLUM_UI.ViewModels
                 QueueTotalPages = 1;
                 _queueCurrentPage = 1;
             }
-
             OnPropertyChanged(nameof(QueueCurrentPage));
             OnPropertyChanged(nameof(CanQueuePrevPage));
             OnPropertyChanged(nameof(CanQueueNextPage));
@@ -216,7 +200,6 @@ namespace SOLUM_UI.ViewModels
             int nextYear = ActiveCycleFiscalYear + 1;
             bool ok = ActionConfirmDialog.Show("Launch New Fiscal Cycle", $"Starting a new cycle will advance the active operational cycle to FY {nextYear}.\n\nThe current FY {ActiveCycleFiscalYear} certified roster will be archived.\n\nDo you wish to proceed?", "Launch Cycle", "Cancel", ConfirmThemeType.Primary);
             if (!ok) return;
-
             var dlg = new NewCycleDialog(nextYear) { Owner = Application.Current?.MainWindow };
             if (dlg.ShowDialog() == true && dlg.ResultRequest != null)
             {
@@ -350,7 +333,6 @@ namespace SOLUM_UI.ViewModels
             {
                 var cycleId = _activeCycleId ?? SelectedFiscalCycle?.CycleId;
                 var rejResp = await _apiService.GetRejectedCandidatesAsync(cycleId, _disqualifiedSearchText, _disqualifiedReasonFilter);
-
                 DisqualifiedCandidates.Clear();
                 if (rejResp?.Data != null && rejResp.Data.Count > 0)
                 {

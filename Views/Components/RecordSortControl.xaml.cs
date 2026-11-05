@@ -59,7 +59,6 @@ namespace SOLUM_UI.Views.Components
                     // Default to ascending, except date fields where newest (descending) is natural
                     IsAscending = (field != RecordSortField.LastUpdated && field != RecordSortField.ApplicationDate);
                 }
-
                 UpdateUI();
                 SortPopup.IsOpen = false;
                 SortChanged?.Invoke(this, new RecordSortEventArgs(SelectedField, IsAscending));
@@ -79,7 +78,6 @@ namespace SOLUM_UI.Views.Components
             // Update Direction Pills
             ApplyPillStyle(BtnAscending, IsAscending);
             ApplyPillStyle(BtnDescending, !IsAscending);
-
             // Dynamic Subtitles
             if (TxtBarangaySubtitle != null)
                 TxtBarangaySubtitle.Text = IsAscending ? "A to Z" : "Z to A (Reversed)";
@@ -87,12 +85,10 @@ namespace SOLUM_UI.Views.Components
                 TxtLastUpdatedSubtitle.Text = IsAscending ? "Oldest created first (Reversed)" : "Recently created first (Newest)";
             if (TxtApplicationDateSubtitle != null)
                 TxtApplicationDateSubtitle.Text = IsAscending ? "Oldest filed first (Reversed)" : "Latest filed first (Newest)";
-
             // Update Field Item Selection
             UpdateOptionRow(OptBarangay, IndBarangay, SelectedField == RecordSortField.Barangay);
             UpdateOptionRow(OptLastUpdated, IndLastUpdated, SelectedField == RecordSortField.LastUpdated);
             UpdateOptionRow(OptApplicationDate, IndApplicationDate, SelectedField == RecordSortField.ApplicationDate);
-
             // Update Trigger Label
             string arrow = IsAscending ? "▲" : "▼";
             string fieldName;

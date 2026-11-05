@@ -9,7 +9,6 @@
         ResizeMode="NoResize"
         Width="780" Height="620"
         ShowInTaskbar="False">
-
     <Window.Resources>
         <Style x:Key="FieldLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
@@ -325,7 +324,6 @@
             </Setter>
         </Style>
     </Window.Resources>
-
     <Border Background="#55000000">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <!-- Shadow Layer: Sibling with NO children. Rendered once into GPU cache, NEVER invalidated by typing inside DialogShell -->
@@ -339,7 +337,6 @@
                     <DropShadowEffect Color="#000000" BlurRadius="40" ShadowDepth="0" Opacity="0.22" RenderingBias="Performance"/>
                 </Border.Effect>
             </Border>
-
             <Border x:Name="DialogShell" Background="White" CornerRadius="18"
                     ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center"
                     TextOptions.TextFormattingMode="Display"
@@ -353,10 +350,8 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-
                     <!-- Mode stripe (green) -->
                     <Border Grid.Row="1" Background="#10B981"/>
-
                     <!-- Header -->
                     <Border Grid.Row="0" Background="White" CornerRadius="18,18,0,0" Padding="36,24,36,24">
                         <Grid>
@@ -389,13 +384,11 @@
                             </Button>
                         </Grid>
                     </Border>
-
                     <!-- Form body -->
                     <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled"
                                   Background="White" Padding="36,28,36,20">
                         <StackPanel>
-
                             <!-- Step hint -->
                             <Border Background="#F0FDF4" CornerRadius="10" Padding="16,12" Margin="0,0,0,24"
                                     BorderBrush="#D1FAE5" BorderThickness="1">
@@ -413,12 +406,10 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
-
                             <!-- Section label -->
                             <Border BorderBrush="#702943" BorderThickness="3,0,0,0" Padding="10,0" Margin="0,0,0,16">
                                 <TextBlock Text="APPLICANT NAME" FontSize="11" FontWeight="Bold" Foreground="#702943"/>
                             </Border>
-
                             <!-- Name row -->
                             <Grid Margin="0,0,0,20">
                                 <Grid.ColumnDefinitions>
@@ -430,7 +421,6 @@
                                     <ColumnDefinition Width="14"/>
                                     <ColumnDefinition Width="140"/>
                                 </Grid.ColumnDefinitions>
-
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Style="{StaticResource FieldLabel}">
                                         Last Name <Run Text="*" Foreground="#D32F2F"/>
@@ -440,7 +430,6 @@
                                              TextChanged="Name_TextChanged"/>
                                     <TextBlock x:Name="ErrLastName" Text="Last name is required." Style="{StaticResource ErrorText}"/>
                                 </StackPanel>
-
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Style="{StaticResource FieldLabel}">
                                         First Name <Run Text="*" Foreground="#D32F2F"/>
@@ -450,14 +439,12 @@
                                              TextChanged="Name_TextChanged"/>
                                     <TextBlock x:Name="ErrFirstName" Text="First name is required." Style="{StaticResource ErrorText}"/>
                                 </StackPanel>
-
                                 <StackPanel Grid.Column="4">
                                     <TextBlock Text="Middle Name" Style="{StaticResource FieldLabel}"/>
                                     <TextBox x:Name="TxtMiddleName" Style="{StaticResource FormBox}"
                                              PreviewTextInput="NameOnly_PreviewTextInput"
                                              TextChanged="Name_TextChanged"/>
                                 </StackPanel>
-
                                 <StackPanel Grid.Column="6">
                                     <TextBlock Text="Extension (Optional)" Style="{StaticResource FieldLabel}"/>
                                     <ComboBox x:Name="CmbExtension" Style="{StaticResource FormCombo}"
@@ -471,12 +458,10 @@
                                     </ComboBox>
                                 </StackPanel>
                             </Grid>
-
                             <!-- Section label -->
                             <Border BorderBrush="#702943" BorderThickness="3,0,0,0" Padding="10,0" Margin="0,0,0,16">
                                 <TextBlock Text="IDENTIFICATION &amp; DATE OF BIRTH" FontSize="11" FontWeight="Bold" Foreground="#702943"/>
                             </Border>
-
                             <!-- Birthdate + PhilSys row -->
                             <Grid Margin="0,0,0,20">
                                 <Grid.ColumnDefinitions>
@@ -484,7 +469,6 @@
                                     <ColumnDefinition Width="14"/>
                                     <ColumnDefinition Width="1.4*"/>
                                 </Grid.ColumnDefinitions>
-
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Style="{StaticResource FieldLabel}">
                                         Birthdate <Run Text="*" Foreground="#D32F2F"/>
@@ -495,7 +479,6 @@
                                     </Border>
                                     <TextBlock x:Name="ErrBirthdate" Style="{StaticResource ErrorText}"/>
                                 </StackPanel>
-
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Style="{StaticResource FieldLabel}">
                                         PhilSys Card Number (Optional)
@@ -507,7 +490,6 @@
                                     <TextBlock x:Name="ErrPhilSys" Text="PhilSys number must contain digits only." Style="{StaticResource ErrorText}"/>
                                 </StackPanel>
                             </Grid>
-
                             <!-- Status / result banner -->
                             <Border x:Name="BannerPanel" Visibility="Collapsed" CornerRadius="12"
                                     Padding="18,14" Margin="0,4,0,0">
@@ -534,10 +516,8 @@
                                     </StackPanel>
                                 </Grid>
                             </Border>
-
                         </StackPanel>
                     </ScrollViewer>
-
                     <!-- Footer -->
                     <Border Grid.Row="2" Background="White" BorderBrush="#EEEEEE"
                             BorderThickness="0,1,0,0" Padding="36,18" CornerRadius="0,0,18,18">
@@ -557,7 +537,6 @@
                             </Button>
                         </Grid>
                     </Border>
-
                 </Grid>
             </Border>
         </Grid>

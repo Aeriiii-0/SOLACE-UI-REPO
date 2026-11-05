@@ -7,7 +7,6 @@
              d:DesignHeight="700" d:DesignWidth="950">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
         <Style x:Key="AuditSearchBox" TargetType="TextBox">
             <Setter Property="Height" Value="36"/>
             <Setter Property="Padding" Value="10,0"/>
@@ -31,7 +30,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="AuditCombo" TargetType="ComboBox">
             <Setter Property="Height" Value="36"/>
             <Setter Property="FontSize" Value="12"/>
@@ -67,7 +65,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="ReinstateSmallBtn" TargetType="Button">
             <Setter Property="Height" Value="26"/>
             <Setter Property="Padding" Value="8,0"/>
@@ -125,7 +122,6 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-
     <!-- Modal Scrim Overlay -->
     <Grid Background="#7F000000" Visibility="{Binding IsDisqualifiedModalOpen, Converter={StaticResource BoolToVis}}" Panel.ZIndex="1000">
         <!-- Centered Fixed Modal Dialog Card -->
@@ -142,7 +138,6 @@
                     <RowDefinition Height="*"/>    <!-- Candidate Rows List -->
                     <RowDefinition Height="Auto"/> <!-- Footer -->
                 </Grid.RowDefinitions>
-
                 <!-- Row 0: Header -->
                 <Grid Grid.Row="0" Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
@@ -157,7 +152,6 @@
                         </StackPanel>
                         <TextBlock Text="Review statutory disqualifications, reviewer justifications, and audit trails for this cycle." FontSize="12" Foreground="#666666" Margin="26,3,0,0"/>
                     </StackPanel>
-
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                         <Border Background="#FEE2E2" CornerRadius="12" Padding="10,4" Margin="0,0,12,0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding DisqualifiedButtonText}" FontSize="11" FontWeight="Bold" Foreground="#991B1B"/>
@@ -167,7 +161,6 @@
                         </Button>
                     </StackPanel>
                 </Grid>
-
                 <!-- Row 1: Search, Filter & CSV Export Toolbar -->
                 <Grid Grid.Row="1" Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
@@ -176,13 +169,11 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-
                     <!-- Search Input -->
                     <TextBox Grid.Column="0"
                              Text="{Binding DisqualifiedSearchText, UpdateSourceTrigger=PropertyChanged}"
                              Style="{StaticResource AuditSearchBox}"
                              Margin="0,0,10,0"/>
-
                     <!-- Reason Filter ComboBox -->
                     <ComboBox Grid.Column="1"
                               SelectedValue="{Binding DisqualifiedReasonFilter, Mode=TwoWay}"
@@ -198,7 +189,6 @@
                         <ComboBoxItem Content="Voluntary Withdrawal by Applicant"/>
                         <ComboBoxItem Content="Other Statutory Disqualification"/>
                     </ComboBox>
-
                     <!-- Refresh Button -->
                     <Button Grid.Column="2"
                             Command="{Binding RefreshDisqualifiedCommand}"
@@ -216,7 +206,6 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
-
                     <!-- Export CSV Button -->
                     <Button Grid.Column="3"
                             Command="{Binding ExportDisqualifiedCsvCommand}"
@@ -236,7 +225,6 @@
                         </Button.Template>
                     </Button>
                 </Grid>
-
                 <!-- Row 2: Table Column Headers -->
                 <Border Grid.Row="2" Background="#F9F5F7" BorderBrush="#EADCE1" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,6">
                     <Grid>
@@ -256,7 +244,6 @@
                         <TextBlock Grid.Column="5" Text="ACTION" FontSize="10" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
                     </Grid>
                 </Border>
-
                 <!-- Row 3: Candidate Rows List & Empty State -->
                 <Grid Grid.Row="3" MinHeight="180" MaxHeight="320">
                     <!-- Scrollable Items List -->
@@ -274,13 +261,11 @@
                                                 <ColumnDefinition Width="*"/>   <!-- Justification Notes & Reviewer -->
                                                 <ColumnDefinition Width="80"/>  <!-- Action -->
                                             </Grid.ColumnDefinitions>
-
                                             <!-- Candidate Name & SP ID -->
                                             <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,0">
                                                 <TextBlock Text="{Binding FullName}" FontSize="12.5" FontWeight="SemiBold" Foreground="#111111" TextTrimming="CharacterEllipsis"/>
                                                 <TextBlock Text="{Binding SpId}" FontSize="10.5" FontFamily="Consolas" Foreground="#888888" Margin="0,2,0,0"/>
                                             </StackPanel>
-
                                             <!-- Demographics (Barangay, Income, Dependents) -->
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0">
                                                 <TextBlock Text="{Binding Barangay}" FontSize="11.5" Foreground="#333333" TextTrimming="CharacterEllipsis"/>
@@ -291,7 +276,6 @@
                                                     <Run Text=" dep."/>
                                                 </TextBlock>
                                             </StackPanel>
-
                                             <!-- Score & Priority Badge -->
                                             <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,10,0">
                                                 <TextBlock Text="{Binding PriorityScore, StringFormat='{}{0:F1}'}" FontSize="12" FontWeight="Bold" Foreground="#333333"/>
@@ -299,13 +283,11 @@
                                                     <TextBlock Text="{Binding Priority}" FontSize="9.5" FontWeight="Bold" Foreground="{Binding PriorityBadgeFg}"/>
                                                 </Border>
                                             </StackPanel>
-
                                             <!-- Disqualification Reason Badge -->
                                             <Border Grid.Column="3" Background="{Binding ReasonBadgeBg}" BorderBrush="{Binding ReasonBadgeBorder}" BorderThickness="1"
                                                     CornerRadius="6" Padding="7,4" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,10,0">
                                                 <TextBlock Text="{Binding RejectionReason}" FontSize="10.5" FontWeight="SemiBold" Foreground="{Binding ReasonBadgeFg}" TextWrapping="Wrap"/>
                                             </Border>
-
                                             <!-- Justification Notes & Audit Trail -->
                                             <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,10,0">
                                                 <TextBlock Text="{Binding DisplayNotes}" FontSize="11" Foreground="#222222" TextWrapping="Wrap" MaxHeight="32" TextTrimming="CharacterEllipsis" ToolTip="{Binding DisplayNotes}"/>
@@ -316,7 +298,6 @@
                                                     <Run Text="{Binding FormattedDisqualifiedAt, Mode=OneWay}"/>
                                                 </TextBlock>
                                             </StackPanel>
-
                                             <!-- Action: Reinstate Button -->
                                             <Button Grid.Column="5"
                                                     Style="{StaticResource ReinstateSmallBtn}"
@@ -331,7 +312,6 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
-
                     <!-- Empty State (Shown when FilteredDisqualifiedCandidates is empty) -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,32"
                                 Visibility="{Binding HasNoDisqualifiedCandidates, Converter={StaticResource BoolToVis}}">
@@ -341,7 +321,6 @@
                         <TextBlock Text="No candidate records match the current search or rejection filter for this cycle." FontSize="11" Foreground="#94A3B8" Margin="0,4,0,0" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
-
                 <!-- Row 4: Footer Bar -->
                 <Grid Grid.Row="4" Margin="0,18,0,0">
                     <Grid.ColumnDefinitions>
@@ -349,14 +328,12 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <Path Data="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 12,2M11,17H13V11H11V17Z"
                               Fill="#888888" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="Disqualified candidates are excluded from quota allocations."
                                    FontSize="11" Foreground="#777777" VerticalAlignment="Center"/>
                     </StackPanel>
-
                     <!-- Pagination Controls -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
                         <TextBlock Text="{Binding DisqualifiedPageSummary}" FontSize="11.5" Foreground="#666666" VerticalAlignment="Center" Margin="0,0,10,0"/>
@@ -366,7 +343,6 @@
                         </Border>
                         <Button Style="{StaticResource ModalPageBtn}" Command="{Binding DisqualifiedNextPageCommand}" Content="▶"/>
                     </StackPanel>
-
                     <Button Grid.Column="2"
                             Command="{Binding CloseDisqualifiedModalCommand}"
                             Height="36" Padding="24,0" Cursor="Hand"

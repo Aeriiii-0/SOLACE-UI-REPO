@@ -112,7 +112,6 @@ namespace SOLUM_UI.Models
             : (IsLowConfidence ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FCA5A5")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BAE6FD")));
         public string FallbackAlertTitle => "Rule-Based Heuristic Fallback";
         public string FallbackAlertDesc => "This score was computed using statutory income criteria because the Python ML microservice was offline during evaluation. Re-evaluating will score with the live ML model.";
-
         // Triage Driver Labels & Brushes
         public string IncomeLabel => $"₱{MonthlyIncome:N0}/mo";
         public string PerCapitaLabel => $"₱{IncomePerCapita:N0} / capita";
@@ -120,7 +119,6 @@ namespace SOLUM_UI.Models
         public string MinorsLabel => Dependants == 1 ? "1 Dependent" : $"{Dependants} Dependents";
         public string ToddlersLabel => Children0To6Count > 0 ? (Children0To6Count == 1 ? "1 Dependent (0–6y)" : $"{Children0To6Count} Dependents (0–6y)") : "0 Dependents (0–6y)";
         public SolidColorBrush ToddlersFg => Children0To6Count >= 2 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Children0To6Count == 1 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")));
-
         // Prominent Metrics for the 4 Dimensions
         public string EconomicStrainPercentLabel => $"{EconomicStrainScore * 100:0}%";
         public string DependencyBurdenPercentLabel => $"{DependencyBurdenScore * 100:0}%";
@@ -157,7 +155,6 @@ namespace SOLUM_UI.Models
         public string CircumstanceDisplay => !string.IsNullOrWhiteSpace(Circumstance) && !Circumstance.Equals("None", StringComparison.OrdinalIgnoreCase) ? Circumstance : "—";
         public string NeedsAndProblemsDisplay => !string.IsNullOrWhiteSpace(NeedsAndProblems) && !NeedsAndProblems.Equals("None", StringComparison.OrdinalIgnoreCase) ? NeedsAndProblems : "—";
         public string OtherIncomeDisplay => !string.IsNullOrWhiteSpace(OtherIncomeSource) && !OtherIncomeSource.Equals("None", StringComparison.OrdinalIgnoreCase) ? OtherIncomeSource : "—";
-
         // Specific Children List for Dependency Dimension Vertical List
         private List<ChildDetailItem> _childrenDetails = new List<ChildDetailItem>();
         public List<ChildDetailItem> ChildrenDetails
@@ -184,7 +181,6 @@ namespace SOLUM_UI.Models
             }
         }
         public bool HasChildrenDetails => ChildrenDetails != null && ChildrenDetails.Count > 0;
-
         // Cross-Check Overlap Flags (1-3 words, clean text, no emojis)
         public bool HasCollegeAgeDependent => CollegeAgeDependentsCount > 0;
         public bool IsPantawidBeneficiary { get; set; }

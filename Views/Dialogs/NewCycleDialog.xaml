@@ -5,7 +5,6 @@
         Background="Transparent" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Width="480" SizeToContent="Height">
-
     <Border Background="Transparent" Padding="16">
         <Border Background="White" CornerRadius="16"
                 BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True">
@@ -18,7 +17,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-
                 <!-- Header / Title -->
                 <StackPanel Grid.Row="0" Margin="28,24,28,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -32,24 +30,20 @@
                     </StackPanel>
                     <Separator Margin="0,14,0,0" Background="#F0E2E7"/>
                 </StackPanel>
-
                 <!-- Form Fields -->
                 <StackPanel Grid.Row="1" Margin="28,16,28,20">
                     <!-- Fiscal Year -->
                     <TextBlock Text="Fiscal Year" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,0,0,4"/>
                     <TextBox x:Name="TxtFiscalYear" Height="34" VerticalContentAlignment="Center" Padding="8,0"
                              FontSize="12.5" BorderBrush="#D4A0B0" BorderThickness="1"/>
-
                     <!-- Target Beneficiary Quota -->
                     <TextBlock Text="Target Beneficiary Quota (Number of Grantees)" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,12,0,4"/>
                     <TextBox x:Name="TxtGrantees" Height="34" VerticalContentAlignment="Center" Padding="8,0"
                              FontSize="12.5" BorderBrush="#D4A0B0" BorderThickness="1" TextChanged="Inputs_Changed"/>
-
                     <!-- Per Grantee Allowance -->
                     <TextBlock Text="Monthly Allowance Per Beneficiary (₱)" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,12,0,4"/>
                     <TextBox x:Name="TxtPerGrantee" Height="34" VerticalContentAlignment="Center" Padding="8,0"
                              FontSize="12.5" BorderBrush="#D4A0B0" BorderThickness="1" TextChanged="Inputs_Changed"/>
-
                     <!-- Computed Total Budget Preview -->
                     <Border Background="#FDF8FA" CornerRadius="8" BorderBrush="#E5D5DC" BorderThickness="1" Padding="12,10" Margin="0,16,0,0">
                         <Grid>
@@ -61,7 +55,6 @@
                         </Grid>
                     </Border>
                 </StackPanel>
-
                 <!-- Footer Buttons -->
                 <Border Grid.Row="2" Background="#FAFAFA" BorderBrush="#EEEEEE" BorderThickness="0,1,0,0" CornerRadius="0,0,16,16" Padding="28,16">
                     <Grid>

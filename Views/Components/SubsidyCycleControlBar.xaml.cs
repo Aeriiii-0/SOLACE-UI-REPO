@@ -23,7 +23,6 @@ namespace SOLUM_UI.Views.Components
             {
                 _parentWindow.StateChanged -= ParentWindow_StateChanged;
                 _parentWindow.StateChanged += ParentWindow_StateChanged;
-
                 // Initial state check based on window state
                 if (_parentWindow.WindowState == WindowState.Normal && _parentWindow.ActualWidth < 1200)
                 {
@@ -78,7 +77,6 @@ namespace SOLUM_UI.Views.Components
                     parent = VisualTreeHelper.GetParent(parent);
                 }
             }
-
             _userManuallyToggled = true;
             bool isCurrentlyExpanded = QuotaExpandedPanel != null && QuotaExpandedPanel.Visibility == Visibility.Visible;
             SetExpanded(!isCurrentlyExpanded);
@@ -90,7 +88,6 @@ namespace SOLUM_UI.Views.Components
             {
                 QuotaExpandedPanel.Visibility = expand ? Visibility.Visible : Visibility.Collapsed;
             }
-
             if (QuotaChevronIcon != null)
             {
                 QuotaChevronIcon.Data = Geometry.Parse(
@@ -99,7 +96,6 @@ namespace SOLUM_UI.Views.Components
                         : "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" // Down chevron (expand)
                 );
             }
-
             if (QuotaHeaderCard != null)
             {
                 QuotaHeaderCard.ToolTip = expand ? "Click to collapse details" : "Click to expand quota & actions";

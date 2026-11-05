@@ -21,7 +21,6 @@ namespace SOLUM_UI.Views.Dialogs
         {
             InitializeComponent();
         }
-
         /// <summary>
         /// Show a confirmation modal dialog with customizable theme and options.
         /// </summary>
@@ -51,29 +50,23 @@ namespace SOLUM_UI.Views.Dialogs
             {
                 dialog.Owner = Application.Current.MainWindow;
             }
-
             dialog.TxtTitle.Text = title;
             dialog.TxtMessage.Text = message;
             dialog.TxtConfirmBtn.Text = confirmText;
             dialog.TxtCancelBtn.Text = cancelText;
-
             dialog.BtnCancel.Visibility = Visibility.Visible;
             Grid.SetColumn(dialog.BtnConfirm, 2);
             Grid.SetColumnSpan(dialog.BtnConfirm, 1);
             dialog.BtnConfirm.HorizontalAlignment = HorizontalAlignment.Stretch;
             dialog.BtnConfirm.Width = double.NaN;
-
             dialog.ApplyTheme(theme);
-
             if (!string.IsNullOrWhiteSpace(customIconData))
             {
                 dialog.IconPath.Data = Geometry.Parse(customIconData);
             }
-
             dialog.ShowDialog();
             return dialog.Confirmed;
         }
-
         /// <summary>
         /// Show an alert/notification dialog (OK-only button).
         /// </summary>
@@ -96,23 +89,19 @@ namespace SOLUM_UI.Views.Dialogs
             {
                 dialog.Owner = Application.Current.MainWindow;
             }
-
             dialog.TxtTitle.Text = title;
             dialog.TxtMessage.Text = message;
             dialog.TxtConfirmBtn.Text = "OK";
             dialog.TxtCancelBtn.Text = "";
             dialog.BtnCancel.Visibility = Visibility.Collapsed;
-
             // Center the single confirmation/OK button across the footer
             Grid.SetColumn(dialog.BtnConfirm, 0);
             Grid.SetColumnSpan(dialog.BtnConfirm, 3);
             dialog.BtnConfirm.HorizontalAlignment = HorizontalAlignment.Center;
             dialog.BtnConfirm.Width = 180;
-
             dialog.ApplyTheme(theme);
             dialog.ShowDialog();
         }
-
         /// <summary>
         /// Show a success notification.
         /// </summary>
@@ -120,7 +109,6 @@ namespace SOLUM_UI.Views.Dialogs
         {
             Alert(title, message, ConfirmThemeType.Success, owner);
         }
-
         /// <summary>
         /// Show an error notification.
         /// </summary>
@@ -128,7 +116,6 @@ namespace SOLUM_UI.Views.Dialogs
         {
             Alert(title, message, ConfirmThemeType.Danger, owner);
         }
-
         /// <summary>
         /// Show a warning notification.
         /// </summary>
@@ -136,7 +123,6 @@ namespace SOLUM_UI.Views.Dialogs
         {
             Alert(title, message, ConfirmThemeType.Warning, owner);
         }
-
         /// <summary>
         /// Show an info notification.
         /// </summary>
@@ -150,7 +136,6 @@ namespace SOLUM_UI.Views.Dialogs
             string primaryColor;
             string circleBg;
             string iconData;
-
             switch (theme)
             {
                 case ConfirmThemeType.Success:
@@ -159,21 +144,18 @@ namespace SOLUM_UI.Views.Dialogs
                     // Check mark icon
                     iconData = "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z";
                     break;
-
                 case ConfirmThemeType.Warning:
                     primaryColor = "#D97706";
                     circleBg = "#FEF3C7";
                     // Alert triangle icon
                     iconData = "M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16";
                     break;
-
                 case ConfirmThemeType.Danger:
                     primaryColor = "#C62828";
                     circleBg = "#FFEBEE";
                     // Trash / Delete / Danger icon
                     iconData = "M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z";
                     break;
-
                 case ConfirmThemeType.Primary:
                 default:
                     primaryColor = "#702943";
@@ -182,17 +164,13 @@ namespace SOLUM_UI.Views.Dialogs
                     iconData = "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z";
                     break;
             }
-
             var colorBrush = (SolidColorBrush)new BrushConverter().ConvertFrom(primaryColor);
             var circleBrush = (SolidColorBrush)new BrushConverter().ConvertFrom(circleBg);
-
             // Store the theme color in window Tag for binding
             this.Tag = colorBrush;
-
             IconCircle.Background = circleBrush;
             IconPath.Fill = colorBrush;
             IconPath.Data = Geometry.Parse(iconData);
-
             Shell.BorderBrush = colorBrush;
             BtnConfirm.Background = colorBrush;
         }

@@ -12,7 +12,6 @@ namespace SOLUM_UI.Views.Components
         {
             InitializeComponent();
             _pulseStoryboard = TryFindResource("PulseStoryboard") as Storyboard;
-
             IsVisibleChanged += UserTableSkeletonLoader_IsVisibleChanged;
             Loaded += UserTableSkeletonLoader_Loaded;
             Unloaded += UserTableSkeletonLoader_Unloaded;

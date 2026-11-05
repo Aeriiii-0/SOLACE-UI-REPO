@@ -46,7 +46,6 @@ namespace SOLUM_UI.ViewModels
                 : _model.LastUpdated != System.DateTime.MinValue
                     ? _model.LastUpdated.AddYears(1).ToString("yyyy-MM-dd")
                     : "—";
-
         /// <summary>True when the record's validity window has passed or record is marked inactive/expired.</summary>
         public bool IsExpired
         {
@@ -57,23 +56,19 @@ namespace SOLUM_UI.ViewModels
                 {
                     return true;
                 }
-
                 if (_model.CurrentTermExpiresAt.HasValue)
                 {
                     return _model.CurrentTermExpiresAt.Value.Date < DateTime.Today;
                 }
-
                 if (_model.LastUpdated != DateTime.MinValue)
                 {
                     return _model.LastUpdated.AddYears(1).Date < DateTime.Today;
                 }
-
                 return false;
             }
         }
 
         public SoloParentRecord RawModel => _model;
-
         /// <summary>True when eligible for renewal (active >= 1 month or expired/inactive).</summary>
         public bool CanRenew => _model.CanRenew(out _, out _);
 
@@ -131,7 +126,6 @@ namespace SOLUM_UI.ViewModels
                 return _isAlternate ? AlternateRowBrush : WhiteBrush;
             }
         }
-
         /// <summary>True when expiration date is within 30 days from today and not yet expired.</summary>
         public bool IsExpiringSoon
         {
@@ -149,7 +143,6 @@ namespace SOLUM_UI.ViewModels
                 return false;
             }
         }
-
         /// <summary>Friendly human-readable status label with relative hints.</summary>
         public string StatusDisplay
         {
@@ -163,7 +156,6 @@ namespace SOLUM_UI.ViewModels
                 return _model.Status ?? "Inactive";
             }
         }
-
         /// <summary>Formatted valid until date with relative hint (e.g. 'in 29d').</summary>
         public string ValidUntilDisplay
         {

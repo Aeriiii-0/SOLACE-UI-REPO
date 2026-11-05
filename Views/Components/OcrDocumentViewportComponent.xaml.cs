@@ -28,7 +28,6 @@ namespace SOLUM_UI.Views.Components
         public event Action<string> DocumentFieldClicked;
 
         private Dictionary<string, double[]> _fieldBBoxes = new Dictionary<string, double[]>(StringComparer.OrdinalIgnoreCase);
-
         // Zoom factor, rotation, and drag panning
         private double _zoomFactor = 1.0;
         private double _currentRotationAngle = 0.0;
@@ -68,7 +67,6 @@ namespace SOLUM_UI.Views.Components
         public OcrDocumentViewportComponent()
         {
             InitializeComponent();
-
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
         }
@@ -86,7 +84,6 @@ namespace SOLUM_UI.Views.Components
         {
             OcrService.WarmupProgressChanged -= OnOcrWarmupProgressChanged;
             _dismissCts?.Cancel();
-
             // Purge any temporary scans created during this session
             foreach (var f in _sessionScannedFiles)
             {
@@ -94,7 +91,6 @@ namespace SOLUM_UI.Views.Components
             }
             _sessionScannedFiles.Clear();
         }
-
         #region Server Health Check & Engine Warmup
 
         private void StartWarmupSpinner()
@@ -124,7 +120,6 @@ namespace SOLUM_UI.Views.Components
             _dismissCts?.Cancel();
             _dismissCts = new CancellationTokenSource();
             var token = _dismissCts.Token;
-
             Task.Delay(delayMs, token).ContinueWith(t =>
             {
                 if (!t.IsCanceled)
@@ -161,7 +156,6 @@ namespace SOLUM_UI.Views.Components
                 OcrWarmupBanner.Visibility = Visibility.Collapsed;
                 return;
             }
-
             ServerStatusChanged?.Invoke(false, "OCR: Warming up...");
             OcrWarmupBanner.Visibility = Visibility.Visible;
             await OcrService.EnsureServerRunningAsync(25);
@@ -173,12 +167,10 @@ namespace SOLUM_UI.Views.Components
             {
                 if (p == null) return;
                 WarmupProgressChanged?.Invoke(p);
-
                 if (p.IsReady)
                 {
                     StopWarmupSpinner();
                     ServerStatusChanged?.Invoke(true, "AI Engine: Ready");
-
                     OcrWarmupBanner.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0FDF4"));
                     OcrWarmupBanner.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#86EFAC"));
                     TxtWarmupTitle.Text = "AI OCR Engine Ready";
@@ -190,17 +182,14 @@ namespace SOLUM_UI.Views.Components
                     BtnDismissWarmup.Visibility = Visibility.Visible;
                     WarmupProgressBar.Value = 100;
                     WarmupProgressBar.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#16A34A"));
-
                     IconWarmupBadge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#16A34A"));
                     IconWarmupPath.Data = Geometry.Parse("M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z");
-
                     ScheduleBannerAutoDismiss(2500);
                 }
                 else if (p.HasFailed)
                 {
                     StopWarmupSpinner();
                     ServerStatusChanged?.Invoke(false, "AI Engine: Offline");
-
                     OcrWarmupBanner.Visibility = Visibility.Visible;
                     OcrWarmupBanner.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF2F2"));
                     OcrWarmupBanner.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FECACA"));
@@ -213,7 +202,6 @@ namespace SOLUM_UI.Views.Components
                     BtnDismissWarmup.Visibility = Visibility.Visible;
                     WarmupProgressBar.Value = 0;
                     WarmupProgressBar.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626"));
-
                     IconWarmupBadge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626"));
                     IconWarmupPath.Data = Geometry.Parse("M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z");
                 }
@@ -235,24 +223,19 @@ namespace SOLUM_UI.Views.Components
                     BtnDismissWarmup.Visibility = Visibility.Collapsed;
                     WarmupProgressBar.Value = p.Percent;
                     WarmupProgressBar.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943"));
-
                     IconWarmupBadge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943"));
                     IconWarmupPath.Data = Geometry.Parse("M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z");
-
                     ServerStatusChanged?.Invoke(false, $"AI Engine: Warming up (~{p.EstimatedSecondsRemaining:F0}s)");
                 }
             });
         }
-
         #endregion
-
         #region Focus & Coordinate Highlighting
 
         public void FocusOnField(string fieldKey, bool autoCenter = true)
         {
             if (string.IsNullOrEmpty(fieldKey)) return;
             _lastFocusedFieldKey = fieldKey;
-
             if (ImgDocument.Source == null || ImgDocument.ActualWidth <= 0 || ImgDocument.ActualHeight <= 0)
                 return;
 
@@ -264,7 +247,6 @@ namespace SOLUM_UI.Views.Components
             else if (key == "employed") key = "is_employed";
             else if (key == "self_employed") key = "is_self_employed";
             else if (key == "not_employed") key = "is_not_employed";
-
             if (key == "employment_status")
             {
                 // Direct focus to the marked checkbox, defaulting to is_employed if none marked yet
@@ -284,21 +266,17 @@ namespace SOLUM_UI.Views.Components
                     key = "is_employed";
                 }
             }
-
             if (key.StartsWith("fam_row", StringComparison.OrdinalIgnoreCase))
             {
                 if (key.StartsWith("fam_row_", StringComparison.OrdinalIgnoreCase))
                     key = "fam_row1_" + key.Substring("fam_row_".Length);
-
                 if (key.Contains("_civil")) key = key.Replace("_civil", "_civ");
                 else if (key.Contains("_income")) key = key.Replace("_income", "_inc");
                 else if (key.Contains("_education")) key = key.Replace("_education", "_edu");
                 else if (key.Contains("_relationship")) key = key.Replace("_relationship", "_rel");
                 else if (key.Contains("_birthdate")) key = key.Replace("_birthdate", "_dob");
             }
-
             double[] bbox = null;
-
             // Prefer dynamically aligned bounding box returned by OCR engine for this specific scan
             if (OcrResponse?.Fields != null && OcrResponse.Fields.TryGetValue(key, out var fieldRes) && fieldRes.Bbox != null && fieldRes.Bbox.Length == 4)
             {
@@ -311,18 +289,15 @@ namespace SOLUM_UI.Views.Components
             else if (key == "is_employed") bbox = new[] { 0.6167, 0.2347, 0.0084, 0.0056 };
             else if (key == "is_self_employed") bbox = new[] { 0.7056, 0.2347, 0.0084, 0.0056 };
             else if (key == "is_not_employed") bbox = new[] { 0.8256, 0.2347, 0.0084, 0.0056 };
-
             if (bbox == null || bbox.Length < 4) return;
 
             double imgW = ImgDocument.ActualWidth;
             double imgH = ImgDocument.ActualHeight;
-
             HighlightCanvas.Children.Clear();
             double boxX = bbox[0] * imgW;
             double boxY = bbox[1] * imgH;
             double boxW = bbox[2] * imgW;
             double boxH = bbox[3] * imgH;
-
             // Outset dashed highlight frame: hugs the field boundary cleanly from outside
             // Transparent interior ensures handwriting and checkboxes remain completely unobscured
             double pad = 3.0;
@@ -340,12 +315,10 @@ namespace SOLUM_UI.Views.Components
             Canvas.SetLeft(rect, boxX - pad);
             Canvas.SetTop(rect, boxY - pad);
             HighlightCanvas.Children.Add(rect);
-
             if (autoCenter)
             {
                 _zoomFactor = 2.8;
                 ApplyZoom();
-
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     double targetCenterX = (boxX + boxW / 2.0) * _zoomFactor;
@@ -353,15 +326,12 @@ namespace SOLUM_UI.Views.Components
 
                     double scrollX = targetCenterX - (DocScrollViewer.ViewportWidth / 2.0);
                     double scrollY = targetCenterY - (DocScrollViewer.ViewportHeight / 2.0);
-
                     DocScrollViewer.ScrollToHorizontalOffset(Math.Max(0, scrollX));
                     DocScrollViewer.ScrollToVerticalOffset(Math.Max(0, scrollY));
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
             }
         }
-
         #endregion
-
         #region OCR Settings Popover Handlers
 
         private void BtnOcrSettings_Click(object sender, RoutedEventArgs e)
@@ -389,9 +359,7 @@ namespace SOLUM_UI.Views.Components
             if (OcrSettingsPopup != null) OcrSettingsPopup.IsOpen = false;
             ViewDetections_Click(sender, e);
         }
-
         #endregion
-
         #region Scanning & Document Processing
 
         private void ScannerSettings_Click(object sender, RoutedEventArgs e)
@@ -423,14 +391,12 @@ namespace SOLUM_UI.Views.Components
         private void TransitionStatusText(TextBlock targetTextBlock, string newText, bool animate = true)
         {
             if (targetTextBlock == null || string.IsNullOrEmpty(newText)) return;
-
             var transform = targetTextBlock.RenderTransform as TranslateTransform;
             if (transform == null)
             {
                 transform = new TranslateTransform(0, 0);
                 targetTextBlock.RenderTransform = transform;
             }
-
             if (!animate || string.Equals(targetTextBlock.Text, newText, StringComparison.Ordinal))
             {
                 targetTextBlock.BeginAnimation(UIElement.OpacityProperty, null);
@@ -440,7 +406,6 @@ namespace SOLUM_UI.Views.Components
                 transform.X = 0;
                 return;
             }
-
             // 1. Outbound Animation: Slide to the left (-14px) with smooth cubic easing while fading out
             var fadeOut = new DoubleAnimation(1.0, 0.0, TimeSpan.FromMilliseconds(160))
             {
@@ -450,12 +415,10 @@ namespace SOLUM_UI.Views.Components
             {
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
             };
-
             slideLeft.Completed += (s, e) =>
             {
                 targetTextBlock.Text = newText;
                 transform.X = 14.0;
-
                 // 2. Inbound Animation: Glide in from the right (+14px) into center (0px) with smooth cubic easing
                 var fadeIn = new DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(220))
                 {
@@ -465,11 +428,9 @@ namespace SOLUM_UI.Views.Components
                 {
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
-
                 targetTextBlock.BeginAnimation(UIElement.OpacityProperty, fadeIn);
                 transform.BeginAnimation(TranslateTransform.XProperty, slideFromRight);
             };
-
             targetTextBlock.BeginAnimation(UIElement.OpacityProperty, fadeOut);
             transform.BeginAnimation(TranslateTransform.XProperty, slideLeft);
         }
@@ -482,17 +443,14 @@ namespace SOLUM_UI.Views.Components
                 if (BtnScanHardware != null) BtnScanHardware.IsEnabled = false;
                 if (BtnSelectImage != null) BtnSelectImage.IsEnabled = false;
                 if (BtnOcrSettings != null) BtnOcrSettings.IsEnabled = false;
-
                 OverlayProcessing.Visibility = Visibility.Visible;
                 if (TxtProcessingPhaseBadge != null)
                     TxtProcessingPhaseBadge.Text = "PHASE 1 OF 2 • OPTICAL HARDWARE SCAN";
                 if (TxtProcessingTitle != null)
                     TxtProcessingTitle.Text = "Scanning Document from Printer...";
-
                 OcrStageProgressBar.IsIndeterminate = true;
                 TransitionStatusText(TxtProcessingStep, "Hardware Optical Acquisition", animate: false);
                 TransitionStatusText(TxtCurrentExtractingField, "Connecting to optical scanner feed...", animate: false);
-
                 _processCts?.Cancel();
                 _processCts = new CancellationTokenSource();
                 var scanToken = _processCts.Token;
@@ -525,10 +483,8 @@ namespace SOLUM_UI.Views.Components
                                 break;
                             }
                             if (msgToken.IsCancellationRequested) break;
-
                             var pair = hwMessages[msgIdx % hwMessages.Length];
                             msgIdx++;
-
                             await Dispatcher.InvokeAsync(() =>
                             {
                                 if (!msgToken.IsCancellationRequested)
@@ -539,7 +495,6 @@ namespace SOLUM_UI.Views.Components
                             });
                         }
                     }, msgToken);
-
                     scannedFile = await WiaScannerService.ScanDocumentAsync(
                         _scannerSettings,
                         status => Dispatcher.InvokeAsync(() =>
@@ -550,12 +505,9 @@ namespace SOLUM_UI.Views.Components
                             }
                         })
                     );
-
                     scanMsgCts.Cancel();
                 }
-
                 OcrStageProgressBar.IsIndeterminate = false;
-
                 if (!string.IsNullOrEmpty(scannedFile) && File.Exists(scannedFile))
                 {
                     _sessionScannedFiles.Add(scannedFile);
@@ -591,7 +543,6 @@ namespace SOLUM_UI.Views.Components
                 Title = "Select CSWDO Solo Parent Application Form Scan",
                 Filter = "Image Files (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp|All Files (*.*)|*.*"
             };
-
             if (dlg.ShowDialog() == true)
             {
                 await ProcessDocumentAsync(dlg.FileName);
@@ -635,10 +586,8 @@ namespace SOLUM_UI.Views.Components
             CurrentImagePath = imagePath;
             _currentDeskewedImagePath = null;
             var window = Window.GetWindow(this);
-
             if (EmptyCanvasState != null)
                 EmptyCanvasState.Visibility = Visibility.Collapsed;
-
             OverlayProcessing.Visibility = Visibility.Visible;
             if (TxtProcessingPhaseBadge != null)
             {
@@ -650,7 +599,6 @@ namespace SOLUM_UI.Views.Components
             {
                 TxtProcessingTitle.Text = "Ingesting Application Form...";
             }
-
             if (!await OcrService.IsServerOnlineAsync())
             {
                 TransitionStatusText(TxtProcessingStep, "Warming Up AI OCR Engine...", animate: isPhaseTwoOfHardwareScan);
@@ -663,12 +611,10 @@ namespace SOLUM_UI.Views.Components
                     throw new Exception("Local OCR server is offline and could not be started automatically. Please click 'Retry' or verify Python installation.");
                 }
             }
-
             OcrStageProgressBar.IsIndeterminate = false;
             OcrStageProgressBar.Value = 18;
             TransitionStatusText(TxtProcessingStep, "Step 1 of 4: Document Alignment & Contrast", animate: isPhaseTwoOfHardwareScan);
             TransitionStatusText(TxtCurrentExtractingField, "Straightening page tilt & suppressing scanner borders...", animate: isPhaseTwoOfHardwareScan);
-
             var bitmap = new BitmapImage();
             using (var fs = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -681,15 +627,12 @@ namespace SOLUM_UI.Views.Components
             ImgDocument.Source = bitmap;
             ImgDocument.Width = DocScrollViewer.ActualWidth > 50 ? DocScrollViewer.ActualWidth - 20 : 440;
             ZoomFit_Click(null, null);
-
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-
             try
             {
                 _processCts?.Cancel();
                 _processCts = new CancellationTokenSource();
                 var token = _processCts.Token;
-
                 using (var ctsLinked = CancellationTokenSource.CreateLinkedTokenSource(token))
                 {
                     var linkedToken = ctsLinked.Token;
@@ -722,7 +665,6 @@ namespace SOLUM_UI.Views.Components
                             int idx = Math.Min(stepIdx, steps.Length - 1);
                             var curStep = steps[idx];
                             stepIdx++;
-
                             await Dispatcher.InvokeAsync(() =>
                             {
                                 if (!linkedToken.IsCancellationRequested)
@@ -734,21 +676,17 @@ namespace SOLUM_UI.Views.Components
                             });
                         }
                     }, linkedToken);
-
                     OcrResponse = await OcrService.ExtractFormAsync(imagePath, "global", token);
                     ctsLinked.Cancel();
                 }
-
                 stopwatch.Stop();
                 if (OcrResponse != null && OcrResponse.ExecutionTimeSeconds <= 0)
                 {
                     OcrResponse.ExecutionTimeSeconds = Math.Round(stopwatch.Elapsed.TotalSeconds, 2);
                 }
-
                 OcrStageProgressBar.Value = 100;
                 TransitionStatusText(TxtProcessingStep, "Step 4 of 4: Extraction Complete!", animate: true);
                 TransitionStatusText(TxtCurrentExtractingField, "Extracted all fields with confidence scores.", animate: true);
-
                 if (!string.IsNullOrEmpty(OcrResponse.PreviewImageBase64))
                 {
                     byte[] bytes = Convert.FromBase64String(OcrResponse.PreviewImageBase64);
@@ -773,7 +711,6 @@ namespace SOLUM_UI.Views.Components
                     }
                     catch { }
                 }
-
                 DocumentProcessed?.Invoke(OcrResponse, imagePath);
             }
             catch (OperationCanceledException)
@@ -791,9 +728,7 @@ namespace SOLUM_UI.Views.Components
                 OverlayProcessing.Visibility = Visibility.Collapsed;
             }
         }
-
         #endregion
-
         #region Pan, Zoom & Document Interaction Controls
 
         private void DocScrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -814,12 +749,10 @@ namespace SOLUM_UI.Views.Components
                 Point currentPoint = e.GetPosition(DocScrollViewer);
                 double deltaX = _scrollMousePoint.X - currentPoint.X;
                 double deltaY = _scrollMousePoint.Y - currentPoint.Y;
-
                 if (Math.Abs(currentPoint.X - _mouseDownPos.X) > 4 || Math.Abs(currentPoint.Y - _mouseDownPos.Y) > 4)
                 {
                     _hasDragged = true;
                 }
-
                 DocScrollViewer.ScrollToHorizontalOffset(_hOffset + deltaX);
                 DocScrollViewer.ScrollToVerticalOffset(_vOffset + deltaY);
             }
@@ -831,14 +764,12 @@ namespace SOLUM_UI.Views.Components
             {
                 _isDragging = false;
                 DocScrollViewer.ReleaseMouseCapture();
-
                 // If mouse wasn't dragged, it's a click to jump to field!
                 if (!_hasDragged && ImgDocument.Source != null && ImgDocument.ActualWidth > 0 && ImgDocument.ActualHeight > 0)
                 {
                     Point clickOnImg = e.GetPosition(ImgDocument);
                     double nx = clickOnImg.X / ImgDocument.ActualWidth;
                     double ny = clickOnImg.Y / ImgDocument.ActualHeight;
-
                     if (nx >= 0.0 && nx <= 1.0 && ny >= 0.0 && ny <= 1.0)
                     {
                         HandleDocumentClick(nx, ny);
@@ -860,12 +791,10 @@ namespace SOLUM_UI.Views.Components
                     }
                 }
             }
-
             if (boxesToSearch.Count == 0) return;
 
             string bestKey = null;
             double minArea = double.MaxValue;
-
             foreach (var kvp in boxesToSearch)
             {
                 var b = kvp.Value;
@@ -881,7 +810,6 @@ namespace SOLUM_UI.Views.Components
                     }
                 }
             }
-
             if (bestKey != null)
             {
                 // When clicking a box directly on the document, highlight without jarring auto-center pan/zoom
@@ -894,7 +822,6 @@ namespace SOLUM_UI.Views.Components
         {
             if (ImgDocument.Source == null || ImgDocument.ActualWidth <= 0 || ImgDocument.ActualHeight <= 0)
                 return;
-
             // Zoom ONLY when Ctrl is held down
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
@@ -903,7 +830,6 @@ namespace SOLUM_UI.Views.Components
                 double oldZoom = _zoomFactor;
                 double zoomDelta = e.Delta > 0 ? 0.15 : -0.15;
                 double newZoom = Math.Max(0.3, Math.Min(5.0, _zoomFactor + zoomDelta));
-
                 if (Math.Abs(newZoom - oldZoom) < 0.001)
                 {
                     e.Handled = true;
@@ -912,20 +838,16 @@ namespace SOLUM_UI.Views.Components
 
                 double contentX = (DocScrollViewer.HorizontalOffset + mousePosInViewer.X) / oldZoom;
                 double contentY = (DocScrollViewer.VerticalOffset + mousePosInViewer.Y) / oldZoom;
-
                 _zoomFactor = newZoom;
                 ApplyZoom();
 
                 double newHorizontalOffset = (contentX * newZoom) - mousePosInViewer.X;
                 double newVerticalOffset = (contentY * newZoom) - mousePosInViewer.Y;
-
                 DocScrollViewer.ScrollToHorizontalOffset(Math.Max(0, newHorizontalOffset));
                 DocScrollViewer.ScrollToVerticalOffset(Math.Max(0, newVerticalOffset));
-
                 e.Handled = true;
                 return;
             }
-
             // Normal scroll behavior without Ctrl:
             // Scroll vertically (or Shift+Wheel horizontally) smoothly without accidental zooming
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
@@ -993,7 +915,6 @@ namespace SOLUM_UI.Views.Components
                 _zoomTransform.ScaleY = _zoomFactor;
                 _rotateTransform.Angle = _currentRotationAngle;
             }
-
             if (TxtZoomLevel != null)
             {
                 TxtZoomLevel.Text = $"{_zoomFactor * 100:F0}%";
@@ -1011,7 +932,6 @@ namespace SOLUM_UI.Views.Components
                 {
                     targetPath = OcrResponse.DebugImagePath;
                 }
-
                 // 2. Check %TEMP%/solace_last_scan_detections.jpg and project directories
                 if (targetPath == null)
                 {
@@ -1031,7 +951,6 @@ namespace SOLUM_UI.Views.Components
                         candidates.Add(Path.GetFullPath(Path.Combine(appDir, @"..\..\OcrService\debug_detections.jpg")));
                     }
                     catch { }
-
                     DateTime bestTime = DateTime.MinValue;
                     foreach (var path in candidates)
                     {
@@ -1046,7 +965,6 @@ namespace SOLUM_UI.Views.Components
                         }
                     }
                 }
-
                 if (targetPath != null && File.Exists(targetPath))
                 {
                     // Copy to a uniquely named file in temp to force Windows Photos to NEVER display a cached previous image
@@ -1070,7 +988,6 @@ namespace SOLUM_UI.Views.Components
                     window);
             }
         }
-
         #endregion
     }
 }

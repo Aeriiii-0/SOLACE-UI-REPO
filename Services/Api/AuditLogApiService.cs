@@ -15,7 +15,6 @@ namespace SOLUM_UI.Services.Api
         public static AuditLogApiService Instance => _instance.Value;
 
         private AuditLogApiService() { }
-
         /// <summary>
         /// Fetches a page of audit logs from the API.
         /// </summary>
@@ -38,32 +37,25 @@ namespace SOLUM_UI.Services.Api
         {
             var sb = new StringBuilder("api/AuditLogs?");
             sb.Append($"pageSize={pageSize}");
-
             if (!string.IsNullOrWhiteSpace(userId))
                 sb.Append($"&userId={Uri.EscapeDataString(userId.Trim())}");
-
             if (!string.IsNullOrWhiteSpace(name))
             {
                 sb.Append($"&name={Uri.EscapeDataString(name.Trim())}");
                 sb.Append($"&targetName={Uri.EscapeDataString(name.Trim())}");
             }
-
             if (!string.IsNullOrWhiteSpace(actionType) &&
                 !actionType.Equals("All", StringComparison.OrdinalIgnoreCase))
                 sb.Append($"&actionType={Uri.EscapeDataString(actionType.Trim())}");
-
             if (startDate.HasValue)
                 sb.Append($"&startDate={Uri.EscapeDataString(startDate.Value.ToString("O"))}");
-
             if (endDate.HasValue)
                 sb.Append($"&endDate={Uri.EscapeDataString(endDate.Value.ToString("O"))}");
-
             if (cursorTimestamp.HasValue && !string.IsNullOrEmpty(cursorId))
             {
                 sb.Append($"&cursorTimestamp={Uri.EscapeDataString(cursorTimestamp.Value.ToString("O"))}");
                 sb.Append($"&cursorId={Uri.EscapeDataString(cursorId)}");
             }
-
             return await ApiClient.Instance.GetAsync<PagedAuditLogsResponse>(sb.ToString());
         }
     }

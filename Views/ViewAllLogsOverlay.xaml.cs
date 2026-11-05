@@ -27,7 +27,6 @@ namespace SOLUM_UI
         public ViewAllLogsOverlay()
         {
             InitializeComponent();
-
             // Only load if the DashboardPage hasn't already pre-fetched.
             Loaded += async (s, e) =>
             {
@@ -36,7 +35,6 @@ namespace SOLUM_UI
                     await vm.LoadAsync();
             };
         }
-
         /// <summary>
         /// Suppresses the default "Select a date" watermark in all DatePickerTextBox controls
         /// to avoid overlapping with our custom MM/DD/YYYY placeholder.
@@ -50,7 +48,6 @@ namespace SOLUM_UI
             // XAML template now properly suppresses native watermark by wrapping ScrollViewer in Grid
             // This prevents rendering of PART_Watermark element, so no code-behind suppression needed
         }
-
         /// <summary>
         /// Helper method to find all visual children of a given type.
         /// </summary>

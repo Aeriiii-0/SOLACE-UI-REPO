@@ -28,19 +28,16 @@ namespace SOLUM_UI.Views.Components
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var chart = (ColumnChart)d;
-
             // Unsubscribe from old collection
             if (e.OldValue is ObservableCollection<ColumnChartData> oldCollection)
             {
                 oldCollection.CollectionChanged -= chart.OnCollectionChanged;
             }
-
             // Subscribe to new collection
             if (e.NewValue is ObservableCollection<ColumnChartData> newCollection)
             {
                 newCollection.CollectionChanged += chart.OnCollectionChanged;
             }
-
             chart.RenderChart();
         }
 
@@ -52,25 +49,21 @@ namespace SOLUM_UI.Views.Components
         private void RenderChart()
         {
             ChartCanvas.Children.Clear();
-
             if (Data == null || Data.Count == 0)
             {
                 NoDataPanel.Visibility = Visibility.Visible;
                 return;
             }
-
             NoDataPanel.Visibility = Visibility.Collapsed;
 
             double padding = 40;
             double chartWidth = ChartCanvas.ActualWidth > 0 ? ChartCanvas.ActualWidth - 2 * padding : 300;
             double chartHeight = ChartCanvas.ActualHeight > 0 ? ChartCanvas.ActualHeight - 2 * padding : 200;
-
             if (chartWidth <= 0 || chartHeight <= 0)
             {
                 chartWidth = 300;
                 chartHeight = 200;
             }
-
             // Find max value
             int maxValue = 0;
             foreach (var item in Data)
@@ -78,17 +71,14 @@ namespace SOLUM_UI.Views.Components
                 if (item.Value > maxValue)
                     maxValue = item.Value;
             }
-
             if (maxValue == 0)
             {
                 NoDataPanel.Visibility = Visibility.Visible;
                 return;
             }
-
             // Calculate scales
             double columnWidth = chartWidth / (Data.Count * 1.5);
             double scaleY = chartHeight / maxValue;
-
             // Draw grid lines
             for (int i = 0; i <= 4; i++)
             {
@@ -103,7 +93,6 @@ namespace SOLUM_UI.Views.Components
                     StrokeThickness = 1
                 };
                 ChartCanvas.Children.Add(gridLine);
-
                 // Y-axis label
                 if (i > 0)
                 {
@@ -119,14 +108,12 @@ namespace SOLUM_UI.Views.Components
                     ChartCanvas.Children.Add(label);
                 }
             }
-
             // Draw columns
             for (int i = 0; i < Data.Count; i++)
             {
                 double columnHeight = Data[i].Value * scaleY;
                 double x = padding + i * (columnWidth * 1.5) + columnWidth * 0.25;
                 double y = padding + chartHeight - columnHeight;
-
                 // Column rectangle
                 Rectangle column = new Rectangle
                 {
@@ -136,11 +123,9 @@ namespace SOLUM_UI.Views.Components
                     Stroke = new SolidColorBrush(Color.FromArgb(255, 234, 217, 219)),
                     StrokeThickness = 1
                 };
-
                 Canvas.SetLeft(column, x);
                 Canvas.SetTop(column, y);
                 ChartCanvas.Children.Add(column);
-
                 // Value label on top
                 TextBlock valueLabel = new TextBlock
                 {
@@ -154,7 +139,6 @@ namespace SOLUM_UI.Views.Components
                 Canvas.SetLeft(valueLabel, x);
                 Canvas.SetTop(valueLabel, y - 18);
                 ChartCanvas.Children.Add(valueLabel);
-
                 // X-axis label
                 TextBlock xLabel = new TextBlock
                 {

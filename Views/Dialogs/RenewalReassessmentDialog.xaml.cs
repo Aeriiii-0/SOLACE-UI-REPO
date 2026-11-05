@@ -318,11 +318,9 @@ namespace SOLUM_UI.Views.Dialogs
             _original = original ?? throw new ArgumentNullException(nameof(original));
             _dto = dto;
             _isReassessmentMode = isReassessmentMode;
-
             DependentsList.ItemsSource = _dependents;
             DpRenewalDate.SelectedDate = _original.RenewalFilingDate ?? DateTime.Today;
             DpRenewalDate.DisplayDateEnd = DateTime.Today;
-
             Loaded += (s, e) =>
             {
                 if (!_isReassessmentMode && !_original.CanRenew(out string failureReason, out _))
@@ -335,14 +333,12 @@ namespace SOLUM_UI.Views.Dialogs
                     Close();
                     return;
                 }
-
                 if (_isReassessmentMode)
                 {
                     Title = "Case Re-assessment";
                     if (TxtDialogTitle != null) TxtDialogTitle.Text = "Case Re-assessment & Eligibility Review";
                     if (TxtDialogSubtitle != null) TxtDialogSubtitle.Text = "Update circumstances, income, and family composition to evaluate vulnerability and subsidy priority.";
                 }
-
                 PopulateIdentity();
                 PopulateStep1();
                 PopulateStep2();
@@ -370,7 +366,6 @@ namespace SOLUM_UI.Views.Dialogs
             double screenH = workH;
             double screenLeft = workLeft;
             double screenTop = workTop;
-
             if (Owner != null && Owner.WindowState != WindowState.Maximized && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
                 screenW    = Math.Min(Owner.ActualWidth, workW);
@@ -378,12 +373,10 @@ namespace SOLUM_UI.Views.Dialogs
                 screenLeft = Math.Max(workLeft, Owner.Left);
                 screenTop  = Math.Max(workTop, Owner.Top);
             }
-
             if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
             if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
             if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
             if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
-
             if (DialogShell != null)
             {
                 DialogShell.MaxHeight = Math.Max(500, Math.Min(screenH - 40, 840));
@@ -430,7 +423,6 @@ namespace SOLUM_UI.Views.Dialogs
                 _isSyncingOtherIncome = false;
             }
         }
-
         // =========================================================================
         // Step Population
         // =========================================================================
@@ -439,7 +431,6 @@ namespace SOLUM_UI.Views.Dialogs
         {
             string fullName = !string.IsNullOrWhiteSpace(_original.FullName) ? _original.FullName : _original.Name;
             TxtApplicantName.Text = fullName;
-
             // Initials
             string initials = "SP";
             if (!string.IsNullOrWhiteSpace(_original.FirstName) && !string.IsNullOrWhiteSpace(_original.Surname))
@@ -447,14 +438,12 @@ namespace SOLUM_UI.Views.Dialogs
                 initials = $"{_original.FirstName[0]}{_original.Surname[0]}".ToUpper();
             }
             TxtInitials.Text = initials;
-
             TxtPhilSysNumber.Text = !string.IsNullOrWhiteSpace(_original.PhilSysNumber) ? _original.PhilSysNumber : "None";
             TxtBarangay.Text = !string.IsNullOrWhiteSpace(_original.Barangay) ? _original.Barangay : "Biñan";
 
             string expStr = _original.CurrentTermExpiresAt.HasValue
                 ? _original.CurrentTermExpiresAt.Value.ToString("MMM d, yyyy")
                 : DateTime.Today.ToString("MMM d, yyyy");
-
             TxtExpiryNotice.Text = $"Current Expiry: {expStr}";
         }
 
@@ -473,7 +462,6 @@ namespace SOLUM_UI.Views.Dialogs
                 }
             }
             if (!foundCiv) CmbCivilStatus.SelectedIndex = 0;
-
             // Employment Status
             if (_original.IsSelfEmployed)
                 CmbEmploymentStatus.SelectedIndex = 1;
@@ -481,7 +469,6 @@ namespace SOLUM_UI.Views.Dialogs
                 CmbEmploymentStatus.SelectedIndex = 2;
             else
                 CmbEmploymentStatus.SelectedIndex = 0; // Default Employed
-
             // Occupation & Income
             TxtOccupation.Text = !string.IsNullOrWhiteSpace(_original.Occupation) ? _original.Occupation : "Employed";
             TxtMonthlyIncome.Text = !string.IsNullOrWhiteSpace(_original.MonthlyIncome) ? _original.MonthlyIncome : "0.00";
@@ -493,7 +480,6 @@ namespace SOLUM_UI.Views.Dialogs
         private void PopulateStep2()
         {
             _dependents.Clear();
-
             // Populate from DTO if available, otherwise record.FamilyMembers
             if (_dto?.FamilyMembers != null && _dto.FamilyMembers.Count > 0)
             {
@@ -527,7 +513,6 @@ namespace SOLUM_UI.Views.Dialogs
                     DateTime dob = DateTime.TryParse(fm.Birthdate, out var parsedDob) ? parsedDob : DateTime.Today.AddYears(-age);
                     decimal income = 0;
                     decimal.TryParse(fm.Income, out income);
-
                     _dependents.Add(new DependentItemViewModel
                     {
                         Id = fm.Id,
@@ -547,7 +532,6 @@ namespace SOLUM_UI.Views.Dialogs
                     });
                 }
             }
-
             TxtNoDependents.Visibility = _dependents.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -580,7 +564,6 @@ namespace SOLUM_UI.Views.Dialogs
             {
                 pNum = SoloParentApiService.ExtractCircumstanceCode(_original.ProblemPresented);
             }
-
             if (string.Equals(pNum, "A1", StringComparison.OrdinalIgnoreCase) || _original.CircumstanceA1) ChkA1.IsChecked = true;
             else if (string.Equals(pNum, "A2", StringComparison.OrdinalIgnoreCase) || _original.CircumstanceA2) ChkA2.IsChecked = true;
             else if (string.Equals(pNum, "A3", StringComparison.OrdinalIgnoreCase) || _original.CircumstanceA3) ChkA3.IsChecked = true;
@@ -594,14 +577,12 @@ namespace SOLUM_UI.Views.Dialogs
             else if (string.Equals(pNum, "E",  StringComparison.OrdinalIgnoreCase) || _original.CircumstanceE)  ChkE.IsChecked = true;
             else if (string.Equals(pNum, "F",  StringComparison.OrdinalIgnoreCase) || _original.CircumstanceF)  ChkF.IsChecked = true;
             else ChkA2.IsChecked = true; // Default fallback
-
             // Conditional subfields
             TxtA2Cause.Text = _dto?.ProblemPresented?.CauseOfDeath ?? _original.CircumstanceA2Cause ?? string.Empty;
             if (DateTime.TryParse(_dto?.ProblemPresented?.date, out var a2Dt))
                 DpA2Date.SelectedDate = a2Dt;
             else if (_original.CircumstanceA2Date != DateTime.MinValue)
                 DpA2Date.SelectedDate = _original.CircumstanceA2Date;
-
             TxtA4Disability.Text = _dto?.ProblemPresented?.TypeOfDisability ?? _original.CircumstanceA4Disability ?? string.Empty;
             TxtA5Period.Text = _dto?.ProblemPresented?.PeriodOfSeparation ?? _original.CircumstanceA5Period ?? string.Empty;
 
@@ -616,12 +597,10 @@ namespace SOLUM_UI.Views.Dialogs
 
             decimal abroad = _dto?.ProblemPresented?.LengthOfAbroad ?? 0;
             TxtBStayAbroad.Text = abroad > 0 ? abroad.ToString("0") : (_original.CircumstanceBStayAbroad ?? string.Empty);
-
             // Needs & Problems
             TxtNeeds.Text = !string.IsNullOrWhiteSpace(_original.NeedsAndProblems)
                 ? _original.NeedsAndProblems
                 : (_dto?.NeedsAndProblems ?? string.Empty);
-
             Circumstance_Changed(null, null);
         }
 
@@ -668,7 +647,6 @@ namespace SOLUM_UI.Views.Dialogs
                 return item.Content?.ToString() ?? string.Empty;
             return cb?.Text ?? string.Empty;
         }
-
         // =========================================================================
         // Stepper & Navigation
         // =========================================================================
@@ -679,38 +657,31 @@ namespace SOLUM_UI.Views.Dialogs
             Step2Panel.Visibility = _currentStep == 2 ? Visibility.Visible : Visibility.Collapsed;
             Step3Panel.Visibility = _currentStep == 3 ? Visibility.Visible : Visibility.Collapsed;
             Step4Panel.Visibility = _currentStep == 4 ? Visibility.Visible : Visibility.Collapsed;
-
             // Stepper indicators
             var activeBg = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
             var doneBg = new SolidColorBrush(Color.FromRgb(0x8B, 0x35, 0x55));
             var inactiveBg = new SolidColorBrush(Color.FromRgb(0xE0, 0xD0, 0xD6));
             var activeFg = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
             var inactiveFg = new SolidColorBrush(Color.FromRgb(0x77, 0x77, 0x77));
-
             // Step 1 Indicator
             Step1Indicator.Background = _currentStep >= 1 ? activeBg : inactiveBg;
             Step1Label.Foreground = _currentStep == 1 ? activeFg : inactiveFg;
-
             // Step 2 Indicator
             Step2Indicator.Background = _currentStep >= 2 ? activeBg : inactiveBg;
             Step2Num.Foreground = _currentStep >= 2 ? Brushes.White : inactiveFg;
             Step2Label.Foreground = _currentStep == 2 ? activeFg : inactiveFg;
-
             // Step 3 Indicator
             Step3Indicator.Background = _currentStep >= 3 ? activeBg : inactiveBg;
             Step3Num.Foreground = _currentStep >= 3 ? Brushes.White : inactiveFg;
             Step3Label.Foreground = _currentStep == 3 ? activeFg : inactiveFg;
-
             // Step 4 Indicator
             Step4Indicator.Background = _currentStep >= 4 ? activeBg : inactiveBg;
             Step4Num.Foreground = _currentStep >= 4 ? Brushes.White : inactiveFg;
             Step4Label.Foreground = _currentStep == 4 ? activeFg : inactiveFg;
-
             // Buttons
             BtnBack.Visibility = _currentStep > 1 ? Visibility.Visible : Visibility.Collapsed;
             BtnNext.Visibility = _currentStep < 4 ? Visibility.Visible : Visibility.Collapsed;
             BtnSubmitRenew.Visibility = _currentStep == 4 ? Visibility.Visible : Visibility.Collapsed;
-
             if (_currentStep == 4)
             {
                 BuildReviewDiff();
@@ -720,7 +691,6 @@ namespace SOLUM_UI.Views.Dialogs
         private void BtnNext_Click(object sender, RoutedEventArgs e)
         {
             if (!ValidateCurrentStep()) return;
-
             if (_currentStep < 4)
             {
                 _currentStep++;
@@ -784,10 +754,8 @@ namespace SOLUM_UI.Views.Dialogs
                     return false;
                 }
             }
-
             return true;
         }
-
         // =========================================================================
         // Step 2 Dependent Management
         // =========================================================================
@@ -797,7 +765,6 @@ namespace SOLUM_UI.Views.Dialogs
             _editingDependent = null;
             TxtAddChildTitle.Text = "Add New Dependent";
             BtnSaveChild.Content = "Add Dependent";
-
             TxtChildName.Text = string.Empty;
             CmbChildRel.SelectedIndex = -1;
             CmbChildSex.SelectedIndex = -1;
@@ -814,7 +781,6 @@ namespace SOLUM_UI.Views.Dialogs
                 PnlChildSpecialNeedsDetails.IsEnabled = false;
                 PnlChildSpecialNeedsDetails.Opacity = 0.5;
             }
-
             AddChildSubCard.Visibility = Visibility.Visible;
             TxtChildName.Focus();
         }
@@ -826,7 +792,6 @@ namespace SOLUM_UI.Views.Dialogs
                 _editingDependent = item;
                 TxtAddChildTitle.Text = $"Edit Dependent: {item.Name}";
                 BtnSaveChild.Content = "Update Dependent";
-
                 TxtChildName.Text = item.Name;
                 SetComboByContent(CmbChildRel, item.Relationship);
                 SetComboByContent(CmbChildSex, item.Sex);
@@ -845,7 +810,6 @@ namespace SOLUM_UI.Views.Dialogs
                 }
                 SetComboByContent(CmbChildSpecialNeedsCategory, item.SpecialNeedsCategory);
                 TxtChildSpecialNeedsDescription.Text = item.SpecialNeedsDescription ?? string.Empty;
-
                 AddChildSubCard.Visibility = Visibility.Visible;
                 TxtChildName.Focus();
             }
@@ -882,14 +846,12 @@ namespace SOLUM_UI.Views.Dialogs
                 CmbChildSex.Focus();
                 return;
             }
-
             if (!DpChildDob.SelectedDate.HasValue)
             {
                 ToastNotification.Show("Validation Required", "Please select a valid birthdate.", ToastType.Warning);
                 DpChildDob.Focus();
                 return;
             }
-
             DateTime dob = DpChildDob.SelectedDate.Value;
             int age = SOLUM_UI.Services.OcrService.CalculateAge(dob);
             if (age < 0 || age > 120) age = 0;
@@ -915,7 +877,6 @@ namespace SOLUM_UI.Views.Dialogs
                 return;
             }
             string snDesc = hasSn ? (TxtChildSpecialNeedsDescription.Text?.Trim() ?? string.Empty) : string.Empty;
-
             if (_editingDependent != null)
             {
                 _editingDependent.Name = name;
@@ -952,7 +913,6 @@ namespace SOLUM_UI.Views.Dialogs
                     SpecialNeedsDescription = snDesc
                 });
             }
-
             AddChildSubCard.Visibility = Visibility.Collapsed;
             _editingDependent = null;
             TxtNoDependents.Visibility = _dependents.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -1004,7 +964,6 @@ namespace SOLUM_UI.Views.Dialogs
                     return;
                 }
             }
-
             foreach (ComboBoxItem item in combo.Items)
             {
                 string text = item.Content?.ToString() ?? "";
@@ -1015,7 +974,6 @@ namespace SOLUM_UI.Views.Dialogs
                     return;
                 }
             }
-
             combo.SelectedIndex = -1;
         }
 
@@ -1046,15 +1004,12 @@ namespace SOLUM_UI.Views.Dialogs
                         }
                     }
                 }
-
                 TxtNoDependents.Visibility = _dependents.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             }
         }
-
         // =========================================================================
         // Step 3 Circumstance Conditional Display
         // =========================================================================
-
         // =========================================================================
         // Step 3 Circumstance Conditional Display
         // =========================================================================
@@ -1067,7 +1022,6 @@ namespace SOLUM_UI.Views.Dialogs
             if (PnlA6 != null) PnlA6.Visibility = ChkA6.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             if (PnlB != null)  PnlB.Visibility  = ChkB.IsChecked  == true ? Visibility.Visible : Visibility.Collapsed;
         }
-
         // =========================================================================
         // Step 4 Review & Diff Calculation
         // =========================================================================
@@ -1075,7 +1029,6 @@ namespace SOLUM_UI.Views.Dialogs
         private void BuildReviewDiff()
         {
             var diffs = new List<RenewalDiffRow>();
-
             // 1. Civil Status
             string oldCiv = !string.IsNullOrWhiteSpace(_original.CivilStatus) ? _original.CivilStatus.Trim() : "Single";
             string newCiv = (CmbCivilStatus.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Single";
@@ -1089,7 +1042,6 @@ namespace SOLUM_UI.Views.Dialogs
                     IsChanged = true
                 });
             }
-
             // 2. Employment Status
             string oldEmpStatus = _original.EmploymentStatusDisplay;
             string newEmpStatus = (CmbEmploymentStatus.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Employed";
@@ -1103,7 +1055,6 @@ namespace SOLUM_UI.Views.Dialogs
                     IsChanged = true
                 });
             }
-
             // 3. Occupation
             string oldOcc = !string.IsNullOrWhiteSpace(_original.Occupation) ? _original.Occupation.Trim() : "—";
             string newOcc = TxtOccupation.Text.Trim();
@@ -1117,7 +1068,6 @@ namespace SOLUM_UI.Views.Dialogs
                     IsChanged = true
                 });
             }
-
             // 4. Monthly Income (compare numerical values to prevent currency formatting differences from triggering false diffs)
             decimal oldInc = 0;
             decimal.TryParse(_original.MonthlyIncome, out oldInc);
@@ -1133,7 +1083,6 @@ namespace SOLUM_UI.Views.Dialogs
                     IsChanged = true
                 });
             }
-
             // 5. Other Sources of Income
             string oldOther = !string.IsNullOrWhiteSpace(_original.OtherIncomeSource) ? _original.OtherIncomeSource.Trim() : "None";
             string currentOther = !string.IsNullOrWhiteSpace(TxtOtherIncomeStep1.Text)
@@ -1150,7 +1099,6 @@ namespace SOLUM_UI.Views.Dialogs
                     IsChanged = true
                 });
             }
-
             // 6. Circumstance Ground
             string oldTag = !string.IsNullOrWhiteSpace(_dto?.ProblemPresented?.ProblemPresentedNumber)
                 ? SoloParentApiService.ExtractCircumstanceCode(_dto.ProblemPresented.ProblemPresentedNumber)
@@ -1162,7 +1110,6 @@ namespace SOLUM_UI.Views.Dialogs
             string newCirc = $"{newTag}. {GetCircumstanceTitle(newTag)}";
 
             bool circGroundChanged = !string.Equals(oldTag, newTag, StringComparison.OrdinalIgnoreCase);
-
             // Check if subfields changed for the selected circumstance
             bool subfieldsChanged = false;
             if (!circGroundChanged)
@@ -1203,12 +1150,10 @@ namespace SOLUM_UI.Views.Dialogs
                     subfieldsChanged = oldAbr != newAbr;
                 }
             }
-
             _isCircumstanceChanged = circGroundChanged || subfieldsChanged;
             string displayOldCirc = !string.IsNullOrWhiteSpace(_original.ProblemPresented)
                 ? _original.ProblemPresented
                 : (!string.IsNullOrWhiteSpace(oldTag) ? $"{oldTag}. {GetCircumstanceTitle(oldTag)}" : "—");
-
             if (_isCircumstanceChanged)
             {
                 diffs.Add(new RenewalDiffRow
@@ -1219,7 +1164,6 @@ namespace SOLUM_UI.Views.Dialogs
                     IsChanged = true
                 });
             }
-
             // 7. Needs and Problems
             string oldNeeds = !string.IsNullOrWhiteSpace(_original.NeedsAndProblems) ? _original.NeedsAndProblems.Trim() : "None specified";
             string newNeeds = !string.IsNullOrWhiteSpace(TxtNeeds.Text.Trim()) ? TxtNeeds.Text.Trim() : "None specified";
@@ -1233,7 +1177,6 @@ namespace SOLUM_UI.Views.Dialogs
                     IsChanged = true
                 });
             }
-
             // 8. Dependents changes (only list changed dependents)
             foreach (var d in _dependents.Where(x => x.IsNew && !x.IsRemoved))
             {
@@ -1245,7 +1188,6 @@ namespace SOLUM_UI.Views.Dialogs
                     IsChanged = true
                 });
             }
-
             foreach (var d in _dependents.Where(x => x.IsRemoved))
             {
                 diffs.Add(new RenewalDiffRow
@@ -1256,7 +1198,6 @@ namespace SOLUM_UI.Views.Dialogs
                     IsChanged = true
                 });
             }
-
             foreach (var d in _dependents.Where(x => !x.IsNew && !x.IsRemoved && IsDependentChanged(x)))
             {
                 diffs.Add(new RenewalDiffRow
@@ -1267,26 +1208,21 @@ namespace SOLUM_UI.Views.Dialogs
                     IsChanged = true
                 });
             }
-
             ReviewDiffList.ItemsSource = diffs;
 
             bool hasChanges = diffs.Count > 0;
             if (DiffTableHeader != null) DiffTableHeader.Visibility = hasChanges ? Visibility.Visible : Visibility.Collapsed;
             if (DiffTableDivider != null) DiffTableDivider.Visibility = hasChanges ? Visibility.Visible : Visibility.Collapsed;
             if (PanelNoDiffs != null) PanelNoDiffs.Visibility = hasChanges ? Visibility.Collapsed : Visibility.Visible;
-
             // Dependents Summary
             int active = _dependents.Count(d => !d.IsRemoved);
             int added = _dependents.Count(d => d.IsNew && !d.IsRemoved);
             int removed = _dependents.Count(d => d.IsRemoved);
-
             TxtDependentsReconcileSummary.Text = $"Dependents: {active} active ({added} newly added, {removed} removed)";
-
             // Validity extension preview
             DateTime today = DateTime.Today;
             DateTime nextYear = today.AddYears(1);
             TxtNewValidityPreview.Text = $"New Validity Period: {today:MMMM d, yyyy} to {nextYear:MMMM d, yyyy}";
-
             BtnSubmitRenew.IsEnabled = true;
             BtnSubmitRenew.ToolTip = null;
         }
@@ -1309,7 +1245,6 @@ namespace SOLUM_UI.Views.Dialogs
         private bool IsDependentChanged(DependentItemViewModel d)
         {
             if (d == null || d.IsNew || d.IsRemoved) return false;
-
             if (_dto?.FamilyMembers != null && _dto.FamilyMembers.Count > 0)
             {
                 var orig = _dto.FamilyMembers.FirstOrDefault(fm => fm.Id == d.Id || string.Equals(fm.Name, d.Name, StringComparison.OrdinalIgnoreCase));
@@ -1326,7 +1261,6 @@ namespace SOLUM_UI.Views.Dialogs
                         || !string.Equals((orig.SpecialNeedsDescription ?? "").Trim(), (d.SpecialNeedsDescription ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
                 }
             }
-
             if (_original?.FamilyMembers != null && _original.FamilyMembers.Count > 0)
             {
                 var orig = _original.FamilyMembers.FirstOrDefault(fm => (fm.Id.HasValue && fm.Id == d.Id) || string.Equals(fm.MemberName, d.Name, StringComparison.OrdinalIgnoreCase));
@@ -1335,7 +1269,6 @@ namespace SOLUM_UI.Views.Dialogs
                     DateTime origDob = DateTime.TryParse(orig.Birthdate, out var parsedDob) ? parsedDob : DateTime.MinValue;
                     decimal origInc = 0;
                     decimal.TryParse(orig.Income, out origInc);
-
                     return !string.Equals((orig.MemberName ?? "").Trim(), (d.Name ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
                         || !string.Equals((orig.Relationship ?? "").Trim(), (d.Relationship ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
                         || !string.Equals((orig.Sex ?? "").Trim(), (d.Sex ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
@@ -1347,10 +1280,8 @@ namespace SOLUM_UI.Views.Dialogs
                         || !string.Equals((orig.SpecialNeedsDescription ?? "").Trim(), (d.SpecialNeedsDescription ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
                 }
             }
-
             return false;
         }
-
         // =========================================================================
         // Step 4 Final Submission
         // =========================================================================
@@ -1358,7 +1289,6 @@ namespace SOLUM_UI.Views.Dialogs
         private void BtnSubmitRenew_Click(object sender, RoutedEventArgs e)
         {
             if (!BtnSubmitRenew.IsEnabled) return;
-
             if (!_original.CanRenew(out string failureReason, out _))
             {
                 ActionConfirmDialog.Warning(
@@ -1367,7 +1297,6 @@ namespace SOLUM_UI.Views.Dialogs
                     this);
                 return;
             }
-
             // Build RenewSoloParentRequest
             string civ = (CmbCivilStatus.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Single";
             string empStatusTag = (CmbEmploymentStatus.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "employed";
@@ -1378,14 +1307,11 @@ namespace SOLUM_UI.Views.Dialogs
                 ? TxtOtherIncomeStep1.Text.Trim()
                 : TxtOtherIncomeStep3.Text.Trim();
             string needs = TxtNeeds.Text.Trim();
-
             // Circumstance
             string circTag = GetSelectedCircumstanceTag();
             string circName = GetCircumstanceTitle(circTag);
-
             decimal? lengthAbroad = null;
             if (decimal.TryParse(TxtBStayAbroad.Text.Trim(), out var lab)) lengthAbroad = lab;
-
             ProblemPresentedDetails problemPresented;
             if (_dto?.ProblemPresented != null && !_isCircumstanceChanged)
             {
@@ -1406,15 +1332,12 @@ namespace SOLUM_UI.Views.Dialogs
                     isAnnulmentOfMarraige = circTag == "A6" ? GetComboValue(CmbA6Declaration) == "Annulment of marriage" : (bool?)null
                 };
             }
-
             // Family members
             var renewFm = new RenewFamilyMembersRequest();
             var updatedFamilyList = new List<FamilyMember>();
-
             foreach (var d in _dependents)
             {
                 if (d.IsRemoved) continue;
-
                 if (d.Id.HasValue && !d.IsNew)
                 {
                     renewFm.ExistingFamilyMembers.Add(new UpdateFamilyMemberRequest
@@ -1450,7 +1373,6 @@ namespace SOLUM_UI.Views.Dialogs
                         SpecialNeedsDescription = d.SpecialNeedsDescription
                     });
                 }
-
                 updatedFamilyList.Add(new FamilyMember
                 {
                     Id = d.Id,
@@ -1468,9 +1390,7 @@ namespace SOLUM_UI.Views.Dialogs
                     SpecialNeedsDescription = d.SpecialNeedsDescription
                 });
             }
-
             renewFm.RemovedFamilyMemberIds = new List<Guid>(_removedFamilyMemberIds);
-
             RenewRequest = new RenewSoloParentRequest
             {
                 RenewalDate = DpRenewalDate.SelectedDate.HasValue ? DpRenewalDate.SelectedDate.Value.ToString("yyyy-MM-dd") : null,
@@ -1486,7 +1406,6 @@ namespace SOLUM_UI.Views.Dialogs
                 NeedsAndProblems = needs,
                 OtherSourcesOfIncome = otherIncome
             };
-
             // Build UpdatedRecord model (copy all immutable fields to avoid false positive changes in audit trail)
             UpdatedRecord = new SoloParentRecord
             {
@@ -1500,7 +1419,6 @@ namespace SOLUM_UI.Views.Dialogs
                 CurrentTermExpiresAt = _isReassessmentMode ? (_original.CurrentTermExpiresAt ?? DateTime.Today.AddYears(1)) : DateTime.Today.AddYears(1),
                 DateOfApplication = _original.DateOfApplication,
                 RecordTerms = _original.RecordTerms,
-
                 Name = _original.Name,
                 Surname = _original.Surname,
                 FirstName = _original.FirstName,
@@ -1516,7 +1434,6 @@ namespace SOLUM_UI.Views.Dialogs
                 PhilSysNumber = _original.PhilSysNumber,
                 Religion = _original.Religion,
                 EducationalAttainment = _original.EducationalAttainment,
-
                 Address = _original.Address,
                 Barangay = _original.Barangay,
                 ContactNumber = _original.ContactNumber,
@@ -1524,11 +1441,9 @@ namespace SOLUM_UI.Views.Dialogs
                 EmergencyRelationship = _original.EmergencyRelationship,
                 EmergencyAddress = _original.EmergencyAddress,
                 EmergencyContactNumber = _original.EmergencyContactNumber,
-
                 IsPantawidBeneficiary = _original.IsPantawidBeneficiary,
                 IsIndigenous = _original.IsIndigenous,
                 IsLGBT = _original.IsLGBT,
-
                 // Updated fields
                 CivilStatus = civ,
                 Occupation = occupation,
@@ -1539,7 +1454,6 @@ namespace SOLUM_UI.Views.Dialogs
                 OtherIncomeSource = otherIncome,
                 NeedsAndProblems = needs,
                 ProblemPresented = circName,
-
                 CircumstanceA1 = circTag == "A1",
                 CircumstanceA2 = circTag == "A2",
                 CircumstanceA2Cause = circTag == "A2" ? TxtA2Cause.Text.Trim() : string.Empty,
@@ -1559,14 +1473,12 @@ namespace SOLUM_UI.Views.Dialogs
                 CircumstanceD = circTag == "D",
                 CircumstanceE = circTag == "E",
                 CircumstanceF = circTag == "F",
-
                 FamilyMembers = updatedFamilyList,
                 RemovedFamilyMemberIds = new List<Guid>(_removedFamilyMemberIds),
                 Children = updatedFamilyList.Count,
                 FamilyComposition = _original.FamilyComposition,
                 AdditionalClassifications = _original.AdditionalClassifications
             };
-
             DialogResult = true;
             Close();
         }

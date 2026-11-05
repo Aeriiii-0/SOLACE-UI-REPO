@@ -15,7 +15,6 @@ namespace SOLUM_UI.ViewModels
         public ObservableCollection<SubsidyItem> PagedRecommendations { get; private set; }
         public ObservableCollection<SelectionRow> PagedShortlistRows { get; private set; }
         public ObservableCollection<SelectionRow> PagedFinalGrantees { get; private set; }
-
         // Dynamic page sizes
         private int _queuePageSize = 10;
         public int QueuePageSize
@@ -64,7 +63,6 @@ namespace SOLUM_UI.ViewModels
             _queuePageSize = newSize;
             OnPropertyChanged(nameof(QueuePageSize));
             OnPropertyChanged(nameof(QueuePageSummary));
-
             if (!_activeCycleId.HasValue || _activeCycleId.Value == Guid.Empty) return;
 
             int firstVisibleItem = (_queueCurrentPage - 1) * oldPageSize + 1;
@@ -97,7 +95,6 @@ namespace SOLUM_UI.ViewModels
             _finalCurrentPage = Math.Max(1, (int)Math.Ceiling(firstVisibleItem / (double)_finalPageSize));
             UpdateFinalPaged();
         }
-
         // Tab 0: Recommendations Queue Pagination (Server-Side)
         private int _queueCurrentPage = 1;
         public int QueueCurrentPage
@@ -164,7 +161,6 @@ namespace SOLUM_UI.ViewModels
 
         public ICommand QueuePrevPageCommand { get; private set; }
         public ICommand QueueNextPageCommand { get; private set; }
-
         // Tab 1: Shortlist Audit Pagination
         private int _shortlistCurrentPage = 1;
         public int ShortlistCurrentPage
@@ -190,7 +186,6 @@ namespace SOLUM_UI.ViewModels
 
         public ICommand ShortlistPrevPageCommand { get; private set; }
         public ICommand ShortlistNextPageCommand { get; private set; }
-
         // Tab 2: Final Grantees Pagination
         private int _finalCurrentPage = 1;
         public int FinalCurrentPage
@@ -222,13 +217,10 @@ namespace SOLUM_UI.ViewModels
             PagedRecommendations = new ObservableCollection<SubsidyItem>();
             PagedShortlistRows = new ObservableCollection<SelectionRow>();
             PagedFinalGrantees = new ObservableCollection<SelectionRow>();
-
             QueuePrevPageCommand = new RelayCommand(async _ => { if (CanQueuePrevPage) await LoadQueuePageAsync(QueueCurrentPage - 1); });
             QueueNextPageCommand = new RelayCommand(async _ => { if (CanQueueNextPage) await LoadQueuePageAsync(QueueCurrentPage + 1); });
-
             ShortlistPrevPageCommand = new RelayCommand(_ => { if (CanShortlistPrevPage) ShortlistCurrentPage--; });
             ShortlistNextPageCommand = new RelayCommand(_ => { if (CanShortlistNextPage) ShortlistCurrentPage++; });
-
             FinalPrevPageCommand = new RelayCommand(_ => { if (CanFinalPrevPage) FinalCurrentPage--; });
             FinalNextPageCommand = new RelayCommand(_ => { if (CanFinalNextPage) FinalCurrentPage++; });
         }
@@ -246,7 +238,6 @@ namespace SOLUM_UI.ViewModels
                     SortOrder = "desc"
                 };
                 if (_auditFilter == "CollegeAge") req.NeedsCloserReview = true;
-
                 var resp = await _apiService.GetAllRecommendationsAsync(req);
                 if (resp?.Data != null)
                 {
@@ -259,10 +250,8 @@ namespace SOLUM_UI.ViewModels
                     OnPropertyChanged(nameof(QueuePageNumberLabel));
                     OnPropertyChanged(nameof(QueuePageSummary));
                     OnPropertyChanged(nameof(RecommendationsSummary));
-
                     PagedRecommendations.Clear();
                     FilteredRecommendations.Clear();
-
                     for (int i = 0; i < resp.Data.Count; i++)
                     {
                         var item = SubsidyModelMapper.ToItem(resp.Data[i]);
@@ -306,14 +295,12 @@ namespace SOLUM_UI.ViewModels
             QueueTotalPages = Math.Max(1, (int)Math.Ceiling(total / (double)QueuePageSize));
             if (_queueCurrentPage > QueueTotalPages) _queueCurrentPage = QueueTotalPages;
             if (_queueCurrentPage < 1) _queueCurrentPage = 1;
-
             PagedRecommendations.Clear();
             if (FilteredRecommendations != null)
             {
                 var slice = FilteredRecommendations.Skip((_queueCurrentPage - 1) * QueuePageSize).Take(QueuePageSize);
                 foreach (var item in slice) PagedRecommendations.Add(item);
             }
-
             QueueTotalCount = total;
             OnPropertyChanged(nameof(QueueCurrentPage));
             OnPropertyChanged(nameof(QueueTotalPages));
@@ -329,13 +316,11 @@ namespace SOLUM_UI.ViewModels
             int total = FilteredShortlistRows?.Count ?? 0;
             ShortlistTotalPages = 1;
             _shortlistCurrentPage = 1;
-
             PagedShortlistRows.Clear();
             if (FilteredShortlistRows != null)
             {
                 foreach (var item in FilteredShortlistRows) PagedShortlistRows.Add(item);
             }
-
             OnPropertyChanged(nameof(ShortlistCurrentPage));
             OnPropertyChanged(nameof(ShortlistTotalPages));
             OnPropertyChanged(nameof(CanShortlistPrevPage));
@@ -350,14 +335,12 @@ namespace SOLUM_UI.ViewModels
             FinalTotalPages = Math.Max(1, (int)Math.Ceiling(total / (double)FinalPageSize));
             if (_finalCurrentPage > FinalTotalPages) _finalCurrentPage = FinalTotalPages;
             if (_finalCurrentPage < 1) _finalCurrentPage = 1;
-
             PagedFinalGrantees.Clear();
             if (FinalGranteesList != null)
             {
                 var slice = FinalGranteesList.Skip((_finalCurrentPage - 1) * FinalPageSize).Take(FinalPageSize);
                 foreach (var item in slice) PagedFinalGrantees.Add(item);
             }
-
             OnPropertyChanged(nameof(FinalCurrentPage));
             OnPropertyChanged(nameof(FinalTotalPages));
             OnPropertyChanged(nameof(CanFinalPrevPage));

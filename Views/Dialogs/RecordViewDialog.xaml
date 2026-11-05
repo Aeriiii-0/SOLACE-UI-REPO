@@ -6,7 +6,6 @@
         Background="Transparent" WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize" SizeChanged="Window_SizeChanged"
         Closing="Window_Closing" Width="920" Height="780">
-
     <Window.Resources>
         <Style x:Key="SegmentTabStyle" TargetType="RadioButton">
             <Setter Property="Height" Value="32"/>
@@ -37,19 +36,16 @@
             </Setter>
         </Style>
     </Window.Resources>
-
     <Border Background="#60000000">
         <Border Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="3" Opacity="0.18" RenderingBias="Performance"/>
             </Border.Effect>
-
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
                 <!-- â”€â”€ Dialog Shell â”€â”€ -->
                 <Border x:Name="DialogShell" Grid.Column="0"
                         Background="#FDFBFC" CornerRadius="14"
@@ -65,7 +61,6 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-
                         <!-- Header -->
                         <Border Grid.Row="0" Background="#702943" CornerRadius="14,14,0,0" Padding="24,13">
                             <Grid>
@@ -96,7 +91,6 @@
                                 </Button>
                             </Grid>
                         </Border>
-
                         <!-- Content -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled"
@@ -153,7 +147,6 @@
                                         </StackPanel>
                                     </Grid>
                                 </Border>
-
                                 <!-- Segmented View Navigation Tabs -->
                                 <Border Background="#F1E4E8" CornerRadius="8" Padding="3" Margin="0,0,0,14" HorizontalAlignment="Left">
                                     <StackPanel Orientation="Horizontal">
@@ -171,10 +164,8 @@
                                                      Click="TabTimeline_Click"/>
                                     </StackPanel>
                                 </Border>
-
                                 <!-- CardPanel (Profile Details View) -->
                                 <StackPanel x:Name="CardPanel"/>
-
                                 <!-- TimelineContainer (Activity History View) -->
                                 <StackPanel x:Name="TimelineContainer" Visibility="Collapsed" Margin="0,2,0,0">
                                     <!-- Header with title & refresh button -->
@@ -220,7 +211,6 @@
                                             </Button>
                                         </Grid>
                                     </Border>
-
                                     <!-- Timeline Loading State -->
                                     <Border x:Name="TimelineLoadingPanel" Background="White" CornerRadius="12" BorderBrush="#E8D4DA" BorderThickness="1.2"
                                             Padding="24,36" Margin="0,0,0,14" Visibility="Collapsed">
@@ -229,7 +219,6 @@
                                             <TextBlock Text="Retrieving audit history from server..." FontSize="11" Foreground="#94A3B8" Margin="0,4,0,0" HorizontalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
-
                                     <!-- Timeline Empty State -->
                                     <Border x:Name="TimelineEmptyPanel" Background="White" CornerRadius="12" BorderBrush="#E8D4DA" BorderThickness="1.2"
                                             Padding="24,36" Margin="0,0,0,14" Visibility="Collapsed">
@@ -242,7 +231,6 @@
                                                        FontSize="11.5" Foreground="#64748B" Margin="0,4,0,0" HorizontalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
-
                                     <!-- Timeline Error State -->
                                     <Border x:Name="TimelineErrorPanel" Background="#FEF2F2" CornerRadius="12" BorderBrush="#FECACA" BorderThickness="1.2"
                                             Padding="20,16" Margin="0,0,0,14" Visibility="Collapsed">
@@ -269,13 +257,11 @@
                                             </Button>
                                         </Grid>
                                     </Border>
-
                                     <!-- Dynamic Timeline Nodes Panel -->
                                     <StackPanel x:Name="TimelineItemsPanel"/>
                                 </StackPanel>
                             </StackPanel>
                         </ScrollViewer>
-
                         <!-- Footer -->
                         <Border Grid.Row="2" Background="White" BorderBrush="#D0B8C0"
                                 BorderThickness="0,1,0,0" CornerRadius="0,0,14,14" Padding="22,12">
@@ -304,7 +290,6 @@
                                 </Button>
                             </Grid>
                         </Border>
-
                         <!-- Delete confirmation overlay â€” spans all 3 rows, sits on top -->
                         <!-- Visibility is driven by IsDeleteOverlayVisible on the VM;
                              the toolbar's Delete_Click sets it via HandleDeleteRequest(). -->
@@ -379,7 +364,6 @@
                                 </StackPanel>
                             </Border>
                         </Grid>
-
                         <!-- ── Notification card overlay – floats at bottom-right ── -->
                         <!-- Bound to VM: IsNotificationVisible, NotificationTitle,   -->
                         <!-- NotificationMessage, IsNotificationSuccess.              -->
@@ -393,13 +377,10 @@
                             IsSuccess="{Binding IsNotificationSuccess}"
                             Visibility="{Binding IsNotificationVisible,
                                 Converter={StaticResource BoolToVisibilityConverter}}"/>
-
                     </Grid>
                 </Border>
-
                 <!-- â”€â”€ Vertical Action Toolbar (extracted to RecordActionToolbar UserControl) â”€â”€ -->
                 <components:RecordActionToolbar Grid.Column="1"/>
-
             </Grid>
         </Border>
     </Border>

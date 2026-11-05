@@ -17,16 +17,13 @@ namespace SOLUM_UI.Services
         public List<ChangeDetail> DetectChanges(SoloParentRecord before, SoloParentRecord after)
         {
             var changes = new List<ChangeDetail>();
-
             if (before == null || after == null)
                 return changes;
-
             // Identity & Metadata
             CompareField(changes, "Last Name", before.Surname, after.Surname);
             CompareField(changes, "First Name", before.FirstName, after.FirstName);
             CompareField(changes, "Middle Name", before.MiddleName, after.MiddleName);
             CompareField(changes, "Extension Name", before.ExtensionName, after.ExtensionName);
-
             // Personal Information
             CompareField(changes, "Sex", before.Sex, after.Sex);
             CompareField(changes, "Civil Status", before.CivilStatus, after.CivilStatus);
@@ -36,7 +33,6 @@ namespace SOLUM_UI.Services
             CompareField(changes, "Blood Type", before.BloodType, after.BloodType);
             CompareField(changes, "Height", before.Height, after.Height);
             CompareField(changes, "Weight", before.Weight, after.Weight);
-
             // Background
             CompareField(changes, "Educational Attainment", before.EducationalAttainment, after.EducationalAttainment);
             CompareField(changes, "PhilSys Number", before.PhilSysNumber, after.PhilSysNumber);
@@ -46,21 +42,17 @@ namespace SOLUM_UI.Services
             CompareField(changes, "Employment Status - Employed", FormatBool(before.IsEmployed), FormatBool(after.IsEmployed));
             CompareField(changes, "Employment Status - Self-Employed", FormatBool(before.IsSelfEmployed), FormatBool(after.IsSelfEmployed));
             CompareField(changes, "Employment Status - Not Employed", FormatBool(before.IsNotEmployed), FormatBool(after.IsNotEmployed));
-
             // Address & Contact
             CompareField(changes, "Address", before.Address, after.Address);
             CompareField(changes, "Barangay", before.Barangay, after.Barangay);
             CompareField(changes, "Contact Number", before.ContactNumber, after.ContactNumber);
-
             // Emergency Contact
             CompareField(changes, "Emergency Contact Name", before.EmergencyContactName, after.EmergencyContactName);
             CompareField(changes, "Emergency Contact Relationship", before.EmergencyRelationship, after.EmergencyRelationship);
             CompareField(changes, "Emergency Contact Address", before.EmergencyAddress, after.EmergencyAddress);
             CompareField(changes, "Emergency Contact Number", before.EmergencyContactNumber, after.EmergencyContactNumber);
-
             // Children & Family
             CompareField(changes, "Number of Children", before.Children.ToString(), after.Children.ToString());
-
             // Circumstances
             CompareField(changes, "Circumstance A1 - Rape", FormatBool(before.CircumstanceA1), FormatBool(after.CircumstanceA1));
             CompareField(changes, "Circumstance A2 - Death of Spouse", FormatBool(before.CircumstanceA2), FormatBool(after.CircumstanceA2));
@@ -96,22 +88,17 @@ namespace SOLUM_UI.Services
             CompareField(changes, "Circumstance D - Legal Guardian", FormatBool(before.CircumstanceD), FormatBool(after.CircumstanceD));
             CompareField(changes, "Circumstance E - Relative 4th Degree", FormatBool(before.CircumstanceE), FormatBool(after.CircumstanceE));
             CompareField(changes, "Circumstance F - Pregnant", FormatBool(before.CircumstanceF), FormatBool(after.CircumstanceF));
-
             // Special Status
             CompareField(changes, "LGBT", FormatBool(before.IsLGBT), FormatBool(after.IsLGBT));
             CompareField(changes, "Pantawid Beneficiary", FormatBool(before.IsPantawidBeneficiary), FormatBool(after.IsPantawidBeneficiary));
             CompareField(changes, "Indigenous", FormatBool(before.IsIndigenous), FormatBool(after.IsIndigenous));
-
             // Needs & Other Income
             CompareField(changes, "Needs & Problems", before.NeedsAndProblems, after.NeedsAndProblems);
             CompareField(changes, "Other Income Source", before.OtherIncomeSource, after.OtherIncomeSource);
-
             // Status
             CompareField(changes, "Status", before.Status, after.Status);
-
             return changes;
         }
-
         /// <summary>
         /// Compares two field values and adds a ChangeDetail to the list if they differ.
         /// Treats null and whitespace-only strings as identical to avoid false-positive audit logs.
@@ -120,13 +107,11 @@ namespace SOLUM_UI.Services
         {
             string sOld = (oldValue ?? "").Trim();
             string sNew = (newValue ?? "").Trim();
-
             if (!string.Equals(sOld, sNew, StringComparison.OrdinalIgnoreCase))
             {
                 changes.Add(new ChangeDetail(fieldName, string.IsNullOrEmpty(sOld) ? null : sOld, string.IsNullOrEmpty(sNew) ? null : sNew));
             }
         }
-
         /// <summary>
         /// Compares monthly income numerically so formatting differences (e.g. "10000" vs "10,000.00")
         /// do not trigger misleading change entries.
@@ -135,7 +120,6 @@ namespace SOLUM_UI.Services
         {
             string cleanOld = System.Text.RegularExpressions.Regex.Replace(oldValue ?? "", @"[^\d.]", "");
             string cleanNew = System.Text.RegularExpressions.Regex.Replace(newValue ?? "", @"[^\d.]", "");
-
             if (decimal.TryParse(cleanOld, out decimal dOld) && decimal.TryParse(cleanNew, out decimal dNew))
             {
                 if (dOld != dNew)
@@ -148,13 +132,11 @@ namespace SOLUM_UI.Services
                 CompareField(changes, "Monthly Income", oldValue, newValue);
             }
         }
-
         /// <summary>Formats a DateTime for comparison, or returns null if the date is unset.</summary>
         private string FormatDate(DateTime dt)
         {
             return dt == DateTime.MinValue ? null : dt.ToString("yyyy-MM-dd");
         }
-
         /// <summary>Formats a boolean as "Yes" or "No", or null if false (to reduce noise).</summary>
         private string FormatBool(bool value)
         {

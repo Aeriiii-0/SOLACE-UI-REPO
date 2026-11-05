@@ -22,7 +22,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style TargetType="{x:Type ScrollBar}">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -106,10 +105,8 @@
             <Style.Triggers><Trigger Property="IsEnabled" Value="False"><Setter Property="Background" Value="#F1F5F9"/><Setter Property="Foreground" Value="#94A3B8"/></Trigger></Style.Triggers>
         </Style>
     </UserControl.Resources>
-
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-
         <!-- Single Unified Compact Ribbon: Single Row Controls & Batch Selection -->
         <Border Grid.Row="0" Background="#FBF5F7" MinHeight="48" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="14,8" Margin="0,0,0,6">
             <Grid VerticalAlignment="Center">
@@ -118,7 +115,6 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
                 <!-- Left: Batch Selection Toggle & Bulk Actions -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Height="28" Padding="14,0" Cursor="Hand" Command="{Binding ToggleShortlistBatchModeCommand}">
@@ -154,7 +150,6 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
-
                     <!-- Alongside: Bulk Operations (Visible when IsShortlistBatchMode is True) -->
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0"
                                 Visibility="{Binding IsShortlistBatchMode, Converter={StaticResource BoolToVis}}">
@@ -163,7 +158,6 @@
                             <TextBlock Text="{Binding ShortlistBatchActionLabel}" FontSize="10.5" FontWeight="Bold" Foreground="#27AE60"
                                        VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
                         </Border>
-
                         <!-- Confirm Selected Button -->
                         <Button Height="28" Cursor="Hand" Command="{Binding BatchConfirmShortlistCommand}"
                                 IsEnabled="{Binding HasShortlistSelection}">
@@ -180,7 +174,6 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-
                         <!-- Revoke Selected Button -->
                         <Button Height="28" Cursor="Hand" Command="{Binding BatchRevokeShortlistCommand}"
                                 IsEnabled="{Binding HasShortlistSelection}" Margin="6,0,0,0">
@@ -199,7 +192,6 @@
                         </Button>
                     </StackPanel>
                 </StackPanel>
-
                 <!-- Center: Search Bar -->
                 <Border Grid.Column="1" Background="White" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Height="30" Margin="14,0" VerticalAlignment="Center">
                     <Grid>
@@ -208,7 +200,6 @@
                         <TextBox Grid.Column="1" Text="{Binding ShortlistSearchText, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" BorderThickness="0" Background="Transparent" FontSize="11" Foreground="#1F2937" Padding="0,0,6,0" ToolTip="Search shortlist by name, 4Ps, or college-age keywords"/>
                     </Grid>
                 </Border>
-
                 <!-- Right: Filters, Status & Export -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                     <!-- Filter Dropdown -->
@@ -234,7 +225,6 @@
                             </Border>
                         </Popup>
                     </Grid>
-
                     <!-- Export Dropdown (Clean White & Maroon Border to match Export Queue) -->
                     <Grid>
                         <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1">
@@ -265,7 +255,6 @@
                 </StackPanel>
             </Grid>
         </Border>
-
         <!-- Main Shortlist Table Container: Record Management Card Design with Radial Mask -->
         <Border Grid.Row="1" CornerRadius="14" BorderBrush="#E8D4DA" BorderThickness="1.5" Background="White">
             <Border.Effect>
@@ -281,8 +270,6 @@
                         </VisualBrush.Visual>
                     </VisualBrush>
                 </Grid.OpacityMask>
-                
-
                 <!-- ListView (Row 0: Column headers start immediately at top) -->
                 <ListView x:Name="ShortlistListView" ItemsSource="{Binding FilteredShortlistRows}" BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource SelRow}"
                           VirtualizingStackPanel.IsVirtualizing="True"
@@ -337,7 +324,6 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-
                             <!-- Col Compliance: Specific flags only, otherwise empty/dash -->
                             <GridViewColumn x:Name="ColCompliance" Header="AUDIT &amp; COMPLIANCE DETAIL" Width="230">
                                 <GridViewColumn.CellTemplate>
@@ -361,7 +347,6 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-
                             <!-- Col: Subsidy Grant Status (Confirmed vs Pending) -->
                             <GridViewColumn x:Name="ColSubsidyStatus" Header="SUBSIDY STATUS" Width="110">
                                 <GridViewColumn.CellTemplate>
@@ -384,7 +369,6 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-
                 <!-- Dynamic Floating Scroll-Down Arrow (Visible only while actively scrolling when more content exists) -->
                 <Border x:Name="ScrollHintIndicator" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10"
                         Background="#702943" CornerRadius="12" Width="24" Height="24"

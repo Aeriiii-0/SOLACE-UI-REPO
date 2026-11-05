@@ -11,7 +11,6 @@
         AllowsTransparency="True"
         ResizeMode="CanResize">
     <Window.Resources>
-
         <Style x:Key="NavButton" TargetType="Button">
             <Setter Property="Width" Value="44"/>
             <Setter Property="Height" Value="44"/>
@@ -47,7 +46,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="SideTooltip" TargetType="ToolTip">
             <Setter Property="Placement" Value="Right"/>
             <Setter Property="HorizontalOffset" Value="10"/>
@@ -67,7 +65,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="WinCtrlButton" TargetType="Button">
             <Setter Property="Width" Value="13"/>
             <Setter Property="Height" Value="13"/>
@@ -91,18 +88,14 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
     </Window.Resources>
-
     <Grid Background="#FFFFFF">
-
         <!-- Nlur on add/edit modal-->
         <Grid x:Name="MainContent">
             <Grid.RowDefinitions>
                 <RowDefinition Height="36"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
             <!-- ── Title Bar ── -->
             <Grid Grid.Row="0"
                   Background="#FFFFFF"
@@ -137,10 +130,8 @@
                     </Button>
                 </StackPanel>
             </Grid>
-
             <!-- ── Main layout ── -->
             <Grid Grid.Row="1">
-
                 <!-- Sidebar -->
                 <Border x:Name="Sidebar"
                         Width="68"
@@ -159,17 +150,14 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-
                         <Image Grid.Row="0"
                                Source="pack://application:,,,/Assets/SidebarLogo.png"
                                Width="44" Height="44"
                                HorizontalAlignment="Center"
                                Margin="0,14,0,20"
                                Stretch="Uniform"/>
-
                         <!-- Top nav -->
                         <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,14,0,14">
-
                             <Button Style="{StaticResource NavButton}"
                                     Tag="Dashboard" Click="NavButton_Click" Margin="0,10,0,15">
                                 <Button.ToolTip>
@@ -179,7 +167,6 @@
                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                       Data="M2,2H11V11H2V2M13,2H22V11H13V2M2,13H11V22H2V13M13,13H22V22H13V13M4,4V9H9V4H4M15,4V9H20V4H15M4,15V20H9V15H4M15,15V20H20V15H15Z"/>
                             </Button>
-
                             <Button Style="{StaticResource NavButton}"
                                     Tag="SoloParentRecords" Click="NavButton_Click" Margin="0,10,0,15">
                                 <Button.ToolTip>
@@ -189,7 +176,6 @@
                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                       Data="M10,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8A2,2 0 0,0 20,6H12L10,4Z"/>
                             </Button>
-
                             <Button Style="{StaticResource NavButton}"
                                     Tag="UserAdministration" Click="NavButton_Click" Margin="0,10,0,15">
                                 <Button.ToolTip>
@@ -199,7 +185,6 @@
                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                       Data="M16,13C15.71,13 15.38,13 15.03,13.05C16.19,13.89 17,15 17,16.5V19H23V16.5C23,14.17 18.33,13 16,13M8,13C5.67,13 1,14.17 1,16.5V19H15V16.5C15,14.17 10.33,13 8,13M8,11A3,3 0 0,0 11,8A3,3 0 0,0 8,5A3,3 0 0,0 5,8A3,3 0 0,0 8,11M16,11A3,3 0 0,0 19,8A3,3 0 0,0 16,5A3,3 0 0,0 13,8A3,3 0 0,0 16,11Z"/>
                             </Button>
-
                             <Button Style="{StaticResource NavButton}"
                                     Tag="SubsidyRecommendation" Click="NavButton_Click" Margin="0,10,0,15">
                                 <Button.ToolTip>
@@ -209,7 +194,6 @@
                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                       Data="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8L6,7M4,19H8L6,17M4,14H8L6,12Z"/>
                             </Button>
-
                             <Button Style="{StaticResource NavButton}"
                                     Tag="Analytics" Click="NavButton_Click" Margin="0,10,0,15">
                                 <Button.ToolTip>
@@ -219,12 +203,9 @@
                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                       Data="M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z"/>
                             </Button>
-
                         </StackPanel>
-
                         <!-- Bottom nav -->
                         <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,0,0,18">
-
                             <Button Style="{StaticResource NavButton}"
                                     Tag="Logout" Click="NavButton_Click" Margin="0,6,0,0">
                                 <Button.ToolTip>
@@ -234,18 +215,15 @@
                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                       Data="M17,7L15.59,8.41L18.17,11H8V13H18.17L15.59,15.58L17,17L22,12M4,5H12V3H4A2,2 0 0,0 2,5V19A2,2 0 0,0 4,21H12V19H4V5Z"/>
                             </Button>
-
                         </StackPanel>
                     </Grid>
                 </Border>
-
                 <!-- Content area -->
                 <Grid x:Name="ContentArea" Margin="112,0,20,20">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-
                     <controls:TopBar x:Name="TopBarControl"
                                      Grid.Row="0"
                                      PageTitle="Dashboard"
@@ -253,7 +231,6 @@
                                      ProfileClicked="TopBarControl_ProfileClicked"
                                      ChangePasswordRequested="TopBarControl_ChangePasswordRequested"
                                      LogoutRequested="TopBarControl_LogoutRequested"/>
-
                     <Border Grid.Row="1"
                             Background="#FFFFFF"
                             CornerRadius="0,0,16,16">
@@ -263,10 +240,8 @@
                                Background="Transparent"/>
                     </Border>
                 </Grid>
-
             </Grid>
         </Grid>
-
         <Grid x:Name="LogoutOverlay" Visibility="Collapsed" Panel.ZIndex="50">
             <Rectangle Fill="#88000000"/>
             <Border Background="White" CornerRadius="16" Padding="32,28" Width="340"
@@ -333,12 +308,10 @@
                 </StackPanel>
             </Border>
         </Grid>
-
         <Grid x:Name="LogoutLoadingOverlay" Visibility="Collapsed" Panel.ZIndex="60" Background="Transparent">
             <Rectangle Fill="#CC000000" Opacity="0.6"/>
             <!-- Glassmorphic Effect -->
             <Border Background="#4D1A1A1A" CornerRadius="0" />
-
             <!-- Circle Spinner Animation -->
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <!-- Spinning Circle with Percentage in Middle -->
@@ -354,17 +327,14 @@
                             <DoubleCollection>55,164</DoubleCollection>
                         </Ellipse.StrokeDashArray>
                     </Ellipse>
-
                     <!-- Percentage Text in Center -->
                     <TextBlock x:Name="LogoutProgressPercentage" Text="0%" 
                               FontFamily="Segoe UI" FontSize="18" FontWeight="Light" Foreground="White"
                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
-
                 <TextBlock Text="Signing out..." FontFamily="Segoe UI" FontSize="14"
                            FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center"/>
             </StackPanel>
         </Grid>
-
     </Grid>
 </Window>

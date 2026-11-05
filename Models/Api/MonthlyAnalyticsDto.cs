@@ -33,7 +33,6 @@ namespace SOLUM_UI.Models.Api
             set => Categories = value;
         }
         public Dictionary<string, int> EducationalAttainment { get; set; } = new Dictionary<string, int>();
-
         // Sector breakdowns
         public Dictionary<string, int> Sectors { get; set; } = new Dictionary<string, int>();
         public Dictionary<string, int> Lgbt { get; set; } = new Dictionary<string, int>();

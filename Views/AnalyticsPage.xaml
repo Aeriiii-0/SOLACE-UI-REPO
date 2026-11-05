@@ -5,7 +5,6 @@
       xmlns:converters="clr-namespace:SOLUM_UI.Converters"
       xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
       Title="Analytics" Background="#FBF9FE">
-
     <Page.Resources>
         <SolidColorBrush x:Key="MaroonPrimary" Color="#7D2245"/>
         <SolidColorBrush x:Key="RosePrimary" Color="#E58BA3"/>
@@ -15,7 +14,6 @@
         <SolidColorBrush x:Key="GrayPrimary" Color="#A89AA0"/>
         <SolidColorBrush x:Key="SecondaryText" Color="#8A6A75"/>
         <SolidColorBrush x:Key="PageBackground" Color="#FFFFFF"/>
-
         <SolidColorBrush x:Key="StatCard1Bg" Color="#FCE4E8"/>
         <SolidColorBrush x:Key="StatCard1Border" Color="#9C2F55"/>
         <SolidColorBrush x:Key="StatCard2Bg" Color="#FFFBE3"/>
@@ -24,7 +22,6 @@
         <SolidColorBrush x:Key="StatCard3Border" Color="#3F7A1F"/>
         <SolidColorBrush x:Key="StatCard4Bg" Color="#EAF6FE"/>
         <SolidColorBrush x:Key="StatCard4Border" Color="#1F7A8C"/>
-
         <SolidColorBrush x:Key="BurundyPrimary" Color="#B03058"/>
         <SolidColorBrush x:Key="BurundyDark" Color="#8B1E3F"/>
         <SolidColorBrush x:Key="OrangePrimary" Color="#E59836"/>
@@ -34,9 +31,7 @@
         <SolidColorBrush x:Key="TextGray" Color="#6B7280"/>
         <SolidColorBrush x:Key="BorderLight" Color="#F3F4F6"/>
         <SolidColorBrush x:Key="BgLight" Color="#F9FAFB"/>
-
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-
         <Style x:Key="BrandDatePicker" TargetType="DatePicker">
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="13"/>
@@ -55,7 +50,6 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="38"/>
                                 </Grid.ColumnDefinitions>
-
                                 <DatePickerTextBox x:Name="PART_TextBox"
                                                    Grid.Column="0"
                                                    Foreground="#333333"
@@ -97,7 +91,6 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
-
                                 <Button x:Name="PART_Button"
                                         Grid.Column="1"
                                         Focusable="False"
@@ -120,7 +113,6 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-
                                 <Popup x:Name="PART_Popup"
                                        AllowsTransparency="True"
                                        Placement="Bottom"
@@ -140,7 +132,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <ControlTemplate x:Key="StyledComboTemplate" TargetType="ComboBox">
             <Grid>
                 <Border x:Name="CbBg" Background="White" BorderBrush="#D0B8C0"
@@ -181,7 +172,6 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
-
         <Style x:Key="StyledComboItem" TargetType="ComboBoxItem">
             <Setter Property="Padding" Value="12,8"/>
             <Setter Property="FontSize" Value="13"/>
@@ -206,7 +196,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="IconBtn" TargetType="Button">
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="13"/>
@@ -233,33 +222,28 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="PanelStyle" TargetType="Border">
             <Setter Property="Background" Value="White"/>
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="BorderThickness" Value="1.5"/>
             <Setter Property="Padding" Value="20,18"/>
         </Style>
-
         <Style x:Key="KpiCard" TargetType="Border">
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="BorderThickness" Value="2"/>
         </Style>
-
         <Style x:Key="PanelTitle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="{StaticResource TextDark}"/>
         </Style>
-
         <Style x:Key="PanelSubtitle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Foreground" Value="{StaticResource SecondaryText}"/>
             <Setter Property="Margin" Value="0,2,0,14"/>
         </Style>
-
         <Style x:Key="MeterBar" TargetType="ProgressBar">
             <Setter Property="Height" Value="10"/>
             <Setter Property="Minimum" Value="0"/>
@@ -277,7 +261,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="TextOnlyButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -302,7 +285,6 @@
             </Style.Triggers>
         </Style>
     </Page.Resources>
-
     <Grid Background="{StaticResource PageBackground}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="24">
@@ -311,12 +293,10 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
                         <TextBlock Text="Analytics &amp; Demographics" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
                         <TextBlock Text="Comprehensive demographic breakdowns, statutory categories, and barangay distributions." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,4,0,0"/>
                     </StackPanel>
-
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                         <Border Background="White" BorderBrush="#D4A0B0" BorderThickness="1.5"
                                 CornerRadius="20" Margin="0,0,8,0">
@@ -340,7 +320,6 @@
                                 </StackPanel>
                             </Button>
                         </Border>
-
                         <Border Background="White" BorderBrush="#D4A0B0" BorderThickness="1.5"
                                 CornerRadius="20" Width="40" Height="40" Margin="0,0,8,0">
                             <Button x:Name="ExportBtn" Background="Transparent" BorderThickness="0" Cursor="Hand"
@@ -364,7 +343,6 @@
                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Button>
                         </Border>
-
                         <Border VerticalAlignment="Center" Background="#FAF2F5" CornerRadius="12" Padding="10,6" BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,8,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 12,22A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
@@ -372,7 +350,6 @@
                                 <TextBlock x:Name="TxtAnalyticsLastRefreshed" Text="Updated: Just now" FontSize="11.5" FontFamily="Segoe UI" FontWeight="Medium" Foreground="#702943"/>
                             </StackPanel>
                         </Border>
-
                         <Border Background="White" BorderBrush="#D4A0B0" BorderThickness="1.5"
                                 CornerRadius="20" Width="40" Height="40"
                                 Padding="0">
@@ -397,7 +374,6 @@
                                           Fill="#702943" Stretch="Uniform"
                                           Width="16" Height="16"
                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
                                     <StackPanel x:Name="LoadingSpinner" Visibility="Collapsed"
                                                 HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <TextBlock Text="⟳" FontSize="17" Foreground="#702943"
@@ -408,7 +384,6 @@
                         </Border>
                     </StackPanel>
                 </Grid>
-
                 <Border Margin="0,0,0,18" Background="White" CornerRadius="12"
                         BorderBrush="#E5E7EB" BorderThickness="1.5" Padding="18,12">
                     <Grid>
@@ -417,7 +392,6 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <Border Grid.Column="0" Background="#FDF0F3" CornerRadius="8" Padding="10,5" Margin="0,0,14,0" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"
@@ -425,12 +399,10 @@
                                 <TextBlock Text="ACTIVE FILTER" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Border>
-
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="Viewing:" FontFamily="Segoe UI" FontSize="13" Foreground="#6B7280" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding ActiveFilterSummary}" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold" Foreground="#1F2937" VerticalAlignment="Center"/>
                         </StackPanel>
-
                         <Button Grid.Column="2"
                                 Visibility="{Binding IsFilterActive, Converter={StaticResource BoolToVisibilityConverter}}"
                                 Style="{StaticResource TextOnlyButtonStyle}"
@@ -446,7 +418,6 @@
                         </Button>
                     </Grid>
                 </Border>
-
                 <Border Margin="0,0,0,18"
                         Background="#FFF8F0" CornerRadius="12"
                         BorderBrush="#F59E0B" BorderThickness="1.5"
@@ -472,7 +443,6 @@
                         </StackPanel>
                     </Grid>
                 </Border>
-
                 <Grid Margin="0,0,0,24" Height="165">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1.6*"/>
@@ -483,7 +453,6 @@
                         <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-
                     <Border Grid.Column="0" Style="{StaticResource KpiCard}"
                             Background="{StaticResource StatCard1Bg}" BorderBrush="{StaticResource StatCard1Border}"
                             Padding="22,18">
@@ -493,7 +462,6 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-
                             <Grid Grid.Row="0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -503,7 +471,6 @@
                                 <Viewbox Grid.Column="0" Width="26" Height="26">
                                     <TextBlock Text="👥" FontSize="20" VerticalAlignment="Center" Foreground="{StaticResource StatCard1Border}"/>
                                 </Viewbox>
-
                                 <Border Grid.Column="2" Background="#1F9C2F55" CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="● " FontSize="10" Foreground="{StaticResource StatCard1Border}" VerticalAlignment="Center"/>
@@ -512,7 +479,6 @@
                                     </StackPanel>
                                 </Border>
                             </Grid>
-
                             <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
                                     <TextBlock Text="{Binding TotalRegisteredCount, Mode=OneWay}" FontSize="36" FontWeight="Bold"
@@ -527,7 +493,6 @@
                                 <TextBlock Text="{Binding Card1Label, Mode=OneWay, FallbackValue='Total registered'}" FontSize="13" FontWeight="SemiBold"
                                            Foreground="{StaticResource StatCard1Border}" Opacity="0.95" Margin="0,2,0,0"/>
                             </StackPanel>
-
                             <Border Grid.Row="2" Background="#1F9C2F55" CornerRadius="8" Padding="10,4">
                                 <TextBlock FontSize="11" Foreground="{StaticResource StatCard1Border}" TextTrimming="CharacterEllipsis">
                                     <Run Text="{Binding Card1Subtitle, Mode=OneWay}"/>
@@ -535,7 +500,6 @@
                             </Border>
                         </Grid>
                     </Border>
-
                     <Border Grid.Column="2" Style="{StaticResource KpiCard}"
                             Background="{StaticResource StatCard2Bg}" BorderBrush="{StaticResource StatCard2Border}"
                             Padding="18,16">
@@ -545,7 +509,6 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-
                             <Grid Grid.Row="0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -559,14 +522,12 @@
                                     <TextBlock Text="Active Status" FontSize="10" FontWeight="Bold" Foreground="{StaticResource StatCard2Border}"/>
                                 </Border>
                             </Grid>
-
                             <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
                                 <TextBlock Text="{Binding ActiveRecordsCount, Mode=OneWay}" FontSize="32" FontWeight="Bold"
                                            Foreground="{StaticResource StatCard2Border}" TextAlignment="Left" LineHeight="34"/>
                                 <TextBlock Text="Active" FontSize="12" FontWeight="SemiBold"
                                            Foreground="{StaticResource StatCard2Border}" Opacity="0.95" Margin="0,2,0,0"/>
                             </StackPanel>
-
                             <Border Grid.Row="2" Background="#1F8A6A00" CornerRadius="6" Padding="8,4">
                                 <TextBlock FontSize="11" Foreground="{StaticResource StatCard2Border}" TextTrimming="CharacterEllipsis">
                                     <Run Text="{Binding Card2Subtitle, Mode=OneWay}"/>
@@ -574,7 +535,6 @@
                             </Border>
                         </Grid>
                     </Border>
-
                     <Border Grid.Column="4" Style="{StaticResource KpiCard}"
                             Background="{StaticResource StatCard3Bg}" BorderBrush="{StaticResource StatCard3Border}"
                             Padding="18,16">
@@ -584,7 +544,6 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-
                             <Grid Grid.Row="0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -598,14 +557,12 @@
                                     <TextBlock Text="Inactive" FontSize="10" FontWeight="Bold" Foreground="{StaticResource StatCard3Border}"/>
                                 </Border>
                             </Grid>
-
                             <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
                                 <TextBlock Text="{Binding InactiveRecordsCount, Mode=OneWay}" FontSize="32" FontWeight="Bold"
                                            Foreground="{StaticResource StatCard3Border}" TextAlignment="Left" LineHeight="34"/>
                                 <TextBlock Text="Inactive records" FontSize="12" FontWeight="SemiBold"
                                            Foreground="{StaticResource StatCard3Border}" Opacity="0.95" Margin="0,2,0,0"/>
                             </StackPanel>
-
                             <Border Grid.Row="2" Background="#1F3F7A1F" CornerRadius="6" Padding="8,4">
                                 <TextBlock FontSize="11" Foreground="{StaticResource StatCard3Border}" TextTrimming="CharacterEllipsis">
                                     <Run Text="{Binding InactiveSubtext, Mode=OneWay}"/>
@@ -613,7 +570,6 @@
                             </Border>
                         </Grid>
                     </Border>
-
                     <Border Grid.Column="6" Style="{StaticResource KpiCard}"
                             Background="{StaticResource StatCard4Bg}" BorderBrush="{StaticResource StatCard4Border}"
                             Padding="18,16">
@@ -623,7 +579,6 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-
                             <Grid Grid.Row="0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -637,14 +592,12 @@
                                     <TextBlock Text="Top Barangay" FontSize="10" FontWeight="Bold" Foreground="{StaticResource StatCard4Border}"/>
                                 </Border>
                             </Grid>
-
                             <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,4,0,4">
                                 <TextBlock Text="{Binding TopBarangayCount, Mode=OneWay}" FontSize="32" FontWeight="Bold"
                                            Foreground="{StaticResource StatCard4Border}" TextAlignment="Left" LineHeight="34"/>
                                 <TextBlock Text="Solo Parents" FontSize="12" FontWeight="SemiBold"
                                            Foreground="{StaticResource StatCard4Border}" Opacity="0.95" Margin="0,2,0,0"/>
                             </StackPanel>
-
                             <Border Grid.Row="2" Background="#1F1F7A8C" CornerRadius="6" Padding="8,4">
                                 <TextBlock FontSize="11" Foreground="{StaticResource StatCard4Border}" TextTrimming="CharacterEllipsis">
                                     <Run Text="Top: "/><Run Text="{Binding TopBarangayName, Mode=OneWay}"/>
@@ -653,7 +606,6 @@
                         </Grid>
                     </Border>
                 </Grid>
-
                 <!-- Solo parents per barangay -->
                 <Border Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}" Margin="0,0,0,20">
                     <StackPanel>
@@ -671,15 +623,12 @@
                                 <Run Text="Page "/><Run Text="{Binding CurrentBarangayPage, Mode=OneWay}"/><Run Text=" of "/><Run Text="{Binding TotalBarangayPages, Mode=OneWay}"/>
                             </TextBlock>
                         </Grid>
-
                         <Canvas x:Name="CvBarangay" Height="290" ClipToBounds="True" Background="Transparent"/>
-
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0">
                             <Border Width="10" Height="10" CornerRadius="2" Background="{StaticResource MaroonPrimary}" VerticalAlignment="Center"/>
                             <TextBlock Text="Solo parents count" FontSize="10" FontFamily="Segoe UI"
                                        Foreground="{StaticResource SecondaryText}" Margin="6,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
-
                         <Grid Margin="0,10,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -697,7 +646,6 @@
                         </Grid>
                     </StackPanel>
                 </Border>
-
                 <!-- Top categories (left, tall) | Age group + Child dependents (right, stacked) -->
                 <Grid Margin="0,0,0,20">
                     <Grid.ColumnDefinitions>
@@ -705,7 +653,6 @@
                         <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="5*"/>
                     </Grid.ColumnDefinitions>
-
                     <Border Grid.Column="0" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -719,7 +666,6 @@
                                     VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
                         </Grid>
                     </Border>
-
                     <StackPanel Grid.Column="2">
                         <Border Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}" Margin="0,0,0,20">
                             <StackPanel>
@@ -728,12 +674,10 @@
                                 <Canvas x:Name="CvAgeBars" Height="250" Background="Transparent"/>
                             </StackPanel>
                         </Border>
-
                         <Border Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                             <StackPanel>
                                 <TextBlock Text="Child dependents by age" Style="{StaticResource PanelTitle}"/>
                                 <TextBlock Text="Developmental stages and childcare resource planning" Style="{StaticResource PanelSubtitle}"/>
-
                                 <Grid Height="250">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -742,7 +686,6 @@
                                         <ColumnDefinition Width="16"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-
                                     <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
                                         <Border Background="#7D2245" CornerRadius="8,8,0,0"
                                                 Height="{Binding AgeGroup0_5BarHeight}" MinHeight="3"/>
@@ -753,7 +696,6 @@
                                         <TextBlock Text="Daycare age" FontSize="10" FontFamily="Segoe UI"
                                                    Foreground="{StaticResource SecondaryText}" TextAlignment="Center"/>
                                     </StackPanel>
-
                                     <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
                                         <Border Background="#A96B87" CornerRadius="8,8,0,0"
                                                 Height="{Binding AgeGroup6_12BarHeight}" MinHeight="3"/>
@@ -764,7 +706,6 @@
                                         <TextBlock Text="School and youth" FontSize="10" FontFamily="Segoe UI"
                                                    Foreground="{StaticResource SecondaryText}" TextAlignment="Center"/>
                                     </StackPanel>
-
                                     <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
                                         <Border Background="#D8A7C0" CornerRadius="8,8,0,0"
                                                 Height="{Binding AgeGroup13_17BarHeight}" MinHeight="3"/>
@@ -780,7 +721,6 @@
                         </Border>
                     </StackPanel>
                 </Grid>
-
                 <!-- Sex | Employment status -->
                 <Grid Margin="0,0,0,20">
                     <Grid.ColumnDefinitions>
@@ -788,12 +728,10 @@
                         <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-
                     <Border Grid.Column="0" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                         <StackPanel>
                             <TextBlock Text="Sex" Style="{StaticResource PanelTitle}"/>
                             <TextBlock Text="Distribution of solo parents" Style="{StaticResource PanelSubtitle}"/>
-
                             <!-- Donut with total in center -->
                             <Grid Width="170" Height="170" HorizontalAlignment="Center" Margin="0,4,0,18">
                                 <Canvas x:Name="CvSexDonut" Width="170" Height="170"/>
@@ -804,14 +742,12 @@
                                                Foreground="{StaticResource SecondaryText}" TextAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
-
                             <!-- Female / Male counts with percentages -->
                             <Grid Margin="24,0,24,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-
                                 <StackPanel Grid.Column="0" HorizontalAlignment="Left">
                                     <TextBlock Text="{Binding FemaleCount, Mode=OneWay}" FontSize="40" FontWeight="Bold"
                                                FontFamily="Segoe UI" Foreground="#C9536E" LineHeight="44"/>
@@ -822,7 +758,6 @@
                                         <Run Text="{Binding FemalePercent, StringFormat=F1, Mode=OneWay}"/><Run Text="%"/>
                                     </TextBlock>
                                 </StackPanel>
-
                                 <StackPanel Grid.Column="1" HorizontalAlignment="Right">
                                     <TextBlock Text="{Binding MaleCount, Mode=OneWay}" FontSize="40" FontWeight="Bold"
                                                FontFamily="Segoe UI" Foreground="#3B9FC9" TextAlignment="Right" LineHeight="44"/>
@@ -834,17 +769,14 @@
                                     </TextBlock>
                                 </StackPanel>
                             </Grid>
-
                             <TextBlock Text="{Binding FemalePercentText}" FontSize="11" FontWeight="SemiBold" FontFamily="Segoe UI"
                                        Foreground="{StaticResource SecondaryText}" TextAlignment="Center" Margin="0,14,0,0"/>
                         </StackPanel>
                     </Border>
-
                     <Border Grid.Column="2" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                         <StackPanel>
                             <TextBlock Text="Employment status" Style="{StaticResource PanelTitle}"/>
                             <TextBlock Text="Work situation of parents" Style="{StaticResource PanelSubtitle}"/>
-
                             <Grid Width="170" Height="170" HorizontalAlignment="Center" Margin="0,4,0,16">
                                 <Canvas x:Name="CvEmployDonut" Width="170" Height="170"/>
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -854,7 +786,6 @@
                                                Foreground="{StaticResource SecondaryText}" TextAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
-
                             <StackPanel HorizontalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,6" ToolTip="{Binding EmployedText}">
                                     <Border Width="10" Height="10" CornerRadius="2" Background="#7D2245" VerticalAlignment="Center"/>
@@ -878,7 +809,6 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-
                 <!-- Civil status | Monthly income -->
                 <Grid Margin="0,0,0,20">
                     <Grid.ColumnDefinitions>
@@ -886,7 +816,6 @@
                         <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="7*"/>
                     </Grid.ColumnDefinitions>
-
                     <Border Grid.Column="0" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                         <StackPanel>
                             <TextBlock Text="Civil status" Style="{StaticResource PanelTitle}"/>
@@ -894,12 +823,10 @@
                             <Canvas x:Name="CvCivilBars" Height="240" Background="Transparent"/>
                         </StackPanel>
                     </Border>
-
                     <Border Grid.Column="2" Style="{StaticResource PanelStyle}" BorderBrush="{StaticResource MaroonPrimary}">
                         <StackPanel>
                             <TextBlock Text="Monthly income" Style="{StaticResource PanelTitle}"/>
                             <TextBlock Text="Poverty threshold and subsidy classification (RA 11861)" Style="{StaticResource PanelSubtitle}"/>
-
                             <Grid Margin="0,4,0,20">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -922,7 +849,6 @@
                                              Value="{Binding IncomeBelowMinPercent, Mode=OneWay}"
                                              Background="#F2FAEA" Foreground="{StaticResource GreenPrimary}"/>
                             </Grid>
-
                             <Grid Margin="0,0,0,20">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -945,7 +871,6 @@
                                              Value="{Binding IncomeMinWagePercent, Mode=OneWay}"
                                              Background="#FCE4E8" Foreground="{StaticResource MaroonPrimary}"/>
                             </Grid>
-
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -973,13 +898,11 @@
                 </Grid>
             </StackPanel>
         </ScrollViewer>
-
         <Grid x:Name="FilterModalOverlay"
               Visibility="Collapsed"
               Background="#66000000"
               Panel.ZIndex="100"
               MouseDown="FilterModalOverlay_MouseDown">
-
             <Border Background="White" CornerRadius="16"
                     BorderBrush="#E8D4DA" BorderThickness="1.5"
                     Padding="26,22"
@@ -988,21 +911,18 @@
                 <Border.Effect>
                     <DropShadowEffect Color="#000000" BlurRadius="25" ShadowDepth="6" Opacity="0.25"/>
                 </Border.Effect>
-
                 <StackPanel>
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="FILTER ANALYTICS" FontFamily="Segoe UI" FontSize="11"
                                        FontWeight="Bold" Foreground="#702943"/>
                             <TextBlock Text="Select timeframe and geographic scope" FontFamily="Segoe UI"
                                        FontSize="11" Foreground="#6B7280" Margin="0,2,0,0"/>
                         </StackPanel>
-
                         <Button Grid.Column="1" Click="FilterModalClose_Click"
                                 Background="Transparent" BorderThickness="0"
                                 Cursor="Hand" Width="28" Height="28"
@@ -1017,7 +937,6 @@
                             </Button.Template>
                         </Button>
                     </Grid>
-
                     <TextBlock Text="Filter By" FontFamily="Segoe UI" FontSize="12"
                                FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
                     <ComboBox x:Name="CmbPeriodType"
@@ -1032,7 +951,6 @@
                         <ComboBoxItem Content="By Yearly" Tag="Yearly"/>
                         <ComboBoxItem Content="Custom Range" Tag="CustomRange"/>
                     </ComboBox>
-
                     <StackPanel x:Name="PnlYearly" Visibility="Collapsed" Margin="0,0,0,14">
                         <TextBlock Text="Select Year" FontFamily="Segoe UI" FontSize="12"
                                    FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
@@ -1042,7 +960,6 @@
                                   Height="40"
                                   FontFamily="Segoe UI" FontSize="13"/>
                     </StackPanel>
-
                     <StackPanel x:Name="PnlMonthly" Visibility="Visible" Margin="0,0,0,14">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -1083,7 +1000,6 @@
                             </StackPanel>
                         </Grid>
                     </StackPanel>
-
                     <StackPanel x:Name="PnlQuarterly" Visibility="Collapsed" Margin="0,0,0,14">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -1116,7 +1032,6 @@
                             </StackPanel>
                         </Grid>
                     </StackPanel>
-
                     <StackPanel x:Name="PnlCustomRange" Visibility="Collapsed" Margin="0,0,0,14">
                         <TextBlock Text="Custom Date Range" FontFamily="Segoe UI" FontSize="12"
                                    FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
@@ -1136,7 +1051,6 @@
                                         Style="{StaticResource BrandDatePicker}"/>
                         </Grid>
                     </StackPanel>
-
                     <TextBlock Text="Barangay" FontFamily="Segoe UI" FontSize="12"
                                FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,6"/>
                     <ComboBox x:Name="CmbFilterBarangay"
@@ -1172,7 +1086,6 @@
                         <ComboBoxItem Content="Tubigan"/>
                         <ComboBoxItem Content="Zapote"/>
                     </ComboBox>
-
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -1221,13 +1134,11 @@
                 </StackPanel>
             </Border>
         </Grid>
-
         <!-- Analytics Skeleton Loader -->
         <components:AnalyticsSkeletonLoader x:Name="AnalyticsSkeleton"
                                             Margin="24,142,24,24"
                                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
                                             Panel.ZIndex="50"/>
-
         <!-- Full-Page Loading Overlay (Disabled in favor of modern Skeleton Loader) -->
         <components:LoadingOverlay x:Name="PageLoadingOverlay"
                                    IsLoading="False"

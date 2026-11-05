@@ -9,10 +9,8 @@
       d:DesignHeight="850" d:DesignWidth="1200"
       Title="Subsidy Recommendation"
       Background="#FFFFFF">
-
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
         <Style x:Key="PageTabBtn" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -43,7 +41,6 @@
             </Setter>
         </Style>
     </Page.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -51,7 +48,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
         <!-- Row 0: Page Title & Metrics Header -->
         <Grid Grid.Row="0" Margin="24,16,24,8">
             <Grid.ColumnDefinitions>
@@ -70,7 +66,6 @@
                         <TextBlock Text="{Binding LastRefreshedText, FallbackValue='Updated: Just now'}" FontSize="11.5" FontFamily="Segoe UI" FontWeight="Medium" Foreground="#702943"/>
                     </StackPanel>
                 </Border>
-
                 <!-- Circular Refresh Button -->
                 <Button x:Name="BtnRefreshSubsidy"
                         Width="40" Height="40" Margin="8,0,0,0"
@@ -98,10 +93,8 @@
                 </Button>
             </StackPanel>
         </Grid>
-
         <!-- Row 1: Cycle & Fiscal Year Management Control Bar -->
         <c:SubsidyCycleControlBar Grid.Row="1" Margin="24,0,24,10"/>
-
         <!-- Row 2: Tab Navigation Bar -->
         <Border Grid.Row="2" BorderBrush="#E8D8DE" BorderThickness="0,0,0,1" Margin="24,0,24,0">
             <StackPanel Orientation="Horizontal">
@@ -125,7 +118,6 @@
                         </TextBlock.Style>
                     </TextBlock>
                 </Button>
-
                 <!-- Tab 1: Approved Selection & Audit (Active Cycle only) -->
                 <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="1"
                         IsEnabled="{Binding CanAccessActivePipelineTabs}">
@@ -146,7 +138,6 @@
                         </TextBlock.Style>
                     </TextBlock>
                 </Button>
-
                 <!-- Tab 2: Final Grantees & Archive (Always Accessible) -->
                 <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="2">
                     <TextBlock Text="Final Grantees" FontSize="13">
@@ -165,14 +156,12 @@
                 </Button>
             </StackPanel>
         </Border>
-
         <!-- Row 3: Tab Content Area -->
         <Grid Grid.Row="3" Margin="24,10,24,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
             <!-- Tab Grids -->
             <Grid Grid.Column="0">
                 <c:RecommendationQueueGrid Visibility="{Binding TabRecommendationsVisible, Converter={StaticResource BoolToVis}}"/>
@@ -182,18 +171,14 @@
                                               Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
                                               Panel.ZIndex="10"/>
             </Grid>
-
             <!-- Detail / Explain Drawer (Accessible on Tab 0 and Tab 1) -->
             <c:SubsidyExplainDrawer Grid.Column="1" Margin="12,0,0,0"
                                     Visibility="{Binding IsDrawerOpen, Converter={StaticResource BoolToVis}}"/>
         </Grid>
-
         <!-- Outlier Rejection Modal Overlay (Spans all rows) -->
         <c:ModalOutlierRejection Grid.RowSpan="4"/>
-
         <!-- Disqualified Candidates Audit Log Modal Overlay (Spans all rows) -->
         <c:ModalDisqualifiedCandidates Grid.RowSpan="4"/>
-
         <!-- Loading Overlay (Disabled in favor of modern Skeleton Loader) -->
         <c:LoadingOverlay Grid.RowSpan="4" IsLoading="False" Visibility="Collapsed" Panel.ZIndex="9999"/>
     </Grid>

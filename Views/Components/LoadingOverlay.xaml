@@ -4,7 +4,6 @@
              x:Name="Self"
              Visibility="Collapsed"
              IsHitTestVisible="False">
-
     <Grid Panel.ZIndex="9999">
         <Rectangle Fill="#88000000" RadiusX="0" RadiusY="0"/>
         <Border HorizontalAlignment="Center" VerticalAlignment="Center"

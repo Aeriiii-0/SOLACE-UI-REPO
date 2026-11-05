@@ -56,7 +56,6 @@ namespace SOLUM_UI.Services
                 : $"Updated {recordName} [{recordId}] — {field}";
             Log(AuditAction.Update, desc, by, role, recordId, recordName, field, oldVal, newVal);
         }
-
         /// <summary>
         /// Log an update with multiple field-level changes tracked in detail.
         /// </summary>
@@ -67,7 +66,6 @@ namespace SOLUM_UI.Services
             string desc = changeCount == 0
                 ? $"Updated record: {recordName} [{recordId}]"
                 : $"Updated record: {recordName} [{recordId}] — {changeCount} field(s) changed";
-
             var log = new AuditLog
             {
                 Id              = _nextId++,
@@ -80,7 +78,6 @@ namespace SOLUM_UI.Services
                 Timestamp       = DateTime.Now,
                 Changes         = changes ?? new List<ChangeDetail>()
             };
-
             Logs.Insert(0, log);
         }
 

@@ -1,35 +1,20 @@
 using System;
-
 using System.Collections.Generic;
-
 using System.Collections.ObjectModel;
-
 using System.Linq;
-
 using System.Threading.Tasks;
-
 using System.Windows.Input;
-
 using SOLUM_UI.Core;
-
 using SOLUM_UI.Models;
-
 using SOLUM_UI.Services;
-
 using SOLUM_UI.Services.Api;
-
 using SOLUM_UI.Services.Implementations;
-
 using SOLUM_UI.Services.Interfaces;
 
-
-
 namespace SOLUM_UI.ViewModels
-
 {
 
     public partial class SubsidyRecommendationViewModel : ObservableObject
-
     {
 
         private readonly ISubsidyApiService _apiService;
@@ -51,49 +36,28 @@ namespace SOLUM_UI.ViewModels
 
         private bool _isDrawerOpen, _isOutlierModalOpen, _outlierAutoPromote = false, _isBatchMode, _isLoading;
 
-
-
         public SubsidyRecommendationViewModel(ISubsidyApiService apiService = null)
-
         {
-
             _apiService = apiService ?? new SubsidyApiService();
-
             FilteredRecommendations = new ObservableCollection<SubsidyItem>();
-
             ShortlistRows = new ObservableCollection<SelectionRow>();
-
             FilteredShortlistRows = new ObservableCollection<SelectionRow>();
-
             FinalGranteesList = new ObservableCollection<SelectionRow>();
-
             AvailableFiscalCycles = new ObservableCollection<FiscalCycleOption>();
-
             DisqualifiedCandidates = new ObservableCollection<DisqualifiedCandidateItem>();
-
             FilteredDisqualifiedCandidates = new ObservableCollection<DisqualifiedCandidateItem>();
-
             PagedDisqualifiedCandidates = new ObservableCollection<DisqualifiedCandidateItem>();
-
             InitCommands();
-
             InitPagination();
-
             if (!AuthApiService.Instance.IsAdmin)
-
             {
-
                 ToastNotification.Show("Access Denied", "Administrator privilege required.", ToastType.Error);
-
                 return;
 
             }
-
             _ = RefreshDataAsync();
 
         }
-
-
 
         public ObservableCollection<SubsidyItem> FilteredRecommendations { get; }
 
@@ -111,8 +75,6 @@ namespace SOLUM_UI.ViewModels
 
         public ObservableCollection<DisqualifiedCandidateItem> PagedDisqualifiedCandidates { get; }
 
-
-
         private bool _isDisqualifiedModalOpen;
 
         public bool IsDisqualifiedModalOpen { get => _isDisqualifiedModalOpen; set => SetProperty(ref _isDisqualifiedModalOpen, value); }
@@ -122,21 +84,13 @@ namespace SOLUM_UI.ViewModels
         private string _disqualifiedSearchText = string.Empty;
 
         public string DisqualifiedSearchText
-
         {
-
             get => _disqualifiedSearchText;
-
             set
-
             {
-
                 if (SetProperty(ref _disqualifiedSearchText, value))
-
                 {
-
                     _disqualifiedCurrentPage = 1;
-
                     TriggerDisqualifiedSearchDebounced();
 
                 }
@@ -145,26 +99,16 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private string _disqualifiedReasonFilter = "All Reasons";
 
         public string DisqualifiedReasonFilter
-
         {
-
             get => _disqualifiedReasonFilter;
-
             set
-
             {
-
                 if (SetProperty(ref _disqualifiedReasonFilter, value))
-
                 {
-
                     _disqualifiedCurrentPage = 1;
-
                     _ = RefreshDisqualifiedCandidatesAsync();
 
                 }
@@ -173,38 +117,24 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private void TriggerDisqualifiedSearchDebounced()
-
         {
-
             if (_disqualifiedSearchDebounceTimer == null)
-
             {
-
                 _disqualifiedSearchDebounceTimer = new System.Windows.Threading.DispatcherTimer
-
                 {
-
                     Interval = TimeSpan.FromMilliseconds(300)
 
                 };
-
                 _disqualifiedSearchDebounceTimer.Tick += (s, e) =>
-
                 {
-
                     _disqualifiedSearchDebounceTimer.Stop();
-
                     _ = RefreshDisqualifiedCandidatesAsync();
 
                 };
 
             }
-
             _disqualifiedSearchDebounceTimer.Stop();
-
             _disqualifiedSearchDebounceTimer.Start();
 
         }
@@ -220,77 +150,47 @@ namespace SOLUM_UI.ViewModels
         public string DisqualifiedButtonText => $"Disqualified ({DisqualifiedCount})";
 
         public void NotifyDisqualifiedMetricsChanged()
-
         {
-
             OnPropertyChanged(nameof(DisqualifiedCount));
-
             OnPropertyChanged(nameof(HasDisqualifiedCandidates));
-
             OnPropertyChanged(nameof(HasFilteredDisqualifiedCandidates));
-
             OnPropertyChanged(nameof(HasNoDisqualifiedCandidates));
-
             OnPropertyChanged(nameof(DisqualifiedButtonText));
-
             OnPropertyChanged(nameof(DisqualifiedPageSummary));
-
             OnPropertyChanged(nameof(DisqualifiedPageNumberLabel));
 
         }
-
-
-
         // Disqualified Modal Pagination
 
         private int _disqualifiedCurrentPage = 1;
 
         public int DisqualifiedCurrentPage
-
         {
-
             get => _disqualifiedCurrentPage;
-
             set { if (SetProperty(ref _disqualifiedCurrentPage, value)) UpdateDisqualifiedPaged(); }
 
         }
 
-
-
         private int _disqualifiedPageSize = 5;
 
         public int DisqualifiedPageSize
-
         {
-
             get => _disqualifiedPageSize;
-
             set { if (SetProperty(ref _disqualifiedPageSize, value)) UpdateDisqualifiedPaged(); }
 
         }
 
-
-
         private int _disqualifiedTotalPages = 1;
 
         public int DisqualifiedTotalPages
-
         {
-
             get => _disqualifiedTotalPages;
-
             set
-
             {
-
                 if (SetProperty(ref _disqualifiedTotalPages, value))
-
                 {
-
                     OnPropertyChanged(nameof(CanDisqualifiedPrevPage));
-
                     OnPropertyChanged(nameof(CanDisqualifiedNextPage));
-
                     OnPropertyChanged(nameof(DisqualifiedPageNumberLabel));
 
                 }
@@ -299,60 +199,40 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public bool CanDisqualifiedPrevPage => DisqualifiedCurrentPage > 1;
 
         public bool CanDisqualifiedNextPage => DisqualifiedCurrentPage < DisqualifiedTotalPages;
 
         public string DisqualifiedPageNumberLabel => $"{DisqualifiedCurrentPage} / {DisqualifiedTotalPages}";
 
-
-
         public string DisqualifiedPageSummary
-
         {
-
             get
-
             {
 
                 int total = FilteredDisqualifiedCandidates?.Count ?? 0;
-
                 if (total == 0) return "No records found";
 
                 int start = (DisqualifiedCurrentPage - 1) * DisqualifiedPageSize + 1;
 
                 int end = Math.Min(DisqualifiedCurrentPage * DisqualifiedPageSize, total);
-
                 return $"Showing {start}–{end} of {total} records";
 
             }
 
         }
 
-
-
         private FiscalCycleOption _selectedFiscalCycle;
 
         public FiscalCycleOption SelectedFiscalCycle
-
         {
-
             get => _selectedFiscalCycle;
-
             set
-
             {
-
                 if (value == null) return;
-
                 if (SetProperty(ref _selectedFiscalCycle, value))
-
                 {
-
                     NotifyCycleProperties();
-
                     _ = LoadCycleDataAsync(value);
 
                 }
@@ -361,76 +241,42 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public void NotifyCycleProperties()
-
         {
-
             OnPropertyChanged(nameof(CanModifyGrantees));
-
             OnPropertyChanged(nameof(CanAccessActivePipelineTabs));
-
             OnPropertyChanged(nameof(CanShowRosterLockToggle));
-
             OnPropertyChanged(nameof(TabDisabledTooltipText));
-
             OnPropertyChanged(nameof(RosterStatusBadgeText));
-
             OnPropertyChanged(nameof(RosterStatusBadgeBg));
-
             OnPropertyChanged(nameof(RosterStatusBadgeFg));
-
             OnPropertyChanged(nameof(RosterLockActionText));
-
             OnPropertyChanged(nameof(RosterLockActionBg));
-
             OnPropertyChanged(nameof(RosterLockActionFg));
-
             OnPropertyChanged(nameof(ActiveCycleHeaderBadgeText));
-
             OnPropertyChanged(nameof(IsActiveCycle));
-
             OnPropertyChanged(nameof(CycleTypeBadgeText));
-
             OnPropertyChanged(nameof(CycleTypeBadgeBg));
-
             OnPropertyChanged(nameof(CycleTypeBadgeFg));
-
             OnPropertyChanged(nameof(CycleSectionTitleText));
-
             OnPropertyChanged(nameof(CycleSectionSubtitleText));
 
         }
 
-
-
         public string ShortlistSearchText { get => _shortlistSearchText; set { if (SetProperty(ref _shortlistSearchText, value)) FilterShortlistRows(); } }
 
         public int ActiveTabIndex
-
         {
-
             get => _activeTabIndex;
-
             set
-
             {
-
                 if (SetProperty(ref _activeTabIndex, value))
-
                 {
-
                     OnPropertyChanged(nameof(TabRecommendationsVisible));
-
                     OnPropertyChanged(nameof(TabShortlistVisible));
-
                     OnPropertyChanged(nameof(TabFinalVisible));
-
                     if (value == 0) _ = LoadQueuePageAsync(QueueCurrentPage);
-
                     else if (value == 1) FilterShortlistRows();
-
                     else if (value == 2) UpdateFinalPaged();
 
                 }
@@ -445,34 +291,23 @@ namespace SOLUM_UI.ViewModels
 
         public double BatchSelectColumnWidth => IsBatchMode ? 38 : 0; public string BatchModeButtonText => IsBatchMode ? "Batch Mode: On" : "Batch Select";
 
-
-
         public int GrantAmountPerRecipient
-
         {
-
             get => _grantAmountPerRecipient;
-
             set { if (value < 0) value = 0; if (SetProperty(ref _grantAmountPerRecipient, value)) { _budgetAmount = _granteeSlots * _grantAmountPerRecipient; OnPropertyChanged(nameof(BudgetAmount)); OnPropertyChanged(nameof(CommittedBudgetText)); NotifyQuotaMetricsChanged(); } }
 
         }
 
         public int GranteeSlots
-
         {
-
             get => _granteeSlots;
-
             set { if (value < 0) value = 0; if (SetProperty(ref _granteeSlots, value)) { _budgetAmount = _granteeSlots * _grantAmountPerRecipient; OnPropertyChanged(nameof(BudgetAmount)); OnPropertyChanged(nameof(CommittedBudgetText)); OnPropertyChanged(nameof(GranteeSlotsText)); NotifyQuotaMetricsChanged(); RecalculateQuotaAndFilter(); } }
 
         }
 
         public int BudgetAmount
-
         {
-
             get => _budgetAmount;
-
             set { if (SetProperty(ref _budgetAmount, value)) { _granteeSlots = _grantAmountPerRecipient > 0 ? Math.Max(0, value / _grantAmountPerRecipient) : 0; OnPropertyChanged(nameof(GranteeSlots)); OnPropertyChanged(nameof(CommittedBudgetText)); OnPropertyChanged(nameof(GranteeSlotsText)); NotifyQuotaMetricsChanged(); RecalculateQuotaAndFilter(); } }
 
         }
@@ -494,28 +329,17 @@ namespace SOLUM_UI.ViewModels
         public string QuotaPercentageLabel => $"{QuotaFillPercentage:F0}% allocated";
 
         public void NotifyQuotaMetricsChanged()
-
         {
-
             OnPropertyChanged(nameof(ConfirmedGranteesCount));
-
             OnPropertyChanged(nameof(RemainingSlots));
-
             OnPropertyChanged(nameof(QuotaFillPercentage));
-
             OnPropertyChanged(nameof(QuotaProgressText));
-
             OnPropertyChanged(nameof(QuotaPercentageLabel));
-
             OnPropertyChanged(nameof(FinalSummaryText));
-
             OnPropertyChanged(nameof(Tab2QuotaSummary));
-
             OnPropertyChanged(nameof(ShortlistSummary));
 
         }
-
-
 
         public string AuditFilterLabel => _auditFilter == "All" ? "Filter: All" : (_auditFilter == "CollegeAge" ? "Filter: City Educ" : "Filter: Cleared");
 
@@ -526,8 +350,6 @@ namespace SOLUM_UI.ViewModels
         public string ShortlistSummary => $"{ShortlistRows.Count(x => !x.IsWaitlisted)} of {_granteeSlots} slots allocated • ₱{ShortlistRows.Count(x => !x.IsWaitlisted) * _grantAmountPerRecipient:N0} committed";
 
         public string FinalSummaryText => $"{FinalGranteesList.Count} official grantees confirmed";
-
-
 
         public bool IsAllShortlistSelected { get => FilteredShortlistRows.Count > 0 && FilteredShortlistRows.All(x => x.IsSelected); set { foreach (var r in FilteredShortlistRows) r.IsSelected = value; OnPropertyChanged(); RecalculateShortlistSelectionCounts(); } }
 
@@ -547,30 +369,17 @@ namespace SOLUM_UI.ViewModels
 
         public void RecalculateShortlistSelectionCounts() { OnPropertyChanged(nameof(IsAllShortlistSelected)); OnPropertyChanged(nameof(ShortlistSelectedCount)); OnPropertyChanged(nameof(HasShortlistSelection)); OnPropertyChanged(nameof(ShortlistBatchActionLabel)); OnPropertyChanged(nameof(SelectAllShortlistButtonText)); }
 
-
-
                 public SubsidyItem ActiveCandidate
-
         {
-
             get => _activeCandidate;
-
             set
-
             {
-
                 if (SetProperty(ref _activeCandidate, value))
-
                 {
-
                     OnPropertyChanged(nameof(CanReassessActiveCandidate));
-
                     OnPropertyChanged(nameof(ActiveCandidateReassessmentTooltip));
-
                     if (!CanReassessActiveCandidate)
-
                     {
-
                         EnsureCooldownTickerStarted();
 
                     }
@@ -581,76 +390,45 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public static TimeSpan ReassessmentCooldown => TimeSpan.FromSeconds(
-
             (int.TryParse(System.Configuration.ConfigurationManager.AppSettings["SubsidyReassessmentCooldownSeconds"], out int v) && v > 0) ? v : 30);
-
-
 
         private readonly Dictionary<Guid, DateTime> _reassessmentCooldowns = new Dictionary<Guid, DateTime>();
 
         private System.Windows.Threading.DispatcherTimer _cooldownTicker;
 
-
-
         public bool CanReassessActiveCandidate
-
         {
-
             get
-
             {
-
                 if (IsLoading || ActiveCandidate == null) return false;
-
                 Guid targetId = ActiveCandidate.SoloParentId != Guid.Empty ? ActiveCandidate.SoloParentId : (Guid.TryParse(ActiveCandidate.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
-
                 if (targetId != Guid.Empty && _reassessmentCooldowns.TryGetValue(targetId, out var lastTime))
-
                 {
-
                     return (DateTime.UtcNow - lastTime) >= ReassessmentCooldown;
 
                 }
-
                 return true;
 
             }
 
         }
 
-
-
         public string ActiveCandidateReassessmentTooltip
-
         {
-
             get
-
             {
-
                 if (ActiveCandidate != null)
-
                 {
-
                     Guid targetId = ActiveCandidate.SoloParentId != Guid.Empty ? ActiveCandidate.SoloParentId : (Guid.TryParse(ActiveCandidate.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
-
                     if (targetId != Guid.Empty && _reassessmentCooldowns.TryGetValue(targetId, out var lastTime))
-
                     {
-
                         var elapsed = DateTime.UtcNow - lastTime;
-
                         var cd = ReassessmentCooldown;
-
                         if (elapsed < cd)
-
                         {
 
                             int rem = (int)Math.Ceiling((cd - elapsed).TotalSeconds);
-
                             return $"Re-assessment cooldown active: please wait {rem}s before re-scoring again.";
 
                         }
@@ -658,85 +436,51 @@ namespace SOLUM_UI.ViewModels
                     }
 
                 }
-
                 return "Re-assess & re-score applicant via live ML model (Right-click to edit circumstances)";
 
             }
 
         }
 
-
-
         public void RecordReassessment(Guid candidateId)
-
         {
-
             if (candidateId == Guid.Empty) return;
-
             _reassessmentCooldowns[candidateId] = DateTime.UtcNow;
-
             OnPropertyChanged(nameof(CanReassessActiveCandidate));
-
             OnPropertyChanged(nameof(ActiveCandidateReassessmentTooltip));
-
             EnsureCooldownTickerStarted();
 
         }
 
-
-
         public void EnsureCooldownTickerStarted()
-
         {
-
             if (_cooldownTicker == null)
-
             {
-
                 _cooldownTicker = new System.Windows.Threading.DispatcherTimer
-
                 {
-
                     Interval = TimeSpan.FromSeconds(1)
 
                 };
-
                 _cooldownTicker.Tick += (s, e) =>
-
                 {
-
                     OnPropertyChanged(nameof(CanReassessActiveCandidate));
-
                     OnPropertyChanged(nameof(ActiveCandidateReassessmentTooltip));
 
-
-
                     bool anyActive = false;
-
                     var now = DateTime.UtcNow;
-
                     var cd = ReassessmentCooldown;
-
                     foreach (var kvp in _reassessmentCooldowns)
-
                     {
-
                         if ((now - kvp.Value) < cd)
-
                         {
-
                             anyActive = true;
-
                             break;
 
                         }
 
                     }
-
                     if (!anyActive && _cooldownTicker.IsEnabled)
-
                     {
-
                         _cooldownTicker.Stop();
 
                     }
@@ -744,11 +488,8 @@ namespace SOLUM_UI.ViewModels
                 };
 
             }
-
             if (!_cooldownTicker.IsEnabled)
-
             {
-
                 _cooldownTicker.Start();
 
             }
@@ -768,19 +509,12 @@ namespace SOLUM_UI.ViewModels
         public bool OutlierAutoPromote { get => _outlierAutoPromote; set => SetProperty(ref _outlierAutoPromote, value); }
 
         public bool IsLoading
-
         {
-
             get => _isLoading;
-
             set
-
             {
-
                 if (SetProperty(ref _isLoading, value))
-
                 {
-
                     System.Windows.Input.CommandManager.InvalidateRequerySuggested();
 
                 }
@@ -790,8 +524,6 @@ namespace SOLUM_UI.ViewModels
         }
 
         public int SelectedFiscalYearIndex { get => _selectedFiscalYearIndex; set { if (SetProperty(ref _selectedFiscalYearIndex, value)) { OnPropertyChanged(nameof(CanModifyGrantees)); OnPropertyChanged(nameof(CanAccessActivePipelineTabs)); OnPropertyChanged(nameof(TabDisabledTooltipText)); } } }
-
-
 
         private bool _isRosterLocked; private int _activeCycleFiscalYear = 2026;
 
@@ -814,13 +546,9 @@ namespace SOLUM_UI.ViewModels
         public string CycleSectionTitleText => IsActiveCycle ? $"Fiscal Year {ActiveCycleFiscalYear} Subsidy Allocation" : $"Fiscal Year {(SelectedFiscalCycle != null ? SelectedFiscalCycle.FiscalYear : 0)} Certified Disbursement Ledger";
 
         public string CycleSectionSubtitleText => IsActiveCycle
-
             ? (IsRosterLocked ? "Roster is finalized & locked for official disbursement (click 'Unlock Roster' to amend)." : "Active pipeline open for staff review, shortlisting, and candidate approvals.")
-
             : (SelectedFiscalCycle != null && SelectedFiscalCycle.IsFinalized
-
                 ? "This cycle is finalized & locked. Records are open for review in read-only mode (click 'Unlock Roster' to amend)."
-
                 : "This cycle is closed and certified for historical reporting and audit (read-only).");
 
         public string TabDisabledTooltipText => IsRosterLocked 
@@ -838,8 +566,6 @@ namespace SOLUM_UI.ViewModels
         public string RosterLockActionBg => "#702943"; public string RosterLockActionFg => "#FFFFFF";
 
         public int ActiveCycleFiscalYear => _activeCycleFiscalYear; public string ActiveCycleHeaderBadgeText => $"Active Cycle: FY {ActiveCycleFiscalYear} • {(IsRosterLocked ? "Finalized & Locked" : "Open for Review")}";
-
-
 
         public ICommand SwitchTabCommand { get; private set; } public ICommand ToggleBatchModeCommand { get; private set; } public ICommand SelectTopNCommand { get; private set; } public ICommand ShortlistSelectedCommand { get; private set; }
 
@@ -862,13 +588,9 @@ namespace SOLUM_UI.ViewModels
 
         public ICommand RefreshCommand { get; private set; } public ICommand GenerateRecommendationsCommand { get; private set; } public ICommand ToggleRosterLockCommand { get; private set; } public ICommand StartNewCycleCommand { get; private set; } public ICommand ToggleShortlistBatchModeCommand { get; private set; } public ICommand SaveQuotaCommand { get; private set; } public ICommand ExportAllQueueCommand { get; private set; }
 
-
-
         private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
 
         private DateTime _lastRefreshTime = DateTime.MinValue;
-
-
 
         public static readonly TimeSpan DataFreshnessTtl = TimeSpan.FromMinutes(2);
 
@@ -878,224 +600,127 @@ namespace SOLUM_UI.ViewModels
 
         public void InvalidateCache() => _lastSuccessfulLoadTime = DateTime.MinValue;
 
-
-
         private string _lastRefreshedText = "Updated: Just now";
 
         public string LastRefreshedText
-
         {
-
             get => _lastRefreshedText;
-
             set => SetProperty(ref _lastRefreshedText, value);
 
         }
 
-
-
         private string _refreshTooltip = "Refresh subsidy recommendations";
 
         public string RefreshTooltip
-
         {
-
             get => _refreshTooltip;
-
             set => SetProperty(ref _refreshTooltip, value);
 
         }
 
-
-
         public async Task LoadFiscalCyclesAsync()
-
         {
-
             var cyclesResp = await _apiService.GetCyclesAsync();
-
             var prevSelectedYear = SelectedFiscalCycle?.FiscalYear;
-
             AvailableFiscalCycles.Clear();
-
             FiscalCycleOption activeOption = null;
-
             if (cyclesResp?.Data != null && cyclesResp.Data.Count > 0)
-
             {
-
                 foreach (var c in cyclesResp.Data)
-
                 {
-
                     var opt = new FiscalCycleOption
-
                     {
-
                         CycleId = c.Id,
-
                         FiscalYear = c.FiscalYear,
-
                         Status = c.Status,
-
                         AllocatedSlots = c.AllocatedSlots,
-
                         TotalBudget = c.TotalBudget,
-
                         PerGranteeAmount = c.PerGranteeAmount
 
                     };
-
                     AvailableFiscalCycles.Add(opt);
-
                     if (opt.IsActive && activeOption == null) activeOption = opt;
 
                 }
 
             }
-
-
-
             FiscalCycleOption target = null;
-
             if (prevSelectedYear.HasValue)
-
             {
-
                 target = AvailableFiscalCycles.FirstOrDefault(c => c.FiscalYear == prevSelectedYear.Value);
 
             }
-
             if (target == null)
-
             {
-
                 target = activeOption ?? AvailableFiscalCycles.FirstOrDefault();
 
             }
-
-
-
             if (target != null)
-
             {
-
                 _selectedFiscalCycle = target;
-
                 OnPropertyChanged(nameof(SelectedFiscalCycle));
 
             }
-
             NotifyCycleProperties();
 
         }
 
-
-
         public async Task RefreshDataAsync(bool forceReloadCycles = false)
-
         {
-
             if (IsLoading) return;
-
             if ((DateTime.UtcNow - _lastRefreshTime) < RefreshCooldown) return;
-
             _lastRefreshTime = DateTime.UtcNow;
-
-
-
             IsLoading = true;
-
             try
-
             {
-
                 // When refreshing the active/selected cycle, bypass cycles re-fetch to load immediately
-
                 if (!forceReloadCycles && SelectedFiscalCycle != null && AvailableFiscalCycles.Count > 0)
-
                 {
-
                     await LoadCycleDataInternalAsync(SelectedFiscalCycle);
-
                     _lastSuccessfulLoadTime = DateTime.UtcNow;
-
                     LastRefreshedText = $"Updated: {DateTime.Now:h:mm tt}";
-
                     RefreshTooltip = $"Refresh subsidy recommendations (Last refreshed: {DateTime.Now:h:mm:ss tt})";
-
                     return;
 
                 }
-
-
-
                 var cyclesResp = await _apiService.GetCyclesAsync();
-
                 AvailableFiscalCycles.Clear();
-
                 FiscalCycleOption activeOption = null;
-
                 if (cyclesResp?.Data != null && cyclesResp.Data.Count > 0)
-
                 {
-
                     foreach (var c in cyclesResp.Data)
-
                     {
-
                         var opt = new FiscalCycleOption
-
                         {
-
                             CycleId = c.Id,
-
                             FiscalYear = c.FiscalYear,
-
                             Status = c.Status,
-
                             AllocatedSlots = c.AllocatedSlots,
-
                             TotalBudget = c.TotalBudget,
-
                             PerGranteeAmount = c.PerGranteeAmount
 
                         };
-
                         AvailableFiscalCycles.Add(opt);
-
                         if (opt.IsActive && activeOption == null) activeOption = opt;
 
                     }
 
                 }
-
                 var target = activeOption ?? AvailableFiscalCycles.FirstOrDefault();
-
                 _selectedFiscalCycle = target;
-
                 OnPropertyChanged(nameof(SelectedFiscalCycle));
-
                 NotifyCycleProperties();
-
                 if (target != null)
-
                 {
-
                     if (!target.IsActive) ActiveTabIndex = 2;
-
                     await LoadCycleDataInternalAsync(target);
-
                     _lastSuccessfulLoadTime = DateTime.UtcNow;
-
                     LastRefreshedText = $"Updated: {DateTime.Now:h:mm tt}";
-
                     RefreshTooltip = $"Refresh subsidy recommendations (Last refreshed: {DateTime.Now:h:mm:ss tt})";
 
                 }
 
             }
-
             catch (Exception ex) { ToastNotification.Show("API Error", ex.Message, ToastType.Error); } finally { IsLoading = false; }
 
         }
@@ -1103,4 +728,3 @@ namespace SOLUM_UI.ViewModels
     }
 
 }
-

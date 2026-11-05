@@ -112,7 +112,6 @@ namespace SOLUM_UI.Models
                 : "—";
             set { }
         }
-
         // Badges for Reasons
         public SolidColorBrush ReasonBadgeBg
         {
@@ -170,7 +169,6 @@ namespace SOLUM_UI.Models
                 return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E5E7EB"));
             }
         }
-
         // Priority Badges
         public SolidColorBrush PriorityBadgeBg
         {

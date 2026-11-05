@@ -30,15 +30,12 @@ namespace SOLUM_UI.Services
         private const int WIA_DPS_PAGES                      = 3096; // Number of pages to scan
         private const int WIA_DPS_HORIZONTAL_BED_SIZE        = 3074; // Thousandths of an inch
         private const int WIA_DPS_VERTICAL_BED_SIZE          = 3075; // Thousandths of an inch
-
         // WIA Format GUIDs
         public const string WIA_FORMAT_PNG  = "{B96B3CAE-0728-11D3-9D7B-0000F81EF32E}";
         public const string WIA_FORMAT_BMP  = "{B96B3CAB-0728-11D3-9D7B-0000F81EF32E}";
         public const string WIA_FORMAT_JPEG = "{B96B3CAF-0728-11D3-9D7B-0000F81EF32E}";
-
         // WIA Device Types
         private const int WIA_DEVICE_TYPE_SCANNER = 1;
-
         /// <summary>
         /// Retrieves a list of all WIA-compatible scanner devices currently detected on the system.
         /// </summary>
@@ -52,24 +49,20 @@ namespace SOLUM_UI.Services
                     Type managerType = Type.GetTypeFromProgID("WIA.DeviceManager");
                     if (managerType == null)
                         return list;
-
                     dynamic deviceManager = Activator.CreateInstance(managerType);
                     int count = (int)deviceManager.DeviceInfos.Count;
-
                     for (int i = 1; i <= count; i++)
                     {
                         try
                         {
                             dynamic info = deviceManager.DeviceInfos[i];
                             int type = (int)info.Type;
-
                             if (type == WIA_DEVICE_TYPE_SCANNER)
                             {
                                 string devId = info.DeviceID?.ToString() ?? string.Empty;
                                 string name = GetPropertyValue(info.Properties, "Name") ?? "Scanner Device";
                                 string desc = GetPropertyValue(info.Properties, "Description") ?? string.Empty;
                                 string mfg = GetPropertyValue(info.Properties, "Manufacturer") ?? string.Empty;
-
                                 list.Add(new ScannerDeviceInfo
                                 {
                                     DeviceId = devId,
@@ -89,11 +82,9 @@ namespace SOLUM_UI.Services
                 {
                     // WIA subsystem error or no drivers installed
                 }
-
                 return list;
             });
         }
-
         /// <summary>
         /// Purges legacy temporary scans from previous sessions to prevent PII accumulation in %TEMP%.
         /// </summary>
@@ -107,7 +98,6 @@ namespace SOLUM_UI.Services
                 {
                     if (currentScanFile != null && string.Equals(f, currentScanFile, StringComparison.OrdinalIgnoreCase))
                         continue;
-
                     try
                     {
                         File.Delete(f);
@@ -117,7 +107,6 @@ namespace SOLUM_UI.Services
             }
             catch { }
         }
-
         /// <summary>
         /// Acquires a document from the specified or default scanner using WIA silent transfer (Option A).
         /// Calibrated for 8.5 x 13 inch CSWDO application forms.
@@ -127,19 +116,14 @@ namespace SOLUM_UI.Services
             return RunInStaAsync(() =>
             {
                 onStatusUpdate?.Invoke("Connecting to scanner hardware...");
-
                 Type managerType = Type.GetTypeFromProgID("WIA.DeviceManager");
                 if (managerType == null)
                     throw new InvalidOperationException("Windows Image Acquisition (WIA) service is not available on this Windows system.");
-
                 dynamic deviceManager = Activator.CreateInstance(managerType);
                 int count = (int)deviceManager.DeviceInfos.Count;
-
                 if (count == 0)
                     throw new InvalidOperationException("No scanner or printer hardware detected. Please ensure your device is powered on and connected via USB or Local Network.");
-
                 dynamic targetInfo = null;
-
                 // 1. Try to match configured DeviceId
                 if (!string.IsNullOrWhiteSpace(settings?.DeviceId))
                 {
@@ -157,7 +141,6 @@ namespace SOLUM_UI.Services
                         catch { }
                     }
                 }
-
                 // 2. Fallback to first available scanner
                 if (targetInfo == null)
                 {
@@ -175,18 +158,14 @@ namespace SOLUM_UI.Services
                         catch { }
                     }
                 }
-
                 if (targetInfo == null)
                     throw new InvalidOperationException("No compatible scanner found. Please verify that your scanner driver (WIA) is installed and the device is powered on.");
-
                 // Connect to scanner device
                 string scannerName = GetPropertyValue(targetInfo.Properties, "Name") ?? "Scanner";
                 onStatusUpdate?.Invoke($"Initializing {scannerName}...");
                 dynamic device = targetInfo.Connect();
-
                 if (device == null || device.Items.Count < 1)
                     throw new InvalidOperationException("Unable to establish communication with the scanner head.");
-
                 // Set Document Handling (Flatbed vs Feeder) BEFORE configuring item properties
                 // so the driver doesn't revert item resolution and extent
                 try
@@ -199,18 +178,13 @@ namespace SOLUM_UI.Services
                     }
                 }
                 catch { }
-
                 dynamic scanItem = device.Items[1];
-
                 // Configure properties: calibrated for 8.5 x 13 CSWDO form with hardware bed clamping
                 ConfigureScanItem(scanItem, settings, device);
-
                 onStatusUpdate?.Invoke("Acquiring document scan from hardware...");
-
                 // Determine best supported image format (prefer PNG for lossless sharpness, then BMP, then JPEG)
                 string chosenFormat = WIA_FORMAT_PNG;
                 string chosenExt = ".png";
-
                 try
                 {
                     var supportedFormats = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -223,7 +197,6 @@ namespace SOLUM_UI.Services
                             if (!string.IsNullOrEmpty(fg)) supportedFormats.Add(fg);
                         }
                     }
-
                     if (supportedFormats.Count > 0)
                     {
                         if (supportedFormats.Contains(WIA_FORMAT_PNG))
@@ -244,7 +217,6 @@ namespace SOLUM_UI.Services
                     }
                 }
                 catch { }
-
                 // Execute transfer directly via scanItem.Transfer() (Option A: Silent in-app transfer)
                 dynamic imageFile = null;
                 try
@@ -261,10 +233,8 @@ namespace SOLUM_UI.Services
                     string friendly = GetFriendlyComErrorMessage(ex);
                     throw new InvalidOperationException(friendly, ex);
                 }
-
                 if (imageFile == null)
                     throw new InvalidOperationException("Scanner hardware did not return an image buffer.");
-
                 onStatusUpdate?.Invoke("Saving scanned image...");
 
                 string tempFile = Path.Combine(Path.GetTempPath(), $"SOLUM_SCAN_{Guid.NewGuid():N}{chosenExt}");
@@ -272,12 +242,9 @@ namespace SOLUM_UI.Services
                 {
                     try { File.Delete(tempFile); } catch { }
                 }
-
                 imageFile.SaveFile(tempFile);
-
                 if (!File.Exists(tempFile) || new FileInfo(tempFile).Length == 0)
                     throw new InvalidOperationException("Scanner returned an empty image file.");
-
                 return tempFile;
             });
         }
@@ -288,17 +255,14 @@ namespace SOLUM_UI.Services
 
             int dpi = settings?.Dpi ?? 200;
             if (dpi <= 0) dpi = 200;
-
 #pragma warning disable CS0618
             ScanColorMode colorMode = settings?.ColorMode ?? ScanColorMode.Color;
             if (colorMode == ScanColorMode.BlackAndWhite) colorMode = ScanColorMode.Grayscale;
 #pragma warning restore CS0618
-
             // 1. Set Color Mode / Intent
             // 1 = Color, 2 = Grayscale
             int intentValue = colorMode == ScanColorMode.Grayscale ? 2 : 1;
             SetProperty(scanItem.Properties, WIA_SCAN_COLOR_MODE, intentValue);
-
             // 2. Set Data Type & Bit Depth
             // 4103 = WIA_IPA_DATATYPE: 2 = Grayscale, 3 = Color (1 is Dither - avoid!)
             // 4104 = WIA_IPA_DEPTH: 8 (Gray), 24 (Color)
@@ -306,20 +270,16 @@ namespace SOLUM_UI.Services
             int bitDepth = colorMode == ScanColorMode.Grayscale ? 8 : 24;
             SetProperty(scanItem.Properties, 4103, dataType);
             SetProperty(scanItem.Properties, 4104, bitDepth);
-
             // 3. Set Resolution DPI (Horizontal and Vertical)
             SetProperty(scanItem.Properties, WIA_HORIZONTAL_SCAN_RESOLUTION_DPI, dpi);
             SetProperty(scanItem.Properties, WIA_VERTICAL_SCAN_RESOLUTION_DPI, dpi);
-
             // 4. Set Start Position X/Y to 0
             SetProperty(scanItem.Properties, WIA_HORIZONTAL_SCAN_START_PIXEL, 0);
             SetProperty(scanItem.Properties, WIA_VERTICAL_SCAN_START_PIXEL, 0);
-
             // 5. Calculate Extent in Pixels for 8.5 x 13 inch CSWDO Form
             // Check hardware bed size limits if flatbed glass is smaller than 13"
             double targetWidthInches = 8.5;
             double targetHeightInches = 13.0;
-
             if (settings?.PaperSource != ScanPaperSource.Feeder && device != null)
             {
                 try
@@ -339,7 +299,6 @@ namespace SOLUM_UI.Services
 
             int widthPixels = (int)Math.Round(targetWidthInches * dpi);
             int heightPixels = (int)Math.Round(targetHeightInches * dpi);
-
             SetProperty(scanItem.Properties, WIA_HORIZONTAL_SCAN_SIZE_PIXELS, widthPixels);
             SetProperty(scanItem.Properties, WIA_VERTICAL_SCAN_SIZE_PIXELS, heightPixels);
         }
@@ -401,7 +360,6 @@ namespace SOLUM_UI.Services
         private static string GetFriendlyComErrorMessage(COMException ex)
         {
             uint hr = (uint)ex.ErrorCode;
-
             switch (hr)
             {
                 case 0x80210001: // WIA_ERROR_GENERAL
@@ -432,7 +390,6 @@ namespace SOLUM_UI.Services
                     return $"Scanner communication failed (Error: 0x{hr:X8}): {ex.Message}";
             }
         }
-
         /// <summary>
         /// Executes an action within a dedicated Single-Threaded Apartment (STA) thread for COM compatibility.
         /// </summary>

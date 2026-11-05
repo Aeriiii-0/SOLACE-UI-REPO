@@ -10,11 +10,8 @@
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
-
         <DropShadowEffect x:Key="CardShadow" Color="#702943" BlurRadius="16" ShadowDepth="2" Opacity="0.06" Direction="270"/>
-
         <FontFamily x:Key="HeadingFont">Georgia</FontFamily>
-
         <Style x:Key="SlimProgress" TargetType="ProgressBar">
             <Setter Property="Height" Value="8"/>
             <Setter Property="Minimum" Value="0"/>
@@ -32,7 +29,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="SegmentToggle" TargetType="RadioButton">
             <Setter Property="Foreground" Value="#702943"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -58,7 +54,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="ArrowButton" TargetType="Button">
             <Setter Property="Width" Value="28"/>
             <Setter Property="Height" Value="28"/>
@@ -79,17 +74,14 @@
             </Setter>
         </Style>
     </Page.Resources>
-
     <Page.DataContext>
         <vm:DashboardViewModel/>
     </Page.DataContext>
-
     <Grid>
         <!-- Loading State -->
         <components:DashboardSkeletonLoader Visibility="{Binding IsLoading,
                                             Converter={StaticResource BoolToVisibilityConverter}}"
                                             Panel.ZIndex="100"/>
-
         <!-- Main Content -->
         <Grid x:Name="DashboardScroll"
               Visibility="{Binding IsLoading,
@@ -104,7 +96,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-
                 <Border Grid.Row="0" Grid.ColumnSpan="3" CornerRadius="22" Margin="0,0,0,16"
                         BorderBrush="#702943" BorderThickness="1.5"
                         Effect="{StaticResource CardShadow}">
@@ -129,17 +120,14 @@
                             <Path Data="M0,6 L6,6 M3,3 L3,9" Stroke="#B5607D" StrokeThickness="1.6" StrokeStartLineCap="Round"
                                   StrokeEndLineCap="Round" Canvas.Left="480" Canvas.Top="84" Opacity="0.55"/>
                         </Canvas>
-
                         <Grid Margin="34,30,34,30">
                             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
-
                                 <TextBlock x:Name="TxtWelcome" Text="Welcome back!"
                                            FontFamily="{StaticResource HeadingFont}" FontSize="38" FontWeight="Bold"
                                            Foreground="#702943"/>
                                 <TextBlock Text="Here's what's happening with your program today."
                                            FontFamily="Segoe UI" FontSize="13" Foreground="#9B6B7E" Margin="0,6,0,0"/>
                             </StackPanel>
-
                             <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
                                 <StackPanel VerticalAlignment="Center" Margin="0,0,18,0">
                                     <TextBlock Text="RECORD HEALTH" FontFamily="Segoe UI" FontSize="9.5" FontWeight="SemiBold"
@@ -161,7 +149,6 @@
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
-
                                 <Grid Width="88" Height="88" VerticalAlignment="Center" Margin="0,0,18,0">
                                     <Ellipse Margin="2" Fill="White" Opacity="0.85"/>
                                     <Viewbox>
@@ -187,7 +174,6 @@
                                                    HorizontalAlignment="Center" Margin="0,-2,0,0"/>
                                     </StackPanel>
                                 </Grid>
-
                                 <Button x:Name="BtnRefreshDashboard" VerticalAlignment="Center"
                                         Width="38" Height="38" Cursor="Hand"
                                         BorderThickness="0" Background="Transparent"
@@ -216,14 +202,12 @@
                         </Grid>
                     </Grid>
                 </Border>
-
                 <Grid Grid.Row="1" Grid.Column="0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-
                     <Grid Grid.Row="0" Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -232,7 +216,6 @@
                             <ColumnDefinition Width="14"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <Border Grid.Column="0" Background="White" CornerRadius="20"
                                 BorderBrush="#702943" BorderThickness="1.5" Padding="20,18"
                                 Effect="{StaticResource CardShadow}">
@@ -256,7 +239,6 @@
                                 </Border>
                             </StackPanel>
                         </Border>
-
                         <Border Grid.Column="2" Background="White" CornerRadius="20"
                                 BorderBrush="#702943" BorderThickness="1.5" Padding="20,18"
                                 Effect="{StaticResource CardShadow}">
@@ -279,7 +261,6 @@
                                              Value="{Binding ActiveSoloParents, Mode=OneWay}"/>
                             </StackPanel>
                         </Border>
-
                         <Border Grid.Column="4" Background="White" CornerRadius="20"
                                 BorderBrush="#702943" BorderThickness="1.5" Padding="20,18"
                                 ToolTip="{Binding InactiveSubtext}"
@@ -304,7 +285,6 @@
                             </StackPanel>
                         </Border>
                     </Grid>
-
                     <Border Grid.Row="1" Background="White" CornerRadius="20" Padding="24,20" Margin="0,0,0,16"
                             BorderBrush="#702943" BorderThickness="1" Effect="{StaticResource CardShadow}">
                         <Grid>
@@ -367,7 +347,6 @@
                             </Grid>
                         </Grid>
                     </Border>
-
                     <Border Grid.Row="2" Background="White" CornerRadius="18" Padding="18,14"
                             BorderBrush="#E8B04A" BorderThickness="1">
                         <Grid>
@@ -404,14 +383,11 @@
                             </Button>
                         </Grid>
                     </Border>
-
                 </Grid>
-
                 <Grid Grid.Row="1" Grid.Column="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-
                     <Border Grid.Row="0" Background="White" CornerRadius="20"
                             BorderBrush="#702943" BorderThickness="1.5" Effect="{StaticResource CardShadow}">
                         <Grid>
@@ -420,7 +396,6 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-
                             <Grid Grid.Row="0" Margin="18,16,18,8">
                                 <TextBlock Text="Recent activity"
                                            FontFamily="{StaticResource HeadingFont}" FontSize="17" FontWeight="Bold" Foreground="#702943"/>
@@ -434,7 +409,6 @@
                                                Foreground="#8E5A70"/>
                                 </Button>
                             </Grid>
-
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                                           HorizontalScrollBarVisibility="Disabled" Padding="10,6,10,0">
                                 <ItemsControl ItemsSource="{Binding RecentLogs}">
@@ -487,7 +461,6 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
-
                             <Border Grid.Row="2" Padding="16,12,16,16">
                                 <Button Click="ViewAllLogs_Click" Cursor="Hand" HorizontalAlignment="Stretch">
                                     <Button.Template>
@@ -510,7 +483,6 @@
                 </Grid>
             </Grid>
         </Grid>
-
         <Grid x:Name="OverlayRoot" Visibility="Collapsed">
             <Rectangle Fill="#80000000"/>
             <local:ViewAllLogsOverlay x:Name="LogsOverlay"
@@ -519,7 +491,6 @@
                                       Margin="60,40,60,40"
                                       CloseRequested="LogsOverlay_CloseRequested"/>
         </Grid>
-
         <Grid Visibility="{Binding IsLogDetailVisible,
                             Converter={StaticResource BoolToVisibilityConverter}}">
             <Rectangle Fill="#66000000" Cursor="Arrow">
@@ -528,7 +499,6 @@
                                   Command="{Binding CloseLogDetailCommand}"/>
                 </Rectangle.InputBindings>
             </Rectangle>
-
             <Border Background="White" CornerRadius="16" Padding="32,28"
                     Width="520" HorizontalAlignment="Center" VerticalAlignment="Center"
                     MaxHeight="650">
@@ -536,11 +506,9 @@
                     <DropShadowEffect Color="#000000" BlurRadius="32"
                                       ShadowDepth="4" Opacity="0.22" Direction="270"/>
                 </Border.Effect>
-
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
                     <StackPanel DataContext="{Binding SelectedLog}">
-
                         <Grid Margin="0,0,0,16">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -568,7 +536,6 @@
                                 </Button.Template>
                             </Button>
                         </Grid>
-
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                             <Border CornerRadius="8" Padding="12,5" Margin="0,0,10,0" Background="{Binding DotColorBrush}">
                                 <TextBlock Text="{Binding ActionLabel}"
@@ -580,9 +547,7 @@
                                        FontWeight="Bold" Foreground="#1A1A1A"
                                        VerticalAlignment="Center"/>
                         </StackPanel>
-
                         <Rectangle Height="1" Fill="#F0E4E4" Margin="0,0,0,14"/>
-
                         <Grid Margin="0,0,0,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="120"/>
@@ -604,7 +569,6 @@
                                 </Border>
                             </StackPanel>
                         </Grid>
-
                         <Grid Margin="0,0,0,10"
                               Visibility="{Binding HasTarget, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Grid.ColumnDefinitions>
@@ -633,7 +597,6 @@
                                            Visibility="{Binding HasTargetId, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             </StackPanel>
                         </Grid>
-
                         <Grid Margin="0,0,0,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="120"/>
@@ -676,7 +639,6 @@
                                 </TextBlock>
                             </Border>
                         </Grid>
-
                         <Grid Margin="0,0,0,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="120"/>
@@ -690,7 +652,6 @@
                                        Foreground="#444444" TextWrapping="Wrap"
                                        VerticalAlignment="Center"/>
                         </Grid>
-
                         <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="120"/>
@@ -704,16 +665,13 @@
                                        FontWeight="Normal" Foreground="#1A1A1A"
                                        VerticalAlignment="Center"/>
                         </Grid>
-
                         <Border Background="#FDF5F7" CornerRadius="12" Padding="16,14" Margin="0,4,0,4">
                             <StackPanel>
                                 <TextBlock Text="CHANGES RECORDED"
                                            FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
                                            Foreground="#9B3060" Margin="0,0,0,10"/>
-
                                 <StackPanel Visibility="{Binding HasChangeDetail,
                                                          Converter={StaticResource BoolToVisibilityConverter}}">
-
                                     <Grid Margin="0,0,0,6">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -731,7 +689,6 @@
                                                    Foreground="#9B3060" Padding="4,0,0,0"/>
                                     </Grid>
                                     <Rectangle Height="1" Fill="#E8D4DC" Margin="0,0,0,6"/>
-
                                     <ItemsControl ItemsSource="{Binding Changes}"
                                                   Visibility="{Binding Changes.Count,
                                                                Converter={StaticResource BoolToVisibilityConverter}}">
@@ -768,7 +725,6 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-
                                     <Grid Visibility="{Binding Changes.Count,
                                                        Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                           MinHeight="32">
@@ -800,7 +756,6 @@
                                         </Border>
                                     </Grid>
                                 </StackPanel>
-
                                 <Border Visibility="{Binding HasChangeDetail,
                                                       Converter={StaticResource InverseBoolToVisibilityConverter}}"
                                         Background="White" CornerRadius="6" Padding="12,10">
@@ -811,12 +766,10 @@
                                 </Border>
                             </StackPanel>
                         </Border>
-
                     </StackPanel>
                 </ScrollViewer>
             </Border>
         </Grid>
-
         <components:LoadingOverlay Grid.RowSpan="99" Grid.ColumnSpan="99"
                                    x:Name="DashboardLoadingOverlay"
                                    IsLoading="False"

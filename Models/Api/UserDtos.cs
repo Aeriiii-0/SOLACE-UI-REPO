@@ -13,13 +13,10 @@ namespace SOLUM_UI.Models.Api
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string ContactNumber { get; set; } = string.Empty;
-
         [Newtonsoft.Json.JsonProperty("isActive")]
         public bool? IsActive { get; set; }
-
         [Newtonsoft.Json.JsonProperty("is_active")]
         private bool? IsActiveSnake { set { if (value.HasValue) IsActive = value; } }
-
         [Newtonsoft.Json.JsonProperty("status")]
         private string StatusSetter
         {
@@ -29,21 +26,16 @@ namespace SOLUM_UI.Models.Api
                     IsActive = value.Equals("Active", StringComparison.OrdinalIgnoreCase);
             }
         }
-
         [Newtonsoft.Json.JsonProperty("roles")]
         public IList<string> Roles { get; set; } = new List<string>();
-
         [Newtonsoft.Json.JsonProperty("role")]
         public string Role { get; set; } = string.Empty;
 
         public string Barangay { get; set; } = string.Empty;
-
         [Newtonsoft.Json.JsonProperty("mustChangePassword")]
         public bool MustChangePassword { get; set; }
-
         [Newtonsoft.Json.JsonProperty("isPasswordChanged")]
         public bool IsPasswordChanged { get; set; }
-
         [Newtonsoft.Json.JsonProperty("lastPasswordChangedDate")]
         public System.DateTime? LastPasswordChangedDate { get; set; }
 

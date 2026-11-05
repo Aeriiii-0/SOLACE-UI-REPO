@@ -1,12 +1,10 @@
-﻿<UserControl x:Class="SOLUM_UI.Views.Components.NotificationCardComponent"
+<UserControl x:Class="SOLUM_UI.Views.Components.NotificationCardComponent"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="Root" Visibility="Collapsed">
-
     <!-- Compact toast-style notification card.
          Bindable: Title, Message, IsSuccess.
          Visibility and auto-hide are driven by the code-behind. -->
-
     <Border x:Name="CardBorder" CornerRadius="10" Padding="14,10"
             MinWidth="260" MaxWidth="340"
             Background="#FFFFFF" BorderThickness="1.5">
@@ -19,12 +17,10 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
             <!-- State dot -->
             <Border Grid.Column="0" x:Name="DotBadge"
                     Width="8" Height="8" CornerRadius="4"
                     VerticalAlignment="Center" Margin="0,0,10,0"/>
-
             <!-- Text -->
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                 <TextBlock x:Name="TxtTitle" Text="{Binding Title, ElementName=Root}"
@@ -34,7 +30,6 @@
                            FontFamily="Segoe UI" FontSize="11" Foreground="#555555"
                            TextWrapping="Wrap" Margin="0,2,0,0"/>
             </StackPanel>
-
             <!-- Dismiss button -->
             <Button Grid.Column="2" Width="20" Height="20" Margin="10,0,0,0"
                     Cursor="Hand" Click="Dismiss_Click" VerticalAlignment="Top">

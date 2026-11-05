@@ -25,7 +25,6 @@ namespace SOLUM_UI.Converters
             return false;
         }
     }
-
     [ValueConversion(typeof(bool), typeof(Visibility))]
     public sealed class InverseBoolToVisibilityConverter : IValueConverter
     {
@@ -46,7 +45,6 @@ namespace SOLUM_UI.Converters
             return false;
         }
     }
-
     [ValueConversion(typeof(bool), typeof(bool))]
     public sealed class InverseBoolConverter : IValueConverter
     {

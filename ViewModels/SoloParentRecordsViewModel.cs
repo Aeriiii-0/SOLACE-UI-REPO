@@ -24,7 +24,6 @@ namespace SOLUM_UI.ViewModels
         // ── Dependencies ────────────────────────────────────────────────────
         private readonly ISoloParentApiService _api;
         private readonly AuditLogService _auditLog;
-
         // ── User context (set by MainWindow before navigation) ───────────────
         public static string CurrentUserName     { get; set; } = string.Empty;
         public static string CurrentUserRole     { get; set; } = string.Empty;
@@ -36,25 +35,21 @@ namespace SOLUM_UI.ViewModels
                                     AuthApiService.Instance.IsAdmin;
         private bool IsBasicUser => string.Equals(CurrentUserRole, "BasicUser",    StringComparison.OrdinalIgnoreCase);
         private bool IsEncoder   => string.Equals(CurrentUserRole, "Encoder",      StringComparison.OrdinalIgnoreCase);
-
         // ── INotifyPropertyChanged ───────────────────────────────────────────
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string name) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
         // ── Events raised to code-behind (need visual tree) ─────────────────
         public event EventHandler<SoloParentRecordViewModel> RequestViewRecord;
         public event EventHandler                             RequestAddRecord;
         public event EventHandler<SoloParentRecord>          RequestEditRecord;
         public event EventHandler<RenewRecordArgs>           RequestRenewRecord;
         public event EventHandler<SoloParentRecordViewModel> RequestExportRecord;
-
         // ── Observable records collection ────────────────────────────────────
         public ObservableCollection<SoloParentRecordViewModel> Records { get; }
             = new ObservableCollection<SoloParentRecordViewModel>();
 
         private List<SoloParentRecordViewModel> _allRecords = new List<SoloParentRecordViewModel>();
-
         // ── Pagination ───────────────────────────────────────────────────────
         private const int PageSize = 10;
         private int _currentPage = 1;
@@ -86,7 +81,6 @@ namespace SOLUM_UI.ViewModels
             get => _isNextVisible;
             private set { if (_isNextVisible == value) return; _isNextVisible = value; OnPropertyChanged(nameof(IsNextVisible)); }
         }
-
         // ── Loading ──────────────────────────────────────────────────────────
         private bool _isLoading = false;
         public bool IsLoading
@@ -96,7 +90,6 @@ namespace SOLUM_UI.ViewModels
         }
 
         public bool IsRefreshEnabled => !_isLoading;
-
         // ── No results ───────────────────────────────────────────────────────
         private Visibility _hasNoResults = Visibility.Collapsed;
         public Visibility HasNoResults
@@ -104,7 +97,6 @@ namespace SOLUM_UI.ViewModels
             get => _hasNoResults;
             private set { if (_hasNoResults == value) return; _hasNoResults = value; OnPropertyChanged(nameof(HasNoResults)); }
         }
-
         // ── Filter / Sort state ──────────────────────────────────────────────
         private string _statusFilter   = "All";
         private string _sexFilter      = "All";
@@ -131,7 +123,6 @@ namespace SOLUM_UI.ViewModels
             get => _sortOption;
             set { if (_sortOption == value) return; _sortOption = value; OnPropertyChanged(nameof(SortOption)); }
         }
-
         // ── Admin search fields (two-way bound) ──────────────────────────────
         private string _searchIdText = string.Empty;
         public string SearchIdText
@@ -174,7 +165,6 @@ namespace SOLUM_UI.ViewModels
                 if (string.IsNullOrEmpty(value)) ApplyFiltersAndPage();
             }
         }
-
         // ── Basic user search field ───────────────────────────────────────────
         private string _basicSearchNameText = string.Empty;
         public string BasicSearchNameText
@@ -188,7 +178,6 @@ namespace SOLUM_UI.ViewModels
                 ApplyFiltersAndPage();
             }
         }
-
         // ── Encoder panel search fields ───────────────────────────────────────
         private string _encSearchId        = string.Empty;
         private string _encSearchFirstName = string.Empty;
@@ -208,7 +197,6 @@ namespace SOLUM_UI.ViewModels
             get => _isClearSearchVisible;
             private set { if (_isClearSearchVisible == value) return; _isClearSearchVisible = value; OnPropertyChanged(nameof(IsClearSearchVisible)); }
         }
-
         // ── Role-based toolbar visibility ────────────────────────────────────
         private Visibility _adminToolbarVisible;
         public Visibility AdminToolbarVisible
@@ -244,7 +232,6 @@ namespace SOLUM_UI.ViewModels
             get => _pagingRowVisible;
             private set { if (_pagingRowVisible == value) return; _pagingRowVisible = value; OnPropertyChanged(nameof(PagingRowVisible)); }
         }
-
         // ── Commands ─────────────────────────────────────────────────────────
         public ICommand LoadRecordsCommand   { get; }
         public ICommand RefreshCommand       { get; }
@@ -261,7 +248,6 @@ namespace SOLUM_UI.ViewModels
         public ICommand DeleteRecordCommand  { get; }
         public ICommand ExportRecordCommand  { get; }
         public ICommand AddRecordCommand     { get; }
-
         // ── Constructor ──────────────────────────────────────────────────────
         public SoloParentRecordsViewModel()
             : this(SoloParentApiService.Instance, AuditLogService.Instance) { }
@@ -270,7 +256,6 @@ namespace SOLUM_UI.ViewModels
         {
             _api      = api      ?? throw new ArgumentNullException(nameof(api));
             _auditLog = auditLog ?? throw new ArgumentNullException(nameof(auditLog));
-
             LoadRecordsCommand  = new RelayCommand(_ => { var _ = LoadRecordsAsync(); });
             RefreshCommand      = new RelayCommand(_ => { var _ = LoadRecordsAsync(); });
             NextPageCommand     = new RelayCommand(_ => NextPage(),  _ => _currentPage < _totalPages);
@@ -286,14 +271,11 @@ namespace SOLUM_UI.ViewModels
             DeleteRecordCommand = new RelayCommand(p  => { var _ = DeleteRecordAsync(p != null ? p.ToString() : string.Empty); });
             ExportRecordCommand = new RelayCommand(p  => OnExportRecord(p != null ? p.ToString() : string.Empty));
             AddRecordCommand    = new RelayCommand(_ => RequestAddRecord?.Invoke(this, EventArgs.Empty));
-
             ApplyRoleView();
         }
-
         // ── Public API for MainWindow ────────────────────────────────────────
         public SoloParentRecordViewModel FindRecord(string spId) =>
             _allRecords.Find(r => r.Id == spId);
-
         // ── Role-based visibility ────────────────────────────────────────────
         public void ApplyRoleView()
         {
@@ -323,30 +305,25 @@ namespace SOLUM_UI.ViewModels
                 PagingRowVisible     = Visibility.Visible;
             }
         }
-
         // ── Data loading ──────────────────────────────────────────────────────
         public async Task LoadRecordsAsync()
         {
             if (_isLoading) return;
             IsLoading = true;
-
             try
             {
                 string effectiveBarangay = IsBasicUser ? CurrentUserBarangay : _barangayFilter;
                 string idQuery           = (_searchIdText ?? string.Empty).Trim();
                 string nameQuery         = (_searchNameText ?? string.Empty).Trim();
                 string barangayQuery     = (_searchBarangayText ?? string.Empty).Trim();
-
                 if (IsBasicUser)
                 {
                     nameQuery     = (_basicSearchNameText ?? string.Empty).Trim();
                     barangayQuery = string.Empty;
                 }
-
                 Guid? searchGuid = null;
                 if (Guid.TryParse(idQuery, out var parsedGuid))
                     searchGuid = parsedGuid;
-
                 bool? isActive = null;
                 if (!IsBasicUser && _statusFilter != "All")
                     isActive = string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase);
@@ -369,7 +346,6 @@ namespace SOLUM_UI.ViewModels
                     case "Oldest":   sortBy = "datecreated"; sortOrder = "asc";  break;
                     case "Barangay": sortBy = "barangay";    sortOrder = "asc";  break;
                 }
-
                 var req = new GetSoloParentRequest
                 {
                     Id        = searchGuid,
@@ -382,9 +358,7 @@ namespace SOLUM_UI.ViewModels
                     Page      = _currentPage,
                     PageSize  = PageSize
                 };
-
                 var resp = await _api.GetSoloParentsAsync(req);
-
                 if (!resp.Succeeded || resp.Data == null)
                 {
                     string err = resp.Errors != null && resp.Errors.Count > 0
@@ -396,19 +370,15 @@ namespace SOLUM_UI.ViewModels
                     UpdatePagingProperties();
                     return;
                 }
-
                 var paged = resp.Data;
                 TotalPages = Math.Max(1, paged.TotalPages);
-
                 var detailTasks     = paged.Items.Select(item => _api.GetSoloParentByIdAsync(item.Id)).ToList();
                 var detailResponses = await Task.WhenAll(detailTasks);
-
                 var newRecords = new List<SoloParentRecordViewModel>();
                 for (int i = 0; i < paged.Items.Count; i++)
                 {
                     var summary    = paged.Items[i];
                     var detailResp = detailResponses[i];
-
                     SoloParentRecord rec;
                     if (detailResp.Succeeded && detailResp.Data != null)
                         rec = _api.MapToRecord(detailResp.Data);
@@ -424,12 +394,10 @@ namespace SOLUM_UI.ViewModels
                         };
                         rec.Name = rec.Surname = rec.FirstName = rec.MiddleName = string.Empty;
                     }
-
                     var vm = new SoloParentRecordViewModel(rec);
                     vm.SetAlternate(i % 2 != 0);
                     newRecords.Add(vm);
                 }
-
                 _allRecords = newRecords;
                 App.Current.Dispatcher.Invoke(() =>
                 {
@@ -437,7 +405,6 @@ namespace SOLUM_UI.ViewModels
                     foreach (var vm in _allRecords) Records.Add(vm);
                     HasNoResults = _allRecords.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
                 });
-
                 UpdatePagingProperties();
             }
             catch (Exception ex)
@@ -449,16 +416,13 @@ namespace SOLUM_UI.ViewModels
                 IsLoading = false;
             }
         }
-
         // ── CRUD operations ──────────────────────────────────────────────────
         public async Task SaveNewRecordAsync(SoloParentRecord record)
         {
             record.CreatedBy = CurrentUserName;
             record.Barangay  = string.IsNullOrEmpty(record.Barangay) ? CurrentUserBarangay : record.Barangay;
-
             var createReq  = _api.MapToCreateRequest(record);
             var createResp = await _api.CreateSoloParentAsync(createReq);
-
             if (!createResp.Succeeded)
             {
                 string err = createResp.Errors != null && createResp.Errors.Count > 0
@@ -466,7 +430,6 @@ namespace SOLUM_UI.ViewModels
                 MessageBox.Show(err, "Creation Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
             record.Id = createResp.Data.ToString();
             ToastNotification.Show("Record Added", record.Name + " was added successfully.", ToastType.Success);
             _auditLog.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
@@ -477,10 +440,8 @@ namespace SOLUM_UI.ViewModels
         public async Task SaveEditedRecordAsync(SoloParentRecord rawRecord, SoloParentRecord editedRecord, SoloParentDto existingDto)
         {
             if (!Guid.TryParse(rawRecord.Id, out var guid)) return;
-
             var updateReq  = _api.MapToUpdateRequest(guid, editedRecord, existingDto);
             var updateResp = await _api.UpdateSoloParentAsync(guid, updateReq);
-
             if (!updateResp.Succeeded)
             {
                 string err = updateResp.Errors != null && updateResp.Errors.Count > 0
@@ -488,13 +449,10 @@ namespace SOLUM_UI.ViewModels
                 MessageBox.Show(err, "Update Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
             ToastNotification.Show("Record Updated", editedRecord.Name + " was updated.", ToastType.Info);
-
             // Track all field-level changes for detailed audit trail
             var changeService = new ChangeTrackingService();
             var changes = changeService.DetectChanges(rawRecord, editedRecord);
-
             _auditLog.LogUpdateWithChanges(editedRecord.Id, editedRecord.Name, GetCurrentUser(), CurrentUserRole, changes);
             await LoadRecordsAsync();
         }
@@ -506,10 +464,8 @@ namespace SOLUM_UI.ViewModels
                 MessageBox.Show("Cannot renew: invalid record ID.", "Renew", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
             var fetch = await _api.GetSoloParentByIdAsync(guid);
             var existingDto = fetch.Succeeded ? fetch.Data : null;
-
             var renewReq = _api.MapToRenewRequest(guid, updated, existingDto);
             var renewResp = await _api.RenewSoloParentRecordAsync(guid, renewReq);
             if (!renewResp.Succeeded)
@@ -524,7 +480,6 @@ namespace SOLUM_UI.ViewModels
                 ? expDt.ToString("MMMM d, yyyy")
                 : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
             ToastNotification.Show("Record Renewed", original.Name + " — valid until " + newExpiry + ".", ToastType.Success);
-
             // Track changes made during renewal
             var changeService = new ChangeTrackingService();
             var changes = changeService.DetectChanges(original, updated);
@@ -537,7 +492,6 @@ namespace SOLUM_UI.ViewModels
                 _auditLog.LogUpdate(original.Id, original.Name, GetCurrentUser(), CurrentUserRole,
                     "Record renewed. Valid until " + newExpiry + ".");
             }
-
             await LoadRecordsAsync();
         }
 
@@ -565,10 +519,8 @@ namespace SOLUM_UI.ViewModels
                 ToastNotification.Show("Invalid ID", "Cannot delete record without a valid ID.", ToastType.Warning);
                 return;
             }
-
             var vm = _allRecords.Find(r => r.Id == id);
             string recordName = vm != null ? vm.Name : id;
-
             var deleteResp = await _api.DeleteSoloParentAsync(guid);
             if (!deleteResp.Succeeded)
             {
@@ -577,12 +529,10 @@ namespace SOLUM_UI.ViewModels
                 MessageBox.Show(err, "Delete Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
             ToastNotification.Show("Record Deleted", "The record was removed.", ToastType.Warning);
             _auditLog.LogDelete(id, recordName, GetCurrentUser(), CurrentUserRole);
             await LoadRecordsAsync();
         }
-
         // ── Audit helpers exposed to code-behind ──────────────────────────────
         public void LogView(string id, string name) =>
             _auditLog.LogView(id, name, GetCurrentUser(), CurrentUserRole);
@@ -590,7 +540,6 @@ namespace SOLUM_UI.ViewModels
         public bool CanEditRecord(SoloParentRecordViewModel vm) =>
             !(IsBasicUser && !string.Equals(vm.RawModel.CreatedBy ?? string.Empty,
                 CurrentUserName, StringComparison.OrdinalIgnoreCase));
-
         // ── Filter / search helpers ───────────────────────────────────────────
         private void ApplyFiltersAndPage() { _currentPage = 1; var _ = LoadRecordsAsync(); }
 
@@ -641,7 +590,6 @@ namespace SOLUM_UI.ViewModels
             _sortOption = string.IsNullOrEmpty(tag) ? "Name A-Z" : tag;
             ApplyFiltersAndPage();
         }
-
         // ── Paging helpers ────────────────────────────────────────────────────
         private void NextPage() { if (_currentPage < _totalPages) { _currentPage++; var _ = LoadRecordsAsync(); } }
         private void PrevPage() { if (_currentPage > 1) { _currentPage--; var _ = LoadRecordsAsync(); } }
@@ -652,7 +600,6 @@ namespace SOLUM_UI.ViewModels
             IsBackVisible = _currentPage > 1           ? Visibility.Visible : Visibility.Collapsed;
             IsNextVisible = _currentPage < _totalPages ? Visibility.Visible : Visibility.Collapsed;
         }
-
         // ── Event-raising helpers ─────────────────────────────────────────────
         private void OnViewRecord(SoloParentRecordViewModel vm)
         {
@@ -690,12 +637,10 @@ namespace SOLUM_UI.ViewModels
             if (vm == null) return;
             RequestExportRecord?.Invoke(this, vm);
         }
-
         // ── Utilities ─────────────────────────────────────────────────────────
         private string GetCurrentUser() =>
             !string.IsNullOrEmpty(CurrentUserName) ? CurrentUserName : "Admin";
     }
-
     // ── Argument DTOs for events ─────────────────────────────────────────────
     public class RenewRecordArgs
     {

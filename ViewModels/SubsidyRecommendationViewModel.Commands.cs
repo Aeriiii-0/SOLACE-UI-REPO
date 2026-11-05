@@ -176,9 +176,7 @@ namespace SOLUM_UI.ViewModels
                 "Re-Assess",
                 "Cancel",
                 ConfirmThemeType.Primary);
-
             if (!confirmed) return;
-
             IsLoading = true;
             try
             {
@@ -209,7 +207,6 @@ namespace SOLUM_UI.ViewModels
 
             bool ok = ActionConfirmDialog.Show("Shortlist Selected", $"Move {selected.Count} selected candidate(s) to Approved Selection & Audit for FY {ActiveCycleFiscalYear}?", "Shortlist All", "Cancel", ConfirmThemeType.Primary);
             if (!ok) return;
-
             var evalIds = selected.Where(x => x.EvaluationId != Guid.Empty).Select(x => x.EvaluationId).ToList();
             if (evalIds.Count > 0)
             {
@@ -282,7 +279,6 @@ namespace SOLUM_UI.ViewModels
                 bool ok = ActionConfirmDialog.Show("Shortlist Candidate", $"Move {item.Name} to Approved Selection & Audit for FY {ActiveCycleFiscalYear}?", "Shortlist", "Cancel", ConfirmThemeType.Primary);
                 if (!ok) return;
             }
-
             item.Status = "Approved";
             if (item.EvaluationId != Guid.Empty)
             {
@@ -334,14 +330,12 @@ namespace SOLUM_UI.ViewModels
                                   || (!string.IsNullOrEmpty(item.Name) && string.Equals(x.Name, item.Name, StringComparison.OrdinalIgnoreCase)));
             FilteredRecommendations.Remove(item);
             PagedRecommendations.Remove(item);
-
             for (int i = 0; i < FilteredRecommendations.Count; i++)
             {
                 FilteredRecommendations[i].Rank = i + 1;
                 FilteredRecommendations[i].IsWithinQuota = (i + 1 <= _granteeSlots);
             }
             QueueTotalCount = FilteredRecommendations.Count;
-
             RecalculateQuotaAndFilter();
             UpdateShortlistAndFinalCollections();
             RecalculateSelectionCounts();
@@ -353,10 +347,8 @@ namespace SOLUM_UI.ViewModels
         {
             var targets = FilteredShortlistRows.Where(x => x.IsSelected).ToList();
             if (targets.Count == 0) { ToastNotification.Show("No Selection", "Please check candidate boxes to confirm.", ToastType.Info); return; }
-
             var expiredTargets = targets.Where(x => x.IsCardExpired).ToList();
             var validTargets = targets.Where(x => !x.IsCardExpired).ToList();
-
             if (validTargets.Count == 0)
             {
                 ToastNotification.Show(
@@ -372,7 +364,6 @@ namespace SOLUM_UI.ViewModels
 
             bool ok = ActionConfirmDialog.Show("Batch Confirm Grantees", confirmMsg, "Confirm Grantees", "Cancel", ConfirmThemeType.Success);
             if (!ok) return;
-
             var evalIds = validTargets.Where(x => x.EvaluationId != Guid.Empty).Select(x => x.EvaluationId).ToList();
             if (evalIds.Count > 0) await _apiService.ConfirmGranteesAsync(_activeCycleId, evalIds);
             foreach (var r in validTargets) { r.IsFinalGrantee = true; r.IsSelected = false; }

@@ -10,7 +10,6 @@
         SizeChanged="Window_SizeChanged"
         Closing="Window_Closing"
         Width="900" Height="760">
-
     <Window.Resources>
         <Style x:Key="SectionLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
@@ -457,27 +456,22 @@
             <Setter Property="Padding" Value="10,0"/>
             <Setter Property="Margin" Value="0,0,0,14"/>
         </Style>
-
         <Style x:Key="FormBoxSm" TargetType="TextBox" BasedOn="{StaticResource FormBox}">
             <Setter Property="Height" Value="34"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Padding" Value="10,0"/>
         </Style>
-
         <Style x:Key="FormDateSm" TargetType="DatePicker" BasedOn="{StaticResource FormDate}">
             <Setter Property="Height" Value="34"/>
             <Setter Property="FontSize" Value="12"/>
         </Style>
-
         <Style x:Key="FieldLabelSm" TargetType="TextBlock">
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="#444444"/>
             <Setter Property="Margin" Value="0,0,0,3"/>
         </Style>
-
     </Window.Resources>
-
     <!-- Dimmed overlay -->
     <Border Background="#44000000" Padding="0">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -492,7 +486,6 @@
                     <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="0" Opacity="0.22" RenderingBias="Performance"/>
                 </Border.Effect>
             </Border>
-
             <!-- DialogShell: Clean container. Keystrokes & cursor blinks only dirty local sub-rectangles -->
             <Border x:Name="DialogShell" Background="White" CornerRadius="16"
                     ClipToBounds="True"
@@ -509,7 +502,6 @@
                         <RowDefinition Height="*"/>  <!-- content -->
                         <RowDefinition Height="Auto"/><!-- footer -->
                     </Grid.RowDefinitions>
-
                     <!-- Header -->
                     <Border x:Name="HeaderBorder" Grid.Row="0" Background="White" CornerRadius="16,16,0,0"
                             BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="32,20">
@@ -534,7 +526,6 @@
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
-
                                 <TextBlock x:Name="FormSubtitle" Text="Add New Record"
                                            FontSize="19" FontWeight="Bold" Foreground="#111111"/>
                                 <TextBlock x:Name="FormStepHint" Text="Step 1 of 2 — Personal Information"
@@ -559,7 +550,6 @@
                             </Button>
                         </Grid>
                     </Border>
-
                     <!-- Mode stripe (hidden by default, shown for Add and Renewal) -->
                     <Border x:Name="ModeStripe" Grid.Row="1"
                             Background="#F0FAF1"
@@ -581,7 +571,6 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-
                     <!-- Step indicator -->
                     <Border x:Name="StepIndicatorRow" Grid.Row="2" Background="White" BorderBrush="#EEEEEE"
                             BorderThickness="0,0,0,1" Padding="32,12,32,14">
@@ -640,16 +629,13 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-
                     <!-- Scrollable content area -->
                     <Grid Grid.Row="3">
-
                         <!-- STEP 1 -->
                         <ScrollViewer x:Name="ScrollStep1" VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled"
                                       Background="#F4F6F9" Visibility="Visible">
                             <StackPanel Margin="32,12,32,16">
-
                                 <!-- CARD: I. IDENTIFYING INFORMATION -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
@@ -688,7 +674,6 @@
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
-
                                         <!-- Name Row -->
                                         <Grid Margin="0,0,0,12">
                                             <Grid.ColumnDefinitions>
@@ -741,7 +726,6 @@
                                                 </ComboBox>
                                             </StackPanel>
                                         </Grid>
-
                                         <!-- Birthdate, Age, PhilSys Row -->
                                         <Grid Margin="0,0,0,12">
                                             <Grid.ColumnDefinitions>
@@ -783,7 +767,6 @@
                                                 <TextBlock x:Name="ErrPhilSys" Text="Invalid format." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                         </Grid>
-
                                         <!-- Duplicate Banner in Step 1 -->
                                         <Border x:Name="DuplicateBannerPanel" Visibility="Collapsed" CornerRadius="10"
                                                 Background="#B71C1C" Padding="16,12" Margin="0,8,0,4">
@@ -834,26 +817,21 @@
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
-
                                     </StackPanel>
                                 </Border>
-
                             </StackPanel>
                         </ScrollViewer>
-
                         <!-- STEP 2: Secondary Information -->
                         <ScrollViewer x:Name="ScrollStep2" VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled"
                                       Background="#F4F6F9" Visibility="Collapsed">
                             <StackPanel Margin="32,12,32,16">
-
                                 <!-- CARD: SECONDARY DEMOGRAPHIC & BACKGROUND -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
                                         <Border Style="{StaticResource CardSectionHeader}">
                                             <TextBlock Text="II. SECONDARY &amp; BACKGROUND INFORMATION" Style="{StaticResource SectionLabel}"/>
                                         </Border>
-
                                         <!-- civil status & sex row -->
                                         <Grid Margin="0,0,0,12">
                                             <Grid.ColumnDefinitions>
@@ -899,7 +877,6 @@
                                                 <TextBlock x:Name="ErrPlaceOfBirth" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                         </Grid>
-
                                         <!-- address row -->
                                         <Grid Margin="0,0,0,12">
                                             <Grid.ColumnDefinitions>
@@ -962,7 +939,6 @@
                                                 <TextBlock x:Name="ErrContact" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                         </Grid>
-
                                         <!-- education & religion row -->
                                         <Grid Margin="0,0,0,12">
                                             <Grid.ColumnDefinitions>
@@ -987,7 +963,6 @@
                                                          TextChanged="TxtReligion_TextChanged"/>
                                             </StackPanel>
                                         </Grid>
-
                                         <!-- occupation & monthly income row -->
                                         <Grid Margin="0,0,0,12">
                                             <Grid.ColumnDefinitions>
@@ -1022,10 +997,8 @@
                                                 </Border>
                                             </StackPanel>
                                         </Grid>
-
                                     </StackPanel>
                                 </Border>
-
                                 <!-- CARD: PERSON IN CASE OF EMERGENCY -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
@@ -1085,7 +1058,6 @@
                                         </Grid>
                                     </StackPanel>
                                 </Border>
-
                     <!-- CARD: ADDITIONAL INFORMATION & SECTOR CLASSIFICATION -->
                     <Border Style="{StaticResource CardSection}">
                         <StackPanel>
@@ -1096,7 +1068,6 @@
                                                FontSize="11" Foreground="#6B7280" Margin="0,2,0,0"/>
                                 </StackPanel>
                             </Border>
-
                             <Grid Margin="0,4,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -1105,7 +1076,6 @@
                                     <ColumnDefinition Width="10"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-
                             <!-- Tile 1: Pantawid Beneficiary (4Ps) -->
                             <Border Grid.Column="0" Background="#FFFBFD" BorderBrush="#E5B8C9" BorderThickness="1"
                                     CornerRadius="7" Padding="10,7">
@@ -1125,7 +1095,6 @@
                                     </StackPanel>
                                 </Grid>
                             </Border>
-
                             <!-- Tile 2: Indigenous Person (IP) -->
                             <Border Grid.Column="2" Background="#FFFBFD" BorderBrush="#E5B8C9" BorderThickness="1"
                                     CornerRadius="7" Padding="10,7">
@@ -1145,7 +1114,6 @@
                                     </StackPanel>
                                 </Grid>
                             </Border>
-
                             <!-- Tile 3: LGBTQ+ -->
                             <Border Grid.Column="4" Background="#FFFBFD" BorderBrush="#E5B8C9" BorderThickness="1"
                                     CornerRadius="7" Padding="10,7">
@@ -1170,13 +1138,11 @@
                     </Border>
                             </StackPanel>
                         </ScrollViewer>
-
                         <!-- STEP 3: Circumstances & Family Composition -->
                         <ScrollViewer x:Name="ScrollStep3" VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled"
                                       Background="#F4F6F9" Visibility="Collapsed">
                             <StackPanel Margin="32,12,32,16">
-
                                 <!-- CARD: III. PROBLEM PRESENTED -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
@@ -1184,7 +1150,6 @@
                                             <TextBlock Text="III. PROBLEM PRESENTED / CIRCUMSTANCE OF BEING SOLO PARENT"
                                                        Style="{StaticResource SectionLabel}"/>
                                         </Border>
-
                                         <!-- 3-column circumstances: A1-A4 | A5-B | C-F -->
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -1192,7 +1157,6 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-
                                             <!-- col 1: A1–A4 -->
                                             <StackPanel Grid.Column="0" Margin="0,0,12,0">
                                                 <RadioButton x:Name="ChkA1" Style="{StaticResource FormCheck}" GroupName="Circumstance"
@@ -1202,7 +1166,6 @@
                                                         <Run Text="Gives birth as a result of rape"/>
                                                     </TextBlock>
                                                 </RadioButton>
-
                                                 <RadioButton x:Name="ChkA2" Style="{StaticResource FormCheck}" GroupName="Circumstance"
                                                           Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
@@ -1231,14 +1194,12 @@
                                                         </StackPanel>
                                                     </Grid>
                                                 </StackPanel>
-
                                                 <RadioButton x:Name="ChkA3" Style="{StaticResource FormCheck}" GroupName="Circumstance">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A3. " FontWeight="Bold"/>
                                                         <Run Text="Detention of Spouse"/>
                                                     </TextBlock>
                                                 </RadioButton>
-
                                                 <RadioButton x:Name="ChkA4" Style="{StaticResource FormCheck}" GroupName="Circumstance"
                                                           Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
@@ -1252,7 +1213,6 @@
                                                              TextChanged="TxtA4Disability_TextChanged"/>
                                                 </StackPanel>
                                             </StackPanel>
-
                                             <!-- col 2: A5–B -->
                                             <StackPanel Grid.Column="1" Margin="0,0,12,0">
                                                 <RadioButton x:Name="ChkA5" Style="{StaticResource FormCheck}" GroupName="Circumstance"
@@ -1267,7 +1227,6 @@
                                                     <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}"
                                                              TextChanged="TxtA5Period_TextChanged"/>
                                                 </StackPanel>
-
                                                 <RadioButton x:Name="ChkA6" Style="{StaticResource FormCheck}" GroupName="Circumstance"
                                                           Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
@@ -1283,14 +1242,12 @@
                                                         <ComboBoxItem Content="Annulment of marriage"/>
                                                     </ComboBox>
                                                 </StackPanel>
-
                                                 <RadioButton x:Name="ChkA7" Style="{StaticResource FormCheck}" GroupName="Circumstance">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A7. " FontWeight="Bold"/>
                                                         <Run Text="Abandonment of spouse for at least 6 months"/>
                                                     </TextBlock>
                                                 </RadioButton>
-
                                                 <RadioButton x:Name="ChkB" Style="{StaticResource FormCheck}" GroupName="Circumstance"
                                                           Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
@@ -1304,7 +1261,6 @@
                                                              TextChanged="TxtBStayAbroad_TextChanged"/>
                                                 </StackPanel>
                                             </StackPanel>
-
                                             <!-- col 3: C–F -->
                                             <StackPanel Grid.Column="2">
                                                 <RadioButton x:Name="ChkC" Style="{StaticResource FormCheck}" GroupName="Circumstance">
@@ -1313,21 +1269,18 @@
                                                         <Run Text="Unmarried Mother or Father"/>
                                                     </TextBlock>
                                                 </RadioButton>
-
                                                 <RadioButton x:Name="ChkD" Style="{StaticResource FormCheck}" GroupName="Circumstance">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="D. " FontWeight="Bold"/>
                                                         <Run Text="Legal Guardian / Adoptive / Foster Parent"/>
                                                     </TextBlock>
                                                 </RadioButton>
-
                                                 <RadioButton x:Name="ChkE" Style="{StaticResource FormCheck}" GroupName="Circumstance">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="E. " FontWeight="Bold"/>
                                                         <Run Text="Relative within the fourth (4th) civil degree of consanguinity or affinity"/>
                                                     </TextBlock>
                                                 </RadioButton>
-
                                                 <RadioButton x:Name="ChkF" Style="{StaticResource FormCheck}" GroupName="Circumstance">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="F. " FontWeight="Bold"/>
@@ -1338,7 +1291,6 @@
                                         </Grid>
                                     </StackPanel>
                                 </Border>
-
                                 <!-- CARD: IV. FAMILY COMPOSITION -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
@@ -1360,7 +1312,6 @@
                                                 </StackPanel>
                                             </Button>
                                         </Grid>
-
                                         <!-- Collapsible Add/Edit Member Inline Sub-Card -->
                                         <Border x:Name="AddMemberSubCard" Background="#FFF9FB" BorderBrush="#702943" BorderThickness="1.5"
                                                 CornerRadius="10" Padding="0" Margin="0,0,0,16" Visibility="Collapsed" ClipToBounds="True">
@@ -1370,7 +1321,6 @@
                                                     <TextBlock x:Name="TxtAddMemberTitle" Text="Add Household Member"
                                                                FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                                                 </Border>
-
                                                 <Border Padding="16,14">
                                                     <StackPanel>
                                                         <!-- Row 1: Name, Relationship, Sex, Civil Status -->
@@ -1384,7 +1334,6 @@
                                                                 <ColumnDefinition Width="10"/>
                                                                 <ColumnDefinition Width="*"/>
                                                             </Grid.ColumnDefinitions>
-
                                                             <StackPanel Grid.Column="0">
                                                                 <TextBlock Style="{StaticResource FieldLabelSm}">
                                                                     Full Name <Run Text="*" Foreground="#E53935"/>
@@ -1392,7 +1341,6 @@
                                                                 <TextBox x:Name="TxtMemberName" Style="{StaticResource FormBoxSm}" MaxLength="60" CharacterCasing="Upper" TextChanged="TxtMemberName_TextChanged"
                                                                          PreviewTextInput="NameOnly_PreviewTextInput"/>
                                                             </StackPanel>
-
                                                             <StackPanel Grid.Column="2">
                                                                 <TextBlock Style="{StaticResource FieldLabelSm}">
                                                                     Relationship <Run Text="*" Foreground="#E53935"/>
@@ -1409,7 +1357,6 @@
                                                                     <ComboBoxItem Content="Other"/>
                                                                 </ComboBox>
                                                             </StackPanel>
-
                                                             <StackPanel Grid.Column="4">
                                                                 <TextBlock Style="{StaticResource FieldLabelSm}">
                                                                     Sex <Run Text="*" Foreground="#E53935"/>
@@ -1419,7 +1366,6 @@
                                                                     <ComboBoxItem Content="Male"/>
                                                                 </ComboBox>
                                                             </StackPanel>
-
                                                             <StackPanel Grid.Column="6">
                                                                 <TextBlock Style="{StaticResource FieldLabelSm}">
                                                                     Civil Status <Run Text="*" Foreground="#E53935"/>
@@ -1434,7 +1380,6 @@
                                                                 </ComboBox>
                                                             </StackPanel>
                                                         </Grid>
-
                                                         <!-- Row 2: Birthdate, Age (auto), Education/Employment, Income -->
                                                         <Grid Margin="0,0,0,12">
                                                             <Grid.ColumnDefinitions>
@@ -1446,7 +1391,6 @@
                                                                 <ColumnDefinition Width="10"/>
                                                                 <ColumnDefinition Width="1.3*"/>
                                                             </Grid.ColumnDefinitions>
-
                                                             <StackPanel Grid.Column="0">
                                                                 <TextBlock Style="{StaticResource FieldLabelSm}">
                                                                     Birthdate <Run Text="*" Foreground="#E53935"/>
@@ -1457,7 +1401,6 @@
                                                                                 SelectedDateChanged="DpMemberDob_SelectedDateChanged"/>
                                                                 </Border>
                                                             </StackPanel>
-
                                                             <StackPanel Grid.Column="2">
                                                                 <TextBlock Text="Age" Style="{StaticResource FieldLabelSm}"/>
                                                                 <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="#F5F5F5" Height="34">
@@ -1466,19 +1409,16 @@
                                                                              HorizontalContentAlignment="Center" ToolTip="Auto-calculated from Birthdate"/>
                                                                 </Border>
                                                             </StackPanel>
-
                                                             <StackPanel Grid.Column="4">
                                                                 <TextBlock Text="Educ. Attainment / Employment" Style="{StaticResource FieldLabelSm}"/>
                                                                 <TextBox x:Name="TxtMemberEdu" Style="{StaticResource FormBoxSm}" MaxLength="80" CharacterCasing="Upper" TextChanged="TxtMemberEdu_TextChanged"/>
                                                             </StackPanel>
-
                                                             <StackPanel Grid.Column="6">
                                                                 <TextBlock Text="Monthly Income (₱)" Style="{StaticResource FieldLabelSm}"/>
                                                                 <TextBox x:Name="TxtMemberIncome" Style="{StaticResource FormBoxSm}"
                                                                          PreviewTextInput="NumberOnly_PreviewTextInput"/>
                                                             </StackPanel>
                                                         </Grid>
-
                                                         <!-- Row 3: Special Needs Integration Box (Revealed columns, starts disabled until checked) -->
                                                         <Border Background="#FAFAFA" BorderBrush="#EAD3DC" BorderThickness="1" CornerRadius="8"
                                                                 Padding="14,12" Margin="0,0,0,14">
@@ -1487,7 +1427,6 @@
                                                                           FontSize="12" FontWeight="SemiBold" Foreground="#702943"
                                                                           Checked="ChkMemberSpecialNeeds_Changed" Unchecked="ChkMemberSpecialNeeds_Changed"
                                                                           VerticalContentAlignment="Center" Cursor="Hand" Margin="0,0,0,10"/>
-
                                                                 <!-- Columns revealed already, starts uneditable until ChkMemberSpecialNeeds is checked -->
                                                                 <Grid x:Name="PnlSpecialNeedsDetails" IsEnabled="False" Opacity="0.5">
                                                                     <Grid.ColumnDefinitions>
@@ -1495,7 +1434,6 @@
                                                                         <ColumnDefinition Width="12"/>
                                                                         <ColumnDefinition Width="2.5*"/>
                                                                     </Grid.ColumnDefinitions>
-
                                                                     <StackPanel Grid.Column="0">
                                                                         <TextBlock Text="Special Needs Category" Style="{StaticResource FieldLabelSm}"/>
                                                                         <ComboBox x:Name="CmbSpecialNeedsCategory" Style="{StaticResource FormCombo}" Height="34" FontSize="12">
@@ -1511,7 +1449,6 @@
                                                                             <ComboBoxItem Content="Other"/>
                                                                         </ComboBox>
                                                                     </StackPanel>
-
                                                                     <StackPanel Grid.Column="2">
                                                                         <TextBlock Text="Description / Special Accommodations (Optional)" Style="{StaticResource FieldLabelSm}"/>
                                                                         <TextBox x:Name="TxtSpecialNeedsDescription" Style="{StaticResource FormBoxSm}" MaxLength="120"
@@ -1520,7 +1457,6 @@
                                                                 </Grid>
                                                             </StackPanel>
                                                         </Border>
-
                                                         <!-- Actions: Cancel and Save -->
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                                             <Button Content="Cancel" Style="{StaticResource OutlineMaroonBtn}" Height="32" Padding="14,0"
@@ -1532,7 +1468,6 @@
                                                 </Border>
                                             </StackPanel>
                                         </Border>
-
                                         <!-- Deeper Colored Table Header Banner for the Dependents Cards List -->
                                         <Border Background="#702943" CornerRadius="6" Padding="14,10" Margin="0,0,0,8">
                                             <Grid>
@@ -1550,7 +1485,6 @@
                                                 <TextBlock Grid.Column="4" Text="ACTIONS" FontSize="11" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right" Margin="0,0,6,0"/>
                                             </Grid>
                                         </Border>
-
                                         <!-- ItemsControl for Cards List -->
                                         <ItemsControl x:Name="FamilyCardsList">
                                             <ItemsControl.ItemTemplate>
@@ -1565,7 +1499,6 @@
                                                                 <ColumnDefinition Width="1.5*"/>
                                                                 <ColumnDefinition Width="84"/>
                                                             </Grid.ColumnDefinitions>
-
                                                             <!-- Column 0: Name + Relationship (+ NEW Highlight Tag) -->
                                                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                                                 <StackPanel Orientation="Horizontal">
@@ -1582,7 +1515,6 @@
                                                                 </StackPanel>
                                                                 <TextBlock Text="{Binding Relationship}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"/>
                                                             </StackPanel>
-
                                                             <!-- Column 1: Age, Sex & Birthdate -->
                                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                                 <StackPanel Orientation="Horizontal">
@@ -1592,13 +1524,11 @@
                                                                 </StackPanel>
                                                                 <TextBlock Text="{Binding BirthdateDisplay, StringFormat='DOB: {0}'}" FontSize="11" Foreground="#6B7280" Margin="0,2,0,0"/>
                                                             </StackPanel>
-
                                                             <!-- Column 2: Education / Work & Income -->
                                                             <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0">
                                                                 <TextBlock Text="{Binding EducationDisplay}" FontSize="12" Foreground="#1F2937" TextTrimming="CharacterEllipsis"/>
                                                                 <TextBlock Text="{Binding IncomeDisplay}" FontSize="11" Foreground="#6B7280" Margin="0,1,0,0"/>
                                                             </StackPanel>
-
                                                             <!-- Column 3: Disability / Special Needs (Direct Typography, No Badges) -->
                                                             <StackPanel Grid.Column="3" VerticalAlignment="Center" ToolTip="{Binding SpecialNeedsTooltip}" Margin="0,0,10,0">
                                                                 <TextBlock Text="{Binding DisabilityTitleDisplay}" FontSize="12"
@@ -1609,7 +1539,6 @@
                                                                            Visibility="{Binding DisabilitySubtitleVisibility}"
                                                                            TextTrimming="CharacterEllipsis" Margin="0,1,0,0"/>
                                                             </StackPanel>
-
                                                             <!-- Column 4: Actions (Prominent Edit & Delete Icons) -->
                                                             <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                                 <!-- Prominent Edit Button -->
@@ -1632,7 +1561,6 @@
                                                                         </ControlTemplate>
                                                                     </Button.Template>
                                                                 </Button>
-
                                                                 <!-- Prominent Delete Button -->
                                                                 <Button Width="32" Height="32" Cursor="Hand"
                                                                         ToolTip="Remove member" Click="BtnRemoveFamilyMember_Click" Tag="{Binding}">
@@ -1659,7 +1587,6 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-
                                         <!-- Empty state placeholder -->
                                         <Border x:Name="PnlNoFamilyMembers" Background="#FAFAFA" BorderBrush="#E5E7EB" BorderThickness="1"
                                                 CornerRadius="8" Padding="20,16" Margin="0,4,0,0" Visibility="Collapsed">
@@ -1670,7 +1597,6 @@
                                                            FontSize="11" Foreground="#9CA3AF" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                                             </StackPanel>
                                         </Border>
-
                                         <!-- Age Threshold Alert banner: when all dependents are 23+ -->
                                         <Border x:Name="PnlAgeThresholdWarning" Background="#FFFBEB" BorderBrush="#F59E0B" BorderThickness="1.2"
                                                 CornerRadius="8" Padding="14,12" Margin="0,6,0,0" Visibility="Collapsed">
@@ -1691,7 +1617,6 @@
                                         </Border>
                                     </StackPanel>
                                 </Border>
-
                                 <!-- CARD: V. NEEDS AND PROBLEMS -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
@@ -1706,7 +1631,6 @@
                                                  TextChanged="TxtNeeds_TextChanged"/>
                                     </StackPanel>
                                 </Border>
-
                                 <!-- CARD: VI. OTHER SOURCES OF INCOME -->
                                 <Border Style="{StaticResource CardSection}">
                                     <StackPanel>
@@ -1721,13 +1645,10 @@
                                                  TextChanged="TxtOtherIncome_TextChanged"/>
                                     </StackPanel>
                                 </Border>
-
                             </StackPanel>
                         </ScrollViewer>
-
                     </Grid>
                     <!-- End content area -->
-
                     <!-- Footer bar -->
                     <Border Grid.Row="4" Background="White" BorderBrush="#EEEEEE"
                             BorderThickness="0,1,0,0" Padding="32,14" CornerRadius="0,0,16,16">
@@ -1751,10 +1672,8 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-
                 </Grid>
             </Border>
         </Grid>
     </Border>
-
 </Window>

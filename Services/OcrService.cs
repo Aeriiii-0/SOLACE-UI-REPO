@@ -15,7 +15,6 @@ namespace SOLUM_UI.Services
         public bool HasFailed { get; set; } = false;
         public string ErrorMessage { get; set; } = null;
     }
-
     /// <summary>
     /// Solace OCR Service Client.
     /// Modularized into partial classes:

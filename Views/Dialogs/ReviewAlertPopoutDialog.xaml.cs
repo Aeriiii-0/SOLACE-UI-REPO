@@ -14,17 +14,14 @@ namespace SOLUM_UI.Views.Dialogs
             TxtExpiringCount.Text = expiringCount.ToString("N0");
             TxtInactiveCount.Text = inactiveCount.ToString("N0");
             TxtPendingCount.Text = pendingCount.ToString("N0");
-
             if (expiringCount <= 0 && CardExpiring != null)
             {
                 CardExpiring.Visibility = Visibility.Collapsed;
             }
-
             if (inactiveCount <= 0 && CardInactive != null)
             {
                 CardInactive.Visibility = Visibility.Collapsed;
             }
-
             if (pendingCount <= 0 && CardPendingReview != null)
             {
                 CardPendingReview.Visibility = Visibility.Collapsed;
@@ -89,7 +86,6 @@ namespace SOLUM_UI.Views.Dialogs
         public static void ShowIfReviewsNeeded(Window owner, int expiringCount, int inactiveCount, int pendingCount = 0)
         {
             if (expiringCount <= 0 && inactiveCount <= 0 && pendingCount <= 0) return;
-
             var mainWin = owner as MainWindow;
             var dlg = new ReviewAlertPopoutDialog(expiringCount, inactiveCount, pendingCount, mainWin)
             {

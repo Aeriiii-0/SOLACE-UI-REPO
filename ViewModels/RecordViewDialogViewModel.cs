@@ -18,13 +18,11 @@ namespace SOLUM_UI.ViewModels
         private readonly SoloParentRecord _record;
         private bool      _toolbarCollapsed;
         private bool      _isDeleteOverlayVisible;
-
         // Backing fields for observable record-level properties
         private string    _applicationType;
         private string    _status;
         private DateTime  _lastUpdated;
         private DateTime? _validUntil;
-
         // Backing fields for notification card
         private bool   _isNotificationVisible;
         private string _notificationTitle;
@@ -32,19 +30,16 @@ namespace SOLUM_UI.ViewModels
         private bool   _isNotificationSuccess;
         private DispatcherTimer _notifyTimer;
         private DispatcherTimer _closeTimer;
-
         // ── INotifyPropertyChanged ───────────────────────────────────────────
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string name) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
         // ── Result signals (inspected by caller after ShowDialog()) ──────────
         public bool OpenedEdit    { get; private set; }
         public bool Renewed       { get; private set; }   // kept for compat
         public bool OpenedRenew   { get; private set; }
         public bool OpenedDelete  { get; private set; }
         public SoloParentRecord RenewalResult { get; private set; }
-
         // ── Colour palette (presentation constants) ──────────────────────────
         // Declared internal so the code-behind card-builder helpers can still
         // reference them during Phase 2 without duplication.
@@ -59,13 +54,10 @@ namespace SOLUM_UI.ViewModels
         internal static readonly SolidColorBrush BrChipBdr  = Clr(0xDF, 0x9B, 0xB1);
         internal static readonly SolidColorBrush BrRowAlt   = Clr(0xF8, 0xFA, 0xFC);
         internal static readonly SolidColorBrush BrSecBg    = Clr(0xFF, 0xFF, 0xFF);
-
         /// <summary>Factory helper preserved verbatim from the original code-behind.</summary>
         internal static SolidColorBrush Clr(byte r, byte g, byte b) =>
             new SolidColorBrush(Color.FromRgb(r, g, b));
-
         // ── Observable state ─────────────────────────────────────────────────
-
         /// <summary>True when the action toolbar is in its collapsed (icon-only) state.</summary>
         public bool IsToolbarCollapsed
         {
@@ -77,12 +69,10 @@ namespace SOLUM_UI.ViewModels
                 OnPropertyChanged(nameof(IsToolbarCollapsed));
             }
         }
-
         /// <summary>True if the current user has permission to delete records (Admins only).</summary>
         public bool CanDelete => MainWindow.CurrentUserRole != null &&
                                  (MainWindow.CurrentUserRole.Equals("Administrator", StringComparison.OrdinalIgnoreCase) ||
                                   MainWindow.CurrentUserRole.Equals("Admin", StringComparison.OrdinalIgnoreCase));
-
         /// <summary>True while the in-dialog delete-confirmation overlay is visible.</summary>
         public bool IsDeleteOverlayVisible
         {
@@ -94,14 +84,12 @@ namespace SOLUM_UI.ViewModels
                 OnPropertyChanged(nameof(IsDeleteOverlayVisible));
             }
         }
-
         // ── Close event (code-behind subscribes to drive the Window) ─────────
         /// <summary>
         /// Fired whenever the dialog should close.
         /// The <c>bool</c> argument is the desired <see cref="System.Windows.Window.DialogResult"/>.
         /// </summary>
         public event Action<bool> RequestClose;
-
         /// <summary>
         /// Application type label shown in the dialog header.
         /// Writing this property also updates the canonical flags on the underlying
@@ -116,7 +104,6 @@ namespace SOLUM_UI.ViewModels
             {
                 if (_applicationType == value) return;
                 _applicationType = value;
-
                 // Keep model flags consistent with the display value so that
                 // record.ApplicationType (the computed property) reflects the
                 // same state and callers can rely on either surface.
@@ -131,11 +118,9 @@ namespace SOLUM_UI.ViewModels
                         _record.IsRenewal      = true;
                         break;
                 }
-
                 OnPropertyChanged(nameof(ApplicationType));
             }
         }
-
         /// <summary>Record status. Auto-set to "Inactive" on expiry; "Active" on renewal. Synced back to model.</summary>
         public string Status
         {
@@ -148,7 +133,6 @@ namespace SOLUM_UI.ViewModels
                 OnPropertyChanged(nameof(Status));
             }
         }
-
         /// <summary>Date the record was last updated. Synced to model; updated immediately on renewal.</summary>
         public DateTime LastUpdated
         {
@@ -161,7 +145,6 @@ namespace SOLUM_UI.ViewModels
                 OnPropertyChanged(nameof(LastUpdated));
             }
         }
-
         /// <summary>
         /// Term expiry (maps to CurrentTermExpiresAt). Set to LastUpdated + 1 yr on renewal.
         /// Triggers an immediate expiration check so <see cref="Status"/> is kept consistent.
@@ -178,7 +161,6 @@ namespace SOLUM_UI.ViewModels
                 EvaluateExpiration();   // re-evaluate Active/Inactive whenever validity changes
             }
         }
-
         // ── Constructor ──────────────────────────────────────────────────────
         public RecordViewDialogViewModel(SoloParentRecord record)
         {
@@ -189,14 +171,12 @@ namespace SOLUM_UI.ViewModels
             _validUntil      = record.CurrentTermExpiresAt;
             EvaluateExpiration();
         }
-
         /// <summary>
         /// Exposes the raw model so the code-behind card-builder helpers can
         /// read it during Phase 2 without holding their own reference.
         /// Will be removed in Phase 4 when cards become data-bound UserControls.
         /// </summary>
         public SoloParentRecord Record => _record;
-
         // ── Lifecycle ─────────────────────────────────────────────────────────
 
         private void EvaluateExpiration()
@@ -207,7 +187,6 @@ namespace SOLUM_UI.ViewModels
             if (_validUntil.HasValue && DateTime.Now > _validUntil.Value)
                 Status = "Inactive";
         }
-
         // ── Notification card properties ──────────────────────────────────────
         public bool   IsNotificationVisible
         {
@@ -229,7 +208,6 @@ namespace SOLUM_UI.ViewModels
             get => _isNotificationSuccess;
             private set { _isNotificationSuccess = value; OnPropertyChanged(nameof(IsNotificationSuccess)); }
         }
-
         /// <summary>Shows the notification card and auto-hides it after 3 seconds.</summary>
         public void ShowNotification(string title, string message, bool isSuccess)
         {
@@ -237,13 +215,11 @@ namespace SOLUM_UI.ViewModels
             NotificationMessage   = message;
             IsNotificationSuccess = isSuccess;
             IsNotificationVisible = true;
-
             _notifyTimer?.Stop();
             _notifyTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
             _notifyTimer.Tick += (s, e) => { _notifyTimer.Stop(); IsNotificationVisible = false; };
             _notifyTimer.Start();
         }
-
         /// <summary>
         /// Shows the notification card then fires <see cref="RequestClose"/> after
         /// <paramref name="closeDelaySecs"/> seconds so the user can read the feedback
@@ -253,15 +229,12 @@ namespace SOLUM_UI.ViewModels
                                    double closeDelaySecs, bool dialogResult)
         {
             ShowNotification(title, message, isSuccess);
-
             _closeTimer?.Stop();
             _closeTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(closeDelaySecs) };
             _closeTimer.Tick += (s, e) => { _closeTimer.Stop(); RequestClose?.Invoke(dialogResult); };
             _closeTimer.Start();
         }
-
         // ── Action methods (called by code-behind *_Click handlers) ──────────
-
         /// <summary>Toggles the action toolbar between collapsed and expanded.</summary>
         public void HandleToolbarToggle()
         {
@@ -269,7 +242,6 @@ namespace SOLUM_UI.ViewModels
         }
 
         public bool IsQuickRenew { get; private set; }
-
         /// <summary>
         /// Called when the user chooses Quick Renewal (Mode 1: No Changes).
         /// Signals parent page to perform an immediate validity extension.
@@ -283,7 +255,6 @@ namespace SOLUM_UI.ViewModels
                 "Extending record validity by 1 year.", true,
                 closeDelaySecs: 0.8, dialogResult: true);
         }
-
         /// <summary>
         /// Called by the code-behind after a successful <see cref="RecordDialog"/>
         /// renewal. Sets result flags and fires <see cref="RequestClose"/> with
@@ -297,7 +268,6 @@ namespace SOLUM_UI.ViewModels
             renewalResult.Status               = "Active";
             renewalResult.IsRenewal            = true;
             renewalResult.IsNewApplicant       = false;
-
             // ── Mirror onto INPC properties for immediate UI update ───────────
             // Order matters: set ValidUntil before Status so the EvaluateExpiration
             // call inside the ValidUntil setter sees the new future date and does
@@ -307,7 +277,6 @@ namespace SOLUM_UI.ViewModels
             Status          = renewalResult.Status;                  // "Active" — wins over any expiry check
             // Derive from the model's computed property to keep a single source of truth.
             ApplicationType = renewalResult.ApplicationType;         // "Renewed" (IsRenewal=true)
-
             RenewalResult = renewalResult;
             OpenedRenew   = true;
             Renewed       = true;
@@ -315,7 +284,6 @@ namespace SOLUM_UI.ViewModels
                 "The solo parent record has been successfully renewed.", true,
                 closeDelaySecs: 1.2, dialogResult: true);
         }
-
         /// <summary>Signals the parent page to open the record in edit mode.</summary>
         public void HandleEdit()
         {
@@ -324,19 +292,16 @@ namespace SOLUM_UI.ViewModels
                 "Loading the record in edit mode.", true,
                 closeDelaySecs: 1.0, dialogResult: true);
         }
-
         /// <summary>Makes the in-dialog delete-confirmation overlay visible.</summary>
         public void HandleDeleteRequest()
         {
             IsDeleteOverlayVisible = true;
         }
-
         /// <summary>Dismisses the delete-confirmation overlay without deleting.</summary>
         public void HandleDeleteCancel()
         {
             IsDeleteOverlayVisible = false;
         }
-
         /// <summary>
         /// Confirms deletion: collapses the overlay, sets the delete flag, and
         /// fires <see cref="RequestClose"/> with <c>DialogResult = true</c> after
@@ -350,7 +315,6 @@ namespace SOLUM_UI.ViewModels
                 "The solo parent record has been permanently removed.", false,
                 closeDelaySecs: 1.2, dialogResult: true);
         }
-
         /// <summary>
         /// Closes the dialog without any action
         /// (<c>DialogResult = false</c>).

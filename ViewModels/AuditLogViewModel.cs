@@ -16,13 +16,10 @@ namespace SOLUM_UI.ViewModels
     {
         // ── Constants ──────────────────────────────────────────────────────────
         private const int PageSize = 8;
-
         // ── Observable collection shown in the list ────────────────────────────
         public ObservableCollection<AuditLog> PagedLogs { get; } = new ObservableCollection<AuditLog>();
-
         // ── Tracks whether the first load has completed ────────────────────────
         public bool IsInitialized { get; private set; }
-
         // ── In-memory page cache ───────────────────────────────────────────────
         // Stores fetched pages so Back/Forward is instant without re-fetching.
         // Cleared when filters change or Refresh is pressed.
@@ -33,14 +30,12 @@ namespace SOLUM_UI.ViewModels
         }
         private readonly Dictionary<int, PageCacheEntry> _pageCache
             = new Dictionary<int, PageCacheEntry>();
-
         // ── User name cache (UserId -> FullName) ──────────────────────────────
         private static readonly Dictionary<string, string> _userNamesCache =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private static bool _userCacheLoaded = false;
         private static readonly System.Threading.SemaphoreSlim _userCacheLock =
             new System.Threading.SemaphoreSlim(1, 1);
-
         // ── Loading / error state ──────────────────────────────────────────────
         private bool _isLoading;
         public bool IsLoading
@@ -59,7 +54,6 @@ namespace SOLUM_UI.ViewModels
         public bool HasError => !string.IsNullOrEmpty(_errorMessage);
 
         public bool HasNoLogs => IsNotLoading && !HasError && PagedLogs.Count == 0;
-
         // ── Role awareness ─────────────────────────────────────────────────────
         public bool IsEncoder => GetEncoderContext().isEncoder;
         public string HeaderTitle => IsEncoder ? "My Audit Logs" : "All Audit Logs";
@@ -67,7 +61,6 @@ namespace SOLUM_UI.ViewModels
             ? "Double-click any entry to view change details."
             : "Double-click any entry to view full change details.";
         public string SearchPlaceholder => IsEncoder ? "Viewing your activity logs (read-only)" : "Search by citizen name or user ID…";
-
         // ── Filter properties ──────────────────────────────────────────────────
         private string _searchText = string.Empty;
         public string SearchText
@@ -112,7 +105,6 @@ namespace SOLUM_UI.ViewModels
             "CREATE_SUBSIDY_CYCLE", "GENERATE_SUBSIDY_RECOMMENDATIONS", "SHORTLIST_SUBSIDY_CANDIDATES",
             "REJECT_SUBSIDY_OUTLIER", "CONFIRM_SUBSIDY_GRANTEES", "REVOKE_SUBSIDY_GRANT"
         };
-
         // ── Cursor-based pagination ────────────────────────────────────────────
         private readonly List<(DateTimeOffset? CursorTs, string CursorId)> _pageStack
             = new List<(DateTimeOffset?, string)>();
@@ -130,7 +122,6 @@ namespace SOLUM_UI.ViewModels
 
         public bool CanGoPrev => _currentPageIndex > 0 && IsNotLoading;
         public bool CanGoNext => _hasMore && IsNotLoading;
-
         // ── Commands ───────────────────────────────────────────────────────────
         public ICommand PrevPageCommand     { get; }
         public ICommand NextPageCommand     { get; }
@@ -139,7 +130,6 @@ namespace SOLUM_UI.ViewModels
         public ICommand RefreshCommand      { get; }
         public ICommand OpenDetailCommand   { get; }
         public ICommand CloseDetailCommand  { get; }
-
         // ── Detail panel ───────────────────────────────────────────────────────
         private AuditLog _selectedLog;
         public AuditLog SelectedLog
@@ -148,12 +138,10 @@ namespace SOLUM_UI.ViewModels
             set { _selectedLog = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsDetailVisible)); }
         }
         public bool IsDetailVisible => SelectedLog != null;
-
         // ── Constructor ────────────────────────────────────────────────────────
         public AuditLogViewModel()
         {
             _pageStack.Add((null, null));
-
             PrevPageCommand     = new RelayCommand(_ => FireAndForget(GoToPrevPageAsync),        _ => CanGoPrev);
             NextPageCommand     = new RelayCommand(_ => FireAndForget(GoToNextPageAsync),        _ => CanGoNext);
             SearchCommand       = new RelayCommand(_ => FireAndForget(ResetAndLoadAsync),        _ => IsNotLoading);
@@ -162,16 +150,13 @@ namespace SOLUM_UI.ViewModels
             OpenDetailCommand   = new RelayCommand(param => SelectedLog = param as AuditLog);
             CloseDetailCommand  = new RelayCommand(_ => SelectedLog = null);
         }
-
         // ── Public entry point ─────────────────────────────────────────────────
         public async Task LoadAsync()
         {
             await FetchPageAsync(_pageStack[_currentPageIndex]);
         }
-
         // ── Helpers ────────────────────────────────────────────────────────────
         private static void FireAndForget(Func<Task> asyncAction) => asyncAction();
-
         // ── Navigation ─────────────────────────────────────────────────────────
         private async Task GoToPrevPageAsync()
         {
@@ -222,7 +207,6 @@ namespace SOLUM_UI.ViewModels
             OnPropertyChanged(nameof(EndDate));
             await ResetAndLoadAsync();
         }
-
         // ── Core fetch ─────────────────────────────────────────────────────────
         private async Task FetchPageAsync((DateTimeOffset? CursorTs, string CursorId) cursor)
         {
@@ -237,27 +221,22 @@ namespace SOLUM_UI.ViewModels
                 RaiseNavChanged();
                 return;
             }
-
             // ── Network fetch ─────────────────────────────────────────────────
             IsLoading    = true;
             ErrorMessage = null;
             RaiseNavChanged();
-
             try
             {
                 string actionType = _selectedFilter == "All" ? null : _selectedFilter;
-
                 DateTimeOffset? startDto = _startDate.HasValue
                     ? (DateTimeOffset?)new DateTimeOffset(_startDate.Value,
                         TimeZoneInfo.Local.GetUtcOffset(_startDate.Value))
                     : null;
-
                 DateTimeOffset? endDto = _endDate.HasValue
                     ? (DateTimeOffset?)new DateTimeOffset(
                         _endDate.Value.Date.AddDays(1).AddTicks(-1),
                         TimeZoneInfo.Local.GetUtcOffset(_endDate.Value))
                     : null;
-
                 var (isEncoder, currentUserId) = GetEncoderContext();
                 string trimmedSearch = _searchText?.Trim();
                 bool isGuid = Guid.TryParse(trimmedSearch, out _);
@@ -269,7 +248,6 @@ namespace SOLUM_UI.ViewModels
                 string searchName = (!isEncoder && !isGuid && !string.IsNullOrWhiteSpace(trimmedSearch))
                     ? trimmedSearch
                     : null;
-
                 var result = await AuditLogApiService.Instance.GetLogsAsync(
                     pageSize:        PageSize,
                     userId:          userId,
@@ -279,7 +257,6 @@ namespace SOLUM_UI.ViewModels
                     cursorTimestamp: cursor.CursorTs,
                     cursorId:        cursor.CursorId,
                     name:            searchName);
-
                 if (!result.Succeeded || result.Data == null)
                 {
                     ErrorMessage = (result.Errors != null && result.Errors.Count > 0)
@@ -288,29 +265,23 @@ namespace SOLUM_UI.ViewModels
                     PagedLogs.Clear();
                     return;
                 }
-
                 var page = result.Data;
                 _hasMore = page.HasMore;
-
                 // Push next cursor if at the frontier
                 if (_currentPageIndex == _pageStack.Count - 1 && _hasMore)
                     _pageStack.Add((page.NextCursorTimestamp, page.NextCursorId));
-
                 // Ensure user names cache is loaded in background/parallel
                 await EnsureUserCacheLoadedAsync();
-
                 // Populate list
                 PagedLogs.Clear();
                 foreach (var dto in page.Items)
                     PagedLogs.Add(MapToAuditLog(dto));
-
                 // ── Store in cache ─────────────────────────────────────────────
                 _pageCache[_currentPageIndex] = new PageCacheEntry
                 {
                     Items   = new List<AuditLog>(PagedLogs),
                     HasMore = _hasMore
                 };
-
                 UpdatePageInfo();
                 IsInitialized = true;
             }
@@ -337,22 +308,17 @@ namespace SOLUM_UI.ViewModels
                     _userNamesCache[curId] = curName;
                 }
             }
-
             if (_userCacheLoaded) return;
-
             // Only Admins have permission to query /api/user. Encoders manage solo parents only.
             if (!AuthApiService.Instance.IsAdmin)
             {
                 _userCacheLoaded = true;
                 return;
             }
-
             if (!await _userCacheLock.WaitAsync(0)) return;
-
             try
             {
                 if (_userCacheLoaded) return;
-
                 // Fetch up to 50 encoders
                 var encoderReq = new GetApplicationUserRequest
                 {
@@ -361,7 +327,6 @@ namespace SOLUM_UI.ViewModels
                     PageSize = 50
                 };
                 var encoderTask = UserApiService.Instance.GetApplicationUsersAsync(encoderReq);
-
                 // Fetch up to 50 admins
                 var adminReq = new GetApplicationUserRequest
                 {
@@ -370,9 +335,7 @@ namespace SOLUM_UI.ViewModels
                     PageSize = 50
                 };
                 var adminTask = UserApiService.Instance.GetApplicationUsersAsync(adminReq);
-
                 await Task.WhenAll(encoderTask, adminTask);
-
                 lock (_userNamesCache)
                 {
                     if (encoderTask.Result?.Succeeded == true && encoderTask.Result.Data?.Items != null)
@@ -388,7 +351,6 @@ namespace SOLUM_UI.ViewModels
                             }
                         }
                     }
-
                     if (adminTask.Result?.Succeeded == true && adminTask.Result.Data?.Items != null)
                     {
                         foreach (var u in adminTask.Result.Data.Items)
@@ -403,7 +365,6 @@ namespace SOLUM_UI.ViewModels
                         }
                     }
                 }
-
                 _userCacheLoaded = true;
             }
             catch
@@ -420,14 +381,12 @@ namespace SOLUM_UI.ViewModels
         {
             if (string.IsNullOrWhiteSpace(rawUserId))
                 return string.Empty;
-
             // Direct check in cache
             lock (_userNamesCache)
             {
                 if (_userNamesCache.TryGetValue(rawUserId.Trim(), out var name) && !string.IsNullOrWhiteSpace(name))
                     return name;
             }
-
             // Check if matches current user id or email
             if (!string.IsNullOrWhiteSpace(MainWindow.CurrentUserId) &&
                 string.Equals(rawUserId.Trim(), MainWindow.CurrentUserId.Trim(), StringComparison.OrdinalIgnoreCase))
@@ -439,7 +398,6 @@ namespace SOLUM_UI.ViewModels
             {
                 return MainWindow.FullName;
             }
-
             return string.Empty;
         }
 
@@ -458,7 +416,6 @@ namespace SOLUM_UI.ViewModels
             OnPropertyChanged(nameof(CurrentPage));
             OnPropertyChanged(nameof(HasNoLogs));
         }
-
         // ── DTO → model ────────────────────────────────────────────────────────
         private static AuditLog MapToAuditLog(AuditLogDto dto)
         {
@@ -487,18 +444,15 @@ namespace SOLUM_UI.ViewModels
                     ? targetName
                     : (!string.IsNullOrWhiteSpace(targetId) ? targetId : (!string.IsNullOrWhiteSpace(targetType) ? targetType : "—")));
             string description = BuildDescription(rawType, displayName, recordName, status);
-
             var changesSource = (dto.Changes != null && dto.Changes.Count > 0)
                 ? dto.Changes
                 : (dto.Metadata?.Changes ?? new List<ChangeItemDto>());
-
             var changesList = changesSource
                 .Select(c => new ChangeDetail(
                     c.FieldName ?? c.Field ?? string.Empty,
                     c.OldValue,
                     c.NewValue))
                 .ToList();
-
             return new AuditLog
             {
                 Id                = 0,
@@ -528,7 +482,6 @@ namespace SOLUM_UI.ViewModels
             string who    = !string.IsNullOrWhiteSpace(actor)  ? actor  : "Unknown";
             string suffix = !string.IsNullOrWhiteSpace(status) ? $" · {status}" : string.Empty;
             string tgt    = !string.IsNullOrWhiteSpace(target) ? $" · {target}" : string.Empty;
-
             switch (rawActionType.ToUpperInvariant())
             {
                 case "LOGIN":                           return $"{who} logged in{suffix}";
@@ -572,7 +525,6 @@ namespace SOLUM_UI.ViewModels
                 case "REGISTER_ADMIN":
                 case "CREATE_SUBSIDY_CYCLE":
                     return AuditAction.Create;
-
                 case "UPDATE_SOLO_PARENT":
                 case "UPDATE_USER":
                 case "ENABLE_USER":
@@ -584,7 +536,6 @@ namespace SOLUM_UI.ViewModels
                 case "SHORTLIST_SUBSIDY_CANDIDATES":
                 case "CONFIRM_SUBSIDY_GRANTEES":
                     return AuditAction.Update;
-
                 case "DELETE_SOLO_PARENT":
                 case "REVOKE_SOLO_PARENT_RECORD":
                 case "DISABLE_USER":
@@ -592,13 +543,10 @@ namespace SOLUM_UI.ViewModels
                 case "REJECT_SUBSIDY_OUTLIER":
                 case "REVOKE_SUBSIDY_GRANT":
                     return AuditAction.Delete;
-
                 case "LOGIN":
                     return AuditAction.Login;
-
                 case "LOGOUT":
                     return AuditAction.Logout;
-
                 case "REFRESH_TOKEN_FAILED":
                 case "GENERATE_SUBSIDY_RECOMMENDATIONS":
                 default:
@@ -615,7 +563,6 @@ namespace SOLUM_UI.ViewModels
                 : MainWindow.CurrentUserId;
             return (isEncoder, userId);
         }
-
         // ── INotifyPropertyChanged ─────────────────────────────────────────────
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string name = null)

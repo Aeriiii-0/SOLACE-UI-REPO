@@ -1,20 +1,17 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
     <!--
         SOLUM Design System - Color tokens
         Light theme, maroon brand. Every key is prefixed "Ds" so it can never
         collide with the legacy SolumTheme / AnalyticsTheme / OcrDialogTheme keys.
         Never hard-code hex values in views; reference these brushes instead.
     -->
-
     <!-- Brand / accent -->
     <Color x:Key="DsPrimaryColor">#702943</Color>
     <Color x:Key="DsPrimaryHoverColor">#85334F</Color>
     <Color x:Key="DsPrimaryPressedColor">#5A2035</Color>
     <Color x:Key="DsPrimaryTintColor">#F7EDF1</Color>
     <Color x:Key="DsPrimaryTintStrongColor">#EFDCE3</Color>
-
     <SolidColorBrush x:Key="DsPrimaryBrush" Color="{StaticResource DsPrimaryColor}"/>
     <SolidColorBrush x:Key="DsPrimaryHoverBrush" Color="{StaticResource DsPrimaryHoverColor}"/>
     <SolidColorBrush x:Key="DsPrimaryPressedBrush" Color="{StaticResource DsPrimaryPressedColor}"/>
@@ -22,7 +19,6 @@
     <SolidColorBrush x:Key="DsPrimaryTintStrongBrush" Color="{StaticResource DsPrimaryTintStrongColor}"/>
     <SolidColorBrush x:Key="DsFocusRingBrush" Color="#66702943"/>
     <SolidColorBrush x:Key="DsFocusGlowBrush" Color="#22702943"/>
-
     <!-- Surfaces (warm neutral, slightly rose-tinted so it sits well with the maroon) -->
     <SolidColorBrush x:Key="DsCanvasBrush" Color="#F7F4F5"/>
     <SolidColorBrush x:Key="DsSurfaceBrush" Color="#FFFFFF"/>
@@ -30,12 +26,10 @@
     <SolidColorBrush x:Key="DsSurfaceHoverBrush" Color="#FBF3F6"/>
     <SolidColorBrush x:Key="DsSurfaceSelectedBrush" Color="#F6E8EE"/>
     <SolidColorBrush x:Key="DsTableHeaderBrush" Color="#FAF5F7"/>
-
     <!-- Borders -->
     <SolidColorBrush x:Key="DsBorderBrush" Color="#E7DFE3"/>
     <SolidColorBrush x:Key="DsBorderStrongBrush" Color="#D3C7CD"/>
     <SolidColorBrush x:Key="DsDividerBrush" Color="#F0EAED"/>
-
     <!-- Text -->
     <SolidColorBrush x:Key="DsTextHeadingBrush" Color="#1D1619"/>
     <SolidColorBrush x:Key="DsTextBodyBrush" Color="#3B3138"/>
@@ -43,13 +37,11 @@
     <SolidColorBrush x:Key="DsTextSubtleBrush" Color="#9B8E95"/>
     <SolidColorBrush x:Key="DsTextDisabledBrush" Color="#BBB1B6"/>
     <SolidColorBrush x:Key="DsTextOnPrimaryBrush" Color="#FFFFFF"/>
-
     <!-- Interaction overlays (laid on top of a control's own background) -->
     <SolidColorBrush x:Key="DsOverlayLightHoverBrush" Color="#1FFFFFFF"/>
     <SolidColorBrush x:Key="DsOverlayLightPressBrush" Color="#14000000"/>
     <SolidColorBrush x:Key="DsOverlayTintHoverBrush" Color="#0D702943"/>
     <SolidColorBrush x:Key="DsOverlayTintPressBrush" Color="#1A702943"/>
-
     <!-- Semantic: success / warning / danger / info / neutral -->
     <SolidColorBrush x:Key="DsSuccessBgBrush" Color="#DCFCE7"/>
     <SolidColorBrush x:Key="DsSuccessFgBrush" Color="#15803D"/>
@@ -67,10 +59,8 @@
     <SolidColorBrush x:Key="DsNeutralBgBrush" Color="#F1EEF0"/>
     <SolidColorBrush x:Key="DsNeutralFgBrush" Color="#6F6269"/>
     <SolidColorBrush x:Key="DsNeutralDotBrush" Color="#A89CA2"/>
-
     <!-- Scrollbar -->
     <SolidColorBrush x:Key="DsScrollThumbBrush" Color="#D8CCD2"/>
     <SolidColorBrush x:Key="DsScrollThumbHoverBrush" Color="#B8A8B0"/>
     <SolidColorBrush x:Key="DsScrollThumbPressBrush" Color="#9C8A93"/>
-
 </ResourceDictionary>

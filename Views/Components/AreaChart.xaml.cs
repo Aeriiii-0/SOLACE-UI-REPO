@@ -32,19 +32,16 @@ namespace SOLUM_UI.Views.Components
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var chart = (AreaChart)d;
-
             // Unsubscribe from old collection
             if (e.OldValue is ObservableCollection<AreaChartData> oldCollection)
             {
                 oldCollection.CollectionChanged -= chart.OnCollectionChanged;
             }
-
             // Subscribe to new collection
             if (e.NewValue is ObservableCollection<AreaChartData> newCollection)
             {
                 newCollection.CollectionChanged += chart.OnCollectionChanged;
             }
-
             chart.RenderChart();
         }
 
@@ -58,25 +55,21 @@ namespace SOLUM_UI.Views.Components
             try
             {
                 ChartCanvas.Children.Clear();
-
                 if (Data == null || Data.Count == 0)
                 {
                     if (NoDataPanel != null) NoDataPanel.Visibility = Visibility.Visible;
                     return;
                 }
-
                 if (NoDataPanel != null) NoDataPanel.Visibility = Visibility.Collapsed;
 
             double padding = 40;
             double chartWidth = ChartCanvas.ActualWidth > 0 ? ChartCanvas.ActualWidth - 2 * padding : 400;
             double chartHeight = ChartCanvas.ActualHeight > 0 ? ChartCanvas.ActualHeight - 2 * padding : 200;
-
             if (chartWidth <= 0 || chartHeight <= 0)
             {
                 chartWidth = 400;
                 chartHeight = 200;
             }
-
             // Find max value
             int maxValue = 0;
             foreach (var point in Data)
@@ -84,22 +77,18 @@ namespace SOLUM_UI.Views.Components
                 if (point.Value > maxValue)
                     maxValue = point.Value;
             }
-
             if (maxValue == 0)
             {
                 NoDataPanel.Visibility = Visibility.Visible;
                 return;
             }
-
             // Calculate scale
             double scaleX = chartWidth / (Data.Count - 1 > 0 ? Data.Count - 1 : 1);
             double scaleY = chartHeight / maxValue;
-
             // Draw grid lines and Y-axis labels
             for (int i = 0; i <= 5; i++)
             {
                 double y = padding + chartHeight - (i * chartHeight / 5);
-
                 // Lighter grid lines
                 Line gridLine = new Line
                 {
@@ -112,7 +101,6 @@ namespace SOLUM_UI.Views.Components
                     StrokeDashArray = new DoubleCollection { 2, 2 }
                 };
                 ChartCanvas.Children.Add(gridLine);
-
                 // Y-axis label
                 if (i > 0 || i == 0)
                 {
@@ -130,7 +118,6 @@ namespace SOLUM_UI.Views.Components
                     ChartCanvas.Children.Add(label);
                 }
             }
-
             // Draw Y-axis
             Line yAxis = new Line
             {
@@ -142,7 +129,6 @@ namespace SOLUM_UI.Views.Components
                 StrokeThickness = 1.5
             };
             ChartCanvas.Children.Add(yAxis);
-
             // Calculate points
             PointCollection points = new PointCollection();
             for (int i = 0; i < Data.Count; i++)
@@ -151,26 +137,21 @@ namespace SOLUM_UI.Views.Components
                 double y = padding + chartHeight - (Data[i].Value * scaleY);
                 points.Add(new Point(x, y));
             }
-
             // Draw smooth gradient area under the line
             PathGeometry areaGeometry = new PathGeometry();
             PathFigure areaFigure = new PathFigure { StartPoint = new Point(padding, padding + chartHeight) };
-
             if (points.Count > 0)
             {
                 areaFigure.Segments.Add(new LineSegment { Point = points[0] });
-
                 // Use Bezier curves for smooth transitions between points
                 for (int i = 1; i < points.Count; i++)
                 {
                     Point p1 = points[i - 1];
                     Point p2 = points[i];
-
                     // Calculate control points for smooth curve
                     double controlPointOffset = scaleX * 0.3;
                     Point cp1 = new Point(p1.X + controlPointOffset, p1.Y);
                     Point cp2 = new Point(p2.X - controlPointOffset, p2.Y);
-
                     BezierSegment curve = new BezierSegment
                     {
                         Point1 = cp1,
@@ -179,17 +160,14 @@ namespace SOLUM_UI.Views.Components
                     };
                     areaFigure.Segments.Add(curve);
                 }
-
                 // Close the area
                 if (points.Count > 0)
                 {
                     areaFigure.Segments.Add(new LineSegment { Point = new Point(padding + chartWidth, padding + chartHeight) });
                 }
             }
-
             areaFigure.IsClosed = true;
             areaGeometry.Figures.Add(areaFigure);
-
             // Create gradient for area (light to transparent)
             LinearGradientBrush areaGradient = new LinearGradientBrush
             {
@@ -201,7 +179,6 @@ namespace SOLUM_UI.Views.Components
                     new GradientStop(Color.FromArgb(20, 123, 20, 38), 1)
                 }
             };
-
             Path areaPath = new Path
             {
                 Data = areaGeometry,
@@ -210,7 +187,6 @@ namespace SOLUM_UI.Views.Components
                 StrokeThickness = 0
             };
             ChartCanvas.Children.Add(areaPath);
-
             // Draw smooth line using Bezier curves
             PathGeometry lineGeometry = new PathGeometry();
             PathFigure lineFigure = new PathFigure();
@@ -225,7 +201,6 @@ namespace SOLUM_UI.Views.Components
                     double controlPointOffset = scaleX * 0.3;
                     Point cp1 = new Point(p1.X + controlPointOffset, p1.Y);
                     Point cp2 = new Point(p2.X - controlPointOffset, p2.Y);
-
                     BezierSegment curve = new BezierSegment
                     {
                         Point1 = cp1,
@@ -236,7 +211,6 @@ namespace SOLUM_UI.Views.Components
                 }
                 lineGeometry.Figures.Add(lineFigure);
             }
-
             Path linePath = new Path
             {
                 Data = lineGeometry,
@@ -245,7 +219,6 @@ namespace SOLUM_UI.Views.Components
                 IsHitTestVisible = false
             };
             ChartCanvas.Children.Add(linePath);
-
             // Draw points with hover tooltips (interactive)
             for (int i = 0; i < Data.Count; i++)
             {
@@ -253,7 +226,6 @@ namespace SOLUM_UI.Views.Components
                 double pointY = points[i].Y;
                 int recordCount = Data[i].Value;
                 string barangayName = Data[i].Label;
-
                 // Create a larger hit-test area for better interactivity
                 Ellipse hitTestCircle = new Ellipse
                 {
@@ -264,15 +236,11 @@ namespace SOLUM_UI.Views.Components
                 };
                 Canvas.SetLeft(hitTestCircle, pointX - 9);
                 Canvas.SetTop(hitTestCircle, pointY - 9);
-
                 // Store data in Tag for hover
                 hitTestCircle.Tag = new { Barangay = barangayName, Count = recordCount };
-
                 hitTestCircle.MouseEnter += (s, e) => ShowTooltip(hitTestCircle, barangayName, recordCount, pointX, pointY);
                 hitTestCircle.MouseLeave += (s, e) => HideTooltip();
-
                 ChartCanvas.Children.Add(hitTestCircle);
-
                 // Visible point circle
                 Ellipse pointCircle = new Ellipse
                 {
@@ -286,7 +254,6 @@ namespace SOLUM_UI.Views.Components
                 Canvas.SetLeft(pointCircle, pointX - 5);
                 Canvas.SetTop(pointCircle, pointY - 5);
                 ChartCanvas.Children.Add(pointCircle);
-
                 // X-axis label (barangay name, truncated if needed)
                 string displayLabel = barangayName.Length > 12 ? barangayName.Substring(0, 10) + ".." : barangayName;
                 TextBlock xLabel = new TextBlock
@@ -318,7 +285,6 @@ namespace SOLUM_UI.Views.Components
             try
             {
                 if (target == null || string.IsNullOrEmpty(barangay)) return;
-
                 Border tooltipBorder = new Border
                 {
                     Background = new SolidColorBrush(Color.FromArgb(240, 123, 20, 38)),
@@ -326,12 +292,10 @@ namespace SOLUM_UI.Views.Components
                     Padding = new Thickness(10, 8, 10, 8),
                     Opacity = 0
                 };
-
                 StackPanel tooltipContent = new StackPanel
                 {
                     Orientation = Orientation.Vertical
                 };
-
                 TextBlock barangayLabel = new TextBlock
                 {
                     Text = barangay,
@@ -339,7 +303,6 @@ namespace SOLUM_UI.Views.Components
                     FontSize = 12,
                     FontWeight = FontWeights.SemiBold
                 };
-
                 TextBlock countLabel = new TextBlock
                 {
                     Text = $"{count} records",
@@ -347,17 +310,13 @@ namespace SOLUM_UI.Views.Components
                     FontSize = 11,
                     Margin = new Thickness(0, 4, 0, 0)
                 };
-
                 tooltipContent.Children.Add(barangayLabel);
                 tooltipContent.Children.Add(countLabel);
                 tooltipBorder.Child = tooltipContent;
-
                 Canvas.SetLeft(tooltipBorder, x + 15);
                 Canvas.SetTop(tooltipBorder, y - 35);
-
                 _currentToolTip = new ToolTip { Content = tooltipBorder, Placement = PlacementMode.Relative };
                 ToolTipService.SetToolTip(target, _currentToolTip);
-
                 // Fade-in animation
                 var animation = new System.Windows.Media.Animation.DoubleAnimation
                 {

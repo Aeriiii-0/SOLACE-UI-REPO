@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -23,7 +23,6 @@ namespace SOLUM_UI.Views.Components
         public string Title   { get => (string)GetValue(TitleProperty);   set => SetValue(TitleProperty, value); }
         public string Message { get => (string)GetValue(MessageProperty); set => SetValue(MessageProperty, value); }
         public bool   IsSuccess { get => (bool)GetValue(IsSuccessProperty); set => SetValue(IsSuccessProperty, value); }
-
         // ── Colours ───────────────────────────────────────────────────────────
         private static readonly SolidColorBrush SuccessDot    = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
         private static readonly SolidColorBrush SuccessBorder = new SolidColorBrush(Color.FromRgb(0xD5, 0xF5, 0xE3));
@@ -31,7 +30,6 @@ namespace SOLUM_UI.Views.Components
         private static readonly SolidColorBrush FailBorder    = new SolidColorBrush(Color.FromRgb(0xFA, 0xDB, 0xD8));
 
         public NotificationCardComponent() => InitializeComponent();
-
         // ── State callback ────────────────────────────────────────────────────
         private static void OnIsSuccessChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {

@@ -8,7 +8,6 @@
         Background="Transparent"
         ResizeMode="NoResize"
         ShowInTaskbar="False">
-
     <Border x:Name="BackdropBorder" Background="#66000000">
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
             <!-- Shadow Layer: Sibling with NO children. Rendered once into GPU cache -->
@@ -27,7 +26,6 @@
                     <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="4" Opacity="0.25" RenderingBias="Performance"/>
                 </Border.Effect>
             </Border>
-
             <!-- Main Interactive Shell Layer (Clean, ZERO DropShadowEffect on visual tree) -->
             <Border x:Name="DialogShell" Background="White" CornerRadius="16"
                     BorderBrush="#702943" BorderThickness="1.5"
@@ -35,7 +33,6 @@
                 <Border.RenderTransform>
                     <TranslateTransform x:Name="DialogShellTransform"/>
                 </Border.RenderTransform>
-
                 <Grid>
                 <Grid.RowDefinitions>
                     <!-- Header -->
@@ -45,7 +42,6 @@
                     <!-- Footer -->
                     <RowDefinition Height="64"/>
                 </Grid.RowDefinitions>
-
                 <!-- HEADER -->
                 <Border x:Name="HeaderBorder" Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="24,0">
                     <Grid VerticalAlignment="Center">
@@ -53,7 +49,6 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="📐" FontSize="22" Margin="0,0,12,0" VerticalAlignment="Center"/>
                             <StackPanel>
@@ -61,7 +56,6 @@
                                 <TextBlock Text="Visually reposition and resize bounding boxes for CSWDO-066-2 Application Form" FontSize="11" Foreground="#E0B8C4"/>
                             </StackPanel>
                         </StackPanel>
-
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <Button Content="🔄 Revert to Default" Click="ResetToDefault_Click"
                                     Height="32" Padding="14,0" Background="#903554" Foreground="White"
@@ -72,14 +66,12 @@
                                     </Style>
                                 </Button.Resources>
                             </Button>
-
                             <Button Click="Close_Click" Background="Transparent" BorderThickness="0" Cursor="Hand" Width="32" Height="32">
                                 <TextBlock Text="✕" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Button>
                         </StackPanel>
                     </Grid>
                 </Border>
-
                 <!-- MAIN WORKSPACE -->
                 <Grid Grid.Row="1" Margin="16,12">
                     <Grid.ColumnDefinitions>
@@ -89,7 +81,6 @@
                         <!-- Field Properties & Calibration Sidebar -->
                         <ColumnDefinition Width="380"/>
                     </Grid.ColumnDefinitions>
-
                     <!-- LEFT: INTERACTIVE DOCUMENT CANVAS -->
                     <Border Grid.Column="0" Background="#2B2B2B" BorderBrush="#D8C8CC" BorderThickness="1" CornerRadius="12" ClipToBounds="True">
                         <Grid>
@@ -106,7 +97,6 @@
                                            Width="{Binding Width, ElementName=OverlayCanvas}"
                                            Height="{Binding Height, ElementName=OverlayCanvas}"
                                            RenderOptions.BitmapScalingMode="HighQuality"/>
-
                                     <!-- Overlay Canvas for Field Boxes -->
                                     <Canvas x:Name="OverlayCanvas" Background="Transparent"
                                             MouseDown="OverlayCanvas_MouseDown"
@@ -114,7 +104,6 @@
                                             MouseUp="OverlayCanvas_MouseUp"/>
                                 </Grid>
                             </ScrollViewer>
-
                             <!-- FLOATING UNDO / REDO DOCK (Top-Left) -->
                             <Border HorizontalAlignment="Left" VerticalAlignment="Top"
                                     Margin="16,14,0,0" Background="#F8FFFFFF" BorderBrush="#D0C0C6" BorderThickness="1"
@@ -132,7 +121,6 @@
                                     <TextBlock Text="💡 Shift+Click to multi-select • Drag empty space to pan • Ctrl+Wheel to zoom" FontSize="10" Foreground="#666666" Margin="4,0,6,0" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
-
                             <!-- FLOATING NAVIGATION DOCK (Bottom-Right, shifted left to clear scrollbars) -->
                             <Border x:Name="FloatingNavDock" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                     Margin="0,0,48,24" Background="#F4FFFFFF" BorderBrush="#D0C0C6" BorderThickness="1"
@@ -159,14 +147,12 @@
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
-
                                     <!-- Zoom Percentage Readout / Reset -->
                                     <Border x:Name="PillZoomLevel" Background="Transparent" CornerRadius="8" Padding="5,2"
                                             Cursor="Hand" MouseLeftButtonUp="ZoomReset_Click" ToolTip="Click to reset zoom to 100%">
                                         <TextBlock x:Name="TxtZoomLevel" Text="100%" FontSize="10.5" FontWeight="Bold" Foreground="#702943"
                                                    VerticalAlignment="Center"/>
                                     </Border>
-
                                     <!-- Zoom In -->
                                     <Button x:Name="BtnFloatZoomIn" Click="ZoomIn_Click" Width="24" Height="24"
                                             Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
@@ -185,10 +171,8 @@
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
-
                                     <!-- Vertical Separator -->
                                     <Border Width="1" Height="14" Background="#E0D0D5" Margin="4,0"/>
-
                                     <!-- Fit Page in View -->
                                     <Button x:Name="BtnFloatZoomFit" Click="ZoomFit_Click" Width="24" Height="24"
                                             Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
@@ -212,7 +196,6 @@
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
-
                                     <!-- 1:1 Actual Size -->
                                     <Button x:Name="BtnFloatZoomReset" Click="ZoomReset1to1_Click" Width="24" Height="24"
                                             Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
@@ -235,7 +218,6 @@
                             </Border>
                         </Grid>
                     </Border>
-
                     <!-- RIGHT: STREAMLINED CALIBRATION SIDEBAR -->
                     <Border Grid.Column="2" Background="#FAFAFA" BorderBrush="#E5D8DC" BorderThickness="1" CornerRadius="12" Padding="14">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -252,7 +234,6 @@
                                                 </DataTemplate>
                                             </ComboBox.ItemTemplate>
                                         </ComboBox>
-
                                         <!-- Compact Key & Category Pill -->
                                         <Grid Margin="0,0,0,8">
                                             <Grid.ColumnDefinitions>
@@ -264,7 +245,6 @@
                                                 <TextBlock x:Name="TxtFieldCategory" Text="Section I" FontSize="10" FontWeight="SemiBold" Foreground="#702943"/>
                                             </Border>
                                         </Grid>
-
                                         <!-- Coordinate Badge Pills (2x2 Grid) -->
                                         <Grid>
                                             <Grid.RowDefinitions>
@@ -276,7 +256,6 @@
                                                 <ColumnDefinition Width="6"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-
                                             <!-- X -->
                                             <Border Grid.Row="0" Grid.Column="0" Background="#F7F5F6" BorderBrush="#E8DFE2" BorderThickness="1" CornerRadius="6" Padding="8,4" Margin="0,0,0,6">
                                                 <Grid>
@@ -284,7 +263,6 @@
                                                     <TextBlock x:Name="TxtValX" Text="0.000" FontSize="11" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 </Grid>
                                             </Border>
-
                                             <!-- Y -->
                                             <Border Grid.Row="0" Grid.Column="2" Background="#F7F5F6" BorderBrush="#E8DFE2" BorderThickness="1" CornerRadius="6" Padding="8,4" Margin="0,0,0,6">
                                                 <Grid>
@@ -292,7 +270,6 @@
                                                     <TextBlock x:Name="TxtValY" Text="0.000" FontSize="11" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 </Grid>
                                             </Border>
-
                                             <!-- Width -->
                                             <Border Grid.Row="1" Grid.Column="0" Background="#F7F5F6" BorderBrush="#E8DFE2" BorderThickness="1" CornerRadius="6" Padding="8,4">
                                                 <Grid>
@@ -300,7 +277,6 @@
                                                     <TextBlock x:Name="TxtValW" Text="0.000" FontSize="11" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 </Grid>
                                             </Border>
-
                                             <!-- Height -->
                                             <Border Grid.Row="1" Grid.Column="2" Background="#F7F5F6" BorderBrush="#E8DFE2" BorderThickness="1" CornerRadius="6" Padding="8,4">
                                                 <Grid>
@@ -311,7 +287,6 @@
                                         </Grid>
                                     </StackPanel>
                                 </Border>
-
                                 <!-- CARD 2: POSITION FINE-TUNING & MICRO-NUDGE -->
                                 <Border Background="White" BorderBrush="#E5D8DC" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,12">
                                     <StackPanel>
@@ -327,7 +302,6 @@
                                                 <RadioButton x:Name="RbStepNormal" Content="5px" FontSize="10" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
-
                                         <!-- Clean Directional D-Pad -->
                                         <Grid HorizontalAlignment="Center" Margin="0,4,0,8">
                                             <Grid.RowDefinitions>
@@ -340,30 +314,25 @@
                                                 <ColumnDefinition Width="42"/>
                                                 <ColumnDefinition Width="42"/>
                                             </Grid.ColumnDefinitions>
-
                                             <!-- Up -->
                                             <Button x:Name="BtnNudgeUp" Grid.Row="0" Grid.Column="1" Click="Nudge_Click" Tag="Up"
                                                     Background="White" BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Up (Arrow Up)">
                                                 <Path Data="M4,9 L10,3 L16,9" Stroke="#702943" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                                       Width="12" Height="7" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Button>
-
                                             <!-- Left -->
                                             <Button x:Name="BtnNudgeLeft" Grid.Row="1" Grid.Column="0" Click="Nudge_Click" Tag="Left"
                                                     Background="White" BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Left (Arrow Left)">
                                                 <Path Data="M9,4 L3,10 L9,16" Stroke="#702943" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                                       Width="7" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Button>
-
                                             <!-- Center: Bullseye removed for a clean, distraction-free D-pad -->
-
                                             <!-- Right -->
                                             <Button x:Name="BtnNudgeRight" Grid.Row="1" Grid.Column="2" Click="Nudge_Click" Tag="Right"
                                                     Background="White" BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Right (Arrow Right)">
                                                 <Path Data="M5,4 L11,10 L5,16" Stroke="#702943" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                                       Width="7" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Button>
-
                                             <!-- Down -->
                                             <Button x:Name="BtnNudgeDown" Grid.Row="2" Grid.Column="1" Click="Nudge_Click" Tag="Down"
                                                     Background="White" BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Down (Arrow Down)">
@@ -371,7 +340,6 @@
                                                       Width="12" Height="7" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Button>
                                         </Grid>
-
                                         <!-- Box Sizing Quick Buttons (Expand / Shrink) -->
                                         <Grid Margin="0,2,0,8">
                                             <Grid.ColumnDefinitions>
@@ -382,14 +350,12 @@
                                             <Button Content="➕ Expand Box" Click="ExpandBox_Click" Height="26" FontSize="10.5" Background="#FAFAFA" BorderBrush="#D0C0C6" Cursor="Hand" ToolTip="Expand width &amp; height by 1px"/>
                                             <Button Grid.Column="2" Content="➖ Shrink Box" Click="ShrinkBox_Click" Height="26" FontSize="10.5" Background="#FAFAFA" BorderBrush="#D0C0C6" Cursor="Hand" ToolTip="Shrink width &amp; height by 1px"/>
                                         </Grid>
-
                                         <!-- Keyboard Shortcut Hint -->
                                         <Border Background="#F9F8F9" CornerRadius="6" Padding="8,4">
                                             <TextBlock Text="💡 Shift+Click boxes to multi-select &amp; resize together. Arrow keys micro-nudge." FontSize="9.5" Foreground="#777777" TextWrapping="Wrap"/>
                                         </Border>
                                     </StackPanel>
                                 </Border>
-
                                 <!-- CARD 3: REAL-TIME LIVE OCR TEST -->
                                 <Border Background="White" BorderBrush="#E5D8DC" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,12">
                                     <StackPanel>
@@ -404,7 +370,6 @@
                                                 <TextBlock Text="Test Box OCR" FontSize="12" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Button>
-
                                         <Border Background="#FDF8FA" BorderBrush="#ECDCE1" BorderThickness="1" CornerRadius="8" Padding="10">
                                             <StackPanel>
                                                 <TextBlock Text="Extraction Result:" FontSize="10" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,4"/>
@@ -413,12 +378,10 @@
                                         </Border>
                                     </StackPanel>
                                 </Border>
-
                                 <!-- CARD 4: ADVANCED GLOBAL CALIBRATION EXPANDER (COLLAPSED BY DEFAULT) -->
                                 <Expander Header="🌐 Advanced: Calibrate All Boxes" FontWeight="SemiBold" FontSize="11" Foreground="#702943" Background="#FDF8FA" BorderBrush="#E5D8DC" BorderThickness="1" Margin="0,0,0,8">
                                     <StackPanel Margin="10,8">
                                         <TextBlock Text="Shift or scale all 50+ boxes simultaneously to adapt to scanner variations:" FontSize="10" Foreground="#666666" TextWrapping="Wrap" Margin="0,0,0,8"/>
-
                                         <!-- Step Size Toggle (1px fine vs 5px normal) -->
                                         <Grid Margin="0,0,0,6">
                                             <Grid.ColumnDefinitions>
@@ -431,7 +394,6 @@
                                                 <RadioButton x:Name="RbGlobalStepNormal" Content="5px" FontSize="10" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
-
                                         <!-- Nudge All D-Pad with clean chevrons -->
                                         <Grid HorizontalAlignment="Center" Margin="0,0,0,8">
                                             <Grid.RowDefinitions>
@@ -449,7 +411,6 @@
                                             <Button Grid.Row="1" Grid.Column="2" Content="Right ▶" Click="GlobalNudgeRight_Click" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Height="24" Cursor="Hand" ToolTip="Nudge all boxes right"/>
                                             <Button Grid.Row="2" Grid.Column="1" Content="▼ Down" Click="GlobalNudgeDown_Click" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Height="24" Cursor="Hand" ToolTip="Nudge all boxes down"/>
                                         </Grid>
-
                                         <!-- Scale All -->
                                         <TextBlock Text="Scale All Boxes Size:" FontSize="10.5" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,4"/>
                                         <Grid Margin="0,0,0,4">
@@ -461,7 +422,6 @@
                                             <Button Grid.Column="0" Content="➖ Shrink All" Click="GlobalScaleShrink_Click" Height="24" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Cursor="Hand" ToolTip="Scale all boxes smaller by 1%"/>
                                             <Button Grid.Column="2" Content="➕ Expand All" Click="GlobalScaleExpand_Click" Height="24" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Cursor="Hand" ToolTip="Scale all boxes larger by 1%"/>
                                         </Grid>
-
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
@@ -477,7 +437,6 @@
                         </ScrollViewer>
                     </Border>
                 </Grid>
-
                 <!-- FOOTER -->
                 <Border Grid.Row="2" Background="#F9F6F7" BorderBrush="#E5D8DC" BorderThickness="0,1,0,0" CornerRadius="0,0,16,16" Padding="24,0">
                     <Grid VerticalAlignment="Center">
@@ -485,11 +444,9 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock x:Name="TxtStatusMessage" Text="● Ready to calibrate field positions." FontSize="12" Foreground="#666666"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <Button Content="Cancel" Click="Close_Click" Width="100" Height="36" Background="White"
                                     BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" Margin="0,0,10,0">
@@ -499,7 +456,6 @@
                                     </Style>
                                 </Button.Resources>
                             </Button>
-
                             <Button Content="💾 Save as Template" Click="SaveTemplate_Click" Width="170" Height="36"
                                     Background="#2E7D32" Foreground="White" FontWeight="Bold" BorderThickness="0"
                                     Cursor="Hand" Margin="0,0,10,0">
@@ -509,7 +465,6 @@
                                     </Style>
                                 </Button.Resources>
                             </Button>
-
                             <Button Content="✓ Apply &amp; Re-Extract" Click="ApplyAndReExtract_Click" Width="170" Height="36"
                                     Background="#702943" Foreground="White" FontWeight="Bold" BorderThickness="0"
                                     Cursor="Hand">

@@ -36,7 +36,6 @@ namespace SOLUM_UI.Services
         {
             var logs = _recentServerLogs.ToArray();
             if (logs.Length == 0) return string.Empty;
-
             var errorLines = logs.Where(l =>
                 l.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 l.IndexOf("fatal", StringComparison.OrdinalIgnoreCase) >= 0 ||
@@ -44,12 +43,10 @@ namespace SOLUM_UI.Services
                 l.IndexOf("traceback", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 l.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0
             ).ToList();
-
             if (errorLines.Count > 0)
             {
                 return string.Join(Environment.NewLine, errorLines);
             }
-
             return string.Join(Environment.NewLine, logs.Skip(Math.Max(0, logs.Length - 10)));
         }
 
@@ -109,7 +106,6 @@ namespace SOLUM_UI.Services
                             return (true, true, null);
                         }
                     }
-
                     return (true, true, null);
                 }
             }
@@ -127,13 +123,11 @@ namespace SOLUM_UI.Services
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "SOLUM", "OcrEngine"
                 );
-
                 if (Directory.Exists(localAppDataDir) &&
                     (File.Exists(Path.Combine(localAppDataDir, "ocr_server.exe")) || File.Exists(Path.Combine(localAppDataDir, "server.py"))))
                 {
                     return; // Already set up!
                 }
-
                 // Check for bundled zip archives in the app folder
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 string[] zipCandidates = new[]
@@ -143,7 +137,6 @@ namespace SOLUM_UI.Services
                     Path.Combine(baseDir, "ocr_runtime.zip"),
                     Path.Combine(baseDir, "ocr_package.zip")
                 };
-
                 foreach (var zip in zipCandidates)
                 {
                     if (File.Exists(zip))
@@ -168,7 +161,6 @@ namespace SOLUM_UI.Services
                 ReportWarmup("OCR Engine Ready", "Local OpenVINO AI service is active and responsive.", 100, 0, 0, isReady: true);
                 return true;
             }
-
             await _warmupLock.WaitAsync();
             try
             {
@@ -177,12 +169,10 @@ namespace SOLUM_UI.Services
                     ReportWarmup("OCR Engine Ready", "Local OpenVINO AI service is active and responsive.", 100, 0, 0, isReady: true);
                     return true;
                 }
-
                 if (_ongoingWarmupTask != null && !_ongoingWarmupTask.IsCompleted)
                 {
                     return await _ongoingWarmupTask;
                 }
-
                 _ongoingWarmupTask = RunWarmupCoreAsync(timeoutSeconds);
                 return await _ongoingWarmupTask;
             }
@@ -196,7 +186,6 @@ namespace SOLUM_UI.Services
         {
             var sw = Stopwatch.StartNew();
             const double targetExpectedDuration = 8.0;
-
             try
             {
                 ReportWarmup(
@@ -206,9 +195,7 @@ namespace SOLUM_UI.Services
                     sw.Elapsed.TotalSeconds,
                     targetExpectedDuration
                 );
-
                 EnsureEngineProvisioned();
-
                 ReportWarmup(
                     "Launching AI Service",
                     "Starting background Python / OpenVINO process...",
@@ -216,7 +203,6 @@ namespace SOLUM_UI.Services
                     sw.Elapsed.TotalSeconds,
                     targetExpectedDuration
                 );
-
                 var startResult = StartLocalServerProcess();
                 if (!startResult.Success)
                 {
@@ -236,13 +222,11 @@ namespace SOLUM_UI.Services
                 int iterations = Math.Max(10, timeoutSeconds * 2);
                 double totalTimeout = (double)timeoutSeconds;
                 double normalBootEstimate = 8.0;
-
                 for (int i = 0; i < iterations; i++)
                 {
                     await Task.Delay(500);
 
                     double elapsed = sw.Elapsed.TotalSeconds;
-
                     // 1. Check if process terminated prematurely
                     if (_serverProcess != null && _serverProcess.HasExited)
                     {
@@ -250,7 +234,6 @@ namespace SOLUM_UI.Services
                         string err = GetRecentServerErrors();
                         if (string.IsNullOrWhiteSpace(err))
                             err = $"Process terminated unexpectedly with exit code {_serverProcess.ExitCode}.";
-
                         ReportWarmup(
                             "OCR Engine Stopped",
                             $"OCR server exited: {err.Trim()}",
@@ -262,7 +245,6 @@ namespace SOLUM_UI.Services
                         );
                         return false;
                     }
-
                     // 2. Dynamic, accurate countdown
                     double remaining;
                     int pct;
@@ -284,9 +266,7 @@ namespace SOLUM_UI.Services
                     string detail = elapsed < 3.0
                         ? "Initializing server runtime environment..."
                         : "Loading OpenVINO DBNet & PaddleOCR models into memory...";
-
                     ReportWarmup(stage, detail, pct, elapsed, remaining);
-
                     var health = await GetServerHealthAsync();
                     if (health.Online)
                     {
@@ -304,7 +284,6 @@ namespace SOLUM_UI.Services
                             );
                             return false;
                         }
-
                         if (health.EngineLoaded)
                         {
                             sw.Stop();
@@ -325,7 +304,6 @@ namespace SOLUM_UI.Services
             {
                 Debug.WriteLine("[OcrService] Warmup exception: " + ex.Message);
             }
-
             sw.Stop();
             var finalHealth = await GetServerHealthAsync();
             if (finalHealth.Online && finalHealth.EngineLoaded)
@@ -344,10 +322,8 @@ namespace SOLUM_UI.Services
             string finalErr = !string.IsNullOrEmpty(finalHealth.InitError)
                 ? finalHealth.InitError
                 : GetRecentServerErrors();
-
             if (string.IsNullOrEmpty(finalErr))
                 finalErr = "Server did not respond on " + ServerUrl;
-
             ReportWarmup(
                 "OCR Engine Offline",
                 "The local engine could not be contacted after " + timeoutSeconds + "s. Click Retry or verify Python setup.",
@@ -357,7 +333,6 @@ namespace SOLUM_UI.Services
                 hasFailed: true,
                 error: finalErr
             );
-
             return false;
         }
 
@@ -380,7 +355,6 @@ namespace SOLUM_UI.Services
             if (_serverProcess != null && !_serverProcess.HasExited) return (true, null);
 
             string ocrDir = FindOcrDirectory();
-
             // 1. Check for standalone compiled binary (e.g. PyInstaller distribution)
             string exePath = Path.Combine(ocrDir, "ocr_server.exe");
             if (File.Exists(exePath))
@@ -411,7 +385,6 @@ namespace SOLUM_UI.Services
                     return (false, $"Failed to launch ocr_server.exe: {ex.Message}");
                 }
             }
-
             // 2. Check for local Python virtual environment, portable runtime, or system Python
             string serverPy = Path.Combine(ocrDir, "server.py");
             if (!File.Exists(serverPy))
@@ -424,7 +397,6 @@ namespace SOLUM_UI.Services
             {
                 return (false, "Local Python runtime not found on this machine. OCR requires Python 3.9 - 3.12 or a standalone engine.");
             }
-
             var pyPsi = new ProcessStartInfo
             {
                 FileName = pythonExe,
@@ -436,7 +408,6 @@ namespace SOLUM_UI.Services
                 RedirectStandardError = true,
                 RedirectStandardOutput = true
             };
-
             try
             {
                 ClearServerLogs();
@@ -499,7 +470,6 @@ namespace SOLUM_UI.Services
             {
                 return localAppDataDir;
             }
-
             // 2. Check AppDomain BaseDirectory and search upwards up to 5 levels
             string current = AppDomain.CurrentDomain.BaseDirectory;
             for (int i = 0; i < 5; i++)
@@ -514,7 +484,6 @@ namespace SOLUM_UI.Services
                 if (parent == null) break;
                 current = parent.FullName;
             }
-
             // 3. Check current working directory and search upwards
             string cwd = Directory.GetCurrentDirectory();
             for (int i = 0; i < 5; i++)
@@ -529,7 +498,6 @@ namespace SOLUM_UI.Services
                 if (parent == null) break;
                 cwd = parent.FullName;
             }
-
             return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OcrService");
         }
 
@@ -538,15 +506,12 @@ namespace SOLUM_UI.Services
             // 1. Check embedded/portable python-runtime inside OcrService directory
             string portablePython = Path.Combine(ocrDir, "python-runtime", "python.exe");
             if (File.Exists(portablePython)) return portablePython;
-
             // 2. Check venv inside OcrService directory
             string venvPython = Path.Combine(ocrDir, "venv", "Scripts", "python.exe");
             if (File.Exists(venvPython)) return venvPython;
-
             // 3. Check direct python.exe in ocrDir
             string directPython = Path.Combine(ocrDir, "python.exe");
             if (File.Exists(directPython)) return directPython;
-
             // 4. Check user local app data installations (default Windows python.org installer for non-admin users)
             string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string[] userPythonVersions = new[] { "Python313", "Python312", "Python311", "Python310", "Python39" };
@@ -555,7 +520,6 @@ namespace SOLUM_UI.Services
                 string p = Path.Combine(localAppData, "Programs", "Python", ver, "python.exe");
                 if (File.Exists(p)) return p;
             }
-
             // 5. Check common machine-wide Python installation paths
             string[] knownPaths = new[]
             {
@@ -568,19 +532,15 @@ namespace SOLUM_UI.Services
                 @"C:\Python39\python.exe",
                 @"C:\Program Files\Python39\python.exe"
             };
-
             foreach (var p in knownPaths)
             {
                 if (File.Exists(p)) return p;
             }
-
             // 6. Check Windows Python launcher
             string pyLauncher = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "py.exe");
             if (File.Exists(pyLauncher)) return pyLauncher;
-
             if (IsExecutableOnPath("python.exe")) return "python.exe";
             if (IsExecutableOnPath("python")) return "python";
-
             return null;
         }
 

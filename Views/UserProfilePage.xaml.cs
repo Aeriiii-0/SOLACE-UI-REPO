@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -19,7 +19,6 @@ namespace SOLUM_UI
             InitializeComponent();
             Loaded += (s, e) => PopulateProfile();
         }
-
         /// <summary>Populate all read-only fields from current session.</summary>
         private void PopulateProfile()
         {
@@ -30,7 +29,6 @@ namespace SOLUM_UI
             string lastName = MainWindow.LastName;
             string email = MainWindow.CurrentUserEmail;
             string contactNumber = MainWindow.ContactNumber;
-
             TxtDisplayName.Text = (name ?? string.Empty).ToUpper();
             TxtDisplayRole.Text = (role ?? string.Empty).ToUpper();
             TxtDisplayEmail.Text = email;
@@ -41,13 +39,11 @@ namespace SOLUM_UI
                 ? "ALL BARANGAYS"
                 : barangay.ToUpper();
             TxtInitial.Text = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "U";
-
             TxtSessionStart.Text = _sessionStart.ToString("MMM d, yyyy  h:mm tt");
             var infoVersion = Assembly.GetExecutingAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
             string appVersion = !string.IsNullOrWhiteSpace(infoVersion) ? ("v" + infoVersion) : ("v" + Assembly.GetExecutingAssembly().GetName().Version);
             TxtSystemVersion.Text = "SOLUM UI " + appVersion;
         }
-
         /// <summary>Show the change password form when button is clicked.</summary>
         private void BtnChangePassword_Click(object sender, RoutedEventArgs e)
         {
@@ -55,7 +51,6 @@ namespace SOLUM_UI
             ChangePasswordFormPanel.Visibility = Visibility.Visible;
             PwdCurrentPassword.Focus();
         }
-
         /// <summary>Cancel change password and hide the form.</summary>
         private void BtnCancelChangePassword_Click(object sender, RoutedEventArgs e)
         {
@@ -63,7 +58,6 @@ namespace SOLUM_UI
             ChangePasswordFormPanel.Visibility = Visibility.Collapsed;
             ChangePasswordButtonPanel.Visibility = Visibility.Visible;
         }
-
         /// <summary>Validate and save the new password.</summary>
         private async void BtnSaveChangePassword_Click(object sender, RoutedEventArgs e)
         {
@@ -74,7 +68,6 @@ namespace SOLUM_UI
             string confirmPassword = PwdConfirmPassword.Password;
 
             bool hasErrors = false;
-
             // Validate current password
             if (string.IsNullOrWhiteSpace(currentPassword))
             {
@@ -82,7 +75,6 @@ namespace SOLUM_UI
                 ErrCurrentPassword.Visibility = Visibility.Visible;
                 hasErrors = true;
             }
-
             // Validate new password
             if (string.IsNullOrWhiteSpace(newPassword))
             {
@@ -96,7 +88,6 @@ namespace SOLUM_UI
                 ErrNewPassword.Visibility = Visibility.Visible;
                 hasErrors = true;
             }
-
             // Validate confirm password
             if (string.IsNullOrWhiteSpace(confirmPassword))
             {
@@ -116,27 +107,20 @@ namespace SOLUM_UI
                 ErrNewPassword.Visibility = Visibility.Visible;
                 hasErrors = true;
             }
-
             if (hasErrors)
                 return;
-
             BtnSaveChangePassword.IsEnabled = false;
-
             try
             {
                 var resp = await AuthApiService.Instance.ChangePasswordAsync(currentPassword, newPassword);
-
                 if (resp != null && resp.Succeeded)
                 {
                     ChangePasswordSuccessBanner.Visibility = Visibility.Visible;
-
                     ToastNotification.Show("Success",
                         "Your password has been changed successfully!",
                         ToastType.Success);
-
                     Services.AuditLogService.Instance.LogSystem(
                         "Password changed by " + MainWindow.CurrentUserName);
-
                     // Clear fields and hide form after 2 seconds
                     await Task.Delay(2000);
                     ClearChangePasswordForm();
@@ -148,7 +132,6 @@ namespace SOLUM_UI
                     string errorMsg = (resp?.Errors != null && resp.Errors.Count > 0)
                         ? string.Join("\n", resp.Errors)
                         : "Failed to change password. Please check your current password.";
-
                     // If error mentions current or old password, display under current password
                     if (errorMsg.IndexOf("current", StringComparison.OrdinalIgnoreCase) >= 0 ||
                         errorMsg.IndexOf("incorrect", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -161,7 +144,6 @@ namespace SOLUM_UI
                         ErrNewPassword.Text = errorMsg;
                         ErrNewPassword.Visibility = Visibility.Visible;
                     }
-
                     ToastNotification.Show("Password Change Failed", errorMsg, ToastType.Error);
                 }
             }
@@ -174,7 +156,6 @@ namespace SOLUM_UI
                 BtnSaveChangePassword.IsEnabled = true;
             }
         }
-
         /// <summary>Clear all error messages.</summary>
         private void ClearErrorMessages()
         {
@@ -183,7 +164,6 @@ namespace SOLUM_UI
             ErrConfirmPassword.Visibility = Visibility.Collapsed;
             ChangePasswordSuccessBanner.Visibility = Visibility.Collapsed;
         }
-
         /// <summary>Clear all password fields.</summary>
         private void ClearChangePasswordForm()
         {

@@ -9,7 +9,6 @@ namespace SOLUM_UI.Models
         public const string Caseworker = "Caseworker";
         public const string BarangaySecretary = "BarangaySecretary";
         public const string BarangayPresident = "BarangayPresident";
-
         // Legacy aliases
         public const string Encoder = "Encoder";
         public const string Administrator = "Administrator";

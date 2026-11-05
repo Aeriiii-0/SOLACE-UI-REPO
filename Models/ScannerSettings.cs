@@ -34,12 +34,10 @@ namespace SOLUM_UI.Models
                 string folder = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "SOLUM_UI");
-
                 if (!Directory.Exists(folder))
                 {
                     try { Directory.CreateDirectory(folder); } catch { }
                 }
-
                 return Path.Combine(folder, "scanner_settings.json");
             }
         }
@@ -70,7 +68,6 @@ namespace SOLUM_UI.Models
             {
                 // Fallback to default
             }
-
             return new ScannerSettings();
         }
 

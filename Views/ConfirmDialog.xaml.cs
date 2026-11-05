@@ -21,7 +21,6 @@ namespace SOLUM_UI
         private static readonly SolidColorBrush _chipBg  = Clr(0xF0, 0xE8, 0xEC);
         private static readonly SolidColorBrush _chipTxt = Clr(0x70, 0x29, 0x43);
         private static readonly SolidColorBrush _divider = Clr(0xEE, 0xEE, 0xF2);
-
         // Mode-specific colors
         private SolidColorBrush _iconBg;    // icon circle background
         private SolidColorBrush _btnColor;  // confirm button
@@ -41,17 +40,14 @@ namespace SOLUM_UI
             InitializeComponent();
             _mode  = mode;
             _totalChanged = fields != null ? fields.FindAll(f => f.IsChanged).Count : 0;
-
             Width  = screenW;
             Height = screenH;
             Left   = screenLeft;
             Top    = screenTop;
             Shell.MaxHeight = screenH * 0.90;
-
             TxtTitle.Text      = title;
             TxtSubtitle.Text   = subtitle;
             TxtConfirmBtn.Text = confirmLabel;
-
             // Apply mode colors
             switch (mode)
             {
@@ -63,7 +59,6 @@ namespace SOLUM_UI
                     SetIconCircle("#27AE60", "↻");
                     SetConfirmBtn("#27AE60");
                     break;
-
                 case ConfirmMode.Edit:
                     // Amber
                     _iconBg   = Clr(0xF5, 0xA6, 0x23);
@@ -71,7 +66,6 @@ namespace SOLUM_UI
                     _changed  = Clr(0xB3, 0x6A, 0x00);
                     SetIconCircle("#F5A623", "✎");
                     SetConfirmBtn("#D47D00");
-
                     if (_totalChanged > 0)
                     {
                         TxtSubtitle.Text = $"{_totalChanged} field{(_totalChanged == 1 ? "" : "s")} modified. Review your changes before saving.";
@@ -84,7 +78,6 @@ namespace SOLUM_UI
                         BtnConfirm.ToolTip = "No changes to save.";
                     }
                     break;
-
                 default: // Add
                     _iconBg   = Clr(0x27, 0xAE, 0x60);
                     _btnColor = Clr(0x27, 0xAE, 0x60);
@@ -92,7 +85,6 @@ namespace SOLUM_UI
                     // default XAML icon/btn already green — no change needed
                     break;
             }
-
             BuildContent(fields);
         }
 
@@ -138,7 +130,6 @@ namespace SOLUM_UI
             string fullName = string.IsNullOrWhiteSpace(summaryName)
                 ? summaryFirst
                 : summaryName + (string.IsNullOrWhiteSpace(summaryFirst) ? "" : ", " + summaryFirst);
-
             var summaryCard = new Border
             {
                 Background      = Brushes.White,
@@ -166,16 +157,13 @@ namespace SOLUM_UI
                 si.Children.Add(new TextBlock { Text = summaryContact, FontSize = 14, Foreground = _label, FontFamily = new FontFamily("Segoe UI") });
             summaryCard.Child = si;
             ContentPanel.Children.Add(summaryCard);
-
             var sections = new List<string>();
             foreach (var f in fields)
                 if (!sections.Contains(f.Section)) sections.Add(f.Section);
-
             foreach (var section in sections)
             {
                 var sectionFields = fields.FindAll(f => f.Section == section);
                 int sectionChangedCount = sectionFields.FindAll(f => f.IsChanged).Count;
-
                 var card = new Border
                 {
                     Background      = Brushes.White,
@@ -186,11 +174,9 @@ namespace SOLUM_UI
                     Margin          = new Thickness(0, 0, 0, 14)
                 };
                 var cardStack = new StackPanel();
-
                 var hdr = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 14) };
                 hdr.Children.Add(new Border { Width = 4, CornerRadius = new CornerRadius(2), Background = sectionChangedCount > 0 ? (_btnColor ?? _accent) : _accent, Margin = new Thickness(0, 2, 12, 2) });
                 hdr.Children.Add(new TextBlock { Text = section, FontSize = 15, FontWeight = FontWeights.Bold, Foreground = _head, FontFamily = new FontFamily("Segoe UI"), VerticalAlignment = VerticalAlignment.Center });
-
                 if (sectionChangedCount > 0)
                 {
                     var secBadge = new Border
@@ -213,10 +199,8 @@ namespace SOLUM_UI
                     };
                     hdr.Children.Add(secBadge);
                 }
-
                 cardStack.Children.Add(hdr);
                 cardStack.Children.Add(new Border { Height = 1, Background = _divider, Margin = new Thickness(0, 0, 0, 14) });
-
                 if (section == "Circumstances")
                 {
                     bool anyCircChanged = sectionFields.Exists(f => f.IsChanged);
@@ -241,7 +225,6 @@ namespace SOLUM_UI
                         {
                             var lines = (sf.NewValue ?? "").Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
                             if (lines.Length == 0) lines = new[] { "None selected" };
-
                             foreach (var line in lines)
                             {
                                 var row = new Border
@@ -315,16 +298,13 @@ namespace SOLUM_UI
                     var fieldsGrid = new Grid();
                     fieldsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                     fieldsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
                     for (int i = 0; i < sectionFields.Count; i++)
                     {
                         var sf  = sectionFields[i];
                         int row = i / 2;
                         int col = i % 2;
-
                         while (fieldsGrid.RowDefinitions.Count <= row)
                             fieldsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
                         var cellContainer = new Border
                         {
                             Margin = new Thickness(0, 0, col == 0 ? 14 : 0, 12),
@@ -334,9 +314,7 @@ namespace SOLUM_UI
                             BorderBrush = sf.IsChanged ? Clr(0xF5, 0xC6, 0x7A) : Brushes.Transparent,
                             BorderThickness = new Thickness(sf.IsChanged ? 1.5 : 0)
                         };
-
                         var cell = new StackPanel();
-
                         var labelRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
                         labelRow.Children.Add(new TextBlock
                         {
@@ -346,7 +324,6 @@ namespace SOLUM_UI
                             Foreground = sf.IsChanged ? Clr(0xB3, 0x6A, 0x00) : _label,
                             FontFamily = new FontFamily("Segoe UI")
                         });
-
                         if (sf.IsChanged)
                         {
                             var badge = new Border
@@ -367,9 +344,7 @@ namespace SOLUM_UI
                             };
                             labelRow.Children.Add(badge);
                         }
-
                         cell.Children.Add(labelRow);
-
                         if (sf.IsChanged)
                         {
                             var prevRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 2) };
@@ -390,7 +365,6 @@ namespace SOLUM_UI
                                 TextWrapping = TextWrapping.Wrap
                             });
                             cell.Children.Add(prevRow);
-
                             var newRow = new StackPanel { Orientation = Orientation.Horizontal };
                             newRow.Children.Add(new TextBlock
                             {
@@ -423,7 +397,6 @@ namespace SOLUM_UI
                                 TextWrapping = TextWrapping.Wrap
                             });
                         }
-
                         cellContainer.Child = cell;
                         Grid.SetRow(cellContainer, row);
                         Grid.SetColumn(cellContainer, col);
@@ -431,7 +404,6 @@ namespace SOLUM_UI
                     }
                     cardStack.Children.Add(fieldsGrid);
                 }
-
                 card.Child = cardStack;
                 ContentPanel.Children.Add(card);
             }
@@ -448,9 +420,7 @@ namespace SOLUM_UI
                 Padding         = new Thickness(14, 10, 14, 10),
                 Margin          = new Thickness(0, 0, 0, 8)
             };
-
             var stack = new StackPanel();
-
             var hdr = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
             hdr.Children.Add(new TextBlock
             {
@@ -460,7 +430,6 @@ namespace SOLUM_UI
                 Foreground = Clr(0xB3, 0x6A, 0x00),
                 FontFamily = new FontFamily("Segoe UI")
             });
-
             var badge = new Border
             {
                 Background = Clr(0xF5, 0xA6, 0x23),
@@ -479,7 +448,6 @@ namespace SOLUM_UI
             };
             hdr.Children.Add(badge);
             stack.Children.Add(hdr);
-
             var prevPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 2) };
             prevPanel.Children.Add(new TextBlock
             {
@@ -498,7 +466,6 @@ namespace SOLUM_UI
                 TextWrapping = TextWrapping.Wrap
             });
             stack.Children.Add(prevPanel);
-
             var newPanel = new StackPanel { Orientation = Orientation.Horizontal };
             newPanel.Children.Add(new TextBlock
             {
@@ -518,7 +485,6 @@ namespace SOLUM_UI
                 TextWrapping = TextWrapping.Wrap
             });
             stack.Children.Add(newPanel);
-
             row.Child = stack;
             return row;
         }
@@ -526,7 +492,6 @@ namespace SOLUM_UI
         private void BtnConfirm_Click(object sender, RoutedEventArgs e)
         {
             if (_mode == ConfirmMode.Edit && _totalChanged == 0) return;
-
             Confirmed = true;
             Close();
         }

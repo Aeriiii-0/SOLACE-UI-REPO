@@ -18,12 +18,10 @@ namespace SOLUM_UI.Views.Dialogs
             _email = email ?? string.Empty;
             _password = password ?? string.Empty;
             _role = string.IsNullOrWhiteSpace(role) ? "Encoder" : role;
-
             if (TxtHeading != null && !string.IsNullOrEmpty(heading))
                 TxtHeading.Text = heading;
             if (TxtSubheading != null && !string.IsNullOrEmpty(subheading))
                 TxtSubheading.Text = subheading;
-
             TxtFullName.Text = _fullName.ToUpper();
             TxtEmail.Text = _email;
             TxtPassword.Text = _password;
@@ -40,7 +38,6 @@ namespace SOLUM_UI.Views.Dialogs
             sb.AppendLine($"Temporary Password: {_password}");
             sb.AppendLine("=================================");
             sb.AppendLine("Please log in and update your password on your Profile page.");
-
             try
             {
                 Clipboard.SetText(sb.ToString());

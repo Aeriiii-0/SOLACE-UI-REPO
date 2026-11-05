@@ -8,7 +8,6 @@
         ResizeMode="NoResize"
         Width="500" Height="340"
         ShowInTaskbar="False">
-
     <Border Background="Transparent">
         <Border Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Border.Effect>
@@ -17,7 +16,6 @@
             <Border Background="White" CornerRadius="16" Padding="32,28" Width="480"
                     BorderBrush="#702943" BorderThickness="1.5">
                 <StackPanel>
-
                     <Grid Margin="0,0,0,24">
                         <TextBlock Text="Select entry method" FontSize="20" FontWeight="Bold"
                                    Foreground="#702943" VerticalAlignment="Center"/>
@@ -39,14 +37,12 @@
                             </Button.Template>
                         </Button>
                     </Grid>
-
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="16"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <Border Grid.Column="0" x:Name="CardScan"
                                 BorderBrush="#E8D0D7" BorderThickness="1.5"
                                 CornerRadius="12" Padding="20,22" Background="White"
@@ -97,7 +93,6 @@
                                 </Button>
                             </StackPanel>
                         </Border>
-
                         <Border Grid.Column="2" x:Name="CardManual"
                                 BorderBrush="#E8D0D7" BorderThickness="1.5"
                                 CornerRadius="12" Padding="20,22" Background="White"
@@ -146,7 +141,6 @@
                                 </Button>
                             </StackPanel>
                         </Border>
-
                     </Grid>
                 </StackPanel>
             </Border>

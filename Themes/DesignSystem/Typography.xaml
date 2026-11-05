@@ -1,10 +1,8 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Colors.xaml"/>
     </ResourceDictionary.MergedDictionaries>
-
     <!--
         SOLUM Design System - Typography
         Segoe UI Variable (Windows 11) with Segoe UI fallback.
@@ -12,47 +10,40 @@
     -->
     <FontFamily x:Key="DsFontFamily">Segoe UI Variable Text, Segoe UI</FontFamily>
     <FontFamily x:Key="DsHeadingFont">Georgia</FontFamily>
-
     <Style x:Key="DsDisplayText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DsHeadingFont}"/>
         <Setter Property="FontSize" Value="24"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{StaticResource DsTextHeadingBrush}"/>
     </Style>
-
     <Style x:Key="DsTitleText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DsHeadingFont}"/>
         <Setter Property="FontSize" Value="18"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{StaticResource DsTextHeadingBrush}"/>
     </Style>
-
     <Style x:Key="DsSubtitleText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DsFontFamily}"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{StaticResource DsTextBodyBrush}"/>
     </Style>
-
     <Style x:Key="DsBodyText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DsFontFamily}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="{StaticResource DsTextBodyBrush}"/>
     </Style>
-
     <Style x:Key="DsCaptionText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DsFontFamily}"/>
         <Setter Property="FontSize" Value="11.5"/>
         <Setter Property="Foreground" Value="{StaticResource DsTextMutedBrush}"/>
     </Style>
-
     <Style x:Key="DsOverlineText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource DsFontFamily}"/>
         <Setter Property="FontSize" Value="10.5"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{StaticResource DsTextSubtleBrush}"/>
     </Style>
-
     <!-- Table cell text -->
     <Style x:Key="DsCellText" TargetType="TextBlock" BasedOn="{StaticResource DsBodyText}">
         <Setter Property="FontSize" Value="12.5"/>
@@ -60,5 +51,4 @@
         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         <Setter Property="Margin" Value="12,0"/>
     </Style>
-
 </ResourceDictionary>

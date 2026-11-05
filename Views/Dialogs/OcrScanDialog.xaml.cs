@@ -24,16 +24,13 @@ namespace SOLUM_UI.Views.Dialogs
             InitializeComponent();
             ViewModel = new OcrScanDialogViewModel();
             DataContext = ViewModel;
-
             // Wire up viewport and child component events
             DocumentViewport.DocumentProcessed += OnDocumentProcessed;
             DocumentViewport.ServerStatusChanged += OnServerStatusChanged;
             DocumentViewport.DocumentFieldClicked += OnDocumentFieldClicked;
-
             PrimaryInfoSection.FieldFocused += tag => DocumentViewport.FocusOnField(tag);
             SecondaryInfoSection.FieldFocused += tag => DocumentViewport.FocusOnField(tag);
             FamilyMembersSection.FieldFocused += tag => DocumentViewport.FocusOnField(tag);
-
             PrimaryInfoSection.DuplicateContinueRequested += () => GoToStep(2);
         }
 
@@ -48,7 +45,6 @@ namespace SOLUM_UI.Views.Dialogs
         private void ApplySize()
         {
             double screenW, screenH, screenLeft, screenTop;
-
             if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
                 screenW    = Owner.ActualWidth;
@@ -63,12 +59,10 @@ namespace SOLUM_UI.Views.Dialogs
                 screenLeft = SystemParameters.WorkArea.Left;
                 screenTop  = SystemParameters.WorkArea.Top;
             }
-
             if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
             if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
             if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
             if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
-
             if (DialogShell != null)
             {
                 double availH = Math.Min(screenH, SystemParameters.WorkArea.Height);
@@ -92,7 +86,6 @@ namespace SOLUM_UI.Views.Dialogs
                 cancelText: "Continue Editing",
                 theme: ConfirmThemeType.Warning,
                 owner: this);
-
             if (!discard)
                 e.Cancel = true;
         }
@@ -105,21 +98,16 @@ namespace SOLUM_UI.Views.Dialogs
         private void OnDocumentProcessed(OcrFormResponse resp, string imagePath)
         {
             if (resp == null) return;
-
             ViewModel.SetConfidence(resp.OverallConfidence, resp.OverallRating);
-
             if (resp.ExecutionTimeSeconds > 0 && BadgeOcrDuration != null && TxtOcrDuration != null)
             {
                 TxtOcrDuration.Text = $"{resp.ExecutionTimeSeconds:F1}s";
                 BadgeOcrDuration.Visibility = Visibility.Visible;
             }
-
             ViewModel.EngineStatusTooltip = "Click to re-scan document (1-min cooldown)";
-
             PrimaryInfoSection.Populate(resp);
             SecondaryInfoSection.Populate(resp);
             FamilyMembersSection.Populate(resp);
-
             ValidationMessage.Visibility = Visibility.Collapsed;
             GoToStep(1);
         }
@@ -175,14 +163,12 @@ namespace SOLUM_UI.Views.Dialogs
         private async void ExecuteBadgeClick()
         {
             if (DocumentViewport == null) return;
-
             // 1. Guard against clicks while OCR processing is already actively running
             if (DocumentViewport.IsProcessingDocument)
             {
                 ViewModel.EngineStatusHeader = "OCR: Scanning...";
                 return;
             }
-
             // 2. Check if an image is loaded for re-scanning
             string currentImg = DocumentViewport.CurrentImagePath;
             if (!string.IsNullOrEmpty(currentImg) && System.IO.File.Exists(currentImg))
@@ -196,7 +182,6 @@ namespace SOLUM_UI.Views.Dialogs
                     ViewModel.EngineStatusTooltip = $"Safety cooldown active to prevent system overload ({remainingSec}s remaining).";
                     return;
                 }
-
                 _lastManualRescanTime = DateTime.UtcNow;
                 ViewModel.EngineStatusHeader = "OCR: Re-scanning...";
                 ViewModel.EngineStatusTooltip = "Re-scanning current document with latest template layout...";
@@ -210,11 +195,9 @@ namespace SOLUM_UI.Views.Dialogs
                 }
                 return;
             }
-
             // If no document is loaded, perform standard server health check
             DocumentViewport.CheckServerHealth();
         }
-
         #region Step Navigation
 
         private bool _isVerifyingPrimary = false;
@@ -224,36 +207,30 @@ namespace SOLUM_UI.Views.Dialogs
         private async Task<bool> VerifyPrimaryStepAsync()
         {
             if (_isVerifyingPrimary) return false;
-
             if (!PrimaryInfoSection.Validate(out var missing))
             {
                 SetValidationMessage(missing);
                 return false;
             }
-
             if (PrimaryInfoSection.DuplicateCheckPassed)
             {
                 return true;
             }
-
             var elapsed = DateTime.UtcNow - _lastPrimaryCheckTime;
             if (elapsed < PrimaryCheckCooldown)
             {
                 return false;
             }
-
             _isVerifyingPrimary = true;
             _lastPrimaryCheckTime = DateTime.UtcNow;
 
             bool prevEnabled = BtnNext != null ? BtnNext.IsEnabled : true;
             object prevContent = BtnNext != null ? BtnNext.Content : "Next →";
-
             if (BtnNext != null && ViewModel.CurrentStep == 1)
             {
                 BtnNext.IsEnabled = false;
                 BtnNext.Content = "Checking...";
             }
-
             try
             {
                 bool passed = await PrimaryInfoSection.CheckDuplicateAsync();
@@ -363,7 +340,6 @@ namespace SOLUM_UI.Views.Dialogs
                 // Personal identity fields: name, birthdate, age, philsys, date of application
                 targetStep = 1;
             }
-
             if (ViewModel.CurrentStep != targetStep)
             {
                 if (ViewModel.CurrentStep == 1 && targetStep > 1)
@@ -377,7 +353,6 @@ namespace SOLUM_UI.Views.Dialogs
                 }
                 GoToStep(targetStep);
             }
-
             if (targetStep == 1)
             {
                 PrimaryInfoSection.FocusField(fieldKey);
@@ -395,25 +370,20 @@ namespace SOLUM_UI.Views.Dialogs
         private void GoToStep(int step)
         {
             ViewModel.CurrentStep = step;
-
             PrimaryInfoSection.Visibility   = step == 1 ? Visibility.Visible  : Visibility.Collapsed;
             SecondaryInfoSection.Visibility = step == 2 ? Visibility.Visible  : Visibility.Collapsed;
             FamilyMembersSection.Visibility = step == 3 ? Visibility.Visible  : Visibility.Collapsed;
-
             BtnBack.Visibility = step > 1 ? Visibility.Visible  : Visibility.Collapsed;
             BtnNext.Visibility = step < 3 ? Visibility.Visible  : Visibility.Collapsed;
             BtnSave.Visibility = step == 3 ? Visibility.Visible : Visibility.Collapsed;
-
             if (step == 1)
             {
                 Step1Dot.Background      = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
                 Step1DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step1Title.Foreground    = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
-
                 Step2Dot.Background      = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
                 Step2DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
                 Step2Title.Foreground    = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
-
                 Step3Dot.Background      = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
                 Step3DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
                 Step3Title.Foreground    = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
@@ -423,11 +393,9 @@ namespace SOLUM_UI.Views.Dialogs
                 Step1Dot.Background      = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
                 Step1DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step1Title.Foreground    = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
-
                 Step2Dot.Background      = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
                 Step2DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step2Title.Foreground    = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
-
                 Step3Dot.Background      = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
                 Step3DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
                 Step3Title.Foreground    = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
@@ -437,19 +405,15 @@ namespace SOLUM_UI.Views.Dialogs
                 Step1Dot.Background      = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
                 Step1DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step1Title.Foreground    = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
-
                 Step2Dot.Background      = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
                 Step2DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step2Title.Foreground    = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
-
                 Step3Dot.Background      = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
                 Step3DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step3Title.Foreground    = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
             }
         }
-
         #endregion
-
         #region Validation & Record Saving
 
         private bool ValidateAll(out List<string> allMissing)
@@ -463,7 +427,6 @@ namespace SOLUM_UI.Views.Dialogs
 
             bool ok3 = FamilyMembersSection.Validate(out var m3);
             allMissing.AddRange(m3);
-
             return ok1 && ok2 && ok3;
         }
 
@@ -480,7 +443,6 @@ namespace SOLUM_UI.Views.Dialogs
         private async void Save_Click(object sender, RoutedEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
-
             // 1. Validate Step 1 (Primary Info)
             if (!PrimaryInfoSection.Validate(out var missingPrimary))
             {
@@ -489,7 +451,6 @@ namespace SOLUM_UI.Views.Dialogs
                 PrimaryInfoSection.FocusFirstInvalidField();
                 return;
             }
-
             if (!PrimaryInfoSection.DuplicateCheckPassed)
             {
                 if (!await VerifyPrimaryStepAsync())
@@ -498,7 +459,6 @@ namespace SOLUM_UI.Views.Dialogs
                     return;
                 }
             }
-
             // 2. Validate Step 2 (Secondary Info)
             if (!SecondaryInfoSection.Validate(out var missingSecondary))
             {
@@ -507,7 +467,6 @@ namespace SOLUM_UI.Views.Dialogs
                 SecondaryInfoSection.FocusFirstInvalidField();
                 return;
             }
-
             // 3. Validate Step 3 (Family Composition & Circumstances)
             if (!FamilyMembersSection.Validate(out var missingFamily))
             {
@@ -516,12 +475,9 @@ namespace SOLUM_UI.Views.Dialogs
                 FamilyMembersSection.FocusFirstInvalidField();
                 return;
             }
-
             var preview = BuildRecord();
             var fields  = BuildConfirmFields(preview);
-
             DialogShell.Visibility = Visibility.Hidden;
-
             var confirm = new ConfirmDialog(
                 "Confirm Scanned Record",
                 "Review the verified document details below before committing to the database.",
@@ -530,15 +486,12 @@ namespace SOLUM_UI.Views.Dialogs
                 screenW: Width, screenH: Height,
                 screenLeft: Left, screenTop: Top
             ) { Owner = Owner ?? this };
-
             confirm.ShowDialog();
-
             if (!confirm.Confirmed)
             {
                 DialogShell.Visibility = Visibility.Visible;
                 return;
             }
-
             try
             {
                 Result = preview;
@@ -562,9 +515,7 @@ namespace SOLUM_UI.Views.Dialogs
             string surname = PrimaryInfoSection.LastName;
             string first   = PrimaryInfoSection.FirstName;
             string middle  = PrimaryInfoSection.MiddleName;
-
             var members = FamilyMembersSection.BuildFamilyMembers();
-
             return new SoloParentRecord
             {
                 Id            = "SP-" + DateTime.Now.ToString("yyMMddHHmm"),
@@ -586,11 +537,9 @@ namespace SOLUM_UI.Views.Dialogs
                 Barangay      = SecondaryInfoSection.Barangay,
                 Status        = FamilyMembersSection.ApplicationStatus,
                 LastUpdated   = DateTime.Now,
-
                 IsNewApplicant      = true,
                 IsRenewal           = false,
                 DateOfApplication   = PrimaryInfoSection.ApplicationDate ?? DateTime.Today,
-
                 EducationalAttainment = SecondaryInfoSection.EducationalAttainment,
                 PhilSysNumber         = PrimaryInfoSection.PhilSysNumber,
                 Religion              = SecondaryInfoSection.Religion,
@@ -599,12 +548,10 @@ namespace SOLUM_UI.Views.Dialogs
                 IsEmployed            = SecondaryInfoSection.IsEmployed,
                 IsSelfEmployed        = SecondaryInfoSection.IsSelfEmployed,
                 IsNotEmployed         = SecondaryInfoSection.IsNotEmployed,
-
                 EmergencyContactName   = SecondaryInfoSection.EmergencyContactName,
                 EmergencyRelationship  = SecondaryInfoSection.EmergencyRelationship,
                 EmergencyAddress       = SecondaryInfoSection.EmergencyAddress,
                 EmergencyContactNumber = OcrService.FormatPhoneNumber(SecondaryInfoSection.EmergencyContactNumber),
-
                 CircumstanceA1             = FamilyMembersSection.CircumstanceA1,
                 CircumstanceA2             = FamilyMembersSection.CircumstanceA2,
                 CircumstanceA2Cause        = FamilyMembersSection.CircumstanceA2Cause,
@@ -624,12 +571,10 @@ namespace SOLUM_UI.Views.Dialogs
                 CircumstanceD              = FamilyMembersSection.CircumstanceD,
                 CircumstanceE              = FamilyMembersSection.CircumstanceE,
                 CircumstanceF              = FamilyMembersSection.CircumstanceF,
-
                 FamilyMembers     = members,
                 Children          = members.Count,
                 NeedsAndProblems  = FamilyMembersSection.NeedsAndProblems,
                 OtherIncomeSource = FamilyMembersSection.OtherIncomeSource,
-
                 IsPantawidBeneficiary = SecondaryInfoSection.IsPantawidBeneficiary,
                 IsIndigenous          = SecondaryInfoSection.IsIndigenous,
                 IsLGBT                = SecondaryInfoSection.IsLGBT
@@ -657,7 +602,6 @@ namespace SOLUM_UI.Views.Dialogs
             string appType = r.IsNewApplicant ? "New Applicant" : r.IsRenewal ? "For Renewal" : "—";
             Add(sec, "Application Type",    appType);
             Add(sec, "Date of Application", r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication.ToString("MMMM d, yyyy") : "—");
-
             sec = "Personal Information";
             Add(sec, "Full Name",              r.FullName);
             Add(sec, "Date of Birth",          r.DateOfBirth.ToString("MMMM d, yyyy"));
@@ -674,27 +618,21 @@ namespace SOLUM_UI.Views.Dialogs
             Add(sec, "Address",                r.Address);
             Add(sec, "Barangay",               r.Barangay);
             Add(sec, "Contact Number",         r.ContactNumber);
-
             sec = "Emergency Contact";
             Add(sec, "Emergency Name",         r.EmergencyContactName);
             Add(sec, "Relationship",           r.EmergencyRelationship);
             Add(sec, "Emergency Address",      r.EmergencyAddress);
             Add(sec, "Emergency Phone",        r.EmergencyContactNumber);
-
             sec = "Circumstance";
             Add(sec, "Solo Parent Category",   r.CircumstancesDisplay);
-
             sec = "Family Composition";
             Add(sec, "Dependents Count",       r.FamilyMembers != null ? r.FamilyMembers.Count.ToString() : "0");
-
             sec = "Additional Classifications";
             Add(sec, "Pantawid Beneficiary", r.IsPantawidBeneficiary ? "✓ Yes" : "No");
             Add(sec, "Indigenous Person",    r.IsIndigenous ? "✓ Yes" : "No");
             Add(sec, "LGBTQ+",               r.IsLGBT ? "✓ Yes" : "No");
-
             sec = "Status";
             Add(sec, "Application Status",     r.Status);
-
             return list;
         }
 
@@ -702,7 +640,6 @@ namespace SOLUM_UI.Views.Dialogs
         {
             Close();
         }
-
         #endregion
     }
 }

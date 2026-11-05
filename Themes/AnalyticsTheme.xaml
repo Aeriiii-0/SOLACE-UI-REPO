@@ -1,6 +1,5 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
     <!-- Gradient Brushes for KPI Cards (Dark to Light by Importance) -->
     <LinearGradientBrush x:Key="KpiGradient1" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="#7B1426" Offset="0"/>
@@ -14,7 +13,6 @@
         <GradientStop Color="#D9A3AB" Offset="0"/>
         <GradientStop Color="#F4E6E8" Offset="1"/>
     </LinearGradientBrush>
-
     <!-- KPI Text Styles for Gradient Cards -->
     <Style x:Key="KpiCardValueDark" TargetType="TextBlock">
         <Setter Property="FontSize" Value="24"/>
@@ -27,7 +25,6 @@
         <Setter Property="Margin" Value="0,6,0,0"/>
         <Setter Property="Opacity" Value="0.95"/>
     </Style>
-
     <Style x:Key="KpiCardValueMid" TargetType="TextBlock">
         <Setter Property="FontSize" Value="24"/>
         <Setter Property="FontWeight" Value="Bold"/>
@@ -38,7 +35,6 @@
         <Setter Property="Foreground" Value="#7A5C60"/>
         <Setter Property="Margin" Value="0,6,0,0"/>
     </Style>
-
     <Style x:Key="KpiCardValueLight" TargetType="TextBlock">
         <Setter Property="FontSize" Value="24"/>
         <Setter Property="FontWeight" Value="Bold"/>
@@ -58,7 +54,6 @@
     <Color x:Key="MutedText">#7A5C60</Color>
     <Color x:Key="BodyText">#2B1A1C</Color>
     <Color x:Key="BackgroundWhite">#FFFFFF</Color>
-
     <!-- Brushes -->
     <SolidColorBrush x:Key="PrimaryMaroonBrush" Color="{StaticResource PrimaryMaroon}"/>
     <SolidColorBrush x:Key="DarkMaroonTextBrush" Color="{StaticResource DarkMaroonText}"/>
@@ -69,7 +64,6 @@
     <SolidColorBrush x:Key="MutedTextBrush" Color="{StaticResource MutedText}"/>
     <SolidColorBrush x:Key="BodyTextBrush" Color="{StaticResource BodyText}"/>
     <SolidColorBrush x:Key="BackgroundWhiteBrush" Color="{StaticResource BackgroundWhite}"/>
-
     <!-- KPI Card Style with Hover Effects -->
     <Style x:Key="KpiCardStyle" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource BackgroundWhiteBrush}"/>
@@ -84,41 +78,35 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-
     <!-- KPI Value Text Style -->
     <Style x:Key="KpiValueTextStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="24"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{StaticResource PrimaryMaroonBrush}"/>
     </Style>
-
     <!-- KPI Label Text Style -->
     <Style x:Key="KpiLabelTextStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11"/>
         <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}"/>
         <Setter Property="Margin" Value="0,6,0,0"/>
     </Style>
-
     <!-- Title Text Style -->
     <Style x:Key="PageTitleStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="24"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{StaticResource DarkMaroonTextBrush}"/>
     </Style>
-
     <!-- Chart Title Style -->
     <Style x:Key="ChartTitleStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{StaticResource BodyTextBrush}"/>
     </Style>
-
     <!-- Chart Label Style -->
     <Style x:Key="ChartLabelStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="10"/>
         <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}"/>
     </Style>
-
     <!-- Button Style (Filter, Export) -->
     <Style x:Key="AnalyticsButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="{StaticResource BackgroundWhiteBrush}"/>
@@ -147,7 +135,6 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-
     <!-- Card Container Style with Hover Effects -->
     <Style x:Key="CardContainerStyle" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource BackgroundWhiteBrush}"/>
@@ -162,14 +149,12 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-
     <!-- Progress Bar Foreground (maroon) -->
     <Style x:Key="AnalyticsProgressBarStyle" TargetType="ProgressBar">
         <Setter Property="Foreground" Value="{StaticResource PrimaryMaroonBrush}"/>
         <Setter Property="Background" Value="{StaticResource TintMaroonBrush}"/>
         <Setter Property="Height" Value="6"/>
     </Style>
-
     <!-- Progressive Gradient Brushes (Dark to Light, Top to Bottom Cards) -->
     <SolidColorBrush x:Key="KpiCardBg1" Color="#CB4E6E"/>     <!-- Card 1: Pantawid Beneficiary (Lightest) -->
     <SolidColorBrush x:Key="KpiCardBg2" Color="#BB4362"/>     <!-- Card 2: LGBT -->
@@ -177,9 +162,7 @@
     <SolidColorBrush x:Key="KpiCardBg4" Color="#9B2D4A"/>     <!-- Card 4: Male -->
     <SolidColorBrush x:Key="KpiCardBg5" Color="#8B2238"/>     <!-- Card 5: Female -->
     <SolidColorBrush x:Key="KpiCardBg6" Color="#7B1426"/>     <!-- Card 6: Total Solo Parents (Darkest) -->
-
     <!-- KPI Card Styles - Progressive Darkening -->
-
     <!-- Card 1: Pantawid Beneficiary (Lightest) -->
     <Style x:Key="KpiCardStyle1" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource KpiCardBg1}"/>
@@ -207,7 +190,6 @@
         <Setter Property="Margin" Value="0,6,0,0"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
     </Style>
-
     <!-- Card 2: LGBT -->
     <Style x:Key="KpiCardStyle2" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource KpiCardBg2}"/>
@@ -235,7 +217,6 @@
         <Setter Property="Margin" Value="0,6,0,0"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
     </Style>
-
     <!-- Card 3: Total Dependents -->
     <Style x:Key="KpiCardStyle3" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource KpiCardBg3}"/>
@@ -263,7 +244,6 @@
         <Setter Property="Margin" Value="0,6,0,0"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
     </Style>
-
     <!-- Card 4: Male -->
     <Style x:Key="KpiCardStyle4" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource KpiCardBg4}"/>
@@ -291,7 +271,6 @@
         <Setter Property="Margin" Value="0,6,0,0"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
     </Style>
-
     <!-- Card 5: Female -->
     <Style x:Key="KpiCardStyle5" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource KpiCardBg5}"/>
@@ -319,7 +298,6 @@
         <Setter Property="Margin" Value="0,6,0,0"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
     </Style>
-
     <!-- Card 6: Total Solo Parents (Darkest) -->
     <Style x:Key="KpiCardStyle6" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource KpiCardBg6}"/>
@@ -380,5 +358,4 @@
             </Setter.Value>
         </Setter>
     </Style>
-
 </ResourceDictionary>

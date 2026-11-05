@@ -21,11 +21,9 @@ namespace SOLUM_UI.Views.Dialogs
         {
             InitializeComponent();
             _args = args ?? throw new ArgumentNullException(nameof(args));
-
             // Populate version comparison
             TxtInstalledVersion.Text = $"v{_args.InstalledVersion}";
             TxtLatestVersion.Text = $"v{_args.CurrentVersion}";
-
             // Fetch changelog text
             LoadChangelogAsync();
         }
@@ -37,14 +35,12 @@ namespace SOLUM_UI.Views.Dialogs
                 TxtChangelog.Text = "No release notes available for this version.";
                 return;
             }
-
             try
             {
                 using (var client = new WebClient())
                 {
                     client.Headers.Add("User-Agent", "SOLUM-UI-Updater");
                     string html = await client.DownloadStringTaskAsync(_args.ChangelogURL);
-
                     // Convert basic HTML to readable plain text for the release notes card
                     string clean = Regex.Replace(html, "<style.*?</style>", string.Empty, RegexOptions.Singleline | RegexOptions.IgnoreCase);
                     clean = Regex.Replace(clean, @"<br\s*/?>", Environment.NewLine, RegexOptions.IgnoreCase);
@@ -53,7 +49,6 @@ namespace SOLUM_UI.Views.Dialogs
                     clean = Regex.Replace(clean, @"<h\d[^>]*>(.*?)</h\d>", "$1" + Environment.NewLine, RegexOptions.IgnoreCase);
                     clean = Regex.Replace(clean, "<.*?>", string.Empty);
                     clean = WebUtility.HtmlDecode(clean).Trim();
-
                     TxtChangelog.Text = !string.IsNullOrWhiteSpace(clean) ? clean : "Performance improvements and bug fixes.";
                 }
             }
@@ -106,20 +101,15 @@ namespace SOLUM_UI.Views.Dialogs
                 ExitApplication();
                 return;
             }
-
             try
             {
                 string extension = Path.GetExtension(new Uri(_args.DownloadURL).AbsolutePath);
                 if (string.IsNullOrEmpty(extension)) extension = ".zip";
-
                 _downloadedFilePath = Path.Combine(Path.GetTempPath(), $"SOLUM_Update_{Guid.NewGuid():N}{extension}");
-
                 _webClient = new WebClient();
                 _webClient.Headers.Add("User-Agent", "SOLUM-UI-Updater");
-
                 _webClient.DownloadProgressChanged += OnDownloadProgressChanged;
                 _webClient.DownloadFileCompleted += OnDownloadFileCompleted;
-
                 TxtDownloadStatus.Text = "Contacting server and downloading update package...";
                 _webClient.DownloadFileAsync(new Uri(_args.DownloadURL), _downloadedFilePath);
             }
@@ -139,7 +129,6 @@ namespace SOLUM_UI.Views.Dialogs
 
                 double receivedMb = e.BytesReceived / (1024.0 * 1024.0);
                 double totalMb = e.TotalBytesToReceive / (1024.0 * 1024.0);
-
                 if (totalMb > 0)
                 {
                     TxtProgressBytes.Text = $"{receivedMb:N1} MB / {totalMb:N1} MB";
@@ -148,7 +137,6 @@ namespace SOLUM_UI.Views.Dialogs
                 {
                     TxtProgressBytes.Text = $"{receivedMb:N1} MB";
                 }
-
                 TxtDownloadStatus.Text = $"Downloading update from GitHub... ({e.ProgressPercentage}%)";
             });
         }
@@ -162,7 +150,6 @@ namespace SOLUM_UI.Views.Dialogs
                     CleanTempFile();
                     return;
                 }
-
                 if (e.Error != null)
                 {
                     var retry = MessageBox.Show(
@@ -170,7 +157,6 @@ namespace SOLUM_UI.Views.Dialogs
                         "Update Error",
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Error);
-
                     if (retry == MessageBoxResult.Yes)
                     {
                         StartDownload();
@@ -181,13 +167,11 @@ namespace SOLUM_UI.Views.Dialogs
                     }
                     return;
                 }
-
                 // Download completed successfully
                 TxtDownloadStatus.Text = "Download complete! Applying update and restarting SOLUM UI...";
                 UpdateProgressBar.Value = 100;
                 TxtProgressPercent.Text = "100%";
                 BtnCancelDownload.IsEnabled = false;
-
                 ApplyUpdateAndRestart();
             });
         }
@@ -202,7 +186,6 @@ namespace SOLUM_UI.Views.Dialogs
                 string exePath = currentProc.MainModule.FileName;
                 int currentPid = currentProc.Id;
                 string extension = Path.GetExtension(_downloadedFilePath).ToLowerInvariant();
-
                 if (extension == ".zip")
                 {
                     // Create an atomic background apply-and-restart batch script that waits for PID exit
@@ -210,7 +193,6 @@ namespace SOLUM_UI.Views.Dialogs
                     string batContent = $@"@echo off
 setlocal
 set ""TARGET_PID={currentPid}""
-
 :: Wait for application process to completely terminate and release file locks
 :wait_loop
 tasklist /fi ""PID eq %TARGET_PID%"" 2>nul | findstr /i ""%TARGET_PID%"" >nul
@@ -219,7 +201,6 @@ if not errorlevel 1 (
     goto wait_loop
 )
 timeout /t 1 /nobreak >nul
-
 :: Extract update package with retry in case DLL locks linger
 set RETRY_COUNT=0
 :extract_loop
@@ -231,14 +212,12 @@ if %ERRORLEVEL% neq 0 (
         goto extract_loop
     )
 )
-
 :: Relaunch updated application
 start """" ""{exePath}""
 del ""{_downloadedFilePath}"" 2>nul
 del ""%~f0"" 2>nul
 ";
                     File.WriteAllText(batPath, batContent);
-
                     var psi = new ProcessStartInfo
                     {
                         FileName = batPath,
@@ -259,7 +238,6 @@ del ""%~f0"" 2>nul
                     };
                     Process.Start(psi);
                 }
-
                 // Shutdown cleanly to release file locks on the running executable and DLLs
                 Application.Current.Shutdown();
                 Environment.Exit(0);
@@ -278,7 +256,6 @@ del ""%~f0"" 2>nul
                 "Mandatory Update",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
-
             if (result == MessageBoxResult.Yes)
             {
                 ExitApplication();

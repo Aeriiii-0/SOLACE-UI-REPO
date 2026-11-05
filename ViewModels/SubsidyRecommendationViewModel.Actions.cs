@@ -39,7 +39,6 @@ namespace SOLUM_UI.ViewModels
                     if (orig != null) { orig.IsDisqualified = true; orig.DisqualificationReason = OutlierRejectionReason; orig.Status = "Rejected"; }
                     if (r.EvaluationId != Guid.Empty)
                         _ = _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = r.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = false });
-
                     AddDisqualifiedCandidateRecord(
                         r.EvaluationId,
                         r.SoloParentId,
@@ -74,7 +73,6 @@ namespace SOLUM_UI.ViewModels
                     target.Status = "Rejected";
                     if (target.EvaluationId != Guid.Empty)
                         _ = _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = target.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = false });
-
                     AddDisqualifiedCandidateRecord(
                         target.EvaluationId,
                         target.SoloParentId,
@@ -89,12 +87,10 @@ namespace SOLUM_UI.ViewModels
                         OutlierNotes,
                         "Admin / Reviewer"
                     );
-
                     _allItems.Remove(target);
                     PagedRecommendations.Remove(target);
                     FilteredRecommendations.Remove(target);
                 }
-
                 _batchRejectTargets = null;
                 IsOutlierModalOpen = false;
                 IsBatchMode = false;
@@ -111,7 +107,6 @@ namespace SOLUM_UI.ViewModels
                 target.Status = "Rejected";
                 if (target.EvaluationId != Guid.Empty)
                     await _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = target.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = false });
-
                 AddDisqualifiedCandidateRecord(
                     target.EvaluationId,
                     target.SoloParentId,
@@ -126,11 +121,9 @@ namespace SOLUM_UI.ViewModels
                     OutlierNotes,
                     "Admin / Reviewer"
                 );
-
                 PagedRecommendations.Remove(target);
                 FilteredRecommendations.Remove(target);
                 if (QueueTotalCount > 0) QueueTotalCount--;
-
                 IsOutlierModalOpen = false;
                 RecalculateQuotaAndFilter();
                 NotifyDisqualifiedMetricsChanged();
@@ -177,7 +170,6 @@ namespace SOLUM_UI.ViewModels
         public void FilterDisqualifiedCandidates()
         {
             if (DisqualifiedCandidates == null || FilteredDisqualifiedCandidates == null) return;
-
             FilteredDisqualifiedCandidates.Clear();
             foreach (var item in DisqualifiedCandidates)
             {
@@ -195,20 +187,16 @@ namespace SOLUM_UI.ViewModels
             int total = FilteredDisqualifiedCandidates.Count;
             int totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)DisqualifiedPageSize));
             _disqualifiedTotalPages = totalPages;
-
             if (_disqualifiedCurrentPage > totalPages) _disqualifiedCurrentPage = totalPages;
             if (_disqualifiedCurrentPage < 1) _disqualifiedCurrentPage = 1;
-
             PagedDisqualifiedCandidates.Clear();
             var pageSlice = FilteredDisqualifiedCandidates
                 .Skip((_disqualifiedCurrentPage - 1) * DisqualifiedPageSize)
                 .Take(DisqualifiedPageSize);
-
             foreach (var item in pageSlice)
             {
                 PagedDisqualifiedCandidates.Add(item);
             }
-
             OnPropertyChanged(nameof(DisqualifiedCurrentPage));
             OnPropertyChanged(nameof(DisqualifiedTotalPages));
             OnPropertyChanged(nameof(CanDisqualifiedPrevPage));
@@ -227,21 +215,17 @@ namespace SOLUM_UI.ViewModels
                 "Reinstate Candidate",
                 "Cancel",
                 ConfirmThemeType.Primary);
-
             if (!ok) return;
-
             try
             {
                 if (item.EvaluationId != Guid.Empty)
                 {
                     _ = _apiService.ReinstateCandidateAsync(item.EvaluationId);
                 }
-
                 DisqualifiedCandidates.Remove(item);
                 FilteredDisqualifiedCandidates.Remove(item);
                 UpdateDisqualifiedPaged();
                 NotifyDisqualifiedMetricsChanged();
-
                 var orig = _allItems.FirstOrDefault(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId) || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId));
                 if (orig != null)
                 {
@@ -273,10 +257,8 @@ namespace SOLUM_UI.ViewModels
                     PagedRecommendations.Add(newItem);
                     FilteredRecommendations.Add(newItem);
                 }
-
                 QueueTotalCount++;
                 RecalculateQuotaAndFilter();
-
                 ToastNotification.Show("Candidate Reinstated", $"{item.FullName} has been restored to the recommendations queue.", ToastType.Success);
             }
             catch (Exception ex)
@@ -293,14 +275,12 @@ namespace SOLUM_UI.ViewModels
                 ToastNotification.Show("No Records", "No disqualified candidate records match the current filter.", ToastType.Info);
                 return;
             }
-
             var dlg = new Microsoft.Win32.SaveFileDialog
             {
                 FileName = $"Disqualified_Candidates_Audit_FY{_activeCycleFiscalYear}_{DateTime.Now:yyyyMMdd}.csv",
                 DefaultExt = ".csv",
                 Filter = "CSV file (*.csv)|*.csv"
             };
-
             if (dlg.ShowDialog() == true)
             {
                 var sb = new System.Text.StringBuilder();
@@ -347,7 +327,6 @@ namespace SOLUM_UI.ViewModels
                     ConfirmThemeType.Warning);
                 if (!ok) return;
             }
-
             row.IsFinalGrantee = confirm;
             if (confirm && row.EvaluationId != Guid.Empty)
                 await _apiService.ConfirmGranteesAsync(_activeCycleId, new List<Guid> { row.EvaluationId });
@@ -431,7 +410,6 @@ namespace SOLUM_UI.ViewModels
                 ToastNotification.Show("Re-scoring Error", "Cannot determine applicant ID.", ToastType.Error);
                 return;
             }
-
             if (_reassessmentCooldowns.TryGetValue(targetId, out var lastTime))
             {
                 var elapsed = DateTime.UtcNow - lastTime;
@@ -443,7 +421,6 @@ namespace SOLUM_UI.ViewModels
                     return;
                 }
             }
-
             try
             {
                 var resp = await _apiService.PredictCandidateAsync(targetId);
@@ -451,21 +428,16 @@ namespace SOLUM_UI.ViewModels
                 {
                     SubsidyModelMapper.UpdateItemFromDto(item, resp.Data);
                     item.RefreshVisuals();
-
                     // Re-enrich with details like children items
                     await FetchRecordForDrawerAsync(item);
-
                     if (ActiveCandidate == item)
                     {
                         OnPropertyChanged(nameof(ActiveCandidate));
                     }
-
                     // Record cooldown timestamp
                     RecordReassessment(targetId);
-
                     // Recalculate quota & sort to update queue order and badges
                     RecalculateQuotaAndFilter();
-
                     ToastNotification.Show("Prediction Updated",
                         $"{item.Name} re-scored: {item.Score:F1} ({item.Priority}) via {resp.Data.ModelVersion}.",
                         ToastType.Success);
@@ -487,7 +459,6 @@ namespace SOLUM_UI.ViewModels
             if (item == null) return;
             Guid targetId = item.SoloParentId != Guid.Empty ? item.SoloParentId : (Guid.TryParse(item.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
             if (targetId == Guid.Empty) return;
-
             if (_reassessmentCooldowns.TryGetValue(targetId, out var lastTime))
             {
                 var elapsed = DateTime.UtcNow - lastTime;
@@ -499,41 +470,34 @@ namespace SOLUM_UI.ViewModels
                     return;
                 }
             }
-
             try
             {
                 SoloParentRecord recordToReassess = null;
                 Models.Api.SoloParentDto existingDto = null;
-
                 var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(targetId);
                 if (detailResp != null && detailResp.Succeeded && detailResp.Data != null)
                 {
                     existingDto = detailResp.Data;
                     recordToReassess = SoloParentApiService.Instance.MapToRecord(existingDto);
                 }
-
                 if (recordToReassess == null)
                 {
                     ToastNotification.Show("Unable to Load Record", "Failed to retrieve candidate profile for re-assessment.", ToastType.Error);
                     return;
                 }
-
                 var dialog = new RenewalReassessmentDialog(recordToReassess, existingDto, isReassessmentMode: true)
                 {
                     Owner = Application.Current.MainWindow
                 };
-
                 if (dialog.ShowDialog() == true && dialog.UpdatedRecord != null)
                 {
                     // Save circumstance & profile updates via update request
                     var updateReq = SoloParentApiService.Instance.MapToUpdateRequest(targetId, dialog.UpdatedRecord, existingDto);
                     var saveResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(targetId, updateReq);
-
                     if (saveResp != null && saveResp.Succeeded)
                     {
                         ToastNotification.Show("Record Updated", $"{recordToReassess.Name} circumstances updated successfully.", ToastType.Success);
                     }
-
                     if (dialog.UpdatedRecord.CurrentTermExpiresAt.HasValue)
                     {
                         item.CardExpiresAt = dialog.UpdatedRecord.CurrentTermExpiresAt.Value;
@@ -542,7 +506,6 @@ namespace SOLUM_UI.ViewModels
                         foreach (var r in FinalGranteesList.Where(x => x.SoloParentId == targetId))
                             r.CardExpiresAt = dialog.UpdatedRecord.CurrentTermExpiresAt.Value;
                     }
-
                     // Run fresh ML prediction on the updated facts
                     await RunQuickPredictAsync(item);
                 }
@@ -582,7 +545,6 @@ namespace SOLUM_UI.ViewModels
                 ToastNotification.Show("Invalid Grant", "Subsidy grant amount must be greater than ₱0.", ToastType.Warning);
                 return;
             }
-
             try
             {
                 if (SelectedFiscalCycle != null)
@@ -591,7 +553,6 @@ namespace SOLUM_UI.ViewModels
                     SelectedFiscalCycle.PerGranteeAmount = GrantAmountPerRecipient;
                     SelectedFiscalCycle.TotalBudget = GranteeSlots * (decimal)GrantAmountPerRecipient;
                 }
-
                 try
                 {
                     var config = System.Configuration.ConfigurationManager.OpenExeConfiguration(System.Configuration.ConfigurationUserLevel.None);
@@ -599,17 +560,14 @@ namespace SOLUM_UI.ViewModels
                         config.AppSettings.Settings.Add("DefaultSubsidyGrantAmount", GrantAmountPerRecipient.ToString());
                     else
                         config.AppSettings.Settings["DefaultSubsidyGrantAmount"].Value = GrantAmountPerRecipient.ToString();
-
                     if (config.AppSettings.Settings["DefaultSubsidyGranteeSlots"] == null)
                         config.AppSettings.Settings.Add("DefaultSubsidyGranteeSlots", GranteeSlots.ToString());
                     else
                         config.AppSettings.Settings["DefaultSubsidyGranteeSlots"].Value = GranteeSlots.ToString();
-
                     config.Save(System.Configuration.ConfigurationSaveMode.Modified);
                     System.Configuration.ConfigurationManager.RefreshSection("appSettings");
                 }
                 catch { }
-
                 if (SelectedFiscalCycle?.CycleId.HasValue == true && SelectedFiscalCycle.IsActive)
                 {
                     try
@@ -623,7 +581,6 @@ namespace SOLUM_UI.ViewModels
                     }
                     catch { }
                 }
-
                 RecalculateQuotaAndFilter();
                 NotifyQuotaMetricsChanged();
                 ToastNotification.Show("Quota Allocation Saved", $"FY {ActiveCycleFiscalYear}: {GranteeSlots} grantees @ ₱{GrantAmountPerRecipient:N0} (Total: ₱{(GranteeSlots * (decimal)GrantAmountPerRecipient):N2}).", ToastType.Success);

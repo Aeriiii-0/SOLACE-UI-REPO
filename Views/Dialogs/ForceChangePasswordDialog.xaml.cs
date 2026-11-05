@@ -18,7 +18,6 @@ namespace SOLUM_UI.Views.Dialogs
         {
             InitializeComponent();
             _email = email;
-
             if (!string.IsNullOrEmpty(currentPassword))
             {
                 PwdCurrent.Password = currentPassword;
@@ -124,37 +123,31 @@ namespace SOLUM_UI.Views.Dialogs
             string current = GetCurrentPassword();
             string newPwd = GetNewPassword();
             string confirm = GetConfirmPassword();
-
             if (string.IsNullOrWhiteSpace(current))
             {
                 ShowError("Please enter your current temporary password.");
                 return;
             }
-
             if (string.IsNullOrWhiteSpace(newPwd))
             {
                 ShowError("Please enter your new password.");
                 return;
             }
-
             if (newPwd.Length < 6)
             {
                 ShowError("New password must be at least 6 characters long.");
                 return;
             }
-
             if (string.Equals(current, newPwd, StringComparison.Ordinal))
             {
                 ShowError("New password must be different from your current temporary password.");
                 return;
             }
-
             if (!string.Equals(newPwd, confirm, StringComparison.Ordinal))
             {
                 ShowError("New password and confirmation do not match.");
                 return;
             }
-
             BtnSave.IsEnabled = false;
             try
             {

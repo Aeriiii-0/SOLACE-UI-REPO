@@ -10,7 +10,6 @@
         ResizeMode="NoResize"
         ShowInTaskbar="True"
         Topmost="True">
-
     <Window.Resources>
         <!-- Modern ProgressBar Style -->
         <Style x:Key="SolumProgressBarStyle" TargetType="ProgressBar">
@@ -29,7 +28,6 @@
             </Setter>
         </Style>
     </Window.Resources>
-
     <!-- Main Card Container with Drop Shadow -->
     <Border Background="White" CornerRadius="16" BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="10">
         <Border.Effect>
@@ -40,7 +38,6 @@
                 <RowDefinition Height="52"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
             <!-- 1. Header Bar (Draggable) -->
             <Border Grid.Row="0" Background="#702943" CornerRadius="14,14,0,0" MouseLeftButtonDown="Header_MouseDown" Cursor="SizeAll">
                 <Grid Margin="18,0">
@@ -50,7 +47,6 @@
                               Fill="White" Stretch="Uniform" Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
                         <TextBlock Text="Software Update" FontFamily="Segoe UI" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                     </StackPanel>
-
                     <!-- Close / Exit Application Button -->
                     <Button x:Name="BtnClose" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center"
                             Background="Transparent" BorderThickness="0" Cursor="Hand" Click="BtnClose_Click" ToolTip="Exit Application">
@@ -69,10 +65,8 @@
                     </Button>
                 </Grid>
             </Border>
-
             <!-- 2. Content Body Area -->
             <Grid Grid.Row="1" Margin="24,18,24,20">
-
                 <!-- VIEW A: Update Available Prompt -->
                 <Grid x:Name="PnlPrompt" Visibility="Visible">
                     <Grid.RowDefinitions>
@@ -81,7 +75,6 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-
                     <!-- Title & Mandatory Notice -->
                     <StackPanel Grid.Row="0" Margin="0,0,0,12">
                         <TextBlock Text="Mandatory Update Required" FontFamily="Segoe UI" FontSize="18" FontWeight="Bold" Foreground="#111111" Margin="0,0,0,6"/>
@@ -96,7 +89,6 @@
                             </Grid>
                         </Border>
                     </StackPanel>
-
                     <!-- Version Chips Card -->
                     <Border Grid.Row="1" Background="#FAF4F6" BorderBrush="#EBD9DF" BorderThickness="1" CornerRadius="10" Padding="14,9" Margin="0,0,0,12">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -106,9 +98,7 @@
                                     <TextBlock x:Name="TxtInstalledVersion" Text="v0.0.1" FontSize="12" FontWeight="SemiBold" Foreground="#37474F"/>
                                 </Border>
                             </StackPanel>
-
                             <TextBlock Text="➔" FontSize="13" Foreground="#888888" VerticalAlignment="Center" Margin="14,0"/>
-
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="Latest:" FontSize="12" Foreground="#666666" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <Border Background="#E8F8EE" BorderBrush="#A5D6A7" BorderThickness="1" CornerRadius="6" Padding="8,3">
@@ -117,7 +107,6 @@
                             </StackPanel>
                         </StackPanel>
                     </Border>
-
                     <!-- Release Notes Card -->
                     <Border Grid.Row="2" Background="#FAFAFA" BorderBrush="#E8E8E8" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,0,16">
                         <Grid>
@@ -131,14 +120,12 @@
                             </ScrollViewer>
                         </Grid>
                     </Border>
-
                     <!-- Action Buttons -->
                     <Grid Grid.Row="3">
                         <Button x:Name="BtnExitApp" Content="Exit Application" Style="{StaticResource SolumSecondaryButton}" Height="38" Padding="16,0" HorizontalAlignment="Left" Click="BtnExitApp_Click" ToolTip="Close SOLUM UI without updating"/>
                         <Button x:Name="BtnDownloadNow" Content="Download &amp; Update Now" Style="{StaticResource SolumPrimaryButton}" Height="38" Padding="18,0" HorizontalAlignment="Right" Click="BtnDownloadNow_Click"/>
                     </Grid>
                 </Grid>
-
                 <!-- VIEW B: Custom Downloading Interface -->
                 <Grid x:Name="PnlDownloading" Visibility="Collapsed">
                     <Grid.RowDefinitions>
@@ -146,13 +133,11 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-
                     <!-- Title -->
                     <StackPanel Grid.Row="0" Margin="0,10,0,20">
                         <TextBlock Text="Downloading SOLUM UI Update" FontFamily="Segoe UI" FontSize="18" FontWeight="Bold" Foreground="#111111"/>
                         <TextBlock x:Name="TxtDownloadingSubtitle" Text="Please wait while the update is downloading..." FontSize="12.5" Foreground="#666666" Margin="0,4,0,0"/>
                     </StackPanel>
-
                     <!-- Progress Bar & Metrics -->
                     <StackPanel Grid.Row="1" VerticalAlignment="Center">
                         <!-- Progress Percentage & Size -->
@@ -160,20 +145,16 @@
                             <TextBlock x:Name="TxtProgressPercent" Text="0%" FontFamily="Segoe UI" FontSize="14" FontWeight="Bold" Foreground="#702943"/>
                             <TextBlock x:Name="TxtProgressBytes" Text="Connecting..." FontFamily="Segoe UI" FontSize="12" Foreground="#777777" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         </Grid>
-
                         <!-- Custom Progress Bar -->
                         <ProgressBar x:Name="UpdateProgressBar" Style="{StaticResource SolumProgressBarStyle}" Height="12" Minimum="0" Maximum="100" Value="0"/>
-
                         <!-- Status Message -->
                         <TextBlock x:Name="TxtDownloadStatus" Text="Connecting to GitHub Releases..." FontSize="11.5" Foreground="#888888" Margin="0,12,0,0" TextWrapping="Wrap"/>
                     </StackPanel>
-
                     <!-- Cancel / Footer Action -->
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button x:Name="BtnCancelDownload" Content="Cancel" Style="{StaticResource SolumSecondaryButton}" Height="36" Padding="18,0" Click="BtnCancelDownload_Click"/>
                     </StackPanel>
                 </Grid>
-
             </Grid>
         </Grid>
     </Border>

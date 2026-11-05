@@ -20,28 +20,22 @@ namespace SOLUM_UI.Services
             // Header & Accents - Maroon
             public static Color HeaderBackground = Color.FromArgb(0x8B, 0x2E, 0x44);  // Maroon Accent
             public static Color TitleBackground = Color.FromArgb(0x8B, 0x2E, 0x44);   // Title Maroon
-
             // Section Headers - Light Neutral
             public static Color SectionHeader = Color.FromArgb(0xE8, 0xE8, 0xE8);     // Light Gray
-
             // Data Rows - Very Light Pastels
             public static Color AlternateRowLight = Color.FromArgb(0xF5, 0xF0, 0xED); // Very light warm beige
             public static Color AlternateRowAlt = Color.FromArgb(0xFF, 0xFF, 0xFF);   // Pure white
-
             // Borders - Subtle but visible
             public static Color BorderColor = Color.FromArgb(0xC0, 0xC0, 0xC0);       // Medium gray border
-
             // Text
             public static Color TextDark = Color.FromArgb(0x1F, 0x1F, 0x1F);          // Near black
             public static Color TextWhite = Color.White;
         }
-
         // Font Settings
         private const string FontName = "Segoe UI";
         private const float HeaderFontSize = 14f;
         private const float SectionHeaderFontSize = 11f;
         private const float DataFontSize = 10f;
-
         /// <summary>
         /// Export analytics data as a professional Excel report with dynamic backend data.
         /// </summary>
@@ -56,18 +50,15 @@ namespace SOLUM_UI.Services
             // EPPlus 8.7.1: Set license for non-commercial use
             // Using organization license for DSWD Solo Parents Program
             ExcelPackage.License.SetNonCommercialOrganization("DSWD Solo Parents Program");
-
             using (var pkg = new ExcelPackage())
             {
                 BuildAnalyticsSheet(pkg, analyticsData, municipality, region, focalPersonName);
-
                 if (!string.IsNullOrEmpty(password))
                     pkg.SaveAs(new System.IO.FileInfo(filePath), password);
                 else
                     pkg.SaveAs(new System.IO.FileInfo(filePath));
             }
         }
-
         /// <summary>
         /// Build the main analytics data sheet with all breakdowns.
         /// </summary>
@@ -79,75 +70,53 @@ namespace SOLUM_UI.Services
             string focalPersonName)
         {
             var ws = pkg.Workbook.Worksheets.Add("Solo Parents Analytics");
-
             // Set default font and column width
             ws.DefaultColWidth = 20;
             ws.Cells.Style.Font.Name = FontName;
             ws.Cells.Style.Font.Size = DataFontSize;
 
             int row = 1;
-
             // ===== HEADER SECTION =====
             BuildHeader(ws, ref row, municipality, region, data.Year, data.Month, focalPersonName);
-
             row += 1;
-
             // ===== MAIN DATA STRUCTURE =====
             // Three columns: Category, Sub-Category, Total Count
-
             BuildColumnHeaders(ws, ref row);
-
             row += 1;
-
             // ===== DATA ROWS - DYNAMIC FROM BACKEND =====
-
             // Age Group Breakdown
             BuildBreakdownSection(ws, ref row, "Age Group", data.AgeBrackets ?? new System.Collections.Generic.Dictionary<string, int>());
-
             // Sex Breakdown
             BuildBreakdownSection(ws, ref row, "Sex", data.Sex ?? new System.Collections.Generic.Dictionary<string, int>());
-
             // Civil Status Breakdown
             BuildBreakdownSection(ws, ref row, "Civil Status", data.CivilStatus ?? new System.Collections.Generic.Dictionary<string, int>());
-
             // Employment Status Breakdown
             BuildBreakdownSection(ws, ref row, "Employment Status", data.EmploymentStatus ?? new System.Collections.Generic.Dictionary<string, int>());
-
             // Monthly Income Breakdown
             BuildBreakdownSection(ws, ref row, "Monthly Income", data.MonthlyIncomeBrackets ?? new System.Collections.Generic.Dictionary<string, int>());
-
             // Children/Dependents Age Range Breakdown
             BuildBreakdownSection(ws, ref row, "Children/Dependents Age Range", data.DependentsAgeBrackets ?? new System.Collections.Generic.Dictionary<string, int>());
-
             // Solo Parent Classification/Category Breakdown
             BuildBreakdownSection(ws, ref row, "Solo Parent Classification", data.Categories ?? new System.Collections.Generic.Dictionary<string, int>());
-
             // Educational Attainment Breakdown
             if (data.EducationalAttainment != null && data.EducationalAttainment.Count > 0)
                 BuildBreakdownSection(ws, ref row, "Educational Attainment", data.EducationalAttainment);
-
             // Program Flags - Pantawid/4Ps
             BuildBreakdownSection(ws, ref row, "Pantawid / 4Ps Beneficiary", data.PantawidBeneficiary ?? new System.Collections.Generic.Dictionary<string, int>());
-
             // Program Flags - Indigenous People (IP)
             if (data.Indigenous != null && data.Indigenous.Count > 0)
                 BuildBreakdownSection(ws, ref row, "Indigenous People (IP)", data.Indigenous);
-
             // Program Flags - LGBTQ+
             BuildBreakdownSection(ws, ref row, "LGBTQ+", data.Lgbt ?? new System.Collections.Generic.Dictionary<string, int>());
-
             // Summary Statistics
             row += 1;
             BuildSummaryStatistics(ws, ref row, data);
-
             // Signature Section
             row += 2;
             BuildSignatureSection(ws, ref row, focalPersonName);
-
             // Adjust column widths dynamically
             AutoFitColumns(ws, 3);
         }
-
         /// <summary>
         /// Build the report header with metadata.
         /// </summary>
@@ -167,7 +136,6 @@ namespace SOLUM_UI.Services
             ApplyHeaderStyle(ws.Cells[row, 1, row, 3]);
             ws.Row(row).Height = 24;
             row++;
-
             // Subtitle with location and period
             string monthName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month);
             var subtitleCell = ws.Cells[row, 1];
@@ -176,7 +144,6 @@ namespace SOLUM_UI.Services
             ApplySectionHeaderStyle(ws.Cells[row, 1, row, 3]);
             ws.Row(row).Height = 18;
             row += 2;
-
             // Metadata
             ApplyMetadataRow(ws, ref row, "Municipality/City:", municipality);
             ApplyMetadataRow(ws, ref row, "Region:", region);
@@ -184,7 +151,6 @@ namespace SOLUM_UI.Services
             ApplyMetadataRow(ws, ref row, "Focal Person:", string.IsNullOrWhiteSpace(focalPersonName) ? "—" : focalPersonName);
             ApplyMetadataRow(ws, ref row, "Date of Submission:", DateTime.Today.ToString("MMMM d, yyyy"));
         }
-
         /// <summary>
         /// Build the column headers for the data table.
         /// </summary>
@@ -193,7 +159,6 @@ namespace SOLUM_UI.Services
             ws.Cells[row, 1].Value = "Category";
             ws.Cells[row, 2].Value = "Sub-Category / Breakdown";
             ws.Cells[row, 3].Value = "Total Count";
-
             for (int col = 1; col <= 3; col++)
             {
                 var cell = ws.Cells[row, col];
@@ -206,11 +171,9 @@ namespace SOLUM_UI.Services
                 cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 ApplyBorder(cell);
             }
-
             ws.Row(row).Height = 20;
             row++;
         }
-
         /// <summary>
         /// Build a breakdown section with dynamic data.
         /// </summary>
@@ -222,7 +185,6 @@ namespace SOLUM_UI.Services
         {
             if (breakdownData == null || breakdownData.Count == 0)
                 return;
-
             // Section header
             var categoryCell = ws.Cells[row, 1, row, 3];
             categoryCell.Merge = true;
@@ -230,27 +192,22 @@ namespace SOLUM_UI.Services
             ApplyCategoryHeaderStyle(categoryCell);
             ws.Row(row).Height = 18;
             row++;
-
             // Data rows
             int total = 0;
             bool isAlternate = false;
-
             foreach (var kvp in breakdownData.OrderByDescending(x => x.Value))
             {
                 string subCategory = FormatSubCategoryLabel(kvp.Key);
                 int count = kvp.Value;
                 total += count;
-
                 ApplyDataRow(ws, row, "", subCategory, count, isAlternate);
                 isAlternate = !isAlternate;
                 row++;
             }
-
             // Subtotal row
             ApplySubtotalRow(ws, row, categoryName, total);
             row += 2;
         }
-
         /// <summary>
         /// Build summary statistics section.
         /// </summary>
@@ -265,34 +222,27 @@ namespace SOLUM_UI.Services
             row++;
 
             bool isAlternate = false;
-
             // Key metrics - handle potential null/default values
             int totalSoloParents = data.TotalSoloParents;
             int activeSoloParents = data.ActiveSoloParents > 0 ? data.ActiveSoloParents : (totalSoloParents > 0 ? totalSoloParents : 0);
             int inactiveSoloParents = data.InactiveSoloParents > 0 ? data.InactiveSoloParents : 0;
             int newRegistrations = data.NewRegistrations > 0 ? data.NewRegistrations : 0;
             int renewals = data.Renewals > 0 ? data.Renewals : 0;
-
             ApplyDataRow(ws, row, "", "Total Solo Parents", totalSoloParents, isAlternate);
             isAlternate = !isAlternate;
             row++;
-
             ApplyDataRow(ws, row, "", "Active Solo Parents", activeSoloParents, isAlternate);
             isAlternate = !isAlternate;
             row++;
-
             ApplyDataRow(ws, row, "", "Inactive Solo Parents", inactiveSoloParents, isAlternate);
             isAlternate = !isAlternate;
             row++;
-
             ApplyDataRow(ws, row, "", "New Registrations", newRegistrations, isAlternate);
             isAlternate = !isAlternate;
             row++;
-
             ApplyDataRow(ws, row, "", "Renewals", renewals, isAlternate);
             row++;
         }
-
         /// <summary>
         /// Build signature section for report submission.
         /// </summary>
@@ -305,10 +255,8 @@ namespace SOLUM_UI.Services
             submittedLabel.Style.Font.Color.SetColor(ColorPalette.TextDark);
             ws.Row(row).Height = 14;
             row++;
-
             // Empty row for spacing
             row++;
-
             // Focal Person Name signature line
             var nameCell = ws.Cells[row, 1, row, 3];
             nameCell.Merge = true;
@@ -320,7 +268,6 @@ namespace SOLUM_UI.Services
             nameCell.Style.Border.Bottom.Color.SetColor(ColorPalette.BorderColor);
             ws.Row(row).Height = 16;
             row++;
-
             // Name label
             var nameLabelCell = ws.Cells[row, 1, row, 3];
             nameLabelCell.Merge = true;
@@ -331,10 +278,8 @@ namespace SOLUM_UI.Services
             nameLabelCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             ws.Row(row).Height = 12;
             row++;
-
             // Empty row
             row++;
-
             // Date of Submission
             var dateCell = ws.Cells[row, 1, row, 3];
             dateCell.Merge = true;
@@ -344,7 +289,6 @@ namespace SOLUM_UI.Services
             ws.Row(row).Height = 14;
             row++;
         }
-
         /// <summary>
         /// Apply styling to a data row with alternating background colors (very light pastels).
         /// </summary>
@@ -357,25 +301,20 @@ namespace SOLUM_UI.Services
             bool isAlternate)
         {
             var bgColor = isAlternate ? ColorPalette.AlternateRowLight : ColorPalette.AlternateRowAlt;
-
             // Category cell
             var categoryCell = ws.Cells[row, 1];
             categoryCell.Value = category;
             ApplyDataCellStyle(categoryCell, bgColor, ExcelHorizontalAlignment.Left);
-
             // Sub-category cell (indented)
             var subCategoryCell = ws.Cells[row, 2];
             subCategoryCell.Value = "  " + subCategory;
             ApplyDataCellStyle(subCategoryCell, bgColor, ExcelHorizontalAlignment.Left);
-
             // Count cell (right-aligned, formatted)
             var countCell = ws.Cells[row, 3];
             countCell.Value = count;
             ApplyDataCellStyle(countCell, bgColor, ExcelHorizontalAlignment.Right);
-
             ws.Row(row).Height = 16;
         }
-
         /// <summary>
         /// Apply styling to a subtotal row with light header background.
         /// </summary>
@@ -389,7 +328,6 @@ namespace SOLUM_UI.Services
             labelCell.Style.Font.Color.SetColor(ColorPalette.TextDark);
             labelCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
             ApplyBorder(labelCell);
-
             var countCell = ws.Cells[row, 3];
             countCell.Value = total;
             countCell.Style.Font.Bold = true;
@@ -398,10 +336,8 @@ namespace SOLUM_UI.Services
             countCell.Style.Font.Color.SetColor(ColorPalette.TextDark);
             countCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
             ApplyBorder(countCell);
-
             ws.Row(row).Height = 16;
         }
-
         /// <summary>
         /// Apply metadata row styling.
         /// </summary>
@@ -411,16 +347,13 @@ namespace SOLUM_UI.Services
             labelCell.Value = label;
             labelCell.Style.Font.Bold = true;
             labelCell.Style.Font.Color.SetColor(ColorPalette.TextDark);
-
             var valueCell = ws.Cells[row, 2];
             valueCell.Value = value;
             ws.Cells[row, 2, row, 3].Merge = true;
             valueCell.Style.Font.Color.SetColor(ColorPalette.TextDark);
-
             ws.Row(row).Height = 14;
             row++;
         }
-
         /// <summary>
         /// Apply header styling to title cells.
         /// </summary>
@@ -435,7 +368,6 @@ namespace SOLUM_UI.Services
             cells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             ApplyBorder(cells);
         }
-
         /// <summary>
         /// Apply section header styling.
         /// </summary>
@@ -450,7 +382,6 @@ namespace SOLUM_UI.Services
             cells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             ApplyBorder(cells);
         }
-
         /// <summary>
         /// Apply category header styling.
         /// </summary>
@@ -465,7 +396,6 @@ namespace SOLUM_UI.Services
             cells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             ApplyBorder(cells);
         }
-
         /// <summary>
         /// Apply data cell styling.
         /// </summary>
@@ -482,7 +412,6 @@ namespace SOLUM_UI.Services
             cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             ApplyBorder(cell);
         }
-
         /// <summary>
         /// Apply clear, visible borders for better section separation.
         /// </summary>
@@ -497,7 +426,6 @@ namespace SOLUM_UI.Services
             cells.Style.Border.Right.Style = ExcelBorderStyle.Thin;
             cells.Style.Border.Right.Color.SetColor(ColorPalette.BorderColor);
         }
-
         /// <summary>
         /// Auto-fit column widths based on content.
         /// </summary>
@@ -506,7 +434,6 @@ namespace SOLUM_UI.Services
             for (int col = 1; col <= columnCount; col++)
             {
                 double maxLength = 0;
-
                 for (int row = 1; row <= ws.Dimension?.Rows; row++)
                 {
                     var cell = ws.Cells[row, col];
@@ -516,12 +443,10 @@ namespace SOLUM_UI.Services
                         maxLength = Math.Max(maxLength, cellValue.Length);
                     }
                 }
-
                 // Set column width with padding
                 ws.Column(col).Width = Math.Min(maxLength + 2, 50);
             }
         }
-
         /// <summary>
         /// Format sub-category labels for display (convert underscores, title case, etc.)
         /// </summary>
@@ -529,13 +454,10 @@ namespace SOLUM_UI.Services
         {
             if (string.IsNullOrEmpty(key))
                 return "—";
-
             // Replace underscores with spaces
             string formatted = key.Replace("_", " ");
-
             // Title case
             formatted = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(formatted.ToLower());
-
             return formatted;
         }
     }

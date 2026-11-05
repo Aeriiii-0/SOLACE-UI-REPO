@@ -17,7 +17,6 @@ namespace SOLUM_UI.Services
             "SP-TEMPLATE.pdf",
             "SOLO-PARENTS-APPLICATION-FORM-TEMPLATE.pdf"
         };
-
         // ------------------------------------------------------------------
         // Reference page = the real template PDF page, measured in PDF points
         // (877.5 x 1311 pt, top-left origin). Every coordinate below is in
@@ -30,7 +29,6 @@ namespace SOLUM_UI.Services
         // ------------------------------------------------------------------
         private const double RefW = 877.5;
         private const double RefH = 1311.0;
-
         /// <param name="debugBoxes">
         /// true = also draw a thin red outline of every field box so you can see
         /// exactly where text will land. Leave false for the real export.
@@ -38,26 +36,21 @@ namespace SOLUM_UI.Services
         public static void ExportToPdf(string outputPath, SoloParentRecord r, bool debugBoxes = false)
         {
             string templatePath = ResolveTemplatePath();
-
             using (var src = PdfReader.Open(templatePath, PdfDocumentOpenMode.Import))
             using (var doc = new PdfDocument())
             {
                 doc.AddPage(src.Pages[0]);
                 var page = doc.Pages[0];
-
                 using (var gfx = XGraphics.FromPdfPage(page))
                 {
                     // Compensate for a MediaBox that doesn't start at y = 0 (this template: 8.04).
                     gfx.TranslateTransform(0, -page.MediaBox.Y1);
-
                     var p = new Painter(gfx, page.Width.Point / RefW, page.Height.Point / RefH, debugBoxes);
                     Fill(p, r);
                 }
-
                 doc.Save(outputPath);
             }
         }
-
         // ------------------------------------------------------------------
         // Row geometry for Section I (points). For each row:
         //   Bottom      = the ruled line at the bottom of the row
@@ -76,7 +69,6 @@ namespace SOLUM_UI.Services
         private static readonly Row R3 = new Row(301.2, 319.5);
         private static readonly Row R4 = new Row(337.0, 353.0);
         private static readonly Row R5 = new Row(370.0, 389.5);
-
         /// <summary>Value box for a cell between two vertical dividers.</summary>
         private static void Cell(Painter p, string text, double x0, double x1, Row row, double maxPt = 10)
         {
@@ -84,7 +76,6 @@ namespace SOLUM_UI.Services
             double h = (row.Bottom - 1.5) - y;
             p.Text(text, x0, y, x1 - x0, h, maxPt);
         }
-
         // ------------------------------------------------------------------
         // Field placement
         // ------------------------------------------------------------------
@@ -99,10 +90,8 @@ namespace SOLUM_UI.Services
                 r.IsRenewal ? "FOR RENEWAL" : null
             }.Where(s => s != null));
             p.OnLine(appType, 294.0, 448.5, 145.0, 10, Align.Center);
-
             // date goes on the blank after "DATE OF THIS APPLICATION:" (x 667.5 - 830.5, line y = 145)
             p.OnLine(Date(r.DateOfApplication, "MM/dd/yyyy"), 667.5, 830.5, 145.0, 10, Align.Center);
-
             // ---- I. Identifying information, row 1 ----------------------
             Cell(p, r.Surname, 31.2, 224.8, R1, 11);
             Cell(p, r.FirstName, 224.8, 422.8, R1, 11);
@@ -110,14 +99,12 @@ namespace SOLUM_UI.Services
             Cell(p, r.ExtensionName, 594.8, 675.2, R1, 10);
             Cell(p, r.CivilStatus, 675.2, 762.8, R1, 10);
             Cell(p, r.Sex, 762.8, 849.0, R1, 10);
-
             // ---- row 2 --------------------------------------------------
             Cell(p, Date(r.DateOfBirth, "MM/dd/yyyy"), 31.2, 189.2, R2, 9);
             Cell(p, r.PlaceOfBirth, 189.2, 364.8, R2, 9);
             Cell(p, Age(r.DateOfBirth), 364.8, 443.2, R2, 9);
             Cell(p, r.EducationalAttainment, 443.2, 646.2, R2, 9);
             Cell(p, r.PhilSysNumber, 646.2, 846.0, R2, 9);
-
             // ---- row 3 --------------------------------------------------
             Cell(p, r.Religion, 31.2, 189.2, R3, 10);
             Cell(p, r.Occupation, 189.2, 402.2, R3, 10);
@@ -126,23 +113,19 @@ namespace SOLUM_UI.Services
             if (r.IsEmployed) p.Check(544.0, 310.9);
             if (r.IsSelfEmployed) p.Check(623.2, 310.9);
             if (r.IsNotEmployed) p.Check(727.4, 310.9);
-
             // ---- row 4 --------------------------------------------------
             Cell(p, r.Address, 31.2, 372.2, R4, 9);
             Cell(p, r.Barangay, 372.2, 594.8, R4, 9);
             Cell(p, r.ContactNumber, 594.8, 846.0, R4, 9);
-
             // ---- row 5 --------------------------------------------------
             Cell(p, r.EmergencyContactName, 31.2, 295.8, R5, 10);
             Cell(p, r.EmergencyRelationship, 295.8, 443.2, R5, 10);
             Cell(p, r.EmergencyAddress, 443.2, 666.8, R5, 10);
             Cell(p, r.EmergencyContactNumber, 666.8, 846.0, R5, 10);
-
             // ---- II. Circumstance code(s): draw a circle around them ----
             foreach (var code in SplitCodes(BuildCircumstanceCodes(r)))
                 if (_codeCenters.TryGetValue(code, out var c))
                     p.Circle(c.X, c.Y, code.Length > 1 ? 13.0 : 11.0);   // true circle (rx = ry)
-
             // ---- II. "Specify" blanks (text sits on each underline) ------
             // A2  Cause of death ____ (x 168-226.5)   Date ____ (x 269.5-311)   line y = 484
             p.OnLine(Prop(r, "CauseOfDeath", "A2CauseOfDeath", "SpouseCauseOfDeath", "DeathCause"),
@@ -158,7 +141,6 @@ namespace SOLUM_UI.Services
             // B   Length of stay abroad ____ (x 496-579, line y = 551.5)
             p.OnLine(Prop(r, "LengthOfStayAbroad", "LengthOfStay", "OfwLengthOfStay", "StayAbroad", "BLengthOfStay"),
                      496.0, 579.0, 551.5, 8, Align.Center);
-
             // ---- III. Family composition (5 rows) ------------------------
             // row lines: 615.8 | 636.0 | 656.8 | 677.5 | 697.5 | 718.2
             double[] rowLines = { 615.8, 636.0, 656.8, 677.5, 697.5, 718.2 };
@@ -178,13 +160,11 @@ namespace SOLUM_UI.Services
                 p.Text(m.EducationEmployment, 616.2, y, 765.8 - 616.2, h, 9);
                 p.Text(m.Income, 765.8, y, 845.5 - 765.8, h, 10, Align.Center);
             }
-
             // ---- IV / V. Free-text boxes (wrap + shrink to fit) ----------
             // IV box: y 744.5 - 782.5      V box: y 810.0 - 848.5
             p.Wrapped(r.NeedsAndProblems, 31.2, 746.0, 814.0, 35.5, 10);
             p.Wrapped(r.OtherIncomeSource, 31.2, 811.5, 814.0, 35.5, 10);
         }
-
         // Centre of each code in Section II (points)
         private static readonly Dictionary<string, XPoint> _codeCenters =
             new Dictionary<string, XPoint>(StringComparer.OrdinalIgnoreCase)
@@ -218,7 +198,6 @@ namespace SOLUM_UI.Services
             if (r.CircumstanceF) codes.Add("F");
             return string.Join(",", codes);
         }
-
         // ------------------------------------------------------------------
         // Helpers
         // ------------------------------------------------------------------
@@ -236,7 +215,6 @@ namespace SOLUM_UI.Services
 
         private static string FamilyAge(string birthdate) =>
             DateTime.TryParse(birthdate, out var d) ? Age(d) : "";
-
         /// <summary>
         /// Reads the first property of the record that exists under one of the given names
         /// (so this compiles even if your model uses a slightly different name).
@@ -261,9 +239,7 @@ namespace SOLUM_UI.Services
         {
             string exeDir = Path.GetDirectoryName(
                 System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-
             string[] folders = { "Assets", "Templates" };
-
             foreach (var f in folders)
                 foreach (var n in TemplateNames)
                 {
@@ -282,14 +258,12 @@ namespace SOLUM_UI.Services
                     }
                 baseDir = Path.GetDirectoryName(baseDir.TrimEnd(Path.DirectorySeparatorChar)) ?? baseDir;
             }
-
             throw new FileNotFoundException(
                 $"Template not found: {TemplateNames[0]}. " +
                 "Put it in Assets\\ and set 'Copy to Output Directory' = 'Copy if newer'.");
         }
 
         private enum Align { Left, Center }
-
         // ------------------------------------------------------------------
         // Drawing helper: scales reference points -> actual page points,
         // fits text inside its box (shrinks, then trims with an ellipsis).
@@ -317,7 +291,6 @@ namespace SOLUM_UI.Services
                 new XRect(x * _sx, y * _sy, w * _sx, h * _sy);
 
             private static XFont Font(double pt) => new XFont("Arial", pt, XFontStyleEx.Bold);
-
             /// <summary>Shrinks the font until the text fits, then trims with an ellipsis if still too wide.</summary>
             private XFont Fit(ref string text, double startPt, double avail)
             {
@@ -332,7 +305,6 @@ namespace SOLUM_UI.Services
                     text = text.Substring(0, text.Length - 2).TrimEnd() + "…";
                 return f;
             }
-
             /// <summary>Single line, vertically centred in its box, shrinks to fit the box.</summary>
             public void Text(string text, double x, double y, double w, double h, double maxPt,
                              Align align = Align.Left)
@@ -340,11 +312,9 @@ namespace SOLUM_UI.Services
                 var rect = Rect(x, y, w, h);
                 if (_debug) _g.DrawRectangle(_dbgPen, rect);
                 if (string.IsNullOrWhiteSpace(text)) return;
-
                 text = text.Trim();
                 double padL = align == Align.Left ? PadLeft : PadRight;
                 double avail = rect.Width - padL - PadRight;
-
                 // never let the font be taller than the box
                 double start = Math.Min(maxPt, rect.Height / 1.2);
                 XFont f = Fit(ref text, start, avail);
@@ -352,10 +322,8 @@ namespace SOLUM_UI.Services
                 double tw = _g.MeasureString(text, f).Width;
                 double tx = align == Align.Center ? rect.X + (rect.Width - tw) / 2 : rect.X + padL;
                 double baseline = rect.Y + rect.Height / 2 + f.Size * CapHalf;
-
                 _g.DrawString(text, f, Ink, new XPoint(tx, baseline), XStringFormats.BaseLineLeft);
             }
-
             /// <summary>
             /// Text that sits ON a printed underline: x0..x1 = the blank, yLine = y of the line.
             /// The baseline is a few points above the line so it never touches or crosses it.
@@ -366,7 +334,6 @@ namespace SOLUM_UI.Services
                 var rect = Rect(x0, yLine - 14.0, x1 - x0, 14.0);
                 if (_debug) _g.DrawRectangle(_dbgPen, rect);
                 if (string.IsNullOrWhiteSpace(text)) return;
-
                 text = text.Trim();
                 double avail = rect.Width - 2.0;
                 XFont f = Fit(ref text, maxPt, avail);
@@ -374,10 +341,8 @@ namespace SOLUM_UI.Services
                 double tw = _g.MeasureString(text, f).Width;
                 double tx = align == Align.Center ? rect.X + (rect.Width - tw) / 2 : rect.X + 1.0;
                 double baseline = (yLine - 3.5) * _sy;   // 3.5 pt above the line
-
                 _g.DrawString(text, f, Ink, new XPoint(tx, baseline), XStringFormats.BaseLineLeft);
             }
-
             /// <summary>Multi-line text that wraps and shrinks to fit the box height.</summary>
             public void Wrapped(string text, double x, double y, double w, double h, double maxPt)
             {
@@ -392,7 +357,6 @@ namespace SOLUM_UI.Services
                     var lines = Wrap(text, f, avail);
                     double lh = f.GetHeight();
                     int maxLines = Math.Max(1, (int)((rect.Height - 2) / lh));
-
                     if (lines.Count <= maxLines || size - 0.5 < MinPt)
                     {
                         for (int i = 0; i < lines.Count && i < maxLines; i++)
@@ -426,7 +390,6 @@ namespace SOLUM_UI.Services
                 }
                 return result;
             }
-
             /// <summary>Draws an "X" centred on a bullet/checkbox (centre in reference points).</summary>
             public void Check(double cx, double cy, double half = 4.5)
             {
@@ -435,7 +398,6 @@ namespace SOLUM_UI.Services
                 _g.DrawLine(_markPen, x1, y1, x2, y2);
                 _g.DrawLine(_markPen, x1, y2, x2, y1);
             }
-
             /// <summary>Draws a true circle around a code (centre + radius in reference points).</summary>
             public void Circle(double cx, double cy, double radius)
             {

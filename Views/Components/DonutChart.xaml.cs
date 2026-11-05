@@ -33,19 +33,16 @@ namespace SOLUM_UI.Views.Components
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var chart = (DonutChart)d;
-
             // Unsubscribe from old collection
             if (e.OldValue is ObservableCollection<DonutSegment> oldCollection)
             {
                 oldCollection.CollectionChanged -= chart.OnCollectionChanged;
             }
-
             // Subscribe to new collection
             if (e.NewValue is ObservableCollection<DonutSegment> newCollection)
             {
                 newCollection.CollectionChanged += chart.OnCollectionChanged;
             }
-
             chart.RenderChart();
         }
 
@@ -58,13 +55,11 @@ namespace SOLUM_UI.Views.Components
         {
             ChartCanvas.Children.Clear();
             segmentMap.Clear();
-
             if (Data == null || Data.Count == 0)
             {
                 NoDataPanel.Visibility = Visibility.Visible;
                 return;
             }
-
             NoDataPanel.Visibility = Visibility.Collapsed;
 
             double centerX = 100;
@@ -77,7 +72,6 @@ namespace SOLUM_UI.Views.Components
             {
                 total += segment.Value;
             }
-
             if (total == 0)
             {
                 NoDataPanel.Visibility = Visibility.Visible;
@@ -86,31 +80,24 @@ namespace SOLUM_UI.Views.Components
 
             double startAngle = 0;
             int colorIndex = 0;
-
             foreach (var segment in Data)
             {
                 double percentage = (double)segment.Value / total;
                 double sweepAngle = percentage * 360;
-
                 // Draw segment arc
                 Path arc = DrawArc(centerX, centerY, outerRadius, innerRadius, startAngle, sweepAngle, segment.Color);
-
                 // Store segment info for tooltip
                 segmentMap[arc] = (segment, percentage);
-
                 // Add mouse events for tooltip
                 arc.MouseEnter += Arc_MouseEnter;
                 arc.MouseLeave += Arc_MouseLeave;
-
                 ChartCanvas.Children.Add(arc);
-
                 // Add label at midpoint of arc
                 double midAngle = startAngle + sweepAngle / 2;
                 double midAngleRad = midAngle * Math.PI / 180;
                 double labelRadius = (outerRadius + innerRadius) / 2;
                 double labelX = centerX + labelRadius * Math.Cos(midAngleRad);
                 double labelY = centerY + labelRadius * Math.Sin(midAngleRad);
-
                 TextBlock label = new TextBlock
                 {
                     Text = $"{percentage:P0}",
@@ -119,15 +106,12 @@ namespace SOLUM_UI.Views.Components
                     FontWeight = FontWeights.Bold,
                     TextAlignment = TextAlignment.Center
                 };
-
                 Canvas.SetLeft(label, labelX - 15);
                 Canvas.SetTop(label, labelY - 8);
                 ChartCanvas.Children.Add(label);
-
                 startAngle += sweepAngle;
                 colorIndex++;
             }
-
             // Draw center circle for donut hole
             Ellipse centerCircle = new Ellipse
             {
@@ -147,7 +131,6 @@ namespace SOLUM_UI.Views.Components
             if (sender is Path path && segmentMap.TryGetValue(path, out var info))
             {
                 var (segment, percentage) = info;
-
                 // Create tooltip
                 ToolTip tooltip = new ToolTip
                 {
@@ -158,7 +141,6 @@ namespace SOLUM_UI.Views.Components
                     Padding = new Thickness(10, 6, 10, 6),
                     IsOpen = true
                 };
-
                 currentToolTip = tooltip;
                 path.ToolTip = tooltip;
             }
@@ -186,33 +168,27 @@ namespace SOLUM_UI.Views.Components
             double startAngleRad = startAngle * Math.PI / 180;
             double sweepAngleRad = sweepAngle * Math.PI / 180;
             double endAngleRad = startAngleRad + sweepAngleRad;
-
             // Outer arc points
             Point outerStart = new Point(
                 centerX + outerRadius * Math.Cos(startAngleRad),
                 centerY + outerRadius * Math.Sin(startAngleRad)
             );
-
             Point outerEnd = new Point(
                 centerX + outerRadius * Math.Cos(endAngleRad),
                 centerY + outerRadius * Math.Sin(endAngleRad)
             );
-
             // Inner arc points
             Point innerEnd = new Point(
                 centerX + innerRadius * Math.Cos(endAngleRad),
                 centerY + innerRadius * Math.Sin(endAngleRad)
             );
-
             Point innerStart = new Point(
                 centerX + innerRadius * Math.Cos(startAngleRad),
                 centerY + innerRadius * Math.Sin(startAngleRad)
             );
-
             // Build geometry
             PathGeometry geometry = new PathGeometry();
             PathFigure figure = new PathFigure { StartPoint = outerStart };
-
             // Outer arc
             ArcSegment outerArc = new ArcSegment(
                 outerEnd,
@@ -223,10 +199,8 @@ namespace SOLUM_UI.Views.Components
                 true
             );
             figure.Segments.Add(outerArc);
-
             // Line to inner arc
             figure.Segments.Add(new LineSegment { Point = innerEnd });
-
             // Inner arc (reverse)
             ArcSegment innerArc = new ArcSegment(
                 innerStart,
@@ -237,10 +211,8 @@ namespace SOLUM_UI.Views.Components
                 true
             );
             figure.Segments.Add(innerArc);
-
             figure.IsClosed = true;
             geometry.Figures.Add(figure);
-
             Path path = new Path
             {
                 Data = geometry,
@@ -248,7 +220,6 @@ namespace SOLUM_UI.Views.Components
                 Stroke = new SolidColorBrush(Colors.White),
                 StrokeThickness = 1
             };
-
             return path;
         }
     }

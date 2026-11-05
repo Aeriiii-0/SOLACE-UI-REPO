@@ -13,49 +13,35 @@ namespace SOLUM_UI.Models.Api
     {
         [JsonProperty("id")]
         public string Id { get; set; }
-
         [JsonProperty("actionType")]
         public string ActionType { get; set; }
-
         [JsonProperty("timestamp")]
         public DateTimeOffset Timestamp { get; set; }
-
         // Root-level properties (API contract)
         [JsonProperty("userId")]
         public string UserId { get; set; }
-
         [JsonProperty("role")]
         public string Role { get; set; }
-
         [JsonProperty("targetType")]
         public string TargetType { get; set; }
-
         [JsonProperty("targetId")]
         public string TargetId { get; set; }
-
         [JsonProperty("targetName")]
         public string TargetName { get; set; }
-
         [JsonProperty("ipAddress")]
         public string IpAddress { get; set; }
-
         [JsonProperty("status")]
         public string Status { get; set; }
-
         [JsonProperty("changes")]
         public List<ChangeItemDto> Changes { get; set; } = new List<ChangeItemDto>();
-
         // Nested objects (backward compatibility)
         [JsonProperty("metadata")]
         public AuditLogMetadata Metadata { get; set; }
-
         [JsonProperty("performedBy")]
         public AuditLogActor PerformedBy { get; set; }
-
         [JsonProperty("target")]
         public AuditLogTarget Target { get; set; }
     }
-
     /// <summary>
     /// A single field-level change as returned by the API.
     /// Supports both "field" and "fieldName" JSON keys.
@@ -63,24 +49,20 @@ namespace SOLUM_UI.Models.Api
     public class ChangeItemDto
     {
         private string _fieldName;
-
         [JsonProperty("field")]
         public string Field
         {
             get => _fieldName;
             set => _fieldName = value;
         }
-
         [JsonProperty("fieldName")]
         public string FieldName
         {
             get => _fieldName;
             set => _fieldName = value;
         }
-
         [JsonProperty("oldValue")]
         public string OldValue { get; set; }
-
         [JsonProperty("newValue")]
         public string NewValue { get; set; }
     }
@@ -89,20 +71,15 @@ namespace SOLUM_UI.Models.Api
     {
         [JsonProperty("ipAddress")]
         public string IpAddress { get; set; }
-
         [JsonProperty("status")]
         public string Status { get; set; }
-
         // Legacy single-field change data
         [JsonProperty("fieldChanged")]
         public string FieldChanged { get; set; }
-
         [JsonProperty("oldValue")]
         public string OldValue { get; set; }
-
         [JsonProperty("newValue")]
         public string NewValue { get; set; }
-
         // Multi-field change list
         [JsonProperty("changes")]
         public List<ChangeItemDto> Changes { get; set; } = new List<ChangeItemDto>();
@@ -112,16 +89,12 @@ namespace SOLUM_UI.Models.Api
     {
         [JsonProperty("userId")]
         public string UserId { get; set; }
-
         [JsonProperty("role")]
         public string Role { get; set; }
-
         [JsonProperty("name")]
         public string Name { get; set; }
-
         [JsonProperty("email")]
         public string Email { get; set; }
-
         [JsonProperty("username")]
         public string Username { get; set; }
     }
@@ -130,14 +103,11 @@ namespace SOLUM_UI.Models.Api
     {
         [JsonProperty("targetId")]
         public string TargetId { get; set; }
-
         [JsonProperty("targetType")]
         public string TargetType { get; set; }
-
         [JsonProperty("targetName")]
         public string TargetName { get; set; }
     }
-
     /// <summary>
     /// Mirrors PagedAuditLogsResponse from the API.
     /// </summary>

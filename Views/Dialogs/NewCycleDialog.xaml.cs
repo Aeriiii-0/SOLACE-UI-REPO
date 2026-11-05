@@ -52,13 +52,11 @@ namespace SOLUM_UI.Views.Dialogs
                 MessageBox.Show("Please enter a valid Fiscal Year (e.g. 2027).", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
             if (!int.TryParse(TxtGrantees.Text?.Replace(",", "").Trim(), out var grantees) || grantees <= 0)
             {
                 MessageBox.Show("Please enter a valid Target Beneficiary Quota greater than 0.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
             if (!decimal.TryParse(TxtPerGrantee.Text?.Replace(",", "").Trim(), out var perGrantee) || perGrantee <= 0)
             {
                 MessageBox.Show("Please enter a valid Allowance Per Beneficiary greater than 0.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -73,7 +71,6 @@ namespace SOLUM_UI.Views.Dialogs
                 PerGranteeAmount = perGrantee,
                 AllocatedSlots = grantees
             };
-
             DialogResult = true;
             Close();
         }

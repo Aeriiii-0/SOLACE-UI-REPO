@@ -22,7 +22,6 @@ namespace SOLUM_UI.Views.Components
                 _resizeDebounceTimer.Stop();
                 UpdateDynamicPageSize();
             };
-
             DataContextChanged += (s, e) => UpdateDynamicPageSize();
             Loaded += (s, e) =>
             {
@@ -43,7 +42,6 @@ namespace SOLUM_UI.Views.Components
         {
             if (e.WidthChanged)
                 AdjustColumnWidths();
-
             if (e.HeightChanged)
             {
                 _resizeDebounceTimer.Stop();
@@ -55,12 +53,10 @@ namespace SOLUM_UI.Views.Components
         {
             double availableHeight = FinalGranteesListView.ActualHeight;
             if (availableHeight <= 100) return;
-
             // GridViewColumnHeader is 46px, each final grantee row is ~48px
             double rowsHeight = availableHeight - 46.0;
             int calculated = (int)Math.Floor(rowsHeight / 48.0);
             int optimal = Math.Max(4, Math.Min(40, calculated));
-
             if (DataContext is SubsidyRecommendationViewModel vm && optimal != vm.FinalPageSize)
             {
                 vm.UpdateFinalPageSize(optimal);
@@ -81,7 +77,6 @@ namespace SOLUM_UI.Views.Components
             double wBarangay = Math.Max(110, Math.Floor(flexibleWidth * 0.18));
             double wAddress = Math.Max(150, Math.Floor(flexibleWidth * 0.30));
             double wEmergencyName = Math.Max(130, flexibleWidth - (wName + wBarangay + wAddress));
-
             ColName.Width = wName;
             ColBarangay.Width = wBarangay;
             ColAddress.Width = wAddress;

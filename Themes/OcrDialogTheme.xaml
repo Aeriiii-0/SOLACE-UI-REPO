@@ -1,20 +1,17 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
     <Style x:Key="SectionLabel" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="#702943"/>
         <Setter Property="Margin" Value="0,0,0,0"/>
     </Style>
-
     <Style x:Key="FieldLabel" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="#222222"/>
         <Setter Property="Margin" Value="0,0,0,4"/>
     </Style>
-
     <Style x:Key="FormBox" TargetType="TextBox">
         <Setter Property="Height" Value="44"/>
         <Setter Property="Padding" Value="12,0"/>
@@ -49,7 +46,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <Style x:Key="FormCombo" TargetType="ComboBox">
         <Setter Property="Height" Value="44"/>
         <Setter Property="FontSize" Value="14"/>
@@ -147,7 +143,6 @@
             </Style>
         </Style.Resources>
     </Style>
-
     <Style x:Key="FormDate" TargetType="DatePicker">
         <Setter Property="Height" Value="44"/>
         <Setter Property="FontSize" Value="14"/>
@@ -240,21 +235,18 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <Style x:Key="FormCheck" TargetType="ToggleButton">
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="#222222"/>
         <Setter Property="Margin" Value="0,4,14,4"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
-
     <Style x:Key="ErrorText" TargetType="TextBlock">
         <Setter Property="FontSize" Value="10"/>
         <Setter Property="Foreground" Value="#E53935"/>
         <Setter Property="Margin" Value="2,2,0,0"/>
         <Setter Property="Visibility" Value="Collapsed"/>
     </Style>
-
     <Style x:Key="SaveBtn" TargetType="Button">
         <Setter Property="Height" Value="38"/>
         <Setter Property="Padding" Value="22,0"/>
@@ -280,7 +272,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <Style x:Key="CancelBtn" TargetType="Button">
         <Setter Property="Height" Value="38"/>
         <Setter Property="Padding" Value="20,0"/>
@@ -309,7 +300,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <Style x:Key="CardSection" TargetType="Border">
         <Setter Property="Background" Value="White"/>
         <Setter Property="CornerRadius" Value="8"/>
@@ -318,38 +308,32 @@
         <Setter Property="Padding" Value="16,12"/>
         <Setter Property="Margin" Value="0,0,0,12"/>
     </Style>
-
     <Style x:Key="CardSectionHeader" TargetType="Border">
         <Setter Property="BorderBrush" Value="#702943"/>
         <Setter Property="BorderThickness" Value="3,0,0,0"/>
         <Setter Property="Padding" Value="10,0"/>
         <Setter Property="Margin" Value="0,0,0,12"/>
     </Style>
-
     <Style x:Key="FormBoxSm" TargetType="TextBox" BasedOn="{StaticResource FormBox}">
         <Setter Property="Height" Value="32"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="Padding" Value="10,0"/>
     </Style>
-
     <Style x:Key="FormComboSm" TargetType="ComboBox" BasedOn="{StaticResource FormCombo}">
         <Setter Property="Height" Value="32"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="Padding" Value="12,0,24,0"/>
     </Style>
-
     <Style x:Key="FormDateSm" TargetType="DatePicker" BasedOn="{StaticResource FormDate}">
         <Setter Property="Height" Value="32"/>
         <Setter Property="FontSize" Value="12"/>
     </Style>
-
     <Style x:Key="FieldLabelSm" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="#444444"/>
         <Setter Property="Margin" Value="0,0,0,2"/>
     </Style>
-
     <Style x:Key="PrimaryMaroonBtn" TargetType="Button">
         <Setter Property="Height" Value="36"/>
         <Setter Property="Padding" Value="16,0"/>
@@ -375,7 +359,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <Style x:Key="OutlineMaroonBtn" TargetType="Button">
         <Setter Property="Height" Value="36"/>
         <Setter Property="Padding" Value="16,0"/>
@@ -404,5 +387,4 @@
             </Setter.Value>
         </Setter>
     </Style>
-
 </ResourceDictionary>

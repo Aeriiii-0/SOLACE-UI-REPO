@@ -7,7 +7,6 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
-
     <!-- Single Unified Ribbon Container with Upper Configuration Row and Lower Batch Row -->
     <Border Background="#FBF5F7" MinHeight="98" CornerRadius="12" BorderBrush="#D4A0B0" BorderThickness="1" Padding="16,12" Margin="0,0,0,6">
         <Grid VerticalAlignment="Center">
@@ -15,23 +14,19 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-
             <!-- Upper Row: Title, Filters & Configuration -->
             <Grid Grid.Row="0" VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-
                 <!-- Left: Title & Subtitle -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
                     <TextBlock Text="Recommendations Queue" FontSize="13" FontWeight="SemiBold" Foreground="#702943"/>
                     <TextBlock Text="Ranked applicants evaluated by ML vulnerability triage." FontSize="10.5" Foreground="#A06080" Margin="0,2,0,0"/>
                 </StackPanel>
-
                 <!-- Right: Actions Toolbar -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-
                     <!-- Export Queue Button -->
                     <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Margin="0,0,8,0">
                         <Button Background="Transparent" BorderThickness="0" Cursor="Hand" Height="30" Padding="10,0" Command="{Binding ExportAllQueueCommand}" ToolTip="Export all recommendation queue records to CSV">
@@ -53,7 +48,6 @@
                             </Button.Template>
                         </Button>
                     </Border>
-
                     <!-- Run ML Evaluations Button -->
                     <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Margin="0,0,8,0"
                             Visibility="{Binding CanModifyGrantees, Converter={StaticResource BoolToVis}}">
@@ -76,7 +70,6 @@
                             </Button.Template>
                         </Button>
                     </Border>
-
                     <!-- Cross-Check Filter Dropdown -->
                     <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Margin="0,0,8,0">
                         <Button x:Name="FilterDropBtn" Background="Transparent" BorderThickness="0" Cursor="Hand" Height="30" Padding="10,0" Click="FilterDrop_Click">
@@ -87,7 +80,6 @@
                             </StackPanel>
                         </Button>
                     </Border>
-
                     <!-- Cross-Check Filter Popup -->
                     <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterDropBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
                         <Border Background="White" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="6" MinWidth="220">
@@ -108,7 +100,6 @@
                             </StackPanel>
                         </Border>
                     </Popup>
-
                     <!-- Refresh Queue Icon Button (At the End of the Ribbon) -->
                     <Button Width="32" Height="32" Cursor="Hand"
                             BorderThickness="0" Background="White"
@@ -136,14 +127,12 @@
                     </Button>
                 </StackPanel>
             </Grid>
-
             <!-- Lower Row: Batch Select & Bulk Actions Strip (Spaced from Upper Row) -->
             <Grid Grid.Row="1" Margin="0,16,0,0" VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-
                 <!-- Left: Batch Selection Toggle Button (Always anchored in exact same position) -->
                 <Button Grid.Column="0" Height="28" Padding="14,0" Cursor="Hand" Command="{Binding ToggleBatchModeCommand}">
                     <Button.Template>
@@ -178,7 +167,6 @@
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
-
                 <!-- Alongside: Bulk Operations (Visible when IsBatchMode is True) -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0"
                             Visibility="{Binding IsBatchMode, Converter={StaticResource BoolToVis}}">
@@ -196,13 +184,11 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
-
                     <!-- Selected Count Badge -->
                     <Border Background="#EAF6F0" CornerRadius="6" Padding="8,0" Height="28" Margin="0,0,6,0" VerticalAlignment="Center">
                         <TextBlock Text="{Binding SelectedCountSummary}" FontSize="10.5" FontWeight="Bold" Foreground="#27AE60"
                                    VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
                     </Border>
-
                     <!-- Shortlist Selected Button -->
                     <Button Height="28" Cursor="Hand" Command="{Binding ShortlistSelectedCommand}"
                             IsEnabled="{Binding HasQueueSelection}">

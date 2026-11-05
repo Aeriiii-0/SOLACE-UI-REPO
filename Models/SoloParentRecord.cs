@@ -26,12 +26,10 @@ namespace SOLUM_UI.Models
             set => _educationEmployment = value?.ToUpper() ?? string.Empty;
         }
         public string Income              { get; set; }
-
         // Special needs
         public bool HasSpecialNeeds       { get; set; } = false;
         public string SpecialNeedsCategory { get; set; }
         public string SpecialNeedsDescription { get; set; }
-
         // OCR confidence (0–1) per field; drives the cell background colour in OcrScanDialog
         public double NameConf { get; set; } = 0.90;
         public double SexConf  { get; set; } = 0.90;
@@ -63,7 +61,6 @@ namespace SOLUM_UI.Models
         public string   LastModifiedBy { get; set; }
         public DateTime LastUpdated { get; set; }
         public string   Status      { get; set; }
-
         // applicant type
         public bool     IsNewApplicant    { get; set; }
         public bool     IsRenewal         { get; set; }
@@ -72,7 +69,6 @@ namespace SOLUM_UI.Models
         public DateTime? RenewalFilingDate { get; set; }
         public DateTime? CurrentTermExpiresAt { get; set; }
         public List<SOLUM_UI.Models.Api.RecordTermDto> RecordTerms { get; set; } = new List<SOLUM_UI.Models.Api.RecordTermDto>();
-
         /// <summary>
         /// Human-readable application type derived from <see cref="IsNewApplicant"/> and
         /// <see cref="IsRenewal"/>. Set automatically by the entry-point flow; never
@@ -81,14 +77,12 @@ namespace SOLUM_UI.Models
         public string ApplicationType =>
             IsNewApplicant ? "New Record" :
             IsRenewal      ? "Renewed" : "—";
-
         // name
         public string Name          { get; set; }
         public string Surname       { get; set; }
         public string FirstName     { get; set; }
         public string MiddleName    { get; set; }
         public string ExtensionName { get; set; }
-
         // personal info
         public DateTime DateOfBirth  { get; set; }
         public string   PlaceOfBirth { get; set; }
@@ -98,7 +92,6 @@ namespace SOLUM_UI.Models
         public string   BloodType    { get; set; }
         public string   Height       { get; set; }
         public string   Weight       { get; set; }
-
         // bg
         public string EducationalAttainment { get; set; }
         public string PhilSysNumber         { get; set; }
@@ -108,23 +101,19 @@ namespace SOLUM_UI.Models
         public bool   IsEmployed            { get; set; }
         public bool   IsSelfEmployed        { get; set; }
         public bool   IsNotEmployed         { get; set; }
-
         // address n contact
         public string Address       { get; set; }
         public string Barangay      { get; set; }
         public string ContactNumber { get; set; }
-
         //  emergency contact 
         public string EmergencyContactName   { get; set; }
         public string EmergencyRelationship  { get; set; }
         public string EmergencyAddress       { get; set; }
         public string EmergencyContactNumber { get; set; }
-
         //  children 
         public int                Children      { get; set; }
         public List<FamilyMember> FamilyMembers { get; set; } = new List<FamilyMember>();
         public List<Guid> RemovedFamilyMemberIds { get; set; } = new List<Guid>();
-
         //  circumstances 
         public bool   CircumstanceA1           { get; set; }
         public bool   CircumstanceA2           { get; set; }
@@ -145,7 +134,6 @@ namespace SOLUM_UI.Models
         public bool   CircumstanceD            { get; set; }
         public bool   CircumstanceE            { get; set; }
         public bool   CircumstanceF            { get; set; }
-
         // needs & other income 
         public string NeedsAndProblems  { get; set; }
         public string OtherIncomeSource { get; set; }
@@ -156,7 +144,6 @@ namespace SOLUM_UI.Models
         public bool IsLGBT { get; set; }
         public bool IsPantawidBeneficiary { get; set; }
         public bool IsIndigenous { get; set; }
-
         // helper
         public string LastUpdatedFormatted => LastUpdated != DateTime.MinValue ? LastUpdated.ToString("yyyy-MM-dd") : "—";
         public string DateOfBirthFormatted => DateOfBirth != DateTime.MinValue ? DateOfBirth.ToString("yyyy-MM-dd") : "—";
@@ -175,7 +162,6 @@ namespace SOLUM_UI.Models
                 return "—";
             }
         }
-
         // newline-separated summary of all ticked circumstances
         public string CircumstancesDisplay
         {
@@ -226,7 +212,6 @@ namespace SOLUM_UI.Models
                 return "—";
             }
         }
-
         /// <summary>
         /// Gets the start/issue date of the current active term.
         /// Checks the latest term in RecordTerms, then LastUpdated, then DateOfApplication, then CurrentTermExpiresAt - 1 year.
@@ -234,7 +219,6 @@ namespace SOLUM_UI.Models
         public DateTime GetActiveTermStartDate()
         {
             DateTime latestStart = DateTime.MinValue;
-
             if (RecordTerms != null && RecordTerms.Count > 0)
             {
                 foreach (var rt in RecordTerms)
@@ -244,27 +228,20 @@ namespace SOLUM_UI.Models
                         dt = s;
                     else if (DateTime.TryParse(rt.StartsAt, out var s2) && s2 > dt)
                         dt = s2;
-
                     if (dt > latestStart)
                         latestStart = dt;
                 }
             }
-
             if (latestStart != DateTime.MinValue)
                 return latestStart;
-
             if (LastUpdated != DateTime.MinValue)
                 return LastUpdated;
-
             if (DateOfApplication != DateTime.MinValue)
                 return DateOfApplication;
-
             if (CurrentTermExpiresAt.HasValue && CurrentTermExpiresAt.Value != DateTime.MinValue)
                 return CurrentTermExpiresAt.Value.AddYears(-1);
-
             return DateTime.MinValue;
         }
-
         /// <summary>
         /// Determines whether the record is eligible for renewal.
         /// Rule: Solo parents cannot renew if their record is active for less than 1 month since its issue/start date.
@@ -278,13 +255,11 @@ namespace SOLUM_UI.Models
             bool isExpired = CurrentTermExpiresAt.HasValue && CurrentTermExpiresAt.Value.Date < DateTime.Today;
             bool isStatusInactive = string.Equals(Status, "Inactive", StringComparison.OrdinalIgnoreCase) ||
                                     string.Equals(Status, "Expired", StringComparison.OrdinalIgnoreCase);
-
             // Expired or inactive records are always eligible for renewal
             if (isExpired || isStatusInactive)
             {
                 return true;
             }
-
             DateTime startDate = GetActiveTermStartDate();
             if (startDate != DateTime.MinValue)
             {
@@ -297,7 +272,6 @@ namespace SOLUM_UI.Models
                     return false;
                 }
             }
-
             return true;
         }
 

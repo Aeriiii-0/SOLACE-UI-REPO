@@ -23,7 +23,6 @@ namespace SOLUM_UI.Services
             IsAscending = isAscending;
         }
     }
-
     /// <summary>
     /// Pure sorting and ordering helper adhering to Strict MVVM.
     /// Handles record ranking, date calculations, and API parameter mapping.
@@ -48,9 +47,7 @@ namespace SOLUM_UI.Services
             bool isAscending)
         {
             if (records == null) return new List<SoloParentRecordViewModel>();
-
             IOrderedEnumerable<SoloParentRecordViewModel> ordered;
-
             switch (field)
             {
                 case RecordSortField.LastUpdated:
@@ -59,13 +56,11 @@ namespace SOLUM_UI.Services
                         ? records.OrderBy(GetLastUpdatedDate).ThenBy(r => r.Surname)
                         : records.OrderByDescending(GetLastUpdatedDate).ThenBy(r => r.Surname);
                     break;
-
                 case RecordSortField.ApplicationDate:
                     ordered = isAscending
                         ? records.OrderBy(r => r.DateOfApplication).ThenBy(r => r.Surname)
                         : records.OrderByDescending(r => r.DateOfApplication).ThenBy(r => r.Surname);
                     break;
-
                 case RecordSortField.Barangay:
                 default:
                     ordered = isAscending
@@ -73,7 +68,6 @@ namespace SOLUM_UI.Services
                         : records.OrderByDescending(r => r.Barangay ?? string.Empty).ThenBy(r => r.Surname);
                     break;
             }
-
             return ordered.ToList();
         }
 

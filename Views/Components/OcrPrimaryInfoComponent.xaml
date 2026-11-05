@@ -9,7 +9,6 @@
                   HorizontalScrollBarVisibility="Disabled"
                   Background="#F4F6F9">
         <StackPanel Margin="20,12,20,16">
-
             <!-- CARD: I. IDENTIFYING INFORMATION -->
             <Border Style="{StaticResource CardSection}">
                 <StackPanel>
@@ -36,7 +35,6 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-
                     <!-- ROW 1: Full Name (Last Name | First Name | Middle Name | Ext.) -->
                     <Grid Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
@@ -45,7 +43,6 @@
                             <ColumnDefinition Width="1.1*"/>
                             <ColumnDefinition Width="75"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -65,7 +62,6 @@
                                      TextChanged="TxtLastName_TextChanged"/>
                             <TextBlock x:Name="ErrLastName" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="1" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -85,7 +81,6 @@
                                      TextChanged="TxtFirstName_TextChanged"/>
                             <TextBlock x:Name="ErrFirstName" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="2" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -104,7 +99,6 @@
                                      PreviewTextInput="NameOnly_PreviewTextInput"
                                      TextChanged="TxtMiddleName_TextChanged"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="3">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -124,7 +118,6 @@
                                      TextChanged="TxtExtension_TextChanged"/>
                         </StackPanel>
                     </Grid>
-
                     <!-- ROW 2: Birthdate | Age | PhilSys Card Number -->
                     <Grid Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
@@ -132,7 +125,6 @@
                             <ColumnDefinition Width="85"/>
                             <ColumnDefinition Width="1.4*"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -157,7 +149,6 @@
                             </Border>
                             <TextBlock x:Name="ErrBirthdate" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="1" Margin="0,0,8,0">
                             <TextBlock Text="Age" Style="{StaticResource FieldLabel}"/>
                             <TextBox x:Name="TxtAge" Style="{StaticResource FormBox}"
@@ -169,7 +160,6 @@
                                      Foreground="#222222"
                                      Padding="0"/>
                         </StackPanel>
-
                         <StackPanel Grid.Column="2">
                             <Grid Margin="0,0,0,2">
                                 <Grid.ColumnDefinitions>
@@ -192,7 +182,6 @@
                     </Grid>
                 </StackPanel>
             </Border>
-
             <!-- Subtle Verification Loading Banner -->
             <Border x:Name="CheckingBannerPanel" Visibility="Collapsed" CornerRadius="8"
                     Background="#FBF5F7" BorderBrush="#E2C6D0" BorderThickness="1.2"
@@ -219,7 +208,6 @@
                     </StackPanel>
                 </Grid>
             </Border>
-
             <!-- Duplicate Banner in Step 1 -->
             <Border x:Name="DuplicateBannerPanel" Visibility="Collapsed" CornerRadius="10"
                     Background="#B71C1C" Padding="16,12" Margin="0,8,0,4">

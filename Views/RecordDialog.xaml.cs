@@ -203,7 +203,6 @@ namespace SOLUM_UI
                 N(nameof(IncomeDisplay));
             }
         }
-
         // Special needs
         public bool HasSpecialNeeds
         {
@@ -257,7 +256,6 @@ namespace SOLUM_UI
                 N(nameof(DisabilitySubtitleVisibility));
             }
         }
-
         // Display Helpers
         public string AgeDisplay => !string.IsNullOrWhiteSpace(Age) ? $"{Age} yrs old" : "—";
         public string SexDisplay => !string.IsNullOrWhiteSpace(Sex) ? Sex : "—";
@@ -286,7 +284,6 @@ namespace SOLUM_UI
                 return "No income";
             }
         }
-
         // Disability & Special Needs Display (Clean typography, no badges)
         public string DisabilityTitleDisplay
         {
@@ -397,13 +394,10 @@ namespace SOLUM_UI
             InitializeComponent();
             _existing  = existing;
             _isRenewal = false;
-
             FamilyCardsList.ItemsSource = _familyRowData;
             _familyRowData.CollectionChanged += (s, e) => { UpdateSaveButtonState(); UpdateFamilyCardsEmptyState(); };
             UpdateFamilyCardsEmptyState();
-
             Loaded += (s, e) => SuppressDatePickerWatermarks();
-
             if (_existing != null)
             {
                 FormSubtitle.Text = string.IsNullOrEmpty(_existing.Id)
@@ -422,7 +416,6 @@ namespace SOLUM_UI
                 // Show add-mode stripe when Loaded
                 Loaded += (s, e) => { ApplyModeStyle(isRenewal: false); UpdateSaveButtonState(); };
             }
-
             // Routed event handlers to react to any input change with debounced save button state
             AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent, new TextChangedEventHandler((s, e) => ScheduleUpdateSaveButtonState()));
             AddHandler(System.Windows.Controls.Primitives.Selector.SelectionChangedEvent, new SelectionChangedEventHandler((s, e) => ScheduleUpdateSaveButtonState()));
@@ -430,12 +423,10 @@ namespace SOLUM_UI
             AddHandler(System.Windows.Controls.Primitives.ToggleButton.CheckedEvent, new RoutedEventHandler((s, e) => ScheduleUpdateSaveButtonState()));
             AddHandler(System.Windows.Controls.Primitives.ToggleButton.UncheckedEvent, new RoutedEventHandler((s, e) => ScheduleUpdateSaveButtonState()));
             _familyRowData.CollectionChanged += (s, e) => ScheduleUpdateSaveButtonState();
-
             SOLUM_UI.Services.FormHelper.BindSameAsApplicantAddress(ChkSameAsApplicant, TxtAddress, TxtEmergencyAddress);
             DpDateOfApplication.DisplayDateEnd = DateTime.Today;
             UpdateValidityPreview();
         }
-
         /// <summary>
         /// Opens the form in renewal mode. Identity fields are locked; only
         /// Civil Status, Monthly Income and Employment Status remain editable.
@@ -448,7 +439,6 @@ namespace SOLUM_UI
             FormStepHint.Text = "Renewal mode — update changeable fields only";
             Loaded           += (s, e) => { ApplyRenewalLocks(); ApplyModeStyle(isRenewal: true); };
         }
-
         /// <summary>
         /// Tints the header and shows the mode stripe.
         /// Add/Renew = green. Edit = amber.
@@ -462,7 +452,6 @@ namespace SOLUM_UI
                 HeaderBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(0xC3, 0xE8, 0xCB));
                 FormSubtitle.Foreground  = new SolidColorBrush(Color.FromRgb(0x1B, 0x5E, 0x20));
                 FormStepHint.Foreground  = new SolidColorBrush(Color.FromRgb(0x38, 0x80, 0x44));
-
                 ModeStripe.Background    = new SolidColorBrush(Color.FromRgb(0xF0, 0xFA, 0xF1));
                 ModeStripe.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xC8, 0xE6, 0xC9));
                 ModeStripeLabel.Text      = "Renewal";
@@ -473,7 +462,6 @@ namespace SOLUM_UI
                 ModeStripeIcon.Data       = Geometry.Parse("M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z");
                 ModeStripeIcon.Fill       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
                 Step1Dot.Background       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
-
                 // Set DialogShell border to green for renewal mode
                 DialogShell.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xC8, 0xE6, 0xC9));
             }
@@ -484,7 +472,6 @@ namespace SOLUM_UI
                 HeaderBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(0xC3, 0xE8, 0xCB));
                 FormSubtitle.Foreground  = new SolidColorBrush(Color.FromRgb(0x1B, 0x5E, 0x20));
                 FormStepHint.Foreground  = new SolidColorBrush(Color.FromRgb(0x38, 0x80, 0x44));
-
                 ModeStripe.Background    = new SolidColorBrush(Color.FromRgb(0xF0, 0xFA, 0xF1));
                 ModeStripe.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xC8, 0xE6, 0xC9));
                 ModeStripeLabel.Text      = "New Registration";
@@ -495,15 +482,12 @@ namespace SOLUM_UI
                 ModeStripeIcon.Data       = Geometry.Parse("M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z");
                 ModeStripeIcon.Fill       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
                 Step1Dot.Background       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
-
                 // Set DialogShell border to green for add mode
                 DialogShell.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xC8, 0xE6, 0xC9));
             }
-
             ModeStripe.Visibility = Visibility.Visible;
             ModeBadge.Visibility  = Visibility.Collapsed;
         }
-
         /// <summary>Amber/yellow tint applied to edit-existing-record mode.</summary>
         private void ApplyEditStyle()
         {
@@ -511,7 +495,6 @@ namespace SOLUM_UI
             HeaderBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0xE0, 0x82));
             FormSubtitle.Foreground  = new SolidColorBrush(Color.FromRgb(0x6D, 0x4C, 0x00));
             FormStepHint.Foreground  = new SolidColorBrush(Color.FromRgb(0x9E, 0x72, 0x00));
-
             ModeStripe.Background    = new SolidColorBrush(Color.FromRgb(0xFF, 0xF8, 0xE1));
             ModeStripe.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xFF, 0xD5, 0x4F));
             ModeStripeLabel.Text      = "Editing Record";
@@ -522,14 +505,11 @@ namespace SOLUM_UI
             ModeStripeIcon.Data       = Geometry.Parse("M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25Z");
             ModeStripeIcon.Fill       = new SolidColorBrush(Color.FromRgb(0xB3, 0x6A, 0x00));
             Step1Dot.Background       = new SolidColorBrush(Color.FromRgb(0xE6, 0x5C, 0x00));
-
             // Set DialogShell border to yellow for edit mode
             DialogShell.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xFF, 0xD5, 0x4F));
-
             ModeStripe.Visibility = Visibility.Visible;
             ModeBadge.Visibility  = Visibility.Collapsed;
         }
-
         /// <summary>
         /// Locks every field that should not change during a renewal.
         /// Only Civil Status, Monthly Income and Employment Status stay editable.
@@ -547,30 +527,23 @@ namespace SOLUM_UI
             }
             void LockCombo(ComboBox cmb) { if (cmb == null) return; cmb.IsEnabled = false; cmb.Opacity = 0.55; }
             void LockDate(DatePicker dp) { if (dp == null)  return; dp.IsEnabled  = false; dp.Opacity  = 0.55; }
-
             // Identity
             LockBox(TxtLastName); LockBox(TxtFirstName); LockBox(TxtMiddleName);
             LockCombo(CmbExtension);
             LockDate(DpBirthdate); LockBox(TxtPlaceOfBirth); LockCombo(CmbSex); LockBox(TxtPhilSys);
-
             // Background (Education and Religion are fixed for renewal; Occupation, Income, Employment remain editable)
             LockCombo(CmbEducation); LockBox(TxtReligion);
-
             // Address & contact
             LockBox(TxtAddress); LockCombo(CmbBarangay); LockBox(TxtContact);
-
             // Emergency contact
             LockBox(TxtEmergencyContact); LockCombo(CmbRelationship);
             LockBox(TxtEmergencyAddress); LockBox(TxtEmergencyNumber);
-
             // Date of application
             LockDate(DpDateOfApplication);
-
             // Additional classifications are fixed for renewal
             ChkPantawid.IsEnabled   = false; ChkPantawid.Opacity   = 0.55;
             ChkIndigenous.IsEnabled = false; ChkIndigenous.Opacity = 0.55;
             ChkLGBTQ.IsEnabled      = false; ChkLGBTQ.Opacity      = 0.55;
-
             // Mutable fields remaining ENABLED for renewal re-assessment:
             // - CmbCivilStatus
             // - TxtOccupation, TxtMonthlyIncome, CmbEmploymentStatus
@@ -578,7 +551,6 @@ namespace SOLUM_UI
             // - FamilyRows (+ Add Row, delete row, edit row)
             // - TxtNeeds, TxtOtherIncome
         }
-
         /// <summary>
         /// Suppresses the default "Select a date" watermark in DatePickerTextBox controls
         /// used for main form fields (DateOfApplication, Birthdate) to avoid overlapping 
@@ -594,7 +566,6 @@ namespace SOLUM_UI
             // XAML template now properly suppresses native watermark by wrapping ScrollViewer in Grid
             // This prevents rendering of PART_Watermark element, so no code-behind suppression needed
         }
-
         /// <summary>
         /// Helper method to find all visual children of a given type.
         /// </summary>
@@ -616,7 +587,6 @@ namespace SOLUM_UI
                 }
             }
         }
-
         /// <summary>
         /// Opens the form for a new record, pre-seeded with the primary identity fields
         /// gathered by the PreCheckDialog.
@@ -652,7 +622,6 @@ namespace SOLUM_UI
         private void ApplySize()
         {
             double screenW, screenH, screenLeft, screenTop;
-
             if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
                 screenW    = Owner.ActualWidth;
@@ -667,12 +636,10 @@ namespace SOLUM_UI
                 screenLeft = SystemParameters.WorkArea.Left;
                 screenTop  = SystemParameters.WorkArea.Top;
             }
-
             if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
             if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
             if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
             if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
-
             DialogShell.MaxHeight = screenH * 0.90;
             DialogShell.Width     = Math.Min(screenW * 0.88, 1320);
             DialogShell.MinWidth  = Math.Max(screenW * 0.60, 680);
@@ -691,7 +658,6 @@ namespace SOLUM_UI
                 cancelText: "Keep Editing",
                 theme: ConfirmThemeType.Warning,
                 owner: this);
-
             if (!discard)
             {
                 e.Cancel = true;
@@ -735,7 +701,6 @@ namespace SOLUM_UI
                     : Visibility.Collapsed;
             }
         }
-
         /// <summary>
         /// Checks whether all registered dependents/children are aged 23 or older without declared special needs.
         /// Under RA 11861, qualifying dependents must be under 23, or of any age if living with disability/special needs.
@@ -743,13 +708,10 @@ namespace SOLUM_UI
         public bool AreAllDependentsOverAge()
         {
             if (_familyRowData == null || _familyRowData.Count == 0) return false;
-
             var dependents = _familyRowData
                 .Where(r => r != null && !string.IsNullOrWhiteSpace(r.MemberName) && IsChildOrDependent(r.Relationship))
                 .ToList();
-
             if (dependents.Count == 0) return false;
-
             // A dependent is qualifying if they are <= 22 or have declared special needs/disability
             bool hasQualifyingDependent = dependents.Any(r =>
             {
@@ -757,7 +719,6 @@ namespace SOLUM_UI
                 int age = GetMemberAge(r);
                 return age >= 0 && age <= 22;
             });
-
             return !hasQualifyingDependent;
         }
 
@@ -811,7 +772,6 @@ namespace SOLUM_UI
                 PnlSpecialNeedsDetails.IsEnabled = false;
                 PnlSpecialNeedsDetails.Opacity = 0.5;
             }
-
             AddMemberSubCard.Visibility = Visibility.Visible;
             TxtMemberName.Focus();
         }
@@ -823,19 +783,16 @@ namespace SOLUM_UI
                 _editingFamilyMember = row;
                 TxtAddMemberTitle.Text = $"Edit Household Member: {row.MemberName}";
                 BtnSaveMember.Content = "Update Member";
-
                 TxtMemberName.Text = row.MemberName;
                 SetComboByContent(CmbMemberRel, row.Relationship);
                 SetComboByContent(CmbMemberSex, row.Sex);
                 SetComboByContent(CmbMemberCivil, row.CivilStatus);
-
                 if (row.BirthdateDate.HasValue)
                     DpMemberDob.SelectedDate = row.BirthdateDate.Value;
                 else if (DateTime.TryParse(row.Birthdate, out DateTime dt))
                     DpMemberDob.SelectedDate = dt;
                 else
                     DpMemberDob.SelectedDate = null;
-
                 TxtMemberAge.Text = row.Age;
                 TxtMemberEdu.Text = row.EducationEmployment;
                 TxtMemberIncome.Text = string.IsNullOrWhiteSpace(row.Income) ? string.Empty : row.Income;
@@ -849,7 +806,6 @@ namespace SOLUM_UI
                 }
                 SetComboByContent(CmbSpecialNeedsCategory, row.SpecialNeedsCategory);
                 TxtSpecialNeedsDescription.Text = row.SpecialNeedsDescription ?? string.Empty;
-
                 AddMemberSubCard.Visibility = Visibility.Visible;
                 TxtMemberName.Focus();
             }
@@ -866,7 +822,6 @@ namespace SOLUM_UI
                     "Keep Member",
                     ConfirmThemeType.Danger,
                     this);
-
                 if (confirm)
                 {
                     if (!row.IsNew && row.Id.HasValue)
@@ -916,7 +871,6 @@ namespace SOLUM_UI
                 CmbMemberSex.Focus();
                 return;
             }
-
             if (!DpMemberDob.SelectedDate.HasValue)
             {
                 var tb = DpMemberDob.Template?.FindName("PART_TextBox", DpMemberDob) as System.Windows.Controls.Primitives.DatePickerTextBox;
@@ -925,14 +879,12 @@ namespace SOLUM_UI
                     DpMemberDob.SelectedDate = dtParsed;
                 }
             }
-
             if (!DpMemberDob.SelectedDate.HasValue)
             {
                 ToastNotification.Show("Validation Required", "Please select a valid birthdate.", ToastType.Warning);
                 DpMemberDob.Focus();
                 return;
             }
-
             DateTime dob = DpMemberDob.SelectedDate.Value;
             int age = SOLUM_UI.Services.OcrService.CalculateAge(dob);
             if (age < 0 || age > 120) age = 0;
@@ -953,7 +905,6 @@ namespace SOLUM_UI
                 return;
             }
             string snDesc = hasSn ? (TxtSpecialNeedsDescription.Text?.Trim() ?? string.Empty) : string.Empty;
-
             if (_editingFamilyMember != null)
             {
                 _editingFamilyMember.MemberName = name;
@@ -986,7 +937,6 @@ namespace SOLUM_UI
                 row.SpecialNeedsDescription = snDesc;
                 _familyRowData.Add(row);
             }
-
             AddMemberSubCard.Visibility = Visibility.Collapsed;
             _editingFamilyMember = null;
             UpdateFamilyCardsEmptyState();
@@ -1054,32 +1004,26 @@ namespace SOLUM_UI
             TxtPlaceOfBirth.Text = r.PlaceOfBirth  ?? string.Empty;
             TxtAddress.Text      = r.Address       ?? string.Empty;
             TxtContact.Text      = SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber ?? string.Empty);
-
             if (r.DateOfBirth != DateTime.MinValue) DpBirthdate.SelectedDate = r.DateOfBirth;
             DpDateOfApplication.SelectedDate = r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication : DateTime.Today;
             UpdateValidityPreview();
-
             SetComboByContent(CmbSex,         r.Sex);
             SetComboByContent(CmbCivilStatus, r.CivilStatus);
             SetComboByContent(CmbEducation,   r.EducationalAttainment);
             SetComboByContent(CmbBarangay,    r.Barangay);
-
             TxtPhilSys.Text        = r.PhilSysNumber   ?? string.Empty;
             TxtReligion.Text       = r.Religion         ?? string.Empty;
             TxtOccupation.Text     = r.Occupation       ?? string.Empty;
             TxtMonthlyIncome.Text  = r.MonthlyIncome    ?? string.Empty;
-
             // Set Employment Status dropdown
             if (r.IsEmployed) SetComboByContent(CmbEmploymentStatus, "Employed");
             else if (r.IsSelfEmployed) SetComboByContent(CmbEmploymentStatus, "Self-Employed");
             else if (r.IsNotEmployed) SetComboByContent(CmbEmploymentStatus, "Not Employed");
             else CmbEmploymentStatus.SelectedIndex = 0;
-
             TxtEmergencyContact.Text = r.EmergencyContactName   ?? string.Empty;
             SetComboByContent(CmbRelationship, r.EmergencyRelationship);
             TxtEmergencyAddress.Text = r.EmergencyAddress       ?? string.Empty;
             TxtEmergencyNumber.Text  = SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.EmergencyContactNumber ?? string.Empty);
-
             ChkA1.IsChecked = false;
             ChkA2.IsChecked = false;
             ChkA3.IsChecked = false;
@@ -1092,7 +1036,6 @@ namespace SOLUM_UI
             ChkD.IsChecked = false;
             ChkE.IsChecked = false;
             ChkF.IsChecked = false;
-
             if (r.CircumstanceA1) ChkA1.IsChecked = true;
             else if (r.CircumstanceA2) ChkA2.IsChecked = true;
             else if (r.CircumstanceA3) ChkA3.IsChecked = true;
@@ -1105,7 +1048,6 @@ namespace SOLUM_UI
             else if (r.CircumstanceD) ChkD.IsChecked = true;
             else if (r.CircumstanceE) ChkE.IsChecked = true;
             else if (r.CircumstanceF) ChkF.IsChecked = true;
-
             TxtA2Cause.Text = r.CircumstanceA2Cause ?? string.Empty;
             if (r.CircumstanceA2Date != DateTime.MinValue) DpA2Date.SelectedDate = r.CircumstanceA2Date;
             TxtA4Disability.Text = r.CircumstanceA4Disability ?? string.Empty;
@@ -1113,16 +1055,12 @@ namespace SOLUM_UI
             if (r.CircumstanceA6Nullity)        SetComboByContent(CmbA6Declaration, "Nullity of marriage");
             else if (r.CircumstanceA6Annulment) SetComboByContent(CmbA6Declaration, "Annulment of marriage");
             else                                CmbA6Declaration.SelectedIndex = 0;
-
             TxtBStayAbroad.Text = r.CircumstanceBStayAbroad ?? string.Empty;
-
             TxtNeeds.Text       = r.NeedsAndProblems  ?? string.Empty;
             TxtOtherIncome.Text = r.OtherIncomeSource ?? string.Empty;
-
             ChkPantawid.IsChecked   = r.IsPantawidBeneficiary;
             ChkIndigenous.IsChecked = r.IsIndigenous;
             ChkLGBTQ.IsChecked      = r.IsLGBT;
-
             if (r.FamilyMembers != null && r.FamilyMembers.Count > 0)
             {
                 _familyRowData.Clear();
@@ -1131,7 +1069,6 @@ namespace SOLUM_UI
                 {
                     _removedFamilyMemberIds.AddRange(r.RemovedFamilyMemberIds);
                 }
-
                 foreach (var fm in r.FamilyMembers)
                 {
                     string normDob = SOLUM_UI.Services.OcrService.NormalizeDateString(fm.Birthdate, out DateTime? dt);
@@ -1144,7 +1081,6 @@ namespace SOLUM_UI
                             ageVal = calcAge.ToString();
                         }
                     }
-
                     var row = MakeFamilyRow(fm.Id, fm.IsNew);
                     row.MemberName          = fm.MemberName;
                     row.Sex                 = fm.Sex;
@@ -1160,9 +1096,7 @@ namespace SOLUM_UI
                     _familyRowData.Add(row);
                 }
             }
-
             UpdateFamilyCardsEmptyState();
-
             Circumstance_Changed(null, null);
             UpdateAge(r.DateOfBirth);
         }
@@ -1184,7 +1118,6 @@ namespace SOLUM_UI
                     return;
                 }
             }
-
             // Specific matching for Sex if combo is CmbSex
             if (combo == CmbSex)
             {
@@ -1201,7 +1134,6 @@ namespace SOLUM_UI
                     }
                 }
             }
-
             // Specific matching for Civil Status if combo is CmbCivilStatus
             if (combo == CmbCivilStatus)
             {
@@ -1232,7 +1164,6 @@ namespace SOLUM_UI
                     return;
                 }
             }
-
             var fallbackItem = new ComboBoxItem { Content = val };
             combo.Items.Add(fallbackItem);
             combo.SelectedItem = fallbackItem;
@@ -1255,7 +1186,6 @@ namespace SOLUM_UI
             DateTime today = DateTime.Today;
             int age = today.Year - dob.Value.Year;
             if (dob.Value.Date > today.AddYears(-age)) age--;
-
             // Validate age - cannot exceed 120
             if (age > 120)
             {
@@ -1270,7 +1200,6 @@ namespace SOLUM_UI
                     MessageBoxImage.Warning);
                 return;
             }
-
             // Valid age - clear any errors
             TxtAge.Text = age.ToString();
             ErrBirthdate.Visibility = Visibility.Collapsed;
@@ -1378,7 +1307,6 @@ namespace SOLUM_UI
                     formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4)}";
                 else
                     formatted = digits;
-
                 if (raw != formatted)
                 {
                     int caret = tb.SelectionStart;
@@ -1486,7 +1414,6 @@ namespace SOLUM_UI
             string digits = Regex.Replace(raw, @"\D", "");
             if (string.IsNullOrEmpty(digits)) return "—";
             if (digits.Length > 16) digits = digits.Substring(0, 16);
-
             if (digits.Length > 12)
                 return $"{digits.Substring(0, 4)}-{digits.Substring(4, 4)}-{digits.Substring(8, 4)}-{digits.Substring(12)}";
             if (digits.Length > 8)
@@ -1505,7 +1432,6 @@ namespace SOLUM_UI
                 string raw = tb.Text ?? "";
                 string formatted = FormatPhilSysNumber(raw);
                 if (formatted == "—") formatted = "";
-
                 if (raw != formatted)
                 {
                     int caret = tb.SelectionStart;
@@ -1634,11 +1560,9 @@ namespace SOLUM_UI
         private void UpdateValidityPreview()
         {
             if (BadgeValidityPreview == null || TxtValidityPreview == null) return;
-
             DateTime appDate = DpDateOfApplication?.SelectedDate ?? DateTime.Today;
             DateTime expiresAt = appDate.AddYears(1);
             DateTime today = DateTime.Today;
-
             if (expiresAt < today)
             {
                 BadgeValidityPreview.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xEB, 0xEE));
@@ -1659,7 +1583,6 @@ namespace SOLUM_UI
         {
             bool ok = true;
             var missing = new List<string>();
-
             ClearDateError(DpDateOfApplication, ErrDateOfApplication);
             if (!DpDateOfApplication.SelectedDate.HasValue)
             {
@@ -1679,13 +1602,10 @@ namespace SOLUM_UI
                 missing.Add("Date of Application (precedes birthdate)");
                 ok = false;
             }
-
             if (string.IsNullOrWhiteSpace(TxtLastName.Text))
             { MarkError(TxtLastName, ErrLastName, "Required."); missing.Add("Last Name"); ok = false; }
-
             if (string.IsNullOrWhiteSpace(TxtFirstName.Text))
             { MarkError(TxtFirstName, ErrFirstName, "Required."); missing.Add("First Name"); ok = false; }
-
             if (!DpBirthdate.SelectedDate.HasValue)
             { MarkDateError(DpBirthdate, ErrBirthdate, "Required."); missing.Add("Birthdate"); ok = false; }
             else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today)
@@ -1700,10 +1620,8 @@ namespace SOLUM_UI
                 missing.Add("PhilSys Card Number (16 digits)");
                 ok = false;
             }
-
             if (!ok)
                 SetValidationMessage(missing);
-
             return ok;
         }
 
@@ -1711,16 +1629,12 @@ namespace SOLUM_UI
         {
             bool ok = true;
             var missing = new List<string>();
-
             if (CmbCivilStatus.SelectedItem == null)
             { MarkError(CmbCivilStatus, ErrCivilStatus, "Required."); missing.Add("Civil Status"); ok = false; }
-
             if (CmbSex.SelectedItem == null)
             { MarkError(CmbSex, ErrSex, "Required."); missing.Add("Sex"); ok = false; }
-
             if (string.IsNullOrWhiteSpace(TxtPlaceOfBirth.Text))
             { MarkError(TxtPlaceOfBirth, ErrPlaceOfBirth, "Required."); missing.Add("Birthplace"); ok = false; }
-
             if (string.IsNullOrWhiteSpace(TxtAddress.Text))
             { MarkError(TxtAddress, ErrAddress, "Required."); missing.Add("Address"); ok = false; }
 
@@ -1737,10 +1651,8 @@ namespace SOLUM_UI
             { MarkError(TxtContact, ErrContact, "Required."); missing.Add("Contact Number"); ok = false; }
             else if (contactDigits.Length != 11)
             { MarkError(TxtContact, ErrContact, "Must be 11 digits."); missing.Add("Contact Number (11 digits)"); ok = false; }
-
             if (!ok)
                 SetValidationMessage(missing);
-
             return ok;
         }
 
@@ -1748,7 +1660,6 @@ namespace SOLUM_UI
         {
             bool ok = ValidateStep1() && ValidateStep2();
             var missing = new List<string>();
-
             // Family composition: every named row must be fully filled
             int rowNum = 0;
             foreach (var item in _familyRowData)
@@ -1756,24 +1667,20 @@ namespace SOLUM_UI
                 var row = item as FamilyMemberRow;
                 if (row == null || string.IsNullOrWhiteSpace(row.MemberName)) continue;
                 rowNum++;
-
                 var rowMissing = new List<string>();
                 if (string.IsNullOrWhiteSpace(row.Sex))                                      rowMissing.Add("Sex");
                 if (!row.BirthdateDate.HasValue && string.IsNullOrWhiteSpace(row.Birthdate)) rowMissing.Add("Birthdate");
                 if (string.IsNullOrWhiteSpace(row.CivilStatus))                              rowMissing.Add("Civil Status");
                 if (string.IsNullOrWhiteSpace(row.Relationship))                             rowMissing.Add("Relationship");
                 if (string.IsNullOrWhiteSpace(row.Income))              rowMissing.Add("Income");
-
                 if (rowMissing.Count > 0)
                 {
                     missing.Add($"Family member #{rowNum} ({row.MemberName}) — missing: {string.Join(", ", rowMissing)}");
                     ok = false;
                 }
             }
-
             if (!ok && missing.Count > 0)
                 SetValidationMessage(missing);
-
             return ok;
         }
 
@@ -1790,18 +1697,15 @@ namespace SOLUM_UI
         private async void Next_Click(object sender, RoutedEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
-
             if (_currentStep == 1)
             {
                 if (!ValidateStep1()) return;
-
                 // If editing an existing record or duplicate already confirmed, continue to Step 2
                 if (_existing != null || _duplicateCheckPassed)
                 {
                     GoToStep(2);
                     return;
                 }
-
                 // Run Duplicate Pre-Check on Step 1
                 BtnNext.IsEnabled = false;
                 try
@@ -1809,11 +1713,9 @@ namespace SOLUM_UI
                     string fName = TxtFirstName.Text.Trim();
                     string lName = TxtLastName.Text.Trim();
                     string philsys = TxtPhilSys.Text.Trim();
-
                     var matches = new List<SoloParentRecord>();
                     SoloParentRecord philsysDuplicate = null;
                     string rawInputPhilsys = System.Text.RegularExpressions.Regex.Replace(philsys ?? "", @"\D", "");
-
                     // 1. Check PhilSys if provided (STRICTLY UNIQUE)
                     if (!string.IsNullOrWhiteSpace(rawInputPhilsys))
                     {
@@ -1824,7 +1726,6 @@ namespace SOLUM_UI
                             {
                                 if (_existing != null && item.Id.ToString() == _existing.Id)
                                     continue;
-
                                 var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
                                 if (detailResp.Succeeded && detailResp.Data != null)
                                 {
@@ -1839,7 +1740,6 @@ namespace SOLUM_UI
                             }
                         }
                     }
-
                     if (philsysDuplicate != null)
                     {
                         _foundRecord = philsysDuplicate;
@@ -1851,7 +1751,6 @@ namespace SOLUM_UI
                         TxtPhilSys.Focus();
                         return;
                     }
-
                     // 2. Check First Name and Last Name
                     if (!string.IsNullOrWhiteSpace(fName) && !string.IsNullOrWhiteSpace(lName))
                     {
@@ -1862,7 +1761,6 @@ namespace SOLUM_UI
                             {
                                 if (_existing != null && item.Id.ToString() == _existing.Id)
                                     continue;
-
                                 if (!matches.Any(m => m.Id == item.Id.ToString()))
                                 {
                                     var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
@@ -1874,7 +1772,6 @@ namespace SOLUM_UI
                             }
                         }
                     }
-
                     if (matches.Count > 0)
                     {
                         _foundRecord = matches[0];
@@ -1895,7 +1792,6 @@ namespace SOLUM_UI
                 {
                     BtnNext.IsEnabled = true;
                 }
-
                 GoToStep(2);
             }
             else if (_currentStep == 2)
@@ -1937,26 +1833,21 @@ namespace SOLUM_UI
         private void GoToStep(int step)
         {
             _currentStep = step;
-
             ScrollStep1.Visibility = step == 1 ? Visibility.Visible : Visibility.Collapsed;
             ScrollStep2.Visibility = step == 2 ? Visibility.Visible : Visibility.Collapsed;
             ScrollStep3.Visibility = step == 3 ? Visibility.Visible : Visibility.Collapsed;
-
             BtnBack.Visibility = step > 1 ? Visibility.Visible : Visibility.Collapsed;
             BtnNext.Visibility = step < 3 ? Visibility.Visible : Visibility.Collapsed;
             BtnSave.Visibility = step == 3 ? Visibility.Visible : Visibility.Collapsed;
-
             if (step == 1)
             {
                 FormStepHint.Text = "Step 1 of 3 — Primary Information";
                 Step1Dot.Background = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
                 Step1DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step1Title.Foreground = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
-
                 Step2Dot.Background = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
                 Step2DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
                 Step2Title.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
-
                 Step3Dot.Background = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
                 Step3DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
                 Step3Title.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
@@ -1967,11 +1858,9 @@ namespace SOLUM_UI
                 Step1Dot.Background = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
                 Step1DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step1Title.Foreground = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
-
                 Step2Dot.Background = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
                 Step2DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step2Title.Foreground = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
-
                 Step3Dot.Background = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0));
                 Step3DotLabel.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
                 Step3Title.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA));
@@ -1982,16 +1871,13 @@ namespace SOLUM_UI
                 Step1Dot.Background = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
                 Step1DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step1Title.Foreground = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
-
                 Step2Dot.Background = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
                 Step2DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step2Title.Foreground = new SolidColorBrush(Color.FromRgb(0x27, 0xAE, 0x60));
-
                 Step3Dot.Background = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
                 Step3DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step3Title.Foreground = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
             }
-
             UpdateSaveButtonState();
         }
 
@@ -2009,7 +1895,6 @@ namespace SOLUM_UI
                 }
                 return;
             }
-
             if (_dirtyCheckTimer == null)
             {
                 _dirtyCheckTimer = new System.Windows.Threading.DispatcherTimer
@@ -2022,7 +1907,6 @@ namespace SOLUM_UI
                     UpdateSaveButtonState();
                 };
             }
-
             if (!_dirtyCheckTimer.IsEnabled)
             {
                 _dirtyCheckTimer.Start();
@@ -2045,7 +1929,6 @@ namespace SOLUM_UI
             BtnSave.IsEnabled = hasChanges;
             BtnSave.Opacity = hasChanges ? 1.0 : 0.45;
             BtnSave.ToolTip = hasChanges ? null : "No changes have been made to this record.";
-
             if (_currentStep == 3)
             {
                 if (!hasChanges)
@@ -2065,10 +1948,8 @@ namespace SOLUM_UI
         {
             bool isEdit = _existing != null && !string.IsNullOrEmpty(_existing.Id);
             if (!isEdit) return true;
-
             if (_removedFamilyMemberIds != null && _removedFamilyMemberIds.Count > 0)
                 return true;
-
             try
             {
                 var preview = BuildRecord();
@@ -2104,9 +1985,7 @@ namespace SOLUM_UI
                 ValidationMessage.Visibility = Visibility.Visible;
                 return;
             }
-
             if (!ValidateFields()) return;
-
             // Dependent age threshold warning (Option C: alert admin if all dependents are 23+)
             if (AreAllDependentsOverAge())
             {
@@ -2118,23 +1997,18 @@ namespace SOLUM_UI
                     theme: ConfirmThemeType.Warning,
                     owner: this
                 );
-
                 if (!proceed)
                 {
                     GoToStep(3); // Navigate straight to family composition step
                     return;
                 }
             }
-
             var preview = BuildRecord();
             var fields  = BuildConfirmFields(preview);
-
             ConfirmMode mode = _isRenewal ? ConfirmMode.Renew
                              : isEdit     ? ConfirmMode.Edit
                              :              ConfirmMode.Add;
-
             DialogShell.Visibility = Visibility.Hidden;
-
             var confirm = new ConfirmDialog(
                 _isRenewal ? "Confirm Renewal"  : isEdit ? "Confirm Changes"  : "Confirm New Record",
                 _isRenewal ? "Review the fields being renewed." : isEdit ? "Review your changes before saving." : "Review the information below before saving.",
@@ -2144,15 +2018,12 @@ namespace SOLUM_UI
                 screenLeft: Left, screenTop: Top,
                 mode: mode
             ) { Owner = Owner ?? this };
-
             confirm.ShowDialog();
-
             if (!confirm.Confirmed)
             {
                 DialogShell.Visibility = Visibility.Visible;
                 return;
             }
-
             if (SaveAsyncHandler != null)
             {
                 try
@@ -2182,7 +2053,6 @@ namespace SOLUM_UI
                     return;
                 }
             }
-
             try
             {
                 Result = preview;
@@ -2208,7 +2078,6 @@ namespace SOLUM_UI
             string ext     = GetComboValue(CmbExtension);
             string brgy    = GetComboValue(CmbBarangay);
             bool isEdit    = _existing != null && !string.IsNullOrEmpty(_existing.Id);
-
             var members = new System.Collections.Generic.List<FamilyMember>();
             foreach (var item in _familyRowData)
             {
@@ -2225,7 +2094,6 @@ namespace SOLUM_UI
                             ageVal = calcAge.ToString();
                         }
                     }
-
                     members.Add(new FamilyMember
                     {
                         Id                  = row.Id,
@@ -2244,7 +2112,6 @@ namespace SOLUM_UI
                     });
                 }
             }
-
             return new SoloParentRecord
             {
                 Id            = _existing != null ? _existing.Id : "SP-" + DateTime.Now.ToString("yyMMddHHmm"),
@@ -2265,11 +2132,9 @@ namespace SOLUM_UI
                 ContactNumber = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtContact.Text.Trim()),
                 Barangay      = brgy,
                 LastUpdated   = DateTime.Today,
-
                 IsNewApplicant      = isEdit ? (_existing?.IsNewApplicant ?? true) : !_isRenewal,
                 IsRenewal           = isEdit ? (_existing?.IsRenewal ?? false) : _isRenewal,
                 DateOfApplication   = DpDateOfApplication.SelectedDate ?? DateTime.Today,
-
                 EducationalAttainment = GetComboValue(CmbEducation),
                 PhilSysNumber         = TxtPhilSys.Text.Trim(),
                 Religion              = TxtReligion.Text.Trim(),
@@ -2278,12 +2143,10 @@ namespace SOLUM_UI
                 IsEmployed            = GetComboValue(CmbEmploymentStatus) == "Employed",
                 IsSelfEmployed        = GetComboValue(CmbEmploymentStatus) == "Self-Employed",
                 IsNotEmployed         = GetComboValue(CmbEmploymentStatus) == "Not Employed",
-
                 EmergencyContactName   = TxtEmergencyContact.Text.Trim(),
                 EmergencyRelationship  = GetComboValue(CmbRelationship),
                 EmergencyAddress       = TxtEmergencyAddress.Text.Trim(),
                 EmergencyContactNumber = SOLUM_UI.Services.OcrService.FormatPhoneNumber(TxtEmergencyNumber.Text.Trim()),
-
                 CircumstanceA1             = ChkA1.IsChecked == true,
                 CircumstanceA2             = ChkA2.IsChecked == true,
                 CircumstanceA2Cause        = ChkA2.IsChecked == true ? TxtA2Cause.Text.Trim() : string.Empty,
@@ -2303,7 +2166,6 @@ namespace SOLUM_UI
                 CircumstanceD              = ChkD.IsChecked == true,
                 CircumstanceE              = ChkE.IsChecked == true,
                 CircumstanceF              = ChkF.IsChecked == true,
-
                 FamilyMembers          = members,
                 RemovedFamilyMemberIds = new List<Guid>(_removedFamilyMemberIds),
                 ProblemPresented       = _existing?.ProblemPresented ?? string.Empty,
@@ -2327,7 +2189,6 @@ namespace SOLUM_UI
                 string sNew = (newVal ?? "").Trim();
                 string sOld = (oldVal ?? "").Trim();
                 bool changed = isEdit && !string.Equals(sOld, sNew, StringComparison.OrdinalIgnoreCase);
-
                 list.Add(new ConfirmField
                 {
                     Section   = section,
@@ -2346,7 +2207,6 @@ namespace SOLUM_UI
 
                 string formattedNew = string.IsNullOrWhiteSpace(dNew) ? "—" : SOLUM_UI.Services.OcrService.FormatPhoneNumber(dNew);
                 string formattedOld = string.IsNullOrWhiteSpace(dOld) ? "—" : SOLUM_UI.Services.OcrService.FormatPhoneNumber(dOld);
-
                 list.Add(new ConfirmField
                 {
                     Section   = section,
@@ -2365,7 +2225,6 @@ namespace SOLUM_UI
 
                 string formattedNew = FormatPhilSysNumber(dNew);
                 string formattedOld = FormatPhilSysNumber(dOld);
-
                 list.Add(new ConfirmField
                 {
                     Section   = section,
@@ -2392,7 +2251,6 @@ namespace SOLUM_UI
 
                 string formattedNew = string.IsNullOrWhiteSpace(cNew) ? "—" : "₱ " + cNew;
                 string formattedOld = string.IsNullOrWhiteSpace(cOld) ? "—" : "₱ " + cOld;
-
                 list.Add(new ConfirmField
                 {
                     Section   = section,
@@ -2412,7 +2270,6 @@ namespace SOLUM_UI
 
                 string formattedNew = hasNew ? newDt.ToString("MMMM d, yyyy") : "—";
                 string formattedOld = hasOld ? oldDt.ToString("MMMM d, yyyy") : "—";
-
                 list.Add(new ConfirmField
                 {
                     Section   = section,
@@ -2428,7 +2285,6 @@ namespace SOLUM_UI
                 bool changed = isEdit && (newBool != oldBool);
                 string displayNew = newBool ? "✓ Yes" : "No";
                 string displayOld = oldBool ? "✓ Yes" : "No";
-
                 list.Add(new ConfirmField
                 {
                     Section   = section,
@@ -2438,7 +2294,6 @@ namespace SOLUM_UI
                     IsChanged = changed
                 });
             }
-
             // 1. Applicant Type (Only for New Registrations)
             if (!isEdit)
             {
@@ -2448,7 +2303,6 @@ namespace SOLUM_UI
                 AddText(secApp, "Application Type", appTypeNew, appTypeOld);
                 AddDate(secApp, "Date of Application", r.DateOfApplication, _existing != null ? _existing.DateOfApplication : DateTime.MinValue);
             }
-
             // 2. Personal Information
             string sec = "Personal Information";
             if (isEdit)
@@ -2468,7 +2322,6 @@ namespace SOLUM_UI
                 ? SOLUM_UI.Services.OcrService.CalculateAge(_existing.DateOfBirth).ToString()
                 : "—";
             AddText(sec, "Age",                    newAge,                    oldAge);
-
             AddText(sec, "Birthplace",             r.PlaceOfBirth,            _existing?.PlaceOfBirth);
             AddText(sec, "Educational Attainment", r.EducationalAttainment,   _existing?.EducationalAttainment);
             AddPhilSys(sec, "PhilSys Card No.",    r.PhilSysNumber,           _existing?.PhilSysNumber);
@@ -2476,20 +2329,17 @@ namespace SOLUM_UI
             AddText(sec, "Occupation",             r.Occupation,              _existing?.Occupation);
             AddCurrency(sec, "Monthly Income",     r.MonthlyIncome,           _existing?.MonthlyIncome);
             AddText(sec, "Employment Status",      r.EmploymentStatusDisplay, _existing?.EmploymentStatusDisplay);
-
             // 3. Address & Contact
             sec = "Address & Contact";
             AddText(sec, "Address",                r.Address,                 _existing?.Address);
             AddText(sec, "Barangay",               r.Barangay,                _existing?.Barangay);
             AddPhone(sec, "Contact No.",           r.ContactNumber,           _existing?.ContactNumber);
-
             // 4. Emergency Contact
             sec = "Emergency Contact";
             AddText(sec, "Contact Person",         r.EmergencyContactName,    _existing?.EmergencyContactName);
             AddText(sec, "Relationship",           r.EmergencyRelationship,   _existing?.EmergencyRelationship);
             AddText(sec, "Address",                r.EmergencyAddress,        _existing?.EmergencyAddress);
             AddPhone(sec, "Contact No.",           r.EmergencyContactNumber,  _existing?.EmergencyContactNumber);
-
             // 5. Circumstances
             sec = "Circumstances";
             string oldCirc = _existing != null ? _existing.CircumstancesDisplay : "—";
@@ -2510,7 +2360,6 @@ namespace SOLUM_UI
                     r.CircumstanceD  == _existing.CircumstanceD &&
                     r.CircumstanceE  == _existing.CircumstanceE &&
                     r.CircumstanceF  == _existing.CircumstanceF;
-
                 if (!sameFlags)
                 {
                     circChanged = true;
@@ -2544,7 +2393,6 @@ namespace SOLUM_UI
 
             string circDisplayOld = isEdit ? (!circChanged ? newCirc : (string.IsNullOrWhiteSpace(oldCirc) ? "None selected" : oldCirc)) : null;
             string circDisplayNew = string.IsNullOrWhiteSpace(newCirc) ? "None selected" : newCirc;
-
             list.Add(new ConfirmField
             {
                 Section   = sec,
@@ -2553,7 +2401,6 @@ namespace SOLUM_UI
                 OldValue  = circDisplayOld,
                 IsChanged = circChanged
             });
-
             // 6. Family Composition
             sec = "Family Composition";
             string FormatMember(FamilyMember m)
@@ -2571,7 +2418,6 @@ namespace SOLUM_UI
 
             int newCount = r.FamilyMembers != null ? r.FamilyMembers.Count : 0;
             int oldCount = (_existing != null && _existing.FamilyMembers != null) ? _existing.FamilyMembers.Count : 0;
-
             if (newCount == 0 && oldCount == 0)
             {
                 list.Add(new ConfirmField
@@ -2600,7 +2446,6 @@ namespace SOLUM_UI
                 {
                     var m = r.FamilyMembers[i];
                     string memberLabel = "Member " + (i + 1);
-
                     FamilyMember oldM = null;
                     if (_existing?.FamilyMembers != null)
                     {
@@ -2613,7 +2458,6 @@ namespace SOLUM_UI
                     string newSummary = FormatMember(m);
                     string oldSummary = oldM != null ? FormatMember(oldM) : null;
                     bool memberChanged = isEdit && (oldM == null || !string.Equals(oldSummary, newSummary, StringComparison.OrdinalIgnoreCase));
-
                     list.Add(new ConfirmField
                     {
                         Section   = sec,
@@ -2623,7 +2467,6 @@ namespace SOLUM_UI
                         IsChanged = memberChanged
                     });
                 }
-
                 if (isEdit && _existing?.FamilyMembers != null)
                 {
                     foreach (var oldM in _existing.FamilyMembers)
@@ -2631,7 +2474,6 @@ namespace SOLUM_UI
                         bool stillExists = r.FamilyMembers != null && r.FamilyMembers.Exists(m =>
                             (m.Id.HasValue && oldM.Id.HasValue && m.Id.Value == oldM.Id.Value) ||
                             string.Equals(m.MemberName, oldM.MemberName, StringComparison.OrdinalIgnoreCase));
-
                         if (!stillExists)
                         {
                             list.Add(new ConfirmField
@@ -2646,18 +2488,15 @@ namespace SOLUM_UI
                     }
                 }
             }
-
             // 7. Needs & Income
             sec = "Needs & Income";
             AddText(sec, "Needs and Problems",      r.NeedsAndProblems,  _existing?.NeedsAndProblems);
             AddText(sec, "Other Sources of Income", r.OtherIncomeSource, _existing?.OtherIncomeSource);
-
             // 8. Additional Classifications
             sec = "Additional Classifications";
             AddBool(sec, "Pantawid Beneficiary", r.IsPantawidBeneficiary, _existing != null && _existing.IsPantawidBeneficiary);
             AddBool(sec, "Indigenous Person",    r.IsIndigenous,          _existing != null && _existing.IsIndigenous);
             AddBool(sec, "LGBTQ+",               r.IsLGBT,                _existing != null && _existing.IsLGBT);
-
             return list;
         }
 

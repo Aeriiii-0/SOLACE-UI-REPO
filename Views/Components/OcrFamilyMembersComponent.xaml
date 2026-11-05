@@ -9,7 +9,6 @@
                   HorizontalScrollBarVisibility="Disabled"
                   Background="#F4F6F9">
         <StackPanel Margin="20,12,20,16">
-
             <!-- CARD: III. PROBLEM PRESENTED / CIRCUMSTANCE -->
             <Border Style="{StaticResource CardSection}">
                 <StackPanel>
@@ -32,7 +31,6 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <!-- Column 1: A1, A2, A3, A4 -->
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
                             <RadioButton x:Name="ChkA1" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a1" GotFocus="Field_GotFocus"
@@ -43,7 +41,6 @@
                                     </TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
-
                             <RadioButton x:Name="ChkA2" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a2" GotFocus="Field_GotFocus"
                                       Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                 <RadioButton.Content>
@@ -74,7 +71,6 @@
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>
-
                             <RadioButton x:Name="ChkA3" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a3" GotFocus="Field_GotFocus">
                                 <RadioButton.Content>
                                     <TextBlock FontSize="11">
@@ -82,7 +78,6 @@
                                     </TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
-
                             <RadioButton x:Name="ChkA4" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a4" GotFocus="Field_GotFocus"
                                       Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                 <RadioButton.Content>
@@ -96,7 +91,6 @@
                                 <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBoxSm}" Tag="circ_a4_disability" GotFocus="Field_GotFocus" CharacterCasing="Upper"/>
                             </StackPanel>
                         </StackPanel>
-
                         <!-- Column 2: A5, A6, A7, B -->
                         <StackPanel Grid.Column="1" Margin="0,0,8,0">
                             <RadioButton x:Name="ChkA5" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a5" GotFocus="Field_GotFocus"
@@ -111,7 +105,6 @@
                                 <TextBlock Text="Period of separation" Style="{StaticResource FieldLabelSm}"/>
                                 <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}" Tag="circ_a5_period" GotFocus="Field_GotFocus" CharacterCasing="Upper"/>
                             </StackPanel>
-
                             <RadioButton x:Name="ChkA6" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a6" GotFocus="Field_GotFocus"
                                       Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                 <RadioButton.Content>
@@ -128,7 +121,6 @@
                                     <ComboBoxItem Content="Annulment of marriage"/>
                                 </ComboBox>
                             </StackPanel>
-
                             <RadioButton x:Name="ChkA7" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a7" GotFocus="Field_GotFocus">
                                 <RadioButton.Content>
                                     <TextBlock FontSize="11">
@@ -136,7 +128,6 @@
                                     </TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
-
                             <RadioButton x:Name="ChkB" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_b" GotFocus="Field_GotFocus"
                                       Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                 <RadioButton.Content>
@@ -150,7 +141,6 @@
                                 <TextBox x:Name="TxtBStayAbroad" Style="{StaticResource FormBoxSm}" Tag="circ_b_stay" GotFocus="Field_GotFocus" CharacterCasing="Upper"/>
                             </StackPanel>
                         </StackPanel>
-
                         <!-- Column 3: C, D, E, F -->
                         <StackPanel Grid.Column="2">
                             <RadioButton x:Name="ChkC" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_c" GotFocus="Field_GotFocus">
@@ -160,7 +150,6 @@
                                     </TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
-
                             <RadioButton x:Name="ChkD" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_d" GotFocus="Field_GotFocus">
                                 <RadioButton.Content>
                                     <TextBlock FontSize="11">
@@ -168,7 +157,6 @@
                                     </TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
-
                             <RadioButton x:Name="ChkE" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_e" GotFocus="Field_GotFocus">
                                 <RadioButton.Content>
                                     <TextBlock TextWrapping="Wrap" FontSize="11">
@@ -176,7 +164,6 @@
                                     </TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
-
                             <RadioButton x:Name="ChkF" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_f" GotFocus="Field_GotFocus">
                                 <RadioButton.Content>
                                     <TextBlock FontSize="11">
@@ -188,7 +175,6 @@
                     </Grid>
                 </StackPanel>
             </Border>
-
             <!-- CARD: IV. FAMILY COMPOSITION -->
             <Border Style="{StaticResource CardSection}">
                 <StackPanel>
@@ -210,7 +196,6 @@
                             </StackPanel>
                         </Button>
                     </Grid>
-
                     <!-- Collapsible Add/Edit Member Inline Sub-Card -->
                     <Border x:Name="AddMemberSubCard" Background="#FFF9FB" BorderBrush="#702943" BorderThickness="1.5"
                             CornerRadius="10" Padding="0" Margin="0,0,0,16" Visibility="Collapsed" ClipToBounds="True">
@@ -220,7 +205,6 @@
                                 <TextBlock x:Name="TxtAddMemberTitle" Text="Add Household Member"
                                            FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                             </Border>
-
                             <Border Padding="16,14">
                                 <StackPanel>
                                     <!-- Row 1: Name, Relationship, Sex, Civil Status -->
@@ -234,7 +218,6 @@
                                             <ColumnDefinition Width="10"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-
                                         <StackPanel Grid.Column="0">
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Full Name <Run Text="*" Foreground="#E53935"/>
@@ -244,7 +227,6 @@
                                                      PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
                                                      PreviewTextInput="NameOnly_PreviewTextInput"/>
                                         </StackPanel>
-
                                         <StackPanel Grid.Column="2">
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Relationship <Run Text="*" Foreground="#E53935"/>
@@ -262,7 +244,6 @@
                                                 <ComboBoxItem Content="Other"/>
                                             </ComboBox>
                                         </StackPanel>
-
                                         <StackPanel Grid.Column="4">
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Sex <Run Text="*" Foreground="#E53935"/>
@@ -273,7 +254,6 @@
                                                 <ComboBoxItem Content="Male"/>
                                             </ComboBox>
                                         </StackPanel>
-
                                         <StackPanel Grid.Column="6">
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Civil Status <Run Text="*" Foreground="#E53935"/>
@@ -289,7 +269,6 @@
                                             </ComboBox>
                                         </StackPanel>
                                     </Grid>
-
                                     <!-- Row 2: Birthdate, Age (auto), Education/Employment, Income -->
                                     <Grid Margin="0,0,0,12">
                                         <Grid.ColumnDefinitions>
@@ -301,7 +280,6 @@
                                             <ColumnDefinition Width="10"/>
                                             <ColumnDefinition Width="1.3*"/>
                                         </Grid.ColumnDefinitions>
-
                                         <StackPanel Grid.Column="0">
                                             <TextBlock Style="{StaticResource FieldLabelSm}">
                                                 Birthdate (MM/DD/YYYY) <Run Text="*" Foreground="#E53935"/>
@@ -318,7 +296,6 @@
                                                             SelectedDateChanged="DpMemberDob_SelectedDateChanged"/>
                                             </Border>
                                         </StackPanel>
-
                                         <StackPanel Grid.Column="2">
                                             <TextBlock Text="Age" Style="{StaticResource FieldLabelSm}"/>
                                             <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="#F5F5F5" Height="32"
@@ -330,13 +307,11 @@
                                                          HorizontalContentAlignment="Center" ToolTip="Auto-calculated from Birthdate"/>
                                             </Border>
                                         </StackPanel>
-
                                         <StackPanel Grid.Column="4">
                                             <TextBlock Text="Educ. Attainment / Employment" Style="{StaticResource FieldLabelSm}"/>
                                             <TextBox x:Name="TxtMemberEdu" Style="{StaticResource FormBoxSm}" MaxLength="80" CharacterCasing="Upper"
                                                      Tag="fam_row_edu" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown"/>
                                         </StackPanel>
-
                                         <StackPanel Grid.Column="6">
                                             <TextBlock Text="Monthly Income (₱)" Style="{StaticResource FieldLabelSm}"/>
                                             <TextBox x:Name="TxtMemberIncome" Style="{StaticResource FormBoxSm}" Tag="fam_row_inc"
@@ -344,7 +319,6 @@
                                                      PreviewTextInput="NumberOnly_PreviewTextInput"/>
                                         </StackPanel>
                                     </Grid>
-
                                     <!-- Row 3: Special Needs Integration Box -->
                                     <Border Background="#FAFAFA" BorderBrush="#EAD3DC" BorderThickness="1" CornerRadius="8"
                                             Padding="14,12" Margin="0,0,0,14">
@@ -353,14 +327,12 @@
                                                       FontSize="12" FontWeight="SemiBold" Foreground="#702943"
                                                       Checked="ChkMemberSpecialNeeds_Changed" Unchecked="ChkMemberSpecialNeeds_Changed"
                                                       VerticalContentAlignment="Center" Cursor="Hand" Margin="0,0,0,10"/>
-
                                             <Grid x:Name="PnlSpecialNeedsDetails" IsEnabled="False" Opacity="0.5">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="1.5*"/>
                                                     <ColumnDefinition Width="12"/>
                                                     <ColumnDefinition Width="2.5*"/>
                                                 </Grid.ColumnDefinitions>
-
                                                 <StackPanel Grid.Column="0">
                                                     <TextBlock Text="Special Needs Category" Style="{StaticResource FieldLabelSm}"/>
                                                     <ComboBox x:Name="CmbSpecialNeedsCategory" Style="{StaticResource FormComboSm}">
@@ -376,7 +348,6 @@
                                                         <ComboBoxItem Content="Other"/>
                                                     </ComboBox>
                                                 </StackPanel>
-
                                                 <StackPanel Grid.Column="2">
                                                     <TextBlock Text="Description / Special Accommodations (Optional)" Style="{StaticResource FieldLabelSm}"/>
                                                     <TextBox x:Name="TxtSpecialNeedsDescription" Style="{StaticResource FormBoxSm}" MaxLength="120"
@@ -386,7 +357,6 @@
                                             </Grid>
                                         </StackPanel>
                                     </Border>
-
                                     <!-- Actions: Cancel and Save -->
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                         <Button Content="Cancel" Style="{StaticResource OutlineMaroonBtn}" Height="32" Padding="14,0"
@@ -398,7 +368,6 @@
                             </Border>
                         </StackPanel>
                     </Border>
-
                     <!-- Deeper Colored Table Header Banner for the Dependents Cards List -->
                     <Border Background="#702943" CornerRadius="6" Padding="14,10" Margin="0,0,0,8">
                         <Grid>
@@ -416,7 +385,6 @@
                             <TextBlock Grid.Column="4" Text="ACTIONS" FontSize="11" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right" Margin="0,0,6,0"/>
                         </Grid>
                     </Border>
-
                     <!-- ItemsControl for Cards List -->
                     <ItemsControl x:Name="FamilyCardsList">
                         <ItemsControl.ItemTemplate>
@@ -433,7 +401,6 @@
                                             <ColumnDefinition Width="1.5*"/>
                                             <ColumnDefinition Width="84"/>
                                         </Grid.ColumnDefinitions>
-
                                         <!-- Column 0: Name + Relationship (+ NEW Highlight Tag) -->
                                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal">
@@ -446,7 +413,6 @@
                                                        Cursor="Hand" ToolTip="Click to view Relationship on document preview"
                                                        Tag="fam_row_rel" PreviewMouseDown="Field_PreviewMouseDown"/>
                                         </StackPanel>
-
                                         <!-- Column 1: Age, Sex & Birthdate -->
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal">
@@ -462,7 +428,6 @@
                                                        Cursor="Hand" ToolTip="Click to view Birthdate on document preview"
                                                        Tag="fam_row_dob" PreviewMouseDown="Field_PreviewMouseDown"/>
                                         </StackPanel>
-
                                         <!-- Column 2: Education / Work & Income -->
                                         <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0">
                                             <TextBlock Text="{Binding EducationDisplay}" FontSize="12" Foreground="#1F2937" TextTrimming="CharacterEllipsis"
@@ -472,7 +437,6 @@
                                                        Cursor="Hand" ToolTip="Click to view Income on document preview"
                                                        Tag="fam_row_inc" PreviewMouseDown="Field_PreviewMouseDown"/>
                                         </StackPanel>
-
                                         <!-- Column 3: Disability / Special Needs -->
                                         <StackPanel Grid.Column="3" VerticalAlignment="Center" ToolTip="{Binding SpecialNeedsTooltip}" Margin="0,0,10,0">
                                             <TextBlock Text="{Binding DisabilityTitleDisplay}" FontSize="12"
@@ -483,7 +447,6 @@
                                                        Visibility="{Binding DisabilitySubtitleVisibility}"
                                                        TextTrimming="CharacterEllipsis" Margin="0,1,0,0"/>
                                         </StackPanel>
-
                                         <!-- Column 4: Actions (Edit & Delete Icons) -->
                                         <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                             <Button Width="32" Height="32" Margin="0,0,6,0" Cursor="Hand"
@@ -505,7 +468,6 @@
                                                     </ControlTemplate>
                                                 </Button.Template>
                                             </Button>
-
                                             <Button Width="32" Height="32" Cursor="Hand"
                                                     ToolTip="Remove member" Click="BtnRemoveFamilyMember_Click" Tag="{Binding}">
                                                 <Button.Template>
@@ -531,7 +493,6 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-
                     <!-- Empty state placeholder -->
                     <Border x:Name="PnlNoFamilyMembers" Background="#FAFAFA" BorderBrush="#E5E7EB" BorderThickness="1"
                             CornerRadius="8" Padding="20,16" Margin="0,4,0,0" Visibility="Collapsed">
@@ -544,7 +505,6 @@
                     </Border>
                 </StackPanel>
             </Border>
-
             <!-- CARD: V. NEEDS AND PROBLEMS -->
             <Border Style="{StaticResource CardSection}">
                 <StackPanel>
@@ -569,7 +529,6 @@
                              VerticalContentAlignment="Top" Padding="10,6"/>
                 </StackPanel>
             </Border>
-
             <!-- CARD: VI. OTHER SOURCES OF INCOME -->
             <Border Style="{StaticResource CardSection}">
                 <StackPanel>
@@ -594,7 +553,6 @@
                              VerticalContentAlignment="Top" Padding="10,6"/>
                 </StackPanel>
             </Border>
-
         </StackPanel>
     </ScrollViewer>
 </UserControl>

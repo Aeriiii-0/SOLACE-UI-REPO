@@ -15,7 +15,6 @@ namespace SOLUM_UI.Models
         public int         Id              { get; set; }
         public string      AuditLogId      { get; set; }
         public AuditAction Action          { get; set; }
-
         /// <summary>
         /// Raw action-type string from the API (e.g. "LOGIN", "CREATE_SOLO_PARENT").
         /// When set, all display properties use this instead of the Action enum.
@@ -45,12 +44,10 @@ namespace SOLUM_UI.Models
         public string      DisplayNewValue => !string.IsNullOrWhiteSpace(NewValue)
             ? ChangeDetail.FormatValueStatic(NewValue)
             : "—";
-
         // Metadata from the API
         public string      IpAddress       { get; set; }
         public string      Status          { get; set; }
         public string      TargetType      { get; set; }
-
         /// <summary>
         /// Collection of detailed field-level changes for this audit entry.
         /// Used when multiple fields are modified in a single update.
@@ -235,7 +232,6 @@ namespace SOLUM_UI.Models
             get => $"{TimestampFormatted} ({TimeAgo})";
             set { }
         }
-
         // ── Display helpers ────────────────────────────────────────────────────
         // When RawActionType is set (API path), switch on the raw string.
         // Otherwise fall back to the enum (local AuditLogService path).
@@ -246,7 +242,6 @@ namespace SOLUM_UI.Models
             {
                 if (!string.IsNullOrWhiteSpace(RawActionType))
                     return ColorForRaw(RawActionType);
-
                 switch (Action)
                 {
                     case AuditAction.Create:  return "#10B981";
@@ -283,7 +278,6 @@ namespace SOLUM_UI.Models
             {
                 if (!string.IsNullOrWhiteSpace(RawActionType))
                     return LabelForRaw(RawActionType);
-
                 switch (Action)
                 {
                     case AuditAction.Create:  return "+";
@@ -304,7 +298,6 @@ namespace SOLUM_UI.Models
             {
                 if (!string.IsNullOrWhiteSpace(RawActionType))
                     return LabelTextForRaw(RawActionType);
-
                 switch (Action)
                 {
                     case AuditAction.Create:  return "Create Record";
@@ -318,7 +311,6 @@ namespace SOLUM_UI.Models
                 }
             }
         }
-
         // ── Raw action-type tables ─────────────────────────────────────────────
 
         private static string ColorForRaw(string raw)
@@ -418,9 +410,7 @@ namespace SOLUM_UI.Models
                         raw.Replace('_', ' ').ToLowerInvariant());
             }
         }
-
         // ── SVG icon paths (Material Design, 24×24 viewbox) ───────────────────
-
         /// <summary>SVG path data for the action dot. Rendered as a scaled Path in the UI.</summary>
         public string DotIcon
         {
@@ -473,7 +463,6 @@ namespace SOLUM_UI.Models
                 default:                                 return _iconUnknown;
             }
         }
-
         // Login — arrow right into box
         private const string _iconLogin    = "M10,17V14H3V10H10V7L15,12L10,17M10,2H19A2,2 0 0,1 21,4V20A2,2 0 0,1 19,22H10A2,2 0 0,1 8,20V18H10V20H19V4H10V6H8V4A2,2 0 0,1 10,2Z";
         // Logout — arrow left out of box

@@ -46,7 +46,6 @@ namespace SOLUM_UI.Services
                 }
             }
             catch { }
-
             try
             {
                 string localPath = GetLocalTemplatePath();

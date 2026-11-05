@@ -26,7 +26,6 @@ namespace SOLUM_UI.Views.Components
                 _resizeDebounceTimer.Stop();
                 UpdateDynamicPageSize();
             };
-
             _scrollHintTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(1200)
@@ -37,7 +36,6 @@ namespace SOLUM_UI.Views.Components
                 if (ScrollHintIndicator != null)
                     ScrollHintIndicator.Visibility = Visibility.Collapsed;
             };
-
             DataContextChanged += OnDataContextChanged;
             Loaded += (s, e) =>
             {
@@ -87,7 +85,6 @@ namespace SOLUM_UI.Views.Components
         {
             if (e.WidthChanged)
                 AdjustColumnWidths();
-
             if (e.HeightChanged)
             {
                 _resizeDebounceTimer.Stop();
@@ -98,7 +95,6 @@ namespace SOLUM_UI.Views.Components
         private void ShortlistListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             if (ScrollHintIndicator == null) return;
-
             if (Math.Abs(e.VerticalChange) > 0.01)
             {
                 var sv = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(ShortlistListView);
@@ -110,7 +106,6 @@ namespace SOLUM_UI.Views.Components
                     return;
                 }
             }
-
             var scrollV = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(ShortlistListView);
             if (scrollV != null && (scrollV.ScrollableHeight <= 0 || scrollV.VerticalOffset >= scrollV.ScrollableHeight - 8))
             {
@@ -148,7 +143,6 @@ namespace SOLUM_UI.Views.Components
 
             double wName = Math.Max(140, Math.Floor(flexibleWidth * 0.38));
             double wCompliance = Math.Max(220, flexibleWidth - wName);
-
             if (ColName != null) ColName.Width = wName;
             if (ColCompliance != null) ColCompliance.Width = wCompliance;
         }
@@ -205,7 +199,6 @@ namespace SOLUM_UI.Views.Components
                         return;
                     }
                 }
-
                 if (sender is ListViewItem lvi && lvi.DataContext is SelectionRow row)
                 {
                     bool isShiftDown = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
@@ -228,7 +221,6 @@ namespace SOLUM_UI.Views.Components
                             return;
                         }
                     }
-
                     row.IsSelected = !row.IsSelected;
                     _lastClickedShortlistRow = row;
                     vm.RecalculateShortlistSelectionCounts();

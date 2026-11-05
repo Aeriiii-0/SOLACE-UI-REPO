@@ -26,14 +26,12 @@ namespace SOLUM_UI.Services
             {
                 buildSummarySheet(pkg, records, period);
                 buildRecordsSheet(pkg, records);
-
                 if (!string.IsNullOrEmpty(password))
                     pkg.SaveAs(new System.IO.FileInfo(filePath), password);
                 else
                     pkg.SaveAs(new System.IO.FileInfo(filePath));
             }
         }
-
         /// <summary>
         /// Export monthly analytics data as LGU Summary report (from MonthlyAnalyticsDto)
         /// </summary>
@@ -50,7 +48,6 @@ namespace SOLUM_UI.Services
             using (var pkg = new ExcelPackage())
             {
                 buildMonthlyAnalyticsSheet(pkg, analytics, submittedByName, cityProvince, region);
-
                 if (!string.IsNullOrEmpty(password))
                     pkg.SaveAs(new System.IO.FileInfo(filePath), password);
                 else
@@ -66,34 +63,28 @@ namespace SOLUM_UI.Services
             string region)
         {
             var ws = pkg.Workbook.Worksheets.Add("LGU Summary");
-
             var accent = Color.FromArgb(0x70, 0x29, 0x43);      // Burgundy
             var light = Color.FromArgb(0xF0, 0xE8, 0xEC);       // Light pink
             var grey = Color.FromArgb(0x77, 0x77, 0x77);        // Dark grey
 
             int row = 1;
-
             // Header
             ws.Cells[row, 1].Value = "LGU SUMMARY OF SOLO PARENTS";
             headerStyle(ws.Cells[row, 1, row, 3], accent, Color.White, 13);
             ws.Row(row).Height = 22;
             row++;
-
             // Period
             string periodLabel = $"{System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(data.Month)} {data.Year}";
             ws.Cells[row, 1].Value = "As of " + periodLabel;
             labelStyle(ws.Cells[row, 1], grey);
             row += 2;
-
             // Location info
             infoRow(ws, ref row, "City / Municipality / Province", cityProvince);
             infoRow(ws, ref row, "Region", region);
             row++;
-
             // Total solo parents
             infoRow(ws, ref row, "Number of Solo Parents served for " + data.Year, data.TotalSoloParents.ToString());
             row++;
-
             // Age brackets
             sectionHeader(ws, ref row, "Age", accent, light);
             dataRow(ws, ref row, "19 years old and below", getValue(data.AgeBrackets, "19_AND_BELOW"));
@@ -101,13 +92,11 @@ namespace SOLUM_UI.Services
             dataRow(ws, ref row, "40-59 years old", getValue(data.AgeBrackets, "40_59"));
             dataRow(ws, ref row, "60 and above", getValue(data.AgeBrackets, "60_AND_ABOVE"));
             row++;
-
             // Sex
             sectionHeader(ws, ref row, "Sex", accent, light);
             dataRow(ws, ref row, "Male", getValue(data.Sex, "Male"));
             dataRow(ws, ref row, "Female", getValue(data.Sex, "Female"));
             row++;
-
             // Civil Status
             sectionHeader(ws, ref row, "Civil Status", accent, light);
             dataRow(ws, ref row, "Single", getValue(data.CivilStatus, "Single"));
@@ -116,28 +105,24 @@ namespace SOLUM_UI.Services
             int sepAnnulled = getValue(data.CivilStatus, "Separated") + getValue(data.CivilStatus, "Annulled");
             dataRow(ws, ref row, "Legally Separated / Annulled", sepAnnulled);
             row++;
-
             // Employment Status
             sectionHeader(ws, ref row, "Employment Status", accent, light);
             dataRow(ws, ref row, "Employed (public & private)", getValue(data.EmploymentStatus, "employed"));
             dataRow(ws, ref row, "Self employed", getValue(data.EmploymentStatus, "self_employed"));
             dataRow(ws, ref row, "Not employed", getValue(data.EmploymentStatus, "not_employed"));
             row++;
-
             // Monthly Income
             sectionHeader(ws, ref row, "Monthly Income", accent, light);
             dataRow(ws, ref row, "below minimum wage", getValue(data.MonthlyIncomeBrackets, "BELOW_MINIMUM_WAGE"));
             dataRow(ws, ref row, "Minimum wage +1 to Php 20833", getValue(data.MonthlyIncomeBrackets, "MIN_WAGE_PLUS1_TO_20833"));
             dataRow(ws, ref row, "Php 20834 and above", getValue(data.MonthlyIncomeBrackets, "20834_AND_ABOVE"));
             row++;
-
             // Dependents by age
             sectionHeader(ws, ref row, "No. of Children / Dependent", accent, light);
             dataRow(ws, ref row, "6 years old and below", getValue(data.DependentsAgeBrackets, "6_AND_BELOW"));
             dataRow(ws, ref row, "7-22 years old", getValue(data.DependentsAgeBrackets, "7_TO_22"));
             dataRow(ws, ref row, "22 years old and above", getValue(data.DependentsAgeBrackets, "22_AND_ABOVE"));
             row++;
-
             // Categories
             sectionHeader(ws, ref row, "Category", accent, light);
             var categoryLabels = new (string key, string label)[]
@@ -158,54 +143,44 @@ namespace SOLUM_UI.Services
             foreach (var (key, label) in categoryLabels)
                 dataRow(ws, ref row, label, getValue(data.Categories, key));
             row++;
-
             // Solo Parent ID Card
             sectionHeader(ws, ref row, "Solo Parent Identification Card", accent, light);
             dataRow(ws, ref row, "Newly issued SPIC", data.NewRegistrations);
             dataRow(ws, ref row, "Renewed SPIC", data.Renewals);
             dataRow(ws, ref row, "Terminated SPIC", 0);
             row++;
-
             // Pantawid Beneficiary
             sectionHeader(ws, ref row, "Pantawid Beneficiary", accent, light);
             dataRow(ws, ref row, "Yes", getValue(data.PantawidBeneficiary, "Yes"));
             dataRow(ws, ref row, "No", getValue(data.PantawidBeneficiary, "No"));
             row++;
-
             // Indigenous Person
             sectionHeader(ws, ref row, "Indigenous Person", accent, light);
             dataRow(ws, ref row, "Yes", getValue(data.Indigenous, "Yes"));
             dataRow(ws, ref row, "No", getValue(data.Indigenous, "No"));
             row++;
-
             // LGBTQ+
             sectionHeader(ws, ref row, "LGBTQ+", accent, light);
             dataRow(ws, ref row, "Yes", getValue(data.Lgbt, "Yes"));
             dataRow(ws, ref row, "No", getValue(data.Lgbt, "No"));
             row += 2;
-
             // Submitted by
             ws.Cells[row, 1].Value = "Submitted by:";
             labelStyle(ws.Cells[row, 1], grey);
             row += 2;
-
             ws.Cells[row, 1].Value = submittedByName;
             ws.Cells[row, 1].Style.Font.Bold = true;
             ws.Cells[row, 1].Style.Font.Size = 10;
             row++;
-
             ws.Cells[row, 1].Value = "Name of Solo Parent Focal Person:";
             labelStyle(ws.Cells[row, 1], grey);
             row++;
-
             ws.Cells[row, 1].Value = "Date of Submission: " + DateTime.Today.ToString("MMMM d, yyyy");
             labelStyle(ws.Cells[row, 1], grey);
-
             ws.Column(1).Width = 36;
             ws.Column(2).Width = 48;
             ws.Column(3).Width = 14;
         }
-
         // Helper to safely get dictionary value
         private static int getValue(Dictionary<string, int> dict, string key)
         {
@@ -215,54 +190,44 @@ namespace SOLUM_UI.Services
         private static void buildSummarySheet(ExcelPackage pkg, List<SoloParentRecord> d, string period)
         {
             var ws = pkg.Workbook.Worksheets.Add("LGU Summary");
-
             var accent = Color.FromArgb(0x70, 0x29, 0x43);
             var light  = Color.FromArgb(0xF0, 0xE8, 0xEC);
             var grey   = Color.FromArgb(0x77, 0x77, 0x77);
 
             int row = 1;
-
             ws.Cells[row, 1].Value = "LGU SUMMARY OF SOLO PARENTS";
             headerStyle(ws.Cells[row, 1, row, 3], accent, Color.White, 13);
             ws.Row(row).Height = 22;
             row++;
-
             ws.Cells[row, 1].Value = "As of " + period;
             labelStyle(ws.Cells[row, 1], grey);
             row += 2;
-
             infoRow(ws, ref row, "City / Municipality / Province", "BINAN, LAGUNA");
             infoRow(ws, ref row, "Region", "IV-A");
             row++;
-
             infoRow(ws, ref row, "Number of Solo Parents served", d.Count.ToString());
             row++;
-
             sectionHeader(ws, ref row, "Age", accent, light);
             dataRow(ws, ref row, "19 years old and below",        d.Count(r => age(r) <= 19));
             dataRow(ws, ref row, "20-39 years old",               d.Count(r => age(r) >= 20 && age(r) <= 39));
             dataRow(ws, ref row, "40-59 years old",               d.Count(r => age(r) >= 40 && age(r) <= 59));
             dataRow(ws, ref row, "60 and above",                  d.Count(r => age(r) >= 60));
             row++;
-
             sectionHeader(ws, ref row, "Sex", accent, light);
             dataRow(ws, ref row, "Male",   d.Count(r => r.Sex == "Male"));
             dataRow(ws, ref row, "Female", d.Count(r => r.Sex == "Female"));
             row++;
-
             sectionHeader(ws, ref row, "Civil Status", accent, light);
             dataRow(ws, ref row, "Single",                       d.Count(r => r.CivilStatus == "Single"));
             dataRow(ws, ref row, "Married",                      d.Count(r => r.CivilStatus == "Married"));
             dataRow(ws, ref row, "Widowed",                      d.Count(r => r.CivilStatus == "Widowed"));
             dataRow(ws, ref row, "Legally Separated / Annulled", d.Count(r => r.CivilStatus == "Separated" || r.CivilStatus == "Annulled"));
             row++;
-
             sectionHeader(ws, ref row, "Employment Status", accent, light);
             dataRow(ws, ref row, "Employed (public & private)", d.Count(r => r.IsEmployed));
             dataRow(ws, ref row, "Self employed",               d.Count(r => r.IsSelfEmployed));
             dataRow(ws, ref row, "Not employed",                d.Count(r => r.IsNotEmployed));
             row++;
-
             sectionHeader(ws, ref row, "Monthly Income", accent, light);
             dataRow(ws, ref row, "Below minimum wage",           d.Count(r => r.MonthlyIncome == "below minimum wage"));
             dataRow(ws, ref row, "Minimum wage +1 to Php 20833", d.Count(r => r.MonthlyIncome == "Minimum wage +1 to Php 20833"));
@@ -277,7 +242,6 @@ namespace SOLUM_UI.Services
             dataRow(ws, ref row, "7-22 years old",         dep7to22);
             dataRow(ws, ref row, "22 years old and above", depAbove22);
             row++;
-
             sectionHeader(ws, ref row, "Category", accent, light);
             dataRow(ws, ref row, "a1. Consequence of rape",               d.Count(r => r.CircumstanceA1));
             dataRow(ws, ref row, "a2. Widow/widower",                     d.Count(r => r.CircumstanceA2));
@@ -292,12 +256,10 @@ namespace SOLUM_UI.Services
             dataRow(ws, ref row, "e. Relative",                           d.Count(r => r.CircumstanceE));
             dataRow(ws, ref row, "f. Pregnant woman",                     d.Count(r => r.CircumstanceF));
             row++;
-
             sectionHeader(ws, ref row, "Solo Parent Identification Card", accent, light);
             dataRow(ws, ref row, "Newly issued SPIC", d.Count(r => r.IsNewApplicant));
             dataRow(ws, ref row, "Renewed SPIC",      d.Count(r => r.IsRenewal));
             dataRow(ws, ref row, "Terminated SPIC",   0);
-
             ws.Column(1).Width = 36;
             ws.Column(2).Width = 48;
             ws.Column(3).Width = 14;
@@ -307,7 +269,6 @@ namespace SOLUM_UI.Services
         {
             var ws = pkg.Workbook.Worksheets.Add("Individual Records");
             var accent = Color.FromArgb(0x70, 0x29, 0x43);
-
             string[] headers = {
                 "SP ID", "Surname", "First Name", "Middle Name",
                 "Date of Birth", "Age", "Sex", "Civil Status",
@@ -315,7 +276,6 @@ namespace SOLUM_UI.Services
                 "Employment", "Monthly Income", "Children", "Status",
                 "Circumstance", "SPIC Type", "Last Updated"
             };
-
             for (int c = 0; c < headers.Length; c++)
             {
                 var cell = ws.Cells[1, c + 1];
@@ -349,7 +309,6 @@ namespace SOLUM_UI.Services
                 ws.Cells[row, 16].Value = r.CircumstancesDisplay.Replace("\n", "; ");
                 ws.Cells[row, 17].Value = r.IsNewApplicant ? "New" : r.IsRenewal ? "Renewal" : "";
                 ws.Cells[row, 18].Value = r.LastUpdated != DateTime.MinValue ? r.LastUpdated.ToString("yyyy-MM-dd") : "";
-
                 if (row % 2 == 0)
                 {
                     ws.Cells[row, 1, row, 18].Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -357,11 +316,9 @@ namespace SOLUM_UI.Services
                 }
                 row++;
             }
-
             double[] colWidths = { 10, 18, 18, 16, 14, 6, 8, 18, 18, 30, 16, 20, 24, 10, 10, 40, 10, 14 };
             for (int c = 0; c < colWidths.Length; c++)
                 ws.Column(c + 1).Width = colWidths[c];
-
             ws.View.FreezePanes(2, 1);
         }
 
@@ -467,7 +424,6 @@ namespace SOLUM_UI.Services
                               .ToDictionary(g => g.Key, g => g.Count()),
             };
         }
-
         // NEW — quarterly LGU summary, built from 3 months of MonthlyAnalyticsDto instead of
         // raw records. Matches your sample file's section list and labels, but NOT its exact
         // merged-cell layout (the sample merges the section label vertically down column A
@@ -487,14 +443,12 @@ namespace SOLUM_UI.Services
             using (var pkg = new ExcelPackage())
             {
                 buildQuarterlySummarySheet(pkg, m1, m2, m3, periodLabel, submittedByName, cityProvince, region);
-
                 if (!string.IsNullOrEmpty(password))
                     pkg.SaveAs(new System.IO.FileInfo(filePath), password);
                 else
                     pkg.SaveAs(new System.IO.FileInfo(filePath));
             }
         }
-
         // Known bucket keys, matching the guesses used in AnalyticsPage's bracket tables.
         // If those turn out wrong against real data (see the "(unmapped)" warning discussed
         // earlier), fix them here too — these are intentionally duplicated, not shared,
@@ -552,7 +506,6 @@ namespace SOLUM_UI.Services
     ("E",  "e. Relative"),
     ("F",  "f. Pregnant woman"),
 };
-
         // Sums one bucket key across the 3 monthly snapshots. Missing keys count as 0.
         private static int sumBucket(Dictionary<string, int> a, Dictionary<string, int> b, Dictionary<string, int> c, string key)
         {
@@ -569,22 +522,18 @@ namespace SOLUM_UI.Services
             string periodLabel, string submittedByName, string cityProvince, string region)
         {
             var ws = pkg.Workbook.Worksheets.Add("LGU Summary");
-
             var accent = Color.FromArgb(0x70, 0x29, 0x43);
             var light = Color.FromArgb(0xF0, 0xE8, 0xEC);
             var grey = Color.FromArgb(0x77, 0x77, 0x77);
 
             int row = 1;
-
             ws.Cells[row, 1].Value = "LGU SUMMARY OF SOLO PARENTS";
             headerStyle(ws.Cells[row, 1, row, 3], accent, Color.White, 13);
             ws.Row(row).Height = 22;
             row++;
-
             ws.Cells[row, 1].Value = "As of " + periodLabel;
             labelStyle(ws.Cells[row, 1], grey);
             row += 2;
-
             infoRow(ws, ref row, "City / Municipality / Province", cityProvince);
             infoRow(ws, ref row, "Region", region);
             row++;
@@ -592,17 +541,14 @@ namespace SOLUM_UI.Services
             int total = m1.TotalSoloParents + m2.TotalSoloParents + m3.TotalSoloParents;
             infoRow(ws, ref row, "Number of Solo Parents served", total.ToString());
             row++;
-
             sectionHeader(ws, ref row, "Age", accent, light);
             foreach (var (key, label) in QAgeBrackets)
                 dataRow(ws, ref row, label, sumBucket(m1.AgeBrackets, m2.AgeBrackets, m3.AgeBrackets, key));
             row++;
-
             sectionHeader(ws, ref row, "Sex", accent, light);
             dataRow(ws, ref row, "Male", sumBucket(m1.Sex, m2.Sex, m3.Sex, "Male"));
             dataRow(ws, ref row, "Female", sumBucket(m1.Sex, m2.Sex, m3.Sex, "Female"));
             row++;
-
             sectionHeader(ws, ref row, "Civil Status", accent, light);
             foreach (var (key, label) in QCivilStatus)
                 dataRow(ws, ref row, label, sumBucket(m1.CivilStatus, m2.CivilStatus, m3.CivilStatus, key));
@@ -610,27 +556,22 @@ namespace SOLUM_UI.Services
                              + sumBucket(m1.CivilStatus, m2.CivilStatus, m3.CivilStatus, "Annulled");
             dataRow(ws, ref row, "Legally Separated / Annulled", sepAnnulled);
             row++;
-
             sectionHeader(ws, ref row, "Employment Status", accent, light);
             foreach (var (key, label) in QEmployment)
                 dataRow(ws, ref row, label, sumBucket(m1.EmploymentStatus, m2.EmploymentStatus, m3.EmploymentStatus, key));
             row++;
-
             sectionHeader(ws, ref row, "Monthly Income", accent, light);
             foreach (var (key, label) in QIncomeBrackets)
                 dataRow(ws, ref row, label, sumBucket(m1.MonthlyIncomeBrackets, m2.MonthlyIncomeBrackets, m3.MonthlyIncomeBrackets, key));
             row++;
-
             sectionHeader(ws, ref row, "No. of Children / Dependent", accent, light);
             foreach (var (key, label) in QDependentsBrackets)
                 dataRow(ws, ref row, label, sumBucket(m1.DependentsAgeBrackets, m2.DependentsAgeBrackets, m3.DependentsAgeBrackets, key));
             row++;
-
             sectionHeader(ws, ref row, "Category", accent, light);
             foreach (var (key, label) in QCategories)
                 dataRow(ws, ref row, label, sumBucket(m1.Categories, m2.Categories, m3.Categories, key));
             row++;
-
             // BLANK — not present in MonthlyAnalyticsDto. Left empty (not 0) so this can't be
             // mistaken for a confirmed zero when the report is reviewed/submitted.
             sectionHeader(ws, ref row, "Solo Parent Identification Card", accent, light);
@@ -638,38 +579,30 @@ namespace SOLUM_UI.Services
             dataRow(ws, ref row, "Renewed SPIC", null);
             dataRow(ws, ref row, "Terminated SPIC", null);
             row++;
-
             sectionHeader(ws, ref row, "Pantawid Beneficiary", accent, light);
             dataRow(ws, ref row, "Yes", null);
             dataRow(ws, ref row, "No", null);
             row++;
-
             sectionHeader(ws, ref row, "Indigenous Person", accent, light);
             dataRow(ws, ref row, "Yes", null);
             dataRow(ws, ref row, "No", null);
             row++;
-
             sectionHeader(ws, ref row, "LGBTQ+", accent, light);
             dataRow(ws, ref row, "Yes", null);
             dataRow(ws, ref row, "No", null);
             row += 2;
-
             ws.Cells[row, 1].Value = "Submitted by:";
             labelStyle(ws.Cells[row, 1], grey);
             row += 2;
-
             ws.Cells[row, 1].Value = submittedByName ?? "";
             ws.Cells[row, 1].Style.Font.Bold = true;
             ws.Cells[row, 1].Style.Font.Size = 10;
             row++;
-
             ws.Cells[row, 1].Value = "Name of Solo Parent Focal Person:";
             labelStyle(ws.Cells[row, 1], grey);
             row++;
-
             ws.Cells[row, 1].Value = "Date of Submission: " + DateTime.Today.ToString("MMMM d, yyyy");
             labelStyle(ws.Cells[row, 1], grey);
-
             ws.Column(1).Width = 36;
             ws.Column(2).Width = 48;
             ws.Column(3).Width = 14;

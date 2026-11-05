@@ -20,27 +20,22 @@ namespace SOLUM_UI.Services
         public static string Generate(int length = 10)
         {
             if (length < 8) length = 8;
-
             var chars = new char[length];
             var randomBytes = new byte[length];
-
             using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(randomBytes);
             }
-
             // Guarantee at least 1 of each required character category
             chars[0] = Uppercase[randomBytes[0] % Uppercase.Length];
             chars[1] = Lowercase[randomBytes[1] % Lowercase.Length];
             chars[2] = Digits[randomBytes[2] % Digits.Length];
             chars[3] = Specials[randomBytes[3] % Specials.Length];
-
             // Fill remaining characters
             for (int i = 4; i < length; i++)
             {
                 chars[i] = AllChars[randomBytes[i] % AllChars.Length];
             }
-
             // Cryptographic Fisher-Yates shuffle so required characters aren't in predictable positions
             using (var rng = RandomNumberGenerator.Create())
             {
@@ -54,7 +49,6 @@ namespace SOLUM_UI.Services
                     chars[j] = temp;
                 }
             }
-
             return new string(chars);
         }
     }

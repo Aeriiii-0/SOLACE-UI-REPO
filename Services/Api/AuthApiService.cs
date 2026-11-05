@@ -46,19 +46,15 @@ namespace SOLUM_UI.Services.Api
                 Email = email?.Trim() ?? string.Empty,
                 Password = password ?? string.Empty
             };
-
             var resp = await ApiClient.Instance.PostAsync<LoginRequest, LoginResponse>("api/auth/login", req);
-
             if (resp.Succeeded && resp.Data != null && !string.IsNullOrWhiteSpace(resp.Data.Token))
             {
                 Token = resp.Data.Token;
                 RefreshToken = resp.Data.RefreshToken;
                 CurrentUserEmail = resp.Data.Email;
                 CurrentRoles = resp.Data.Roles != null ? resp.Data.Roles.ToList() : new List<string>();
-
                 ApiClient.Instance.SetBearerToken(Token);
             }
-
             return resp;
         }
 
@@ -92,7 +88,6 @@ namespace SOLUM_UI.Services.Api
             {
                 ClearSession();
             }
-
             return new BaseResponse<bool> { Succeeded = true, Data = true };
         }
 
@@ -102,25 +97,20 @@ namespace SOLUM_UI.Services.Api
             {
                 return BaseResponse<LoginResponse>.Fail("No token available to refresh.");
             }
-
             var req = new TokenRequest
             {
                 ExpiredToken = Token,
                 RefreshToken = RefreshToken
             };
-
             var resp = await ApiClient.Instance.PostAsync<TokenRequest, LoginResponse>("api/auth/refresh-token", req);
-
             if (resp.Succeeded && resp.Data != null && !string.IsNullOrWhiteSpace(resp.Data.Token))
             {
                 Token = resp.Data.Token;
                 RefreshToken = resp.Data.RefreshToken;
                 CurrentUserEmail = resp.Data.Email;
                 CurrentRoles = resp.Data.Roles != null ? resp.Data.Roles.ToList() : new List<string>();
-
                 ApiClient.Instance.SetBearerToken(Token);
             }
-
             return resp;
         }
 
@@ -134,7 +124,6 @@ namespace SOLUM_UI.Services.Api
                 LastName = lastName?.Trim() ?? string.Empty,
                 ContactNumber = contactNumber?.Trim() ?? string.Empty
             };
-
             return await ApiClient.Instance.PostAsync<RegisterUserRequest, RegisterResponse>("api/auth/register", req);
         }
 
@@ -148,7 +137,6 @@ namespace SOLUM_UI.Services.Api
                 LastName = lastName?.Trim() ?? string.Empty,
                 ContactNumber = contactNumber?.Trim() ?? string.Empty
             };
-
             return await ApiClient.Instance.PostAsync<RegisterUserRequest, RegisterResponse>("api/auth/register-admin", req);
         }
 
@@ -162,7 +150,6 @@ namespace SOLUM_UI.Services.Api
                 LastName = lastName?.Trim() ?? string.Empty,
                 ContactNumber = contactNumber?.Trim() ?? string.Empty
             };
-
             return await ApiClient.Instance.PostAsync<RegisterUserRequest, RegisterResponse>("api/auth/register-superadmin", req);
         }
 
@@ -177,7 +164,6 @@ namespace SOLUM_UI.Services.Api
                 ContactNumber = contactNumber?.Trim() ?? string.Empty,
                 Barangay = barangay?.Trim() ?? string.Empty
             };
-
             return await ApiClient.Instance.PostAsync<RegisterBarangaySecretaryRequest, RegisterResponse>("api/auth/register-barangay-secretary", req);
         }
 
@@ -188,7 +174,6 @@ namespace SOLUM_UI.Services.Api
                 CurrentPassword = currentPassword,
                 NewPassword = newPassword
             };
-
             var resp = await ApiClient.Instance.PostAsync<ChangePasswordRequest, object>("api/auth/change-password", req);
             return new BaseResponse<string>
             {
@@ -206,18 +191,15 @@ namespace SOLUM_UI.Services.Api
             string token = rawToken.Trim().Trim('"', '\'');   // strip stray quotes
             if (token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                 token = token.Substring(7).Trim();
-
             try
             {
                 var handler = new JwtSecurityTokenHandler();
                 if (!handler.CanReadToken(token))
                     return null;
-
                 var value = handler.ReadJwtToken(token).Claims
                     .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier
                                   || c.Type == "nameid"
                                   || c.Type == "sub")?.Value;
-
                 return Guid.TryParse(value, out var id) ? id : (Guid?)null;
             }
             catch (Exception)

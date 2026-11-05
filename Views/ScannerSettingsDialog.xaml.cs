@@ -15,7 +15,6 @@ namespace SOLUM_UI
     {
         public ScannerSettings Settings { get; private set; }
         private List<ScannerDeviceInfo> _availableScanners = new List<ScannerDeviceInfo>();
-
         // Smooth header dragging fields
         private Point _dragStartPoint;
         private bool _isDragging = false;
@@ -26,7 +25,6 @@ namespace SOLUM_UI
         {
             InitializeComponent();
             Settings = currentSettings ?? ScannerSettings.Load();
-
             ApplySettingsToUI();
             Loaded += async (s, e) =>
             {
@@ -38,7 +36,6 @@ namespace SOLUM_UI
         private void ApplySize()
         {
             double screenW, screenH, screenLeft, screenTop;
-
             if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
                 screenW    = Owner.ActualWidth;
@@ -53,7 +50,6 @@ namespace SOLUM_UI
                 screenLeft = SystemParameters.WorkArea.Left;
                 screenTop  = SystemParameters.WorkArea.Top;
             }
-
             if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
             if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
             if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
@@ -68,7 +64,6 @@ namespace SOLUM_UI
                 Close();
             }
         }
-
         #region Header Dragging
         private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -79,7 +74,6 @@ namespace SOLUM_UI
                 if (dep is Button) return;
                 dep = VisualTreeHelper.GetParent(dep);
             }
-
             _isDragging = true;
             _dragStartPoint = e.GetPosition(this);
             _startTransformX = DialogShellTransform.X;
@@ -111,7 +105,6 @@ namespace SOLUM_UI
                 Rb300Dpi.IsChecked = true;
             else
                 Rb200Dpi.IsChecked = true;
-
             switch (Settings.ColorMode)
             {
                 case ScanColorMode.Grayscale:
@@ -121,7 +114,6 @@ namespace SOLUM_UI
                     CmbColorMode.SelectedIndex = 0;
                     break;
             }
-
             CmbPaperSource.SelectedIndex = Settings.PaperSource == ScanPaperSource.Feeder ? 1 : 0;
         }
 
@@ -129,9 +121,7 @@ namespace SOLUM_UI
         {
             TxtDeviceStatus.Text = "Scanning for connected hardware...";
             CmbDevices.Items.Clear();
-
             _availableScanners = await WiaScannerService.GetConnectedScannersAsync();
-
             if (_availableScanners.Count == 0)
             {
                 CmbDevices.Items.Add(new ComboBoxItem
@@ -151,22 +141,18 @@ namespace SOLUM_UI
                 string label = string.IsNullOrWhiteSpace(scanner.Manufacturer)
                     ? scanner.Name
                     : $"{scanner.Name} ({scanner.Manufacturer})";
-
                 var item = new ComboBoxItem
                 {
                     Content = label,
                     Tag = scanner.DeviceId
                 };
-
                 CmbDevices.Items.Add(item);
-
                 if (!string.IsNullOrEmpty(Settings.DeviceId) &&
                     string.Equals(scanner.DeviceId, Settings.DeviceId, StringComparison.OrdinalIgnoreCase))
                 {
                     selectedIndex = i;
                 }
             }
-
             CmbDevices.SelectedIndex = selectedIndex;
             TxtDeviceStatus.Text = $"{_availableScanners.Count} scanner device(s) available and ready.";
         }
@@ -180,30 +166,24 @@ namespace SOLUM_UI
         {
             // DPI
             Settings.Dpi = (Rb300Dpi.IsChecked == true) ? 300 : 200;
-
             // Color Mode
             Settings.ColorMode = (CmbColorMode.SelectedIndex == 1)
                 ? ScanColorMode.Grayscale
                 : ScanColorMode.Color;
-
             // Paper Source
             Settings.PaperSource = CmbPaperSource.SelectedIndex == 1
                 ? ScanPaperSource.Feeder
                 : ScanPaperSource.Flatbed;
-
             // Paper Size locked to official 8.5x13 Long Bond dimension
             Settings.PaperSize = "8.5x13";
-
             // Selected Device
             if (CmbDevices.SelectedItem is ComboBoxItem selectedItem)
             {
                 string devId = selectedItem.Tag?.ToString() ?? string.Empty;
                 Settings.DeviceId = devId;
-
                 var matched = _availableScanners.FirstOrDefault(s => s.DeviceId == devId);
                 Settings.DeviceName = matched != null ? matched.Name : selectedItem.Content?.ToString();
             }
-
             Settings.Save();
             DialogResult = true;
             Close();

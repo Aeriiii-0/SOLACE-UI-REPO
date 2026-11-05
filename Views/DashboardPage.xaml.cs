@@ -26,28 +26,21 @@ namespace SOLUM_UI
         public DashboardPage()
         {
             InitializeComponent();
-
             if (!(DataContext is DashboardViewModel))
                 DataContext = new DashboardViewModel();
-
             if (DataContext is DashboardViewModel dvm)
             {
                 dvm.PropertyChanged += Vm_PropertyChanged;
             }
-
             LogsOverlay.DataContext = _logsVm;
-
             _ready = true;
-
             Loaded += async (s, e) =>
             {
                 if (DataContext is DashboardViewModel vm)
                 {
                     await vm.LoadAsync();
-
                     RefreshChart();
                 }
-
                 if (!_logsVm.IsInitialized)
                     _ = _logsVm.LoadAsync();
             };
@@ -57,7 +50,6 @@ namespace SOLUM_UI
         {
             var vm = sender as DashboardViewModel;
             if (vm == null) return;
-
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 switch (e.PropertyName)
@@ -98,10 +90,8 @@ namespace SOLUM_UI
         private void RefreshChart()
         {
             if (!_ready) return;
-
             var vm = DataContext as DashboardViewModel;
             IEnumerable<DateTime> dates = vm?.RegistrationDates;
-
             _points = BuildPoints(dates, _mode);
 
             int year = DateTime.Today.Year;
@@ -115,7 +105,6 @@ namespace SOLUM_UI
                 TxtChartTitle.Text = "Quarterly registrations";
                 TxtChartSubtitle.Text = "New solo parents, Q1 to Q4 " + year;
             }
-
             DrawChart();
         }
 
@@ -125,7 +114,6 @@ namespace SOLUM_UI
             var result = new List<ChartPoint>();
             var today = DateTime.Today;
             int year = today.Year;
-
             if (mode == ChartGranularity.Monthly)
             {
                 for (int m = 1; m <= 12; m++)
@@ -160,7 +148,6 @@ namespace SOLUM_UI
                     });
                 }
             }
-
             for (int i = 1; i < result.Count; i++)
             {
                 int diff = result[i].Value - result[i - 1].Value;
@@ -181,7 +168,6 @@ namespace SOLUM_UI
                     result[i].DeltaText = "● Same as " + prev;
                 }
             }
-
             return result;
         }
 
@@ -198,11 +184,9 @@ namespace SOLUM_UI
         private void ShowChartTip(int index, Point p, bool placeLeft)
         {
             var pt = _points[index];
-
             TipTitle.Text = pt.Title;
             TipRange.Text = pt.Range;
             TipValue.Text = pt.Value.ToString("N0");
-
             if (string.IsNullOrEmpty(pt.DeltaText))
             {
                 TipDeltaPill.Visibility = Visibility.Collapsed;
@@ -214,14 +198,12 @@ namespace SOLUM_UI
                 TipDeltaPill.Background = Frozen(pt.DeltaKind > 0 ? "#DDF3EA" : pt.DeltaKind < 0 ? "#FCE0E3" : "#F3E8EC");
                 TipDelta.Foreground = Frozen(pt.DeltaKind > 0 ? "#0B7A5A" : pt.DeltaKind < 0 ? "#B4283F" : "#7A5566");
             }
-
             ChartTip.Visibility = Visibility.Visible;
             ChartTip.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
             double tw = ChartTip.DesiredSize.Width, th = ChartTip.DesiredSize.Height;
             double cw = ChartCanvas.ActualWidth, ch = ChartCanvas.ActualHeight;
             double left, top;
-
             if (placeLeft)
             {
                 left = p.X - tw - 22;
@@ -234,7 +216,6 @@ namespace SOLUM_UI
                 top = p.Y - th - 18;
                 if (top < 0) top = p.Y + 18;
             }
-
             ChartTip.Margin = new Thickness(left, top, 0, 0);
         }
 
@@ -246,18 +227,15 @@ namespace SOLUM_UI
         private void DrawChart()
         {
             if (!_ready) return;
-
             var canvas = ChartCanvas;
             canvas.Children.Clear();
             HideChartTip();
 
             double w = canvas.ActualWidth, h = canvas.ActualHeight;
             if (w < 120 || h < 100) return;
-
             const double L = 40, R = 24, T = 44, B = 30;
             double pw = w - L - R, ph = h - T - B;
             int n = _points.Count;
-
             if (n == 0)
             {
                 var empty = new TextBlock { Text = "No registration data yet", Foreground = Frozen("#C0A0AA"), FontSize = 13 };
@@ -268,7 +246,6 @@ namespace SOLUM_UI
 
             int m = _points.Count(p => !p.IsFuture);
             double yMax = NiceMax(_points.Max(p => p.Value));
-
             for (int i = 0; i <= 2; i++)
             {
                 double y = T + ph * i / 2.0;
@@ -283,7 +260,6 @@ namespace SOLUM_UI
                     StrokeDashArray = i == 2 ? null : new DoubleCollection { 2, 4 }
                 };
                 canvas.Children.Add(line);
-
                 var lbl = new TextBlock
                 {
                     Text = (yMax * (2 - i) / 2.0).ToString("0"),
@@ -296,7 +272,6 @@ namespace SOLUM_UI
                 Canvas.SetTop(lbl, y - 8);
                 canvas.Children.Add(lbl);
             }
-
             var pts = new Point[n];
             for (int i = 0; i < n; i++)
             {
@@ -304,7 +279,6 @@ namespace SOLUM_UI
                 double y = T + ph - (ph * _points[i].Value / yMax);
                 pts[i] = new Point(x, y);
             }
-
             for (int i = 0; i < n; i++)
             {
                 var xl = new TextBlock
@@ -320,11 +294,9 @@ namespace SOLUM_UI
                 Canvas.SetTop(xl, T + ph + 8);
                 canvas.Children.Add(xl);
             }
-
             if (m == 0) return;
 
             double baseY = T + ph;
-
             Func<double, double> clampY = y => Math.Max(T, Math.Min(baseY, y));
             Action<PathFigure> addCurve = fig =>
             {
@@ -334,25 +306,21 @@ namespace SOLUM_UI
                     Point p1 = pts[i];
                     Point p2 = pts[i + 1];
                     Point p3 = i + 2 < m ? pts[i + 2] : pts[i + 1];
-
                     var c1 = new Point(p1.X + (p2.X - p0.X) / 6.0, clampY(p1.Y + (p2.Y - p0.Y) / 6.0));
                     var c2 = new Point(p2.X - (p3.X - p1.X) / 6.0, clampY(p2.Y - (p3.Y - p1.Y) / 6.0));
                     fig.Segments.Add(new BezierSegment(c1, c2, p2, true));
                 }
             };
-
             if (m >= 2)
             {
                 var areaFig = new PathFigure { StartPoint = new Point(pts[0].X, baseY), IsClosed = true };
                 areaFig.Segments.Add(new LineSegment(pts[0], true));
                 addCurve(areaFig);
                 areaFig.Segments.Add(new LineSegment(new Point(pts[m - 1].X, baseY), true));
-
                 var areaBrush = new LinearGradientBrush { StartPoint = new Point(0, 0), EndPoint = new Point(0, 1) };
                 areaBrush.GradientStops.Add(new GradientStop(Frozenless("#F4BFD0"), 0));
                 areaBrush.GradientStops.Add(new GradientStop(Frozenless("#FFF6F9"), 1));
                 canvas.Children.Add(new Path { Data = new PathGeometry(new[] { areaFig }), Fill = areaBrush, IsHitTestVisible = false });
-
                 var lineFig = new PathFigure { StartPoint = pts[0] };
                 addCurve(lineFig);
                 canvas.Children.Add(new Path
@@ -366,13 +334,11 @@ namespace SOLUM_UI
                     IsHitTestVisible = false
                 });
             }
-
             for (int i = 0; i < m; i++)
             {
                 int idx = i;
                 bool isLast = i == m - 1;
                 Ellipse visual = null;
-
                 if (isLast)
                 {
                     const double halo = 28, core = 14;
@@ -386,7 +352,6 @@ namespace SOLUM_UI
                     Canvas.SetLeft(haloDot, pts[i].X - halo / 2);
                     Canvas.SetTop(haloDot, pts[i].Y - halo / 2);
                     canvas.Children.Add(haloDot);
-
                     var coreDot = new Ellipse
                     {
                         Width = core,
@@ -397,7 +362,6 @@ namespace SOLUM_UI
                     Canvas.SetLeft(coreDot, pts[i].X - core / 2);
                     Canvas.SetTop(coreDot, pts[i].Y - core / 2);
                     canvas.Children.Add(coreDot);
-
                     var badge = new Border
                     {
                         Background = Maroon,
@@ -438,7 +402,6 @@ namespace SOLUM_UI
                     Canvas.SetTop(visual, pts[i].Y - d / 2);
                     canvas.Children.Add(visual);
                 }
-
                 const double hitSize = 34;
                 var hit = new Ellipse
                 {
@@ -449,7 +412,6 @@ namespace SOLUM_UI
                 };
                 Canvas.SetLeft(hit, pts[i].X - hitSize / 2);
                 Canvas.SetTop(hit, pts[i].Y - hitSize / 2);
-
                 var captured = visual;
                 hit.MouseEnter += (s, e) =>
                 {
@@ -497,28 +459,22 @@ namespace SOLUM_UI
             try
             {
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Starting navigation");
-
                 var mainWindow = Application.Current.MainWindow as MainWindow;
                 if (mainWindow == null)
                 {
                     System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: MainWindow is null!");
                     return;
                 }
-
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: MainWindow found");
-
                 // Clear cache to force fresh page load
                 mainWindow.ClearPageCache("SoloParentRecords");
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Cache cleared");
-
                 // Set the filter to ExpiringSoon
                 SoloParentRecordsPage.RequestedStatusFilter = "ExpiringSoon";
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Filter set to ExpiringSoon");
-
                 // Activate the SoloParentRecords button and navigate
                 mainWindow.ActivateButton("SoloParentRecords");
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Button activated");
-
                 mainWindow.NavigateTo("SoloParentRecords");
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Navigation called");
             }

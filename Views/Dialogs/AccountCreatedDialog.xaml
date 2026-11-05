@@ -5,7 +5,6 @@
         Background="Transparent" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Width="480" SizeToContent="Height">
-
     <Border Background="Transparent" Padding="16">
         <Border Background="White" CornerRadius="16"
                 BorderBrush="#702943" BorderThickness="1.5"
@@ -19,7 +18,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-
                 <!-- Header / Success Icon / Title -->
                 <StackPanel Grid.Row="0" Margin="32,26,32,0" HorizontalAlignment="Center">
                     <Border Width="56" Height="56" CornerRadius="28"
@@ -35,7 +33,6 @@
                                FontFamily="Segoe UI" FontSize="12.5" Foreground="#666666"
                                TextWrapping="Wrap" TextAlignment="Center" Margin="0,4,0,0"/>
                 </StackPanel>
-
                 <!-- Credentials Card -->
                 <StackPanel Grid.Row="1" Margin="28,18,28,20">
                     <Border Background="#FDF8F9" CornerRadius="12"
@@ -43,30 +40,25 @@
                         <StackPanel>
                             <TextBlock Text="LOGIN CREDENTIALS" FontFamily="Segoe UI" FontSize="10"
                                        FontWeight="Bold" Foreground="#702943" Margin="0,0,0,12"/>
-
                             <!-- Name -->
                             <Grid Margin="0,0,0,8">
                                 <TextBlock Text="Full Name" FontFamily="Segoe UI" FontSize="12" Foreground="#777777"/>
                                 <TextBlock x:Name="TxtFullName" Text="Juana Dela Cruz" FontFamily="Segoe UI"
                                            FontSize="13" FontWeight="SemiBold" Foreground="#111111" HorizontalAlignment="Right"/>
                             </Grid>
-
                             <!-- Role -->
                             <Grid Margin="0,0,0,8">
                                 <TextBlock Text="Position / Role" FontFamily="Segoe UI" FontSize="12" Foreground="#777777"/>
                                 <TextBlock x:Name="TxtRole" Text="Encoder" FontFamily="Segoe UI"
                                            FontSize="12" FontWeight="SemiBold" Foreground="#702943" HorizontalAlignment="Right"/>
                             </Grid>
-
                             <Separator Background="#EFE0E5" Margin="0,4,0,10"/>
-
                             <!-- Email -->
                             <Grid Margin="0,0,0,8">
                                 <TextBlock Text="Email Address" FontFamily="Segoe UI" FontSize="12" Foreground="#777777" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="TxtEmail" Text="juana@solace.gov.ph" FontFamily="Segoe UI"
                                            FontSize="13" FontWeight="SemiBold" Foreground="#111111" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                             </Grid>
-
                             <!-- Temporary Password -->
                             <Grid Margin="0,0,0,4">
                                 <TextBlock Text="Temporary Password" FontFamily="Segoe UI" FontSize="12" Foreground="#777777" VerticalAlignment="Center"/>
@@ -78,7 +70,6 @@
                             </Grid>
                         </StackPanel>
                     </Border>
-
                     <!-- Notice banner -->
                     <Border Background="#FFF9E6" CornerRadius="8" BorderBrush="#FFE082" BorderThickness="1"
                             Padding="12,9" Margin="0,12,0,0">
@@ -97,7 +88,6 @@
                         </Grid>
                     </Border>
                 </StackPanel>
-
                 <!-- Footer Action Buttons -->
                 <Border Grid.Row="2" Background="#FAFAFA" BorderBrush="#EEEEEE"
                         BorderThickness="0,1,0,0" CornerRadius="0,0,16,16" Padding="28,16">
@@ -107,7 +97,6 @@
                             <ColumnDefinition Width="12"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <!-- Copy Credentials Button -->
                         <Button x:Name="BtnCopy" Grid.Column="0" Height="42" Cursor="Hand" Click="BtnCopy_Click">
                             <Button.Template>
@@ -129,7 +118,6 @@
                                            FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-
                         <!-- Done Button -->
                         <Button x:Name="BtnDone" Grid.Column="2" Width="100" Height="42" Cursor="Hand" Click="BtnDone_Click">
                             <Button.Template>

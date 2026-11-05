@@ -8,7 +8,6 @@
         ResizeMode="NoResize"
         Width="520" Height="360"
         ShowInTaskbar="False">
-
     <Border Background="Transparent">
         <Border Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Border.Effect>
@@ -17,7 +16,6 @@
             <Border Background="White" CornerRadius="16" Padding="32,28" Width="500"
                     BorderBrush="#702943" BorderThickness="1.5">
                 <StackPanel>
-
                     <Grid Margin="0,0,0,24">
                         <StackPanel>
                             <TextBlock Text="Annual Renewal" FontSize="20" FontWeight="Bold"
@@ -43,14 +41,12 @@
                             </Button.Template>
                         </Button>
                     </Grid>
-
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="16"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <!-- Option 1: Quick Renew -->
                         <Border Grid.Column="0" x:Name="CardQuick"
                                 BorderBrush="#D1E7DD" BorderThickness="1.5"
@@ -100,7 +96,6 @@
                                 </Button>
                             </StackPanel>
                         </Border>
-
                         <!-- Option 2: Re-assess & Renew -->
                         <Border Grid.Column="2" x:Name="CardReassess"
                                 BorderBrush="#E8D0D7" BorderThickness="1.5"
@@ -150,7 +145,6 @@
                                 </Button>
                             </StackPanel>
                         </Border>
-
                     </Grid>
                 </StackPanel>
             </Border>

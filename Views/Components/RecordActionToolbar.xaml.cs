@@ -51,7 +51,6 @@ namespace SOLUM_UI.Views.Components
                             MainWindow.CurrentUserRole.Equals("Admin", System.StringComparison.OrdinalIgnoreCase) ||
                             MainWindow.CurrentUserRole.Equals("SuperAdmin", System.StringComparison.OrdinalIgnoreCase) ||
                             AuthApiService.Instance.IsAdmin);
-
             if (!isAdmin)
             {
                 BtnDelete.Visibility = Visibility.Collapsed;
@@ -61,7 +60,6 @@ namespace SOLUM_UI.Views.Components
                 BtnDelete.Visibility = (Vm != null && Vm.IsToolbarCollapsed) ? Visibility.Collapsed : Visibility.Visible;
             }
         }
-
         // ── Toolbar toggle ────────────────────────────────────────────────────
         private void BtnToolbarToggle_Click(object sender, RoutedEventArgs e)
         {
@@ -70,7 +68,6 @@ namespace SOLUM_UI.Views.Components
             // ActionToolbar.Width stays fixed at 58 (both states) per original.
             if (ActionToolbar == null) return;
             ActionToolbar.Width = 58;
-
             // Original tooltip-template probe preserved verbatim.
             if (BtnToolbarToggle.ToolTip is ToolTip t1)
             {
@@ -85,10 +82,8 @@ namespace SOLUM_UI.Views.Components
         private async void Renew_Click(object sender, RoutedEventArgs e)
         {
             if (Vm?.Record == null || string.IsNullOrWhiteSpace(Vm.Record.Id)) return;
-
             var parentWindow = Window.GetWindow(this);
             var record = Vm.Record;
-
             // Pre-check with in-memory record first
             if (!record.CanRenew(out string preCheckReason, out _))
             {
@@ -98,7 +93,6 @@ namespace SOLUM_UI.Views.Components
                     parentWindow);
                 return;
             }
-
             Models.Api.SoloParentDto existingDto = null;
             if (Guid.TryParse(record.Id, out var guid))
             {
@@ -109,7 +103,6 @@ namespace SOLUM_UI.Views.Components
                     record = Services.Api.SoloParentApiService.Instance.MapToRecord(existingDto);
                 }
             }
-
             // Post-fetch check with latest backend data
             if (!record.CanRenew(out string reason, out _))
             {
@@ -119,23 +112,19 @@ namespace SOLUM_UI.Views.Components
                     parentWindow);
                 return;
             }
-
             var dialog = new Views.Dialogs.RenewalReassessmentDialog(record, existingDto)
             {
                 Owner = parentWindow?.Owner ?? parentWindow
             };
             if (dialog.ShowDialog() != true || dialog.UpdatedRecord == null) return;
-
             Vm.HandleRenewResult(dialog.UpdatedRecord);
         }
-
         // ── Edit ──────────────────────────────────────────────────────────────
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
             // VM sets OpenedEdit = true and fires RequestClose(true).
             Vm?.HandleEdit();
         }
-
         // ── Delete (shows overlay) ────────────────────────────────────────────
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
@@ -145,7 +134,6 @@ namespace SOLUM_UI.Views.Components
                             MainWindow.CurrentUserRole.Equals("SuperAdmin", System.StringComparison.OrdinalIgnoreCase) ||
                             AuthApiService.Instance.IsAdmin);
             if (!isAdmin) return;
-
             // VM sets IsDeleteOverlayVisible = true.
             // The overlay's Visibility is bound to that property in the parent XAML.
             Vm?.HandleDeleteRequest();

@@ -164,7 +164,6 @@ namespace SOLUM_UI.Services
                 string needs = ResolveNeedsAndProblems(dto.ProblemPresented);
                 if (!string.IsNullOrEmpty(needs)) item.NeedsAndProblems = needs;
             }
-
             if (dto.FamilyMembers != null && dto.FamilyMembers.Count > 0)
             {
                 var children = dto.FamilyMembers
@@ -200,7 +199,6 @@ namespace SOLUM_UI.Services
                 string needs = ResolveNeedsAndProblems(dto.ProblemPresented);
                 if (!string.IsNullOrEmpty(needs)) row.NeedsAndProblems = needs;
             }
-
             if (dto.PersonalInfo?.Birthdate != null && dto.PersonalInfo.Birthdate != DateTime.MinValue)
                 row.DateOfBirthFormatted = dto.PersonalInfo.Birthdate.ToString("yyyy-MM-dd");
             if (string.IsNullOrEmpty(row.ContactNumber)) row.ContactNumber = dto.ContactDetails?.ApplicantContactNumber;
@@ -208,7 +206,6 @@ namespace SOLUM_UI.Services
             if (string.IsNullOrEmpty(row.Barangay) && !string.IsNullOrEmpty(dto.AddressDetails?.Barangay)) row.Barangay = dto.AddressDetails.Barangay;
             row.EmergencyContactName = dto.EmergencyContact?.EmergencyPersonName;
             row.EmergencyContactNumber = dto.EmergencyContact?.EmergencyPersonContactNumber;
-
             if (dto.FamilyMembers != null && dto.FamilyMembers.Count > 0)
             {
                 var children = dto.FamilyMembers

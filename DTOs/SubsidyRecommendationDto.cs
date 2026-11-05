@@ -14,7 +14,6 @@ namespace SOLUM_UI.DTOs
         private int _minorDependentsCount;
         private int _toddlersUnder5Count;
         private int _collegeAgeDependentsCount;
-
         // Backend Primary Identifiers
         public Guid EvaluationId { get; set; }
         public Guid CycleId { get; set; }
@@ -24,7 +23,6 @@ namespace SOLUM_UI.DTOs
         public string Barangay { get; set; }
         public string ContactNumber { get; set; }
         public string SubsidyType { get; set; } = "Allowance";
-
         // ML Inference Results
         public string PredictedPriority { get; set; }
         public decimal PriorityScore { get; set; }
@@ -35,7 +33,6 @@ namespace SOLUM_UI.DTOs
         public decimal ProbabilityHigh { get; set; }
         public string ModelVersion { get; set; }
         public DateTime ScoredAt { get; set; }
-
         // Demographic & Economics
         public double MonthlyIncome { get; set; }
         public double IncomePerCapita { get; set; }
@@ -52,13 +49,11 @@ namespace SOLUM_UI.DTOs
         public string OtherIncomeSource { get; set; } = string.Empty;
         public string NeedsAndProblems { get; set; } = string.Empty;
         public List<ChildDetailDto> Children { get; set; } = new List<ChildDetailDto>();
-
         // Explainability Scores
         public double EconomicStrainScore { get; set; } = 0.50;
         public double DependencyBurdenScore { get; set; } = 0.50;
         public double CareBurdenScore { get; set; } = 0.50;
         public double ResourceAdequacyScore { get; set; } = 0.50;
-
         // Lifecycle & Audit Flags
         public string Status { get; set; }
         public int? SelectionRank { get; set; }
@@ -73,7 +68,6 @@ namespace SOLUM_UI.DTOs
         public string RejectionNotes { get; set; }
         public string ReviewedBy { get; set; }
         public DateTime? ConfirmedAt { get; set; }
-
         // UI Compatibility Fallbacks
         public string SpId { get => _spId ?? (SoloParentId != Guid.Empty ? "SP-" + SoloParentId.ToString().Substring(0, 8).ToUpper() : string.Empty); set => _spId = value; }
         public string Name { get => !string.IsNullOrEmpty(FullName) ? FullName : _name; set => _name = value; }

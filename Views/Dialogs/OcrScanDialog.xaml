@@ -12,7 +12,6 @@
         SizeChanged="Window_SizeChanged"
         Closing="Window_Closing"
         Width="1380" Height="860">
-
     <!-- Outer Shadow and Dialog Shell -->
     <Border Background="#66000000" Padding="0">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -31,7 +30,6 @@
                     <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="0" Opacity="0.22" RenderingBias="Performance"/>
                 </Border.Effect>
             </Border>
-
             <!-- DialogShell: Clean container -->
             <Border x:Name="DialogShell" Background="White" CornerRadius="16"
                     ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -53,7 +51,6 @@
                         <!-- Row 3: Footer Actions -->
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-
                     <!-- TOP HEADER -->
                     <Border x:Name="HeaderBorder" Grid.Row="0" Background="White" CornerRadius="16,16,0,0"
                             BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="28,16">
@@ -62,12 +59,10 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock x:Name="FormSubtitle" Text="Solo Parent Application Form" FontSize="19" FontWeight="Bold" Foreground="#111111"/>
                                 <TextBlock x:Name="FormStepHint" Text="{Binding StepHintText}" FontSize="13" Foreground="#666666" Margin="0,3,0,0"/>
                             </StackPanel>
-
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                 <!-- Engine Status Badge Pill -->
                                 <Border x:Name="PillEngineStatus"
@@ -92,7 +87,6 @@
                                                    FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
-
                                 <!-- Circular Close Button -->
                                 <Button HorizontalAlignment="Right" VerticalAlignment="Center"
                                         Width="32" Height="32" Background="Transparent"
@@ -114,7 +108,6 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-
                     <!-- MODE STRIPE -->
                     <Border x:Name="ModeStripe" Grid.Row="1"
                             Background="#F0FAF1" BorderBrush="#C8E6C9" BorderThickness="0,0,0,1"
@@ -133,7 +126,6 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-
                     <!-- MAIN WORKSPACE -->
                     <Grid Grid.Row="2" Margin="16,12">
                         <Grid.ColumnDefinitions>
@@ -143,10 +135,8 @@
                             <!-- Right: Partitioned Record Verification -->
                             <ColumnDefinition Width="*" MinWidth="460"/>
                         </Grid.ColumnDefinitions>
-
                         <!-- LEFT: INTERACTIVE LIVE DOCUMENT VIEWPORT COMPONENT -->
                         <components:OcrDocumentViewportComponent x:Name="DocumentViewport" Grid.Column="0"/>
-
                         <!-- DRAGGABLE WORKSPACE SPLITTER -->
                         <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch"
                                       Background="Transparent" Cursor="SizeWE" ShowsPreview="False">
@@ -159,7 +149,6 @@
                                 </ControlTemplate>
                             </GridSplitter.Template>
                         </GridSplitter>
-
                         <!-- RIGHT: 1:1 RECORD VERIFICATION WITH 3-STEP WIZARD -->
                         <Border Grid.Column="2" Background="White" BorderBrush="#DDD0D5" BorderThickness="1" CornerRadius="10" Padding="0" ClipToBounds="True">
                             <Grid>
@@ -169,7 +158,6 @@
                                     <!-- Partitioned Content Components -->
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-
                                 <!-- STEP INDICATOR HEADER (3-STEP WIZARD) -->
                                 <Border Grid.Row="0" Background="#FDFAFB" BorderBrush="#EDE0E5"
                                         BorderThickness="0,0,0,1" Padding="20,10">
@@ -181,7 +169,6 @@
                                             <ColumnDefinition Width="28"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-
                                         <!-- Step 1: Primary Info -->
                                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Cursor="Hand" MouseLeftButtonUp="Step1Header_Click">
                                             <Border x:Name="Step1Dot" Width="26" Height="26" CornerRadius="13"
@@ -195,10 +182,8 @@
                                                 <TextBlock Text="Identity &amp; verification" FontSize="10" Foreground="#888888"/>
                                             </StackPanel>
                                         </StackPanel>
-
                                         <Border Grid.Column="1" Height="2" Background="#E0E0E0"
                                                 VerticalAlignment="Center" Margin="4,0"/>
-
                                         <!-- Step 2: Secondary Info -->
                                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Cursor="Hand" MouseLeftButtonUp="Step2Header_Click">
                                             <Border x:Name="Step2Dot" Width="26" Height="26" CornerRadius="13"
@@ -213,10 +198,8 @@
                                                 <TextBlock Text="Address &amp; background" FontSize="10" Foreground="#AAAAAA"/>
                                             </StackPanel>
                                         </StackPanel>
-
                                         <Border Grid.Column="3" Height="2" Background="#E0E0E0"
                                                 VerticalAlignment="Center" Margin="4,0"/>
-
                                         <!-- Step 3: Circumstances & Family -->
                                         <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" Cursor="Hand" MouseLeftButtonUp="Step3Header_Click">
                                             <Border x:Name="Step3Dot" Width="26" Height="26" CornerRadius="13"
@@ -233,7 +216,6 @@
                                         </StackPanel>
                                     </Grid>
                                 </Border>
-
                                 <!-- STEP CONTENT AREA (3 COMPONENTS) -->
                                 <Grid Grid.Row="1">
                                     <components:OcrPrimaryInfoComponent x:Name="PrimaryInfoSection" Visibility="Visible"/>
@@ -243,7 +225,6 @@
                             </Grid>
                         </Border>
                     </Grid>
-
                     <!-- FOOTER ACTIONS -->
                     <Border Grid.Row="3" Background="White" BorderBrush="#EEEEEE"
                             BorderThickness="0,1,0,0" Padding="28,12" CornerRadius="0,0,16,16">
@@ -252,7 +233,6 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock x:Name="ValidationMessage"
                                            Text=""
@@ -269,7 +249,6 @@
                                                    VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
-
                                 <!-- OCR Duration Badge -->
                                 <Border x:Name="BadgeOcrDuration" Background="#F0F4F8" CornerRadius="12" Padding="10,4"
                                         BorderBrush="#D9E2EC" BorderThickness="1" Margin="8,0,0,0" Visibility="Collapsed"
@@ -284,7 +263,6 @@
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
-
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                 <Button x:Name="BtnCancel" Content="Cancel" Style="{StaticResource CancelBtn}"
                                         Margin="0,0,8,0" Click="Close_Click"/>
@@ -297,7 +275,6 @@
                             </StackPanel>
                         </Grid>
                     </Border>
-
                 </Grid>
             </Border>
         </Grid>

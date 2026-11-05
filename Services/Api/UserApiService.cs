@@ -18,16 +18,12 @@ namespace SOLUM_UI.Services.Api
         public async Task<BaseResponse<PagedResult<ApplicationUserDTO>>> GetApplicationUsersAsync(GetApplicationUserRequest request)
         {
             var queryParams = new List<string>();
-
             if (request.Id != Guid.Empty)
                 queryParams.Add($"id={request.Id}");
-
             if (!string.IsNullOrWhiteSpace(request.Role))
                 queryParams.Add($"role={Uri.EscapeDataString(request.Role.Trim())}");
-
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
                 queryParams.Add($"searchTerm={Uri.EscapeDataString(request.SearchTerm.Trim())}");
-
             if (request.IsActive.HasValue)
                 queryParams.Add($"isActive={request.IsActive.Value.ToString().ToLowerInvariant()}");
             queryParams.Add($"page={request.Page}");

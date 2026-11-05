@@ -23,7 +23,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="SelRow" TargetType="ListViewItem">
             <Setter Property="Background" Value="White"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Setter Property="BorderBrush" Value="#F2EAEF"/><Setter Property="Padding" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Template">
@@ -41,17 +40,14 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style x:Key="PagerBtn" TargetType="Button">
             <Setter Property="Height" Value="26"/><Setter Property="Padding" Value="10,0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Background" Value="White"/><Setter Property="Foreground" Value="#702943"/>
             <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter>
             <Style.Triggers><Trigger Property="IsEnabled" Value="False"><Setter Property="Background" Value="#F1F5F9"/><Setter Property="Foreground" Value="#94A3B8"/></Trigger></Style.Triggers>
         </Style>
     </UserControl.Resources>
-
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-
         <!-- Single Compact Ribbon: Summary & Export Final Ledger -->
         <Border Grid.Row="0" Background="#FBF5F7" MinHeight="48" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="14,8" Margin="0,0,0,6">
             <Grid VerticalAlignment="Center">
@@ -59,14 +55,12 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
                 <!-- Left: Summary Counter -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <Border Background="#FFF0F5" CornerRadius="6" BorderBrush="#D4A0B0" BorderThickness="1" Padding="10,4">
                         <TextBlock Text="{Binding FinalSummaryText}" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
                     </Border>
                 </StackPanel>
-
                 <!-- Right: Export Final Ledger -->
                 <Button Grid.Column="1" Height="30" Padding="14,0" Cursor="Hand" Command="{Binding ExportFinalLedgerCommand}">
                     <Button.Template>
@@ -82,7 +76,6 @@
                 </Button>
             </Grid>
         </Border>
-
         <!-- Main Ledger Table Container: Record Management Card Design with Radial Mask -->
         <Border Grid.Row="1" CornerRadius="14" BorderBrush="#E8D4DA" BorderThickness="1.5" Background="White">
             <Border.Effect>
@@ -99,7 +92,6 @@
                     </VisualBrush>
                 </Grid.OpacityMask>
                 <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-
                 <!-- ListView (Row 0: Column headers start immediately at top) -->
                 <ListView Grid.Row="0" x:Name="FinalGranteesListView" ItemsSource="{Binding PagedFinalGrantees}"
                           BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource SelRow}"
@@ -138,7 +130,6 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-
                 <!-- Integrated Card Footer for Pagination -->
                 <Border Grid.Row="1" Background="#FAF6F8" BorderBrush="#EFE4E8" BorderThickness="0,1.2,0,0" Padding="18,10">
                     <Grid VerticalAlignment="Center">

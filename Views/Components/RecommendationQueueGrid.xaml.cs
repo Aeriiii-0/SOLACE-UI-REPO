@@ -24,7 +24,6 @@ namespace SOLUM_UI.Views.Components
                 _resizeDebounceTimer.Stop();
                 UpdateDynamicPageSize();
             };
-
             _scrollHintTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(1200)
@@ -35,7 +34,6 @@ namespace SOLUM_UI.Views.Components
                 if (ScrollHintIndicator != null)
                     ScrollHintIndicator.Visibility = Visibility.Collapsed;
             };
-
             DataContextChanged += OnDataContextChanged;
             Loaded += (s, e) =>
             {
@@ -89,7 +87,6 @@ namespace SOLUM_UI.Views.Components
         {
             if (e.WidthChanged)
                 AdjustColumnWidths();
-
             if (e.HeightChanged)
             {
                 _resizeDebounceTimer.Stop();
@@ -100,7 +97,6 @@ namespace SOLUM_UI.Views.Components
         private void QueueListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             if (ScrollHintIndicator == null) return;
-
             if (Math.Abs(e.VerticalChange) > 0.01)
             {
                 var sv = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(QueueListView);
@@ -112,7 +108,6 @@ namespace SOLUM_UI.Views.Components
                     return;
                 }
             }
-
             var scrollV = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(QueueListView);
             if (scrollV != null && (scrollV.ScrollableHeight <= 0 || scrollV.VerticalOffset >= scrollV.ScrollableHeight - 8))
             {
@@ -151,7 +146,6 @@ namespace SOLUM_UI.Views.Components
             double wCare = Math.Max(125, Math.Floor(flexibleWidth * 0.19));
             double wCirc = Math.Max(130, Math.Floor(flexibleWidth * 0.20));
             double wNeeds = Math.Max(140, flexibleWidth - (wName + wIncome + wCare + wCirc));
-
             if (ColName != null) ColName.Width = wName;
             if (ColIncome != null) ColIncome.Width = wIncome;
             if (ColCare != null) ColCare.Width = wCare;
@@ -211,7 +205,6 @@ namespace SOLUM_UI.Views.Components
                         return;
                     }
                 }
-
                 if (sender is ListViewItem lvi && lvi.DataContext is Models.SubsidyItem item)
                 {
                     bool isShiftDown = (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Shift) == System.Windows.Input.ModifierKeys.Shift;
@@ -234,7 +227,6 @@ namespace SOLUM_UI.Views.Components
                             return;
                         }
                     }
-
                     item.IsSelected = !item.IsSelected;
                     _lastClickedQueueItem = item;
                     vm.RecalculateSelectionCounts();

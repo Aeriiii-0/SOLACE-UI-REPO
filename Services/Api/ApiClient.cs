@@ -32,18 +32,15 @@ namespace SOLUM_UI.Services.Api
             {
                 configUrl += "/";
             }
-
             System.Net.ServicePointManager.DefaultConnectionLimit = 64;
             System.Net.ServicePointManager.SecurityProtocol |=
                 System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls13;
-
             BaseUrl = configUrl;
             _httpClient = new HttpClient
             {
                 BaseAddress = new Uri(BaseUrl),
                 Timeout = TimeSpan.FromSeconds(30)
             };
-
             _jsonSettings = new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
@@ -151,24 +148,20 @@ namespace SOLUM_UI.Services.Api
             bool isRetry = false)
         {
             string body = await response.Content.ReadAsStringAsync();
-
             if (response.IsSuccessStatusCode)
             {
                 if (string.IsNullOrWhiteSpace(body))
                 {
                     return new BaseResponse<T> { Succeeded = true };
                 }
-
                 try
                 {
                     var baseResp = JsonConvert.DeserializeObject<BaseResponse<T>>(body, _jsonSettings);
-
                     if (baseResp != null && baseResp.Data != null)
                     {
                         baseResp.StatusCode = (int)response.StatusCode;
                         return baseResp;
                     }
-
                     var rawData = JsonConvert.DeserializeObject<T>(body, _jsonSettings);
                     return new BaseResponse<T>
                     {
@@ -183,7 +176,6 @@ namespace SOLUM_UI.Services.Api
                     {
                         return (BaseResponse<T>)(object)BaseResponse<string>.Success(body);
                     }
-
                     try
                     {
                         var jToken = JToken.Parse(body);
@@ -192,7 +184,6 @@ namespace SOLUM_UI.Services.Api
                             var dataToken = jObj["data"] ?? jObj["Data"];
                             bool succeeded = jObj["succeeded"]?.Value<bool>() ?? jObj["Succeeded"]?.Value<bool>() ?? true;
                             var errors = jObj["errors"]?.ToObject<List<string>>() ?? jObj["Errors"]?.ToObject<List<string>>() ?? new List<string>();
-
                             // Scenario A: Caller expects List<TItem> or IEnumerable, but backend returned PagedResult with "items" inside data
                             if (typeof(System.Collections.IEnumerable).IsAssignableFrom(typeof(T)) && typeof(T) != typeof(string))
                             {
@@ -203,7 +194,6 @@ namespace SOLUM_UI.Services.Api
                                     return new BaseResponse<T> { Succeeded = succeeded, Errors = errors, Data = items };
                                 }
                             }
-
                             // Scenario B: Caller expects PagedResult<TItem>, but backend returned a flat list or array in data
                             if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(PagedResult<>))
                             {
@@ -212,14 +202,12 @@ namespace SOLUM_UI.Services.Api
                                     var itemType = typeof(T).GetGenericArguments()[0];
                                     var listType = typeof(List<>).MakeGenericType(itemType);
                                     var itemsList = jArr.ToObject(listType, JsonSerializer.Create(_jsonSettings));
-
                                     var pagedInstance = Activator.CreateInstance(typeof(T));
                                     typeof(T).GetProperty("Items")?.SetValue(pagedInstance, itemsList);
                                     int count = jArr.Count;
                                     typeof(T).GetProperty("TotalCount")?.SetValue(pagedInstance, count);
                                     typeof(T).GetProperty("Page")?.SetValue(pagedInstance, 1);
                                     typeof(T).GetProperty("PageSize")?.SetValue(pagedInstance, Math.Max(1, count));
-
                                     return new BaseResponse<T> { Succeeded = succeeded, Errors = errors, Data = (T)pagedInstance };
                                 }
                             }
@@ -229,20 +217,16 @@ namespace SOLUM_UI.Services.Api
                     {
                         // Fall through to empty response
                     }
-
                     return new BaseResponse<T> { Succeeded = true };
                 }
             }
-
             var errorResult = new BaseResponse<T> { Succeeded = false, StatusCode = (int)response.StatusCode };
-
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
                 bool isAuthEndpoint = !string.IsNullOrEmpty(endpoint) &&
                     (endpoint.IndexOf("api/auth/login", StringComparison.OrdinalIgnoreCase) >= 0 ||
                      endpoint.IndexOf("api/auth/refresh-token", StringComparison.OrdinalIgnoreCase) >= 0 ||
                      endpoint.IndexOf("api/auth/logout", StringComparison.OrdinalIgnoreCase) >= 0);
-
                 if (!isRetry && retryFunc != null && !isAuthEndpoint &&
                     !string.IsNullOrWhiteSpace(AuthApiService.Instance.Token) &&
                     !string.IsNullOrWhiteSpace(AuthApiService.Instance.RefreshToken))
@@ -252,7 +236,6 @@ namespace SOLUM_UI.Services.Api
                     {
                         // Use a longer timeout to avoid race conditions that trigger false session expirations
                         lockAcquired = await _refreshLock.WaitAsync(TimeSpan.FromSeconds(30));
-
                         if (lockAcquired)
                         {
                             var refreshResult = await AuthApiService.Instance.RefreshTokenAsync();
@@ -291,17 +274,14 @@ namespace SOLUM_UI.Services.Api
                     // Only notify session expired on actual 401, not on every error
                     AuthApiService.Instance.NotifySessionExpired("Session expired or revoked. Please log in again.");
                 }
-
                 errorResult.Errors.Add("Unauthorized access. Please log in again.");
                 return errorResult;
             }
-
             if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
                 errorResult.Errors.Add("You do not have permission to perform this action.");
                 return errorResult;
             }
-
             if (!string.IsNullOrWhiteSpace(body))
             {
                 try
@@ -312,14 +292,12 @@ namespace SOLUM_UI.Services.Api
                         errorResult.Errors.AddRange(errObj.Errors);
                         return errorResult;
                     }
-
                     var listErrors = JsonConvert.DeserializeObject<List<string>>(body, _jsonSettings);
                     if (listErrors != null && listErrors.Count > 0)
                     {
                         errorResult.Errors.AddRange(listErrors);
                         return errorResult;
                     }
-
                     var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(body, _jsonSettings);
                     if (dict != null)
                     {
@@ -346,7 +324,6 @@ namespace SOLUM_UI.Services.Api
                     return errorResult;
                 }
             }
-
             errorResult.Errors.Add($"Server responded with {(int)response.StatusCode} ({response.ReasonPhrase}).");
             return errorResult;
         }
@@ -377,7 +354,6 @@ namespace SOLUM_UI.Services.Api
                 if (innerEx != null)
                 {
                     string exceptionTypeName = innerEx.GetType().Name;
-
                     // Common network connectivity error types
                     if (exceptionTypeName.Contains("IOException") ||
                         exceptionTypeName.Contains("SocketException") ||
@@ -391,7 +367,6 @@ namespace SOLUM_UI.Services.Api
                         return true;
                     }
                 }
-
                 // Check the main exception message
                 if (ex.Message.IndexOf("unable to reach", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     ex.Message.IndexOf("no such host", StringComparison.OrdinalIgnoreCase) >= 0 ||
@@ -400,7 +375,6 @@ namespace SOLUM_UI.Services.Api
                     return true;
                 }
             }
-
             return false;
         }
     }

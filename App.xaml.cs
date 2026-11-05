@@ -17,10 +17,8 @@ namespace SOLUM_UI
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-
             // Enable PDFsharp to use Windows fonts (Arial, etc.)
             GlobalFontSettings.UseWindowsFontsUnderWindows = true;
-
             // Configure en-PH culture so that all WPF controls (DatePicker, formatting) use form standard MM/dd/yyyy
             var culture = new CultureInfo("en-PH");
             culture.DateTimeFormat.ShortDatePattern = "MM/dd/yyyy";
@@ -29,26 +27,20 @@ namespace SOLUM_UI
             CultureInfo.DefaultThreadCurrentUICulture = culture;
             System.Threading.Thread.CurrentThread.CurrentCulture = culture;
             System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
-
             FrameworkElement.LanguageProperty.OverrideMetadata(
                 typeof(FrameworkElement),
                 new FrameworkPropertyMetadata(XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
-
             // Increase connection limit from default (2) to 64 for fast concurrent HTTP calls in .NET Framework
             System.Net.ServicePointManager.DefaultConnectionLimit = 64;
             System.Net.ServicePointManager.SecurityProtocol |=
                 System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls13;
-
             // Launch local background OCR engine if not already running
             _ = OcrService.EnsureServerRunningAsync();
-
             // Initialize AutoUpdater in background with custom downloading UI
             InitializeAutoUpdater();
-
             // Show login page as startup screen
             var loginPage = new LoginPage();
             loginPage.Show();
-
             // Set shutdown mode so app closes when login closes
             ShutdownMode = ShutdownMode.OnLastWindowClose;
         }
@@ -64,16 +56,13 @@ namespace SOLUM_UI
                 string updateUrl = ConfigurationManager.AppSettings["UpdateXmlUrl"];
                 if (string.IsNullOrWhiteSpace(updateUrl))
                     return;
-
                 // Cache-buster for GitHub raw CDN so clients get instant update detection without waiting 5 minutes
                 if (updateUrl.Contains("raw.githubusercontent.com"))
                 {
                     updateUrl += (updateUrl.Contains("?") ? "&" : "?") + "t=" + DateTime.UtcNow.Ticks;
                 }
-
                 AutoUpdater.ReportErrors = false; // Do not show error alert if internet/server is unreachable
                 AutoUpdater.AppCastURL = updateUrl;
-
                 // Hook custom update & downloading interface
                 AutoUpdater.CheckForUpdateEvent += AutoUpdater_CheckForUpdateEvent;
                 AutoUpdater.Start();

@@ -23,15 +23,12 @@ namespace SOLUM_UI
         // ── Outputs ─────────────────────────────────────────────────────────────
         /// <summary>True when the user confirmed "Continue" and no duplicate blocked them.</summary>
         public bool ProceedToFullForm { get; private set; }
-
         /// <summary>When ProceedToFullForm is true, contains the primary-field values
         /// to pre-populate in RecordDialog.</summary>
         public PreCheckResult PrimaryData { get; private set; }
-
         /// <summary>When a duplicate was found AND the user clicked "View Existing Record",
         /// this holds that record so the caller can open RecordViewDialog.</summary>
         public SoloParentRecord ExistingRecordToView { get; private set; }
-
         // ── Private state ────────────────────────────────────────────────────────
         private SoloParentRecord _foundRecord;   // cached search result
         private bool _searching;
@@ -48,7 +45,6 @@ namespace SOLUM_UI
             InitializeComponent();
             Loaded += (s, e) => SuppressDatePickerWatermarks();
         }
-
         /// <summary>
         /// Watermark suppression is now handled via XAML ControlTemplate in FormDate style.
         /// This method is kept for compatibility but no longer needed.
@@ -58,7 +54,6 @@ namespace SOLUM_UI
             // XAML template now properly suppresses native watermark by wrapping ScrollViewer in Grid
             // This prevents rendering of PART_Watermark element, so no code-behind suppression needed
         }
-
         /// <summary>
         /// Helper method to find all visual children of a given type.
         /// Note: Now kept for potential future use, but not used by SuppressDatePickerWatermarks.
@@ -81,7 +76,6 @@ namespace SOLUM_UI
                 }
             }
         }
-
         // ── UI event handlers ─────────────────────────────────────────────────────
 
         private void NameOnly_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
@@ -135,7 +129,6 @@ namespace SOLUM_UI
                     formatted = $"{digits.Substring(0, 4)}-{digits.Substring(4)}";
                 else
                     formatted = digits;
-
                 if (raw != formatted)
                 {
                     int caret = tb.SelectionStart;
@@ -201,16 +194,13 @@ namespace SOLUM_UI
         private async void Continue_Click(object sender, RoutedEventArgs e)
         {
             if (_searching) return;
-
             if (!Validate()) return;
-
             // If a duplicate was already found and the user clicked "Add as New Anyway", proceed
             if (_foundRecord != null && BannerPanel.Visibility == Visibility.Visible)
             {
                 ProceedWithForm();
                 return;
             }
-
             await RunDuplicateCheck();
         }
 
@@ -236,13 +226,11 @@ namespace SOLUM_UI
             DialogResult = false;
             Close();
         }
-
         // ── Core logic ────────────────────────────────────────────────────────────
 
         private bool Validate()
         {
             bool ok = true;
-
             if (string.IsNullOrWhiteSpace(TxtLastName.Text))
             {
                 MarkError(TxtLastName, ErrLastName, "Last name is required.");
@@ -271,7 +259,6 @@ namespace SOLUM_UI
                 ErrBirthdate.Visibility = Visibility.Visible;
                 ok = false;
             }
-
             // PhilSys is now optional, but if provided, must contain valid digits
             if (!string.IsNullOrWhiteSpace(TxtPhilSys.Text))
             {
@@ -282,7 +269,6 @@ namespace SOLUM_UI
                     ok = false;
                 }
             }
-
             // Enforce barangay validation - user must have a valid barangay assigned
             string userBarangay = MainWindow.CurrentUserBarangay;
             if (string.IsNullOrWhiteSpace(userBarangay))
@@ -290,7 +276,6 @@ namespace SOLUM_UI
                 ShowErrorBanner("Cannot proceed: Your user account does not have a barangay assigned. Contact system administrator.");
                 ok = false;
             }
-
             return ok;
         }
 
@@ -300,16 +285,13 @@ namespace SOLUM_UI
             BtnContinue.IsEnabled = false;
             BtnContinueText.Text  = "Checking…";
             HideBanner();
-
             try
             {
                 string firstName = TxtFirstName.Text.Trim();
                 string lastName  = TxtLastName.Text.Trim();
                 string fullName  = lastName + " " + firstName;
                 string philsys   = TxtPhilSys.Text.Trim();
-
                 BaseResponse<PagedResult<SoloParentSummaryDto>> response = null;
-
                 // 1. Check PhilSys ID if provided
                 if (!string.IsNullOrWhiteSpace(philsys))
                 {
@@ -320,7 +302,6 @@ namespace SOLUM_UI
                         PageSize  = 5
                     };
                     response = await SoloParentApiService.Instance.GetSoloParentsAsync(philsysReq);
-
                     // If not found with raw input, try with stripped digits
                     string philsysDigits = Regex.Replace(philsys, @"\D", "");
                     if ((response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
@@ -335,7 +316,6 @@ namespace SOLUM_UI
                         response = await SoloParentApiService.Instance.GetSoloParentsAsync(philsysDigitsReq);
                     }
                 }
-
                 // 2. Search by First Name AND Last Name (GET /api/soloparent?firstName=Juana&lastName=Dela Cruz)
                 if (response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
                 {
@@ -348,7 +328,6 @@ namespace SOLUM_UI
                     };
                     response = await SoloParentApiService.Instance.GetSoloParentsAsync(nameReq);
                 }
-
                 // 3. Fallback: Search by Fullname ("FirstName LastName" and "LastName FirstName")
                 if (response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
                 {
@@ -361,7 +340,6 @@ namespace SOLUM_UI
                     };
                     response = await SoloParentApiService.Instance.GetSoloParentsAsync(request);
                 }
-
                 if (response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
                 {
                     string reversedFullName = $"{lastName} {firstName}".Trim();
@@ -373,13 +351,11 @@ namespace SOLUM_UI
                     };
                     response = await SoloParentApiService.Instance.GetSoloParentsAsync(request);
                 }
-
                 if (response.Succeeded && response.Data?.Items != null && response.Data.Items.Count > 0)
                 {
                     // Fetch the full record for the first match
                     var summary = response.Data.Items[0];
                     var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(summary.Id);
-
                     if (detailResp.Succeeded && detailResp.Data != null)
                     {
                         _foundRecord = SoloParentApiService.Instance.MapToRecord(detailResp.Data);
@@ -421,7 +397,6 @@ namespace SOLUM_UI
             // Use safe barangay - get from current user with "ALL" fallback if empty
             string userBarangay = MainWindow.CurrentUserBarangay;
             string safeBarangay = !string.IsNullOrWhiteSpace(userBarangay) ? userBarangay : "ALL";
-
             PrimaryData = new PreCheckResult
             {
                 LastName   = TxtLastName.Text.Trim(),
@@ -435,7 +410,6 @@ namespace SOLUM_UI
             DialogResult = true;
             Close();
         }
-
         // ── Banner helpers ────────────────────────────────────────────────────────
 
         private void ShowDuplicateBanner(SoloParentRecord record)
@@ -471,7 +445,6 @@ namespace SOLUM_UI
                 BtnContinueText.Text     = "Check & Continue";
             }
         }
-
         // ── Field error helpers ───────────────────────────────────────────────────
 
         private void MarkError(TextBox tb, TextBlock err, string msg)
@@ -499,7 +472,6 @@ namespace SOLUM_UI
             if (ErrBirthdate != null) ErrBirthdate.Visibility = Visibility.Collapsed;
         }
     }
-
     /// <summary>Data bag passed back to the caller after a successful pre-check.</summary>
     public class PreCheckResult
     {

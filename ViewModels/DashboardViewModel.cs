@@ -247,7 +247,6 @@ namespace SOLUM_UI.ViewModels
             RefreshCommand        = new RelayCommand(
                 async _ => await LoadAsync(forceRefresh: true),
                 _         => !IsLoading && (DateTime.UtcNow - _lastRefreshTime) >= RefreshCooldown);
-
             RegisteredSoloParents = 9;
             ActiveSoloParents = 7;
             InactiveRecordsCount = 2;
@@ -257,7 +256,6 @@ namespace SOLUM_UI.ViewModels
             RegisteredDelta = "-9 added this quarter";
             RegisteredQuarterDelta = "-9 added this quarter";
             CalendarTitle = DateTime.Now.ToString("MMMM yyyy");
-
             if (RecentLogs.Count == 0)
             {
                 RecentLogs.Add(new AuditLog
@@ -297,7 +295,6 @@ namespace SOLUM_UI.ViewModels
                     RecordName = "Solo Parent Record"
                 });
             }
-
             LoadChart();
         }
 
@@ -308,13 +305,10 @@ namespace SOLUM_UI.ViewModels
                 return;
             if (_hasLoadedData && !forceRefresh && (DateTime.UtcNow - _lastLoadedTime) < CacheTtl)
                 return;
-
             if (forceRefresh)
                 _lastRefreshTime = DateTime.UtcNow;
-
             IsLoading    = true;
             ErrorMessage = null;
-
             try
             {
                 var (isEncoder, currentUserId) = GetEncoderContext();
@@ -322,11 +316,9 @@ namespace SOLUM_UI.ViewModels
 
                 int currentYear = DateTime.Now.Year;
                 ChartSubtitle = $"New solo parents registered — Jan to Dec {currentYear}";
-
                 // 1. Fetch primary KPI stats and recent logs
                 var statsTask = AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
                 var logsTask  = AuditLogApiService.Instance.GetLogsAsync(pageSize: 10, userId: effectiveUserId);
-
                 // Start monthly chart tasks in parallel with safe individual error handling
                 var monthlyTasks = Enumerable.Range(1, 12)
                     .Select(async m =>
@@ -341,10 +333,8 @@ namespace SOLUM_UI.ViewModels
                         }
                     })
                     .ToArray();
-
                 // Await primary stats and logs first so user sees KPI numbers and activity right away
                 await Task.WhenAll(statsTask, logsTask);
-
                 var statsResponse = statsTask.Result;
                 if (statsResponse != null && statsResponse.Succeeded && statsResponse.Data != null)
                     Apply(statsResponse.Data);
@@ -352,7 +342,6 @@ namespace SOLUM_UI.ViewModels
                     ErrorMessage = statsResponse?.Errors?.Count > 0
                         ? string.Join(Environment.NewLine, statsResponse.Errors)
                         : "Failed to load dashboard data.";
-
                 var logsResponse = logsTask.Result;
                 RecentLogs.Clear();
                 if (logsResponse != null && logsResponse.Succeeded && logsResponse.Data?.Items != null)
@@ -361,12 +350,10 @@ namespace SOLUM_UI.ViewModels
                     foreach (var dto in logsResponse.Data.Items)
                         RecentLogs.Add(MapDtoToLog(dto));
                 }
-
                 // 2. Await monthly chart data and populate the chart bars
                 var monthlyResponses = await Task.WhenAll(monthlyTasks);
                 var monthlyValues = new int[12];
                 var registrationDatesList = new List<DateTime>();
-
                 for (int i = 0; i < 12; i++)
                 {
                     var res = monthlyResponses[i];
@@ -384,7 +371,6 @@ namespace SOLUM_UI.ViewModels
                         }
                     }
                 }
-
                 if (registrationDatesList.Count == 0 && RegisteredSoloParents > 0)
                 {
                     int currentMonth = DateTime.Now.Month;
@@ -399,7 +385,6 @@ namespace SOLUM_UI.ViewModels
                 ChartYMax = maxVal.ToString();
                 ChartYMid = (maxVal / 2).ToString();
                 ChartYLow = (maxVal / 4).ToString();
-
                 MonthlyBars.Clear();
                 for (int i = 0; i < 12; i++)
                 {
@@ -412,7 +397,6 @@ namespace SOLUM_UI.ViewModels
                         TooltipText = $"{_monthLabels[i]} {currentYear}: {val:N0} new registrations"
                     });
                 }
-
                 _lastLoadedTime = DateTime.UtcNow;
                 _hasLoadedData = true;
                 LastRefreshedText = $"Updated: {DateTime.Now:h:mm tt}";
@@ -435,7 +419,6 @@ namespace SOLUM_UI.ViewModels
             RenewalsDueThisMonth  = d.RenewalsDueThisMonth;
             PendingReviewCount    = d.PendingReviewCount;
             InactiveRecordsCount  = d.InactiveRecords;
-
             // Record health percentage
             if (RegisteredSoloParents > 0)
             {
@@ -446,18 +429,14 @@ namespace SOLUM_UI.ViewModels
             {
                 RecordHealthText = "—";
             }
-
             OnPropertyChanged(nameof(ExpiringBannerText));
             // Card 1: Added this month
             RegisteredDelta = $"-{d.RegisteredThisMonth:N0} added this quarter";
             RegisteredQuarterDelta = $"-{d.RegisteredThisMonth:N0} added this quarter";
-
             // Card 2: Expiring this month (using RenewalsDueThisMonth as proxy for expiring)
             ExpiringThisMonthCount = $"⚠ {d.RenewalsDueThisMonth:N0} expiring this month";
-
             // Card 3: Inactive subtext
             InactiveSubtext = "Requires review";
-
             // Original Active delta for backward compatibility
             IsActiveChangeNegative = d.ActiveChangeFromLastMonth < 0;
             ActiveDelta = d.ActiveChangeFromLastMonth > 0
@@ -465,7 +444,6 @@ namespace SOLUM_UI.ViewModels
                 : d.ActiveChangeFromLastMonth < 0
                     ? $"↓ {Math.Abs(d.ActiveChangeFromLastMonth):N0} from last month"
                     : "No change from last month";
-
             // Original renewals delta for backward compatibility
             RenewalsDelta = $"↑ {d.RenewalsCompletedToday:N0} completed today";
         }
@@ -488,18 +466,15 @@ namespace SOLUM_UI.ViewModels
 
             string resolvedName = AuditLogViewModel.ResolveUserName(userId);
             string displayName = !string.IsNullOrWhiteSpace(resolvedName) ? resolvedName : userId;
-
             var changesSource = (dto.Changes != null && dto.Changes.Count > 0)
                 ? dto.Changes
                 : (dto.Metadata?.Changes ?? new List<ChangeItemDto>());
-
             var changesList = changesSource
                 .Select(c => new ChangeDetail(
                     c.FieldName ?? c.Field ?? string.Empty,
                     c.OldValue,
                     c.NewValue))
                 .ToList();
-
             return new AuditLog
             {
                 Id                = 0,
@@ -534,7 +509,6 @@ namespace SOLUM_UI.ViewModels
                 case "REGISTER_ADMIN":
                 case "CREATE_SUBSIDY_CYCLE":
                     return AuditAction.Create;
-
                 case "UPDATE_SOLO_PARENT":
                 case "UPDATE_USER":
                 case "ENABLE_USER":
@@ -546,7 +520,6 @@ namespace SOLUM_UI.ViewModels
                 case "SHORTLIST_SUBSIDY_CANDIDATES":
                 case "CONFIRM_SUBSIDY_GRANTEES":
                     return AuditAction.Update;
-
                 case "DELETE_SOLO_PARENT":
                 case "REVOKE_SOLO_PARENT_RECORD":
                 case "DISABLE_USER":
@@ -554,13 +527,10 @@ namespace SOLUM_UI.ViewModels
                 case "REJECT_SUBSIDY_OUTLIER":
                 case "REVOKE_SUBSIDY_GRANT":
                     return AuditAction.Delete;
-
                 case "LOGIN":
                     return AuditAction.Login;
-
                 case "LOGOUT":
                     return AuditAction.Logout;
-
                 case "REFRESH_TOKEN_FAILED":
                 case "GENERATE_SUBSIDY_RECOMMENDATIONS":
                 default:
@@ -573,7 +543,6 @@ namespace SOLUM_UI.ViewModels
             string who    = !string.IsNullOrWhiteSpace(actor)  ? actor  : "Unknown";
             string suffix = !string.IsNullOrWhiteSpace(status) ? $" · {status}" : string.Empty;
             string tgt    = !string.IsNullOrWhiteSpace(target) ? $" · {target}" : string.Empty;
-
             switch (rawType.ToUpperInvariant())
             {
                 case "LOGIN":                           return $"{who} logged in{suffix}";

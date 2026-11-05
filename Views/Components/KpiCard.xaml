@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Width="140"
              Height="Auto">
-
     <Border x:Name="CardBorder" 
             Style="{StaticResource KpiCardStyle}" 
             Height="120"

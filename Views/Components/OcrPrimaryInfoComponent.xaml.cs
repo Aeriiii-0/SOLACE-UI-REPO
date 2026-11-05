@@ -34,7 +34,6 @@ namespace SOLUM_UI.Views.Components
 
         private static readonly Regex NameRegex = new Regex(@"^[a-zA-ZñÑ\s\.\-']+$", RegexOptions.Compiled);
         private static readonly Regex NumberOnlyRegex = new Regex(@"^\d+$", RegexOptions.Compiled);
-
         static OcrPrimaryInfoComponent()
         {
             ErrorBrush.Freeze();
@@ -63,7 +62,6 @@ namespace SOLUM_UI.Views.Components
             return !string.IsNullOrWhiteSpace(TxtLastName.Text) ||
                    !string.IsNullOrWhiteSpace(TxtFirstName.Text);
         }
-
         #region Focus & Navigation Handling
 
         public bool FocusField(string tag)
@@ -130,9 +128,7 @@ namespace SOLUM_UI.Views.Components
                 FieldFocused?.Invoke(tag);
             }
         }
-
         #endregion
-
         #region Data Population & Confidence Badges
 
         public void Populate(OcrFormResponse resp)
@@ -148,7 +144,6 @@ namespace SOLUM_UI.Views.Components
                 {
                     DpDateOfApplication.SelectedDate = parsedAppDate;
                 }
-
                 TxtLastName.Text = OcrService.CleanPersonName(GetVal(resp, "last_name"));
                 TxtFirstName.Text = OcrService.CleanPersonName(GetVal(resp, "first_name"));
                 TxtMiddleName.Text = OcrService.CleanPersonName(GetVal(resp, "middle_name"));
@@ -165,9 +160,7 @@ namespace SOLUM_UI.Views.Components
                     DpBirthdate.SelectedDate = null;
                     UpdateAge(null);
                 }
-
                 TxtPhilSys.Text = GetVal(resp, "philsys_number");
-
                 SetFieldConfidence("application_date", Badge_AppDate, TxtConf_AppDate, resp);
                 SetFieldConfidence("last_name", Badge_LastName, TxtConf_LastName, resp);
                 SetFieldConfidence("first_name", Badge_FirstName, TxtConf_FirstName, resp);
@@ -197,13 +190,11 @@ namespace SOLUM_UI.Views.Components
         private void SetFieldConfidence(string key, Border badge, TextBlock txtBadge, OcrFormResponse resp)
         {
             if (badge == null || txtBadge == null) return;
-
             if (resp?.Fields != null && resp.Fields.TryGetValue(key, out var f) && f != null && !string.IsNullOrWhiteSpace(f.Value))
             {
                 int confPct = (int)(f.Confidence * 100);
                 txtBadge.Text = $"{confPct}%";
                 badge.Visibility = Visibility.Visible;
-
                 if (confPct >= 80)
                 {
                     badge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E6F9EE"));
@@ -235,9 +226,7 @@ namespace SOLUM_UI.Views.Components
             txt.Text = "Edited";
             txt.Foreground = EditedBadgeFg;
         }
-
         #endregion
-
         #region TextChanged & Formatting
 
         private void ToUpperBox(TextBox tb)
@@ -260,7 +249,6 @@ namespace SOLUM_UI.Views.Components
                 string raw = tb.Text ?? "";
                 string formatted = RecordDialog.FormatPhilSysNumber(raw);
                 if (formatted == "—") formatted = "";
-
                 if (raw != formatted)
                 {
                     int caret = tb.SelectionStart;
@@ -340,9 +328,7 @@ namespace SOLUM_UI.Views.Components
                 }
             }
         }
-
         #endregion
-
         #region Date Handling & Age Calculation
 
         private void UpdateAge(DateTime? dob)
@@ -356,7 +342,6 @@ namespace SOLUM_UI.Views.Components
             DateTime today = DateTime.Today;
             int age = today.Year - dob.Value.Year;
             if (dob.Value.Date > today.AddYears(-age)) age--;
-
             if (dob.Value.Date > today)
             {
                 TxtAge.Text = string.Empty;
@@ -364,7 +349,6 @@ namespace SOLUM_UI.Views.Components
                 ErrBirthdate.Visibility = Visibility.Visible;
                 return;
             }
-
             if (age > 120)
             {
                 TxtAge.Text = string.Empty;
@@ -377,7 +361,6 @@ namespace SOLUM_UI.Views.Components
                     Window.GetWindow(this));
                 return;
             }
-
             TxtAge.Text = age.ToString();
             ErrBirthdate.Visibility = Visibility.Collapsed;
         }
@@ -420,22 +403,17 @@ namespace SOLUM_UI.Views.Components
                 }
             }
         }
-
         #endregion
-
         #region Validation & Duplicate Checking
 
         public bool Validate(out List<string> missing)
         {
             bool ok = true;
             missing = new List<string>();
-
             if (string.IsNullOrWhiteSpace(TxtLastName.Text))
             { MarkError(TxtLastName, ErrLastName, "Required."); missing.Add("Last Name"); ok = false; }
-
             if (string.IsNullOrWhiteSpace(TxtFirstName.Text))
             { MarkError(TxtFirstName, ErrFirstName, "Required."); missing.Add("First Name"); ok = false; }
-
             if (!DpBirthdate.SelectedDate.HasValue)
             { MarkDateError(DpBirthdate, ErrBirthdate, "Required."); missing.Add("Birthdate"); ok = false; }
             else if (DpBirthdate.SelectedDate.Value.Date > DateTime.Today)
@@ -452,7 +430,6 @@ namespace SOLUM_UI.Views.Components
                 missing.Add("PhilSys Card Number (16 digits)");
                 ok = false;
             }
-
             return ok;
         }
 
@@ -482,18 +459,15 @@ namespace SOLUM_UI.Views.Components
         public async Task<bool> CheckDuplicateAsync()
         {
             if (DuplicateCheckPassed) return true;
-
             StartCheckingSpinner();
             try
             {
                 string fName = TxtFirstName.Text.Trim();
                 string lName = TxtLastName.Text.Trim();
                 string philsys = TxtPhilSys.Text.Trim();
-
                 var matches = new List<SoloParentRecord>();
                 SoloParentRecord philsysDuplicate = null;
                 string rawInputPhilsys = System.Text.RegularExpressions.Regex.Replace(philsys ?? "", @"\D", "");
-
                 // 1. Strict PhilSys uniqueness check
                 if (!string.IsNullOrWhiteSpace(rawInputPhilsys))
                 {
@@ -516,7 +490,6 @@ namespace SOLUM_UI.Views.Components
                         }
                     }
                 }
-
                 if (philsysDuplicate != null)
                 {
                     FoundRecord = philsysDuplicate;
@@ -528,7 +501,6 @@ namespace SOLUM_UI.Views.Components
                     TxtPhilSys.Focus();
                     return false;
                 }
-
                 if (!string.IsNullOrWhiteSpace(fName) && !string.IsNullOrWhiteSpace(lName))
                 {
                     var nameResp = await SoloParentApiService.Instance.GetSoloParentsAsync(new GetSoloParentRequest { FirstName = fName, LastName = lName, PageSize = 5 });
@@ -547,7 +519,6 @@ namespace SOLUM_UI.Views.Components
                         }
                     }
                 }
-
                 if (matches.Count > 0)
                 {
                     FoundRecord = matches[0];
@@ -568,7 +539,6 @@ namespace SOLUM_UI.Views.Components
             {
                 StopCheckingSpinner();
             }
-
             DuplicateCheckPassed = true;
             return true;
         }
@@ -680,7 +650,6 @@ namespace SOLUM_UI.Views.Components
                 }
             }
         }
-
         #endregion
     }
 }

@@ -111,27 +111,22 @@ namespace SOLUM_UI
         public SplashScreenWindow()
         {
             InitializeComponent();
-
             LoadLogo(Logo1, "cswdo.png");
             LoadLogo(Logo2, "solace.png");
             LoadLogo(Logo3, "binan.png");
-
             _waves.Add(new WaveLayer { Shape = WaveB1, BaseFrac = 0.30, Rise = 0.02, Amp = 30, Length = 900, Speed = 0.55, Phase = 0.0, Angle = 9 });
             _waves.Add(new WaveLayer { Shape = WaveB2, BaseFrac = 0.22, Rise = 0.02, Amp = 24, Length = 680, Speed = -0.85, Phase = 1.7, Angle = 10.5 });
             _waves.Add(new WaveLayer { Shape = WaveB3, BaseFrac = 0.14, Rise = 0.02, Amp = 18, Length = 520, Speed = 1.15, Phase = 3.1, Angle = 12 });
             _waves.Add(new WaveLayer { Shape = WaveT1, FromTop = true, BaseFrac = 0.18, Rise = 0, Amp = 24, Length = 760, Speed = -0.6, Phase = 0.8, Angle = 9 });
             _waves.Add(new WaveLayer { Shape = WaveT2, FromTop = true, BaseFrac = 0.30, Rise = 0, Amp = 30, Length = 1000, Speed = 0.4, Phase = 2.4, Angle = 11 });
-
             Loaded += (s, e) =>
             {
                 foreach (var L in _waves)
                     L.Shape.RenderTransform = new RotateTransform(L.Angle, ActualWidth / 2, ActualHeight / 2);
-
                 CompositionTarget.Rendering += OnRender;
                 PlayAnimations();
                 StartProgress();
             };
-
             // Ensure proper cleanup when splash screen closes
             Closed += (s, e) =>
             {
@@ -158,13 +153,11 @@ namespace SOLUM_UI
             double w = ActualWidth, h = ActualHeight;
             if (w < 10 || h < 10) return;
             double t = (DateTime.UtcNow - _openedAt).TotalSeconds;
-
             foreach (var L in _waves)
             {
                 double baseY = (L.BaseFrac + L.Rise * _progress) * h;
                 double amp = L.Amp * (1 + 0.15 * Math.Sin(t * 0.7 + L.Phase));
                 double phase = L.Phase + t * L.Speed;
-
                 const double pad = 900;
                 var pts = new List<Point>();
                 for (double x = -pad; x <= w + pad; x += 12)
@@ -172,7 +165,6 @@ namespace SOLUM_UI
                     double off = baseY + amp * Math.Sin(2 * Math.PI * x / L.Length + phase);
                     pts.Add(new Point(x, L.FromTop ? off : h - off));
                 }
-
                 var geo = new StreamGeometry();
                 using (var ctx = geo.Open())
                 {
@@ -197,28 +189,22 @@ namespace SOLUM_UI
         {
             if (_headerShown) return;
             _headerShown = true;
-
             var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
-
             Fade(TitleBlock, 0, 0.4);
             TitleShift.BeginAnimation(TranslateTransform.YProperty,
                 new DoubleAnimation(-14, 0, TimeSpan.FromSeconds(0.6)) { EasingFunction = ease });
-
             Fade(LoadingBlock, 0, 0.4);
         }
 
         private void PushForward(int i)
         {
             ShowHeaderAndProgress();
-
             var card = new[] { Card1, Card2, Card3 }[i];
             var scale = new[] { Scale1, Scale2, Scale3 }[i];
             var rise = new[] { Wave1, Wave2, Wave3 }[i];
-
             var dur = TimeSpan.FromSeconds(0.6);
             var pop = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.5 };
             var smooth = new CubicEase { EasingMode = EasingMode.EaseOut };
-
             card.BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromSeconds(0.4)));
             var grow = new DoubleAnimation(1.0, dur) { EasingFunction = pop };
             scale.BeginAnimation(ScaleTransform.ScaleXProperty, grow);
@@ -235,13 +221,10 @@ namespace SOLUM_UI
                 double t = Math.Min(1, (DateTime.UtcNow - started).TotalSeconds / LoadingSeconds);
                 double p = t * t * (3 - 2 * t);
                 _progress = p;
-
                 BarScale.ScaleX = p;
                 TxtPercent.Text = (int)Math.Round(p * 100) + "%";
-
                 for (int i = 0; i < 3; i++)
                     if (!_revealed[i] && p >= _revealAt[i]) { _revealed[i] = true; PushForward(i); }
-
                 if (t >= 1)
                 {
                     timer.Stop();

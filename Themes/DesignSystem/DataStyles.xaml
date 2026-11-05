@@ -1,15 +1,12 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Colors.xaml"/>
         <ResourceDictionary Source="Typography.xaml"/>
         <ResourceDictionary Source="Effects.xaml"/>
         <ResourceDictionary Source="ScrollStyles.xaml"/>
     </ResourceDictionary.MergedDictionaries>
-
     <!-- ===================== ListView / GridView ===================== -->
-
     <!-- Column header: hover tint, resize gripper, auto-collapses when its column is null (matches legacy GvHeader behaviour) -->
     <Style x:Key="DsGridViewColumnHeader" TargetType="GridViewColumnHeader">
         <Setter Property="FontFamily" Value="{StaticResource DsFontFamily}"/>
@@ -59,11 +56,9 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <Style x:Key="DsGridViewColumnHeaderCenter" TargetType="GridViewColumnHeader" BasedOn="{StaticResource DsGridViewColumnHeader}">
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
     </Style>
-
     <!-- Row: hairline divider, hover tint, selected tint with a brand accent bar, subtle zebra via AlternationCount=2 -->
     <Style x:Key="DsListViewItem" TargetType="ListViewItem">
         <Setter Property="Background" Value="{StaticResource DsSurfaceBrush}"/>
@@ -106,9 +101,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <!-- ===================== DataGrid ===================== -->
-
     <Style x:Key="DsDataGridColumnHeader" TargetType="DataGridColumnHeader">
         <Setter Property="FontFamily" Value="{StaticResource DsFontFamily}"/>
         <Setter Property="FontSize" Value="11"/>
@@ -171,7 +164,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <!-- Row: keeps the stock row template (virtualization-safe), only colours change through triggers -->
     <Style x:Key="DsDataGridRow" TargetType="DataGridRow">
         <Setter Property="Background" Value="{StaticResource DsSurfaceBrush}"/>
@@ -190,7 +182,6 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-
     <!-- Cell: no focus rectangle, vertically centered content -->
     <Style x:Key="DsDataGridCell" TargetType="DataGridCell">
         <Setter Property="Padding" Value="12,0"/>
@@ -206,7 +197,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <Style x:Key="DsDataGrid" TargetType="DataGrid">
         <Setter Property="Background" Value="{StaticResource DsSurfaceBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource DsTextBodyBrush}"/>
@@ -230,5 +220,4 @@
             <Style TargetType="ScrollBar" BasedOn="{StaticResource DsScrollBar}"/>
         </Style.Resources>
     </Style>
-
 </ResourceDictionary>

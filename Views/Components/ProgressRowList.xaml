@@ -4,7 +4,6 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../../Themes/AnalyticsTheme.xaml"/>
     </UserControl.Resources>
-
     <Grid>
         <StackPanel x:Name="ItemsStackPanel"/>
         <StackPanel x:Name="NoDataPanel" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">

@@ -19,18 +19,15 @@ namespace SOLUM_UI.Services
             TextBox txtEmergencyAddress)
         {
             if (chkSame == null || txtApplicantAddress == null || txtEmergencyAddress == null) return;
-
             chkSame.Checked += (s, e) =>
             {
                 txtEmergencyAddress.Text = txtApplicantAddress.Text ?? string.Empty;
                 txtEmergencyAddress.IsEnabled = false;
             };
-
             chkSame.Unchecked += (s, e) =>
             {
                 txtEmergencyAddress.IsEnabled = true;
             };
-
             txtApplicantAddress.TextChanged += (s, e) =>
             {
                 if (chkSame.IsChecked == true)

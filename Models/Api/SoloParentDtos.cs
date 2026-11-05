@@ -67,7 +67,6 @@ namespace SOLUM_UI.Models.Api
         public bool? isNullity { get; set; }
         public bool? isAnnulmentOfMarraige { get; set; }
     }
-
     // ========================
     // Family Members
     // ========================
@@ -146,7 +145,6 @@ namespace SOLUM_UI.Models.Api
         public string ExpiresAt { get; set; }
         public DateTime? DateCreated { get; set; }
     }
-
     // ========================
     // Solo Parent CRUD DTOs
     // ========================
@@ -192,7 +190,6 @@ namespace SOLUM_UI.Models.Api
     public class UpdateSoloParentRequest : ISoloParentRequest
     {
         public Guid Id { get; set; }
-
         /// <summary>Corrected application filing date (YYYY-MM-DD).</summary>
         public string ApplicationDate { get; set; }
 
@@ -247,7 +244,6 @@ namespace SOLUM_UI.Models.Api
         public bool IsPantawidBeneficiary { get; set; }
         public bool IsIndigenous { get; set; }
         public string SubsidyEligibility { get; set; }
-
         /// <summary>Original application filing date (YYYY-MM-DD).</summary>
         public string ApplicationDate { get; set; }
 
@@ -279,7 +275,6 @@ namespace SOLUM_UI.Models.Api
 
         public string NeedsAndProblems { get; set; }
         public string OtherSourcesOfIncome { get; set; }
-
         /// <summary>Original application filing date (YYYY-MM-DD).</summary>
         public string ApplicationDate { get; set; }
 
@@ -291,7 +286,6 @@ namespace SOLUM_UI.Models.Api
         public bool IsActive { get; set; }
         public string Status { get; set; }
     }
-
     /// <summary>
     /// Matches SoloParentDetailDto returned by GET /api/soloparent/{id}
     /// </summary>
@@ -304,7 +298,6 @@ namespace SOLUM_UI.Models.Api
         public AddressInfo AddressDetails { get; set; } = new AddressInfo();
         public EmergencyContactInfo EmergencyContact { get; set; } = new EmergencyContactInfo();
         public ProblemPresentedDetails ProblemPresented { get; set; } = new ProblemPresentedDetails();
-
         /// <summary>Original application filing date (YYYY-MM-DD).</summary>
         public string ApplicationDate { get; set; }
 
@@ -327,12 +320,10 @@ namespace SOLUM_UI.Models.Api
         public string NeedsAndProblems { get; set; }
         public string OtherSourcesOfIncome { get; set; }
     }
-
     // Kept as alias for compatibility
     public class SoloParentDto : SoloParentDetailDto
     {
     }
-
     /// <summary>
     /// Nested family members payload for renewal re-assessment.
     /// </summary>
@@ -342,7 +333,6 @@ namespace SOLUM_UI.Models.Api
         public List<CreateFamilyMemberRequest> NewFamilyMembers { get; set; } = new List<CreateFamilyMemberRequest>();
         public List<Guid> RemovedFamilyMemberIds { get; set; } = new List<Guid>();
     }
-
     /// <summary>
     /// Request payload for POST /api/soloparent/{id}/renew (Mode 2: Annual Re-assessment Renewal).
     /// </summary>
@@ -358,7 +348,6 @@ namespace SOLUM_UI.Models.Api
         public string NeedsAndProblems { get; set; }
         public string OtherSourcesOfIncome { get; set; }
     }
-
     /// <summary>
     /// Response model returned by POST /api/soloparent/{id}/renew
     /// </summary>
