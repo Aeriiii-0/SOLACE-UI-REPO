@@ -381,9 +381,39 @@ namespace SOLUM_UI
             HandleLogout();
         }
 
-        private void HandleLogout()
-        {
-            LogoutOverlay.Visibility = Visibility.Visible;
+        private void HandleLogout()
+        {
+            const string logoutIcon = "M17,7L15.59,8.41L18.17,11H8V13H18.17L15.59,15.58L17,17L22,12M4,5H12V3H4A2,2 0 0,0 2,5V19A2,2 0 0,0 4,21H12V19H4V5Z";
+
+            bool isConfirmed = ActionConfirmDialog.Show(
+                title: "Confirm Logout",
+                message: "Are you sure you want to sign out?",
+                confirmText: "Logout",
+                cancelText: "Cancel",
+                theme: ConfirmThemeType.Primary,
+                owner: this,
+                customIconData: logoutIcon);
+
+            if (!isConfirmed) return;
+
+            LogoutLoadingOverlay.Visibility = Visibility.Visible;
+            PerformLogoutAsync();
+        }
+
+        private async void PerformLogoutAsync()
+        {
+            try
+            {
+                await AuthApiService.Instance.LogoutAsync();
+            }
+            catch { }
+            AuthApiService.Instance.OnSessionExpired -= HandleSessionExpired;
+            var login = new LoginPage();
+            login.Show();
+            AuditLogService.Instance.LogLogout(CurrentUserName, CurrentUserRole);
+            ToastNotification.Show("Logged Out", "You have been logged out.", ToastType.Info);
+            _isExiting = true;
+            this.Close();
         }
 
         private bool _isSessionExpiredRedirecting = false;
@@ -465,4 +495,5 @@ namespace SOLUM_UI
         }
     }
 }
+
 
