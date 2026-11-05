@@ -27,8 +27,6 @@ using System.Windows.Controls.Primitives;
 
 using System.Windows.Input;
 
-
-
 namespace SOLUM_UI
 
 {
@@ -45,13 +43,9 @@ namespace SOLUM_UI
 
         public static string RequestedStatusFilter { get; set; } = null;
 
-
-
         private List<SoloParentRecordViewModel> _allRecords;
 
         private List<SoloParentRecordViewModel> _filteredRecords;
-
-
 
         private string _statusFilter = "All";
 
@@ -65,8 +59,6 @@ namespace SOLUM_UI
 
         private bool? _isIndigenousFilter = null;
 
-
-
         private int _pageSize = 10;
 
         private int _currentPage = 1;
@@ -79,8 +71,6 @@ namespace SOLUM_UI
 
         private bool _isLoading = false;
 
-
-
         private static readonly TimeSpan DataFreshnessTtl = TimeSpan.FromMinutes(2);
 
         private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
@@ -90,8 +80,6 @@ namespace SOLUM_UI
         private DateTime _lastRefreshClickTime = DateTime.MinValue;
 
         private bool _hasLoadedData = false;
-
-
 
         public static readonly DependencyProperty SearchPlaceholderProperty =
 
@@ -105,8 +93,6 @@ namespace SOLUM_UI
 
                 new PropertyMetadata("Search records (name, PhilSys ID)..."));
 
-
-
         public string SearchPlaceholder
 
         {
@@ -116,8 +102,6 @@ namespace SOLUM_UI
             set => SetValue(SearchPlaceholderProperty, value);
 
         }
-
-
 
         private bool IsAdmin => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
 
@@ -131,15 +115,11 @@ namespace SOLUM_UI
 
         private bool IsEncoder => string.Equals(CurrentUserRole, "Encoder", StringComparison.OrdinalIgnoreCase);
 
-
-
         public SoloParentRecordsPage()
 
         {
 
             InitializeComponent();
-
-
 
             Loaded += (s, e) =>
 
@@ -152,7 +132,7 @@ namespace SOLUM_UI
                 {
                     _statusFilter = RequestedStatusFilter;
                     RequestedStatusFilter = null; // Clear for next navigation
-                    
+
                     // Select the corresponding radio button (will trigger Click event and load records)
                     if (_statusFilter == "ExpiringSoon")
                     {
@@ -214,8 +194,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void InitDynamicPaging()
 
         {
@@ -248,8 +226,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void UpdateDynamicPageSize()
 
         {
@@ -258,23 +234,17 @@ namespace SOLUM_UI
 
             if (availableHeight <= 100) return;
 
-
-
             // GridView column header is 46px + 1px border. Leave 4px safety buffer.
 
             double rowsAvailable = availableHeight - 51;
 
             if (rowsAvailable <= 0) return;
 
-
-
             // Each row is locked to 48px height.
 
             int calculated = (int)Math.Floor(rowsAvailable / 48.0);
 
             int optimal = Math.Max(4, Math.Min(50, calculated));
-
-
 
             if (optimal != _pageSize)
 
@@ -295,8 +265,6 @@ namespace SOLUM_UI
             }
 
         }
-
-
 
         private void ApplyRoleView()
 
@@ -320,13 +288,9 @@ namespace SOLUM_UI
 
                 _barangayFilter = CurrentUserBarangay;
 
-
-
                 // Start with the search-first state
 
                 SetEncoderResultsVisible(false);
-
-
 
                 if (ColSex != null) ColSex.Width = 0;
 
@@ -356,8 +320,6 @@ namespace SOLUM_UI
 
                 PagingRow.Visibility = Visibility.Collapsed;
 
-
-
                 SetEncoderResultsVisible(false);
 
             }
@@ -382,15 +344,11 @@ namespace SOLUM_UI
 
             }
 
-
-
             // Hide delete buttons for non-admin users
 
             HideDeleteButtonsIfNotAdmin();
 
         }
-
-
 
         /// <summary>
 
@@ -410,13 +368,9 @@ namespace SOLUM_UI
 
             if (!IsEncoder && !IsBasicUser) return;
 
-
-
             var show = Visibility.Visible;
 
             var hide = Visibility.Collapsed;
-
-
 
             // Results table (Row 3) — always visible for Encoder/BasicUser
 
@@ -424,15 +378,11 @@ namespace SOLUM_UI
 
                 RecordsClipGrid.Visibility = show;
 
-
-
             // Empty-state placeholder in search panel — hidden now that table is always visible
 
             if (SearchFirstPanel != null)
 
                 SearchFirstPanel.Visibility = hide;
-
-
 
             // Table empty state overlay — shown inside table when no search done yet
 
@@ -440,15 +390,11 @@ namespace SOLUM_UI
 
                 TableEmptyStateOverlay.Visibility = showResults ? Visibility.Collapsed : Visibility.Visible;
 
-
-
             // If returning to landing view, hide skeleton loader
 
             if (!showResults && RecordsSkeletonLoader != null)
 
                 RecordsSkeletonLoader.Visibility = Visibility.Collapsed;
-
-
 
             // Paging row
 
@@ -458,27 +404,19 @@ namespace SOLUM_UI
 
         }
 
-
-
         private async Task LoadRecordsAsync()
 
         {
 
             if (_isLoading) return;
 
-
-
             // For all users: automatically hydrate initial records (scoped to user's barangay for BasicUser / Caseworker / Barangay Secretary)
-
-
 
             _isLoading = true;
 
             if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = false;
 
             if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
-
-
 
             // Encoder/BasicUser with a search: show the results card
 
@@ -490,15 +428,11 @@ namespace SOLUM_UI
 
             if (SearchFirstPanel != null) SearchFirstPanel.Visibility = Visibility.Collapsed;
 
-
-
             try
 
             {
 
                 string effectiveBarangay = IsBasicUser ? CurrentUserBarangay : _barangayFilter;
-
-
 
                 // Handle search query based on user role
 
@@ -507,8 +441,6 @@ namespace SOLUM_UI
                     ? (EncSearchQuery?.Text?.Trim() ?? string.Empty)
 
                     : (SearchName?.Text?.Trim() ?? string.Empty);
-
-
 
                 Guid? searchGuid = null;
 
@@ -521,8 +453,6 @@ namespace SOLUM_UI
                 string philsysId = null;
 
                 string barangay = null;
-
-
 
                 if (!string.IsNullOrWhiteSpace(query))
 
@@ -550,8 +480,6 @@ namespace SOLUM_UI
 
                     }
 
-
-
                     if (selectedMode == "RECORD_ID" || (selectedMode == "AUTO" && Guid.TryParse(query, out var parsedGuidAuto)))
 
                     {
@@ -576,15 +504,11 @@ namespace SOLUM_UI
 
                                 break;
 
-
-
                             case "LAST_NAME":
 
                                 lastName = query;
 
                                 break;
-
-
 
                             case "FULL_NAME":
 
@@ -592,15 +516,11 @@ namespace SOLUM_UI
 
                                 break;
 
-
-
                             case "PHILSYS_ID":
 
                                 philsysId = query;
 
                                 break;
-
-
 
                             case "AUTO":
 
@@ -652,8 +572,6 @@ namespace SOLUM_UI
 
                 }
 
-
-
                 bool? isActive = null;
 
                 bool? isDeleted = null;
@@ -700,11 +618,7 @@ namespace SOLUM_UI
 
                 }
 
-
-
                 string sex = (!IsEncoder && !IsBasicUser && _sexFilter != "All") ? _sexFilter : null;
-
-
 
                 // For non-Encoder users, apply barangay filter
 
@@ -722,15 +636,11 @@ namespace SOLUM_UI
 
                 }
 
-
-
                 var (sortBy, sortOrder) = SortControl != null
 
                     ? RecordSortingHelper.MapToApiParams(SortControl.SelectedField, SortControl.IsAscending)
 
                     : ("datecreated", "desc");
-
-
 
                 var req = new GetSoloParentRequest
 
@@ -770,15 +680,11 @@ namespace SOLUM_UI
 
                 };
 
-
-
                 // Fetch the list page, then retrieve full details in parallel (the list
 
                 // endpoint does not return complete PersonalInfo — detail endpoint does).
 
                 var resp = await SoloParentApiService.Instance.GetSoloParentsAsync(req);
-
-
 
                 if (!resp.Succeeded || resp.Data == null)
 
@@ -791,8 +697,6 @@ namespace SOLUM_UI
                         : "Unable to load records from backend.";
 
                     ToastNotification.Show("API Notice", err, ToastType.Warning);
-
-
 
                     _allRecords = new List<SoloParentRecordViewModel>();
 
@@ -808,15 +712,11 @@ namespace SOLUM_UI
 
                 }
 
-
-
                 var paged = resp.Data;
 
                 _totalCount = paged.TotalCount;
 
                 _totalPages = Math.Max(1, paged.TotalPages);
-
-
 
                 // Fetch every record's full detail in parallel
 
@@ -828,8 +728,6 @@ namespace SOLUM_UI
 
                 var detailResponses = await Task.WhenAll(detailTasks);
 
-
-
                 _allRecords = new List<SoloParentRecordViewModel>();
 
                 for (int i = 0; i < paged.Items.Count; i++)
@@ -839,8 +737,6 @@ namespace SOLUM_UI
                     var summary = paged.Items[i];
 
                     var detailResp = detailResponses[i];
-
-
 
                     SoloParentRecord rec;
 
@@ -878,15 +774,11 @@ namespace SOLUM_UI
 
                     }
 
-
-
                     var vm = new SoloParentRecordViewModel(rec);
 
                     _allRecords.Add(vm);
 
                 }
-
-
 
                 if (SortControl != null)
                 {
@@ -920,8 +812,6 @@ namespace SOLUM_UI
 
                 }
 
-
-
                 for (int i = 0; i < _allRecords.Count; i++)
 
                 {
@@ -930,21 +820,15 @@ namespace SOLUM_UI
 
                 }
 
-
-
                 _filteredRecords = new List<SoloParentRecordViewModel>(_allRecords);
 
                 RecordsList.ItemsSource = null;
 
                 RecordsList.ItemsSource = _filteredRecords;
 
-
-
                 if (NoResultsPanel != null)
 
                     NoResultsPanel.Visibility = _filteredRecords.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-
-
 
                 // After a search completes for Encoder/BasicUser, SearchFirstPanel should stay hidden
 
@@ -954,25 +838,17 @@ namespace SOLUM_UI
 
                 if (TableEmptyStateOverlay != null) TableEmptyStateOverlay.Visibility = Visibility.Collapsed;
 
-
-
                 // After a successful search for Encoder/BasicUser, ensure results table is visible
 
                 if ((IsEncoder || IsBasicUser) && _filteredRecords.Count > 0)
 
                     SetEncoderResultsVisible(true);
 
-
-
                 UpdatePagingUI();
-
-
 
                 _lastLoadedTime = DateTime.UtcNow;
 
                 _hasLoadedData = true;
-
-
 
                 if (TxtLastRefreshed != null)
 
@@ -981,8 +857,6 @@ namespace SOLUM_UI
                 if (BtnRefreshRecords != null)
 
                     BtnRefreshRecords.ToolTip = $"Refresh records (Last updated: {DateTime.Now:h:mm:ss tt})";
-
-
 
                 // Ensure delete is hidden for non-admin roles after every data load
 
@@ -1038,8 +912,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private async void BtnRefreshRecords_Click(object sender, RoutedEventArgs e)
 
         {
@@ -1048,21 +920,15 @@ namespace SOLUM_UI
 
                 return;
 
-
-
             _lastRefreshClickTime = DateTime.UtcNow;
 
             if (BtnRefreshRecords != null) BtnRefreshRecords.IsEnabled = false;
-
-
 
             _lastLoadedTime = DateTime.MinValue; // Force fresh fetch
 
             await LoadRecordsAsync();
 
         }
-
-
 
         private void ApplyFiltersAndPage()
 
@@ -1074,15 +940,9 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void ApplyFilters() => ApplyFiltersAndPage();
 
-
-
         private int TotalPages => _totalPages;
-
-
 
         private void UpdatePagingUI()
 
@@ -1092,15 +952,11 @@ namespace SOLUM_UI
 
                 PageInfoText.Text = TotalPages > 0 ? $"Page {_currentPage} of {TotalPages}" : "Page 1 of 1";
 
-
-
             if (TxtRecordsSummary != null)
 
                 TxtRecordsSummary.Text = $"{_totalCount:N0} total records";
             if (TxtHeaderRecordCount != null)
                 TxtHeaderRecordCount.Text = $"{_totalCount:N0} Records";
-
-
 
             if (TxtRecordsPageSummary != null)
 
@@ -1114,8 +970,6 @@ namespace SOLUM_UI
 
             }
 
-
-
             if (BtnBack != null)
 
             {
@@ -1125,8 +979,6 @@ namespace SOLUM_UI
                 BtnBack.IsEnabled = _currentPage > 1;
 
             }
-
-
 
             if (BtnNext != null)
 
@@ -1139,8 +991,6 @@ namespace SOLUM_UI
             }
 
         }
-
-
 
         private void BtnNext_Click(object sender, RoutedEventArgs e)
 
@@ -1158,8 +1008,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void BtnBack_Click(object sender, RoutedEventArgs e)
 
         {
@@ -1176,19 +1024,9 @@ namespace SOLUM_UI
 
         }
 
-
-
-
-
-
-
         private void SearchBtn_Click(object sender, RoutedEventArgs e) => ApplyFiltersAndPage();
 
-
-
         private void EncoderSearchBtn_Click(object sender, RoutedEventArgs e) => ApplyFiltersAndPage();
-
-
 
         private void SearchBox_KeyDown(object sender, KeyEventArgs e)
 
@@ -1197,8 +1035,6 @@ namespace SOLUM_UI
             if (e.Key == Key.Enter) ApplyFiltersAndPage();
 
         }
-
-
 
         /// <summary>Updates the search box hint to match the selected search type.</summary>
 
@@ -1252,8 +1088,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void CmbSearchMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
 
         {
@@ -1263,8 +1097,6 @@ namespace SOLUM_UI
             {
 
                 UpdateSearchPlaceholder(item.Tag?.ToString() ?? "AUTO");
-
-
 
                 if (!string.IsNullOrWhiteSpace(SearchName?.Text))
 
@@ -1278,8 +1110,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void EncSearchMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
 
         {
@@ -1289,8 +1119,6 @@ namespace SOLUM_UI
             {
 
                 UpdateSearchPlaceholder(item.Tag?.ToString() ?? "AUTO");
-
-
 
                 // Re-run only if the encoder already typed something
 
@@ -1306,21 +1134,15 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void SearchFields_TextChanged(object sender, TextChangedEventArgs e)
 
         {
 
             bool hasText = !string.IsNullOrEmpty(SearchName?.Text);
 
-
-
             if (ClearSearchBtn != null)
 
                 ClearSearchBtn.Visibility = hasText ? Visibility.Visible : Visibility.Collapsed;
-
-
 
             if (!hasText)
 
@@ -1328,21 +1150,15 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void EncoderFields_TextChanged(object sender, TextChangedEventArgs e)
 
         {
 
             bool hasText = !string.IsNullOrEmpty(EncSearchQuery?.Text);
 
-
-
             // if (EncClearBtn != null)
 
             //     EncClearBtn.Visibility = hasText ? Visibility.Visible : Visibility.Collapsed;
-
-
 
             // Emptying the box returns the encoder to the landing view
 
@@ -1351,8 +1167,6 @@ namespace SOLUM_UI
                 ApplyFiltersAndPage();
 
         }
-
-
 
         private void ClearSearch_Click(object sender, RoutedEventArgs e)
 
@@ -1382,21 +1196,13 @@ namespace SOLUM_UI
 
             }
 
-
-
             ApplyFiltersAndPage();
 
         }
 
-
-
         private void FilterDrop_Click(object sender, RoutedEventArgs e) => FilterPopup.IsOpen = true;
 
-
-
         private void FilterCombo_Changed(object sender, SelectionChangedEventArgs e) { }
-
-
 
         private void FilterApply_Click(object sender, RoutedEventArgs e)
 
@@ -1414,23 +1220,17 @@ namespace SOLUM_UI
 
             _statusFilter = statusVal;
 
-
-
             _isPantawidFilter = null;
 
             _isLGBTFilter = null;
 
             _isIndigenousFilter = null;
 
-
-
             FilterPopup.IsOpen = false;
             UpdateFilterBadge();
             ApplyFiltersAndPage();
 
         }
-
-
 
         private void FilterReset_Click(object sender, RoutedEventArgs e)
 
@@ -1441,12 +1241,6 @@ namespace SOLUM_UI
             if (CmbFilterBarangay != null) CmbFilterBarangay.SelectedIndex = 0;
 
             if (CmbFilterStatus != null) CmbFilterStatus.SelectedIndex = 0;
-
-
-
-
-
-
 
             _sexFilter = "All";
 
@@ -1460,23 +1254,15 @@ namespace SOLUM_UI
 
             _isIndigenousFilter = null;
 
-
-
             FilterPopup.IsOpen = false;
             UpdateFilterBadge();
             ApplyFiltersAndPage();
 
         }
 
-
-
         private void StatusOpt_Click(object sender, MouseButtonEventArgs e) { }
 
-
-
         private void SexOpt_Click(object sender, MouseButtonEventArgs e) { }
-
-
 
         private void RecordSortControl_SortChanged(object sender, RecordSortEventArgs e)
 
@@ -1487,8 +1273,6 @@ namespace SOLUM_UI
             ApplyFiltersAndPage();
 
         }
-
-
 
         private void RecordsListColumnHeader_Click(object sender, RoutedEventArgs e)
 
@@ -1506,8 +1290,6 @@ namespace SOLUM_UI
 
                 {
 
-
-
                     case "BARANGAY":
 
                         targetField = RecordSortField.Barangay;
@@ -1522,8 +1304,6 @@ namespace SOLUM_UI
                         break;
 
                 }
-
-
 
                 if (targetField.HasValue && SortControl != null)
 
@@ -1543,11 +1323,7 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void RecordsList_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
-
-
 
         private void RecordsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
 
@@ -1557,15 +1333,11 @@ namespace SOLUM_UI
 
             if (vm == null) return;
 
-
-
             AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
 
             OpenViewDialog(vm);
 
         }
-
-
 
         /// <summary>Eye button in the Actions column: same as double-clicking the row.</summary>
 
@@ -1579,23 +1351,17 @@ namespace SOLUM_UI
 
             if (vm == null) return;
 
-
-
             AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
 
             OpenViewDialog(vm);
 
         }
 
-
-
         private async void OpenViewDialog(SoloParentRecordViewModel vm)
 
         {
 
             SoloParentRecord recordToView = vm.RawModel;
-
-
 
             if (Guid.TryParse(vm.Id, out var id))
 
@@ -1613,13 +1379,9 @@ namespace SOLUM_UI
 
             }
 
-
-
             var view = new RecordViewDialog(recordToView) { Owner = Window.GetWindow(this) };
 
             view.ShowDialog();
-
-
 
             if (view.OpenedRenew)
 
@@ -1637,8 +1399,6 @@ namespace SOLUM_UI
 
             }
 
-
-
             if (view.Renewed)
 
             {
@@ -1648,8 +1408,6 @@ namespace SOLUM_UI
                 return;
 
             }
-
-
 
             if (view.OpenedEdit)
 
@@ -1661,8 +1419,6 @@ namespace SOLUM_UI
 
             }
 
-
-
             if (view.OpenedDelete)
 
             {
@@ -1673,8 +1429,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private async void AddNewRecord_Click(object sender, RoutedEventArgs e)
 
         {
@@ -1682,8 +1436,6 @@ namespace SOLUM_UI
             var methodDialog = new EntryMethodDialog { Owner = Window.GetWindow(this) };
 
             bool? picked = methodDialog.ShowDialog();
-
-
 
             if (picked != true || methodDialog.Selected == EntryMethod.None)
 
@@ -1693,15 +1445,11 @@ namespace SOLUM_UI
 
             }
 
-
-
             if (methodDialog.Selected == EntryMethod.Scan)
 
             {
 
                 var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Window.GetWindow(this) };
-
-
 
                 if (ocr.ShowDialog() == true && ocr.Result != null)
 
@@ -1714,8 +1462,6 @@ namespace SOLUM_UI
                 return;
 
             }
-
-
 
             // Manual entry — open 3-step wizard (Step 1 performs validation & duplicate check)
 
@@ -1752,8 +1498,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private async Task SaveNewRecordAsync(SoloParentRecord record)
 
         {
@@ -1761,8 +1505,6 @@ namespace SOLUM_UI
             // Show loading indicator
 
             PageLoadingOverlay.Visibility = Visibility.Visible;
-
-
 
             try
 
@@ -1778,13 +1520,9 @@ namespace SOLUM_UI
 
                     : record.Barangay;
 
-
-
                 var createReq = SoloParentApiService.Instance.MapToCreateRequest(record);
 
                 var createResp = await SoloParentApiService.Instance.CreateSoloParentAsync(createReq);
-
-
 
                 if (!createResp.Succeeded)
                 {
@@ -1797,8 +1535,6 @@ namespace SOLUM_UI
                     Views.Dialogs.ActionConfirmDialog.Error(title, err);
                     return;
                 }
-
-
 
                 record.Id = createResp.Data.ToString();
 
@@ -1828,8 +1564,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private async void Edit_Click(object sender, RoutedEventArgs e)
 
         {
@@ -1839,8 +1573,6 @@ namespace SOLUM_UI
             SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
 
             if (vm == null) return;
-
-
 
             if (IsBasicUser && !string.Equals(vm.RawModel.CreatedBy ?? string.Empty, CurrentUserName, StringComparison.OrdinalIgnoreCase))
 
@@ -1852,13 +1584,9 @@ namespace SOLUM_UI
 
             }
 
-
-
             await EditRecordAsync(vm.RawModel);
 
         }
-
-
 
         private async Task RenewRecordQuickAsync(SoloParentRecord record, bool skipConfirmation = false)
 
@@ -1878,8 +1606,6 @@ namespace SOLUM_UI
 
             }
 
-
-
             if (!record.CanRenew(out string quickRenewReason, out _))
 
             {
@@ -1896,8 +1622,6 @@ namespace SOLUM_UI
 
             }
 
-
-
             if (!skipConfirmation)
 
             {
@@ -1907,8 +1631,6 @@ namespace SOLUM_UI
                 string nextExpiry = DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
 
                 const string renewIcon = "M12,4V1L8,5L12,9V6C15.31,6 18,8.69 18,12C18,13.04 17.73,14.01 17.27,14.86L18.74,16.33C19.54,15.08 20,13.6 20,12C20,7.58 16.42,4 12,4M12,18C8.69,18 6,15.31 6,12C6,10.96 6.27,9.99 6.73,9.14L5.26,7.67C4.46,8.92 4,10.4 4,12C4,16.42 7.58,20 12,20V23L16,19L12,15V18Z";
-
-
 
                 bool isConfirmed = Views.Dialogs.ActionConfirmDialog.Show(
 
@@ -1926,13 +1648,9 @@ namespace SOLUM_UI
 
                     customIconData: renewIcon);
 
-
-
                 if (!isConfirmed) return;
 
             }
-
-
 
             PageLoadingOverlay.Visibility = Visibility.Visible;
 
@@ -1951,8 +1669,6 @@ namespace SOLUM_UI
                         ? expDt.ToString("MMMM d, yyyy")
 
                         : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
-
-
 
                     ToastNotification.Show("Record Renewed", $"{record.Name} — valid until {newExpiry}.", ToastType.Success);
 
@@ -1998,8 +1714,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private async Task RenewRecordAsync(SoloParentRecord original, SoloParentRecord updated, SoloParentDto existingDto = null)
 
         {
@@ -2018,8 +1732,6 @@ namespace SOLUM_UI
 
             }
 
-
-
             if (!original.CanRenew(out string renewReason, out _))
 
             {
@@ -2035,8 +1747,6 @@ namespace SOLUM_UI
                 return;
 
             }
-
-
 
             PageLoadingOverlay.Visibility = Visibility.Visible;
 
@@ -2060,13 +1770,9 @@ namespace SOLUM_UI
 
                 }
 
-
-
                 var renewReq = SoloParentApiService.Instance.MapToRenewRequest(guid, updated, existingDto);
 
                 var renewResp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid, renewReq);
-
-
 
                 if (!renewResp.Succeeded)
 
@@ -2086,21 +1792,15 @@ namespace SOLUM_UI
 
                 }
 
-
-
                 string newExpiry = (renewResp.Data != null && DateTime.TryParse(renewResp.Data.ExpiresAt, out var expDt))
 
                     ? expDt.ToString("MMMM d, yyyy")
 
                     : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
 
-
-
                 ToastNotification.Show("Record Renewed",
 
                     $"{original.Name} — valid until {newExpiry}.", ToastType.Success);
-
-
 
                 var changeService = new ChangeTrackingService();
 
@@ -2124,8 +1824,6 @@ namespace SOLUM_UI
 
                 }
 
-
-
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
@@ -2145,8 +1843,6 @@ namespace SOLUM_UI
             }
 
         }
-
-
 
         private async Task EditRecordAsync(SoloParentRecord rawRecord)
 
@@ -2171,8 +1867,6 @@ namespace SOLUM_UI
                 }
 
             }
-
-
 
             RecordDialog dialog = new RecordDialog(rawRecord) { Owner = Window.GetWindow(this) };
             dialog.SaveAsyncHandler = async (rec) =>
@@ -2204,8 +1898,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private async void Renew_Click(object sender, RoutedEventArgs e)
 
         {
@@ -2226,19 +1918,13 @@ namespace SOLUM_UI
 
             }
 
-
-
             SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
 
             string recordName = vm != null ? vm.Name : id;
 
-
-
             SoloParentRecord rawRecord = vm?.RawModel;
 
             SoloParentDto existingDto = null;
-
-
 
             PageLoadingOverlay.Visibility = Visibility.Visible;
 
@@ -2268,11 +1954,7 @@ namespace SOLUM_UI
 
             }
 
-
-
             if (rawRecord == null) rawRecord = new SoloParentRecord { Id = id, Surname = recordName };
-
-
 
             if (!rawRecord.CanRenew(out string renewalEligibilityReason, out _))
 
@@ -2289,8 +1971,6 @@ namespace SOLUM_UI
                 return;
 
             }
-
-
 
             var dialog = new RenewalReassessmentDialog(rawRecord, existingDto)
 
@@ -2310,8 +1990,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private async void Delete_Click(object sender, RoutedEventArgs e)
 
         {
@@ -2326,8 +2004,6 @@ namespace SOLUM_UI
 
             }
 
-
-
             string id = (sender as Button)?.Tag?.ToString() ?? string.Empty;
 
             SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
@@ -2337,8 +2013,6 @@ namespace SOLUM_UI
             await DeleteRecordAsync(id, recordName);
 
         }
-
-
 
         private async Task DeleteRecordAsync(string id, string recordName)
 
@@ -2354,8 +2028,6 @@ namespace SOLUM_UI
 
             }
 
-
-
             if (!Guid.TryParse(id, out var guid))
 
             {
@@ -2365,8 +2037,6 @@ namespace SOLUM_UI
                 return;
 
             }
-
-
 
             bool isConfirmed = ActionConfirmDialog.Show(
 
@@ -2382,17 +2052,11 @@ namespace SOLUM_UI
 
                 owner: Window.GetWindow(this));
 
-
-
             if (!isConfirmed) return;
-
-
 
             // Show loading indicator
 
             PageLoadingOverlay.Visibility = Visibility.Visible;
-
-
 
             try
 
@@ -2420,8 +2084,6 @@ namespace SOLUM_UI
 
                 }
 
-
-
                 ToastNotification.Show("Record Deleted", "The record was removed.", ToastType.Warning);
 
                 AuditLogService.Instance.LogDelete(id, recordName, GetCurrentUser(), CurrentUserRole);
@@ -2442,8 +2104,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void ExportRecord_Click(object sender, RoutedEventArgs e)
 
         {
@@ -2453,8 +2113,6 @@ namespace SOLUM_UI
             SoloParentRecordViewModel vm = _allRecords?.Find(r => r.Id == id);
 
             if (vm == null) return;
-
-
 
             var dlg = new Microsoft.Win32.SaveFileDialog
 
@@ -2468,11 +2126,7 @@ namespace SOLUM_UI
 
             };
 
-
-
             if (dlg.ShowDialog() != true) return;
-
-
 
             try
 
@@ -2502,8 +2156,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
 
         {
@@ -2513,8 +2165,6 @@ namespace SOLUM_UI
             UpdateDynamicPageSize();
 
         }
-
-
 
         private void ResizeNameColumn()
         {
@@ -2555,9 +2205,6 @@ namespace SOLUM_UI
             }
         }
 
-
-
-
         private void BasicSearchName_TextChanged(object sender, TextChangedEventArgs e)
 
         {
@@ -2565,8 +2212,6 @@ namespace SOLUM_UI
             ApplyFiltersAndPage();
 
         }
-
-
 
         private async void BasicUserAddRecord_Click(object sender, RoutedEventArgs e)
 
@@ -2576,8 +2221,6 @@ namespace SOLUM_UI
 
             bool? picked = methodDialog.ShowDialog();
 
-
-
             if (picked != true || methodDialog.Selected == EntryMethod.None)
 
             {
@@ -2586,15 +2229,11 @@ namespace SOLUM_UI
 
             }
 
-
-
             if (methodDialog.Selected == EntryMethod.Scan)
 
             {
 
                 var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Window.GetWindow(this) };
-
-
 
                 if (ocr.ShowDialog() == true && ocr.Result != null)
 
@@ -2608,13 +2247,9 @@ namespace SOLUM_UI
 
             }
 
-
-
             // Manual entry — open RecordDialog Step 1 (Primary Info) directly
 
             RecordDialog dialog = new RecordDialog() { Owner = Window.GetWindow(this) };
-
-
 
             if (dialog.ShowDialog() == true && dialog.Result != null)
 
@@ -2626,11 +2261,7 @@ namespace SOLUM_UI
 
         }
 
-
-
         private string GetCurrentUser() => !string.IsNullOrEmpty(CurrentUserName) ? CurrentUserName : "Admin";
-
-
 
         private bool HasSearchQuery()
 
@@ -2672,8 +2303,6 @@ namespace SOLUM_UI
 
         }
 
-
-
         /// <summary>
 
         /// Hides the delete button in each row for non-admin users.
@@ -2688,8 +2317,6 @@ namespace SOLUM_UI
 
             if (IsAdmin) return;
 
-
-
             // Walk the visual tree after the ListView renders
 
             Dispatcher.BeginInvoke(new Action(() =>
@@ -2701,8 +2328,6 @@ namespace SOLUM_UI
             }), System.Windows.Threading.DispatcherPriority.Loaded);
 
         }
-
-
 
         private void HideDeleteInContainer(System.Windows.DependencyObject parent)
 
@@ -2738,10 +2363,6 @@ namespace SOLUM_UI
 
         }
 
-
-
-
-
         /// <summary>
 
         /// Compares two records field-by-field and returns a structured list of
@@ -2760,8 +2381,6 @@ namespace SOLUM_UI
 
             var changes = new List<SOLUM_UI.Models.ChangeDetail>();
 
-
-
             void Check(string label, string a, string b)
 
             {
@@ -2775,8 +2394,6 @@ namespace SOLUM_UI
                     changes.Add(new SOLUM_UI.Models.ChangeDetail(label, oldVal, newVal));
 
             }
-
-
 
             Check("Last Name", before.Surname, after.Surname);
 
@@ -2834,8 +2451,6 @@ namespace SOLUM_UI
 
                 before.CircumstanceF != after.CircumstanceF;
 
-
-
             if (!circChanged)
 
             {
@@ -2864,8 +2479,6 @@ namespace SOLUM_UI
 
             }
 
-
-
             if (circChanged)
 
             {
@@ -2884,8 +2497,6 @@ namespace SOLUM_UI
 
             Check("Other Sources of Income", before.OtherIncomeSource, after.OtherIncomeSource);
 
-
-
             if (before.DateOfBirth != after.DateOfBirth)
 
                 changes.Add(new SOLUM_UI.Models.ChangeDetail(
@@ -2896,13 +2507,9 @@ namespace SOLUM_UI
 
                     after.DateOfBirth != DateTime.MinValue ? after.DateOfBirth.ToString("yyyy-MM-dd") : "—"));
 
-
-
             return changes;
 
         }
-
-
 
         public SoloParentRecordViewModel FindRecord(string spId)
 
@@ -2911,8 +2518,6 @@ namespace SOLUM_UI
             return _allRecords?.Find(r => r.Id == spId);
 
         }
-
-
 
         public void HighlightRecord(string spId)
 
@@ -2934,16 +2539,11 @@ namespace SOLUM_UI
 
         }
 
-
-
         private void PageLoadingOverlay_Loaded(object sender, RoutedEventArgs e)
 
         {
 
-
-
         }
-
 
         // ==================== Status Tabs & Filter Badges ====================
 

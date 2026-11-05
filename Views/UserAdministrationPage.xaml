@@ -4,16 +4,16 @@
       xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
       Title="User Administration"
       Background="#FFFFFF">
-
+
     <Page.Resources>
-
+
         <Style x:Key="FieldLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="#333333"/>
             <Setter Property="Margin" Value="0,0,0,5"/>
         </Style>
-
+
         <Style x:Key="FormBox" TargetType="TextBox">
             <Setter Property="Height" Value="40"/>
             <Setter Property="Padding" Value="12,0"/>
@@ -44,13 +44,13 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+
         <Style x:Key="FormBoxReadOnly" TargetType="TextBox" BasedOn="{StaticResource FormBox}">
             <Setter Property="Background" Value="#F5F5F5"/>
             <Setter Property="Foreground" Value="#888888"/>
             <Setter Property="IsReadOnly" Value="True"/>
         </Style>
-
+
         <Style x:Key="FormPass" TargetType="PasswordBox">
             <Setter Property="Height" Value="40"/>
             <Setter Property="Padding" Value="12,0"/>
@@ -81,7 +81,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+
         <Style x:Key="FormCombo" TargetType="ComboBox">
             <Setter Property="Height" Value="40"/>
             <Setter Property="FontSize" Value="13"/>
@@ -160,7 +160,7 @@
                 </Style>
             </Style.Resources>
         </Style>
-
+
         <!-- On-Theme Filter ComboBox (Matching Search Box Pill Styling) -->
         <Style x:Key="FilterComboBox" TargetType="ComboBox">
             <Setter Property="Height" Value="44"/>
@@ -214,7 +214,7 @@
                                     </ToggleButton>
                                 </Grid>
                             </Border>
-
+
                             <Popup x:Name="PART_Popup"
                                    Placement="Bottom"
                                    VerticalOffset="4"
@@ -283,14 +283,14 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+
         <Style x:Key="ErrorText" TargetType="TextBlock">
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Foreground" Value="#E53935"/>
             <Setter Property="Margin" Value="2,3,0,0"/>
             <Setter Property="Visibility" Value="Collapsed"/>
         </Style>
-
+
         <Style x:Key="TableHeaderText" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="11"/>
@@ -298,7 +298,7 @@
             <Setter Property="Foreground" Value="#702943"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
-
+
         <Style x:Key="RowContextMenu" TargetType="ContextMenu">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#E0CDD3"/>
@@ -322,7 +322,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+
         <Style x:Key="RowMenuItem" TargetType="MenuItem">
             <Setter Property="Height" Value="34"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -357,7 +357,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+
         <Style x:Key="DangerMenuItem" TargetType="MenuItem" BasedOn="{StaticResource RowMenuItem}">
             <Setter Property="Foreground" Value="#E53935"/>
             <Setter Property="Template">
@@ -386,7 +386,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+
         <Style x:Key="RowMenuSeparator" TargetType="Separator">
             <Setter Property="Background" Value="#F0E8EC"/>
             <Setter Property="Margin" Value="4,4"/>
@@ -399,7 +399,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+
         <Style x:Key="PagerBtn" TargetType="Button">
             <Setter Property="Height" Value="26"/>
             <Setter Property="Padding" Value="10,0"/>
@@ -422,20 +422,20 @@
             </Style.Triggers>
         </Style>
     </Page.Resources>
-
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition x:Name="ColPanel" Width="0"/>
         </Grid.ColumnDefinitions>
-
+
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
+
             <!-- Row 0: Page Title & Header -->
             <Grid Grid.Row="0" Margin="24,16,24,8">
                 <Grid.ColumnDefinitions>
@@ -529,14 +529,14 @@
                     </Button>
                 </StackPanel>
             </Grid>
-
+
                         <Grid Grid.Row="1" Margin="24,6,24,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
+
                 <Border Grid.Column="0" Background="White" CornerRadius="22"
                         BorderBrush="#E0D0D5" BorderThickness="1.5" Height="44">
                     <Border.Effect>
@@ -582,7 +582,7 @@
                         </TextBox>
                     </Grid>
                 </Border>
-
+
                                 <!-- Role Filter (On-Theme) -->
                 <ComboBox x:Name="CmbRoleFilter" Grid.Column="1" Width="175" Height="44"
                           Margin="12,0,0,0"
@@ -594,7 +594,7 @@
                     <ComboBoxItem Content="Barangay Secretary" Tag="BarangaySecretary"/>
                     <ComboBoxItem x:Name="CmbFilterRoleSuperAdmin" Content="SuperAdmin" Tag="SuperAdmin"/>
                 </ComboBox>
-
+
                 <!-- Status Filter (On-Theme) -->
                 <ComboBox x:Name="CmbUserStatus" Grid.Column="2" Width="145" Height="44"
                           Margin="12,0,0,0"
@@ -605,7 +605,7 @@
                     <ComboBoxItem Content="Disabled" Tag="DISABLED"/>
                 </ComboBox>
             </Grid>
-
+
             <!-- Row 2: Unified Modern Table Card -->
             <Border Grid.Row="2" Margin="24,4,24,20" Background="White"
                     BorderBrush="#E8D4DA" BorderThickness="1.5" CornerRadius="14"
@@ -627,7 +627,7 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-
+
                     <!-- Table Content (Header + Body) -->
                     <Grid Grid.Row="0">
                 <Grid>
@@ -635,7 +635,7 @@
                         <RowDefinition Height="46"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-
+
                     <!-- Table Header -->
                     <Border Grid.Row="0" Background="#FAF2F5"
                             BorderBrush="#EBD8DE" BorderThickness="0,0,0,1">
@@ -668,7 +668,7 @@
                             </Border>
                         </Grid>
                     </Border>
-
+
                     <!-- Table Body & Empty State Container -->
                     <Grid Grid.Row="1">
                         <ListView x:Name="UserList"
@@ -715,7 +715,7 @@
                                             <ColumnDefinition Width="140"/>
                                             <ColumnDefinition Width="130"/>
                                         </Grid.ColumnDefinitions>
-
+
                                         <!-- Col 0: User Identity -->
                                         <Border Grid.Column="0" Padding="20,10,12,10" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0">
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -733,7 +733,7 @@
                                                 </StackPanel>
                                             </StackPanel>
                                         </Border>
-
+
                                         <!-- Col 1: Role Badge -->
                                         <Border Grid.Column="1" Padding="12,10" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0">
                                             <Border CornerRadius="12" Background="{Binding RoleBadgeColor}"
@@ -749,7 +749,7 @@
                                                 </StackPanel>
                                             </Border>
                                         </Border>
-
+
                                         <!-- Col 2: Assigned Jurisdiction / Area -->
                                         <Border Grid.Column="2" Padding="12,10" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0">
                                             <Border CornerRadius="6" Background="{Binding ScopeBadgeBackground}"
@@ -766,7 +766,7 @@
                                                 </StackPanel>
                                             </Border>
                                         </Border>
-
+
                                         <!-- Col 3: Contact Number -->
                                         <Border Grid.Column="3" Padding="12,10" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0">
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -778,7 +778,7 @@
                                                            TextTrimming="CharacterEllipsis"/>
                                             </StackPanel>
                                         </Border>
-
+
                                         <!-- Col 4: Status Badge & Password Status -->
                                         <Border Grid.Column="4" Padding="6,8" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0">
                                             <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -801,7 +801,7 @@
                                                 </Border>
                                             </StackPanel>
                                         </Border>
-
+
                                         <!-- Col 5: Row Actions -->
                                         <Border Grid.Column="5" Padding="8,10" BorderThickness="0">
                                             <StackPanel Orientation="Horizontal"
@@ -838,7 +838,7 @@
                                                         <TextBlock Text="Edit" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
                                                     </StackPanel>
                                                 </Button>
-
+
                                                 <!-- More Actions (⋮) Button with Dropdown Menu -->
                                                 <Button Width="28" Height="28" BorderThickness="1"
                                                         BorderBrush="#E8D4DA" Background="#FFFFFF" Cursor="Hand"
@@ -910,7 +910,7 @@
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-
+
                         <!-- Empty State Panel -->
                         <StackPanel x:Name="EmptyStatePanel"
                                     VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -945,7 +945,7 @@
                                 <TextBlock Text="Clear Filters" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
                             </Button>
                         </StackPanel>
-
+
                         <components:UserTableSkeletonLoader x:Name="UsersSkeletonLoader"
                                                             Visibility="Collapsed"
                                                             HorizontalAlignment="Stretch"
@@ -954,7 +954,7 @@
                     </Grid>
                 </Grid>
                     </Grid>
-
+
                     <!-- Integrated Card Footer for Pagination -->
                     <Border Grid.Row="1" Background="#FAF6F8" BorderBrush="#EFE4E8" BorderThickness="0,1.2,0,0" Padding="18,10">
                         <Grid VerticalAlignment="Center">
@@ -962,14 +962,14 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
+
                             <!-- Dynamic Record Count Summary on Left -->
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                 <Ellipse Width="6" Height="6" Fill="#22C55E" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <TextBlock x:Name="TxtUsersPageSummary" Text="Showing 0 of 0" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="TxtUsersSummary" Visibility="Collapsed"/>
                             </StackPanel>
-
+
                             <!-- Centered Navigation Controls (Centered across entire width) -->
                             <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Button x:Name="BtnPrevPage" Width="105" Height="34" Cursor="Hand" Click="BtnPrevPage_Click" Margin="0,0,10,0">
@@ -1027,7 +1027,7 @@
                 </Grid>
             </Border>
         </Grid>
-
+
         <Border x:Name="AddUserPanel" Grid.Column="1" Background="White" BorderBrush="#E2E8F0"
                 BorderThickness="1" Width="300" CornerRadius="12"
                 VerticalAlignment="Stretch" Margin="0,20,24,24">
@@ -1040,7 +1040,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-
+
                 <Border Grid.Row="0" BorderBrush="#F0EEF1" BorderThickness="0,0,0,1" Padding="24,18">
                     <Grid>
                         <StackPanel>
@@ -1068,7 +1068,7 @@
                         </Button>
                     </Grid>
                 </Border>
-
+
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,16,24,0">
                     <StackPanel>
                         <Grid Margin="0,0,0,14">
@@ -1090,13 +1090,13 @@
                                 <TextBlock x:Name="ErrLastName" Text="Required." Style="{StaticResource ErrorText}"/>
                             </StackPanel>
                         </Grid>
-
+
                         <StackPanel Margin="0,0,0,14">
                             <TextBlock Text="Email Address *" Style="{StaticResource FieldLabel}"/>
                             <TextBox x:Name="TxtEmail" Style="{StaticResource FormBox}" TextChanged="ClearErrors"/>
                             <TextBlock x:Name="ErrEmail" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
-
+
                         <StackPanel Margin="0,0,0,14">
                             <TextBlock Text="Position / Role *" Style="{StaticResource FieldLabel}"/>
                             <ComboBox x:Name="CmbRole" Style="{StaticResource FormCombo}" SelectionChanged="CmbRole_SelectionChanged">
@@ -1107,7 +1107,7 @@
                             </ComboBox>
                             <TextBox x:Name="TxtPosition" Text="ENCODER" Style="{StaticResource FormBoxReadOnly}" Visibility="Collapsed"/>
                         </StackPanel>
-
+
                         <!-- Assigned Barangay (Required for Barangay Secretary) -->
                         <StackPanel x:Name="PnlUserBarangay" Margin="0,0,0,14" Visibility="Collapsed">
                             <TextBlock Text="Assigned Barangay * (Required for Barangay Secretary)" Style="{StaticResource FieldLabel}"/>
@@ -1140,7 +1140,7 @@
                             </ComboBox>
                             <TextBlock x:Name="ErrUserBarangay" Text="Barangay is required for Barangay Secretary." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
-
+
                         <StackPanel x:Name="PnlAccountStatus" Margin="0,0,0,14" Visibility="Collapsed">
                             <TextBlock Text="Account Status *" Style="{StaticResource FieldLabel}"/>
                             <ComboBox x:Name="CmbEditStatus" Style="{StaticResource FormCombo}">
@@ -1148,14 +1148,14 @@
                                 <ComboBoxItem Content="DISABLED" Tag="false"/>
                             </ComboBox>
                         </StackPanel>
-
+
                         <StackPanel Margin="0,0,0,14">
                             <TextBlock Text="Contact Number *" Style="{StaticResource FieldLabel}"/>
                             <TextBox x:Name="TxtContactNumber" Style="{StaticResource FormBox}" TextChanged="ClearErrors"
                                      PreviewTextInput="ContactNumber_PreviewTextInput" MaxLength="13"/>
                             <TextBlock x:Name="ErrContactNumber" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
-
+
                         <!-- Autogenerated Password Block -->
                         <StackPanel x:Name="PnlPassword" Margin="0,0,0,14">
                             <Grid Margin="0,0,0,5">
@@ -1163,7 +1163,7 @@
                                 <TextBlock Text="Autogenerated" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold"
                                            Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                             </Grid>
-
+
                             <Border Background="#FBF8F9" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1.5" Height="40" Padding="10,0,6,0">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -1172,19 +1172,19 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-
+
                                     <!-- Visible Password -->
                                     <TextBox x:Name="TxtGeneratedPassword" Grid.Column="0"
                                              IsReadOnly="True" BorderThickness="0" Background="Transparent"
                                              FontFamily="Consolas" FontSize="13" FontWeight="Bold" Foreground="#702943"
                                              VerticalAlignment="Center"/>
-
+
                                     <!-- Masked Password (Dots) -->
                                     <PasswordBox x:Name="PwdGeneratedPasswordMasked" Grid.Column="0"
                                                  IsEnabled="False" BorderThickness="0" Background="Transparent"
                                                  FontFamily="Segoe UI" FontSize="13" Foreground="#702943"
                                                  VerticalAlignment="Center" Visibility="Collapsed"/>
-
+
                                     <!-- Toggle Mask / Eye Button -->
                                     <Button x:Name="BtnTogglePasswordMask" Grid.Column="1"
                                             Width="28" Height="28" Background="Transparent" BorderThickness="0"
@@ -1206,7 +1206,7 @@
                                               Data="M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z"
                                               Fill="#702943" Stretch="Uniform" Width="14" Height="14"/>
                                     </Button>
-
+
                                     <!-- Regenerate Button -->
                                     <Button x:Name="BtnRegeneratePassword" Grid.Column="2"
                                             Width="28" Height="28" Background="Transparent" BorderThickness="0"
@@ -1227,7 +1227,7 @@
                                         <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
                                               Fill="#702943" Stretch="Uniform" Width="13" Height="13"/>
                                     </Button>
-
+
                                     <!-- Quick Copy Button -->
                                     <Button x:Name="BtnCopyPassword" Grid.Column="3"
                                             Width="28" Height="28" Background="Transparent" BorderThickness="0"
@@ -1253,7 +1253,7 @@
                             <TextBlock Text="A secure temporary password is generated. The user should change it upon first login."
                                        FontFamily="Segoe UI" FontSize="11" Foreground="#777777" TextWrapping="Wrap" Margin="0,5,0,0"/>
                         </StackPanel>
-
+
                         <!-- Edit Mode: Admin Password Reset Quick Action -->
                         <Border x:Name="PnlEditPasswordReset" Visibility="Collapsed"
                                 Background="#FFF8FA" BorderBrush="#EBD3DC" BorderThickness="1.5"
@@ -1290,7 +1290,7 @@
                                 </Button>
                             </StackPanel>
                         </Border>
-
+
                         <Border x:Name="FormErrorBanner" Visibility="Collapsed"
                                 Background="#FFF3F3" CornerRadius="8"
                                 BorderBrush="#FFCCCC" BorderThickness="1"
@@ -1301,7 +1301,7 @@
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
-
+
                 <Border Grid.Row="2" BorderBrush="#F0EEF1" BorderThickness="0,1,0,0" Padding="24,14">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -1346,8 +1346,7 @@
                 </Border>
             </Grid>
         </Border>
-
-
+
         <components:LoadingOverlay x:Name="UsersLoadingOverlay"
                                    Grid.RowSpan="99" Grid.ColumnSpan="99"
                                    Panel.ZIndex="9999"/>

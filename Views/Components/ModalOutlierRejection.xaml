@@ -169,8 +169,6 @@
                          Text="{Binding OutlierNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Margin="0,0,0,22"/>
 
-
-
                 <!-- Modal Actions Styled after Form CancelBtn and SaveBtn -->
                 <Grid>
                     <Grid.ColumnDefinitions>

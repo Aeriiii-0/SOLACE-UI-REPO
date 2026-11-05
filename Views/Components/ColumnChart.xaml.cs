@@ -28,19 +28,19 @@ namespace SOLUM_UI.Views.Components
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var chart = (ColumnChart)d;
-            
+
             // Unsubscribe from old collection
             if (e.OldValue is ObservableCollection<ColumnChartData> oldCollection)
             {
                 oldCollection.CollectionChanged -= chart.OnCollectionChanged;
             }
-            
+
             // Subscribe to new collection
             if (e.NewValue is ObservableCollection<ColumnChartData> newCollection)
             {
                 newCollection.CollectionChanged += chart.OnCollectionChanged;
             }
-            
+
             chart.RenderChart();
         }
 

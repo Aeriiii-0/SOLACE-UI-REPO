@@ -7,7 +7,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
-    
+
     <!-- Single Unified Ribbon Container with Upper Configuration Row and Lower Batch Row -->
     <Border Background="#FBF5F7" MinHeight="98" CornerRadius="12" BorderBrush="#D4A0B0" BorderThickness="1" Padding="16,12" Margin="0,0,0,6">
         <Grid VerticalAlignment="Center">
@@ -108,7 +108,6 @@
                             </StackPanel>
                         </Border>
                     </Popup>
-
 
                     <!-- Refresh Queue Icon Button (At the End of the Ribbon) -->
                     <Button Width="32" Height="32" Cursor="Hand"

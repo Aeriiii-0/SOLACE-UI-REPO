@@ -421,7 +421,7 @@ namespace SOLUM_UI
             // Use safe barangay - get from current user with "ALL" fallback if empty
             string userBarangay = MainWindow.CurrentUserBarangay;
             string safeBarangay = !string.IsNullOrWhiteSpace(userBarangay) ? userBarangay : "ALL";
-            
+
             PrimaryData = new PreCheckResult
             {
                 LastName   = TxtLastName.Text.Trim(),

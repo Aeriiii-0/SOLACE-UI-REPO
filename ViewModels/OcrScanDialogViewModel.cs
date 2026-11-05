@@ -252,7 +252,6 @@ namespace SOLUM_UI.ViewModels
             }
         }
 
-
         public void SetConfidence(double confidence, string rating)
         {
             int pct = (int)(confidence * 100);

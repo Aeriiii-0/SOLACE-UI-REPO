@@ -76,7 +76,6 @@ namespace SOLUM_UI.ViewModels
             set { _searchText = value; OnPropertyChanged(); }
         }
 
-
         private string _selectedFilter = "All";
         public string SelectedFilter
         {

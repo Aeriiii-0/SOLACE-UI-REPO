@@ -252,7 +252,7 @@ namespace SOLUM_UI.Services.Api
                     {
                         // Use a longer timeout to avoid race conditions that trigger false session expirations
                         lockAcquired = await _refreshLock.WaitAsync(TimeSpan.FromSeconds(30));
-                        
+
                         if (lockAcquired)
                         {
                             var refreshResult = await AuthApiService.Instance.RefreshTokenAsync();
@@ -377,7 +377,7 @@ namespace SOLUM_UI.Services.Api
                 if (innerEx != null)
                 {
                     string exceptionTypeName = innerEx.GetType().Name;
-                    
+
                     // Common network connectivity error types
                     if (exceptionTypeName.Contains("IOException") ||
                         exceptionTypeName.Contains("SocketException") ||
@@ -391,7 +391,7 @@ namespace SOLUM_UI.Services.Api
                         return true;
                     }
                 }
-                
+
                 // Check the main exception message
                 if (ex.Message.IndexOf("unable to reach", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     ex.Message.IndexOf("no such host", StringComparison.OrdinalIgnoreCase) >= 0 ||
@@ -400,7 +400,7 @@ namespace SOLUM_UI.Services.Api
                     return true;
                 }
             }
-            
+
             return false;
         }
     }

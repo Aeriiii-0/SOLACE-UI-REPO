@@ -359,8 +359,6 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e) => ApplySize();
 
-
-
         private void ApplySize()
         {
             double workW = SystemParameters.WorkArea.Width;

@@ -20,17 +20,17 @@ namespace SOLUM_UI.Services
             // Header & Accents - Maroon
             public static Color HeaderBackground = Color.FromArgb(0x8B, 0x2E, 0x44);  // Maroon Accent
             public static Color TitleBackground = Color.FromArgb(0x8B, 0x2E, 0x44);   // Title Maroon
-            
+
             // Section Headers - Light Neutral
             public static Color SectionHeader = Color.FromArgb(0xE8, 0xE8, 0xE8);     // Light Gray
-            
+
             // Data Rows - Very Light Pastels
             public static Color AlternateRowLight = Color.FromArgb(0xF5, 0xF0, 0xED); // Very light warm beige
             public static Color AlternateRowAlt = Color.FromArgb(0xFF, 0xFF, 0xFF);   // Pure white
-            
+
             // Borders - Subtle but visible
             public static Color BorderColor = Color.FromArgb(0xC0, 0xC0, 0xC0);       // Medium gray border
-            
+
             // Text
             public static Color TextDark = Color.FromArgb(0x1F, 0x1F, 0x1F);          // Near black
             public static Color TextWhite = Color.White;
@@ -56,7 +56,7 @@ namespace SOLUM_UI.Services
             // EPPlus 8.7.1: Set license for non-commercial use
             // Using organization license for DSWD Solo Parents Program
             ExcelPackage.License.SetNonCommercialOrganization("DSWD Solo Parents Program");
-            
+
             using (var pkg = new ExcelPackage())
             {
                 BuildAnalyticsSheet(pkg, analyticsData, municipality, region, focalPersonName);

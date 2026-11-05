@@ -11,34 +11,34 @@ using SOLUM_UI.Services.Api;
 using SOLUM_UI.Views.Dialogs;
 using SOLUM_UI.Views.Pages;
 using SOLUM_UI.ViewModels;
-
+
 namespace SOLUM_UI
 {
     public partial class MainWindow : Window
     {
         private Button _activeButton;
-
+
         public static readonly DependencyProperty IsNavActiveProperty =
             DependencyProperty.RegisterAttached("IsNavActive", typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
-
+
         public static void SetIsNavActive(DependencyObject obj, bool value) => obj.SetValue(IsNavActiveProperty, value);
         public static bool GetIsNavActive(DependencyObject obj) => (bool)obj.GetValue(IsNavActiveProperty);
-
+
         public static string CurrentUserName { get; set; } = "ADMIN USER";
         public static string CurrentUserId { get; set; } = string.Empty;
         public static string CurrentUserRole { get; set; } = "ADMINISTRATOR";
         public static string CurrentUserBarangay { get; set; } = string.Empty;
-
+
         public static string CurrentUserEmail { get; set; } = string.Empty;
-
+
         public static string FirstName { get; set; } = string.Empty;
-
+
         public static string LastName { get; set; } = string.Empty;
-
+
         public static string ContactNumber { get; set; } = string.Empty;
-
+
         public static string FullName => $"{FirstName} {LastName}".Trim().ToUpper();
-
+
         public static void SetCurrentUser(ApplicationUserDTO user)
         {
             if (user != null)
@@ -76,7 +76,7 @@ namespace SOLUM_UI
                 CurrentUserId = AuthApiService.Instance.CurrentUserId ?? string.Empty;
             }
         }
-
+
         /// <summary>
         /// Gets the current user's barangay with null safety. 
         /// Returns the barangay if set, otherwise returns "ALL" as safe default.
@@ -85,10 +85,10 @@ namespace SOLUM_UI
         {
             return !string.IsNullOrWhiteSpace(CurrentUserBarangay) ? CurrentUserBarangay : "ALL";
         }
-
+
         private Dictionary<string, Button> _navButtons = new Dictionary<string, Button>();
         private Dictionary<string, Page> _pageCache = new Dictionary<string, Page>(); // NEW — one instance per page tag
-
+
         public MainWindow(ApplicationUserDTO user)
         {
             InitializeComponent();
@@ -107,7 +107,7 @@ namespace SOLUM_UI
             };
             SetCurrentUser(user);
         }
-
+
         // NEW — returns the cached page instance for this tag, creating it once on first use
         private Page GetOrCreatePage(string tag, Func<Page> factory)
         {
@@ -118,7 +118,7 @@ namespace SOLUM_UI
             }
             return page;
         }
-
+
         private async Task CheckAdminReviewsOnStartupAsync()
         {
             try
@@ -127,19 +127,19 @@ namespace SOLUM_UI
                                string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase) ||
                                string.Equals(CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase) ||
                                AuthApiService.Instance.IsAdmin || AuthApiService.Instance.IsSuperAdmin;
-
+
                 if (!isAdmin) return;
-
+
                 // Brief delay so main dashboard completes initial render
                 await Task.Delay(800);
-
+
                 var dashRes = await AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
                 if (dashRes != null && dashRes.Succeeded && dashRes.Data != null)
                 {
                     int expiring = dashRes.Data.RenewalsDueThisMonth;
                     int inactive = dashRes.Data.InactiveRecords;
                     int pending = dashRes.Data.PendingReviewCount;
-
+
                     if (expiring > 0 || inactive > 0 || pending > 0)
                     {
                         ReviewAlertPopoutDialog.ShowIfReviewsNeeded(this, expiring, inactive, pending);
@@ -151,12 +151,12 @@ namespace SOLUM_UI
                 System.Diagnostics.Debug.WriteLine($"[MainWindow] CheckAdminReviewsOnStartup error: {ex.Message}");
             }
         }
-
+
         public void ClearPageCache(string tag)
         {
             if (_pageCache.ContainsKey(tag)) _pageCache.Remove(tag);
         }
-
+
         private void ApplyRoleNavVisibility()
         {
             bool isAdmin = string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
@@ -168,7 +168,7 @@ namespace SOLUM_UI
             if (_navButtons.ContainsKey("SubsidyRecommendation"))
                 _navButtons["SubsidyRecommendation"].Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
         }
-
+
         private void MainFrame_Navigated(object sender, NavigationEventArgs e)
         {
             while (MainFrame.CanGoBack)
@@ -176,7 +176,7 @@ namespace SOLUM_UI
             while (MainFrame.CanGoForward)
                 MainFrame.RemoveBackEntry();
         }
-
+
         // CHANGED — simplified now that caching handles "don't rebuild the same page" for us.
         // This just avoids re-navigating the Frame to the exact same instance it's already showing.
         private void NavigatePage(Page page)
@@ -185,7 +185,7 @@ namespace SOLUM_UI
                 return;
             MainFrame.Navigate(page);
         }
-
+
         private void RegisterNavButtons()
         {
             foreach (Button btn in FindAllButtons(this))
@@ -198,7 +198,7 @@ namespace SOLUM_UI
                 }
             }
         }
-
+
         private List<Button> FindAllButtons(DependencyObject parent)
         {
             List<Button> result = new List<Button>();
@@ -213,7 +213,7 @@ namespace SOLUM_UI
             }
             return result;
         }
-
+
         private void NavButton_Click(object sender, RoutedEventArgs e)
         {
             Button btn = sender as Button;
@@ -222,46 +222,46 @@ namespace SOLUM_UI
             ActivateButton(tag);
             NavigateTo(tag);
         }
-
+
         public void ActivateButton(string tag)
         {
             foreach (Button b in _navButtons.Values)
                 SetIsNavActive(b, false);
-
+
             if (_navButtons.ContainsKey(tag))
             {
                 SetIsNavActive(_navButtons[tag], true);
                 _activeButton = _navButtons[tag];
             }
         }
-
+
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ButtonState == MouseButtonState.Pressed)
                 this.DragMove();
         }
-
+
         private bool _isExiting = false;
-
+
         private async void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (_isExiting) return;
-
+
             e.Cancel = true;
             await PromptExitAndLogoutAsync();
         }
-
+
         private async void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             await PromptExitAndLogoutAsync();
         }
-
+
         private async Task PromptExitAndLogoutAsync()
         {
             if (_isExiting) return;
-
+
             const string logoutIcon = "M17,7L15.59,8.41L18.17,11H8V13H18.17L15.59,15.58L17,17L22,12M4,5H12V3H4A2,2 0 0,0 2,5V19A2,2 0 0,0 4,21H12V19H4V5Z";
-
+
             bool isConfirmed = ActionConfirmDialog.Show(
                 title: "Exit Application",
                 message: "Are you sure you want to sign out and exit the application?",
@@ -270,42 +270,42 @@ namespace SOLUM_UI
                 theme: ConfirmThemeType.Primary,
                 owner: this,
                 customIconData: logoutIcon);
-
+
             if (!isConfirmed) return;
-
+
             _isExiting = true;
-
+
             if (LogoutLoadingOverlay != null)
             {
                 LogoutLoadingOverlay.Visibility = Visibility.Visible;
             }
-
+
             try
             {
                 await AuthApiService.Instance.LogoutAsync();
             }
             catch { }
-
+
             try
             {
                 AuditLogService.Instance.LogLogout(CurrentUserName, CurrentUserRole);
             }
             catch { }
-
+
             AuthApiService.Instance.OnSessionExpired -= HandleSessionExpired;
-
+
             Application.Current.Shutdown();
         }
-
+
         private void MinimizeButton_Click(object sender, RoutedEventArgs e) => this.WindowState = WindowState.Minimized;
-
+
         private void MaximizeButton_Click(object sender, RoutedEventArgs e)
         {
             this.WindowState = this.WindowState == WindowState.Maximized
                 ? WindowState.Normal
                 : WindowState.Maximized;
         }
-
+
         public void NavigateTo(string tag)
         {
             switch (tag)
@@ -329,7 +329,7 @@ namespace SOLUM_UI
                     TopBarControl.PageTitle = tag;
                     break;
             }
-
+
             switch (tag)
             {
                 case "Dashboard":
@@ -379,13 +379,13 @@ namespace SOLUM_UI
                     break;
             }
         }
-
+
         private void TopBarControl_ProfileClicked(object sender, RoutedEventArgs e)
         {
             ActivateButton("UserProfile");
             NavigateTo("UserProfile");
         }
-
+
         private void TopBarControl_ChangePasswordRequested(object sender, RoutedEventArgs e)
         {
             ActivateButton("UserProfile");
@@ -393,19 +393,19 @@ namespace SOLUM_UI
             var page = (UserProfilePage)GetOrCreatePage("UserProfile", () => new UserProfilePage());
             NavigatePage(page);
         }
-
+
         private void TopBarControl_LogoutRequested(object sender, RoutedEventArgs e)
         {
             HandleLogout();
         }
-
+
         private void HandleLogout()
         {
             LogoutOverlay.Visibility = Visibility.Visible;
         }
-
+
         private bool _isSessionExpiredRedirecting = false;
-
+
         private void HandleSessionExpired(string message)
         {
             Dispatcher.Invoke(() =>
@@ -413,31 +413,31 @@ namespace SOLUM_UI
                 if (_isSessionExpiredRedirecting) return;
                 _isSessionExpiredRedirecting = true;
                 AuthApiService.Instance.OnSessionExpired -= HandleSessionExpired;
-
+
                 var login = new LoginPage(message);
                 login.Show();
                 _isExiting = true;
                 this.Close();
             });
         }
-
+
         private void LogoutCancel_Click(object sender, RoutedEventArgs e)
         {
             LogoutOverlay.Visibility = Visibility.Collapsed;
             ActivateButton(_activeButton?.Tag?.ToString() ?? "Dashboard");
         }
-
+
         private async void LogoutConfirm_Click(object sender, RoutedEventArgs e)
         {
             LogoutOverlay.Visibility = Visibility.Collapsed;
             LogoutLoadingOverlay.Visibility = Visibility.Visible;
-
+
             try
             {
                 await AuthApiService.Instance.LogoutAsync();
             }
             catch { }
-
+
             AuthApiService.Instance.OnSessionExpired -= HandleSessionExpired;
             var login = new LoginPage();
             login.Show();
@@ -446,7 +446,7 @@ namespace SOLUM_UI
             _isExiting = true;
             this.Close();
         }
-
+
         public void NavigateToRecord(string spId)
         {
             ActivateButton("SoloParentRecords");
@@ -458,29 +458,29 @@ namespace SOLUM_UI
             page.HighlightRecord(spId);
             NavigatePage(page);
         }
-
+
         public void NavigateToSoloParentRecordsWithFilter(string statusFilter)
         {
             try
             {
                 System.Diagnostics.Debug.WriteLine($"NavigateToSoloParentRecordsWithFilter START - statusFilter: {statusFilter}");
-                
+
                 ActivateButton("SoloParentRecords");
                 SoloParentRecordsPage.CurrentUserName = CurrentUserName;
                 SoloParentRecordsPage.CurrentUserRole = CurrentUserRole;
                 SoloParentRecordsPage.CurrentUserBarangay = CurrentUserBarangay;
                 TopBarControl.PageTitle = "Solo Parent Records";
-                
+
                 // Set the filter FIRST
                 SoloParentRecordsPage.RequestedStatusFilter = statusFilter;
                 System.Diagnostics.Debug.WriteLine($"Set RequestedStatusFilter to: {statusFilter}");
-                
+
                 ClearPageCache("SoloParentRecords"); // Clear cache to ensure fresh page with new filter
                 System.Diagnostics.Debug.WriteLine("Cleared page cache");
-                
+
                 var page = new SoloParentRecordsPage();
                 System.Diagnostics.Debug.WriteLine($"Created new SoloParentRecordsPage instance. RequestedStatusFilter now: {SoloParentRecordsPage.RequestedStatusFilter}");
-                
+
                 NavigatePage(page);
                 System.Diagnostics.Debug.WriteLine("NavigatePage called successfully");
             }

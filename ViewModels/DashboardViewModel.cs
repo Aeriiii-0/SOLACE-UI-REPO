@@ -366,7 +366,7 @@ namespace SOLUM_UI.ViewModels
                 var monthlyResponses = await Task.WhenAll(monthlyTasks);
                 var monthlyValues = new int[12];
                 var registrationDatesList = new List<DateTime>();
-                
+
                 for (int i = 0; i < 12; i++)
                 {
                     var res = monthlyResponses[i];

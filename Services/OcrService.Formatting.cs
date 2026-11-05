@@ -10,8 +10,6 @@ using System.Text.RegularExpressions;
 
 using SOLUM_UI.Models;
 
-
-
 namespace SOLUM_UI.Services
 
 {
@@ -21,8 +19,6 @@ namespace SOLUM_UI.Services
     {
 
         #region Official Biñan Barangays & Fuzzy Matching
-
-
 
         public static readonly string[] BinanBarangays = new[]
 
@@ -39,8 +35,6 @@ namespace SOLUM_UI.Services
             "Soro-Soro", "Timbao", "Tubigan", "Zapote"
 
         };
-
-
 
         private static readonly Dictionary<string, string> BarangayAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 
@@ -108,8 +102,6 @@ namespace SOLUM_UI.Services
 
         };
 
-
-
         /// <summary>
 
         /// Evaluates OCR text against the 24 official Biñan barangays using aliases and fuzzy string matching.
@@ -122,19 +114,13 @@ namespace SOLUM_UI.Services
 
             if (string.IsNullOrWhiteSpace(rawText) || IsOcrNotApplicable(rawText)) return string.Empty;
 
-
-
             string cleaned = rawText.Trim();
 
             if (IsOcrNotApplicable(cleaned)) return string.Empty;
 
-
-
             string norm = NormalizeBarangayText(cleaned);
 
             if (string.IsNullOrEmpty(norm)) return string.Empty;
-
-
 
             // 1. Direct alias match
 
@@ -145,8 +131,6 @@ namespace SOLUM_UI.Services
                 return directAlias;
 
             }
-
-
 
             // 2. Substring check against aliases
 
@@ -164,8 +148,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             // 3. Direct / core name match against canonical barangays
 
             foreach (var brgy in BinanBarangays)
@@ -175,8 +157,6 @@ namespace SOLUM_UI.Services
                 string normBrgy = NormalizeBarangayText(brgy);
 
                 if (normBrgy == norm) return brgy;
-
-
 
                 string core = NormalizeBarangayText(brgy.Split('(')[0].Trim());
 
@@ -190,15 +170,11 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             // 4. Fuzzy Levenshtein / similarity ratio across all candidates
 
             string bestMatch = null;
 
             double bestScore = 0.0;
-
-
 
             var candidates = new List<KeyValuePair<string, string>>();
 
@@ -228,8 +204,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             foreach (var candidate in candidates)
 
             {
@@ -244,8 +218,6 @@ namespace SOLUM_UI.Services
 
                 }
 
-
-
                 if (sim > bestScore)
 
                 {
@@ -258,8 +230,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             if (bestMatch != null && bestScore >= 0.60)
 
             {
@@ -268,17 +238,11 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             return cleaned;
 
         }
 
-
-
         public static readonly string[] StandardExtensions = new[] { "Jr.", "Sr.", "II", "III", "IV", "V" };
-
-
 
         public static string FuzzyMatchExtension(string raw)
 
@@ -300,8 +264,6 @@ namespace SOLUM_UI.Services
 
             if (norm == "v" || norm == "5th" || norm == "five") return "V";
 
-
-
             foreach (var ext in StandardExtensions)
 
             {
@@ -318,8 +280,6 @@ namespace SOLUM_UI.Services
 
         }
 
-
-
         public static string FuzzyMatchSex(string raw)
 
         {
@@ -331,8 +291,6 @@ namespace SOLUM_UI.Services
             norm = Regex.Replace(norm, @"^(sex|gender|kasarian)\s*[:\-_.]*", "");
 
             string clean = Regex.Replace(norm, @"[^a-z]", "");
-
-
 
             // Visual confusion in table cells: F often misread as E, P, T, EF, FE
 
@@ -355,8 +313,6 @@ namespace SOLUM_UI.Services
                     return "Male";
             }
 
-
-
             if (clean.StartsWith("fem") || norm.Contains("female") || norm.Contains("babae"))
 
                 return "Female";
@@ -364,8 +320,6 @@ namespace SOLUM_UI.Services
             if (clean.StartsWith("mas") || (norm.Contains("male") && !norm.Contains("female")) || norm.Contains("lalaki"))
 
                 return "Male";
-
-
 
             if (clean.StartsWith("f"))
 
@@ -375,19 +329,13 @@ namespace SOLUM_UI.Services
 
                 return "Male";
 
-
-
             if (clean.Contains("other") || clean.Contains("lgbt") || clean == "x")
 
                 return "Others";
 
-
-
             return string.Empty;
 
         }
-
-
 
         public static readonly string[] StandardReligions = new[]
 
@@ -413,8 +361,6 @@ namespace SOLUM_UI.Services
 
         };
 
-
-
         public static string FuzzyMatchReligion(string raw)
 
         {
@@ -425,8 +371,6 @@ namespace SOLUM_UI.Services
 
             string clean = Regex.Replace(norm, @"[^a-z0-9]", "");
 
-
-
             // 1. Direct & keyword matching for Catholic
 
             string[] cathKeywords = new[] { "cath", "katol", "roman", "rc", "ctolc", "catol", "katlk", "cthlc", "cathl", "cato", "kato", "ctc" };
@@ -435,13 +379,9 @@ namespace SOLUM_UI.Services
 
                 return "Catholic";
 
-
-
             if (ComputeSimilarity(clean, "catholic") >= 0.45 || ComputeSimilarity(clean, "katoliko") >= 0.45)
 
                 return "Catholic";
-
-
 
             // 2. Other denominations
 
@@ -459,8 +399,6 @@ namespace SOLUM_UI.Services
 
             if (clean.Contains("methodist") || clean.Contains("metod")) return "Methodist";
 
-
-
             foreach (var rel in StandardReligions)
 
             {
@@ -471,13 +409,9 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             return IsOcrNotApplicable(raw) ? string.Empty : clean_text_capitalized(raw);
 
         }
-
-
 
         public static bool IsOcrNotApplicable(string raw)
 
@@ -507,8 +441,6 @@ namespace SOLUM_UI.Services
 
         }
 
-
-
         public static string FuzzyMatchIncome(string raw)
 
         {
@@ -530,8 +462,6 @@ namespace SOLUM_UI.Services
             return digits;
 
         }
-
-
 
         public static readonly string[] StandardCivilStatuses = new[]
 
@@ -555,8 +485,6 @@ namespace SOLUM_UI.Services
 
         };
 
-
-
         public static string FuzzyMatchCivilStatus(string raw)
 
         {
@@ -570,8 +498,6 @@ namespace SOLUM_UI.Services
             string clean = Regex.Replace(norm, @"[^a-z0-9]", "");
 
             string alpha = Regex.Replace(norm, @"[^a-z]", "");
-
-
 
             // 1. Single letter or short abbreviation
 
@@ -603,8 +529,6 @@ namespace SOLUM_UI.Services
 
                 return "Common-law / Live-in";
 
-
-
             // 2. Keyword containment
 
             if (alpha.Contains("single") || alpha.Contains("dalaga") || alpha.Contains("binata") || alpha.Contains("walang"))
@@ -635,8 +559,6 @@ namespace SOLUM_UI.Services
 
                 return "Common-law / Live-in";
 
-
-
             foreach (var st in StandardCivilStatuses)
 
             {
@@ -647,13 +569,9 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             return IsOcrNotApplicable(raw) ? string.Empty : clean_text_capitalized(raw);
 
         }
-
-
 
         public static readonly string[] StandardRelationships = new[]
 
@@ -679,8 +597,6 @@ namespace SOLUM_UI.Services
 
         };
 
-
-
         public static string FuzzyMatchRelationship(string raw)
 
         {
@@ -690,8 +606,6 @@ namespace SOLUM_UI.Services
             string norm = raw.Trim().ToLowerInvariant();
 
             string clean = Regex.Replace(norm, @"[^a-z]", "");
-
-
 
             if (clean.Contains("child") || clean.Contains("anak") || clean.Contains("son") || clean.Contains("daughter") || clean.Contains("dtr") || clean.Contains("bata")) return "Child";
 
@@ -711,8 +625,6 @@ namespace SOLUM_UI.Services
 
             if (clean.Contains("friend") || clean.Contains("kaibigan") || clean.Contains("neighbor") || clean.Contains("kapitbahay") || clean.Contains("other")) return "Other";
 
-
-
             foreach (var r in StandardRelationships)
 
             {
@@ -723,13 +635,9 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             return IsOcrNotApplicable(raw) ? string.Empty : clean_text_capitalized(raw);
 
         }
-
-
 
         public static readonly string[] StandardEducations = new[]
 
@@ -757,8 +665,6 @@ namespace SOLUM_UI.Services
 
         };
 
-
-
         public static string FuzzyMatchEducation(string raw)
 
         {
@@ -768,8 +674,6 @@ namespace SOLUM_UI.Services
             string norm = raw.Trim().ToLowerInvariant();
 
             string clean = Regex.Replace(norm, @"[^a-z0-9]", "");
-
-
 
             // Post Graduate
 
@@ -784,8 +688,6 @@ namespace SOLUM_UI.Services
                 return "Post Graduate";
 
             }
-
-
 
             // College / Bachelor Degrees
 
@@ -807,8 +709,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             // Vocational / TVET / TESDA / Caregiver
 
             if (clean.Contains("voc") || clean.Contains("tech") || clean.Contains("tvet") || 
@@ -820,8 +720,6 @@ namespace SOLUM_UI.Services
                 return "Vocational";
 
             }
-
-
 
             // High School
 
@@ -835,8 +733,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             // Elementary
 
             if (clean.Contains("elem") || clean.Contains("primary") || clean.Contains("mababa") || clean.Contains("grade"))
@@ -847,13 +743,9 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             if (clean.Contains("none") || clean.Contains("wala") || clean.Contains("na"))
 
                 return string.Empty;
-
-
 
             // Fallback similarity check against standard 5
 
@@ -869,13 +761,9 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             return IsOcrNotApplicable(raw) ? string.Empty : clean_text_capitalized(raw);
 
         }
-
-
 
         private static string clean_text_capitalized(string raw)
 
@@ -886,8 +774,6 @@ namespace SOLUM_UI.Services
             return raw.Trim().ToUpperInvariant();
 
         }
-
-
 
         private static string NormalizeBarangayText(string text)
 
@@ -905,8 +791,6 @@ namespace SOLUM_UI.Services
 
         }
 
-
-
         private static double ComputeSimilarity(string s1, string s2)
 
         {
@@ -915,21 +799,15 @@ namespace SOLUM_UI.Services
 
             if (s1 == s2) return 1.0;
 
-
-
             int dist = LevenshteinDistance(s1, s2);
 
             int maxLen = Math.Max(s1.Length, s2.Length);
 
             if (maxLen == 0) return 1.0;
 
-
-
             return 1.0 - ((double)dist / maxLen);
 
         }
-
-
 
         private static int LevenshteinDistance(string s1, string s2)
 
@@ -937,13 +815,9 @@ namespace SOLUM_UI.Services
 
             int[,] d = new int[s1.Length + 1, s2.Length + 1];
 
-
-
             for (int i = 0; i <= s1.Length; i++) d[i, 0] = i;
 
             for (int j = 0; j <= s2.Length; j++) d[0, j] = j;
-
-
 
             for (int i = 1; i <= s1.Length; i++)
 
@@ -967,17 +841,11 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             return d[s1.Length, s2.Length];
 
         }
 
-
-
         #endregion
-
-
 
         private static int NormalizeHandwrittenYear(int yr)
 
@@ -991,8 +859,6 @@ namespace SOLUM_UI.Services
 
         }
 
-
-
         public static bool TryParseOcrDate(string raw, out DateTime result)
 
         {
@@ -1001,15 +867,11 @@ namespace SOLUM_UI.Services
 
             if (string.IsNullOrWhiteSpace(raw)) return false;
 
-
-
             string s = raw.Trim();
 
             s = Regex.Replace(s, @"^(.*?)(date\s*of\s*(this\s*)?application|application\s*date|petsa(\s*ng\s*aplikasyon)?|date\s*of\s*birth|birthdate|dob|kaarawan|bday|date)\s*[:\-_.]*", "", RegexOptions.IgnoreCase).Trim();
 
             s = Regex.Replace(s, @"^\s*\(?\s*m+[/.]?d+[/.]?y+\s*\)?\s*", "", RegexOptions.IgnoreCase).Trim();
-
-
 
             // 1. Check written month names if text contains letters
 
@@ -1057,8 +919,6 @@ namespace SOLUM_UI.Services
 
                 }, RegexOptions.IgnoreCase);
 
-
-
                 // Day first: e.g. 19 June 2004, 2 May 2002, 2-May-2002, 19th June 2004
 
                 var mDayFirst = Regex.Match(s, @"\b(\d{1,2})(?:st|nd|rd|th)?[\s\-_,]+([a-zA-Z]{3,})[\s\-_,]+(\d{4}|\d{2})\b");
@@ -1088,8 +948,6 @@ namespace SOLUM_UI.Services
                     }
 
                 }
-
-
 
                 // Month first: e.g. June 19, 2004, May 2, 2002, MAY 21973
 
@@ -1121,8 +979,6 @@ namespace SOLUM_UI.Services
 
                 }
 
-
-
                 // Concat: e.g. Jum192004, June192004
 
                 var mConcat = Regex.Match(s, @"\b([a-zA-Z]{3,})(\d{1,2})(\d{4})\b");
@@ -1149,8 +1005,6 @@ namespace SOLUM_UI.Services
 
                 }
 
-
-
                 // Fallback standard DateTime.TryParse with invariant and US cultures
 
                 if (DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
@@ -1162,8 +1016,6 @@ namespace SOLUM_UI.Services
                     return true;
 
             }
-
-
 
             // 2. Check ISO YYYY-MM-DD or YYYY/MM/DD
 
@@ -1199,8 +1051,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             // 3. Numeric with separators: DD/MM/YYYY or MM/DD/YYYY
 
             var mSlash = Regex.Match(s, @"^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})$");
@@ -1218,8 +1068,6 @@ namespace SOLUM_UI.Services
                 int yr = yStr.Length == 4 ? int.Parse(yStr) : (int.Parse(yStr) < 40 ? 2000 + int.Parse(yStr) : 1900 + int.Parse(yStr));
 
                 yr = NormalizeHandwrittenYear(yr);
-
-
 
                 // If p1 > 12: p1 is definitely Day, p2 is Month (DD/MM/YYYY)
 
@@ -1279,8 +1127,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             // 4. Missing one separator: e.g. 1/252020 or 01/252020
 
             var mOneSlash1 = Regex.Match(s, @"^(\d{1,2})[/\-.](\d{1,2})(\d{4})$");
@@ -1310,8 +1156,6 @@ namespace SOLUM_UI.Services
                 }
 
             }
-
-
 
             // Missing first separator: e.g. 0125/2020
 
@@ -1343,8 +1187,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             // 5. Check pure 8 digits: 06192004 or 20040619
 
             var digitsOnly = Regex.Replace(s, @"\D", "");
@@ -1367,8 +1209,6 @@ namespace SOLUM_UI.Services
 
                 }
 
-
-
                 // Try DDMMYYYY
 
                 int d2 = int.Parse(digitsOnly.Substring(0, 2));
@@ -1386,8 +1226,6 @@ namespace SOLUM_UI.Services
                 }
 
             }
-
-
 
             if (digitsOnly.Length == 7)
 
@@ -1408,8 +1246,6 @@ namespace SOLUM_UI.Services
                 }
 
             }
-
-
 
             if (digitsOnly.Length == 6)
 
@@ -1433,8 +1269,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             if (DateTime.TryParse(s, out result))
 
             {
@@ -1449,8 +1283,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             if (result != DateTime.MinValue && (result.Year < 1900 || result.Year > DateTime.Today.Year || result.Date > DateTime.Today))
 
             {
@@ -1461,13 +1293,9 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             return false;
 
         }
-
-
 
         private static int ParseMonthWordToNum(string w)
 
@@ -1503,8 +1331,6 @@ namespace SOLUM_UI.Services
 
         }
 
-
-
         public static string CleanPersonName(string raw)
 
         {
@@ -1533,8 +1359,6 @@ namespace SOLUM_UI.Services
 
         }
 
-
-
         public static string CleanAgeString(string raw)
 
         {
@@ -1554,8 +1378,6 @@ namespace SOLUM_UI.Services
                 return pureAge.ToString();
 
             }
-
-
 
             if (t.Length <= 3)
 
@@ -1587,8 +1409,6 @@ namespace SOLUM_UI.Services
 
         }
 
-
-
         public static string NormalizeDateString(string raw, out DateTime? parsedDate)
 
         {
@@ -1597,15 +1417,11 @@ namespace SOLUM_UI.Services
 
             if (string.IsNullOrWhiteSpace(raw) || IsOcrNotApplicable(raw)) return string.Empty;
 
-
-
             string s = raw.Trim();
 
             s = Regex.Replace(s, @"^(date\s*of\s*(this\s*)?application|application\s*date|petsa(\s*ng\s*aplikasyon)?|date\s*of\s*birth|birthdate|dob|kaarawan|bday|date)\s*[:\-_.]*", "", RegexOptions.IgnoreCase).Trim();
 
             s = Regex.Replace(s, @"^\s*\(?\s*m+[/.]?d+[/.]?y+\s*\)?\s*", "", RegexOptions.IgnoreCase).Trim();
-
-
 
             if (TryParseOcrDate(s, out DateTime dt) && dt.Year >= 1900 && dt.Date <= DateTime.Today)
 
@@ -1617,13 +1433,9 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             return string.Empty;
 
         }
-
-
 
         public static int CalculateAge(DateTime birthDate)
 
@@ -1636,8 +1448,6 @@ namespace SOLUM_UI.Services
             return age;
 
         }
-
-
 
         public static string FormatPhoneNumber(string raw)
 
@@ -1655,8 +1465,6 @@ namespace SOLUM_UI.Services
 
                 digits = "0" + digits;
 
-
-
             if (digits.Length == 11)
 
                 return $"{digits.Substring(0, 4)}-{digits.Substring(4, 3)}-{digits.Substring(7, 4)}";
@@ -1672,8 +1480,6 @@ namespace SOLUM_UI.Services
             return digits;
 
         }
-
-
 
         public static SoloParentRecord ConvertToSoloParentRecord(OcrFormResponse ocr)
 
@@ -1727,8 +1533,6 @@ namespace SOLUM_UI.Services
 
             };
 
-
-
             string dobStr = GetFieldValue(ocr, "birthdate");
 
             if (TryParseOcrDate(dobStr, out DateTime dob))
@@ -1738,8 +1542,6 @@ namespace SOLUM_UI.Services
                 r.DateOfBirth = dob;
 
             }
-
-
 
             string appDateStr = GetFieldValue(ocr, "date_of_application");
 
@@ -1759,8 +1561,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             string isEmp = GetFieldValue(ocr, "is_employed").ToLower();
 
             string isSelf = GetFieldValue(ocr, "is_self_employed").ToLower();
@@ -1768,8 +1568,6 @@ namespace SOLUM_UI.Services
             string isNot = GetFieldValue(ocr, "is_not_employed").ToLower();
 
             string emp = GetFieldValue(ocr, "employment_status").ToLower();
-
-
 
             if (isSelf == "true" || isSelf == "1" || emp.Contains("self"))
 
@@ -1807,8 +1605,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             if (ocr.Circumstance != null && ocr.Circumstance.Detected)
 
             {
@@ -1841,8 +1637,6 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             if (ocr.FamilyMembers != null && ocr.FamilyMembers.Count > 0)
 
             {
@@ -1853,15 +1647,11 @@ namespace SOLUM_UI.Services
 
             }
 
-
-
             r.Name = r.FullName;
 
             return r;
 
         }
-
-
 
         private static string GetFieldValue(OcrFormResponse ocr, string key)
 
@@ -1904,4 +1694,3 @@ namespace SOLUM_UI.Services
     }
 
 }
-

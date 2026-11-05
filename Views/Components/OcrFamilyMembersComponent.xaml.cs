@@ -328,7 +328,6 @@ namespace SOLUM_UI.Views.Components
                 SetFieldConfidence("needs", Badge_Needs, TxtConf_Needs, resp);
                 SetFieldConfidence("other_income", Badge_OtherIncome, TxtConf_OtherIncome, resp);
 
-                
             }
             finally
             {
@@ -762,8 +761,6 @@ namespace SOLUM_UI.Views.Components
         {
             e.Handled = !NumberOnlyRegex.IsMatch(e.Text);
         }
-
-
 
         private void SetComboByContent(ComboBox combo, string value)
         {

@@ -24,8 +24,6 @@ using SOLUM_UI.Models;
 
 using SOLUM_UI.ViewModels;
 
-
-
 namespace SOLUM_UI.Views.Dialogs
 
 {
@@ -35,8 +33,6 @@ namespace SOLUM_UI.Views.Dialogs
     {
 
         private readonly RecordViewDialogViewModel _vm;
-
-
 
         // ── Public result surface — unchanged API for all call-sites ──────────
 
@@ -52,21 +48,15 @@ namespace SOLUM_UI.Views.Dialogs
 
         public SoloParentRecord RenewalResult => _vm.RenewalResult;
 
-
-
         public RecordViewDialog(SoloParentRecord record)
 
         {
 
             InitializeComponent();
 
-
-
             _vm = new RecordViewDialogViewModel(record);
 
             DataContext = _vm;
-
-
 
             // When the VM decides the dialog should close it fires RequestClose;
 
@@ -74,19 +64,13 @@ namespace SOLUM_UI.Views.Dialogs
 
             _vm.RequestClose += result => { DialogResult = result; Close(); };
 
-
-
             Loaded += (s, e) => { ApplySize(); BuildContent(); };
 
         }
 
-
-
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e) => ApplySize();
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) { }
-
-
 
         private void ScrollViewer_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
 
@@ -104,8 +88,6 @@ namespace SOLUM_UI.Views.Dialogs
 
         }
 
-
-
         // UI-layout logic
 
         private void ApplySize()
@@ -121,8 +103,6 @@ namespace SOLUM_UI.Views.Dialogs
             double workLeft = SystemParameters.WorkArea.Left;
 
             double workTop = SystemParameters.WorkArea.Top;
-
-
 
             if (Owner != null && Owner.WindowState != WindowState.Maximized && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
 
@@ -152,8 +132,6 @@ namespace SOLUM_UI.Views.Dialogs
 
             }
 
-
-
             if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
 
             if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
@@ -161,8 +139,6 @@ namespace SOLUM_UI.Views.Dialogs
             if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
 
             if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
-
-
 
             if (DialogShell != null)
 
@@ -176,11 +152,7 @@ namespace SOLUM_UI.Views.Dialogs
 
         }
 
-
-
         // ── Programmatic card-builders ────────────────────────────────────────
-
-
 
         private void BuildContent()
 
@@ -190,11 +162,7 @@ namespace SOLUM_UI.Views.Dialogs
 
             if (r == null) return;
 
-
-
             TxtRecordName.Text = r.Name ?? string.Empty;
-
-
 
             int age = 0;
 
@@ -208,11 +176,7 @@ namespace SOLUM_UI.Views.Dialogs
 
             }
 
-
-
             TxtSexAge.Text = (r.Sex ?? "—") + (age > 0 ? $"  ·  {age} years old" : string.Empty);
-
-
 
             string brgy = !string.IsNullOrWhiteSpace(r.Barangay) ? r.Barangay : "Biñan";
 
@@ -222,19 +186,13 @@ namespace SOLUM_UI.Views.Dialogs
 
             TxtBarangayBadge.Text = brgy;
 
-
-
             string phone = string.IsNullOrWhiteSpace(r.ContactNumber) ? "Not applicable" : SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber);
 
             TxtContact.Text = phone;
 
-
-
             string status = string.IsNullOrWhiteSpace(r.Status) ? "Active" : r.Status;
 
             TxtStatusBadge.Text = status;
-
-
 
             // Status styling
 
@@ -280,8 +238,6 @@ namespace SOLUM_UI.Views.Dialogs
 
             }
 
-
-
             // Validity styling
 
             string validUntil = r.CurrentTermExpiresAt.HasValue
@@ -294,18 +250,12 @@ namespace SOLUM_UI.Views.Dialogs
 
                     : "Not applicable";
 
-
-
             TxtValidUntil.Text = "Valid until: " + validUntil;
 
             TxtSpId.Text = string.Empty;
             TxtSpId.Visibility = Visibility.Collapsed;
 
-
-
             CardPanel.Children.Clear();
-
-
 
             // 1. Identity & Personal Info
 
@@ -335,8 +285,6 @@ namespace SOLUM_UI.Views.Dialogs
 
             });
 
-
-
             // 2. Background & Socio-Economic
 
             AddCard("Background & Socio-Economic", new[]
@@ -357,8 +305,6 @@ namespace SOLUM_UI.Views.Dialogs
 
             });
 
-
-
             // 3. Address & Contacts
 
             AddCard("Address & Contact", new[]
@@ -372,8 +318,6 @@ namespace SOLUM_UI.Views.Dialogs
                 ("Contact No.", string.IsNullOrWhiteSpace(r.ContactNumber) ? "Not applicable" : SOLUM_UI.Services.OcrService.FormatPhoneNumber(r.ContactNumber)),
 
             });
-
-
 
             // 4. Emergency Contact
 
@@ -391,25 +335,17 @@ namespace SOLUM_UI.Views.Dialogs
 
             });
 
-
-
             // 5. Circumstances
 
             AddCircumstancesCard(r.CircumstancesDisplay);
-
-
 
             // 6. Additional Classifications (Shows "Not applicable" if none present)
 
             AddClassificationsCard(r);
 
-
-
             // 7. Family Composition (with non-colliding layout and Special Needs badges)
 
             AddFamilyCard(r.FamilyMembers);
-
-
 
             // 8. Assessment / Needs & Income
 
@@ -422,8 +358,6 @@ namespace SOLUM_UI.Views.Dialogs
                 ("Other Sources of Income", string.IsNullOrWhiteSpace(r.OtherIncomeSource) || r.OtherIncomeSource.Equals("None", StringComparison.OrdinalIgnoreCase) ? "Not applicable" : r.OtherIncomeSource),
 
             });
-
-
 
             // 9. System Information
 
@@ -450,8 +384,6 @@ namespace SOLUM_UI.Views.Dialogs
 
         }
 
-
-
         private void AddCard(string title, (string Label, string Value)[] fields)
 
         {
@@ -462,15 +394,11 @@ namespace SOLUM_UI.Views.Dialogs
 
             inner.Children.Add(MakeSectionHeader(title));
 
-
-
             var grid = new Grid { Margin = new Thickness(0, 10, 0, 0) };
 
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-
 
             int row = 0, col = 0;
 
@@ -482,8 +410,6 @@ namespace SOLUM_UI.Views.Dialogs
 
                     grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-
-
                 var cell = MakeCell(label, value);
 
                 Grid.SetRow(cell, row);
@@ -492,15 +418,11 @@ namespace SOLUM_UI.Views.Dialogs
 
                 grid.Children.Add(cell);
 
-
-
                 col++;
 
                 if (col > 1) { col = 0; row++; }
 
             }
-
-
 
             inner.Children.Add(grid);
 
@@ -509,8 +431,6 @@ namespace SOLUM_UI.Views.Dialogs
             CardPanel.Children.Add(card);
 
         }
-
-
 
         private void AddCircumstancesCard(string display)
 
@@ -522,11 +442,7 @@ namespace SOLUM_UI.Views.Dialogs
 
             inner.Children.Add(MakeSectionHeader("Qualifying Circumstances"));
 
-
-
             var wrap = new WrapPanel { Margin = new Thickness(0, 10, 0, 2) };
-
-
 
             if (!string.IsNullOrWhiteSpace(display) && display != "—" && !display.Equals("Not applicable", StringComparison.OrdinalIgnoreCase))
 
@@ -622,8 +538,6 @@ namespace SOLUM_UI.Views.Dialogs
 
             }
 
-
-
             inner.Children.Add(wrap);
 
             card.Child = inner;
@@ -631,8 +545,6 @@ namespace SOLUM_UI.Views.Dialogs
             CardPanel.Children.Add(card);
 
         }
-
-
 
         private void AddClassificationsCard(SoloParentRecord r)
 
@@ -644,11 +556,7 @@ namespace SOLUM_UI.Views.Dialogs
 
             inner.Children.Add(MakeSectionHeader("Additional Classifications"));
 
-
-
             bool hasAny = r.IsPantawidBeneficiary || r.IsIndigenous || r.IsLGBT;
-
-
 
             if (!hasAny)
 
@@ -678,8 +586,6 @@ namespace SOLUM_UI.Views.Dialogs
 
                 var wrap = new WrapPanel { Margin = new Thickness(0, 10, 0, 2) };
 
-
-
                 if (r.IsPantawidBeneficiary)
 
                     wrap.Children.Add(MakeActiveClassificationBadge("Pantawid (4Ps) Beneficiary", Color.FromRgb(0x27, 0xAE, 0x60)));
@@ -692,21 +598,15 @@ namespace SOLUM_UI.Views.Dialogs
 
                     wrap.Children.Add(MakeActiveClassificationBadge("LGBTQ+ Member", Color.FromRgb(0x8E, 0x44, 0xAD)));
 
-
-
                 inner.Children.Add(wrap);
 
             }
-
-
 
             card.Child = inner;
 
             CardPanel.Children.Add(card);
 
         }
-
-
 
         private Border MakeActiveClassificationBadge(string title, Color activeColor)
 
@@ -772,8 +672,6 @@ namespace SOLUM_UI.Views.Dialogs
 
         }
 
-
-
         private void AddFamilyCard(List<FamilyMember> members)
 
         {
@@ -782,13 +680,9 @@ namespace SOLUM_UI.Views.Dialogs
 
             var inner = new StackPanel();
 
-
-
             int totalMembers = members?.Count ?? 0;
 
             int snCount = members?.Count(m => m.HasSpecialNeeds) ?? 0;
-
-
 
             string countText = totalMembers == 1 ? "1 DEPENDENT" : $"{totalMembers} DEPENDENTS";
 
@@ -799,8 +693,6 @@ namespace SOLUM_UI.Views.Dialogs
                 countText += $" · {snCount} WITH SPECIAL NEEDS (PWD)";
 
             }
-
-
 
             inner.Children.Add(MakeSectionHeader($"Family Composition ({countText})"));
 
@@ -845,8 +737,6 @@ namespace SOLUM_UI.Views.Dialogs
                 }
             }
 
-
-
             if (totalMembers == 0)
 
             {
@@ -875,15 +765,11 @@ namespace SOLUM_UI.Views.Dialogs
 
             }
 
-
-
             // 4-Column non-colliding layout matching RecordDialog
 
             string[] colLabels = { "NAME & RELATIONSHIP", "BIRTHDATE & AGE", "EDUCATION & INCOME", "SPECIAL NEEDS (PWD)" };
 
             double[] widths    = { 2.4, 1.8, 2.0, 2.2 };
-
-
 
             var headerGrid = new Grid { Margin = new Thickness(0, 12, 0, 6) };
 
@@ -892,8 +778,6 @@ namespace SOLUM_UI.Views.Dialogs
                 headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(widths[c], GridUnitType.Star) });
 
             headerGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-
 
             for (int c = 0; c < colLabels.Length; c++)
 
@@ -927,8 +811,6 @@ namespace SOLUM_UI.Views.Dialogs
 
             inner.Children.Add(new Border { Height = 1, Background = RecordViewDialogViewModel.BrDivider, Margin = new Thickness(0, 2, 0, 4) });
 
-
-
             bool alt = false;
 
             foreach (var m in members)
@@ -960,8 +842,6 @@ namespace SOLUM_UI.Views.Dialogs
                     rowGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(widths[c], GridUnitType.Star) });
 
                 rowGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-
 
                 // Column 0: Name & Relationship
 
@@ -1011,8 +891,6 @@ namespace SOLUM_UI.Views.Dialogs
 
                 rowGrid.Children.Add(col0);
 
-
-
                 // Column 1: Birthdate & Sex/Age
 
                 var col1 = new StackPanel { Margin = new Thickness(6, 0, 6, 0), VerticalAlignment = VerticalAlignment.Center };
@@ -1049,8 +927,6 @@ namespace SOLUM_UI.Views.Dialogs
 
                     sexAge = "Not applicable";
 
-
-
                 col1.Children.Add(new TextBlock
 
                 {
@@ -1070,8 +946,6 @@ namespace SOLUM_UI.Views.Dialogs
                 Grid.SetColumn(col1, 1);
 
                 rowGrid.Children.Add(col1);
-
-
 
                 // Column 2: Education & Monthly Income
 
@@ -1103,8 +977,6 @@ namespace SOLUM_UI.Views.Dialogs
 
                     incDisplay = m.Income;
 
-
-
                 col2.Children.Add(new TextBlock
 
                 {
@@ -1124,8 +996,6 @@ namespace SOLUM_UI.Views.Dialogs
                 Grid.SetColumn(col2, 2);
 
                 rowGrid.Children.Add(col2);
-
-
 
                 // Column 3: Special Needs / PWD
 
@@ -1197,8 +1067,6 @@ namespace SOLUM_UI.Views.Dialogs
 
                     snPanel.Children.Add(snBadge);
 
-
-
                     if (!string.IsNullOrWhiteSpace(m.SpecialNeedsDescription))
 
                     {
@@ -1251,13 +1119,9 @@ namespace SOLUM_UI.Views.Dialogs
 
                 }
 
-
-
                 Grid.SetColumn(snElement, 3);
 
                 rowGrid.Children.Add(snElement);
-
-
 
                 rowBorder.Child = rowGrid;
 
@@ -1267,15 +1131,11 @@ namespace SOLUM_UI.Views.Dialogs
 
             }
 
-
-
             card.Child = inner;
 
             CardPanel.Children.Add(card);
 
         }
-
-
 
         private Border MakeCard() => new Border
 
@@ -1294,8 +1154,6 @@ namespace SOLUM_UI.Views.Dialogs
             Margin          = new Thickness(0, 0, 0, 12)
 
         };
-
-
 
         private UIElement MakeSectionHeader(string title)
 
@@ -1361,8 +1219,6 @@ namespace SOLUM_UI.Views.Dialogs
 
         }
 
-
-
         private StackPanel MakeCell(string label, string value)
 
         {
@@ -1413,11 +1269,7 @@ namespace SOLUM_UI.Views.Dialogs
 
         }
 
-
-
         // ── Event handlers — overlay cancel / confirm stay here; toolbar handlers moved to RecordActionToolbar ──
-
-
 
         private void DeleteCancel_Click(object sender, RoutedEventArgs e)
 
@@ -1428,8 +1280,6 @@ namespace SOLUM_UI.Views.Dialogs
             _vm.HandleDeleteCancel();
 
         }
-
-
 
         private void DeleteConfirm_Click(object sender, RoutedEventArgs e)
 
@@ -1443,8 +1293,6 @@ namespace SOLUM_UI.Views.Dialogs
 
         }
 
-
-
         private void Close_Click(object sender, RoutedEventArgs e)
 
         {
@@ -1455,17 +1303,11 @@ namespace SOLUM_UI.Views.Dialogs
 
         }
 
-
-
         // ── Activity History / Timeline Logic ─────────────────────────────────
-
-
 
         private List<AuditLogDto> _cachedTimeline = null;
 
         private bool _isLoadingTimeline = false;
-
-
 
         private void TabProfile_Click(object sender, RoutedEventArgs e)
 
@@ -1477,8 +1319,6 @@ namespace SOLUM_UI.Views.Dialogs
 
         }
 
-
-
         private async void TabTimeline_Click(object sender, RoutedEventArgs e)
 
         {
@@ -1486,8 +1326,6 @@ namespace SOLUM_UI.Views.Dialogs
             CardPanel.Visibility = Visibility.Collapsed;
 
             TimelineContainer.Visibility = Visibility.Visible;
-
-
 
             if (_cachedTimeline == null)
 
@@ -1499,8 +1337,6 @@ namespace SOLUM_UI.Views.Dialogs
 
         }
 
-
-
         private async void BtnRefreshTimeline_Click(object sender, RoutedEventArgs e)
 
         {
@@ -1510,8 +1346,6 @@ namespace SOLUM_UI.Views.Dialogs
             await LoadTimelineAsync();
 
         }
-
-
 
         private async Task LoadTimelineAsync()
 
@@ -1533,8 +1367,6 @@ namespace SOLUM_UI.Views.Dialogs
 
             }
 
-
-
             _isLoadingTimeline = true;
 
             TimelineLoadingPanel.Visibility = Visibility.Visible;
@@ -1544,8 +1376,6 @@ namespace SOLUM_UI.Views.Dialogs
             TimelineErrorPanel.Visibility = Visibility.Collapsed;
 
             TimelineItemsPanel.Children.Clear();
-
-
 
             try
 
@@ -1621,8 +1451,6 @@ namespace SOLUM_UI.Views.Dialogs
 
         }
 
-
-
         private void RenderTimeline(List<AuditLogDto> logs)
 
         {
@@ -1630,8 +1458,6 @@ namespace SOLUM_UI.Views.Dialogs
             TimelineItemsPanel.Children.Clear();
 
             var sortedLogs = logs.OrderByDescending(x => x.Timestamp).ToList();
-
-
 
             for (int i = 0; i < sortedLogs.Count; i++)
 
@@ -1646,8 +1472,6 @@ namespace SOLUM_UI.Views.Dialogs
             }
 
         }
-
-
 
         private UIElement BuildTimelineNode(AuditLogDto log, bool isLast)
 
@@ -1668,8 +1492,6 @@ namespace SOLUM_UI.Views.Dialogs
             Color dotColor = Color.FromRgb(0x64, 0x74, 0x8B);
 
             string dotSymbol = "●";
-
-
 
             if (actionType.IndexOf("CREATE", StringComparison.OrdinalIgnoreCase) >= 0)
 
@@ -1761,15 +1583,11 @@ namespace SOLUM_UI.Views.Dialogs
 
             }
 
-
-
             var outerGrid = new Grid { Margin = new Thickness(0, 0, 0, 0) };
 
             outerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(40) });
 
             outerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-
 
             // Left timeline vertical line + dot
 
@@ -1798,8 +1616,6 @@ namespace SOLUM_UI.Views.Dialogs
                 trackGrid.Children.Add(line);
 
             }
-
-
 
             var dotBorder = new Border
 
@@ -1841,13 +1657,9 @@ namespace SOLUM_UI.Views.Dialogs
 
             trackGrid.Children.Add(dotBorder);
 
-
-
             Grid.SetColumn(trackGrid, 0);
 
             outerGrid.Children.Add(trackGrid);
-
-
 
             // Right Event Card
 
@@ -1869,11 +1681,7 @@ namespace SOLUM_UI.Views.Dialogs
 
             };
 
-
-
             var cardStack = new StackPanel();
-
-
 
             // Card Header Row: Title & Action Badge
 
@@ -1882,8 +1690,6 @@ namespace SOLUM_UI.Views.Dialogs
             headGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
             headGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-
 
             var titleSp = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
 
@@ -1902,8 +1708,6 @@ namespace SOLUM_UI.Views.Dialogs
                 FontFamily = new FontFamily("Segoe UI")
 
             });
-
-
 
             var badgeBorder = new Border
 
@@ -1939,8 +1743,6 @@ namespace SOLUM_UI.Views.Dialogs
 
             };
 
-
-
             Grid.SetColumn(titleSp, 0);
 
             Grid.SetColumn(badgeBorder, 1);
@@ -1951,15 +1753,11 @@ namespace SOLUM_UI.Views.Dialogs
 
             cardStack.Children.Add(headGrid);
 
-
-
             // Timestamp and Performed By
 
             DateTime localDt = log.Timestamp.LocalDateTime;
 
             string dateStr = localDt.ToString("MMMM d, yyyy · h:mm tt");
-
-
 
             string actorUserId = log.PerformedBy?.UserId ?? string.Empty;
 
@@ -1974,8 +1772,6 @@ namespace SOLUM_UI.Views.Dialogs
                     ? log.PerformedBy.Email
 
                     : (!string.IsNullOrWhiteSpace(actorUserId) ? actorUserId : "System"));
-
-
 
             var metaSp = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
 
@@ -2025,8 +1821,6 @@ namespace SOLUM_UI.Views.Dialogs
 
             cardStack.Children.Add(metaSp);
 
-
-
             // Changes section (if any)
 
             if (log.Changes != null && log.Changes.Count > 0)
@@ -2051,8 +1845,6 @@ namespace SOLUM_UI.Views.Dialogs
 
                 };
 
-
-
                 var diffStack = new StackPanel();
 
                 diffStack.Children.Add(new TextBlock
@@ -2073,8 +1865,6 @@ namespace SOLUM_UI.Views.Dialogs
 
                 });
 
-
-
                 foreach (var ch in log.Changes)
 
                 {
@@ -2085,15 +1875,11 @@ namespace SOLUM_UI.Views.Dialogs
 
                     string newVal = !string.IsNullOrWhiteSpace(ch.NewValue) ? ch.NewValue : "—";
 
-
-
                     var chRow = new Grid { Margin = new Thickness(0, 2, 0, 4) };
 
                     chRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(140) });
 
                     chRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-
 
                     var fieldTxt = new TextBlock
 
@@ -2113,11 +1899,7 @@ namespace SOLUM_UI.Views.Dialogs
 
                     };
 
-
-
                     var valSp = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-
-                    
 
                     // Old Value badge
 
@@ -2151,8 +1933,6 @@ namespace SOLUM_UI.Views.Dialogs
 
                     };
 
-
-
                     var arrowTxt = new TextBlock
 
                     {
@@ -2168,8 +1948,6 @@ namespace SOLUM_UI.Views.Dialogs
                         VerticalAlignment = VerticalAlignment.Center
 
                     };
-
-
 
                     // New Value badge
 
@@ -2201,15 +1979,11 @@ namespace SOLUM_UI.Views.Dialogs
 
                     };
 
-
-
                     valSp.Children.Add(oldBdr);
 
                     valSp.Children.Add(arrowTxt);
 
                     valSp.Children.Add(newBdr);
-
-
 
                     Grid.SetColumn(fieldTxt, 0);
 
@@ -2219,13 +1993,9 @@ namespace SOLUM_UI.Views.Dialogs
 
                     chRow.Children.Add(valSp);
 
-
-
                     diffStack.Children.Add(chRow);
 
                 }
-
-
 
                 diffBox.Child = diffStack;
 
@@ -2233,15 +2003,11 @@ namespace SOLUM_UI.Views.Dialogs
 
             }
 
-
-
             card.Child = cardStack;
 
             Grid.SetColumn(card, 1);
 
             outerGrid.Children.Add(card);
-
-
 
             return outerGrid;
 
@@ -2250,4 +2016,3 @@ namespace SOLUM_UI.Views.Dialogs
     }
 
 }
-

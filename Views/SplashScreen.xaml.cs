@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
@@ -131,7 +131,7 @@ namespace SOLUM_UI
                 PlayAnimations();
                 StartProgress();
             };
-            
+
             // Ensure proper cleanup when splash screen closes
             Closed += (s, e) =>
             {

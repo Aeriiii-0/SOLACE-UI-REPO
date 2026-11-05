@@ -473,7 +473,7 @@ namespace SOLUM_UI
                 ModeStripeIcon.Data       = Geometry.Parse("M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z");
                 ModeStripeIcon.Fill       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
                 Step1Dot.Background       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
-                
+
                 // Set DialogShell border to green for renewal mode
                 DialogShell.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xC8, 0xE6, 0xC9));
             }
@@ -495,7 +495,7 @@ namespace SOLUM_UI
                 ModeStripeIcon.Data       = Geometry.Parse("M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z");
                 ModeStripeIcon.Fill       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
                 Step1Dot.Background       = new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
-                
+
                 // Set DialogShell border to green for add mode
                 DialogShell.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xC8, 0xE6, 0xC9));
             }
@@ -522,7 +522,7 @@ namespace SOLUM_UI
             ModeStripeIcon.Data       = Geometry.Parse("M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25Z");
             ModeStripeIcon.Fill       = new SolidColorBrush(Color.FromRgb(0xB3, 0x6A, 0x00));
             Step1Dot.Background       = new SolidColorBrush(Color.FromRgb(0xE6, 0x5C, 0x00));
-            
+
             // Set DialogShell border to yellow for edit mode
             DialogShell.BorderBrush   = new SolidColorBrush(Color.FromRgb(0xFF, 0xD5, 0x4F));
 
@@ -1041,7 +1041,6 @@ namespace SOLUM_UI
             });
             return row;
         }
-        
 
         private void PopulateFields(SoloParentRecord r)
         {
@@ -1256,7 +1255,7 @@ namespace SOLUM_UI
             DateTime today = DateTime.Today;
             int age = today.Year - dob.Value.Year;
             if (dob.Value.Date > today.AddYears(-age)) age--;
-            
+
             // Validate age - cannot exceed 120
             if (age > 120)
             {
@@ -1271,7 +1270,7 @@ namespace SOLUM_UI
                     MessageBoxImage.Warning);
                 return;
             }
-            
+
             // Valid age - clear any errors
             TxtAge.Text = age.ToString();
             ErrBirthdate.Visibility = Visibility.Collapsed;
@@ -2082,7 +2081,6 @@ namespace SOLUM_UI
             }
         }
 
-        
         public void SetPhilSysError(string msg)
         {
             GoToStep(1);

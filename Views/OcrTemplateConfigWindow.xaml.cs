@@ -88,8 +88,6 @@ namespace SOLUM_UI
             ApplySize();
         }
 
-
-
         private void ApplySize()
         {
             double screenW, screenH, screenLeft, screenTop;
@@ -608,7 +606,7 @@ namespace SOLUM_UI
             double labelPadV = Math.Max(1.0, 2.5 / z);
             double labelCorner = Math.Max(2.0, 3.0 / z);
             double labelOffset = Math.Max(14.0, 18.0 / z);
-            
+
             // Compact 10px screen handle size
             double hSize = 10.0 / z;
             double halfH = hSize / 2.0;

@@ -17,8 +17,6 @@ using SOLUM_UI.Models;
 
 using SOLUM_UI.Models.Api;
 
-
-
 namespace SOLUM_UI.Services.Api
 
 {
@@ -33,19 +31,13 @@ namespace SOLUM_UI.Services.Api
 
         public static SoloParentApiService Instance => _instance.Value;
 
-
-
         private static readonly ConcurrentDictionary<Guid, (SoloParentDto Data, DateTime CachedAt)> _soloParentDetailCache =
 
             new ConcurrentDictionary<Guid, (SoloParentDto Data, DateTime CachedAt)>();
 
         private static readonly TimeSpan DetailCacheTtl = TimeSpan.FromMinutes(10);
 
-
-
         private SoloParentApiService() { }
-
-
 
         public async Task<BaseResponse<PagedResult<SoloParentSummaryDto>>> GetSoloParentsAsync(GetSoloParentRequest request)
 
@@ -72,8 +64,6 @@ namespace SOLUM_UI.Services.Api
             return response;
 
         }
-
-
 
         /// <summary>
 
@@ -109,117 +99,79 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         private List<string> BuildQueryParams(GetSoloParentRequest request)
 
         {
 
             var queryParams = new List<string>();
 
-
-
             if (request.Id.HasValue)
 
                 queryParams.Add($"id={request.Id.Value}");
-
-
 
             if (!string.IsNullOrWhiteSpace(request.FirstName))
 
                 queryParams.Add($"firstName={Uri.EscapeDataString(request.FirstName.Trim())}");
 
-
-
             if (!string.IsNullOrWhiteSpace(request.LastName))
 
                 queryParams.Add($"lastName={Uri.EscapeDataString(request.LastName.Trim())}");
-
-
 
             if (!string.IsNullOrWhiteSpace(request.Fullname))
 
                 queryParams.Add($"fullname={Uri.EscapeDataString(request.Fullname.Trim())}");
 
-
-
             if (!string.IsNullOrWhiteSpace(request.PhilsysId))
 
                 queryParams.Add($"philsysId={Uri.EscapeDataString(request.PhilsysId.Trim())}");
-
-
 
             if (!string.IsNullOrWhiteSpace(request.Sex) && !request.Sex.Equals("All", StringComparison.OrdinalIgnoreCase))
 
                 queryParams.Add($"sex={Uri.EscapeDataString(request.Sex.Trim())}");
 
-
-
             if (!string.IsNullOrWhiteSpace(request.Barangay) && !request.Barangay.Equals("All", StringComparison.OrdinalIgnoreCase))
 
                 queryParams.Add($"barangay={Uri.EscapeDataString(request.Barangay.Trim())}");
-
-
 
             if (request.IsActive.HasValue)
 
                 queryParams.Add($"isActive={request.IsActive.Value.ToString().ToLowerInvariant()}");
 
-
-
             if (request.IsDeleted.HasValue)
 
                 queryParams.Add($"isDeleted={request.IsDeleted.Value.ToString().ToLowerInvariant()}");
-
-
 
             if (request.IsLGBT.HasValue)
 
                 queryParams.Add($"isLGBT={request.IsLGBT.Value.ToString().ToLowerInvariant()}");
 
-
-
             if (request.IsPantawidBeneficiary.HasValue)
 
                 queryParams.Add($"isPantawidBeneficiary={request.IsPantawidBeneficiary.Value.ToString().ToLowerInvariant()}");
-
-
 
             if (request.IsIndigenous.HasValue)
 
                 queryParams.Add($"isIndigenous={request.IsIndigenous.Value.ToString().ToLowerInvariant()}");
 
-
-
             if (!string.IsNullOrWhiteSpace(request.Status) && !request.Status.Equals("All", StringComparison.OrdinalIgnoreCase))
 
                 queryParams.Add($"status={Uri.EscapeDataString(request.Status.Trim())}");
-
-
 
             if (!string.IsNullOrWhiteSpace(request.SortBy))
 
                 queryParams.Add($"sortBy={Uri.EscapeDataString(request.SortBy)}");
 
-
-
             if (!string.IsNullOrWhiteSpace(request.SortOrder))
 
                 queryParams.Add($"sortOrder={Uri.EscapeDataString(request.SortOrder)}");
-
-
 
             queryParams.Add($"page={request.Page}");
 
             queryParams.Add($"pageSize={request.PageSize}");
 
-
-
             return queryParams;
 
         }
-
-
 
         public async Task<BaseResponse<SoloParentDto>> GetSoloParentByIdAsync(Guid id)
 
@@ -232,8 +184,6 @@ namespace SOLUM_UI.Services.Api
                 return BaseResponse<SoloParentDto>.Success(cached.Data);
 
             }
-
-
 
             var resp = await ApiClient.Instance.GetAsync<SoloParentDto>($"api/soloparent/{id}");
 
@@ -249,8 +199,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         public async Task<BaseResponse<Guid>> CreateSoloParentAsync(CreateSoloParentRequest request)
 
         {
@@ -258,8 +206,6 @@ namespace SOLUM_UI.Services.Api
             return await ApiClient.Instance.PostAsync<CreateSoloParentRequest, Guid>("api/soloparent", request);
 
         }
-
-
 
         public async Task<BaseResponse<bool>> UpdateSoloParentAsync(Guid id, UpdateSoloParentRequest request)
 
@@ -273,8 +219,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         public async Task<BaseResponse<bool>> DeleteSoloParentAsync(Guid id)
 
         {
@@ -285,8 +229,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         public async Task<BaseResponse<RenewSoloParentResponse>> RenewSoloParentRecordAsync(Guid id, RenewSoloParentRequest request = null)
 
         {
@@ -294,8 +236,6 @@ namespace SOLUM_UI.Services.Api
             return await ApiClient.Instance.PostAsync<object, RenewSoloParentResponse>($"api/soloparent/{id}/renew", request ?? (object)new { });
 
         }
-
-
 
         /// <summary>
 
@@ -315,8 +255,6 @@ namespace SOLUM_UI.Services.Api
 
                 return BaseResponse<List<AuditLogDto>>.Fail("Record ID is required.");
 
-
-
             // 1. Primary endpoint: GET api/soloparent/{id}/timeline
 
             var resp = await ApiClient.Instance.GetAsync<List<AuditLogDto>>($"api/soloparent/{id}/timeline");
@@ -325,15 +263,11 @@ namespace SOLUM_UI.Services.Api
 
                 return resp;
 
-
-
             bool is404 = resp.Errors != null && resp.Errors.Any(e =>
 
                 e.IndexOf("404", StringComparison.OrdinalIgnoreCase) >= 0 ||
 
                 e.IndexOf("not found", StringComparison.OrdinalIgnoreCase) >= 0);
-
-
 
             // 2. Fallback to plural route: GET api/soloparents/{id}/timeline
 
@@ -346,8 +280,6 @@ namespace SOLUM_UI.Services.Api
                 if (pluralResp.Succeeded && pluralResp.Data != null)
 
                     return pluralResp;
-
-
 
                 // 3. Fallback to central AuditLogs query: GET api/AuditLogs?targetId={id}&name={recordName}
 
@@ -371,8 +303,6 @@ namespace SOLUM_UI.Services.Api
 
                     }
 
-
-
                     var auditResp = await ApiClient.Instance.GetAsync<PagedAuditLogsResponse>(auditQuery.ToString());
 
                     if (auditResp.Succeeded && auditResp.Data?.Items != null && auditResp.Data.Items.Count > 0)
@@ -387,8 +317,6 @@ namespace SOLUM_UI.Services.Api
 
                 catch { }
 
-
-
                 // If backend returned 404 because no timeline events exist yet for this record,
 
                 // treat it as an empty timeline (clean UI empty state) instead of an error.
@@ -397,21 +325,15 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             return resp;
 
         }
-
-
 
         // =========================================================================
 
         // Mapping Helpers: SoloParentRecord <-> Backend DTOs
 
         // =========================================================================
-
-
 
         public CreateSoloParentRequest MapToCreateRequest(SoloParentRecord r)
 
@@ -447,8 +369,6 @@ namespace SOLUM_UI.Services.Api
 
             };
 
-
-
             if (r.FamilyMembers != null)
 
             {
@@ -469,13 +389,9 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             return req;
 
         }
-
-
 
         public UpdateSoloParentRequest MapToUpdateRequest(Guid id, SoloParentRecord r, SoloParentDto existingEntity = null)
 
@@ -486,8 +402,6 @@ namespace SOLUM_UI.Services.Api
                 ? existingEntity.ProblemPresented
 
                 : MapProblemPresented(r);
-
-
 
             var req = new UpdateSoloParentRequest
 
@@ -509,8 +423,6 @@ namespace SOLUM_UI.Services.Api
 
                 ProblemPresented = problemPresented,
 
-
-
                 IsIndigenous = r.IsIndigenous,
 
                 IsLGBT = r.IsLGBT,
@@ -523,19 +435,13 @@ namespace SOLUM_UI.Services.Api
 
             };
 
-
-
             var existingIds = existingEntity?.FamilyMembers != null
 
                 ? new HashSet<Guid>(existingEntity.FamilyMembers.Select(f => f.Id))
 
                 : new HashSet<Guid>();
 
-
-
             var processedExistingIds = new HashSet<Guid>();
-
-
 
             if (r.FamilyMembers != null)
 
@@ -548,8 +454,6 @@ namespace SOLUM_UI.Services.Api
                     string mName = fm.MemberName?.Trim() ?? string.Empty;
 
                     if (string.IsNullOrWhiteSpace(mName)) continue;
-
-
 
                     // 1. Existing family member (has database GUID)
 
@@ -647,8 +551,6 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             // 4. Collect removed IDs:
 
             // First, from explicit removals tracked during UI deletion
@@ -673,8 +575,6 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             // Second, reconcile: any existing member not present in processedExistingIds
 
             foreach (var existingId in existingIds)
@@ -691,13 +591,9 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             return req;
 
         }
-
-
 
         public RenewSoloParentRequest MapToRenewRequest(Guid id, SoloParentRecord r, SoloParentDto existingEntity = null, DateTime? renewalDate = null)
 
@@ -708,8 +604,6 @@ namespace SOLUM_UI.Services.Api
                 ? existingEntity.ProblemPresented
 
                 : MapProblemPresented(r);
-
-
 
             var req = new RenewSoloParentRequest
             {
@@ -728,19 +622,13 @@ namespace SOLUM_UI.Services.Api
 
             };
 
-
-
             var existingIds = existingEntity?.FamilyMembers != null
 
                 ? new HashSet<Guid>(existingEntity.FamilyMembers.Select(f => f.Id))
 
                 : new HashSet<Guid>();
 
-
-
             var processedExistingIds = new HashSet<Guid>();
-
-
 
             if (r.FamilyMembers != null)
 
@@ -753,8 +641,6 @@ namespace SOLUM_UI.Services.Api
                     string mName = fm.MemberName?.Trim() ?? string.Empty;
 
                     if (string.IsNullOrWhiteSpace(mName)) continue;
-
-
 
                     // 1. Existing family member (has database GUID)
 
@@ -852,8 +738,6 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             if (r.RemovedFamilyMemberIds != null)
 
             {
@@ -874,8 +758,6 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             foreach (var existingId in existingIds)
 
             {
@@ -890,13 +772,9 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             return req;
 
         }
-
-
 
         public SoloParentRecord MapToRecord(SoloParentDto dto)
 
@@ -904,13 +782,9 @@ namespace SOLUM_UI.Services.Api
 
             if (dto == null) return null;
 
-
-
             bool isActive = dto.IsActive;
 
             DateTime validUntil = dto.CurrentTermExpiresAt ?? DateTime.MinValue;
-
-
 
             // Derive application-type flags and latest-activity date from RecordTerms.
 
@@ -923,8 +797,6 @@ namespace SOLUM_UI.Services.Api
             bool   isRenewal       = false;
 
             DateTime lastTermStart = DateTime.MinValue;   // best proxy for "last updated"
-
-
 
             if (dto.RecordTerms != null && dto.RecordTerms.Count > 0)
 
@@ -946,8 +818,6 @@ namespace SOLUM_UI.Services.Api
 
                     }
 
-
-
                     // Track start date so we can pick the most-recent term
 
                     DateTime termStart = rt.DateCreated ?? DateTime.MinValue;
@@ -957,8 +827,6 @@ namespace SOLUM_UI.Services.Api
                         startParsed = DateTime.MinValue;
 
                     if (startParsed > termStart) termStart = startParsed;
-
-
 
                     if (termStart >= lastTermStart)
 
@@ -980,8 +848,6 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             // Fall back: if no terms came back, treat every record as a new applicant so
 
             // ApplicationType shows "New Record" instead of the empty "—" sentinel.
@@ -990,8 +856,6 @@ namespace SOLUM_UI.Services.Api
 
                 isNewApplicant = true;
 
-
-
             // LastUpdated: prefer the backend UpdatedAt timestamp, then the most-recent term's start date, then DateCreated.
 
             DateTime lastUpdated = dto.UpdatedAt.HasValue && dto.UpdatedAt.Value != DateTime.MinValue
@@ -999,8 +863,6 @@ namespace SOLUM_UI.Services.Api
                 ? dto.UpdatedAt.Value
 
                 : (lastTermStart != DateTime.MinValue ? lastTermStart : dto.DateCreated);
-
-
 
                         DateTime dateOfApplication = DateTime.MinValue;
             if (!string.IsNullOrWhiteSpace(dto.ApplicationDate) && DateTime.TryParse(dto.ApplicationDate, out var parsedAppDate))
@@ -1015,8 +877,6 @@ namespace SOLUM_UI.Services.Api
             {
                 dateOfApplication = dto.DateCreated;
             }
-
-
 
             string computedStatus = "Inactive";
 
@@ -1035,8 +895,6 @@ namespace SOLUM_UI.Services.Api
                 computedStatus = isActive ? "Valid" : "Inactive";
 
             }
-
-
 
             var record = new SoloParentRecord
 
@@ -1063,8 +921,6 @@ namespace SOLUM_UI.Services.Api
 
                 RecordTerms = dto.RecordTerms ?? new List<RecordTermDto>(),
 
-
-
                 Surname = dto.PersonalInfo?.LastName ?? string.Empty,
 
                 FirstName = dto.PersonalInfo?.FirstName ?? string.Empty,
@@ -1087,8 +943,6 @@ namespace SOLUM_UI.Services.Api
 
                 Religion = dto.PersonalInfo?.Religion ?? string.Empty,
 
-
-
                 Occupation = dto.Employment?.Occupation ?? string.Empty,
 
                 MonthlyIncome = dto.Employment?.MonthlyIncome > 0 ? dto.Employment.MonthlyIncome.ToString("N2") : string.Empty,
@@ -1099,15 +953,11 @@ namespace SOLUM_UI.Services.Api
 
                 IsNotEmployed = string.Equals(dto.Employment?.EmploymentStatus, "not_employed", StringComparison.OrdinalIgnoreCase),
 
-
-
                 Address = dto.AddressDetails?.Address ?? string.Empty,
 
                 Barangay = dto.AddressDetails?.Barangay ?? string.Empty,
 
                 ContactNumber = dto.ContactDetails?.ApplicantContactNumber ?? string.Empty,
-
-
 
                 EmergencyContactName = dto.EmergencyContact?.EmergencyPersonName ?? string.Empty,
 
@@ -1116,8 +966,6 @@ namespace SOLUM_UI.Services.Api
                 EmergencyAddress = dto.EmergencyContact?.EmergencyPersonContactAddress ?? string.Empty,
 
                 EmergencyContactNumber = dto.EmergencyContact?.EmergencyPersonContactNumber ?? string.Empty,
-
-
 
                 ProblemPresented = dto.ProblemPresented?.Name ?? string.Empty,
 
@@ -1151,19 +999,13 @@ namespace SOLUM_UI.Services.Api
 
             };
 
-
-
             record.Name = $"{record.Surname}, {record.FirstName} {record.MiddleName}".Trim();
-
-
 
             // Match circumstance checkboxes from ProblemPresentedNumber and Name
 
             string probNum = dto.ProblemPresented?.ProblemPresentedNumber ?? string.Empty;
 
             string probName = dto.ProblemPresented?.Name ?? string.Empty;
-
-
 
             var numTokens = new HashSet<string>(
 
@@ -1178,8 +1020,6 @@ namespace SOLUM_UI.Services.Api
             string trimmedNum = probNum.Trim().ToUpperInvariant();
 
             bool HasCode(string code) => numTokens.Contains(code) || trimmedNum == code;
-
-
 
             record.CircumstanceA1 = HasCode("A1") || probName.IndexOf("rape", StringComparison.OrdinalIgnoreCase) >= 0;
 
@@ -1204,8 +1044,6 @@ namespace SOLUM_UI.Services.Api
             record.CircumstanceE  = HasCode("E")  || probName.IndexOf("relative", StringComparison.OrdinalIgnoreCase) >= 0 || probName.IndexOf("4th civil", StringComparison.OrdinalIgnoreCase) >= 0;
 
             record.CircumstanceF  = HasCode("F")  || probName.IndexOf("pregnant", StringComparison.OrdinalIgnoreCase) >= 0;
-
-
 
             if (dto.FamilyMembers != null)
 
@@ -1243,19 +1081,13 @@ namespace SOLUM_UI.Services.Api
 
                 }).ToList();
 
-
-
                 record.Children = record.FamilyMembers.Count;
 
             }
 
-
-
             return record;
 
         }
-
-
 
         /// <summary>
 
@@ -1273,8 +1105,6 @@ namespace SOLUM_UI.Services.Api
 
             if (dto == null) return null;
 
-
-
             // Resolve first/last name: prefer root-level flat fields, fall back to PersonalInfo
 
             string firstName = !string.IsNullOrWhiteSpace(dto.PersonalInfo?.FirstName)
@@ -1283,23 +1113,17 @@ namespace SOLUM_UI.Services.Api
 
                 : dto.FirstName ?? string.Empty;
 
-
-
             string lastName = !string.IsNullOrWhiteSpace(dto.PersonalInfo?.LastName)
 
                 ? dto.PersonalInfo.LastName
 
                 : dto.LastName ?? string.Empty;
 
-
-
             string middleName = !string.IsNullOrWhiteSpace(dto.PersonalInfo?.MiddleName)
 
                 ? dto.PersonalInfo.MiddleName
 
                 : dto.MiddleName ?? string.Empty;
-
-
 
             // Adapt to SoloParentDto and delegate to the full mapper
 
@@ -1374,11 +1198,7 @@ namespace SOLUM_UI.Services.Api
 
             };
 
-
-
             var record = MapToRecord(adapted);
-
-
 
             // If the name is still blank (API returns a flat fullName), use it directly
 
@@ -1386,21 +1206,15 @@ namespace SOLUM_UI.Services.Api
 
                 record.Name = dto.FullName;
 
-
-
             return record;
 
         }
-
-
 
         // =========================================================================
 
         // Internal field mappers & sanitizers (enforcing backend FluentValidation)
 
         // =========================================================================
-
-
 
         private PersonalInfo MapPersonalInfo(SoloParentRecord r)
 
@@ -1415,8 +1229,6 @@ namespace SOLUM_UI.Services.Api
             if (age < 15) age = 15;
 
             if (age > 120) age = 120;
-
-
 
             return new PersonalInfo
 
@@ -1450,8 +1262,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         private EmploymentInfo MapEmploymentInfo(SoloParentRecord r)
 
         {
@@ -1462,13 +1272,9 @@ namespace SOLUM_UI.Services.Api
 
             else if (r.IsEmployed) status = "employed";
 
-
-
             string occupation = !string.IsNullOrWhiteSpace(r.Occupation) ? r.Occupation.Trim() : (status == "not_employed" ? "Unemployed" : "Employed");
 
             decimal income = ParseDecimal(r.MonthlyIncome);
-
-
 
             return new EmploymentInfo
 
@@ -1484,8 +1290,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         private ContactInfo MapContactInfo(SoloParentRecord r)
 
         {
@@ -1500,8 +1304,6 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             return new ContactInfo
 
             {
@@ -1511,8 +1313,6 @@ namespace SOLUM_UI.Services.Api
             };
 
         }
-
-
 
         private AddressInfo MapAddressInfo(SoloParentRecord r)
 
@@ -1530,8 +1330,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         private EmergencyContactInfo MapEmergencyContact(SoloParentRecord r)
 
         {
@@ -1543,8 +1341,6 @@ namespace SOLUM_UI.Services.Api
             string addr = !string.IsNullOrWhiteSpace(r.EmergencyAddress) ? r.EmergencyAddress.Trim() : (!string.IsNullOrWhiteSpace(r.Address) ? r.Address.Trim() : "Biñan");
 
             string num = CleanPhoneNumber(r.EmergencyContactNumber);
-
-
 
             return new EmergencyContactInfo
 
@@ -1562,8 +1358,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         private static readonly HashSet<string> KnownClassifications = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 
         {
@@ -1580,8 +1374,6 @@ namespace SOLUM_UI.Services.Api
 
         };
 
-
-
         private static bool IsKnownClassification(string name)
 
         {
@@ -1592,8 +1384,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         private ProblemPresentedDetails MapProblemPresented(SoloParentRecord r)
 
         {
@@ -1601,8 +1391,6 @@ namespace SOLUM_UI.Services.Api
             var codes = new List<string>();
 
             string title = "Solo Parent";
-
-
 
             if (r.CircumstanceA1) { codes.Add("A1"); title = "Birth from rape"; }
 
@@ -1628,8 +1416,6 @@ namespace SOLUM_UI.Services.Api
 
             if (r.CircumstanceF)  { codes.Add("F");  title = "Pregnant Woman"; }
 
-
-
             // If no circumstance checkbox is checked, retain existing classification title if available
 
             if (codes.Count == 0 && !string.IsNullOrWhiteSpace(r.ProblemPresented))
@@ -1640,17 +1426,11 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             string code = codes.Count > 0 ? string.Join(",", codes) : string.Empty;
-
-
 
             decimal? lengthAbroad = null;
 
             if (decimal.TryParse(r.CircumstanceBStayAbroad, out var lab)) lengthAbroad = lab;
-
-
 
             return new ProblemPresentedDetails
 
@@ -1677,8 +1457,6 @@ namespace SOLUM_UI.Services.Api
             };
 
         }
-
-
 
         public static string GetCircumstanceCode(SoloParentRecord r)
 
@@ -1714,8 +1492,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         public static string ExtractCircumstanceCode(string text)
 
         {
@@ -1725,8 +1501,6 @@ namespace SOLUM_UI.Services.Api
             var match = Regex.Match(text, @"\b([A-Fa-f][1-7]?)\b");
 
             if (match.Success) return match.Value.ToUpperInvariant();
-
-
 
             string lower = text.ToLowerInvariant();
 
@@ -1754,21 +1528,15 @@ namespace SOLUM_UI.Services.Api
 
             if (lower.Contains("pregnant")) return "F";
 
-
-
             return string.Empty;
 
         }
-
-
 
         public static bool HasCircumstanceChanged(SoloParentRecord r, ProblemPresentedDetails existing)
 
         {
 
             if (existing == null) return true;
-
-
 
             string rCode = GetCircumstanceCode(r);
 
@@ -1777,8 +1545,6 @@ namespace SOLUM_UI.Services.Api
                 ? ExtractCircumstanceCode(existing.ProblemPresentedNumber)
 
                 : ExtractCircumstanceCode(existing.Name);
-
-
 
             // If neither has a detected code, check if raw name is equal
 
@@ -1790,8 +1556,6 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             if (!string.Equals(rCode, existingCode, StringComparison.OrdinalIgnoreCase))
 
             {
@@ -1799,8 +1563,6 @@ namespace SOLUM_UI.Services.Api
                 return true;
 
             }
-
-
 
             // Same code — check subfields
 
@@ -1860,13 +1622,9 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             return false;
 
         }
-
-
 
         private CreateFamilyMemberRequest MapCreateFamilyMember(FamilyMember fm)
 
@@ -1902,8 +1660,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         private static string NormalizeSex(string sex)
 
         {
@@ -1918,8 +1674,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         private static string CleanPhoneNumber(string num)
 
         {
@@ -1929,8 +1683,6 @@ namespace SOLUM_UI.Services.Api
             return Regex.Replace(num, @"[^\d+]", "");
 
         }
-
-
 
         private static decimal ParseDecimal(string val)
 
@@ -1952,8 +1704,6 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-
-
         private static int ParseAge(string ageStr, string birthdateStr)
 
         {
@@ -1961,8 +1711,6 @@ namespace SOLUM_UI.Services.Api
             if (int.TryParse(ageStr, out var age) && age >= 0 && age <= 120)
 
                 return age;
-
-
 
             if (DateTime.TryParse(birthdateStr, out var dt) && dt != DateTime.MinValue)
 
@@ -1976,13 +1724,9 @@ namespace SOLUM_UI.Services.Api
 
             }
 
-
-
             return 5;
 
         }
-
-
 
         private static DateTime ParseDate(string dateStr, DateTime fallback)
 
@@ -1999,4 +1743,3 @@ namespace SOLUM_UI.Services.Api
     }
 
 }
-

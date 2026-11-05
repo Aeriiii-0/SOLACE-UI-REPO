@@ -497,7 +497,7 @@ namespace SOLUM_UI
             try
             {
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Starting navigation");
-                
+
                 var mainWindow = Application.Current.MainWindow as MainWindow;
                 if (mainWindow == null)
                 {
@@ -506,19 +506,19 @@ namespace SOLUM_UI
                 }
 
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: MainWindow found");
-                
+
                 // Clear cache to force fresh page load
                 mainWindow.ClearPageCache("SoloParentRecords");
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Cache cleared");
-                
+
                 // Set the filter to ExpiringSoon
                 SoloParentRecordsPage.RequestedStatusFilter = "ExpiringSoon";
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Filter set to ExpiringSoon");
-                
+
                 // Activate the SoloParentRecords button and navigate
                 mainWindow.ActivateButton("SoloParentRecords");
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Button activated");
-                
+
                 mainWindow.NavigateTo("SoloParentRecords");
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Navigation called");
             }

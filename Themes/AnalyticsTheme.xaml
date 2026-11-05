@@ -179,7 +179,7 @@
     <SolidColorBrush x:Key="KpiCardBg6" Color="#7B1426"/>     <!-- Card 6: Total Solo Parents (Darkest) -->
 
     <!-- KPI Card Styles - Progressive Darkening -->
-    
+
     <!-- Card 1: Pantawid Beneficiary (Lightest) -->
     <Style x:Key="KpiCardStyle1" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource KpiCardBg1}"/>

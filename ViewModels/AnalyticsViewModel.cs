@@ -11,8 +11,6 @@ using System.Runtime.CompilerServices;
 
 using SOLUM_UI.Models.Api;
 
-
-
 namespace SOLUM_UI.ViewModels
 
 {
@@ -22,8 +20,6 @@ namespace SOLUM_UI.ViewModels
     {
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-
 
         // KPI Properties
 
@@ -49,8 +45,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _femaleCount;
 
         public int FemaleCount
@@ -72,8 +66,6 @@ namespace SOLUM_UI.ViewModels
             }
 
         }
-
-
 
         private int _maleCount;
 
@@ -97,8 +89,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _totalDependents;
 
         public int TotalDependents
@@ -110,8 +100,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _totalDependents, value);
 
         }
-
-
 
         private int _lgbtCount;
 
@@ -125,8 +113,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _pantawidBeneficiaryCount;
 
         public int PantawidBeneficiaryCount
@@ -139,8 +125,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _indigenousCount;
 
         public int IndigenousCount
@@ -152,8 +136,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _indigenousCount, value);
 
         }
-
-
 
         // Top Barangay Properties
 
@@ -169,8 +151,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _topBarangayCount;
 
         public int TopBarangayCount
@@ -182,8 +162,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _topBarangayCount, value);
 
         }
-
-
 
         // Dashboard Operational KPI Properties (from GET /api/Analytics/dashboard)
 
@@ -209,8 +187,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public int TotalRegisteredCount
 
         {
@@ -220,8 +196,6 @@ namespace SOLUM_UI.ViewModels
             set { }
 
         }
-
-
 
         public int AddedThisMonthCount
 
@@ -233,8 +207,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public int ActiveRecordsCount
 
         {
@@ -244,8 +216,6 @@ namespace SOLUM_UI.ViewModels
             set { }
 
         }
-
-
 
         public int ExpiringThisMonthCount
 
@@ -257,8 +227,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public int InactiveRecordsCount
 
         {
@@ -268,8 +236,6 @@ namespace SOLUM_UI.ViewModels
             set { }
 
         }
-
-
 
         private string _inactiveSubtext = "Requires review";
 
@@ -282,8 +248,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _inactiveSubtext, value);
 
         }
-
-
 
         public int DisplayTotalEnrolled
 
@@ -304,8 +268,6 @@ namespace SOLUM_UI.ViewModels
             set { }
 
         }
-
-
 
         private int _activeRecords;
 
@@ -328,8 +290,6 @@ namespace SOLUM_UI.ViewModels
             }
 
         }
-
-
 
         private int _inactiveRecords;
 
@@ -359,8 +319,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _filteredActiveRecords;
 
         public int FilteredActiveRecords
@@ -383,8 +341,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public int DisplayActiveRecords
 
         {
@@ -404,8 +360,6 @@ namespace SOLUM_UI.ViewModels
             set { }
 
         }
-
-
 
         private int _filteredInactiveRecords;
 
@@ -429,8 +383,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public int DisplayInactiveRecords
 
         {
@@ -450,8 +402,6 @@ namespace SOLUM_UI.ViewModels
             set { }
 
         }
-
-
 
         private int _activeChangeFromLastMonth;
 
@@ -475,8 +425,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public string ActiveChangeText
 
         {
@@ -499,11 +447,7 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public bool ActiveChangeIsPositive => _activeChangeFromLastMonth >= 0;
-
-
 
         private int _renewalsDueThisMonth;
 
@@ -525,8 +469,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _renewalsCompletedToday;
 
         public int RenewalsCompletedToday
@@ -539,8 +481,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _renewalsThisMonth;
 
         public int RenewalsThisMonth
@@ -552,8 +492,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _renewalsThisMonth, value);
 
         }
-
-
 
         private int _registeredThisMonth;
 
@@ -577,8 +515,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _filteredNewRegistrations;
 
         public int FilteredNewRegistrations
@@ -601,8 +537,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public int DisplayRegisteredCount
 
         {
@@ -622,10 +556,6 @@ namespace SOLUM_UI.ViewModels
             set { }
 
         }
-
-
-
-        
 
         private PreviousYearComparisonDto _previousYearComparison;
 
@@ -659,8 +589,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public bool HasPreviousYearComparison => _previousYearComparison != null && _previousYearComparison.PreviousYear > 0;
 
         public Visibility PreviousYearComparisonVisibility => HasPreviousYearComparison ? Visibility.Visible : Visibility.Collapsed;
@@ -676,8 +604,6 @@ namespace SOLUM_UI.ViewModels
             ? $"{(GrowthPercentage >= 0 ? "▲ +" : "▼ ")}{Math.Abs(GrowthPercentage):F1}% vs {_previousYearComparison.PreviousYear}"
 
             : string.Empty;
-
-
 
         public string Card1Label
 
@@ -699,8 +625,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public string Card1Subtitle
 
         {
@@ -712,8 +636,6 @@ namespace SOLUM_UI.ViewModels
                 if (HasPreviousYearComparison && _previousYearComparison.PreviousYearTotal > 0)
 
                     return $"{_previousYearComparison.PreviousYearTotal:N0} in {_previousYearComparison.PreviousYear} ({GrowthPercentageDisplay} YoY)";
-
-
 
                 if (!IsFilterActive)
 
@@ -733,8 +655,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public string Card2Subtitle
 
         {
@@ -746,8 +666,6 @@ namespace SOLUM_UI.ViewModels
                 if (HasPreviousYearComparison && _previousYearComparison.PreviousYearActive > 0)
 
                     return $"{_previousYearComparison.PreviousYearActive:N0} active in {_previousYearComparison.PreviousYear}";
-
-
 
                 if (!IsFilterActive)
 
@@ -767,8 +685,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public string DisplayRegisteredLabel
 
         {
@@ -780,8 +696,6 @@ namespace SOLUM_UI.ViewModels
                 if (!IsFilterActive)
 
                     return "Enrolled This Month";
-
-
 
                 switch (FilterType)
 
@@ -813,8 +727,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _filteredRenewals;
 
         public int FilteredRenewals
@@ -826,8 +738,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _filteredRenewals, value);
 
         }
-
-
 
         // Active Filter Summary Indicator
 
@@ -842,8 +752,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _activeFilterSummary, value);
 
         }
-
-
 
         private bool _isFilterActive;
 
@@ -881,8 +789,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         // Hierarchical Period Filter Properties
 
         private string _filterType = "Monthly";
@@ -905,8 +811,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _selectedYear = DateTime.Today.Year;
 
         public int SelectedYear
@@ -918,8 +822,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _selectedYear, value);
 
         }
-
-
 
         private int _selectedMonth = DateTime.Today.Month;
 
@@ -933,8 +835,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _selectedQuarter = (DateTime.Today.Month - 1) / 3 + 1;
 
         public int SelectedQuarter
@@ -947,33 +847,23 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         // Solo Parent Statutory Age Brackets (from MonthlyAnalyticsDto.AgeBrackets)
 
         private int _parentAge19Below;
 
         public int ParentAge19Below { get => _parentAge19Below; set => SetProperty(ref _parentAge19Below, value); }
 
-
-
         private int _parentAge20_39;
 
         public int ParentAge20_39 { get => _parentAge20_39; set => SetProperty(ref _parentAge20_39, value); }
-
-
 
         private int _parentAge40_59;
 
         public int ParentAge40_59 { get => _parentAge40_59; set => SetProperty(ref _parentAge40_59, value); }
 
-
-
         private int _parentAge60Above;
 
         public int ParentAge60Above { get => _parentAge60Above; set => SetProperty(ref _parentAge60Above, value); }
-
-
 
         private double _parentAge19BelowPercent;
 
@@ -997,8 +887,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _parentAge20_39Percent;
 
         public double ParentAge20_39Percent
@@ -1020,8 +908,6 @@ namespace SOLUM_UI.ViewModels
             }
 
         }
-
-
 
         private double _parentAge40_59Percent;
 
@@ -1045,8 +931,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _parentAge60AbovePercent;
 
         public double ParentAge60AbovePercent
@@ -1069,21 +953,15 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         // Proportional GridLengths for accurate bar widths
 
         public System.Windows.GridLength FemaleGridLength =>
 
             new System.Windows.GridLength(FemaleCount > 0 ? FemaleCount : (MaleCount > 0 ? 0 : 1), System.Windows.GridUnitType.Star);
 
-
-
         public System.Windows.GridLength MaleGridLength =>
 
             new System.Windows.GridLength(MaleCount > 0 ? MaleCount : (FemaleCount > 0 ? 0 : 1), System.Windows.GridUnitType.Star);
-
-
 
         public System.Windows.GridLength ParentAge19BelowGridLength =>
 
@@ -1093,8 +971,6 @@ namespace SOLUM_UI.ViewModels
 
             new System.Windows.GridLength(Math.Max(100.0 - ParentAge19BelowPercent, 0.001), System.Windows.GridUnitType.Star);
 
-
-
         public System.Windows.GridLength ParentAge20_39GridLength =>
 
             new System.Windows.GridLength(Math.Max(ParentAge20_39Percent, 0), System.Windows.GridUnitType.Star);
@@ -1102,8 +978,6 @@ namespace SOLUM_UI.ViewModels
         public System.Windows.GridLength ParentAge20_39RemainingGridLength =>
 
             new System.Windows.GridLength(Math.Max(100.0 - ParentAge20_39Percent, 0.001), System.Windows.GridUnitType.Star);
-
-
 
         public System.Windows.GridLength ParentAge40_59GridLength =>
 
@@ -1113,8 +987,6 @@ namespace SOLUM_UI.ViewModels
 
             new System.Windows.GridLength(Math.Max(100.0 - ParentAge40_59Percent, 0.001), System.Windows.GridUnitType.Star);
 
-
-
         public System.Windows.GridLength ParentAge60AboveGridLength =>
 
             new System.Windows.GridLength(Math.Max(ParentAge60AbovePercent, 0), System.Windows.GridUnitType.Star);
@@ -1123,49 +995,33 @@ namespace SOLUM_UI.ViewModels
 
             new System.Windows.GridLength(Math.Max(100.0 - ParentAge60AbovePercent, 0.001), System.Windows.GridUnitType.Star);
 
-
-
         public System.Windows.GridLength IncomeBelowMinGridLength =>
 
             new System.Windows.GridLength(IncomeBelowMinCount > 0 ? IncomeBelowMinCount : (IncomeBelowMinCount + IncomeMinWageCount + IncomeAboveMinCount > 0 ? 0 : 1), System.Windows.GridUnitType.Star);
-
-
 
         public System.Windows.GridLength IncomeMinWageGridLength =>
 
             new System.Windows.GridLength(IncomeMinWageCount > 0 ? IncomeMinWageCount : (IncomeBelowMinCount + IncomeMinWageCount + IncomeAboveMinCount > 0 ? 0 : 1), System.Windows.GridUnitType.Star);
 
-
-
         public System.Windows.GridLength IncomeAboveMinGridLength =>
 
             new System.Windows.GridLength(IncomeAboveMinCount > 0 ? IncomeAboveMinCount : (IncomeBelowMinCount + IncomeMinWageCount + IncomeAboveMinCount > 0 ? 0 : 1), System.Windows.GridUnitType.Star);
-
-
 
         private double _parentAge19BelowBarWidth;
 
         public double ParentAge19BelowBarWidth { get => _parentAge19BelowBarWidth; set => SetProperty(ref _parentAge19BelowBarWidth, value); }
 
-
-
         private double _parentAge20_39BarWidth;
 
         public double ParentAge20_39BarWidth { get => _parentAge20_39BarWidth; set => SetProperty(ref _parentAge20_39BarWidth, value); }
-
-
 
         private double _parentAge40_59BarWidth;
 
         public double ParentAge40_59BarWidth { get => _parentAge40_59BarWidth; set => SetProperty(ref _parentAge40_59BarWidth, value); }
 
-
-
         private double _parentAge60AboveBarWidth;
 
         public double ParentAge60AboveBarWidth { get => _parentAge60AboveBarWidth; set => SetProperty(ref _parentAge60AboveBarWidth, value); }
-
-
 
         // Age Group Data (for Donut Chart)
 
@@ -1181,8 +1037,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         // Civil Status Data (for List)
 
         private ObservableCollection<ListItem> _civilStatusData;
@@ -1196,8 +1050,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _civilStatusData, value);
 
         }
-
-
 
         // Employment Status Data (for Progress Rows)
 
@@ -1213,8 +1065,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         // Income Bracket Data (for Progress Rows)
 
         private ObservableCollection<ProgressItem> _incomeBracketData;
@@ -1228,8 +1078,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _incomeBracketData, value);
 
         }
-
-
 
         // Dependents Age Data (for Column Chart)
 
@@ -1245,8 +1093,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private ObservableCollection<AreaChartData> _barangayData;
 
         public ObservableCollection<AreaChartData> BarangayData
@@ -1259,8 +1105,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private ObservableCollection<AreaChartData> _topCasesData;
 
         public ObservableCollection<AreaChartData> TopCasesData
@@ -1272,8 +1116,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _topCasesData, value);
 
         }
-
-
 
         // New properties for simplified UI
 
@@ -1289,8 +1131,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _marriedCount;
 
         public int MarriedCount
@@ -1302,8 +1142,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _marriedCount, value);
 
         }
-
-
 
         private int _widowedCount;
 
@@ -1317,8 +1155,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _separatedCount;
 
         public int SeparatedCount
@@ -1331,8 +1167,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _annulledCount;
 
         public int AnnulledCount
@@ -1344,8 +1178,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _annulledCount, value);
 
         }
-
-
 
         // Employment percentages
 
@@ -1361,8 +1193,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _selfEmployedPercent;
 
         public double SelfEmployedPercent
@@ -1375,8 +1205,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _notEmployedPercent;
 
         public double NotEmployedPercent
@@ -1388,8 +1216,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _notEmployedPercent, value);
 
         }
-
-
 
         // Arc path properties for employment charts (dynamically calculated)
 
@@ -1405,8 +1231,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private string _selfEmployedArcPath;
 
         public string SelfEmployedArcPath
@@ -1418,8 +1242,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _selfEmployedArcPath, value);
 
         }
-
-
 
         private string _notEmployedArcPath;
 
@@ -1433,8 +1255,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _ageGroup0_5;
 
         public int AgeGroup0_5
@@ -1446,8 +1266,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _ageGroup0_5, value);
 
         }
-
-
 
         private int _ageGroup6_12;
 
@@ -1461,8 +1279,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _ageGroup13_17;
 
         public int AgeGroup13_17
@@ -1474,8 +1290,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _ageGroup13_17, value);
 
         }
-
-
 
         private string _employedText;
 
@@ -1489,8 +1303,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private string _selfEmployedText;
 
         public string SelfEmployedText
@@ -1502,8 +1314,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _selfEmployedText, value);
 
         }
-
-
 
         private string _notEmployedText;
 
@@ -1517,8 +1327,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private string _femalePercentText;
 
         public string FemalePercentText
@@ -1530,8 +1338,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _femalePercentText, value);
 
         }
-
-
 
         private double _femalePercent;
 
@@ -1545,8 +1351,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _malePercent;
 
         public double MalePercent
@@ -1558,8 +1362,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _malePercent, value);
 
         }
-
-
 
         private double _femalePercentWidth;
 
@@ -1573,8 +1375,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private DateTime? _startDate;
 
         public DateTime? StartDate
@@ -1586,8 +1386,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _startDate, value);
 
         }
-
-
 
         private DateTime? _endDate;
 
@@ -1601,8 +1399,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private string _incomeBelowMinText;
 
         public string IncomeBelowMinText
@@ -1614,8 +1410,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _incomeBelowMinText, value);
 
         }
-
-
 
         private string _incomeMinWageText;
 
@@ -1629,8 +1423,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _incomeBelowMinPercentWidth;
 
         public double IncomeBelowMinPercentWidth
@@ -1642,8 +1434,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _incomeBelowMinPercentWidth, value);
 
         }
-
-
 
         private double _ageGroup0_5Percent;
 
@@ -1657,8 +1447,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _ageGroup6_12Percent;
 
         public double AgeGroup6_12Percent
@@ -1670,8 +1458,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _ageGroup6_12Percent, value);
 
         }
-
-
 
         private double _ageGroup13_17Percent;
 
@@ -1685,8 +1471,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private DateTime _lastRefreshTime;
 
         public DateTime LastRefreshTime
@@ -1699,8 +1483,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private bool _isLoading;
 
         public bool IsLoading
@@ -1712,8 +1494,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _isLoading, value);
 
         }
-
-
 
         /// <summary>True when the current data set has at least one record.</summary>
 
@@ -1745,15 +1525,9 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         /// <summary>True when the filter returned zero results — drives the empty-state banner.</summary>
 
         public bool IsNoData => !_hasData;
-
-
-
-
 
         // Pagination properties
 
@@ -1769,8 +1543,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _totalBarangayPages;
 
         public int TotalBarangayPages
@@ -1782,8 +1554,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _totalBarangayPages, value);
 
         }
-
-
 
         private bool _hasNextBarangayPage;
 
@@ -1797,8 +1567,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private bool _hasPreviousBarangayPage;
 
         public bool HasPreviousBarangayPage
@@ -1810,8 +1578,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _hasPreviousBarangayPage, value);
 
         }
-
-
 
         // All barangays list (for pagination)
 
@@ -1826,8 +1592,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _allBarangayData, value);
 
         }
-
-
 
         // Income breakdown details
 
@@ -1855,8 +1619,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private int _incomeMinWageCount;
 
         public int IncomeMinWageCount
@@ -1880,8 +1642,6 @@ namespace SOLUM_UI.ViewModels
             }
 
         }
-
-
 
         private int _incomeAboveMinCount;
 
@@ -1907,8 +1667,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _incomeBelowMinPercent;
 
         public double IncomeBelowMinPercent
@@ -1920,8 +1678,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _incomeBelowMinPercent, value);
 
         }
-
-
 
         private double _incomeMinWagePercent;
 
@@ -1935,8 +1691,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _incomeAboveMinPercent;
 
         public double IncomeAboveMinPercent
@@ -1948,8 +1702,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _incomeAboveMinPercent, value);
 
         }
-
-
 
         private double _incomeMinWagePercentWidth;
 
@@ -1963,8 +1715,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _incomeAboveMinPercentWidth;
 
         public double IncomeAboveMinPercentWidth
@@ -1976,8 +1726,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _incomeAboveMinPercentWidth, value);
 
         }
-
-
 
         private double _ageGroup0_5BarHeight;
 
@@ -1991,8 +1739,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _ageGroup6_12BarHeight;
 
         public double AgeGroup6_12BarHeight
@@ -2005,8 +1751,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         private double _ageGroup13_17BarHeight;
 
         public double AgeGroup13_17BarHeight
@@ -2018,8 +1762,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _ageGroup13_17BarHeight, value);
 
         }
-
-
 
         // Selected Barangay Filter
 
@@ -2035,8 +1777,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         // Analytics DTO for export purposes
 
         private MonthlyAnalyticsDto _analyticsData;
@@ -2050,8 +1790,6 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _analyticsData, value);
 
         }
-
-
 
         /// <summary>
 
@@ -2093,8 +1831,6 @@ namespace SOLUM_UI.ViewModels
 
             HasPreviousBarangayPage = false;
 
-            
-
             // Initialize date range to current month
 
             StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
@@ -2106,8 +1842,6 @@ namespace SOLUM_UI.ViewModels
             UpdateActiveFilterSummary();
 
         }
-
-
 
         /// <summary>
 
@@ -2125,13 +1859,9 @@ namespace SOLUM_UI.ViewModels
 
                 : $"Barangay {SelectedBarangay}";
 
-
-
             string periodStr;
 
             bool isCustomDate = false;
-
-
 
             switch (FilterType)
 
@@ -2145,8 +1875,6 @@ namespace SOLUM_UI.ViewModels
 
                     break;
 
-
-
                 case "Quarterly":
 
                     periodStr = $"Q{SelectedQuarter} {SelectedYear}";
@@ -2156,8 +1884,6 @@ namespace SOLUM_UI.ViewModels
                     isCustomDate = (SelectedYear != DateTime.Today.Year || SelectedQuarter != currentQuarter);
 
                     break;
-
-
 
                 case "CustomRange":
 
@@ -2177,8 +1903,6 @@ namespace SOLUM_UI.ViewModels
 
                     break;
 
-
-
                 case "Monthly":
 
                 default:
@@ -2197,23 +1921,15 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             ActiveFilterSummary = $"{bName}  •  {periodStr}";
-
-
 
             bool isCustomBarangay = !string.IsNullOrWhiteSpace(SelectedBarangay) && !SelectedBarangay.Equals("ALL", StringComparison.OrdinalIgnoreCase);
 
             bool isNotDefaultType = !string.Equals(FilterType, "Monthly", StringComparison.OrdinalIgnoreCase);
 
-
-
             IsFilterActive = isCustomBarangay || isCustomDate || isNotDefaultType;
 
         }
-
-
 
         /// <summary>
 
@@ -2243,15 +1959,11 @@ namespace SOLUM_UI.ViewModels
 
             RegisteredThisMonth = dto.RegisteredThisMonth;
 
-
-
             if (TotalSoloParents <= 0 && dto.TotalRegistered > 0)
 
                 TotalSoloParents = dto.TotalRegistered;
 
         }
-
-
 
         /// <summary>
 
@@ -2264,8 +1976,6 @@ namespace SOLUM_UI.ViewModels
         {
 
             if (dto == null || dto.Barangays == null) return;
-
-
 
             int calculatedTotal = dto.GrandTotalSoloParents;
 
@@ -2284,8 +1994,6 @@ namespace SOLUM_UI.ViewModels
                 calculatedTotal = dto.TotalActive + dto.TotalInactive;
 
             }
-
-
 
             if (IsFilterActive)
 
@@ -2325,19 +2033,13 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             AllBarangayData.Clear();
-
-
 
             var sortedBarangays = dto.Barangays.OrderByDescending(b => b.TotalSoloParents).ToList();
 
             int maxVal = sortedBarangays.Count > 0 ? sortedBarangays[0].TotalSoloParents : 1;
 
             if (maxVal <= 0) maxVal = 1;
-
-
 
             int rank = 1;
 
@@ -2346,8 +2048,6 @@ namespace SOLUM_UI.ViewModels
             {
 
                 double barWidth = (b.TotalSoloParents * 1.0 / maxVal) * 280;
-
-
 
                 AllBarangayData.Add(new AreaChartData
 
@@ -2381,8 +2081,6 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             const int barangaysPerPage = 10;
 
             TotalBarangayPages = Math.Max(1, (int)Math.Ceiling(AllBarangayData.Count / (double)barangaysPerPage));
@@ -2391,15 +2089,9 @@ namespace SOLUM_UI.ViewModels
 
             UpdateBarangayPage();
 
-
-
             HasData = TotalSoloParents > 0 || AllBarangayData.Count > 0;
 
         }
-
-
-
-
 
         /// <summary>
 
@@ -2423,8 +2115,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         /// <summary>
 
         /// Navigate to previous barangay page
@@ -2447,8 +2137,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         /// <summary>
 
         /// Update the displayed barangay data for current page
@@ -2465,8 +2153,6 @@ namespace SOLUM_UI.ViewModels
 
             int endIndex = Math.Min(startIndex + itemsPerPage, AllBarangayData.Count);
 
-
-
             BarangayData.Clear();
 
             for (int i = startIndex; i < endIndex; i++)
@@ -2477,11 +2163,7 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             UpdateTopBarangay();
-
-            
 
             // Update navigation buttons
 
@@ -2490,8 +2172,6 @@ namespace SOLUM_UI.ViewModels
             HasNextBarangayPage = CurrentBarangayPage < TotalBarangayPages;
 
         }
-
-
 
         /// <summary>
 
@@ -2527,8 +2207,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         /// <summary>
 
         /// Safely retrieves an integer value from a dictionary using case-insensitive matching across multiple key aliases.
@@ -2563,8 +2241,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         /// <summary>
 
         /// Populate ViewModel from MonthlyAnalyticsDto
@@ -2585,19 +2261,13 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             System.Diagnostics.Debug.WriteLine("→ LoadFromAnalyticsDto: Processing analytics data...");
-
-
 
             // Store the DTO for export purposes
 
             AnalyticsData = dto;
 
             PreviousYearComparison = dto.PreviousYearComparison;
-
-
 
             // Calculate KPIs
 
@@ -2626,8 +2296,6 @@ namespace SOLUM_UI.ViewModels
                 if (dto.Renewals > 0 || FilteredRenewals <= 0)
 
                     FilteredRenewals = dto.Renewals;
-
-
 
                 if (dto.NewRegistrations > 0 || RegisteredThisMonth == 0)
 
@@ -2671,11 +2339,7 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             System.Diagnostics.Debug.WriteLine($"  TotalSoloParents: {TotalSoloParents}, Active: {dto.ActiveSoloParents}, Inactive: {dto.InactiveSoloParents}, New: {dto.NewRegistrations}");
-
-            
 
             // Female/Male from Sex dictionary (null-safe & case-insensitive)
 
@@ -2690,8 +2354,6 @@ namespace SOLUM_UI.ViewModels
             MaleCount = male;
 
             System.Diagnostics.Debug.WriteLine($"  Female: {female}, Male: {male}");
-
-
 
             // Calculate female/male percentages for progress bar and summary label
 
@@ -2731,8 +2393,6 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             // Total dependents sum (null-safe)
 
             var dependentsAge = dto.DependentsAgeBrackets ?? new System.Collections.Generic.Dictionary<string, int>();
@@ -2746,8 +2406,6 @@ namespace SOLUM_UI.ViewModels
                 TotalDependents += kvp.Value;
 
             }
-
-
 
             // Special Sectors (null-safe, case-insensitive, with sub-breakdown fallback)
 
@@ -2763,8 +2421,6 @@ namespace SOLUM_UI.ViewModels
 
             LgbtCount = lgbt;
 
-
-
             int pantawid = GetDictValue(dto.Sectors, "isPantawidBeneficiary", "pantawidBeneficiary", "pantawid");
 
             if (pantawid <= 0 && dto.PantawidBeneficiary != null)
@@ -2777,8 +2433,6 @@ namespace SOLUM_UI.ViewModels
 
             PantawidBeneficiaryCount = pantawid;
 
-
-
             int indigenous = GetDictValue(dto.Sectors, "isIndigenous", "indigenous", "IP");
 
             if (indigenous <= 0 && dto.Indigenous != null)
@@ -2790,8 +2444,6 @@ namespace SOLUM_UI.ViewModels
             }
 
             IndigenousCount = indigenous;
-
-
 
             // Load civil status simple counts (null-safe & case-insensitive)
 
@@ -2807,8 +2459,6 @@ namespace SOLUM_UI.ViewModels
 
             AnnulledCount = GetDictValue(civilStatus, "Annulled", "annulled", "Divorced", "divorced");
 
-
-
             // Load employment status simple text counts (null-safe & case-insensitive)
 
             var employment = dto.EmploymentStatus ?? new System.Collections.Generic.Dictionary<string, int>();
@@ -2819,11 +2469,7 @@ namespace SOLUM_UI.ViewModels
 
             int notEmployed = GetDictValue(employment, "Unemployed", "unemployed", "Not Employed", "not_employed", "Not-Employed", "not employed");
 
-
-
             int totalEmpBase = (employed + selfEmployed + notEmployed > 0) ? (employed + selfEmployed + notEmployed) : TotalSoloParents;
-
-
 
             EmployedPercent = totalEmpBase > 0 ? (employed * 100.0 / totalEmpBase) : 0;
 
@@ -2831,15 +2477,11 @@ namespace SOLUM_UI.ViewModels
 
             NotEmployedPercent = totalEmpBase > 0 ? (notEmployed * 100.0 / totalEmpBase) : 0;
 
-
-
             EmployedText = $"{employed} ({EmployedPercent:F1}%)";
 
             SelfEmployedText = $"{selfEmployed} ({SelfEmployedPercent:F1}%)";
 
             NotEmployedText = $"{notEmployed} ({NotEmployedPercent:F1}%)";
-
-
 
             // Generate SVG arc paths for employment ring charts (64x64 canvas, radius 28, center at 32,32)
 
@@ -2849,8 +2491,6 @@ namespace SOLUM_UI.ViewModels
 
             NotEmployedArcPath = GenerateArcPath(NotEmployedPercent);
 
-
-
             // Load dependents age brackets (null-safe & case-insensitive)
 
             AgeGroup0_5 = GetDictValue(dependentsAge, "6_AND_BELOW", "0_6", "0-6", "6 and below");
@@ -2858,8 +2498,6 @@ namespace SOLUM_UI.ViewModels
             AgeGroup6_12 = GetDictValue(dependentsAge, "7_TO_22", "7_22", "7-22", "7_TO_21");
 
             AgeGroup13_17 = GetDictValue(dependentsAge, "22_AND_ABOVE", "22_ABOVE", "22 and above", "22+");
-
-
 
             int totalDependentsByAge = AgeGroup0_5 + AgeGroup6_12 + AgeGroup13_17;
 
@@ -2886,8 +2524,6 @@ namespace SOLUM_UI.ViewModels
                 AgeGroup13_17Percent = 0;
 
             }
-
-
 
             // Calculate age group bar heights relative to the max bracket (scale to 0-115px for visual display)
 
@@ -2919,8 +2555,6 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             // Load income brackets with detailed calculations (null-safe & case-insensitive)
 
             var incomeBrackets = dto.MonthlyIncomeBrackets ?? new System.Collections.Generic.Dictionary<string, int>();
@@ -2931,8 +2565,6 @@ namespace SOLUM_UI.ViewModels
 
             int incomeAboveMin = GetDictValue(incomeBrackets, "20834_AND_ABOVE", "20834_and_above");
 
-
-
             int totalWithIncome = incomeBelowMin + incomeMinWagePlus + incomeAboveMin;
 
             IncomeBelowMinCount = incomeBelowMin;
@@ -2940,8 +2572,6 @@ namespace SOLUM_UI.ViewModels
             IncomeMinWageCount = incomeMinWagePlus;
 
             IncomeAboveMinCount = incomeAboveMin;
-
-
 
             if (totalWithIncome > 0)
 
@@ -2952,8 +2582,6 @@ namespace SOLUM_UI.ViewModels
                 IncomeMinWagePercent = (incomeMinWagePlus * 100.0 / totalWithIncome);
 
                 IncomeAboveMinPercent = (incomeAboveMin * 100.0 / totalWithIncome);
-
-
 
                 IncomeBelowMinText = $"{incomeBelowMin} · {IncomeBelowMinPercent:F1}%";
 
@@ -2977,8 +2605,6 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             double totalBarWidth = 300;
 
             IncomeBelowMinPercentWidth = (IncomeBelowMinPercent / 100.0) * totalBarWidth;
@@ -2986,8 +2612,6 @@ namespace SOLUM_UI.ViewModels
             IncomeMinWagePercentWidth = (IncomeMinWagePercent / 100.0) * totalBarWidth;
 
             IncomeAboveMinPercentWidth = (IncomeAboveMinPercent / 100.0) * totalBarWidth;
-
-
 
             // Load Solo Parent Statutory Age Brackets (null-safe & case-insensitive)
 
@@ -3000,8 +2624,6 @@ namespace SOLUM_UI.ViewModels
             ParentAge40_59 = GetDictValue(ageBrackets, "40_59", "40-59");
 
             ParentAge60Above = GetDictValue(ageBrackets, "60_AND_ABOVE", "60_and_above", "60_above");
-
-
 
             int totalParentAge = ParentAge19Below + ParentAge20_39 + ParentAge40_59 + ParentAge60Above;
 
@@ -3033,8 +2655,6 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             ParentAge19BelowBarWidth = Math.Max(0, (ParentAge19BelowPercent / 100.0) * 240.0);
 
             ParentAge20_39BarWidth = Math.Max(0, (ParentAge20_39Percent / 100.0) * 240.0);
@@ -3042,8 +2662,6 @@ namespace SOLUM_UI.ViewModels
             ParentAge40_59BarWidth = Math.Max(0, (ParentAge40_59Percent / 100.0) * 240.0);
 
             ParentAge60AboveBarWidth = Math.Max(0, (ParentAge60AbovePercent / 100.0) * 240.0);
-
-
 
             // Update Donut Chart Data
 
@@ -3073,8 +2691,6 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             // Load Civil Status Collection
 
             CivilStatusData.Clear();
@@ -3090,8 +2706,6 @@ namespace SOLUM_UI.ViewModels
                 CivilStatusData.Add(new ListItem { Label = civilStatusOrder[i], Value = civilStatusCounts[i] });
 
             }
-
-
 
             // Load Employment Status Collection
 
@@ -3121,8 +2735,6 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             // Load Income Bracket Collection
 
             IncomeBracketData.Clear();
@@ -3150,8 +2762,6 @@ namespace SOLUM_UI.ViewModels
                 });
 
             }
-
-
 
             // Load Dependents Age Column Chart Data
 
@@ -3181,8 +2791,6 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             // Load Top Cases (Classification/Circumstance) with horizontal bar data
 
             TopCasesData.Clear();
@@ -3198,8 +2806,6 @@ namespace SOLUM_UI.ViewModels
                 int maxCaseCount = sortedCases.Count > 0 ? sortedCases[0].Value : 1;
 
                 if (maxCaseCount <= 0) maxCaseCount = 1;
-
-
 
                 int rank = 1;
 
@@ -3231,27 +2837,19 @@ namespace SOLUM_UI.ViewModels
 
             }
 
-
-
             // Get Top Barangay from AllBarangayData (set by LoadBarangayBreakdownDto)
 
             // This will be populated when barangay data loads
 
             UpdateTopBarangay();
 
-
-
             LastRefreshTime = DateTime.Now;
-
-
 
             // Update empty-state flag
 
             HasData = TotalSoloParents > 0;
 
         }
-
-
 
         /// <summary>
 
@@ -3277,8 +2875,6 @@ namespace SOLUM_UI.ViewModels
 
             EmploymentStatusData.Clear();
 
-
-
             FemaleCount = 0;
 
             MaleCount = 0;
@@ -3290,8 +2886,6 @@ namespace SOLUM_UI.ViewModels
             FemalePercentText = "0% Female  ·  0% Male";
 
             FemalePercentWidth = 0;
-
-
 
             EmployedPercent = 0;
 
@@ -3311,8 +2905,6 @@ namespace SOLUM_UI.ViewModels
 
             NotEmployedArcPath = string.Empty;
 
-
-
             AgeGroup0_5 = 0;
 
             AgeGroup6_12 = 0;
@@ -3325,8 +2917,6 @@ namespace SOLUM_UI.ViewModels
 
             AgeGroup13_17Percent = 0;
 
-
-
             SingleCount = 0;
 
             MarriedCount = 0;
@@ -3337,8 +2927,6 @@ namespace SOLUM_UI.ViewModels
 
             AnnulledCount = 0;
 
-
-
             LgbtCount = 0;
 
             PantawidBeneficiaryCount = 0;
@@ -3347,15 +2935,11 @@ namespace SOLUM_UI.ViewModels
 
             TotalDependents = 0;
 
-
-
             UpdateTopBarangay();
 
             LastRefreshTime = DateTime.Now;
 
         }
-
-
 
         /// <summary>
 
@@ -3375,15 +2959,11 @@ namespace SOLUM_UI.ViewModels
 
             if (percentage >= 100.0) percentage = 99.99;
 
-
-
             const double centerX = 32.0;
 
             const double centerY = 32.0;
 
             const double radius = 28.0;
-
-
 
             // Convert percentage to degrees (0-360)
 
@@ -3391,15 +2971,11 @@ namespace SOLUM_UI.ViewModels
 
             double radians = degrees * Math.PI / 180.0;
 
-
-
             // Start point (top center: 0°)
 
             double startX = centerX;
 
             double startY = centerY - radius;
-
-
 
             // End point (calculated from degrees)
 
@@ -3407,13 +2983,9 @@ namespace SOLUM_UI.ViewModels
 
             double endY = centerY - radius * Math.Cos(radians);
 
-
-
             // Determine if arc is large (> 180°)
 
             int isLargeArc = degrees > 180.0 ? 1 : 0;
-
-
 
             // Build SVG arc path using InvariantCulture to avoid decimal localization bugs
 
@@ -3426,8 +2998,6 @@ namespace SOLUM_UI.ViewModels
                 startX, startY, radius, isLargeArc, endX, endY);
 
         }
-
-
 
         protected void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
 
@@ -3445,8 +3015,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
 
         {
@@ -3456,8 +3024,6 @@ namespace SOLUM_UI.ViewModels
         }
 
     }
-
-
 
     public class DonutSegment
 
@@ -3471,8 +3037,6 @@ namespace SOLUM_UI.ViewModels
 
     }
 
-
-
     public class ListItem
 
     {
@@ -3482,8 +3046,6 @@ namespace SOLUM_UI.ViewModels
         public int Value { get; set; }
 
     }
-
-
 
     public class ProgressItem
 
@@ -3497,8 +3059,6 @@ namespace SOLUM_UI.ViewModels
 
     }
 
-
-
     public class ColumnChartData
 
     {
@@ -3510,8 +3070,6 @@ namespace SOLUM_UI.ViewModels
         public string Color { get; set; }
 
     }
-
-
 
     public class AreaChartData
 
@@ -3541,23 +3099,15 @@ namespace SOLUM_UI.ViewModels
 
         public int RenewalsCount { get; set; }
 
-
-
         public System.Windows.GridLength BarGridLength =>
 
             new System.Windows.GridLength(Math.Max(Value, 0), System.Windows.GridUnitType.Star);
-
-
 
         public System.Windows.GridLength RemainingGridLength =>
 
             new System.Windows.GridLength(Math.Max(MaxBarangayValue - Value, 0.001), System.Windows.GridUnitType.Star);
 
-
-
         public string PercentageShareText => $"{PercentageShare:F1}%";
-
-
 
         /// <summary>
 
@@ -3573,8 +3123,6 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-
-
         public string TooltipSummary => 
 
             $"{Label}: {Value} Solo Parents ({PercentageShare:F1}%)\n" +
@@ -3586,4 +3134,3 @@ namespace SOLUM_UI.ViewModels
     }
 
 }
-

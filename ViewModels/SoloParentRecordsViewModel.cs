@@ -490,11 +490,11 @@ namespace SOLUM_UI.ViewModels
             }
 
             ToastNotification.Show("Record Updated", editedRecord.Name + " was updated.", ToastType.Info);
-            
+
             // Track all field-level changes for detailed audit trail
             var changeService = new ChangeTrackingService();
             var changes = changeService.DetectChanges(rawRecord, editedRecord);
-            
+
             _auditLog.LogUpdateWithChanges(editedRecord.Id, editedRecord.Name, GetCurrentUser(), CurrentUserRole, changes);
             await LoadRecordsAsync();
         }
@@ -524,7 +524,7 @@ namespace SOLUM_UI.ViewModels
                 ? expDt.ToString("MMMM d, yyyy")
                 : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
             ToastNotification.Show("Record Renewed", original.Name + " — valid until " + newExpiry + ".", ToastType.Success);
-            
+
             // Track changes made during renewal
             var changeService = new ChangeTrackingService();
             var changes = changeService.DetectChanges(original, updated);
@@ -537,7 +537,7 @@ namespace SOLUM_UI.ViewModels
                 _auditLog.LogUpdate(original.Id, original.Name, GetCurrentUser(), CurrentUserRole,
                     "Record renewed. Valid until " + newExpiry + ".");
             }
-            
+
             await LoadRecordsAsync();
         }
 

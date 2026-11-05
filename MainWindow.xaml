@@ -1,4 +1,4 @@
-﻿<Window x:Class="SOLUM_UI.MainWindow"
+<Window x:Class="SOLUM_UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:SOLUM_UI.Controls"
@@ -338,7 +338,7 @@
             <Rectangle Fill="#CC000000" Opacity="0.6"/>
             <!-- Glassmorphic Effect -->
             <Border Background="#4D1A1A1A" CornerRadius="0" />
-            
+
             <!-- Circle Spinner Animation -->
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <!-- Spinning Circle with Percentage in Middle -->
@@ -354,13 +354,13 @@
                             <DoubleCollection>55,164</DoubleCollection>
                         </Ellipse.StrokeDashArray>
                     </Ellipse>
-                    
+
                     <!-- Percentage Text in Center -->
                     <TextBlock x:Name="LogoutProgressPercentage" Text="0%" 
                               FontFamily="Segoe UI" FontSize="18" FontWeight="Light" Foreground="White"
                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
-                
+
                 <TextBlock Text="Signing out..." FontFamily="Segoe UI" FontSize="14"
                            FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center"/>
             </StackPanel>

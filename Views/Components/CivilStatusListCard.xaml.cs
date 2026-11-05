@@ -26,19 +26,19 @@ namespace SOLUM_UI.Views.Components
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (CivilStatusListCard)d;
-            
+
             // Unsubscribe from old collection
             if (e.OldValue is ObservableCollection<ListItem> oldCollection)
             {
                 oldCollection.CollectionChanged -= control.OnCollectionChanged;
             }
-            
+
             // Subscribe to new collection
             if (e.NewValue is ObservableCollection<ListItem> newCollection)
             {
                 newCollection.CollectionChanged += control.OnCollectionChanged;
             }
-            
+
             control.RenderList();
         }
 

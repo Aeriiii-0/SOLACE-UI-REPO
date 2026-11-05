@@ -33,19 +33,19 @@ namespace SOLUM_UI.Views.Components
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var chart = (DonutChart)d;
-            
+
             // Unsubscribe from old collection
             if (e.OldValue is ObservableCollection<DonutSegment> oldCollection)
             {
                 oldCollection.CollectionChanged -= chart.OnCollectionChanged;
             }
-            
+
             // Subscribe to new collection
             if (e.NewValue is ObservableCollection<DonutSegment> newCollection)
             {
                 newCollection.CollectionChanged += chart.OnCollectionChanged;
             }
-            
+
             chart.RenderChart();
         }
 
@@ -94,14 +94,14 @@ namespace SOLUM_UI.Views.Components
 
                 // Draw segment arc
                 Path arc = DrawArc(centerX, centerY, outerRadius, innerRadius, startAngle, sweepAngle, segment.Color);
-                
+
                 // Store segment info for tooltip
                 segmentMap[arc] = (segment, percentage);
-                
+
                 // Add mouse events for tooltip
                 arc.MouseEnter += Arc_MouseEnter;
                 arc.MouseLeave += Arc_MouseLeave;
-                
+
                 ChartCanvas.Children.Add(arc);
 
                 // Add label at midpoint of arc
@@ -147,7 +147,7 @@ namespace SOLUM_UI.Views.Components
             if (sender is Path path && segmentMap.TryGetValue(path, out var info))
             {
                 var (segment, percentage) = info;
-                
+
                 // Create tooltip
                 ToolTip tooltip = new ToolTip
                 {
@@ -158,7 +158,7 @@ namespace SOLUM_UI.Views.Components
                     Padding = new Thickness(10, 6, 10, 6),
                     IsOpen = true
                 };
-                
+
                 currentToolTip = tooltip;
                 path.ToolTip = tooltip;
             }

@@ -401,7 +401,6 @@
                                 </Grid>
                             </Border>
 
-
                             <!-- Action filter -->
                             <ComboBox Grid.Column="2" Height="40"
                                       ItemsSource="{Binding ActionFilters}"
@@ -471,7 +470,6 @@
                         </Grid>
                      </StackPanel>
                 </Border>
-
 
                 <!-- ── Content area: loading / error / list ────────────────── -->
                 <Grid Grid.Row="2" Background="#F7F5F6">
@@ -931,4 +929,3 @@
         </Grid>
     </Border>
 </UserControl>
-

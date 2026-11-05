@@ -595,8 +595,6 @@
                 </StackPanel>
             </Border>
 
-
-
         </StackPanel>
     </ScrollViewer>
 </UserControl>

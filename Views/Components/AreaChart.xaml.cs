@@ -32,19 +32,19 @@ namespace SOLUM_UI.Views.Components
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var chart = (AreaChart)d;
-            
+
             // Unsubscribe from old collection
             if (e.OldValue is ObservableCollection<AreaChartData> oldCollection)
             {
                 oldCollection.CollectionChanged -= chart.OnCollectionChanged;
             }
-            
+
             // Subscribe to new collection
             if (e.NewValue is ObservableCollection<AreaChartData> newCollection)
             {
                 newCollection.CollectionChanged += chart.OnCollectionChanged;
             }
-            
+
             chart.RenderChart();
         }
 
@@ -99,7 +99,7 @@ namespace SOLUM_UI.Views.Components
             for (int i = 0; i <= 5; i++)
             {
                 double y = padding + chartHeight - (i * chartHeight / 5);
-                
+
                 // Lighter grid lines
                 Line gridLine = new Line
                 {
@@ -264,13 +264,13 @@ namespace SOLUM_UI.Views.Components
                 };
                 Canvas.SetLeft(hitTestCircle, pointX - 9);
                 Canvas.SetTop(hitTestCircle, pointY - 9);
-                
+
                 // Store data in Tag for hover
                 hitTestCircle.Tag = new { Barangay = barangayName, Count = recordCount };
-                
+
                 hitTestCircle.MouseEnter += (s, e) => ShowTooltip(hitTestCircle, barangayName, recordCount, pointX, pointY);
                 hitTestCircle.MouseLeave += (s, e) => HideTooltip();
-                
+
                 ChartCanvas.Children.Add(hitTestCircle);
 
                 // Visible point circle
@@ -326,7 +326,7 @@ namespace SOLUM_UI.Views.Components
                     Padding = new Thickness(10, 8, 10, 8),
                     Opacity = 0
                 };
-                
+
                 StackPanel tooltipContent = new StackPanel
                 {
                     Orientation = Orientation.Vertical

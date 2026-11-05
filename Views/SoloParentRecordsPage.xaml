@@ -706,8 +706,6 @@
 
                             </Border>
 
-                            
-
                         </Grid>
 
                         <ControlTemplate.Triggers>
@@ -1392,7 +1390,6 @@
 
                                                         <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="13" Foreground="#702943"/>
 
-                                                        
                                                         <TextBlock Text="{Binding Barangay, StringFormat='Barangay: {0}'}" FontSize="11" Foreground="#555555"/>
 
                                                         <TextBlock Text="{Binding Sex, StringFormat='Sex: {0}'}" FontSize="11" Foreground="#555555"/>
@@ -2555,4 +2552,3 @@
     </Grid>
 
 </Page>
-

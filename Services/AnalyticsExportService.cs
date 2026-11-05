@@ -710,5 +710,4 @@ namespace SOLUM_UI.Services
         public Dictionary<string, int> ByBarangay { get; set; }
     }
 
-
 }

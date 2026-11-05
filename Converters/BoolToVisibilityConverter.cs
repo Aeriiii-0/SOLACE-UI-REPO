@@ -65,4 +65,3 @@ namespace SOLUM_UI.Converters
         }
     }
 }
-

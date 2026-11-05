@@ -38,7 +38,7 @@ namespace SOLUM_UI
             System.Net.ServicePointManager.DefaultConnectionLimit = 64;
             System.Net.ServicePointManager.SecurityProtocol |=
                 System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls13;
-            
+
             // Launch local background OCR engine if not already running
             _ = OcrService.EnsureServerRunningAsync();
 
@@ -48,7 +48,7 @@ namespace SOLUM_UI
             // Show login page as startup screen
             var loginPage = new LoginPage();
             loginPage.Show();
-            
+
             // Set shutdown mode so app closes when login closes
             ShutdownMode = ShutdownMode.OnLastWindowClose;
         }

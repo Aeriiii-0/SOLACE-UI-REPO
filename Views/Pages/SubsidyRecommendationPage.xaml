@@ -9,7 +9,7 @@
       d:DesignHeight="850" d:DesignWidth="1200"
       Title="Subsidy Recommendation"
       Background="#FFFFFF">
-    
+
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 

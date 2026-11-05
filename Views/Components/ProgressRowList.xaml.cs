@@ -26,19 +26,19 @@ namespace SOLUM_UI.Views.Components
         private static void OnDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ProgressRowList)d;
-            
+
             // Unsubscribe from old collection
             if (e.OldValue is ObservableCollection<ProgressItem> oldCollection)
             {
                 oldCollection.CollectionChanged -= control.OnCollectionChanged;
             }
-            
+
             // Subscribe to new collection
             if (e.NewValue is ObservableCollection<ProgressItem> newCollection)
             {
                 newCollection.CollectionChanged += control.OnCollectionChanged;
             }
-            
+
             control.RenderRows();
         }
 
@@ -97,7 +97,7 @@ namespace SOLUM_UI.Views.Components
                     FontWeight = FontWeights.Medium,
                     Margin = new Thickness(0, 0, 0, 6)
                 };
-                
+
                 // Add tooltip with category info
                 value.ToolTip = new ToolTip
                 {
@@ -107,7 +107,7 @@ namespace SOLUM_UI.Views.Components
                     FontSize = 10,
                     Padding = new Thickness(8, 4, 8, 4)
                 };
-                
+
                 Grid.SetRow(value, 0);
                 Grid.SetColumn(value, 1);
                 row.Children.Add(value);
@@ -121,7 +121,7 @@ namespace SOLUM_UI.Views.Components
                     Foreground = new SolidColorBrush(Color.FromArgb(255, 123, 20, 38)),
                     Background = new SolidColorBrush(Color.FromArgb(255, 244, 230, 232))
                 };
-                
+
                 // Add tooltip to progress bar
                 progressBar.ToolTip = new ToolTip
                 {
@@ -131,7 +131,7 @@ namespace SOLUM_UI.Views.Components
                     FontSize = 10,
                     Padding = new Thickness(8, 4, 8, 4)
                 };
-                
+
                 Grid.SetRow(progressBar, 1);
                 Grid.SetColumn(progressBar, 0);
                 Grid.SetColumnSpan(progressBar, 2);

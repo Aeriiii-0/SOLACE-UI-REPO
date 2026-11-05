@@ -44,7 +44,7 @@ namespace SOLUM_UI.Views.Dialogs
                 {
                     client.Headers.Add("User-Agent", "SOLUM-UI-Updater");
                     string html = await client.DownloadStringTaskAsync(_args.ChangelogURL);
-                    
+
                     // Convert basic HTML to readable plain text for the release notes card
                     string clean = Regex.Replace(html, "<style.*?</style>", string.Empty, RegexOptions.Singleline | RegexOptions.IgnoreCase);
                     clean = Regex.Replace(clean, @"<br\s*/?>", Environment.NewLine, RegexOptions.IgnoreCase);
