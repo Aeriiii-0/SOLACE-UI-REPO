@@ -305,9 +305,6 @@ namespace SOLUM_UI
             // Results table (Row 3) — always visible for Encoder/BasicUser
             if (RecordsClipGrid != null)
                 RecordsClipGrid.Visibility = show;
-            // Empty-state placeholder in search panel — hidden now that table is always visible
-            if (SearchFirstPanel != null)
-                SearchFirstPanel.Visibility = hide;
             // Table empty state overlay — shown inside table when no search done yet
             if (TableEmptyStateOverlay != null)
                 TableEmptyStateOverlay.Visibility = showResults ? Visibility.Collapsed : Visibility.Visible;
@@ -341,8 +338,8 @@ namespace SOLUM_UI
             // Encoder/BasicUser with a search: show the results card
             if (IsEncoder || IsBasicUser)
                 SetEncoderResultsVisible(true);
-            // Hide the SearchFirstPanel while loading
-            if (SearchFirstPanel != null) SearchFirstPanel.Visibility = Visibility.Collapsed;
+            // Hide the LoadingOverlay while loading
+            if (PageLoadingOverlay != null) PageLoadingOverlay.Visibility = Visibility.Collapsed;
             try
             {
 
@@ -596,7 +593,6 @@ namespace SOLUM_UI
                 if (NoResultsPanel != null)
                     NoResultsPanel.Visibility = _filteredRecords.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
                 // After a search completes for Encoder/BasicUser, SearchFirstPanel should stay hidden
-                if (SearchFirstPanel != null) SearchFirstPanel.Visibility = Visibility.Collapsed;
                 // Hide the table empty state overlay when results are displayed
                 if (TableEmptyStateOverlay != null) TableEmptyStateOverlay.Visibility = Visibility.Collapsed;
                 // After a successful search for Encoder/BasicUser, ensure results table is visible
