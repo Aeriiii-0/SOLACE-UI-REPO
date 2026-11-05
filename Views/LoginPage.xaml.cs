@@ -349,19 +349,16 @@ namespace SOLUM_UI
                 ToastNotification.Show("Welcome", "Logged in as " + MainWindow.CurrentUserName + ".", ToastType.Success);
                 splash?.Close();
                 splash = null;
-                // Close and dispose the login window to free resources
+                // Close and dispose the login window immediately to free resources
                 progressTimer?.Stop();
                 progressTimer?.Dispose();
                 // Clear all visual elements and event handlers
                 this.DataContext = null;
                 this.Content = null;
-                // Schedule window close on dispatcher
-                this.Dispatcher.InvokeAsync(() =>
-                {
-                    this.Close();
-                    System.GC.Collect();
-                    System.GC.WaitForPendingFinalizers();
-                }, System.Windows.Threading.DispatcherPriority.Background);
+                // Close the login window immediately after successful authentication
+                this.Close();
+                System.GC.Collect();
+                System.GC.WaitForPendingFinalizers();
 
             }
             catch (Exception ex)
