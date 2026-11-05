@@ -327,7 +327,9 @@ namespace SOLUM_UI
                 _allRecords = new List<SoloParentRecordViewModel>();
                 _filteredRecords = new List<SoloParentRecordViewModel>();
                 RecordsList.ItemsSource = null;
-                if (NoResultsPanel != null) NoResultsPanel.Visibility = Visibility.Visible;
+                // Show the initial empty state overlay (not the "no results" overlay)
+                if (TableEmptyStateOverlay != null) TableEmptyStateOverlay.Visibility = Visibility.Visible;
+                if (NoResultsPanel != null) NoResultsPanel.Visibility = Visibility.Collapsed;
                 UpdatePagingUI();
                 return;
             }
