@@ -7,6 +7,7 @@ using SOLUM_UI.ViewModels;
 using SOLUM_UI.Views.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -78,6 +79,50 @@ namespace SOLUM_UI
             get => (string)GetValue(SearchPlaceholderProperty);
             set => SetValue(SearchPlaceholderProperty, value);
 
+        }
+
+        // ── Notification card properties ──────────────────────────────────────
+        private bool   _isNotificationVisible;
+        private string _notificationTitle;
+        private string _notificationMessage;
+        private bool   _isNotificationSuccess;
+        private DispatcherTimer _notifyTimer;
+
+        public bool   IsNotificationVisible
+        {
+            get => _isNotificationVisible;
+            private set { _isNotificationVisible = value; OnPropertyChanged(nameof(IsNotificationVisible)); }
+        }
+        public string NotificationTitle
+        {
+            get => _notificationTitle;
+            private set { _notificationTitle = value; OnPropertyChanged(nameof(NotificationTitle)); }
+        }
+        public string NotificationMessage
+        {
+            get => _notificationMessage;
+            private set { _notificationMessage = value; OnPropertyChanged(nameof(NotificationMessage)); }
+        }
+        public bool IsNotificationSuccess
+        {
+            get => _isNotificationSuccess;
+            private set { _isNotificationSuccess = value; OnPropertyChanged(nameof(IsNotificationSuccess)); }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged(string propertyName)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        public void ShowNotification(string title, string message, bool isSuccess)
+        {
+            NotificationTitle     = title;
+            NotificationMessage   = message;
+            IsNotificationSuccess = isSuccess;
+            IsNotificationVisible = true;
+            _notifyTimer?.Stop();
+            _notifyTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+            _notifyTimer.Tick += (s, e) => { _notifyTimer.Stop(); IsNotificationVisible = false; };
+            _notifyTimer.Start();
         }
 
         private bool IsAdmin => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
