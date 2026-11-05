@@ -38,7 +38,7 @@ namespace SOLUM_UI.Models
             }
         }
 
-        public string FormattedIncome => $"₱{MonthlyIncome:N2}";
+        public string FormattedIncome { get => $"₱{MonthlyIncome:N2}"; set { } }
 
         public int Dependents { get => _dependents; set => SetProperty(ref _dependents, value); }
 
@@ -83,9 +83,13 @@ namespace SOLUM_UI.Models
             }
         }
 
-        public string DisplayNotes => !string.IsNullOrWhiteSpace(RejectionNotes)
-            ? RejectionNotes
-            : "No additional justification notes recorded.";
+        public string DisplayNotes
+        {
+            get => !string.IsNullOrWhiteSpace(RejectionNotes)
+                ? RejectionNotes
+                : "No additional justification notes recorded.";
+            set { }
+        }
 
         public string DisqualifiedBy { get => _disqualifiedBy; set => SetProperty(ref _disqualifiedBy, value); }
 
@@ -101,9 +105,13 @@ namespace SOLUM_UI.Models
             }
         }
 
-        public string FormattedDisqualifiedAt => DisqualifiedAt.HasValue
-            ? DisqualifiedAt.Value.ToString("MMM dd, yyyy h:mm tt")
-            : "—";
+        public string FormattedDisqualifiedAt
+        {
+            get => DisqualifiedAt.HasValue
+                ? DisqualifiedAt.Value.ToString("MMM dd, yyyy h:mm tt")
+                : "—";
+            set { }
+        }
 
         // Badges for Reasons
         public SolidColorBrush ReasonBadgeBg

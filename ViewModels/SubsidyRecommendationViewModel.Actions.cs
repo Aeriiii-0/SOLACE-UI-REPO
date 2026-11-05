@@ -59,9 +59,49 @@ namespace SOLUM_UI.ViewModels
                 IsOutlierModalOpen = false;
                 UpdateShortlistAndFinalCollections();
                 RecalculateQuotaAndFilter();
+                IsShortlistBatchMode = false;
                 RecalculateShortlistSelectionCounts();
                 NotifyDisqualifiedMetricsChanged();
                 ToastNotification.Show("Revocation Complete", $"{count} candidate(s) revoked ({OutlierRejectionReason}).", ToastType.Warning);
+            }
+            else if (_batchRejectTargets != null && _batchRejectTargets.Count > 0)
+            {
+                int count = _batchRejectTargets.Count;
+                foreach (var target in _batchRejectTargets)
+                {
+                    target.IsDisqualified = true;
+                    target.DisqualificationReason = OutlierRejectionReason;
+                    target.Status = "Rejected";
+                    if (target.EvaluationId != Guid.Empty)
+                        _ = _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = target.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = false });
+
+                    AddDisqualifiedCandidateRecord(
+                        target.EvaluationId,
+                        target.SoloParentId,
+                        target.SpId,
+                        target.Name,
+                        target.Barangay,
+                        target.MonthlyIncome,
+                        target.Score,
+                        target.Priority,
+                        target.Dependants,
+                        OutlierRejectionReason,
+                        OutlierNotes,
+                        "Admin / Reviewer"
+                    );
+
+                    _allItems.Remove(target);
+                    PagedRecommendations.Remove(target);
+                    FilteredRecommendations.Remove(target);
+                }
+
+                _batchRejectTargets = null;
+                IsOutlierModalOpen = false;
+                IsBatchMode = false;
+                RecalculateQuotaAndFilter();
+                RecalculateSelectionCounts();
+                NotifyDisqualifiedMetricsChanged();
+                ToastNotification.Show("Candidates Disqualified", $"{count} candidate(s) disqualified from queue ({OutlierRejectionReason}).", ToastType.Warning);
             }
             else if (OutlierTarget != null)
             {
@@ -138,29 +178,43 @@ namespace SOLUM_UI.ViewModels
         {
             if (DisqualifiedCandidates == null || FilteredDisqualifiedCandidates == null) return;
 
-            var q = DisqualifiedCandidates.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(_disqualifiedReasonFilter) && _disqualifiedReasonFilter != "All Reasons")
-            {
-                q = q.Where(x => string.Equals(x.RejectionReason, _disqualifiedReasonFilter, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(_disqualifiedSearchText))
-            {
-                string t = _disqualifiedSearchText.Trim().ToLowerInvariant();
-                q = q.Where(x => (x.FullName != null && x.FullName.ToLowerInvariant().Contains(t))
-                              || (x.SpId != null && x.SpId.ToLowerInvariant().Contains(t))
-                              || (x.Barangay != null && x.Barangay.ToLowerInvariant().Contains(t))
-                              || (x.RejectionNotes != null && x.RejectionNotes.ToLowerInvariant().Contains(t)));
-            }
-
             FilteredDisqualifiedCandidates.Clear();
-            foreach (var item in q)
+            foreach (var item in DisqualifiedCandidates)
             {
                 FilteredDisqualifiedCandidates.Add(item);
             }
             OnPropertyChanged(nameof(HasFilteredDisqualifiedCandidates));
             OnPropertyChanged(nameof(HasNoDisqualifiedCandidates));
+            UpdateDisqualifiedPaged();
+        }
+
+        public void UpdateDisqualifiedPaged()
+        {
+            if (FilteredDisqualifiedCandidates == null || PagedDisqualifiedCandidates == null) return;
+
+            int total = FilteredDisqualifiedCandidates.Count;
+            int totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)DisqualifiedPageSize));
+            _disqualifiedTotalPages = totalPages;
+
+            if (_disqualifiedCurrentPage > totalPages) _disqualifiedCurrentPage = totalPages;
+            if (_disqualifiedCurrentPage < 1) _disqualifiedCurrentPage = 1;
+
+            PagedDisqualifiedCandidates.Clear();
+            var pageSlice = FilteredDisqualifiedCandidates
+                .Skip((_disqualifiedCurrentPage - 1) * DisqualifiedPageSize)
+                .Take(DisqualifiedPageSize);
+
+            foreach (var item in pageSlice)
+            {
+                PagedDisqualifiedCandidates.Add(item);
+            }
+
+            OnPropertyChanged(nameof(DisqualifiedCurrentPage));
+            OnPropertyChanged(nameof(DisqualifiedTotalPages));
+            OnPropertyChanged(nameof(CanDisqualifiedPrevPage));
+            OnPropertyChanged(nameof(CanDisqualifiedNextPage));
+            OnPropertyChanged(nameof(DisqualifiedPageNumberLabel));
+            OnPropertyChanged(nameof(DisqualifiedPageSummary));
         }
 
         public async Task ReinstateCandidateAsync(DisqualifiedCandidateItem item)
@@ -185,6 +239,7 @@ namespace SOLUM_UI.ViewModels
 
                 DisqualifiedCandidates.Remove(item);
                 FilteredDisqualifiedCandidates.Remove(item);
+                UpdateDisqualifiedPaged();
                 NotifyDisqualifiedMetricsChanged();
 
                 var orig = _allItems.FirstOrDefault(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId) || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId));
@@ -263,6 +318,36 @@ namespace SOLUM_UI.ViewModels
         private async void ToggleGrantee(SelectionRow row, bool confirm)
         {
             if (row == null) return;
+            if (confirm)
+            {
+                if (row.IsCardExpired)
+                {
+                    ToastNotification.Show(
+                        "Card Expired",
+                        $"Cannot confirm {row.Name} to Final Grantees because their Solo Parent ID expired on {row.CardValidityDisplay}. Please renew their card first.",
+                        ToastType.Error);
+                    return;
+                }
+
+                bool ok = ActionConfirmDialog.Show(
+                    "Confirm Final Grantee",
+                    $"Confirm {row.Name} as an official Final Grantee for FY {ActiveCycleFiscalYear}?",
+                    "Confirm Grantee",
+                    "Cancel",
+                    ConfirmThemeType.Success);
+                if (!ok) return;
+            }
+            else
+            {
+                bool ok = ActionConfirmDialog.Show(
+                    "Revert Grantee",
+                    $"Revert {row.Name} back to pending selection audit?",
+                    "Revert",
+                    "Cancel",
+                    ConfirmThemeType.Warning);
+                if (!ok) return;
+            }
+
             row.IsFinalGrantee = confirm;
             if (confirm && row.EvaluationId != Guid.Empty)
                 await _apiService.ConfirmGranteesAsync(_activeCycleId, new List<Guid> { row.EvaluationId });
@@ -447,6 +532,15 @@ namespace SOLUM_UI.ViewModels
                     if (saveResp != null && saveResp.Succeeded)
                     {
                         ToastNotification.Show("Record Updated", $"{recordToReassess.Name} circumstances updated successfully.", ToastType.Success);
+                    }
+
+                    if (dialog.UpdatedRecord.CurrentTermExpiresAt.HasValue)
+                    {
+                        item.CardExpiresAt = dialog.UpdatedRecord.CurrentTermExpiresAt.Value;
+                        foreach (var r in ShortlistRows.Where(x => x.SoloParentId == targetId))
+                            r.CardExpiresAt = dialog.UpdatedRecord.CurrentTermExpiresAt.Value;
+                        foreach (var r in FinalGranteesList.Where(x => x.SoloParentId == targetId))
+                            r.CardExpiresAt = dialog.UpdatedRecord.CurrentTermExpiresAt.Value;
                     }
 
                     // Run fresh ML prediction on the updated facts

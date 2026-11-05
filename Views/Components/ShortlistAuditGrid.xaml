@@ -5,6 +5,64 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="1050">
     <UserControl.Resources>
+        <!-- Reusable Sleek Translucent Maroon ScrollBar -->
+        <Style x:Key="SolumScrollBarThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border x:Name="ThumbBorder" Background="#702943" CornerRadius="2" Opacity="0.22"
+                                Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbBorder" Property="Opacity" Value="0.80"/></Trigger>
+                            <Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbBorder" Property="Opacity" Value="1.0"/><Setter TargetName="ThumbBorder" Property="Background" Value="#5C2036"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type ScrollBar}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Vertical">
+                    <Setter Property="Width" Value="3"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ScrollBar}">
+                                <Grid x:Name="Bg" Background="Transparent" SnapsToDevicePixels="True">
+                                    <Track x:Name="PART_Track" IsDirectionReversed="True" HorizontalAlignment="Stretch">
+                                        <Track.Thumb><Thumb Style="{StaticResource SolumScrollBarThumb}"/></Track.Thumb>
+                                    </Track>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True"><Setter Property="Width" Value="7"/></Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="Height" Value="3"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ScrollBar}">
+                                <Grid x:Name="Bg" Background="Transparent" SnapsToDevicePixels="True">
+                                    <Track x:Name="PART_Track" HorizontalAlignment="Stretch">
+                                        <Track.Thumb><Thumb Style="{StaticResource SolumScrollBarThumb}"/></Track.Thumb>
+                                    </Track>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True"><Setter Property="Height" Value="7"/></Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <Style x:Key="ColHeader" TargetType="GridViewColumnHeader">
             <Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Background" Value="#FAF2F5"/><Setter Property="Foreground" Value="#702943"/><Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Height" Value="46"/><Setter Property="Padding" Value="4,0"/><Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -25,16 +83,18 @@
             </Setter>
         </Style>
         <Style x:Key="SelRow" TargetType="ListViewItem">
+            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="Row_PreviewMouseLeftButtonDown"/>
             <EventSetter Event="MouseDoubleClick" Handler="Row_MouseDoubleClick"/>
             <Setter Property="Background" Value="White"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Setter Property="BorderBrush" Value="#F2EAEF"/><Setter Property="Padding" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Cursor" Value="Hand"/><Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListViewItem">
                 <Grid>
                     <Border x:Name="RowBg" Background="White" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
-                    <Rectangle x:Name="AccentIndicator" HorizontalAlignment="Left" Width="3" Fill="#27AE60" VerticalAlignment="Stretch"/>
-                    <GridViewRowPresenter VerticalAlignment="Stretch" Margin="2,0,2,0"/>
+                                        <GridViewRowPresenter VerticalAlignment="Stretch" Margin="0"/>
                 </Grid>
                 <ControlTemplate.Triggers>
-                    <DataTrigger Binding="{Binding IsFinalGrantee}" Value="False"><Setter TargetName="AccentIndicator" Property="Fill" Value="#F59E0B"/></DataTrigger>
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                        <Setter TargetName="RowBg" Property="Background" Value="#F5E2E8"/>
+                    </DataTrigger>
                     <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="RowBg" Property="Background" Value="#FDF6F8"/></Trigger>
                     <Trigger Property="IsSelected" Value="True"><Setter TargetName="RowBg" Property="Background" Value="#F5E2E8"/></Trigger>
                 </ControlTemplate.Triggers>
@@ -50,17 +110,109 @@
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
 
-        <!-- Single Unified Ribbon: Upper Configuration & Lower Batch Selection Row -->
-        <Border Grid.Row="0" Background="#FBF5F7" MinHeight="98" CornerRadius="12" BorderBrush="#D4A0B0" BorderThickness="1" Padding="16,12" Margin="0,0,0,6">
+        <!-- Single Unified Compact Ribbon: Single Row Controls & Batch Selection -->
+        <Border Grid.Row="0" Background="#FBF5F7" MinHeight="48" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="14,8" Margin="0,0,0,6">
             <Grid VerticalAlignment="Center">
-                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-                <Grid Grid.Row="0" VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="Shortlisted Candidates for Audit &amp; Verification" FontSize="13" FontWeight="SemiBold" Foreground="#702943"/>
-                        <TextBlock Text="Verify records and manage candidate shortlist before final grant confirmation." FontSize="10.5" Foreground="#A06080" Margin="0,2,0,0"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Batch Selection Toggle & Bulk Actions -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Height="28" Padding="14,0" Cursor="Hand" Command="{Binding ToggleShortlistBatchModeCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" CornerRadius="6" Padding="{TemplateBinding Padding}" BorderThickness="1">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="White"/>
+                                            <Setter Property="BorderBrush" Value="#D4A0B0"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsShortlistBatchMode}" Value="True">
+                                                    <Setter Property="Background" Value="#702943"/>
+                                                    <Setter Property="BorderBrush" Value="#702943"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding ShortlistBatchModeButtonText}" FontSize="11" FontWeight="SemiBold"
+                                               VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#702943"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsShortlistBatchMode}" Value="True">
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <!-- Alongside: Bulk Operations (Visible when IsShortlistBatchMode is True) -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0"
+                                Visibility="{Binding IsShortlistBatchMode, Converter={StaticResource BoolToVis}}">
+                        <!-- Selected Count Badge (Green styling identical to Recommendations Queue) -->
+                        <Border Background="#EAF6F0" CornerRadius="6" Padding="8,0" Height="28" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ShortlistBatchActionLabel}" FontSize="10.5" FontWeight="Bold" Foreground="#27AE60"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        </Border>
+
+                        <!-- Confirm Selected Button -->
+                        <Button Height="28" Cursor="Hand" Command="{Binding BatchConfirmShortlistCommand}"
+                                IsEnabled="{Binding HasShortlistSelection}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#702943" CornerRadius="6" Padding="14,0">
+                                        <TextBlock Text="Confirm Selected" FontSize="10.5" FontWeight="SemiBold" Foreground="White"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#853250"/></Trigger>
+                                        <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <!-- Revoke Selected Button -->
+                        <Button Height="28" Cursor="Hand" Command="{Binding BatchRevokeShortlistCommand}"
+                                IsEnabled="{Binding HasShortlistSelection}" Margin="6,0,0,0">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="White" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="6" Padding="14,0">
+                                        <TextBlock Text="Revoke Selected" FontSize="10.5" FontWeight="SemiBold" Foreground="#702943"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FDF2F4"/></Trigger>
+                                        <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
                     </StackPanel>
-                    <Grid Grid.Column="1" Margin="14,0,8,0" VerticalAlignment="Center">
+                </StackPanel>
+
+                <!-- Center: Search Bar -->
+                <Border Grid.Column="1" Background="White" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Height="30" Margin="14,0" VerticalAlignment="Center">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Path Grid.Column="0" Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.29,20.42L13.03,15.15C11.9,16 10.46,16.5 9.5,16.5A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" Fill="#A06080" Stretch="Uniform" Width="12" Height="12" Margin="8,0,5,0" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" Text="{Binding ShortlistSearchText, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" BorderThickness="0" Background="Transparent" FontSize="11" Foreground="#1F2937" Padding="0,0,6,0" ToolTip="Search shortlist by name, 4Ps, or college-age keywords"/>
+                    </Grid>
+                </Border>
+
+                <!-- Right: Filters, Status & Export -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Filter Dropdown -->
+                    <Grid Margin="0,0,8,0" VerticalAlignment="Center">
                         <Button x:Name="FilterDropBtn" Height="30" Padding="10,0" Cursor="Hand" Click="FilterDropBtn_Click">
                             <Button.Template><ControlTemplate TargetType="Button"><Border Background="White" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -82,20 +234,23 @@
                             </Border>
                         </Popup>
                     </Grid>
-                    <Border Grid.Column="2" Background="White" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Height="30" Margin="0,0,10,0" VerticalAlignment="Center">
-                        <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                            <Path Grid.Column="0" Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.29,20.42L13.03,15.15C11.9,16 10.46,16.5 9.5,16.5A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" Fill="#A06080" Stretch="Uniform" Width="12" Height="12" Margin="8,0,5,0" VerticalAlignment="Center"/>
-                            <TextBox Grid.Column="1" Text="{Binding ShortlistSearchText, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" BorderThickness="0" Background="Transparent" FontSize="11" Foreground="#1F2937" Padding="0,0,6,0" ToolTip="Search shortlist by name, 4Ps, or college-age keywords"/>
-                        </Grid>
-                    </Border>
-                    <Border Grid.Column="3" Background="#FFF0F5" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Padding="10,4" Margin="0,0,8,0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Tab2QuotaSummary}" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
-                    </Border>
-                    <Grid Grid.Column="4">
-                        <Button x:Name="ExportDropBtn" Height="30" Padding="12,0" Cursor="Hand" Click="ExportDropBtn_Click">
-                            <Button.Template><ControlTemplate TargetType="Button"><Border Background="#702943" CornerRadius="8" Padding="{TemplateBinding Padding}"><TextBlock Text="Export Rosters ▾" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Opacity" Value="0.88"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template>
-                        </Button>
+
+                    <!-- Export Dropdown (Clean White & Maroon Border to match Export Queue) -->
+                    <Grid>
+                        <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1">
+                            <Button x:Name="ExportDropBtn" Background="Transparent" BorderThickness="0" Height="30" Padding="12,0" Cursor="Hand" Click="ExportDropBtn_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                            <TextBlock Text="Export Rosters ▾" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="BtnBorder" Property="Background" Value="#FDF2F4"/></Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Border>
                         <Popup x:Name="ExportPopup" PlacementTarget="{Binding ElementName=ExportDropBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
                             <Border Background="White" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="6" MinWidth="250">
                                 <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.16"/></Border.Effect>
@@ -107,19 +262,7 @@
                             </Border>
                         </Popup>
                     </Grid>
-                </Grid>
-                <Grid Grid.Row="1" Margin="0,16,0,0" VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Height="28" Padding="14,0" Cursor="Hand" Command="{Binding ToggleShortlistBatchModeCommand}">
-                        <Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" CornerRadius="6" Padding="{TemplateBinding Padding}" BorderThickness="1"><Border.Style><Style TargetType="Border"><Setter Property="Background" Value="White"/><Setter Property="BorderBrush" Value="#D4A0B0"/><Style.Triggers><DataTrigger Binding="{Binding IsShortlistBatchMode}" Value="True"><Setter Property="Background" Value="#702943"/><Setter Property="BorderBrush" Value="#702943"/></DataTrigger></Style.Triggers></Style></Border.Style><TextBlock Text="{Binding ShortlistBatchModeButtonText}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="#702943"/><Style.Triggers><DataTrigger Binding="{Binding IsShortlistBatchMode}" Value="True"><Setter Property="Foreground" Value="White"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock></Border></ControlTemplate></Button.Template>
-                    </Button>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0" Visibility="{Binding IsShortlistBatchMode, Converter={StaticResource BoolToVis}}">
-                        <Button Height="28" Cursor="Hand" Command="{Binding SelectAllShortlistCommand}" Margin="0,0,6,0"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="White" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="6" Padding="12,0"><TextBlock Text="{Binding SelectAllShortlistButtonText}" FontSize="10.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FAF0F3"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
-                        <Border Background="#FDF0F3" CornerRadius="6" Padding="8,0" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" Visibility="{Binding HasShortlistSelection, Converter={StaticResource BoolToVis}}"><TextBlock Text="{Binding ShortlistBatchActionLabel}" FontSize="10.5" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border>
-                        <Button Height="28" Cursor="Hand" Command="{Binding BatchConfirmShortlistCommand}" IsEnabled="{Binding HasShortlistSelection}" Margin="0,0,6,0"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="#27AE60" CornerRadius="6" Padding="14,0"><TextBlock Text="Confirm Selected" FontSize="10.5" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.88"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
-                        <Button Height="28" Cursor="Hand" Command="{Binding BatchRevokeShortlistCommand}" IsEnabled="{Binding HasShortlistSelection}"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="#E11D48" CornerRadius="6" Padding="14,0"><TextBlock Text="Revoke Selected" FontSize="10.5" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Opacity" Value="0.88"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
-                    </StackPanel>
-                </Grid>
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -138,10 +281,14 @@
                         </VisualBrush.Visual>
                     </VisualBrush>
                 </Grid.OpacityMask>
-                <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                
 
                 <!-- ListView (Row 0: Column headers start immediately at top) -->
-                <ListView x:Name="ShortlistListView" Grid.Row="0" ItemsSource="{Binding PagedShortlistRows}" BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource SelRow}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" SizeChanged="ShortlistListView_SizeChanged">
+                <ListView x:Name="ShortlistListView" ItemsSource="{Binding FilteredShortlistRows}" BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource SelRow}"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          ScrollViewer.IsDeferredScrollingEnabled="False"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.ScrollChanged="ShortlistListView_ScrollChanged" SizeChanged="ShortlistListView_SizeChanged">
                     <ListView.View>
                         <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
                             <GridViewColumn x:Name="ColSelect" Width="0">
@@ -149,102 +296,104 @@
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColSelect}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,10"><CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Click="RowCheckBox_Click"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn x:Name="ColRank" Header="RANK" Width="56">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColRank}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,10"><TextBlock Text="{Binding Rank, StringFormat='#{0}'}" FontSize="12" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColRank}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,10"><TextBlock Text="{Binding Rank, StringFormat='#{0}'}" FontSize="12" FontWeight="Bold" Foreground="#000000" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn x:Name="ColName" Header="SOLO PARENT" Width="150">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="10,10"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Barangay}" FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="10,10"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#000000" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Barangay}" FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn x:Name="ColScore" Header="SCORE" Width="76">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColScore}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="4,8"><StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"><TextBlock Text="{Binding ScoreLabel}" FontSize="13.5" FontWeight="Bold" Foreground="{Binding ScoreBarColor}" HorizontalAlignment="Center"/><Border Background="{Binding ModelSourceBg}" BorderBrush="{Binding ModelSourceBorder}" BorderThickness="1" CornerRadius="3" Padding="4,1" Margin="0,2,0,0" ToolTip="{Binding ModelSourceTooltip}"><TextBlock Text="{Binding ModelSourceBadge}" FontSize="8.5" FontWeight="Bold" Foreground="{Binding ModelSourceFg}" HorizontalAlignment="Center"/></Border></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            <!-- Col 3: Vulnerability Score (Transparent cell, clean score, top-right '!' signal for concern/fallback) -->
+                            <GridViewColumn x:Name="ColScore" Header="SCORE" Width="78">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Width="{Binding ActualWidth, ElementName=ColScore}" Margin="-6,0,-6,0"
+                                                BorderBrush="#F2EAEF" BorderThickness="0,0,1,0"
+                                                Background="Transparent" Padding="4,6"
+                                                ToolTip="{Binding ScoreCellTooltip}">
+                                            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <TextBlock Text="{Binding ScoreLabel}" FontSize="13.5" FontWeight="Bold" Foreground="{Binding ScoreBarColor}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <!-- Small '!' warning indicator in top-right corner if low confidence or fallback -->
+                                                <Border Visibility="{Binding HasAlertSignal, Converter={StaticResource BoolToVis}}"
+                                                        HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-4,-12,0"
+                                                        Background="{Binding AlertSignalBg}" CornerRadius="6" Width="12" Height="12"
+                                                        ToolTip="{Binding AlertSignalTooltip}">
+                                                    <TextBlock Text="!" FontSize="8.5" FontWeight="Bold" Foreground="{Binding AlertSignalFg}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" Margin="0,-1,0,0"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn x:Name="ColCrossCheck" Header="CROSS-CHECK" Width="110">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColCrossCheck}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="8,10"><TextBlock Text="{Binding CrossCheckText}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding CrossCheckFg}" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            <GridViewColumn x:Name="ColCrossCheck" Header="COMPLIANCE FLAGS" Width="135">
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColCrossCheck}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="8,10"><TextBlock Text="{Binding CrossCheckText}" FontSize="11" FontWeight="SemiBold" Foreground="#000000" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn x:Name="ColCompliance" Header="AUDIT &amp; COMPLIANCE DETAIL" Width="280">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColCompliance}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="10,8"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding DependantsDetailLabel}" FontSize="11" FontWeight="SemiBold" Foreground="#1F2937" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding ScholarshipEligibilityNotice}" FontSize="10" FontWeight="SemiBold" Foreground="{Binding ScholarshipEligibilityFg}" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/><Border Visibility="{Binding HasSpecialNeedsDependent, Converter={StaticResource BoolToVis}}" Background="#EFF6FF" BorderBrush="#93C5FD" BorderThickness="1" CornerRadius="3" Padding="4,1" Margin="0,3,0,0" HorizontalAlignment="Left"><TextBlock Text="{Binding SpecialNeedsBadgeText}" FontSize="8.5" FontWeight="Bold" Foreground="#1D4ED8"/></Border></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            <!-- Col Dependents (Dedicated count column) -->
+                            <GridViewColumn x:Name="ColDependents" Header="DEPENDENTS" Width="95">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Width="{Binding ActualWidth, ElementName=ColDependents}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="4,10">
+                                            <TextBlock Text="{Binding Dependants}" FontSize="12" FontWeight="SemiBold" Foreground="#000000" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <!-- Col Compliance: Specific flags only, otherwise empty/dash -->
+                            <GridViewColumn x:Name="ColCompliance" Header="AUDIT &amp; COMPLIANCE DETAIL" Width="230">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Width="{Binding ActualWidth, ElementName=ColCompliance}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="10,8">
+                                            <TextBlock Text="{Binding AuditFlagsSummary}" FontSize="10.5" FontWeight="SemiBold" Foreground="#000000" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding AuditFlagsSummary}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn x:Name="ColValidUntil" Header="VALID UNTIL" Width="95">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColValidUntil}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="8,10"><TextBlock Text="{Binding ValidUntilFormatted}" FontSize="11" Foreground="#333333" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColValidUntil}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="8,10"><TextBlock Text="{Binding ValidUntilFormatted}" FontSize="11" Foreground="#000000" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="90">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColStatus}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="6,10"><Border CornerRadius="10" Padding="8,2" Background="{Binding RankBg}" HorizontalAlignment="Center"><TextBlock Text="{Binding StatusText}" FontSize="10.5" FontWeight="Bold" Foreground="{Binding RankFg}"/></Border></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            <!-- Col: Solo Parent ID Card Validity (Clean text, no pill) -->
+                            <GridViewColumn x:Name="ColCardStatus" Header="VALIDITY" Width="90">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Width="{Binding ActualWidth, ElementName=ColCardStatus}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="4,10">
+                                            <TextBlock Text="{Binding CardStatusText}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding CardStatusFg}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <!-- Col: Subsidy Grant Status (Confirmed vs Pending) -->
+                            <GridViewColumn x:Name="ColSubsidyStatus" Header="SUBSIDY STATUS" Width="110">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Width="{Binding ActualWidth, ElementName=ColSubsidyStatus}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="4,10">
+                                            <Border Background="{Binding SubsidyStatusBg}" BorderBrush="{Binding SubsidyStatusBorder}" BorderThickness="1" CornerRadius="10" Padding="8,3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding SubsidyStatusText}" FontSize="10.5" FontWeight="SemiBold" Foreground="{Binding SubsidyStatusFg}" HorizontalAlignment="Center"/>
+                                            </Border>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- ColAction: Final column - No trailing vertical divider line -->
                             <GridViewColumn x:Name="ColAction" Header="ACTIONS" Width="150">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColAction}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,10"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Button Height="26" Padding="10,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="{Binding ConfirmButtonToolTip}" Command="{Binding DataContext.ConfirmShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border Background="{Binding ConfirmButtonBg}" BorderBrush="{Binding ConfirmButtonBorder}" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="{Binding ConfirmButtonText}" FontSize="10.5" FontWeight="Bold" Foreground="{Binding ConfirmButtonFg}" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border></ControlTemplate></Button.Template></Button>
-                                    <Button Height="26" Padding="10,0" Cursor="Hand" ToolTip="Revoke Grant / Selection" Command="{Binding DataContext.RevokeShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border Background="#FFF1F2" BorderBrush="#FDA4AF" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="Revoke" FontSize="10.5" FontWeight="SemiBold" Foreground="#E11D48" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border></ControlTemplate></Button.Template></Button>
+                                    <Button Height="26" Padding="10,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="{Binding ConfirmButtonToolTip}" IsEnabled="{Binding DataContext.CanModifyGrantees, RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.ConfirmShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="{Binding ConfirmButtonBg}" BorderBrush="{Binding ConfirmButtonBorder}" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="{Binding ConfirmButtonText}" FontSize="10.5" FontWeight="Bold" Foreground="{Binding ConfirmButtonFg}" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
+                                    <Button Height="26" Padding="10,0" Cursor="Hand" ToolTip="Revoke Grant / Selection" IsEnabled="{Binding DataContext.CanModifyGrantees, RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.RevokeShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="White" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="Revoke" FontSize="10.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FDF2F4"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
                                 </StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>
 
-                <!-- Integrated Card Footer for Pagination -->
-                <Border Grid.Row="1" Background="#FAF6F8" BorderBrush="#EFE4E8" BorderThickness="0,1.2,0,0" Padding="18,10">
-                    <Grid VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Ellipse Width="6" Height="6" Fill="#22C55E" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="{Binding ShortlistSummary}" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
-                            <TextBlock Text=" • " FontFamily="Segoe UI" FontSize="12" Foreground="#CBD5E1" Margin="4,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding ShortlistPageSummary}" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Button Width="105" Height="34" Cursor="Hand" Command="{Binding ShortlistPrevPageCommand}" IsEnabled="{Binding CanShortlistPrevPage}" ToolTip="Previous page" Margin="0,0,10,0">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Bg" Background="White" CornerRadius="17" BorderBrush="#E0D0D5" BorderThickness="1.5">
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
-                                                      Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
-                                                <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
-                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
-                                            </Trigger>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                            <Border Background="#FAF2F5" CornerRadius="14" Padding="14,6"
-                                    BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding ShortlistPageNumberLabel}" FontFamily="Segoe UI" FontSize="12"
-                                           FontWeight="SemiBold" Foreground="#702943"/>
-                            </Border>
-                            <Button Width="105" Height="34" Cursor="Hand" Command="{Binding ShortlistNextPageCommand}" IsEnabled="{Binding CanShortlistNextPage}" ToolTip="Next page">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Bg" Background="White" CornerRadius="17" BorderBrush="#E0D0D5" BorderThickness="1.5">
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
-                                                <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
-                                                      Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
-                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
-                                            </Trigger>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
+                <!-- Dynamic Floating Scroll-Down Arrow (Visible only while actively scrolling when more content exists) -->
+                <Border x:Name="ScrollHintIndicator" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10"
+                        Background="#702943" CornerRadius="12" Width="24" Height="24"
+                        Opacity="0.85" Visibility="Collapsed" IsHitTestVisible="False">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="1" Opacity="0.25"/>
+                    </Border.Effect>
+                    <Path Data="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"
+                          Fill="White" Width="11" Height="11" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
             </Grid>
         </Border>

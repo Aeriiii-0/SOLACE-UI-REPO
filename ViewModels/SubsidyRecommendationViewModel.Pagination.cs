@@ -153,9 +153,9 @@ namespace SOLUM_UI.ViewModels
             {
                 int total = QueueTotalCount;
                 if (total == 0) return "No candidate records found";
-                int start = (QueueCurrentPage - 1) * QueuePageSize + 1;
-                int end = Math.Min(QueueCurrentPage * QueuePageSize, total);
-                return $"Showing {start}–{end} of {total} records";
+                int quota = Math.Min(GranteeSlots, total);
+                int sel = FilteredRecommendations != null ? FilteredRecommendations.Count(x => x.IsSelected) : 0;
+                return $"Showing all {total} candidates • {quota} within quota • {sel} selected";
             }
         }
 
@@ -181,9 +181,9 @@ namespace SOLUM_UI.ViewModels
             {
                 int total = FilteredShortlistRows?.Count ?? 0;
                 if (total == 0) return "No shortlist records found";
-                int start = (ShortlistCurrentPage - 1) * ShortlistPageSize + 1;
-                int end = Math.Min(ShortlistCurrentPage * ShortlistPageSize, total);
-                return $"Showing {start}–{end} of {total} records";
+                int confirmed = FilteredShortlistRows != null ? FilteredShortlistRows.Count(x => x.IsFinalGrantee) : 0;
+                int pending = total - confirmed;
+                return $"Showing all {total} candidates • {confirmed} confirmed • {pending} pending";
             }
         }
         public string ShortlistPageNumberLabel => $"{ShortlistCurrentPage} / {ShortlistTotalPages}";
@@ -242,19 +242,17 @@ namespace SOLUM_UI.ViewModels
                 var req = new GetSubsidyRecommendationsRequest
                 {
                     CycleId = _activeCycleId,
-                    Page = page,
-                    PageSize = QueuePageSize,
                     SortBy = "PriorityScore",
                     SortOrder = "desc"
                 };
                 if (_auditFilter == "CollegeAge") req.NeedsCloserReview = true;
 
-                var resp = await _apiService.GetRecommendationsPagedAsync(req);
+                var resp = await _apiService.GetAllRecommendationsAsync(req);
                 if (resp?.Data != null)
                 {
-                    QueueTotalCount = resp.Data.TotalCount;
-                    QueueTotalPages = Math.Max(1, resp.Data.TotalPages);
-                    _queueCurrentPage = resp.Data.Page;
+                    QueueTotalCount = resp.Data.Count;
+                    QueueTotalPages = 1;
+                    _queueCurrentPage = 1;
                     OnPropertyChanged(nameof(QueueCurrentPage));
                     OnPropertyChanged(nameof(CanQueuePrevPage));
                     OnPropertyChanged(nameof(CanQueueNextPage));
@@ -265,19 +263,16 @@ namespace SOLUM_UI.ViewModels
                     PagedRecommendations.Clear();
                     FilteredRecommendations.Clear();
 
-                    int startIndex = (resp.Data.Page - 1) * resp.Data.PageSize;
-                    if (resp.Data.Items != null)
+                    for (int i = 0; i < resp.Data.Count; i++)
                     {
-                        for (int i = 0; i < resp.Data.Items.Count; i++)
-                        {
-                            var item = SubsidyModelMapper.ToItem(resp.Data.Items[i]);
-                            item.Rank = startIndex + i + 1;
-                            item.IsWithinQuota = (item.Rank <= _granteeSlots);
-                            PagedRecommendations.Add(item);
-                            FilteredRecommendations.Add(item);
-                        }
+                        var item = SubsidyModelMapper.ToItem(resp.Data[i]);
+                        item.Rank = i + 1;
+                        item.IsWithinQuota = (item.Rank <= _granteeSlots);
+                        PagedRecommendations.Add(item);
+                        FilteredRecommendations.Add(item);
                     }
                     RecalculateSelectionCounts();
+                    EnrichAllCandidatesFromRecordsAsync();
                 }
                 else
                 {
@@ -332,15 +327,13 @@ namespace SOLUM_UI.ViewModels
         public void UpdateShortlistPaged()
         {
             int total = FilteredShortlistRows?.Count ?? 0;
-            ShortlistTotalPages = Math.Max(1, (int)Math.Ceiling(total / (double)ShortlistPageSize));
-            if (_shortlistCurrentPage > ShortlistTotalPages) _shortlistCurrentPage = ShortlistTotalPages;
-            if (_shortlistCurrentPage < 1) _shortlistCurrentPage = 1;
+            ShortlistTotalPages = 1;
+            _shortlistCurrentPage = 1;
 
             PagedShortlistRows.Clear();
             if (FilteredShortlistRows != null)
             {
-                var slice = FilteredShortlistRows.Skip((_shortlistCurrentPage - 1) * ShortlistPageSize).Take(ShortlistPageSize);
-                foreach (var item in slice) PagedShortlistRows.Add(item);
+                foreach (var item in FilteredShortlistRows) PagedShortlistRows.Add(item);
             }
 
             OnPropertyChanged(nameof(ShortlistCurrentPage));

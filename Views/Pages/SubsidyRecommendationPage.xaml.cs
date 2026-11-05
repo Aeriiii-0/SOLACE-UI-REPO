@@ -18,25 +18,5 @@ namespace SOLUM_UI.Views.Pages
                 }
             };
         }
-
-        private void SlotBreakdownBtn_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (SlotPopup != null) SlotPopup.IsOpen = !SlotPopup.IsOpen;
-        }
-
-        private void EditQuotaBtn_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (EditQuotaPopup != null) EditQuotaPopup.IsOpen = !EditQuotaPopup.IsOpen;
-        }
-
-        private void CancelEditQuota_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (EditQuotaPopup != null) EditQuotaPopup.IsOpen = false;
-        }
-
-        private void SaveEditQuota_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (EditQuotaPopup != null) EditQuotaPopup.IsOpen = false;
-        }
     }
 }

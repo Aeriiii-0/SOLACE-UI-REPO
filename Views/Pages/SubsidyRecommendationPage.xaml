@@ -60,228 +60,12 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                 <TextBlock Text="Subsidy Recommendation" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
-                <TextBlock Text="ML vulnerability triage and quota allocation awaiting staff review." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="0,4,0,0"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <!-- Quota Status Section (Structured Section, No Emojis) -->
-                <Border Background="#FFFFFF" BorderBrush="#E5D5DC" BorderThickness="1" CornerRadius="10" Padding="14,8" VerticalAlignment="Center">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Progress Bar & Acceptance Label -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Width="185" Margin="0,0,14,0">
-                        <TextBlock Text="ACCEPTED RECIPIENTS" FontSize="9" FontWeight="Bold" Foreground="#888888" Margin="0,0,0,4"/>
-                        <Border Height="6" Background="#F5E8EC" CornerRadius="3" ClipToBounds="True">
-                            <ProgressBar Value="{Binding QuotaFillPercentage, Mode=OneWay}" Minimum="0" Maximum="100" Height="6" BorderThickness="0" Background="Transparent" Foreground="#27AE60"/>
-                        </Border>
-                        <TextBlock Text="{Binding QuotaProgressText}" FontSize="9.5" FontWeight="SemiBold" Foreground="#27AE60" Margin="0,3,0,0"/>
-                        <!-- Grant Rate & Committed Budget Summary under Accepted Recipients -->
-                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                            <TextBlock Text="{Binding GrantAmountPerRecipient, StringFormat='₱{0:N0} / recipient'}" FontSize="9.5" FontWeight="SemiBold" Foreground="#702943"/>
-                            <TextBlock Text=" • " FontSize="9.5" Foreground="#C4A0B0"/>
-                            <TextBlock Text="{Binding CommittedBudgetText}" FontSize="9.5" Foreground="#702943"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- Vertical Divider -->
-                    <Border Grid.Column="1" Width="1" Background="#EEDDE2" Margin="0,2,14,2"/>
-
-                    <!-- Slots Indicators, Details Action & Edit Quota Action -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <!-- Total Slots -->
-                        <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
-                            <TextBlock Text="TOTAL SLOTS" FontSize="9.5" FontWeight="Bold" Foreground="#888888"/>
-                            <TextBlock Text="{Binding GranteeSlots}" FontSize="14" FontWeight="Bold" Foreground="#702943" Margin="0,1,0,0"/>
-                        </StackPanel>
-
-                        <!-- Remaining Slots -->
-                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
-                            <TextBlock Text="REMAINING" FontSize="9.5" FontWeight="Bold" Foreground="#888888"/>
-                            <TextBlock Text="{Binding RemainingSlots}" FontSize="14" FontWeight="Bold" Foreground="#B45309" Margin="0,1,0,0"/>
-                        </StackPanel>
-
-                        <!-- Details Flyout Button -->
-                        <Grid VerticalAlignment="Center" Margin="0,0,6,0">
-                            <Button x:Name="SlotBreakdownBtn" Height="28" Padding="10,0" Cursor="Hand" Click="SlotBreakdownBtn_Click">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="#FBF5F7" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                            <TextBlock Text="Details ▾" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-
-                            <Popup x:Name="SlotPopup" PlacementTarget="{Binding ElementName=SlotBreakdownBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
-                                <Border Background="White" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1.5" Padding="14,10" MinWidth="220">
-                                    <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="14" ShadowDepth="3" Opacity="0.18"/></Border.Effect>
-                                    <StackPanel>
-                                        <TextBlock Text="Quota Slots Breakdown" FontSize="11.5" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,8"/>
-                                        <Grid Margin="0,2">
-                                            <TextBlock Text="Total Allocated Quota:" FontSize="11" Foreground="#555555"/>
-                                            <TextBlock Text="{Binding GranteeSlots}" FontSize="11" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                        <Grid Margin="0,2">
-                                            <TextBlock Text="Confirmed Grantees:" FontSize="11" Foreground="#555555"/>
-                                            <TextBlock Text="{Binding ConfirmedGranteesCount}" FontSize="11" FontWeight="Bold" Foreground="#27AE60" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                        <Grid Margin="0,2">
-                                            <TextBlock Text="Shortlisted in Review:" FontSize="11" Foreground="#555555"/>
-                                            <TextBlock Text="{Binding ShortlistRows.Count}" FontSize="11" FontWeight="Bold" Foreground="#B45309" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                        <Separator Margin="0,6" Background="#F0E2E7"/>
-                                        <Grid Margin="0,2">
-                                            <TextBlock Text="Remaining Open Slots:" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/>
-                                            <TextBlock Text="{Binding RemainingSlots}" FontSize="12" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                        <Separator Margin="0,6" Background="#F0E2E7"/>
-                                        <Button Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0,2"
-                                                HorizontalAlignment="Left"
-                                                Command="{Binding OpenDisqualifiedModalCommand}">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <TextBlock Text="Disqualified Outliers: " FontSize="11" Foreground="#555555"/>
-                                                <TextBlock Text="{Binding DisqualifiedCount}" FontSize="11" FontWeight="Bold" Foreground="#B91C1C" Margin="0,0,4,0"/>
-                                                <TextBlock Text="(View Log →)" FontSize="10.5" Foreground="#702943" TextDecorations="Underline"/>
-                                            </StackPanel>
-                                        </Button>
-                                    </StackPanel>
-                                </Border>
-                            </Popup>
-                        </Grid>
-
-                        <!-- Edit Quota Button -->
-                        <Grid VerticalAlignment="Center">
-                            <Button x:Name="EditQuotaBtn" Height="28" Padding="10,0" Cursor="Hand"
-                                    Click="EditQuotaBtn_Click"
-                                    IsEnabled="{Binding CanModifyGrantees}"
-                                    ToolTip="Edit target grantee slots and subsidy grant amount">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Bg" Background="#FBF5F7" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.07,6.19L3,17.25Z"
-                                                      Fill="#702943" Width="10" Height="10" Stretch="Uniform" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                                <TextBlock Text="Edit" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#F5ECEE"/></Trigger>
-                                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-
-                            <!-- Edit Quota Popup -->
-                            <Popup x:Name="EditQuotaPopup" PlacementTarget="{Binding ElementName=EditQuotaBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
-                                <Border Background="White" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1.5" Padding="14,12" MinWidth="260">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="3" Opacity="0.16"/>
-                                    </Border.Effect>
-                                    <StackPanel>
-                                        <TextBlock Text="Edit Quota &amp; Grant Allocation" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,10"/>
-
-                                        <!-- Target Grantees Input -->
-                                        <TextBlock Text="Target Grantees (Slots)" FontSize="10.5" FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,3"/>
-                                        <Border Background="#FDF5F8" CornerRadius="6" BorderBrush="#D0B8C0" BorderThickness="1" Padding="8,4" Margin="0,0,0,8">
-                                            <TextBox Text="{Binding GranteeSlots, UpdateSourceTrigger=PropertyChanged}"
-                                                     FontSize="12" FontWeight="Bold" Foreground="#702943" BorderThickness="0" Background="Transparent"/>
-                                        </Border>
-
-                                        <!-- Grant Amount Input -->
-                                        <TextBlock Text="Grant Amount Per Recipient (PHP)" FontSize="10.5" FontWeight="SemiBold" Foreground="#555555" Margin="0,0,0,3"/>
-                                        <Border Background="#FDF5F8" CornerRadius="6" BorderBrush="#D0B8C0" BorderThickness="1" Padding="8,4" Margin="0,0,0,10">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="₱ " FontSize="12" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
-                                                <TextBox Grid.Column="1" Text="{Binding GrantAmountPerRecipient, UpdateSourceTrigger=PropertyChanged}"
-                                                         FontSize="12" FontWeight="Bold" Foreground="#702943" BorderThickness="0" Background="Transparent"/>
-                                            </Grid>
-                                        </Border>
-
-                                        <!-- Real-time Budget Calculation -->
-                                        <Border Background="#FFF0F5" CornerRadius="6" Padding="8,6" Margin="0,0,0,12">
-                                            <TextBlock Text="{Binding CommittedBudgetText}" FontSize="11" FontWeight="SemiBold" Foreground="#702943" HorizontalAlignment="Center"/>
-                                        </Border>
-
-                                        <!-- Actions -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="8"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Button Grid.Column="0" Content="Cancel" Height="28" Click="CancelEditQuota_Click" Cursor="Hand">
-                                                <Button.Template>
-                                                    <ControlTemplate TargetType="Button">
-                                                        <Border Background="#F3F4F6" CornerRadius="6" Padding="10,0">
-                                                            <TextBlock Text="Cancel" FontSize="11" FontWeight="SemiBold" Foreground="#475569" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </Button.Template>
-                                            </Button>
-                                            <Button Grid.Column="2" Height="28" Command="{Binding SaveQuotaCommand}" Click="SaveEditQuota_Click" Cursor="Hand">
-                                                <Button.Template>
-                                                    <ControlTemplate TargetType="Button">
-                                                        <Border Background="#702943" CornerRadius="6" Padding="10,0">
-                                                            <TextBlock Text="Save" FontSize="11" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </Button.Template>
-                                            </Button>
-                                        </Grid>
-                                    </StackPanel>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-                <!-- Disqualified Candidates Audit Button -->
-                <Button x:Name="DisqualifiedListBtn"
-                        Command="{Binding OpenDisqualifiedModalCommand}"
-                        Height="46" Margin="10,0,0,0" Padding="14,0"
-                        Background="#FFF8F9" BorderBrush="#F8D7DA" BorderThickness="1"
-                        Cursor="Hand" VerticalAlignment="Center"
-                        ToolTip="View audit log of disqualified and rejected candidates for this cycle">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bg" Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="10" Padding="{TemplateBinding Padding}">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,13.85 19.38,15.55 18.32,16.91L7.09,5.68C8.45,4.62 10.15,4 12,4M4,12C4,10.15 4.62,8.45 5.68,7.09L16.91,18.32C15.55,19.38 13.85,20 12,20A8,8 0 0,1 4,12Z"
-                                          Fill="#B91C1C" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Disqualified" FontSize="11.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
-                                    <Border Background="#FEE2E2" CornerRadius="10" Padding="6,1" Margin="6,0,0,0" VerticalAlignment="Center"
-                                            Visibility="{Binding HasDisqualifiedCandidates, Converter={StaticResource BoolToVis}}">
-                                        <TextBlock Text="{Binding DisqualifiedCount}" FontSize="10.5" FontWeight="Bold" Foreground="#991B1B"/>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#FCE8EC"/>
-                                    <Setter TargetName="Bg" Property="BorderBrush" Value="#E5AAB5"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-
                 <!-- Last Refreshed Timestamp Pill -->
                 <Border VerticalAlignment="Center" Background="#FAF2F5" CornerRadius="12" Padding="10,6" BorderBrush="#EBD8DE" BorderThickness="1" Margin="10,0,0,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
+                        <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
                               Fill="#702943" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0" Opacity="0.75"/>
                         <TextBlock Text="{Binding LastRefreshedText, FallbackValue='Updated: Just now'}" FontSize="11.5" FontFamily="Segoe UI" FontWeight="Medium" Foreground="#702943"/>
                     </StackPanel>
@@ -323,7 +107,7 @@
             <StackPanel Orientation="Horizontal">
                 <!-- Tab 0: Recommendations Queue (Active Cycle only) -->
                 <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="0"
-                        IsEnabled="{Binding IsActiveCycle}">
+                        IsEnabled="{Binding CanAccessActivePipelineTabs}">
                     <Button.ToolTip>
                         <ToolTip Content="{Binding TabDisabledTooltipText}"/>
                     </Button.ToolTip>
@@ -344,7 +128,7 @@
 
                 <!-- Tab 1: Approved Selection & Audit (Active Cycle only) -->
                 <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="1"
-                        IsEnabled="{Binding IsActiveCycle}">
+                        IsEnabled="{Binding CanAccessActivePipelineTabs}">
                     <Button.ToolTip>
                         <ToolTip Content="{Binding TabDisabledTooltipText}"/>
                     </Button.ToolTip>
@@ -365,7 +149,7 @@
 
                 <!-- Tab 2: Final Grantees & Archive (Always Accessible) -->
                 <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="2">
-                    <TextBlock Text="Final Grantees &amp; Archive" FontSize="13">
+                    <TextBlock Text="Final Grantees" FontSize="13">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="#A06080"/>
