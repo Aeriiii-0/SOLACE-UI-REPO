@@ -38,11 +38,11 @@ namespace SOLUM_UI
             _ = OcrService.EnsureServerRunningAsync();
             // Initialize AutoUpdater in background with custom downloading UI
             InitializeAutoUpdater();
+            // Set shutdown mode so app closes when login closes (or MainWindow if authenticated)
+            ShutdownMode = ShutdownMode.OnLastWindowClose;
             // Show login page as startup screen
             var loginPage = new LoginPage();
             loginPage.Show();
-            // Set shutdown mode so app closes when login closes
-            ShutdownMode = ShutdownMode.OnLastWindowClose;
         }
 
         private void InitializeAutoUpdater()

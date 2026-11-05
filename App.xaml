@@ -1,18 +1,17 @@
-<Application x:Class="SOLUM_UI.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:converters="clr-namespace:SOLUM_UI.Converters"
-             StartupUri="Views/LoginPage.xaml">
-    <Application.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Themes/SolumTheme.xaml"/>
-                <ResourceDictionary Source="Themes/AnalyticsTheme.xaml"/>
-                <ResourceDictionary Source="Themes/OcrDialogTheme.xaml"/>
-                <ResourceDictionary Source="Themes/DesignSystem/DesignSystem.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-            <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
-        </ResourceDictionary>
-    </Application.Resources>
-</Application>
+<Application x:Class="SOLUM_UI.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:SOLUM_UI.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/SolumTheme.xaml"/>
+                <ResourceDictionary Source="Themes/AnalyticsTheme.xaml"/>
+                <ResourceDictionary Source="Themes/OcrDialogTheme.xaml"/>
+                <ResourceDictionary Source="Themes/DesignSystem/DesignSystem.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
