@@ -39,19 +39,19 @@
                     VerticalAlignment="Top"
                     Margin="88,71,0,0">
             <Image Source="pack://application:,,,/Assets/SidebarLogo.png"
-                   Width="44" Height="44"
+                   Width="48.4" Height="48.4"
                    Stretch="Uniform"
                    RenderOptions.BitmapScalingMode="HighQuality"
                    VerticalAlignment="Center"/>
             <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
                 <TextBlock Text="SOLACE"
                            FontFamily="Segoe UI"
-                           FontSize="20"
+                           FontSize="22"
                            FontWeight="Bold"
                            Foreground="#6D1F40"/>
                 <TextBlock Text="Solo Parent Management"
                            FontFamily="Segoe UI"
-                           FontSize="12"
+                           FontSize="13.2"
                            Foreground="#8A5068"/>
             </StackPanel>
         </StackPanel>
@@ -84,7 +84,7 @@
                             </Grid>
                             <TextBlock Text="Authorized Personnel Access"
                                        FontFamily="Segoe UI"
-                                       FontSize="12.5"
+                                       FontSize="13.75"
                                        FontWeight="Bold"
                                        Foreground="#6D1F40"
                                        VerticalAlignment="Center"/>
@@ -93,24 +93,24 @@
                     <!-- Headline -->
                     <TextBlock Text="A secure gateway to"
                                FontFamily="Georgia"
-                               FontSize="42"
+                               FontSize="46"
                                FontWeight="ExtraBold"
                                Foreground="#2B0D1A"
-                               LineHeight="50"/>
+                               LineHeight="55"/>
                     <TextBlock Text="solo parent records."
                                FontFamily="Georgia"
-                               FontSize="42"
+                               FontSize="46"
                                FontWeight="ExtraBold"
                                Foreground="#7A2650"
-                               LineHeight="50"
+                               LineHeight="55"
                                Margin="0,0,0,20"/>
                     <!-- Description -->
                     <TextBlock Text="Sign in to manage solo parent records, monitor program operations, and access beneficiary data through the unified management system of the Biñan City Social Welfare and Development Office."
                                FontFamily="Segoe UI"
-                               FontSize="15"
+                               FontSize="16.5"
                                Foreground="#6B4256"
                                TextWrapping="Wrap"
-                               LineHeight="24"
+                               LineHeight="27"
                                MaxWidth="560"
                                HorizontalAlignment="Left"
                                Margin="0,0,0,34"/>
@@ -118,37 +118,37 @@
                     <StackPanel Orientation="Horizontal">
                         <Border Style="{StaticResource FeatureChip}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="34" Height="34" CornerRadius="17" Background="#F6DCE6" Margin="0,0,10,0">
-                                    <TextBlock Text="&#xEA18;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                <Border Width="37.4" Height="37.4" CornerRadius="18.7" Background="#F6DCE6" Margin="0,0,10,0">
+                                    <TextBlock Text="&#xEA18;" FontFamily="Segoe MDL2 Assets" FontSize="15.4"
                                                Foreground="#6D1F40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Role-Based" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold" Foreground="#2B0D1A"/>
-                                    <TextBlock Text="Access" FontFamily="Segoe UI" FontSize="11.5" Foreground="#8A5068"/>
+                                    <TextBlock Text="Role-Based" FontFamily="Segoe UI" FontSize="14.3" FontWeight="Bold" Foreground="#2B0D1A"/>
+                                    <TextBlock Text="Access" FontFamily="Segoe UI" FontSize="12.65" Foreground="#8A5068"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource FeatureChip}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="34" Height="34" CornerRadius="17" Background="#F6DCE6" Margin="0,0,10,0">
-                                    <TextBlock Text="&#xE8FD;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                <Border Width="37.4" Height="37.4" CornerRadius="18.7" Background="#F6DCE6" Margin="0,0,10,0">
+                                    <TextBlock Text="&#xE8FD;" FontFamily="Segoe MDL2 Assets" FontSize="15.4"
                                                Foreground="#6D1F40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Audit" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold" Foreground="#2B0D1A"/>
-                                    <TextBlock Text="Logged" FontFamily="Segoe UI" FontSize="11.5" Foreground="#8A5068"/>
+                                    <TextBlock Text="Audit" FontFamily="Segoe UI" FontSize="14.3" FontWeight="Bold" Foreground="#2B0D1A"/>
+                                    <TextBlock Text="Logged" FontFamily="Segoe UI" FontSize="12.65" Foreground="#8A5068"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource FeatureChip}">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="34" Height="34" CornerRadius="17" Background="#F6DCE6" Margin="0,0,10,0">
-                                    <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                <Border Width="37.4" Height="37.4" CornerRadius="18.7" Background="#F6DCE6" Margin="0,0,10,0">
+                                    <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="15.4"
                                                Foreground="#6D1F40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Encrypted" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold" Foreground="#2B0D1A"/>
-                                    <TextBlock Text="Data" FontFamily="Segoe UI" FontSize="11.5" Foreground="#8A5068"/>
+                                    <TextBlock Text="Encrypted" FontFamily="Segoe UI" FontSize="14.3" FontWeight="Bold" Foreground="#2B0D1A"/>
+                                    <TextBlock Text="Data" FontFamily="Segoe UI" FontSize="12.65" Foreground="#8A5068"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -161,7 +161,7 @@
                             BorderBrush="#6D1F40"
                             BorderThickness="1.5"
                             CornerRadius="20"
-                            Padding="48,60,48,48"
+                            Padding="53,66,53,53"
                             SnapsToDevicePixels="True">
                         <Border.Effect>
                             <DropShadowEffect Color="#6D1F40" BlurRadius="32" ShadowDepth="6" Direction="270" Opacity="0.14" RenderingBias="Quality"/>
@@ -172,13 +172,13 @@
                                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                     <TextBlock Text="Welcome back"
                                                FontFamily="Georgia"
-                                               FontSize="35"
+                                               FontSize="39"
                                                FontWeight="SemiBold"
                                                Foreground="#2B0D1A"
                                                TextAlignment="Center"/>
                                     <TextBlock Text="Sign in to your SOLACE account"
                                                FontFamily="Segoe UI"
-                                               FontSize="18"
+                                               FontSize="20"
                                                Foreground="#8A5068"
                                                Margin="0,7,0,0"
                                                TextAlignment="Center"/>
@@ -189,7 +189,7 @@
                             <!-- Email label -->
                             <TextBlock Text="Email"
                                        FontFamily="Segoe UI"
-                                       FontSize="17"
+                                       FontSize="18.7"
                                        FontWeight="SemiBold"
                                        Foreground="#2B0D1A"
                                        Margin="0,0,0,9"/>
@@ -200,17 +200,17 @@
                                     BorderThickness="1"
                                     CornerRadius="10"
                                     Padding="18,0">
-                                <Grid Height="62">
+                                <Grid Height="68">
                                     <TextBlock x:Name="PlaceholderEmail"
                                                Text="Enter your email address"
                                                Foreground="#B08A9C"
                                                FontFamily="Segoe UI"
-                                               FontSize="17"
+                                               FontSize="18.7"
                                                VerticalAlignment="Center"
                                                IsHitTestVisible="False"/>
                                     <TextBox x:Name="TxtEmail"
                                              FontFamily="Segoe UI"
-                                             FontSize="17"
+                                             FontSize="18.7"
                                              Foreground="#2B0D1A"
                                              Background="Transparent"
                                              BorderThickness="0"
@@ -230,7 +230,7 @@
                             <!-- Password label -->
                             <TextBlock Text="Password"
                                        FontFamily="Segoe UI"
-                                       FontSize="17"
+                                       FontSize="18.7"
                                        FontWeight="SemiBold"
                                        Foreground="#2B0D1A"
                                        Margin="0,22,0,9"/>
@@ -241,7 +241,7 @@
                                     BorderThickness="1"
                                     CornerRadius="10"
                                     Padding="18,0,12,0">
-                                <Grid Height="62">
+                                <Grid Height="68">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
@@ -251,12 +251,12 @@
                                                    Text="Enter your password"
                                                    Foreground="#B08A9C"
                                                    FontFamily="Segoe UI"
-                                                   FontSize="17"
+                                                   FontSize="18.7"
                                                    VerticalAlignment="Center"
                                                    IsHitTestVisible="False"/>
                                         <PasswordBox x:Name="TxtPassword"
                                                      FontFamily="Segoe UI"
-                                                     FontSize="17"
+                                                     FontSize="18.7"
                                                      Foreground="#2B0D1A"
                                                      Background="Transparent"
                                                      BorderThickness="0"
@@ -265,7 +265,7 @@
                                                      PasswordChanged="TxtPassword_PasswordChanged"/>
                                         <TextBox x:Name="TxtPasswordVisible"
                                                  FontFamily="Segoe UI"
-                                                 FontSize="17"
+                                                 FontSize="18.7"
                                                  Foreground="#2B0D1A"
                                                  Background="Transparent"
                                                  BorderThickness="0"
@@ -292,7 +292,7 @@
                                         <TextBlock x:Name="TxtToggleIcon"
                                                    Text="&#xED1A;"
                                                    FontFamily="Segoe MDL2 Assets"
-                                                   FontSize="20"
+                                                   FontSize="22"
                                                    Foreground="#6D1F40"/>
                                     </Button>
                                 </Grid>
@@ -311,16 +311,16 @@
                                            Foreground="#7A2650"
                                            TextDecorations="None"
                                            FontFamily="Segoe UI"
-                                           FontSize="12.5"
+                                           FontSize="13.75"
                                            FontWeight="SemiBold"
                                            Click="LinkForgotPassword_Click">Forgot password?</Hyperlink>
                             </TextBlock>
                             <!-- Login button -->
                             <Button x:Name="BtnLogin"
                                     Content="Sign in securely"
-                                    Height="64"
+                                    Height="71"
                                     FontFamily="Segoe UI"
-                                    FontSize="19"
+                                    FontSize="21"
                                     FontWeight="SemiBold"
                                     Foreground="White"
                                     Cursor="Hand"
@@ -355,17 +355,17 @@
                             </Button>
                             <!-- Terms -->
                             <TextBlock HorizontalAlignment="Center" Margin="0,14,0,0">
-                                <Run Text="By signing in you agree to our " Foreground="#8A5068" FontFamily="Segoe UI" FontSize="11"/>
+                                <Run Text="By signing in you agree to our " Foreground="#8A5068" FontFamily="Segoe UI" FontSize="12.1"/>
                                 <Hyperlink x:Name="LinkTerms"
                                            Foreground="#7A2650"
                                            TextDecorations="Underline"
                                            FontFamily="Segoe UI"
-                                           FontSize="11"
+                                           FontSize="12.1"
                                            Click="LinkTerms_Click">Terms and Conditions</Hyperlink>
                             </TextBlock>
                             <TextBlock Text="Accounts are issued by the system administrator."
                                        FontFamily="Segoe UI"
-                                       FontSize="11"
+                                       FontSize="12.1"
                                        Foreground="#8A5068"
                                        HorizontalAlignment="Center"
                                        Margin="0,6,0,0"/>
@@ -375,9 +375,9 @@
                     <TextBlock HorizontalAlignment="Center"
                                TextAlignment="Center"
                                FontFamily="Segoe UI"
-                               FontSize="12.5"
+                               FontSize="13.75"
                                Foreground="#6B4256"
-                               LineHeight="22"
+                               LineHeight="24.2"
                                Margin="0,24,0,0">
                         Access is restricted to authorized CSWDO personnel.<LineBreak/>Unauthorized use is monitored and logged.
                     </TextBlock>
@@ -387,7 +387,7 @@
         <!-- Copyright (bottom-left) -->
         <TextBlock Text="© 2026 Biñan City Social Welfare and Development Office. All rights reserved."
                    FontFamily="Segoe UI"
-                   FontSize="12"
+                   FontSize="13.2"
                    Foreground="#6B4256"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Bottom"
