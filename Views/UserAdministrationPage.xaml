@@ -422,12 +422,12 @@
         <!-- ═════════ TABLE STYLES ═════════ -->
         <Style x:Key="TableHeaderText" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="10.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#702943"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Left"/>
         </Style>
 
         <Style x:Key="RowContextMenu" TargetType="ContextMenu">
@@ -696,7 +696,7 @@
                         </Grid.RowDefinitions>
 
                         <!-- Header (centered text) -->
-                        <Border Grid.Row="0" Background="#FDF5F7" BorderBrush="#702943" BorderThickness="0,0,0,1">
+                        <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#E8DFE3" BorderThickness="0,0,0,1" Height="44">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="2.2*"/>
@@ -706,12 +706,12 @@
                                     <ColumnDefinition Width="140"/>
                                     <ColumnDefinition Width="130"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="USER" Style="{StaticResource TableHeaderText}"/>
-                                <TextBlock Grid.Column="1" Text="ROLE" Style="{StaticResource TableHeaderText}"/>
-                                <TextBlock Grid.Column="2" Text="ASSIGNED JURISDICTION" Style="{StaticResource TableHeaderText}"/>
-                                <TextBlock Grid.Column="3" Text="CONTACT" Style="{StaticResource TableHeaderText}"/>
-                                <TextBlock Grid.Column="4" Text="STATUS" Style="{StaticResource TableHeaderText}"/>
-                                <TextBlock Grid.Column="5" Text="ACTIONS" Style="{StaticResource TableHeaderText}"/>
+                                <TextBlock Grid.Column="0" Text="USER" Style="{StaticResource TableHeaderText}" Padding="20,0,12,0"/>
+                                <TextBlock Grid.Column="1" Text="ROLE" Style="{StaticResource TableHeaderText}" Padding="12,0"/>
+                                <TextBlock Grid.Column="2" Text="ASSIGNED JURISDICTION" Style="{StaticResource TableHeaderText}" Padding="12,0"/>
+                                <TextBlock Grid.Column="3" Text="CONTACT" Style="{StaticResource TableHeaderText}" Padding="12,0"/>
+                                <TextBlock Grid.Column="4" Text="STATUS" Style="{StaticResource TableHeaderText}" Padding="6,0" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="5" Text="ACTIONS" Style="{StaticResource TableHeaderText}" Padding="8,0" HorizontalAlignment="Center"/>
                             </Grid>
                         </Border>
 
