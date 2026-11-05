@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
@@ -86,7 +86,7 @@ namespace SOLUM_UI
         }
 
         private Dictionary<string, Button> _navButtons = new Dictionary<string, Button>();
-        private Dictionary<string, Page> _pageCache = new Dictionary<string, Page>(); // NEW â€” one instance per page tag
+        private Dictionary<string, Page> _pageCache = new Dictionary<string, Page>(); // NEW Ã¢â‚¬â€ one instance per page tag
 
         public MainWindow(ApplicationUserDTO user)
         {
@@ -102,11 +102,10 @@ namespace SOLUM_UI
                 ApplyRoleNavVisibility();
                 ActivateButton("Dashboard");
                 NavigatePage(GetOrCreatePage("Dashboard", () => new DashboardPage())); // CHANGED
-                await CheckAdminReviewsOnStartupAsync();
             };
             SetCurrentUser(user);
         }
-        // NEW â€” returns the cached page instance for this tag, creating it once on first use
+        // NEW Ã¢â‚¬â€ returns the cached page instance for this tag, creating it once on first use
         private Page GetOrCreatePage(string tag, Func<Page> factory)
         {
             if (!_pageCache.TryGetValue(tag, out var page))
@@ -168,7 +167,7 @@ namespace SOLUM_UI
             while (MainFrame.CanGoForward)
                 MainFrame.RemoveBackEntry();
         }
-        // CHANGED â€” simplified now that caching handles "don't rebuild the same page" for us.
+        // CHANGED Ã¢â‚¬â€ simplified now that caching handles "don't rebuild the same page" for us.
         // This just avoids re-navigating the Frame to the exact same instance it's already showing.
         private void NavigatePage(Page page)
         {
@@ -493,5 +492,6 @@ namespace SOLUM_UI
         }
     }
 }
+
 
 
