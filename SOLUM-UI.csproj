@@ -326,6 +326,9 @@
     <Compile Include="Views\SoloParentRecordsPage.xaml.cs">
       <DependentUpon>SoloParentRecordsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\SoloParentRecordsPage.Paging.cs">
+      <DependentUpon>SoloParentRecordsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Pages\SubsidyRecommendationPage.xaml.cs">
       <DependentUpon>SubsidyRecommendationPage.xaml</DependentUpon>
     </Compile>

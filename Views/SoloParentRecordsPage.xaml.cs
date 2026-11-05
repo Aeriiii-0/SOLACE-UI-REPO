@@ -666,6 +666,7 @@ namespace SOLUM_UI
 
         private void UpdatePagingUI()
         {
+            BuildPageNumbers();
             if (PageInfoText != null)
                 PageInfoText.Text = TotalPages > 0 ? $"Page {_currentPage} of {TotalPages}" : "Page 1 of 1";
             if (TxtRecordsSummary != null)
