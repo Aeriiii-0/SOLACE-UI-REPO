@@ -390,6 +390,9 @@
     <Compile Include="Views\UserAdministrationPage.xaml.cs">
       <DependentUpon>UserAdministrationPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UserAdministrationPage.Paging.cs">
+      <DependentUpon>UserAdministrationPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UserProfilePage.xaml.cs">
       <DependentUpon>UserProfilePage.xaml</DependentUpon>
     </Compile>

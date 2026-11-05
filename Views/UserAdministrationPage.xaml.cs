@@ -719,6 +719,7 @@ namespace SOLUM_UI
 
         private void UpdatePagingControls()
         {
+            BuildUserPageNumbers();
             if (TxtPageInfo != null)
                 TxtPageInfo.Text = _totalPages > 0 ? $"Page {_currentPage} of {_totalPages}" : "Page 1 of 1";
             if (TxtUsersSummary != null)
@@ -792,6 +793,18 @@ namespace SOLUM_UI
             _currentPage = 1;
             ApplyFilters();
 
+        }
+
+        private void CloseFilterPopup_Click(object sender, RoutedEventArgs e)
+        {
+            // This handler closes the filter popup by unchecking the BtnFilter toggle button
+            // The button will be added to the XAML when the filter popup UI is finalized
+            var btnFilter = FindName("BtnFilter");
+            if (btnFilter != null)
+            {
+                dynamic btn = btnFilter;
+                btn.IsChecked = false;
+            }
         }
 
         private void Search_TextChanged(object sender, TextChangedEventArgs e)
@@ -1444,10 +1457,6 @@ namespace SOLUM_UI
 
             bool isSuperAdmin = AuthApiService.Instance.IsSuperAdmin ||
                                 string.Equals(MainWindow.CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
-            if (CmbRoleItemAdmin != null)
-                CmbRoleItemAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
-            if (CmbRoleItemSuperAdmin != null)
-                CmbRoleItemSuperAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
             if (CmbRoleItemAdmin != null)
                 CmbRoleItemAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
             if (CmbRoleItemSuperAdmin != null)
