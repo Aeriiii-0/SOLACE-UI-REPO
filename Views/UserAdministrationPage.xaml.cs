@@ -1,5 +1,4 @@
-﻿using System.Windows.Threading;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -8,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
@@ -15,43 +15,28 @@ using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
 {
-
     public class AppUser
     {
-
         public Guid Id { get; set; }
-
         public string FirstName { get; set; }
-
         public string LastName { get; set; }
-
         public string Email { get; set; }
-
         public string Role { get; set; } = "ENCODER";
-
         public string Barangay { get; set; } = string.Empty;
         public bool MustChangePassword { get; set; }
         public bool IsPasswordChanged { get; set; }
         public DateTime? LastPasswordChangedDate { get; set; }
 
         public Visibility PasswordStatusVisibility => MustChangePassword ? Visibility.Visible : Visibility.Collapsed;
-
         public string PasswordStatusText => "Temporary Password";
-
         public string PasswordStatusTooltip => "Temporary password assigned. User must change their password upon login.";
-
         public Brush PasswordStatusBadgeColor => new SolidColorBrush(Color.FromRgb(254, 243, 199));
-
         public Brush PasswordStatusBadgeBorder => new SolidColorBrush(Color.FromRgb(252, 211, 77));
-
         public Brush PasswordStatusTextColor => new SolidColorBrush(Color.FromRgb(180, 83, 9));
 
         public string ContactNumber { get; set; } = string.Empty;
-
         public bool IsActive { get; set; } = true;
-
         public string Password { get; set; }
-
         public string DateAdded { get; set; } = "—";
 
         public string FullName => $"{FirstName} {LastName}".Trim().ToUpper();
@@ -60,14 +45,10 @@ namespace SOLUM_UI
         {
             get
             {
-
                 string f = string.IsNullOrEmpty(FirstName) ? "" : FirstName[0].ToString().ToUpper();
-
                 string l = string.IsNullOrEmpty(LastName) ? "" : LastName[0].ToString().ToUpper();
                 return f + l;
-
             }
-
         }
 
         public string DisplayContact => string.IsNullOrWhiteSpace(ContactNumber) ? "—" : ContactNumber;
@@ -84,7 +65,7 @@ namespace SOLUM_UI
             string.Equals(Role, "BARANGAY PRESIDENT", StringComparison.OrdinalIgnoreCase);
 
         public bool IsCaseworkerUser => string.Equals(Role, "CASEWORKER", StringComparison.OrdinalIgnoreCase) ||
-                                       (Role != null && Role.IndexOf("CASEWORKER", StringComparison.OrdinalIgnoreCase) >= 0);
+                                        (Role != null && Role.IndexOf("CASEWORKER", StringComparison.OrdinalIgnoreCase) >= 0);
 
         public bool IsEncoderUser => string.Equals(Role, "ENCODER", StringComparison.OrdinalIgnoreCase);
 
@@ -100,12 +81,24 @@ namespace SOLUM_UI
                 if (IsCaseworkerUser) return "CASEWORKER";
                 if (IsEncoderUser) return "ENCODER";
                 return !string.IsNullOrWhiteSpace(Role) ? Role : "USER";
-
             }
-
         }
 
-                public string BarangayDisplay
+        // Title-case label shown in the table (plain text)
+        public string RoleLabel
+        {
+            get
+            {
+                if (IsSuperAdminUser) return "Superadmin";
+                if (IsAdminUser) return "Admin";
+                if (IsBarangaySecretaryUser) return "Barangay Secretary";
+                if (IsCaseworkerUser) return "Caseworker";
+                if (IsEncoderUser) return "Encoder";
+                return !string.IsNullOrWhiteSpace(Role) ? Role : "User";
+            }
+        }
+
+        public string BarangayDisplay
         {
             get
             {
@@ -114,9 +107,7 @@ namespace SOLUM_UI
                     Barangay.StartsWith("Barangay", StringComparison.OrdinalIgnoreCase))
                     return Barangay;
                 return $"Brgy. {Barangay}";
-
             }
-
         }
 
         public Visibility BarangayVisibility => !string.IsNullOrWhiteSpace(Barangay) ? Visibility.Visible : Visibility.Collapsed;
@@ -133,17 +124,11 @@ namespace SOLUM_UI
                         Barangay.StartsWith("Barangay", StringComparison.OrdinalIgnoreCase))
                         return Barangay;
                     return $"Brgy. {Barangay}";
-
                 }
                 if (IsSuperAdminUser || IsAdminUser || IsCaseworkerUser || IsEncoderUser)
-                {
                     return "City-Wide (All Barangays)";
-
-                }
                 return !string.IsNullOrWhiteSpace(Barangay) ? $"Brgy. {Barangay}" : "City-Wide";
-
             }
-
         }
 
         public string ScopeIconData => HasSpecificBarangay
@@ -151,31 +136,20 @@ namespace SOLUM_UI
             : "M12,3L2,12H5V20H19V12H22L12,3M12,7.7C13.5,7.7 14.7,8.9 14.7,10.4C14.7,11.9 13.5,13.1 12,13.1C10.5,13.1 9.3,11.9 9.3,10.4C9.3,8.9 10.5,7.7 12,7.7Z";
 
         private static readonly SolidColorBrush BrgyBadgeBg = CreateFrozenBrush(0xF0, 0xF9, 0xFF);
-
         private static readonly SolidColorBrush BrgyBadgeBorder = CreateFrozenBrush(0xBA, 0xE6, 0xFD);
-
         private static readonly SolidColorBrush BrgyBadgeFg = CreateFrozenBrush(0x03, 0x69, 0xA1);
-
         private static readonly SolidColorBrush BrgyIconBrush = CreateFrozenBrush(0x02, 0x84, 0xC7);
-
         private static readonly SolidColorBrush CityBadgeBg = CreateFrozenBrush(0xF8, 0xFA, 0xFC);
-
         private static readonly SolidColorBrush CityBadgeBorder = CreateFrozenBrush(0xE2, 0xE8, 0xF0);
-
         private static readonly SolidColorBrush CityBadgeFg = CreateFrozenBrush(0x47, 0x55, 0x69);
-
         private static readonly SolidColorBrush CityIconBrush = CreateFrozenBrush(0x64, 0x74, 0x8B);
 
         public SolidColorBrush ScopeBadgeBackground => HasSpecificBarangay ? BrgyBadgeBg : CityBadgeBg;
-
         public SolidColorBrush ScopeBadgeBorder => HasSpecificBarangay ? BrgyBadgeBorder : CityBadgeBorder;
-
         public SolidColorBrush ScopeTextColor => HasSpecificBarangay ? BrgyBadgeFg : CityBadgeFg;
-
         public SolidColorBrush ScopeIconBrush => HasSpecificBarangay ? BrgyIconBrush : CityIconBrush;
 
         public bool HasContact => !string.IsNullOrWhiteSpace(ContactNumber);
-
         public Visibility HasContactVisibility => HasContact ? Visibility.Visible : Visibility.Collapsed;
 
         public SolidColorBrush ContactTextColor => HasContact
@@ -190,12 +164,9 @@ namespace SOLUM_UI
                 {
                     return AuthApiService.Instance.IsSuperAdmin ||
                            string.Equals(MainWindow.CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
-
                 }
                 return true;
-
             }
-
         }
 
         public string ActionDisabledToolTip => CanManage
@@ -203,43 +174,25 @@ namespace SOLUM_UI
             : "Only SuperAdmins have permission to manage Admin accounts.";
 
         private static readonly Geometry SuperAdminIcon;
-
         private static readonly Geometry AdminIcon;
-
         private static readonly Geometry BarangaySecretaryIcon;
-
         private static readonly Geometry CaseworkerIcon;
-
         private static readonly Geometry EncoderIcon;
 
         private static readonly SolidColorBrush SuperAdminBg = CreateFrozenBrush(0x70, 0x29, 0x43);
-
         private static readonly SolidColorBrush SuperAdminBorder = CreateFrozenBrush(0x59, 0x1D, 0x33);
-
         private static readonly SolidColorBrush SuperAdminFg = CreateFrozenBrush(0xFF, 0xFF, 0xFF);
-
         private static readonly SolidColorBrush AdminBg = CreateFrozenBrush(0xFA, 0xF0, 0xF3);
-
         private static readonly SolidColorBrush AdminBorder = CreateFrozenBrush(0xDF, 0x9B, 0xB1);
-
         private static readonly SolidColorBrush AdminFg = CreateFrozenBrush(0x70, 0x29, 0x43);
-
         private static readonly SolidColorBrush BarangaySecretaryBg = CreateFrozenBrush(0xEA, 0xF2, 0xF8);
-
         private static readonly SolidColorBrush BarangaySecretaryBorder = CreateFrozenBrush(0xAE, 0xD6, 0xF1);
-
         private static readonly SolidColorBrush BarangaySecretaryFg = CreateFrozenBrush(0x1B, 0x4F, 0x72);
-
         private static readonly SolidColorBrush CaseworkerBg = CreateFrozenBrush(0xFD, 0xF6, 0xED);
-
         private static readonly SolidColorBrush CaseworkerBorder = CreateFrozenBrush(0xF4, 0xD6, 0xB4);
-
         private static readonly SolidColorBrush CaseworkerFg = CreateFrozenBrush(0x8B, 0x4E, 0x12);
-
         private static readonly SolidColorBrush DefaultBg = CreateFrozenBrush(0xF5, 0xF2, 0xF4);
-
         private static readonly SolidColorBrush DefaultBorder = CreateFrozenBrush(0xD8, 0xCE, 0xD3);
-
         private static readonly SolidColorBrush DefaultFg = CreateFrozenBrush(0x5A, 0x4D, 0x53);
 
         private static SolidColorBrush CreateFrozenBrush(byte r, byte g, byte b)
@@ -247,8 +200,8 @@ namespace SOLUM_UI
             var brush = new SolidColorBrush(Color.FromRgb(r, g, b));
             brush.Freeze();
             return brush;
-
         }
+
         static AppUser()
         {
             SuperAdminIcon = Geometry.Parse("M5,16L3,5L8.5,10L12,4L15.5,10L21,5L19,16H5M19,19A1,1 0 0,1 18,20H6A1,1 0 0,1 5,19V18H19V19Z");
@@ -261,7 +214,6 @@ namespace SOLUM_UI
             CaseworkerIcon.Freeze();
             EncoderIcon = Geometry.Parse("M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z");
             EncoderIcon.Freeze();
-
         }
 
         public Geometry RoleIconData => IsSuperAdminUser ? SuperAdminIcon
@@ -288,7 +240,7 @@ namespace SOLUM_UI
             : IsCaseworkerUser ? CaseworkerFg
             : DefaultFg;
 
-        public string StatusText => IsActive ? "ACTIVE" : "DISABLED";
+        public string StatusText => IsActive ? "Active" : "Disabled";
 
         public SolidColorBrush StatusBadgeColor => IsActive
             ? new SolidColorBrush(Color.FromRgb(0xE8, 0xF5, 0xE9))
@@ -307,7 +259,6 @@ namespace SOLUM_UI
             : new SolidColorBrush(Color.FromRgb(0xD3, 0x2F, 0x2F));
 
         public string ToggleActionToolTip => IsActive ? "Disable User Account" : "Re-enable User Account";
-
         public string ToggleButtonText => IsActive ? "Disable" : "Re-enable";
 
         public SolidColorBrush ToggleButtonBorder => IsActive
@@ -329,44 +280,28 @@ namespace SOLUM_UI
         public SolidColorBrush ToggleIconBrush => IsActive
             ? new SolidColorBrush(Color.FromRgb(0x75, 0x75, 0x75))
             : new SolidColorBrush(Color.FromRgb(0x2E, 0x7D, 0x32));
-
     }
 
     public partial class UserAdministrationPage : Page
     {
-
-        private List<AppUser> _allUsers = new List<AppUser>(); 
-
+        private List<AppUser> _allUsers = new List<AppUser>();
         private List<AppUser> _filtered = new List<AppUser>();
-
         private AppUser _editTarget = null;
-
         private string _generatedPassword = string.Empty;
-
         private bool _isPasswordMasked = false;
-
         private int _pageSize = 10;
-
         private DispatcherTimer _userResizeDebounceTimer;
-
-        private int _currentPage = 1;                
-
-                private int _totalPages = 1;
-
+        private int _currentPage = 1;
+        private int _totalPages = 1;
         private int _totalCount = 0;
 
         private static readonly TimeSpan DataFreshnessTtl = TimeSpan.FromMinutes(3);
-
         private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
 
         private DateTime _lastLoadedTime = DateTime.MinValue;
-
         private DateTime _lastRefreshClickTime = DateTime.MinValue;
-
         private bool _hasLoadedData = false;
-
         private bool _isLoading = false;
-
         private bool _isUpdatingFilters = false;
 
         public UserAdministrationPage()
@@ -374,20 +309,16 @@ namespace SOLUM_UI
             InitializeComponent();
             Loaded += async (s, e) =>
             {
-
                 bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
                 if (isStale)
                 {
                     await LoadUsersAsync();
-
                 }
-
             };
             DataObject.AddPastingHandler(TxtFirstName, NamePasteHandler);
             DataObject.AddPastingHandler(TxtLastName, NamePasteHandler);
             DataObject.AddPastingHandler(TxtContactNumber, ContactPasteHandler);
             InitDynamicUserPaging();
-
         }
 
         private void InitDynamicUserPaging()
@@ -395,29 +326,24 @@ namespace SOLUM_UI
             _userResizeDebounceTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(200)
-
             };
             _userResizeDebounceTimer.Tick += (s, e) =>
             {
                 _userResizeDebounceTimer.Stop();
                 RefreshList();
                 UpdatePagingControls();
-
             };
             UserList.SizeChanged += (s, e) => UpdateUserDynamicPageSize();
             UserList.Loaded += (s, e) => UpdateUserDynamicPageSize();
-
         }
 
         private void UpdateUserDynamicPageSize()
         {
-
             double availableHeight = UserList.ActualHeight;
             if (availableHeight <= 100) return;
-            // In UserList, each row has MinHeight="56" + 1px border = 57px
 
+            // Each row: MinHeight 56 + 1px border = 57px
             int calculated = (int)Math.Floor(availableHeight / 57.0);
-
             int optimal = Math.Max(4, Math.Min(50, calculated));
             if (optimal != _pageSize)
             {
@@ -428,16 +354,12 @@ namespace SOLUM_UI
                 {
                     _userResizeDebounceTimer.Stop();
                     _userResizeDebounceTimer.Start();
-
                 }
-
             }
-
         }
 
         private void InitRolePermissions()
         {
-
             bool isSuperAdmin = AuthApiService.Instance.IsSuperAdmin ||
                                 string.Equals(MainWindow.CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
             if (BtnAddAdmin != null)
@@ -455,18 +377,13 @@ namespace SOLUM_UI
                     if (selTag == "Admin" || selTag == "SuperAdmin")
                     {
                         CmbRoleFilter.SelectedIndex = 0;
-
                     }
-
                 }
-
             }
             finally
             {
                 _isUpdatingFilters = false;
-
             }
-
         }
 
         private async Task LoadUsersAsync(bool forceRefresh = false)
@@ -476,7 +393,6 @@ namespace SOLUM_UI
             {
                 ApplyFilters();
                 return;
-
             }
             _isLoading = true;
             if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Visible;
@@ -495,18 +411,16 @@ namespace SOLUM_UI
                     rolesToFetch.Add("Encoder");
                     rolesToFetch.Add("BarangaySecretary");
                     rolesToFetch.Add("SuperAdmin");
-
                 }
                 else
                 {
                     rolesToFetch.Add("Encoder");
                     rolesToFetch.Add("BarangaySecretary");
-
                 }
+
                 var tasks = new List<Task<(string role, bool isActive, BaseResponse<PagedResult<ApplicationUserDTO>> res)>>();
                 foreach (var role in rolesToFetch)
                 {
-
                     string r = role;
                     // Active users
                     tasks.Add(Task.Run(async () =>
@@ -520,17 +434,13 @@ namespace SOLUM_UI
                                 Page = 1,
                                 PageSize = 100,
                                 IsActive = true
-
                             });
                             return (r, true, res);
-
                         }
                         catch
                         {
                             return (r, true, (BaseResponse<PagedResult<ApplicationUserDTO>>)null);
-
                         }
-
                     }));
                     // Disabled users
                     tasks.Add(Task.Run(async () =>
@@ -544,21 +454,17 @@ namespace SOLUM_UI
                                 Page = 1,
                                 PageSize = 100,
                                 IsActive = false
-
                             });
                             return (r, false, res);
-
                         }
                         catch
                         {
                             return (r, false, (BaseResponse<PagedResult<ApplicationUserDTO>>)null);
-
                         }
-
                     }));
-
                 }
                 await Task.WhenAll(tasks);
+
                 var userMap = new Dictionary<Guid, AppUser>();
                 foreach (var t in tasks)
                 {
@@ -569,7 +475,6 @@ namespace SOLUM_UI
                         {
                             if (!userMap.TryGetValue(dto.Id, out var existing))
                             {
-
                                 string assignedRole = !string.IsNullOrWhiteSpace(dto.PrimaryRole)
                                     ? dto.PrimaryRole
                                     : queriedRole;
@@ -586,25 +491,19 @@ namespace SOLUM_UI
                                     MustChangePassword = dto.MustChangePassword,
                                     IsPasswordChanged = dto.IsPasswordChanged,
                                     LastPasswordChangedDate = dto.LastPasswordChangedDate
-
                                 };
-
                             }
                             else
                             {
                                 if (!string.IsNullOrWhiteSpace(dto.Barangay) && string.IsNullOrWhiteSpace(existing.Barangay))
                                 {
                                     existing.Barangay = dto.Barangay;
-
                                 }
-
                             }
-
                         }
-
                     }
-
                 }
+
                 _allUsers = userMap.Values
                     .OrderBy(u => u.LastName)
                     .ThenBy(u => u.FirstName)
@@ -612,32 +511,27 @@ namespace SOLUM_UI
                 _hasLoadedData = true;
                 _lastLoadedTime = DateTime.UtcNow;
                 ApplyFilters();
-
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[UserAdmin] LoadUsersAsync error: {ex.Message}");
-
             }
             finally
             {
                 _isLoading = false;
                 if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Collapsed;
                 if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = true;
-
             }
-
         }
 
         private void ApplyFilters()
         {
-
             string roleTag = (CmbRoleFilter?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "ALL";
-
             string statusTag = (CmbUserStatus?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "ALL";
-
             string search = SearchBox?.Text?.Trim() ?? string.Empty;
+
             IEnumerable<AppUser> query = _allUsers;
+
             // 1. Role Filter
             if (!string.Equals(roleTag, "ALL", StringComparison.OrdinalIgnoreCase))
             {
@@ -651,19 +545,14 @@ namespace SOLUM_UI
                     query = query.Where(u => u.IsBarangaySecretaryUser);
                 else
                     query = query.Where(u => string.Equals(u.Role, roleTag, StringComparison.OrdinalIgnoreCase));
-
             }
+
             // 2. Status Filter
             if (string.Equals(statusTag, "ACTIVE", StringComparison.OrdinalIgnoreCase))
-            {
                 query = query.Where(u => u.IsActive);
-
-            }
             else if (string.Equals(statusTag, "DISABLED", StringComparison.OrdinalIgnoreCase))
-            {
                 query = query.Where(u => !u.IsActive);
 
-            }
             // 3. Search Filter
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -674,10 +563,9 @@ namespace SOLUM_UI
                     (!string.IsNullOrEmpty(u.Email) && u.Email.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0) ||
                     (!string.IsNullOrEmpty(u.ContactNumber) && u.ContactNumber.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0) ||
                     (!string.IsNullOrEmpty(u.Barangay) && u.Barangay.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                    (!string.IsNullOrEmpty(u.RoleDisplay) && u.RoleDisplay.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)
-                );
-
+                    (!string.IsNullOrEmpty(u.RoleDisplay) && u.RoleDisplay.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0));
             }
+
             _filtered = query
                 .OrderBy(u => u.LastName)
                 .ThenBy(u => u.FirstName)
@@ -688,7 +576,6 @@ namespace SOLUM_UI
             if (_currentPage < 1) _currentPage = 1;
             RefreshList();
             UpdatePagingControls();
-
         }
 
         private void CmbRoleFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -696,7 +583,6 @@ namespace SOLUM_UI
             if (!IsLoaded || _isUpdatingFilters) return;
             _currentPage = 1;
             ApplyFilters();
-
         }
 
         private void CmbUserStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -704,7 +590,6 @@ namespace SOLUM_UI
             if (!IsLoaded || _isUpdatingFilters) return;
             _currentPage = 1;
             ApplyFilters();
-
         }
 
         private async void BtnRefreshUsers_Click(object sender, RoutedEventArgs e)
@@ -714,7 +599,6 @@ namespace SOLUM_UI
             _lastLoadedTime = DateTime.MinValue;
             _currentPage = 1;
             await LoadUsersAsync(forceRefresh: true);
-
         }
 
         private void UpdatePagingControls()
@@ -725,18 +609,14 @@ namespace SOLUM_UI
                 TxtUsersSummary.Text = $"{_totalCount:N0} total users registered";
             if (TxtUsersPageSummary != null)
             {
-
                 int start = _totalCount == 0 ? 0 : ((_currentPage - 1) * _pageSize) + 1;
-
                 int end = Math.Min(_totalCount, _currentPage * _pageSize);
                 TxtUsersPageSummary.Text = $"Showing {start}–{end} of {_totalCount}";
-
             }
             if (BtnPrevPage != null)
                 BtnPrevPage.IsEnabled = _currentPage > 1;
             if (BtnNextPage != null)
                 BtnNextPage.IsEnabled = _currentPage < _totalPages;
-
         }
 
         private void BtnPrevPage_Click(object sender, RoutedEventArgs e)
@@ -745,7 +625,6 @@ namespace SOLUM_UI
             _currentPage--;
             RefreshList();
             UpdatePagingControls();
-
         }
 
         private void BtnNextPage_Click(object sender, RoutedEventArgs e)
@@ -754,7 +633,6 @@ namespace SOLUM_UI
             _currentPage++;
             RefreshList();
             UpdatePagingControls();
-
         }
 
         private void RefreshList()
@@ -769,9 +647,7 @@ namespace SOLUM_UI
             if (EmptyStatePanel != null)
             {
                 EmptyStatePanel.Visibility = (_filtered == null || _filtered.Count == 0) ? Visibility.Visible : Visibility.Collapsed;
-
             }
-
         }
 
         private void ClearFilters_Click(object sender, RoutedEventArgs e)
@@ -782,26 +658,26 @@ namespace SOLUM_UI
                 if (SearchBox != null) SearchBox.Text = string.Empty;
                 if (CmbRoleFilter != null) CmbRoleFilter.SelectedIndex = 0;
                 if (CmbUserStatus != null) CmbUserStatus.SelectedIndex = 0;
-
             }
             finally
             {
                 _isUpdatingFilters = false;
-
             }
             _currentPage = 1;
             ApplyFilters();
-
         }
 
-        private void CloseFilterPopup_Click(object sender, RoutedEventArgs e) => BtnFilter.IsChecked = false;
+        // NEW: closes the Filter popup (Done button)
+        private void CloseFilterPopup_Click(object sender, RoutedEventArgs e)
+        {
+            BtnFilter.IsChecked = false;
+        }
 
         private void Search_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (!IsLoaded || _isUpdatingFilters) return;
             _currentPage = 1;
             ApplyFilters();
-
         }
 
         private void OpenAddPanel_Click(object sender, RoutedEventArgs e)
@@ -811,12 +687,10 @@ namespace SOLUM_UI
             SetPanelMode(false);
             SelectRoleByTag("Caseworker");
             ColPanel.Width = new GridLength(324);
-
         }
 
         private void EditUser_Click(object sender, RoutedEventArgs e)
         {
-
             string tagStr = (sender as Button)?.Tag?.ToString() ?? string.Empty;
             if (!Guid.TryParse(tagStr, out var id)) return;
             AppUser user = _allUsers.Find(u => u.Id == id);
@@ -828,7 +702,6 @@ namespace SOLUM_UI
                     "Only SuperAdmins have permission to manage Admin accounts.",
                     Window.GetWindow(this));
                 return;
-
             }
             _editTarget = user;
             TxtFirstName.Text = user.FirstName?.ToUpper() ?? string.Empty;
@@ -839,7 +712,6 @@ namespace SOLUM_UI
             if (CmbEditStatus != null)
             {
                 CmbEditStatus.SelectedIndex = user.IsActive ? 0 : 1;
-
             }
             SetPanelMode(true);
             ClearErrors(null, null);
@@ -856,14 +728,10 @@ namespace SOLUM_UI
                     {
                         CmbUserBarangay.SelectedItem = cbItem;
                         break;
-
                     }
-
                 }
-
             }
             ColPanel.Width = new GridLength(324);
-
         }
 
         private void SelectRoleByTag(string tag)
@@ -875,11 +743,8 @@ namespace SOLUM_UI
                 {
                     CmbRole.SelectedIndex = i;
                     break;
-
                 }
-
             }
-
         }
 
         private void OpenAddAdminPanel_Click(object sender, RoutedEventArgs e)
@@ -889,7 +754,6 @@ namespace SOLUM_UI
             SetPanelMode(false);
             SelectRoleByTag("Admin");
             ColPanel.Width = new GridLength(324);
-
         }
 
         private void MoreActions_Click(object sender, RoutedEventArgs e)
@@ -900,9 +764,7 @@ namespace SOLUM_UI
                 btn.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
                 btn.ContextMenu.DataContext = btn.DataContext;
                 btn.ContextMenu.IsOpen = true;
-
             }
-
         }
 
         private async void ResetPassword_Click(object sender, RoutedEventArgs e)
@@ -910,14 +772,11 @@ namespace SOLUM_UI
             AppUser user = (sender as FrameworkElement)?.DataContext as AppUser;
             if (user == null)
             {
-
                 string tagStr = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
                 if (Guid.TryParse(tagStr, out var id))
                 {
                     user = _allUsers.Find(u => u.Id == id);
-
                 }
-
             }
             if (user == null) return;
             if (!user.CanManage)
@@ -927,17 +786,14 @@ namespace SOLUM_UI
                     "Only SuperAdmins have permission to manage Admin accounts.",
                     Window.GetWindow(this));
                 return;
-
             }
             await ExecutePasswordResetAsync(user);
-
         }
 
         private async void EditPanelResetPassword_Click(object sender, RoutedEventArgs e)
         {
             if (_editTarget == null) return;
             await ExecutePasswordResetAsync(_editTarget);
-
         }
 
         private async Task ExecutePasswordResetAsync(AppUser user)
@@ -950,7 +806,6 @@ namespace SOLUM_UI
                     "Only SuperAdmins have permission to manage Admin accounts.",
                     Window.GetWindow(this));
                 return;
-
             }
 
             bool isConfirmed = ActionConfirmDialog.Show(
@@ -965,18 +820,15 @@ namespace SOLUM_UI
             if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
             try
             {
-
                 string tempPassword = PasswordGenerator.Generate(10);
                 var response = await UserApiService.Instance.ResetUserPasswordAsync(user.Id, tempPassword);
                 if (!response.Succeeded)
                 {
-
                     string err = response.Errors != null && response.Errors.Count > 0
                         ? string.Join("\n", response.Errors)
                         : "Failed to reset password on server.";
                     ToastNotification.Show("Reset Failed", err, ToastType.Error);
                     return;
-
                 }
                 ToastNotification.Show("Password Reset", "Temporary password generated.", ToastType.Success);
                 AuditLogService.Instance.LogUserAdmin("password reset",
@@ -991,14 +843,11 @@ namespace SOLUM_UI
                     Window.GetWindow(this),
                     heading: "Password Reset Successfully",
                     subheading: "A new temporary password was generated. Provide it to the employee so they can log in.");
-
             }
             finally
             {
                 if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
-
             }
-
         }
 
         private async void ToggleStatus_Click(object sender, RoutedEventArgs e)
@@ -1006,14 +855,11 @@ namespace SOLUM_UI
             AppUser user = (sender as FrameworkElement)?.DataContext as AppUser;
             if (user == null)
             {
-
                 string tagStr = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
                 if (Guid.TryParse(tagStr, out var id))
                 {
                     user = _allUsers.Find(u => u.Id == id);
-
                 }
-
             }
             if (user == null) return;
             if (!user.CanManage)
@@ -1023,15 +869,11 @@ namespace SOLUM_UI
                     "Only SuperAdmins have permission to manage Admin accounts.",
                     Window.GetWindow(this));
                 return;
-
             }
 
             bool newStatus = !user.IsActive;
-
             string actionVerb = newStatus ? "re-enable" : "disable";
-
             string actionTitle = newStatus ? "Re-enable User" : "Disable User";
-
             string confirmText = newStatus ? "Re-enable" : "Disable";
             var theme = newStatus ? ConfirmThemeType.Success : ConfirmThemeType.Warning;
 
@@ -1049,13 +891,11 @@ namespace SOLUM_UI
                 var response = await UserApiService.Instance.UpdateUserStatusAsync(user.Id, newStatus);
                 if (!response.Succeeded)
                 {
-
                     string err = response.Errors != null && response.Errors.Count > 0
                         ? string.Join("\n", response.Errors)
                         : $"Unable to {actionVerb} user.";
                     ToastNotification.Show("Status Update Failed", err, ToastType.Warning);
                     return;
-
                 }
                 user.IsActive = newStatus;
                 RefreshList();
@@ -1066,30 +906,23 @@ namespace SOLUM_UI
                     user.Id.ToString());
                 _lastLoadedTime = DateTime.MinValue;
                 await LoadUsersAsync(forceRefresh: true);
-
             }
             finally
             {
                 if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
-
             }
-
         }
-        // CHANGED — Id-based lookup, calls real delete endpoint
 
         private async void DeleteUser_Click(object sender, RoutedEventArgs e)
         {
             AppUser user = (sender as FrameworkElement)?.DataContext as AppUser;
             if (user == null)
             {
-
                 string tagStr = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
                 if (Guid.TryParse(tagStr, out var id))
                 {
                     user = _allUsers.Find(u => u.Id == id);
-
                 }
-
             }
             if (user == null) return;
             if (!user.CanManage)
@@ -1099,7 +932,6 @@ namespace SOLUM_UI
                     "Only SuperAdmins have permission to manage Admin accounts.",
                     Window.GetWindow(this));
                 return;
-
             }
 
             bool isConfirmed = ActionConfirmDialog.Show(
@@ -1110,16 +942,15 @@ namespace SOLUM_UI
                 theme: ConfirmThemeType.Danger,
                 owner: Window.GetWindow(this));
             if (!isConfirmed) return;
+
             var response = await UserApiService.Instance.DeleteApplicationUserAsync(user.Id);
             if (!response.Succeeded)
             {
-
                 string err = response.Errors != null && response.Errors.Count > 0
                     ? string.Join("\n", response.Errors)
                     : "Unable to delete user.";
                 ToastNotification.Show("Delete Failed", err, ToastType.Warning);
                 return;
-
             }
             if (_editTarget == user) ClosePanel_Click(null, null);
             ToastNotification.Show("User Deleted", user.FullName + " was removed.", ToastType.Warning);
@@ -1127,7 +958,6 @@ namespace SOLUM_UI
                 MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
                 user.Id.ToString());
             await LoadUsersAsync();
-
         }
 
         private void ClosePanel_Click(object sender, RoutedEventArgs e)
@@ -1135,25 +965,20 @@ namespace SOLUM_UI
             ColPanel.Width = new GridLength(0);
             _editTarget = null;
             ResetForm();
-
         }
-        // CHANGED — now async, branches into Register (create) or Update against real endpoints
 
         private async void Submit_Click(object sender, RoutedEventArgs e)
         {
             ClearErrors(null, null);
 
             string firstName = TxtFirstName.Text.Trim().ToUpper();
-
             string lastName = TxtLastName.Text.Trim().ToUpper();
-
             string email = TxtEmail.Text.Trim();
-
             string contactNumber = TxtContactNumber.Text.Trim();
-
             string password = _generatedPassword;
 
             bool ok = true;
+
             if (string.IsNullOrWhiteSpace(firstName))
             {
                 ErrFirstName.Text = "Required.";
@@ -1172,6 +997,7 @@ namespace SOLUM_UI
                 ErrFirstName.Visibility = Visibility.Visible;
                 ok = false;
             }
+
             if (string.IsNullOrWhiteSpace(lastName))
             {
                 ErrLastName.Text = "Required.";
@@ -1195,47 +1021,39 @@ namespace SOLUM_UI
                 ErrLastName.Text = "Only letters, spaces, and '.' are allowed.";
                 ErrLastName.Visibility = Visibility.Visible;
                 ok = false;
-
             }
+
             if (string.IsNullOrWhiteSpace(contactNumber))
             {
                 ErrContactNumber.Text = "Required.";
                 ErrContactNumber.Visibility = Visibility.Visible;
                 ok = false;
-
             }
             else
             {
-
                 bool is09 = Regex.IsMatch(contactNumber, @"^09\d{9}$");
-
                 bool is63 = Regex.IsMatch(contactNumber, @"^\+63\d{9,10}$");
                 if (!is09 && !is63)
                 {
                     ErrContactNumber.Text = "Must be 11 digits (starts with 09) or start with +63.";
                     ErrContactNumber.Visibility = Visibility.Visible;
                     ok = false;
-
                 }
-
             }
+
             // Email & Role validation only matter for CREATE — locked/read-only in edit mode
             if (_editTarget == null)
             {
-
                 string selRole = (CmbRole?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Caseworker";
                 if (selRole.Equals("BarangaySecretary", StringComparison.OrdinalIgnoreCase) || selRole.Equals("BarangayPresident", StringComparison.OrdinalIgnoreCase))
                 {
-
                     string brgy = (CmbUserBarangay?.SelectedItem as ComboBoxItem)?.Content?.ToString();
                     if (string.IsNullOrWhiteSpace(brgy) || brgy.StartsWith("Select", StringComparison.OrdinalIgnoreCase))
                     {
                         ErrUserBarangay.Text = "Barangay is required for Barangay Secretary.";
                         ErrUserBarangay.Visibility = Visibility.Visible;
                         ok = false;
-
                     }
-
                 }
                 if (string.IsNullOrWhiteSpace(email))
                 { ErrEmail.Text = "Required."; ErrEmail.Visibility = Visibility.Visible; ok = false; }
@@ -1247,23 +1065,20 @@ namespace SOLUM_UI
                 {
                     GenerateNewPassword();
                     password = _generatedPassword;
-
                 }
-
             }
+
             if (!ok)
             {
                 TxtFormError.Text = "Please fix the errors above.";
                 FormErrorBanner.Visibility = Visibility.Visible;
                 ToastNotification.Show("Incomplete Form", "Fill in all required fields.", ToastType.Warning);
                 return;
-
             }
+
             if (_editTarget != null)
             {
-
                 bool selectedStatus = (CmbEditStatus?.SelectedItem as ComboBoxItem)?.Tag?.ToString() == "true";
-
                 bool statusChanging = selectedStatus != _editTarget.IsActive;
 
                 string confirmMsg = statusChanging
@@ -1279,6 +1094,7 @@ namespace SOLUM_UI
                     owner: Window.GetWindow(this),
                     customIconData: "M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.07,6.19L3,17.25Z");
                 if (!isConfirmed) return;
+
                 if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
                 try
                 {
@@ -1288,62 +1104,54 @@ namespace SOLUM_UI
                         FirstName = firstName,
                         LastName = lastName,
                         ContactNumber = contactNumber
-
                     };
                     var response = await UserApiService.Instance.UpdateApplicationUserAsync(updateReq);
-                if (!response.Succeeded)
-                {
-
-                    string err = response.Errors != null && response.Errors.Count > 0
-                        ? string.Join("\n", response.Errors)
-                        : "Unable to update user.";
-                    TxtFormError.Text = err;
-                    FormErrorBanner.Visibility = Visibility.Visible;
-                    return;
-
-                }
-                // Check if account status was toggled in the edit dropdown
-                if (statusChanging)
-                {
-                    var statusResponse = await UserApiService.Instance.UpdateUserStatusAsync(_editTarget.Id, selectedStatus);
-                    if (!statusResponse.Succeeded)
+                    if (!response.Succeeded)
                     {
-
-                        string err = statusResponse.Errors != null && statusResponse.Errors.Count > 0
-                            ? string.Join("\n", statusResponse.Errors)
-                            : "Account details updated, but status update failed.";
-                        ToastNotification.Show("Status Update Issue", err, ToastType.Warning);
-
-                    }
-                    else
-                    {
-                        _editTarget.IsActive = selectedStatus;
-                        RefreshList();
-                        AuditLogService.Instance.LogUserAdmin($"status changed to {(selectedStatus ? "Active" : "Disabled")}",
-                            $"{_editTarget.FullName} ({_editTarget.Email})",
-                            MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
-                            _editTarget.Id.ToString());
-
+                        string err = response.Errors != null && response.Errors.Count > 0
+                            ? string.Join("\n", response.Errors)
+                            : "Unable to update user.";
+                        TxtFormError.Text = err;
+                        FormErrorBanner.Visibility = Visibility.Visible;
+                        return;
                     }
 
+                    // Check if account status was toggled in the edit dropdown
+                    if (statusChanging)
+                    {
+                        var statusResponse = await UserApiService.Instance.UpdateUserStatusAsync(_editTarget.Id, selectedStatus);
+                        if (!statusResponse.Succeeded)
+                        {
+                            string err = statusResponse.Errors != null && statusResponse.Errors.Count > 0
+                                ? string.Join("\n", statusResponse.Errors)
+                                : "Account details updated, but status update failed.";
+                            ToastNotification.Show("Status Update Issue", err, ToastType.Warning);
+                        }
+                        else
+                        {
+                            _editTarget.IsActive = selectedStatus;
+                            RefreshList();
+                            AuditLogService.Instance.LogUserAdmin($"status changed to {(selectedStatus ? "Active" : "Disabled")}",
+                                $"{_editTarget.FullName} ({_editTarget.Email})",
+                                MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
+                                _editTarget.Id.ToString());
+                        }
+                    }
+
+                    ToastNotification.Show("User Updated", firstName + " " + lastName + " was updated.", ToastType.Info);
+                    AuditLogService.Instance.LogUserAdmin("updated",
+                        firstName + " " + lastName + " (" + _editTarget.Email + ")",
+                        MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
+                        _editTarget.Id.ToString());
+                    ClosePanel_Click(null, null);
+                    _lastLoadedTime = DateTime.MinValue;
+                    await LoadUsersAsync(forceRefresh: true);
                 }
-                ToastNotification.Show("User Updated", firstName + " " + lastName + " was updated.", ToastType.Info);
-                AuditLogService.Instance.LogUserAdmin("updated",
-                    firstName + " " + lastName + " (" + _editTarget.Email + ")",
-                    MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
-                    _editTarget.Id.ToString());
-                ClosePanel_Click(null, null);
-                _lastLoadedTime = DateTime.MinValue;
-                await LoadUsersAsync(forceRefresh: true);
-
+                finally
+                {
+                    if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
+                }
             }
-            finally
-            {
-                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
-
-            }
-
-        }
             else
             {
                 string selectedRole = (CmbRole?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Caseworker";
@@ -1366,7 +1174,6 @@ namespace SOLUM_UI
                     scope: scopeDisplay,
                     password: password,
                     owner: Window.GetWindow(this));
-
                 if (!confirmed) return;
 
                 if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
@@ -1419,7 +1226,6 @@ namespace SOLUM_UI
                     if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
                 }
             }
-
         }
 
         private void GenerateNewPassword()
@@ -1429,7 +1235,6 @@ namespace SOLUM_UI
                 TxtGeneratedPassword.Text = _generatedPassword;
             if (PwdGeneratedPasswordMasked != null)
                 PwdGeneratedPasswordMasked.Password = _generatedPassword;
-
         }
 
         private void SetPanelMode(bool editMode)
@@ -1450,16 +1255,15 @@ namespace SOLUM_UI
                 CmbRoleItemAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
             if (CmbRoleItemSuperAdmin != null)
                 CmbRoleItemSuperAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
+
             if (CmbRole != null)
             {
                 if (editMode)
                 {
                     CmbRole.IsEnabled = false;
-
                 }
                 else
                 {
-
                     bool isAdminOrHigher = isSuperAdmin ||
                                            AuthApiService.Instance.IsAdmin ||
                                            string.Equals(MainWindow.CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
@@ -1467,11 +1271,8 @@ namespace SOLUM_UI
                     CmbRole.IsEnabled = isAdminOrHigher;
                     if (!isAdminOrHigher)
                         CmbRole.SelectedIndex = 0;
-
                 }
-
             }
-
         }
 
         private void ResetForm()
@@ -1485,7 +1286,6 @@ namespace SOLUM_UI
             if (CmbEditStatus != null) CmbEditStatus.SelectedIndex = 0;
             FormErrorBanner.Visibility = Visibility.Collapsed;
             SetPanelMode(false);
-
         }
 
         private void ToUpperBox(TextBox tb)
@@ -1493,27 +1293,22 @@ namespace SOLUM_UI
             if (tb == null) return;
             if (tb.Text != tb.Text.ToUpper())
             {
-
                 int caret = tb.SelectionStart;
                 tb.Text = tb.Text.ToUpper();
                 tb.SelectionStart = Math.Min(caret + 1, tb.Text.Length);
-
             }
-
         }
 
         private void TxtFirstName_TextChanged(object sender, TextChangedEventArgs e)
         {
             ToUpperBox(TxtFirstName);
             ClearErrors(null, null);
-
         }
 
         private void TxtLastName_TextChanged(object sender, TextChangedEventArgs e)
         {
             ToUpperBox(TxtLastName);
             ClearErrors(null, null);
-
         }
 
         private void ClearErrors(object sender, object e)
@@ -1523,7 +1318,6 @@ namespace SOLUM_UI
             ErrEmail.Visibility = Visibility.Collapsed;
             ErrContactNumber.Visibility = Visibility.Collapsed;
             FormErrorBanner.Visibility = Visibility.Collapsed;
-
         }
 
         private void CmbRole_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1531,12 +1325,10 @@ namespace SOLUM_UI
             if (CmbRole == null || PnlUserBarangay == null) return;
 
             string tag = (CmbRole.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
-
             bool isSec = tag.Equals("BarangaySecretary", StringComparison.OrdinalIgnoreCase) ||
                          tag.Equals("BarangayPresident", StringComparison.OrdinalIgnoreCase);
             PnlUserBarangay.Visibility = isSec ? Visibility.Visible : Visibility.Collapsed;
             if (ErrUserBarangay != null) ErrUserBarangay.Visibility = Visibility.Collapsed;
-
         }
 
         private void TogglePasswordMask_Click(object sender, RoutedEventArgs e)
@@ -1551,16 +1343,13 @@ namespace SOLUM_UI
                 IconPasswordMask.Data = Geometry.Parse(_isPasswordMasked
                     ? "M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.09L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C20.87,15.39 21.89,13.78 22.46,12C20.73,7.61 16.47,4.5 12,4.5C10.5,4.5 9.09,4.75 7.79,5.2L9.64,7.05C10.37,6.69 11.16,7 12,7Z"
                     : "M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z");
-
             }
-
         }
 
         private void RegeneratePassword_Click(object sender, RoutedEventArgs e)
         {
             GenerateNewPassword();
             ToastNotification.Show("Password Generated", "New temporary password generated.", ToastType.Info);
-
         }
 
         private void CopyGeneratedPassword_Click(object sender, RoutedEventArgs e)
@@ -1569,9 +1358,7 @@ namespace SOLUM_UI
             {
                 Clipboard.SetText(_generatedPassword);
                 ToastNotification.Show("Copied", "Temporary password copied to clipboard.", ToastType.Success);
-
             }
-
         }
 
         private void Name_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -1641,122 +1428,59 @@ namespace SOLUM_UI
             {
                 e.Handled = true;
                 return;
-
             }
 
             string current = tb.Text ?? "";
-
             int selStart = tb.SelectionStart;
-
             int selLen = tb.SelectionLength;
-
             string resulting = current.Remove(selStart, selLen).Insert(selStart, e.Text);
+
             // Must start with '0' or '+'
             if (!resulting.StartsWith("0") && !resulting.StartsWith("+"))
             {
                 e.Handled = true;
                 return;
-
             }
             if (resulting.StartsWith("0"))
             {
-                if (resulting.Contains("+"))
-                {
-                    e.Handled = true;
-                    return;
-
-                }
-                if (resulting.Length >= 2 && resulting[1] != '9')
-                {
-                    e.Handled = true;
-                    return;
-
-                }
-                if (!Regex.IsMatch(resulting, @"^\d+$"))
-                {
-                    e.Handled = true;
-                    return;
-
-                }
-                if (resulting.Length > 11)
-                {
-                    e.Handled = true;
-                    return;
-
-                }
-
+                if (resulting.Contains("+")) { e.Handled = true; return; }
+                if (resulting.Length >= 2 && resulting[1] != '9') { e.Handled = true; return; }
+                if (!Regex.IsMatch(resulting, @"^\d+$")) { e.Handled = true; return; }
+                if (resulting.Length > 11) { e.Handled = true; return; }
             }
             else if (resulting.StartsWith("+"))
             {
-                if (resulting.IndexOf('+', 1) != -1)
-                {
-                    e.Handled = true;
-                    return;
-
-                }
-                if (resulting.Length >= 2 && resulting[1] != '6')
-                {
-                    e.Handled = true;
-                    return;
-
-                }
-                if (resulting.Length >= 3 && resulting[2] != '3')
-                {
-                    e.Handled = true;
-                    return;
-
-                }
-                if (resulting.Length > 3 && !Regex.IsMatch(resulting.Substring(1), @"^\d+$"))
-                {
-                    e.Handled = true;
-                    return;
-
-                }
-                if (resulting.Length > 13)
-                {
-                    e.Handled = true;
-                    return;
-
-                }
-
+                if (resulting.IndexOf('+', 1) != -1) { e.Handled = true; return; }
+                if (resulting.Length >= 2 && resulting[1] != '6') { e.Handled = true; return; }
+                if (resulting.Length >= 3 && resulting[2] != '3') { e.Handled = true; return; }
+                if (resulting.Length > 3 && !Regex.IsMatch(resulting.Substring(1), @"^\d+$")) { e.Handled = true; return; }
+                if (resulting.Length > 13) { e.Handled = true; return; }
             }
-
         }
 
         private void ContactPasteHandler(object sender, DataObjectPastingEventArgs e)
         {
             if (e.DataObject.GetDataPresent(typeof(string)))
             {
-
                 string text = ((string)e.DataObject.GetData(typeof(string)))?.Trim() ?? "";
                 if (!(sender is TextBox tb)) { e.CancelCommand(); return; }
 
                 string current = tb.Text ?? "";
-
                 int selStart = tb.SelectionStart;
-
                 int selLen = tb.SelectionLength;
-
                 string resulting = current.Remove(selStart, selLen).Insert(selStart, text);
 
                 bool valid09 = Regex.IsMatch(resulting, @"^09\d{0,9}$") && resulting.Length <= 11;
-
                 bool valid63 = Regex.IsMatch(resulting, @"^\+63\d{0,10}$") && resulting.Length <= 13;
                 if (!valid09 && !valid63)
                 {
                     e.CancelCommand();
-
                 }
-
             }
             else
             {
                 e.CancelCommand();
-
             }
-
         }
-
     }
-
 }
