@@ -1,4 +1,4 @@
-<Page x:Class="SOLUM_UI.UserAdministrationPage"
+﻿<Page x:Class="SOLUM_UI.UserAdministrationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
