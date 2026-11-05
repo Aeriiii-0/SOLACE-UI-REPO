@@ -242,6 +242,7 @@
                 </Grid>
             </Grid>
         </Grid>
+        <!-- DEPRECATED: LogoutOverlay replaced with ActionConfirmDialog in HandleLogout() -->
         <Grid x:Name="LogoutOverlay" Visibility="Collapsed" Panel.ZIndex="50">
             <Rectangle Fill="#88000000"/>
             <Border Background="White" CornerRadius="16" Padding="32,28" Width="340"
