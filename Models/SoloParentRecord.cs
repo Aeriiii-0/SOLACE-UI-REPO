@@ -185,7 +185,7 @@ namespace SOLUM_UI.Models
                 }
                 if (CircumstanceA5)
                 {
-                    var s = "A5. Legal or de facto Separation";
+                    var s = "A5. Legal or de facto Separation (at least 6 mos.)";
                     if (!string.IsNullOrWhiteSpace(CircumstanceA5Period)) s += " (" + CircumstanceA5Period + ")";
                     parts.Add(s);
                 }
@@ -194,12 +194,12 @@ namespace SOLUM_UI.Models
                     var sub = new List<string>();
                     if (CircumstanceA6Nullity)   sub.Add("Nullity of marriage");
                     if (CircumstanceA6Annulment) sub.Add("Annulment of marriage");
-                    parts.Add("A6. Declaration of" + (sub.Count > 0 ? ": " + string.Join(", ", sub) : ""));
+                    parts.Add("A6. Declaration of Nullity or Annulment of Marriage" + (sub.Count > 0 ? ": " + string.Join(", ", sub) : ""));
                 }
                 if (CircumstanceA7) parts.Add("A7. Abandonment of spouse for at least 6 months");
                 if (CircumstanceB)
                 {
-                    var s = "B. OFW-related";
+                    var s = "B. Spouse or family member of an OFW (continuous stay abroad)";
                     if (!string.IsNullOrWhiteSpace(CircumstanceBStayAbroad)) s += " (" + CircumstanceBStayAbroad + ")";
                     parts.Add(s);
                 }

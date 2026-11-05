@@ -1022,18 +1022,20 @@
                                                              Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A5. " FontWeight="Bold"/>
-                                                        <Run Text="Legal or de facto Separation"/>
+                                                        <Run Text="Legal or de facto Separation (at least 6 mos.)"/>
                                                     </TextBlock>
                                                 </RadioButton>
                                                 <StackPanel x:Name="PnlA5" Visibility="Collapsed" Margin="22,2,0,6">
-                                                    <TextBlock Text="Period of separation" Style="{StaticResource FieldLabelSm}"/>
+                                                    <TextBlock Text="Period of separation (e.g., 8 mos, 2 yrs)" Style="{StaticResource FieldLabelSm}"/>
                                                     <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}"/>
+                                                    <TextBlock Text="* Requires at least 6 months continuous separation"
+                                                               FontSize="10" Foreground="#888888" Margin="2,2,0,0"/>
                                                 </StackPanel>
                                                 <RadioButton x:Name="ChkA6" Style="{StaticResource FormCheck}" GroupName="Circumstance"
                                                              Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A6. " FontWeight="Bold"/>
-                                                        <Run Text="Declaration of:"/>
+                                                        <Run Text="Declaration of Nullity or Annulment of Marriage"/>
                                                     </TextBlock>
                                                 </RadioButton>
                                                 <StackPanel x:Name="PnlA6" Visibility="Collapsed" Margin="22,2,0,6">
@@ -1055,13 +1057,15 @@
                                                              Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="B. " FontWeight="Bold"/>
-                                                        <Run Text="Spouse or any family member of an OFW"/>
+                                                        <Run Text="Spouse or family member of an OFW (continuous stay abroad)"/>
                                                     </TextBlock>
                                                 </RadioButton>
                                                 <StackPanel x:Name="PnlB" Visibility="Collapsed" Margin="22,2,0,6">
                                                     <TextBlock Text="Length of Stay Abroad (months)" Style="{StaticResource FieldLabelSm}"/>
                                                     <TextBox x:Name="TxtBStayAbroad" Style="{StaticResource FormBoxSm}"
                                                              PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                                    <TextBlock Text="* Continuous deployment for at least 6 months required"
+                                                               FontSize="10" Foreground="#888888" Margin="2,2,0,0"/>
                                                 </StackPanel>
                                             </StackPanel>
                                             <!-- col 3: C–F -->
