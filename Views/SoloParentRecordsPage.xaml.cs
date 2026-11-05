@@ -507,7 +507,7 @@ namespace SOLUM_UI
                     string err = resp.Errors != null && resp.Errors.Count > 0
                         ? resp.Errors[0]
                         : "Unable to load records from backend.";
-                    ToastNotification.Show("API Notice", err, ToastType.Warning);
+                    ShowNotification("API Notice", err, false);
                     _allRecords = new List<SoloParentRecordViewModel>();
                     _filteredRecords = new List<SoloParentRecordViewModel>();
                     RecordsList.ItemsSource = null;
@@ -611,7 +611,7 @@ namespace SOLUM_UI
             }
             catch (Exception ex)
             {
-                ToastNotification.Show("Error", ex.Message, ToastType.Error);
+                ShowNotification("Error", ex.Message, false);
 
             }
             finally
@@ -1022,7 +1022,7 @@ namespace SOLUM_UI
             };
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                ToastNotification.Show("Record Added", dialog.Result.Name + " was added successfully.", ToastType.Success);
+                ShowNotification("Record Added", dialog.Result.Name + " was added successfully.", true);
                 AuditLogService.Instance.LogCreate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole);
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
@@ -1059,7 +1059,7 @@ namespace SOLUM_UI
                     return;
                 }
                 record.Id = createResp.Data.ToString();
-                ToastNotification.Show("Record Added", record.Name + " was added successfully.", ToastType.Success);
+                ShowNotification("Record Added", record.Name + " was added successfully.", true);
                 AuditLogService.Instance.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
@@ -1086,7 +1086,7 @@ namespace SOLUM_UI
             if (vm == null) return;
             if (IsBasicUser && !string.Equals(vm.RawModel.CreatedBy ?? string.Empty, CurrentUserName, StringComparison.OrdinalIgnoreCase))
             {
-                ToastNotification.Show("Access Denied", "You can only edit records you created.", ToastType.Warning);
+                ShowNotification("Access Denied", "You can only edit records you created.", false);
                 return;
 
             }
@@ -1142,7 +1142,7 @@ namespace SOLUM_UI
                     string newExpiry = (resp.Data != null && DateTime.TryParse(resp.Data.ExpiresAt, out var expDt))
                         ? expDt.ToString("MMMM d, yyyy")
                         : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
-                    ToastNotification.Show("Record Renewed", $"{record.Name} — valid until {newExpiry}.", ToastType.Success);
+                    ShowNotification("Record Renewed", $"{record.Name} — valid until {newExpiry}.", true);
                     AuditLogService.Instance.LogUpdate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole, $"Record quick renewed. Valid until {newExpiry}.");
                     (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
@@ -1222,8 +1222,8 @@ namespace SOLUM_UI
                 string newExpiry = (renewResp.Data != null && DateTime.TryParse(renewResp.Data.ExpiresAt, out var expDt))
                     ? expDt.ToString("MMMM d, yyyy")
                     : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
-                ToastNotification.Show("Record Renewed",
-                    $"{original.Name} — valid until {newExpiry}.", ToastType.Success);
+                ShowNotification("Record Renewed",
+                    $"{original.Name} — valid until {newExpiry}.", true);
                 var changeService = new ChangeTrackingService();
                 var changes = changeService.DetectChanges(original, updated);
                 if (changes.Count > 0)
@@ -1283,7 +1283,7 @@ namespace SOLUM_UI
             };
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                ToastNotification.Show("Record Updated", dialog.Result.Name + " was updated.", ToastType.Info);
+                ShowNotification("Record Updated", dialog.Result.Name + " was updated.", true);
                 var changeList = BuildChangeList(rawRecord, dialog.Result);
                 AuditLogService.Instance.LogUpdateWithChanges(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole, changeList);
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
@@ -1355,7 +1355,7 @@ namespace SOLUM_UI
         {
             if (!IsAdmin)
             {
-                ToastNotification.Show("Access Denied", "Encoders cannot delete records. Only administrators have permission to delete records.", ToastType.Warning);
+                ShowNotification("Access Denied", "Encoders cannot delete records. Only administrators have permission to delete records.", false);
                 return;
 
             }
@@ -1372,13 +1372,13 @@ namespace SOLUM_UI
         {
             if (!IsAdmin)
             {
-                ToastNotification.Show("Access Denied", "Encoders cannot delete records. Only administrators have permission to delete records.", ToastType.Warning);
+                ShowNotification("Access Denied", "Encoders cannot delete records. Only administrators have permission to delete records.", false);
                 return;
 
             }
             if (!Guid.TryParse(id, out var guid))
             {
-                ToastNotification.Show("Invalid ID", "Cannot delete record without a valid ID.", ToastType.Warning);
+                ShowNotification("Invalid ID", "Cannot delete record without a valid ID.", false);
                 return;
 
             }
@@ -1408,7 +1408,7 @@ namespace SOLUM_UI
                     return;
 
                 }
-                ToastNotification.Show("Record Deleted", "The record was removed.", ToastType.Warning);
+                ShowNotification("Record Deleted", "The record was removed.", false);
                 AuditLogService.Instance.LogDelete(id, recordName, GetCurrentUser(), CurrentUserRole);
                 await LoadRecordsAsync();
 
