@@ -146,7 +146,7 @@ namespace SOLUM_UI
                 {
                     _statusFilter = RequestedStatusFilter;
                     RequestedStatusFilter = null; // Clear for next navigation
-                    // Select the corresponding radio button (will trigger Click event and load records)
+                    // Select the corresponding radio button
                     if (_statusFilter == "ExpiringSoon")
                     {
                         TabStatusExpiring.IsChecked = true;
@@ -162,6 +162,12 @@ namespace SOLUM_UI
                     else
                     {
                         TabStatusAll.IsChecked = true;
+                    }
+                    if (!IsEncoder)
+                    {
+                        _currentPage = 1;
+                        if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
+                        _ = LoadRecordsAsync();
                     }
                 }
                 else
@@ -435,6 +441,9 @@ namespace SOLUM_UI
                 }
                 bool? isActive = null;
                 bool? isDeleted = null;
+                bool? isDueForRenewal = null;
+                DateTime? validUntilFrom = null;
+                DateTime? validUntilTo = null;
                 if (!IsEncoder && !IsBasicUser && _statusFilter != "All")
                 {
                     if (string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase) ||
@@ -448,22 +457,20 @@ namespace SOLUM_UI
                     {
                         isActive = true;
                         isDeleted = false;
+                        isDueForRenewal = true;
                     }
                     else if (string.Equals(_statusFilter, "Inactive", StringComparison.OrdinalIgnoreCase) ||
                              string.Equals(_statusFilter, "Inactive (Expired)", StringComparison.OrdinalIgnoreCase) ||
                              string.Equals(_statusFilter, "Expired", StringComparison.OrdinalIgnoreCase))
                     {
-                        isActive = string.Equals(_statusFilter, "Expired", StringComparison.OrdinalIgnoreCase) ? (bool?)null : false;
+                        isActive = false;
                         isDeleted = false;
-
                     }
                     else if (string.Equals(_statusFilter, "Terminated (Deleted)", StringComparison.OrdinalIgnoreCase) ||
                              string.Equals(_statusFilter, "Terminated", StringComparison.OrdinalIgnoreCase))
                     {
                         isDeleted = true;
-
                     }
-
                 }
 
                 string sex = (!IsEncoder && !IsBasicUser && _sexFilter != "All") ? _sexFilter : null;
@@ -491,6 +498,9 @@ namespace SOLUM_UI
                     Sex = sex,
                     IsActive = isActive,
                     IsDeleted = isDeleted,
+                    IsDueForRenewal = isDueForRenewal,
+                    ValidUntilFrom = validUntilFrom,
+                    ValidUntilTo = validUntilTo,
                     IsLGBT = (!IsEncoder && !IsBasicUser) ? _isLGBTFilter : null,
                     IsPantawidBeneficiary = (!IsEncoder && !IsBasicUser) ? _isPantawidFilter : null,
                     IsIndigenous = (!IsEncoder && !IsBasicUser) ? _isIndigenousFilter : null,
@@ -562,24 +572,10 @@ namespace SOLUM_UI
                 }
                 if (!IsEncoder && !IsBasicUser && !string.Equals(_statusFilter, "All", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (string.Equals(_statusFilter, "ExpiringSoon", StringComparison.OrdinalIgnoreCase))
-                    {
-                        _allRecords = _allRecords.Where(r => r.IsExpiringSoon).ToList();
-                    }
-                    else if (string.Equals(_statusFilter, "Expired", StringComparison.OrdinalIgnoreCase) ||
-                             string.Equals(_statusFilter, "Inactive", StringComparison.OrdinalIgnoreCase) ||
-                             string.Equals(_statusFilter, "Inactive (Expired)", StringComparison.OrdinalIgnoreCase))
-                    {
-                        _allRecords = _allRecords.Where(r => r.IsExpired).ToList();
-                    }
-                    else if (string.Equals(_statusFilter, "Active", StringComparison.OrdinalIgnoreCase) ||
-                             string.Equals(_statusFilter, "Valid", StringComparison.OrdinalIgnoreCase) ||
-                             string.Equals(_statusFilter, "Active (Valid)", StringComparison.OrdinalIgnoreCase))
-                    {
-                        _allRecords = _allRecords.Where(r => !r.IsExpired && !r.IsExpiringSoon).ToList();
-                    }
-                    _totalCount = _allRecords.Count;
-                    _totalPages = Math.Max(1, (int)Math.Ceiling((double)_totalCount / Math.Max(1, _pageSize)));
+                    // Server handles isActive, isDeleted, and isDueForRenewal natively.
+                    // Preserve the server-returned total count and total pages.
+                    _totalCount = paged.TotalCount;
+                    _totalPages = Math.Max(1, paged.TotalPages);
                 }
                 {
 
@@ -843,10 +839,9 @@ namespace SOLUM_UI
 
             string barangayVal = (CmbFilterBarangay?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "All";
 
-            string statusVal = (CmbFilterStatus?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "All";
+            // Keep existing _statusFilter from the active status tab
             _sexFilter = sexVal;
             _barangayFilter = barangayVal;
-            _statusFilter = statusVal;
             _isPantawidFilter = null;
             _isLGBTFilter = null;
             _isIndigenousFilter = null;
@@ -864,6 +859,7 @@ namespace SOLUM_UI
             _sexFilter = "All";
             _barangayFilter = "All";
             _statusFilter = "All";
+            if (TabStatusAll != null) TabStatusAll.IsChecked = true;
             _isPantawidFilter = null;
             _isLGBTFilter = null;
             _isIndigenousFilter = null;

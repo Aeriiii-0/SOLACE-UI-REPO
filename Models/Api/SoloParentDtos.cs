@@ -222,6 +222,9 @@ namespace SOLUM_UI.Models.Api
         public string Barangay { get; set; }
         public bool? IsActive { get; set; }
         public bool? IsDeleted { get; set; }
+        public bool? IsDueForRenewal { get; set; }
+        public DateTime? ValidUntilFrom { get; set; }
+        public DateTime? ValidUntilTo { get; set; }
         public bool? IsLGBT { get; set; }
         public bool? IsPantawidBeneficiary { get; set; }
         public bool? IsIndigenous { get; set; }

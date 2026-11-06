@@ -88,6 +88,12 @@ namespace SOLUM_UI.Services.Api
                 queryParams.Add($"isActive={request.IsActive.Value.ToString().ToLowerInvariant()}");
             if (request.IsDeleted.HasValue)
                 queryParams.Add($"isDeleted={request.IsDeleted.Value.ToString().ToLowerInvariant()}");
+            if (request.IsDueForRenewal.HasValue)
+                queryParams.Add($"isDueForRenewal={request.IsDueForRenewal.Value.ToString().ToLowerInvariant()}");
+            if (request.ValidUntilFrom.HasValue)
+                queryParams.Add($"validUntilFrom={request.ValidUntilFrom.Value:yyyy-MM-dd}");
+            if (request.ValidUntilTo.HasValue)
+                queryParams.Add($"validUntilTo={request.ValidUntilTo.Value:yyyy-MM-dd}");
             if (request.IsLGBT.HasValue)
                 queryParams.Add($"isLGBT={request.IsLGBT.Value.ToString().ToLowerInvariant()}");
             if (request.IsPantawidBeneficiary.HasValue)
