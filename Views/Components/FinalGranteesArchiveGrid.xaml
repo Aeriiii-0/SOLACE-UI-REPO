@@ -6,13 +6,13 @@
              mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="1050">
     <UserControl.Resources>
         <Style x:Key="ColHeader" TargetType="GridViewColumnHeader">
-            <Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Background" Value="#FAF2F5"/><Setter Property="Foreground" Value="#702943"/><Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Height" Value="46"/><Setter Property="Padding" Value="8,0"/><Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Background" Value="#FBF5F7"/><Setter Property="Foreground" Value="#5C1D38"/><Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="Bold"/><Setter Property="Height" Value="46"/><Setter Property="Padding" Value="10,0"/><Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="GridViewColumnHeader">
-                        <Border Background="#FAF2F5" BorderBrush="#EBD8DE" BorderThickness="0,0,0,1">
-                            <Border BorderBrush="#EBD8DE" BorderThickness="0,0,1,0" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" TextBlock.Foreground="#702943" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="11" TextBlock.FontWeight="SemiBold"/>
+                        <Border Background="#FBF5F7" BorderBrush="#5C1D38" BorderThickness="0,0,0,2">
+                            <Border Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" TextBlock.Foreground="#5C1D38" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="11" TextBlock.FontWeight="Bold"/>
                             </Border>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -24,7 +24,7 @@
             </Setter>
         </Style>
         <Style x:Key="SelRow" TargetType="ListViewItem">
-            <Setter Property="Background" Value="White"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Setter Property="BorderBrush" Value="#F2EAEF"/><Setter Property="Padding" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Background" Value="White"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Setter Property="BorderBrush" Value="#EDE2E6"/><Setter Property="Padding" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
@@ -41,15 +41,15 @@
             </Setter>
         </Style>
         <Style x:Key="PagerBtn" TargetType="Button">
-            <Setter Property="Height" Value="26"/><Setter Property="Padding" Value="10,0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Background" Value="White"/><Setter Property="Foreground" Value="#702943"/>
-            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter>
+            <Setter Property="Height" Value="26"/><Setter Property="Padding" Value="10,0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Background" Value="White"/><Setter Property="Foreground" Value="#5C1D38"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter>
             <Style.Triggers><Trigger Property="IsEnabled" Value="False"><Setter Property="Background" Value="#F1F5F9"/><Setter Property="Foreground" Value="#94A3B8"/></Trigger></Style.Triggers>
         </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
         <!-- Single Compact Ribbon: Summary & Export Final Ledger -->
-        <Border Grid.Row="0" Background="#FBF5F7" MinHeight="48" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="14,8" Margin="0,0,0,6">
+        <Border Grid.Row="0" Background="#FBF5F7" MinHeight="48" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1.5" Padding="14,8" Margin="0,-10,0,11">
             <Grid VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -57,15 +57,15 @@
                 </Grid.ColumnDefinitions>
                 <!-- Left: Summary Counter -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#FFF0F5" CornerRadius="6" BorderBrush="#D4A0B0" BorderThickness="1" Padding="10,4">
-                        <TextBlock Text="{Binding FinalSummaryText}" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                    <Border Background="#FFF0F5" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1.5" Padding="10,4">
+                        <TextBlock Text="{Binding FinalSummaryText}" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center"/>
                     </Border>
                 </StackPanel>
                 <!-- Right: Export Final Ledger -->
                 <Button Grid.Column="1" Height="30" Padding="14,0" Cursor="Hand" Command="{Binding ExportFinalLedgerCommand}">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="#702943" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <Border Background="#5C1D38" CornerRadius="8" Padding="{TemplateBinding Padding}">
                                 <TextBlock Text="Export Final List" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
                             </Border>
                             <ControlTemplate.Triggers>
@@ -77,9 +77,9 @@
             </Grid>
         </Border>
         <!-- Main Ledger Table Container: Record Management Card Design with Radial Mask -->
-        <Border Grid.Row="1" CornerRadius="14" BorderBrush="#E8D4DA" BorderThickness="1.5" Background="White">
+        <Border Grid.Row="1" CornerRadius="12" BorderBrush="#5C1D38" BorderThickness="1" Background="White" TextOptions.TextRenderingMode="ClearType" TextOptions.TextFormattingMode="Display">
             <Border.Effect>
-                <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="2" Opacity="0.06"/>
+                <DropShadowEffect Color="#5C1D38" BlurRadius="12" ShadowDepth="1" Opacity="0.08"/>
             </Border.Effect>
             <Grid x:Name="TableClipGrid">
                 <Grid.OpacityMask>
@@ -101,27 +101,27 @@
                         <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
                             <!-- Col 1: BENEFICIARY NAME -->
                             <GridViewColumn x:Name="ColName" Header="BENEFICIARY NAME" Width="170">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="12,10"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderThickness="0" Padding="12,10"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 2: CONTACT NUMBER -->
                             <GridViewColumn x:Name="ColContact" Header="CONTACT NUMBER" Width="130">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColContact}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="8,10"><TextBlock Text="{Binding ContactNumberFormatted}" FontSize="11.5" FontWeight="SemiBold" Foreground="#15803D" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColContact}" Margin="-6,0,-6,0" BorderThickness="0" Padding="8,10"><TextBlock Text="{Binding ContactNumberFormatted}" FontSize="11.5" FontWeight="SemiBold" Foreground="#16A34A" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 3: BARANGAY -->
                             <GridViewColumn x:Name="ColBarangay" Header="BARANGAY" Width="120">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColBarangay}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="10,10"><TextBlock Text="{Binding Barangay}" FontSize="11" Foreground="#333333" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColBarangay}" Margin="-6,0,-6,0" BorderThickness="0" Padding="10,10"><TextBlock Text="{Binding Barangay}" FontSize="11" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 4: RESIDENTIAL ADDRESS -->
                             <GridViewColumn x:Name="ColAddress" Header="RESIDENTIAL ADDRESS" Width="170">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColAddress}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="10,10"><TextBlock Text="{Binding FullAddress}" FontSize="11" Foreground="#333333" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColAddress}" Margin="-6,0,-6,0" BorderThickness="0" Padding="10,10"><TextBlock Text="{Binding FullAddress}" FontSize="11" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 5: EMERGENCY CONTACT -->
                             <GridViewColumn x:Name="ColEmergencyName" Header="EMERGENCY CONTACT" Width="140">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColEmergencyName}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="10,10"><TextBlock Text="{Binding EmergencyContactName}" FontSize="11" Foreground="#333333" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColEmergencyName}" Margin="-6,0,-6,0" BorderThickness="0" Padding="10,10"><TextBlock Text="{Binding EmergencyContactName}" FontSize="11" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 6: EMERGENCY PHONE -->
                             <GridViewColumn x:Name="ColEmergencyPhone" Header="EMERGENCY PHONE" Width="130">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColEmergencyPhone}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="8,10"><TextBlock Text="{Binding EmergencyContactFormatted}" FontSize="11" Foreground="#555555" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColEmergencyPhone}" Margin="-6,0,-6,0" BorderThickness="0" Padding="8,10"><TextBlock Text="{Binding EmergencyContactFormatted}" FontSize="11" Foreground="#666666" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 7: STATUS (Final column - No trailing vertical divider line) -->
                             <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="90">
@@ -146,17 +146,17 @@
                             <Button Width="105" Height="34" Cursor="Hand" Command="{Binding FinalPrevPageCommand}" IsEnabled="{Binding CanFinalPrevPage}" ToolTip="Previous page" Margin="0,0,10,0">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Bg" Background="White" CornerRadius="17" BorderBrush="#E0D0D5" BorderThickness="1.5">
+                                        <Border x:Name="Bg" Background="White" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1.5">
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
-                                                      Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
-                                                <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                                      Fill="#5C1D38" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
+                                                <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
                                             </StackPanel>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
-                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                                <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#5C1D38"/>
                                             </Trigger>
                                             <Trigger Property="IsEnabled" Value="False">
                                                 <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
@@ -165,25 +165,25 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            <Border Background="#FAF2F5" CornerRadius="14" Padding="14,6"
-                                    BorderBrush="#EBD8DE" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <Border Background="#FBF5F7" CornerRadius="8" Padding="14,6"
+                                    BorderBrush="#EDE2E6" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding FinalPageNumberLabel}" FontFamily="Segoe UI" FontSize="12"
-                                           FontWeight="SemiBold" Foreground="#702943"/>
+                                           FontWeight="SemiBold" Foreground="#5C1D38"/>
                             </Border>
                             <Button Width="105" Height="34" Cursor="Hand" Command="{Binding FinalNextPageCommand}" IsEnabled="{Binding CanFinalNextPage}" ToolTip="Next page">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Bg" Background="White" CornerRadius="17" BorderBrush="#E0D0D5" BorderThickness="1.5">
+                                        <Border x:Name="Bg" Background="White" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1.5">
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
+                                                <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
                                                 <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
-                                                      Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
+                                                      Fill="#5C1D38" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
                                             </StackPanel>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Bg" Property="Background" Value="#FAF2F5"/>
-                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                                <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#5C1D38"/>
                                             </Trigger>
                                             <Trigger Property="IsEnabled" Value="False">
                                                 <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>

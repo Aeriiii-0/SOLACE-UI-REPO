@@ -6,144 +6,146 @@
         Background="Transparent"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Width="500" Height="340"
-        ShowInTaskbar="False">
-    <Border Background="Transparent">
-        <Border Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Center">
+        Width="640" Height="440"
+        ShowInTaskbar="False"
+        FontFamily="Segoe UI"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
+        TextOptions.TextHintingMode="Fixed">
+    <Window.Resources>
+        <Style x:Key="MethodCard" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#E8D4DA"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Card"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="16"
+                                Padding="22,22,22,20">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Card" Property="BorderBrush" Value="#702943"/>
+                                <Setter TargetName="Card" Property="Background" Value="#FFFAFB"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Card" Property="Background" Value="#FBF1F4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CloseBtn" TargetType="Button">
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="White" BorderBrush="#E0D0D5" BorderThickness="1" CornerRadius="17">
+                            <Viewbox Width="12" Height="12">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M5,5 L19,19 M19,5 L5,19" Stroke="#702943" StrokeThickness="2.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#FBF1F4"/>
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="20">
+        <Border Background="White" CornerRadius="22">
             <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="0" Opacity="0.18"/>
+                <DropShadowEffect Color="#3A1020" BlurRadius="28" ShadowDepth="6" Direction="270" Opacity="0.22"/>
             </Border.Effect>
-            <Border Background="White" CornerRadius="16" Padding="32,28" Width="480"
-                    BorderBrush="#702943" BorderThickness="1.5">
-                <StackPanel>
-                    <Grid Margin="0,0,0,24">
-                        <TextBlock Text="Select entry method" FontSize="20" FontWeight="Bold"
-                                   Foreground="#702943" VerticalAlignment="Center"/>
-                        <Button HorizontalAlignment="Right" VerticalAlignment="Center"
-                                Width="30" Height="30" Background="Transparent"
-                                BorderThickness="0" Cursor="Hand" Click="Close_Click">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="15">
-                                        <TextBlock Text="&#x2715;" FontSize="13" Foreground="#AAAAAA"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#F0F0F0"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                    </Grid>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" x:Name="CardScan"
-                                BorderBrush="#E8D0D7" BorderThickness="1.5"
-                                CornerRadius="12" Padding="20,22" Background="White"
-                                Cursor="Hand">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="BorderBrush" Value="#F3C8D2"/>
-                                            <Setter Property="Background" Value="#FFFAFB"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <StackPanel HorizontalAlignment="Center">
-                                <Viewbox Width="52" Height="52" Margin="0,0,0,14">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Fill="#702943"
-                                              Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                                        <Path Fill="#702943" Opacity="0.6"
-                                              Data="M9,13H15V15H9V13M9,17H13V19H9V17M10,7L8,9L10,11L8,13"/>
-                                    </Canvas>
-                                </Viewbox>
-                                <TextBlock Text="Scan a document" FontSize="14" FontWeight="Bold"
-                                           Foreground="#222222" HorizontalAlignment="Center"
-                                           Margin="0,0,0,5"/>
-                                <TextBlock Text="Extract data from a file" FontSize="11"
-                                           Foreground="#888888" HorizontalAlignment="Center"
-                                           Margin="0,0,0,18"/>
-                                <Button Content="Scan document" Click="ScanDocument_Click"
-                                        Height="36" Padding="0,0"
-                                        Background="#702943" Foreground="White"
-                                        FontSize="12" FontWeight="SemiBold"
-                                        BorderThickness="0" Cursor="Hand">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Bg" Background="{TemplateBinding Background}"
-                                                    CornerRadius="8" Padding="16,0">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                            </StackPanel>
-                        </Border>
-                        <Border Grid.Column="2" x:Name="CardManual"
-                                BorderBrush="#E8D0D7" BorderThickness="1.5"
-                                CornerRadius="12" Padding="20,22" Background="White"
-                                Cursor="Hand">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="BorderBrush" Value="#F3C8D2"/>
-                                            <Setter Property="Background" Value="#FFFAFB"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <StackPanel HorizontalAlignment="Center">
-                                <Viewbox Width="52" Height="52" Margin="0,0,0,14">
-                                    <Canvas Width="24" Height="24">
-                                        <Path Fill="#702943"
-                                              Data="M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04Z"/>
-                                    </Canvas>
-                                </Viewbox>
-                                <TextBlock Text="Manual Fill" FontSize="14" FontWeight="Bold"
-                                           Foreground="#222222" HorizontalAlignment="Center"
-                                           Margin="0,0,0,5"/>
-                                <TextBlock Text="Enter all records by typing" FontSize="11"
-                                           Foreground="#888888" HorizontalAlignment="Center"
-                                           Margin="0,0,0,18"/>
-                                <Button Content="Add a record" Click="ManualFill_Click"
-                                        Height="36" Padding="0,0"
-                                        Background="#702943" Foreground="White"
-                                        FontSize="12" FontWeight="SemiBold"
-                                        BorderThickness="0" Cursor="Hand">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Bg" Background="{TemplateBinding Background}"
-                                                    CornerRadius="8" Padding="16,0">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-                </StackPanel>
-            </Border>
         </Border>
-    </Border>
+        <Border Background="White" CornerRadius="22" BorderBrush="#EBDDE2" BorderThickness="1" Padding="32,28,32,32">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Add new record" FontSize="22" FontWeight="Bold" Foreground="#702943"/>
+                        <TextBlock Text="Choose how you want to enter the solo parent's information."
+                                   FontSize="13" Foreground="#5F4F55" Margin="0,5,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Style="{StaticResource CloseBtn}" Click="Close_Click" VerticalAlignment="Top" ToolTip="Close"/>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="CardScan" Grid.Column="0" Style="{StaticResource MethodCard}" Click="ScanDocument_Click">
+                        <StackPanel>
+                            <Border Width="52" Height="52" CornerRadius="26" Background="#FBF1F4" HorizontalAlignment="Left" Margin="0,0,0,18">
+                                <Viewbox Width="24" Height="24">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Data="M4,8 V5 A1,1 0 0 1 5,4 H8 M16,4 H19 A1,1 0 0 1 20,5 V8 M20,16 V19 A1,1 0 0 1 19,20 H16 M8,20 H5 A1,1 0 0 1 4,19 V16 M4,12 H20"
+                                              Stroke="#702943" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                    </Canvas>
+                                </Viewbox>
+                            </Border>
+                            <TextBlock Text="Scan a document" FontSize="16" FontWeight="Bold" Foreground="#111111"/>
+                            <TextBlock Text="Upload an ID or form and let the system read the details for you."
+                                       FontSize="12.5" Foreground="#5F4F55" TextWrapping="Wrap" Margin="0,6,0,20" MinHeight="36"/>
+                            <Border Background="#702943" CornerRadius="17" Height="34" Padding="16,0" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="Start scanning" FontSize="12.5" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="CardManual" Grid.Column="2" Style="{StaticResource MethodCard}" Click="ManualFill_Click">
+                        <StackPanel>
+                            <Border Width="52" Height="52" CornerRadius="26" Background="#FBF1F4" HorizontalAlignment="Left" Margin="0,0,0,18">
+                                <Viewbox Width="24" Height="24">
+                                    <Canvas Width="24" Height="24">
+                                        <Path Data="M12,20 H21 M16.5,3.5 A2.12,2.12 0 0 1 20.5,7.5 L7.5,20.5 L3,21 L3.5,16.5 Z"
+                                              Stroke="#702943" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                    </Canvas>
+                                </Viewbox>
+                            </Border>
+                            <TextBlock Text="Fill in manually" FontSize="16" FontWeight="Bold" Foreground="#111111"/>
+                            <TextBlock Text="Type in the details yourself, step by step."
+                                       FontSize="12.5" Foreground="#5F4F55" TextWrapping="Wrap" Margin="0,6,0,20" MinHeight="36"/>
+                            <Border Background="#702943" CornerRadius="17" Height="34" Padding="16,0" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="Add a record" FontSize="12.5" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                   
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>

@@ -141,7 +141,7 @@ namespace SOLUM_UI
         private static readonly SolidColorBrush BrgyIconBrush = CreateFrozenBrush(0x02, 0x84, 0xC7);
         private static readonly SolidColorBrush CityBadgeBg = CreateFrozenBrush(0xF8, 0xFA, 0xFC);
         private static readonly SolidColorBrush CityBadgeBorder = CreateFrozenBrush(0xE2, 0xE8, 0xF0);
-        private static readonly SolidColorBrush CityBadgeFg = CreateFrozenBrush(0x47, 0x55, 0x69);
+        private static readonly SolidColorBrush CityBadgeFg = CreateFrozenBrush(0x33, 0x41, 0x55);
         private static readonly SolidColorBrush CityIconBrush = CreateFrozenBrush(0x64, 0x74, 0x8B);
 
         public SolidColorBrush ScopeBadgeBackground => HasSpecificBarangay ? BrgyBadgeBg : CityBadgeBg;
@@ -195,6 +195,17 @@ namespace SOLUM_UI
         private static readonly SolidColorBrush DefaultBorder = CreateFrozenBrush(0xD8, 0xCE, 0xD3);
         private static readonly SolidColorBrush DefaultFg = CreateFrozenBrush(0x5A, 0x4D, 0x53);
 
+        // ── Role text colors for the table (hierarchy: Barangay Secretary < Encoder < Admin < Superadmin) ──
+        // Superadmin  : deep maroon, BOLD
+        // Admin       : maroon, regular weight
+        // Encoder     : black
+        // Brgy. Sec.  : blue (view-only, lowest in the hierarchy)
+        private static readonly SolidColorBrush RoleLabelSuperAdmin = CreateFrozenBrush(0x70, 0x29, 0x43);
+        private static readonly SolidColorBrush RoleLabelAdmin = CreateFrozenBrush(0x9C, 0x6F, 0x8F);
+        private static readonly SolidColorBrush RoleLabelBarangaySecretary = CreateFrozenBrush(0x0D, 0x35, 0x8F);
+        private static readonly SolidColorBrush RoleLabelEncoder = CreateFrozenBrush(0x11, 0x11, 0x11);
+        private static readonly SolidColorBrush RoleLabelDefault = CreateFrozenBrush(0x47, 0x55, 0x69);
+
         private static SolidColorBrush CreateFrozenBrush(byte r, byte g, byte b)
         {
             var brush = new SolidColorBrush(Color.FromRgb(r, g, b));
@@ -239,6 +250,16 @@ namespace SOLUM_UI
             : IsBarangaySecretaryUser ? BarangaySecretaryFg
             : IsCaseworkerUser ? CaseworkerFg
             : DefaultFg;
+
+        // Color-coded role text for the table (works on a white background)
+        public SolidColorBrush RoleLabelBrush => IsSuperAdminUser ? RoleLabelSuperAdmin
+            : IsAdminUser ? RoleLabelAdmin
+            : IsBarangaySecretaryUser ? RoleLabelBarangaySecretary
+            : (IsCaseworkerUser || IsEncoderUser) ? RoleLabelEncoder
+            : RoleLabelDefault;
+
+        // Only Superadmin is bold; everyone else is Medium so the distinction reads clearly.
+        public FontWeight RoleFontWeight => IsSuperAdminUser ? FontWeights.Bold : FontWeights.Medium;
 
         public string StatusText => IsActive ? "Active" : "Disabled";
 
@@ -295,6 +316,9 @@ namespace SOLUM_UI
         private int _totalPages = 1;
         private int _totalCount = 0;
 
+        // Max number of numbered page buttons shown at once (window slides when exceeded)
+        private const int MaxVisiblePageButtons = 3;
+
         private static readonly TimeSpan DataFreshnessTtl = TimeSpan.FromMinutes(3);
         private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
 
@@ -303,6 +327,10 @@ namespace SOLUM_UI
         private bool _hasLoadedData = false;
         private bool _isLoading = false;
         private bool _isUpdatingFilters = false;
+
+        // Icon paths used by the row "more options" menu
+        private const string ResetPasswordIconData = "M7,14A2,2 0 0,1 5,12A2,2 0 0,1 7,10A2,2 0 0,1 9,12A2,2 0 0,1 7,14M12.65,10C11.83,7.67 9.61,6 7,6A6,6 0 0,0 1,12A6,6 0 0,0 7,18C9.61,18 11.83,16.33 12.65,14H17V18H21V14H23V10H12.65Z";
+        private const string DeleteIconData = "M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z";
 
         public UserAdministrationPage()
         {
@@ -319,6 +347,7 @@ namespace SOLUM_UI
             DataObject.AddPastingHandler(TxtLastName, NamePasteHandler);
             DataObject.AddPastingHandler(TxtContactNumber, ContactPasteHandler);
             InitDynamicUserPaging();
+            UpdatePagingControls();
         }
 
         private void InitDynamicUserPaging()
@@ -342,8 +371,8 @@ namespace SOLUM_UI
             double availableHeight = UserList.ActualHeight;
             if (availableHeight <= 100) return;
 
-            // Each row: MinHeight 56 + 1px border = 57px
-            int calculated = (int)Math.Floor(availableHeight / 57.0);
+            // Each row: MinHeight 60 + 1px border = 61px
+            int calculated = (int)Math.Floor(availableHeight / 61.0);
             int optimal = Math.Max(4, Math.Min(50, calculated));
             if (optimal != _pageSize)
             {
@@ -358,10 +387,15 @@ namespace SOLUM_UI
             }
         }
 
+        private bool IsCurrentUserSuperAdmin()
+        {
+            return AuthApiService.Instance.IsSuperAdmin ||
+                   string.Equals(MainWindow.CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
+        }
+
         private void InitRolePermissions()
         {
-            bool isSuperAdmin = AuthApiService.Instance.IsSuperAdmin ||
-                                string.Equals(MainWindow.CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
+            bool isSuperAdmin = IsCurrentUserSuperAdmin();
             if (BtnAddAdmin != null)
                 BtnAddAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
             _isUpdatingFilters = true;
@@ -400,8 +434,7 @@ namespace SOLUM_UI
             if (BtnRefreshUsers != null) BtnRefreshUsers.IsEnabled = false;
             InitRolePermissions();
 
-            bool isSuperAdmin = AuthApiService.Instance.IsSuperAdmin ||
-                                string.Equals(MainWindow.CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
+            bool isSuperAdmin = IsCurrentUserSuperAdmin();
             try
             {
                 var rolesToFetch = new List<string>();
@@ -530,6 +563,14 @@ namespace SOLUM_UI
             string statusTag = (CmbUserStatus?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "ALL";
             string search = SearchBox?.Text?.Trim() ?? string.Empty;
 
+            // Show a dot on the Filter pill when any filter is active
+            if (FilterActiveDot != null)
+            {
+                bool filtersActive = !string.Equals(roleTag, "ALL", StringComparison.OrdinalIgnoreCase) ||
+                                     !string.Equals(statusTag, "ALL", StringComparison.OrdinalIgnoreCase);
+                FilterActiveDot.Visibility = filtersActive ? Visibility.Visible : Visibility.Collapsed;
+            }
+
             IEnumerable<AppUser> query = _allUsers;
 
             // 1. Role Filter
@@ -603,20 +644,55 @@ namespace SOLUM_UI
 
         private void UpdatePagingControls()
         {
-            if (TxtPageInfo != null)
-                TxtPageInfo.Text = _totalPages > 0 ? $"Page {_currentPage} of {_totalPages}" : "Page 1 of 1";
             if (TxtUsersSummary != null)
                 TxtUsersSummary.Text = $"{_totalCount:N0} total users registered";
             if (TxtUsersPageSummary != null)
             {
                 int start = _totalCount == 0 ? 0 : ((_currentPage - 1) * _pageSize) + 1;
                 int end = Math.Min(_totalCount, _currentPage * _pageSize);
-                TxtUsersPageSummary.Text = $"Showing {start}–{end} of {_totalCount}";
+                TxtUsersPageSummary.Text = $"Showing {start}–{end} of {_totalCount} users";
             }
             if (BtnPrevPage != null)
                 BtnPrevPage.IsEnabled = _currentPage > 1;
             if (BtnNextPage != null)
                 BtnNextPage.IsEnabled = _currentPage < _totalPages;
+            BuildPageButtons();
+        }
+
+        // Builds the numbered pager: circle buttons, max 3 visible, sliding window.
+        // Examples with 10 pages: page 1 -> [1 2 3], page 3 -> [2 3 4], page 10 -> [8 9 10]
+        private void BuildPageButtons()
+        {
+            if (PnlPageNumbers == null) return;
+            PnlPageNumbers.Children.Clear();
+
+            int total = Math.Max(1, _totalPages);
+            int start = Math.Max(1, Math.Min(_currentPage - 1, total - MaxVisiblePageButtons + 1));
+            int end = Math.Min(total, start + MaxVisiblePageButtons - 1);
+
+            for (int p = start; p <= end; p++)
+            {
+                bool isActive = p == _currentPage;
+                var btn = new Button
+                {
+                    Content = p.ToString(),
+                    Tag = p,
+                    Style = (Style)FindResource(isActive ? "PageNumBtnActive" : "PageNumBtn"),
+                    Margin = new Thickness(0, 0, 8, 0)
+                };
+                btn.Click += PageNumber_Click;
+                PnlPageNumbers.Children.Add(btn);
+            }
+        }
+
+        private void PageNumber_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button b && b.Tag is int page && page != _currentPage)
+            {
+                _currentPage = page;
+                RefreshList();
+                UpdatePagingControls();
+            }
         }
 
         private void BtnPrevPage_Click(object sender, RoutedEventArgs e)
@@ -641,7 +717,7 @@ namespace SOLUM_UI
                 .Skip((_currentPage - 1) * _pageSize)
                 .Take(_pageSize)
                 .ToList();
-            UserList.ItemsSource = null;
+            // A fresh list instance is enough to make WPF rebuild the rows
             UserList.ItemsSource = paged;
             TxtUserCount.Text = " " + _filtered.Count;
             if (EmptyStatePanel != null)
@@ -667,7 +743,7 @@ namespace SOLUM_UI
             ApplyFilters();
         }
 
-        // NEW: closes the Filter popup (Done button)
+        // Closes the Filter popup (Done button)
         private void CloseFilterPopup_Click(object sender, RoutedEventArgs e)
         {
             BtnFilter.IsChecked = false;
@@ -689,20 +765,34 @@ namespace SOLUM_UI
             ColPanel.Width = new GridLength(324);
         }
 
+        // ─────────────────────────────────────────────────────────────
+        // Row helpers: always resolve the user from the button's Tag (user Id)
+        // against the current _allUsers list, so a stale/reloaded row can never
+        // leave a button pointing at an old object.
+        // ─────────────────────────────────────────────────────────────
+        private AppUser ResolveUserFromTag(object sender)
+        {
+            string tagStr = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
+            if (!Guid.TryParse(tagStr, out var id)) return null;
+            return _allUsers.Find(u => u.Id == id);
+        }
+
+        private bool EnsureCanManage(AppUser user)
+        {
+            if (user.CanManage) return true;
+            ActionConfirmDialog.Warning(
+                "Permission Denied",
+                "Only SuperAdmins have permission to manage Admin accounts.",
+                Window.GetWindow(this));
+            return false;
+        }
+
         private void EditUser_Click(object sender, RoutedEventArgs e)
         {
-            string tagStr = (sender as Button)?.Tag?.ToString() ?? string.Empty;
-            if (!Guid.TryParse(tagStr, out var id)) return;
-            AppUser user = _allUsers.Find(u => u.Id == id);
+            AppUser user = ResolveUserFromTag(sender);
             if (user == null) return;
-            if (!user.CanManage)
-            {
-                ActionConfirmDialog.Warning(
-                    "Permission Denied",
-                    "Only SuperAdmins have permission to manage Admin accounts.",
-                    Window.GetWindow(this));
-                return;
-            }
+            if (!EnsureCanManage(user)) return;
+
             _editTarget = user;
             TxtFirstName.Text = user.FirstName?.ToUpper() ?? string.Empty;
             TxtLastName.Text = user.LastName?.ToUpper() ?? string.Empty;
@@ -756,38 +846,74 @@ namespace SOLUM_UI
             ColPanel.Width = new GridLength(324);
         }
 
+        // ─────────────────────────────────────────────────────────────
+        // "More" menu. The menu is now built fresh in code for the clicked row,
+        // and each item captures that row's user directly. No DataContext juggling,
+        // no Closed handlers, no stale state -> buttons keep working after any action.
+        // ─────────────────────────────────────────────────────────────
         private void MoreActions_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.ContextMenu != null)
-            {
-                btn.ContextMenu.PlacementTarget = btn;
-                btn.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-                btn.ContextMenu.DataContext = btn.DataContext;
-                btn.ContextMenu.IsOpen = true;
-            }
+            if (!(sender is Button btn)) return;
+            AppUser user = ResolveUserFromTag(btn);
+            if (user == null) return;
+
+            ContextMenu menu = BuildRowMenu(user);
+            menu.PlacementTarget = btn;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Right;
+            menu.IsOpen = true;
         }
 
-        private async void ResetPassword_Click(object sender, RoutedEventArgs e)
+        private ContextMenu BuildRowMenu(AppUser user)
         {
-            AppUser user = (sender as FrameworkElement)?.DataContext as AppUser;
-            if (user == null)
+            var menu = new ContextMenu
             {
-                string tagStr = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
-                if (Guid.TryParse(tagStr, out var id))
+                Style = (Style)FindResource("RowContextMenu"),
+                StaysOpen = false
+            };
+
+            bool canManage = user.CanManage;
+            string tip = user.ActionDisabledToolTip;
+
+            // Reset Password
+            var reset = CreateMenuItem("Reset Password", ResetPasswordIconData,
+                (Brush)new BrushConverter().ConvertFromString("#702943"), "RowMenuItem", canManage, tip);
+            reset.Click += async (s, args) => await ExecutePasswordResetAsync(user);
+            menu.Items.Add(reset);
+
+            // Disable / Re-enable
+            var toggle = CreateMenuItem(user.ToggleActionToolTip, user.ToggleIconData,
+                user.ToggleIconBrush, "RowMenuItem", canManage, tip);
+            toggle.Click += async (s, args) => await ExecuteToggleStatusAsync(user);
+            menu.Items.Add(toggle);
+
+            menu.Items.Add(new Separator { Style = (Style)FindResource("RowMenuSeparator") });
+
+            // Delete
+            var delete = CreateMenuItem("Delete User", DeleteIconData,
+                (Brush)new BrushConverter().ConvertFromString("#E53935"), "DangerMenuItem", canManage, tip);
+            delete.Click += async (s, args) => await ExecuteDeleteUserAsync(user);
+            menu.Items.Add(delete);
+
+            return menu;
+        }
+
+        private MenuItem CreateMenuItem(string header, string iconData, Brush iconBrush, string styleKey, bool enabled, string disabledTip)
+        {
+            return new MenuItem
+            {
+                Header = header,
+                Style = (Style)FindResource(styleKey),
+                IsEnabled = enabled,
+                ToolTip = enabled ? null : disabledTip,
+                Icon = new System.Windows.Shapes.Path
                 {
-                    user = _allUsers.Find(u => u.Id == id);
+                    Data = Geometry.Parse(iconData),
+                    Fill = iconBrush,
+                    Stretch = Stretch.Uniform,
+                    Width = 12,
+                    Height = 12
                 }
-            }
-            if (user == null) return;
-            if (!user.CanManage)
-            {
-                ActionConfirmDialog.Warning(
-                    "Permission Denied",
-                    "Only SuperAdmins have permission to manage Admin accounts.",
-                    Window.GetWindow(this));
-                return;
-            }
-            await ExecutePasswordResetAsync(user);
+            };
         }
 
         private async void EditPanelResetPassword_Click(object sender, RoutedEventArgs e)
@@ -799,14 +925,7 @@ namespace SOLUM_UI
         private async Task ExecutePasswordResetAsync(AppUser user)
         {
             if (user == null) return;
-            if (!user.CanManage)
-            {
-                ActionConfirmDialog.Warning(
-                    "Permission Denied",
-                    "Only SuperAdmins have permission to manage Admin accounts.",
-                    Window.GetWindow(this));
-                return;
-            }
+            if (!EnsureCanManage(user)) return;
 
             bool isConfirmed = ActionConfirmDialog.Show(
                 title: "Reset Password",
@@ -815,8 +934,9 @@ namespace SOLUM_UI
                 cancelText: "Cancel",
                 theme: ConfirmThemeType.Warning,
                 owner: Window.GetWindow(this),
-                customIconData: "M7,14A2,2 0 0,1 5,12A2,2 0 0,1 7,10A2,2 0 0,1 9,12A2,2 0 0,1 7,14M12.65,10C11.83,7.67 9.61,6 7,6A6,6 0 0,0 1,12A6,6 0 0,0 7,18C9.61,18 11.83,16.33 12.65,14H17V18H21V14H23V10H12.65Z");
+                customIconData: ResetPasswordIconData);
             if (!isConfirmed) return;
+
             if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
             try
             {
@@ -844,32 +964,21 @@ namespace SOLUM_UI
                     heading: "Password Reset Successfully",
                     subheading: "A new temporary password was generated. Provide it to the employee so they can log in.");
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[UserAdmin] Reset password error: {ex.Message}");
+                ToastNotification.Show("Reset Failed", "Something went wrong while resetting the password.", ToastType.Error);
+            }
             finally
             {
                 if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
             }
         }
 
-        private async void ToggleStatus_Click(object sender, RoutedEventArgs e)
+        private async Task ExecuteToggleStatusAsync(AppUser user)
         {
-            AppUser user = (sender as FrameworkElement)?.DataContext as AppUser;
-            if (user == null)
-            {
-                string tagStr = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
-                if (Guid.TryParse(tagStr, out var id))
-                {
-                    user = _allUsers.Find(u => u.Id == id);
-                }
-            }
             if (user == null) return;
-            if (!user.CanManage)
-            {
-                ActionConfirmDialog.Warning(
-                    "Permission Denied",
-                    "Only SuperAdmins have permission to manage Admin accounts.",
-                    Window.GetWindow(this));
-                return;
-            }
+            if (!EnsureCanManage(user)) return;
 
             bool newStatus = !user.IsActive;
             string actionVerb = newStatus ? "re-enable" : "disable";
@@ -885,6 +994,7 @@ namespace SOLUM_UI
                 theme: theme,
                 owner: Window.GetWindow(this));
             if (!isConfirmed) return;
+
             if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
             try
             {
@@ -898,14 +1008,20 @@ namespace SOLUM_UI
                     return;
                 }
                 user.IsActive = newStatus;
-                RefreshList();
                 ToastNotification.Show("Status Updated", $"{user.FullName} was {(newStatus ? "re-enabled" : "disabled")}.", ToastType.Success);
                 AuditLogService.Instance.LogUserAdmin($"status changed to {(newStatus ? "Active" : "Disabled")}",
                     $"{user.FullName} ({user.Email})",
                     MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
                     user.Id.ToString());
+
+                // Reload so rows/buttons are rebuilt from fresh data
                 _lastLoadedTime = DateTime.MinValue;
                 await LoadUsersAsync(forceRefresh: true);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[UserAdmin] Toggle status error: {ex.Message}");
+                ToastNotification.Show("Status Update Failed", "Something went wrong while updating the status.", ToastType.Warning);
             }
             finally
             {
@@ -913,26 +1029,10 @@ namespace SOLUM_UI
             }
         }
 
-        private async void DeleteUser_Click(object sender, RoutedEventArgs e)
+        private async Task ExecuteDeleteUserAsync(AppUser user)
         {
-            AppUser user = (sender as FrameworkElement)?.DataContext as AppUser;
-            if (user == null)
-            {
-                string tagStr = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
-                if (Guid.TryParse(tagStr, out var id))
-                {
-                    user = _allUsers.Find(u => u.Id == id);
-                }
-            }
             if (user == null) return;
-            if (!user.CanManage)
-            {
-                ActionConfirmDialog.Warning(
-                    "Permission Denied",
-                    "Only SuperAdmins have permission to manage Admin accounts.",
-                    Window.GetWindow(this));
-                return;
-            }
+            if (!EnsureCanManage(user)) return;
 
             bool isConfirmed = ActionConfirmDialog.Show(
                 title: "Delete User",
@@ -943,21 +1043,37 @@ namespace SOLUM_UI
                 owner: Window.GetWindow(this));
             if (!isConfirmed) return;
 
-            var response = await UserApiService.Instance.DeleteApplicationUserAsync(user.Id);
-            if (!response.Succeeded)
+            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
+            try
             {
-                string err = response.Errors != null && response.Errors.Count > 0
-                    ? string.Join("\n", response.Errors)
-                    : "Unable to delete user.";
-                ToastNotification.Show("Delete Failed", err, ToastType.Warning);
-                return;
+                var response = await UserApiService.Instance.DeleteApplicationUserAsync(user.Id);
+                if (!response.Succeeded)
+                {
+                    string err = response.Errors != null && response.Errors.Count > 0
+                        ? string.Join("\n", response.Errors)
+                        : "Unable to delete user.";
+                    ToastNotification.Show("Delete Failed", err, ToastType.Warning);
+                    return;
+                }
+                if (_editTarget != null && _editTarget.Id == user.Id) ClosePanel_Click(null, null);
+                ToastNotification.Show("User Deleted", user.FullName + " was removed.", ToastType.Warning);
+                AuditLogService.Instance.LogUserAdmin("deleted", user.FullName + " (" + user.Email + ")",
+                    MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
+                    user.Id.ToString());
+
+                // Force a reload — a non-forced call would return the stale cached list
+                _lastLoadedTime = DateTime.MinValue;
+                await LoadUsersAsync(forceRefresh: true);
             }
-            if (_editTarget == user) ClosePanel_Click(null, null);
-            ToastNotification.Show("User Deleted", user.FullName + " was removed.", ToastType.Warning);
-            AuditLogService.Instance.LogUserAdmin("deleted", user.FullName + " (" + user.Email + ")",
-                MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
-                user.Id.ToString());
-            await LoadUsersAsync();
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[UserAdmin] Delete user error: {ex.Message}");
+                ToastNotification.Show("Delete Failed", "Something went wrong while deleting the user.", ToastType.Warning);
+            }
+            finally
+            {
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
+            }
         }
 
         private void ClosePanel_Click(object sender, RoutedEventArgs e)
@@ -1078,12 +1194,14 @@ namespace SOLUM_UI
 
             if (_editTarget != null)
             {
+                // Keep a local reference: ClosePanel_Click nulls _editTarget later in this method
+                AppUser target = _editTarget;
                 bool selectedStatus = (CmbEditStatus?.SelectedItem as ComboBoxItem)?.Tag?.ToString() == "true";
-                bool statusChanging = selectedStatus != _editTarget.IsActive;
+                bool statusChanging = selectedStatus != target.IsActive;
 
                 string confirmMsg = statusChanging
-                    ? $"Are you sure you want to save changes to this user account ({_editTarget.FullName}) and set status to {(selectedStatus ? "Active" : "Disabled")}?"
-                    : $"Are you sure you want to save changes to this user account ({_editTarget.FullName})?";
+                    ? $"Are you sure you want to save changes to this user account ({target.FullName}) and set status to {(selectedStatus ? "Active" : "Disabled")}?"
+                    : $"Are you sure you want to save changes to this user account ({target.FullName})?";
 
                 bool isConfirmed = ActionConfirmDialog.Show(
                     title: "Update User Account",
@@ -1100,7 +1218,7 @@ namespace SOLUM_UI
                 {
                     var updateReq = new UpdateApplicationUserRequest
                     {
-                        Id = _editTarget.Id,
+                        Id = target.Id,
                         FirstName = firstName,
                         LastName = lastName,
                         ContactNumber = contactNumber
@@ -1119,7 +1237,7 @@ namespace SOLUM_UI
                     // Check if account status was toggled in the edit dropdown
                     if (statusChanging)
                     {
-                        var statusResponse = await UserApiService.Instance.UpdateUserStatusAsync(_editTarget.Id, selectedStatus);
+                        var statusResponse = await UserApiService.Instance.UpdateUserStatusAsync(target.Id, selectedStatus);
                         if (!statusResponse.Succeeded)
                         {
                             string err = statusResponse.Errors != null && statusResponse.Errors.Count > 0
@@ -1129,23 +1247,28 @@ namespace SOLUM_UI
                         }
                         else
                         {
-                            _editTarget.IsActive = selectedStatus;
-                            RefreshList();
+                            target.IsActive = selectedStatus;
                             AuditLogService.Instance.LogUserAdmin($"status changed to {(selectedStatus ? "Active" : "Disabled")}",
-                                $"{_editTarget.FullName} ({_editTarget.Email})",
+                                $"{target.FullName} ({target.Email})",
                                 MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
-                                _editTarget.Id.ToString());
+                                target.Id.ToString());
                         }
                     }
 
                     ToastNotification.Show("User Updated", firstName + " " + lastName + " was updated.", ToastType.Info);
                     AuditLogService.Instance.LogUserAdmin("updated",
-                        firstName + " " + lastName + " (" + _editTarget.Email + ")",
+                        firstName + " " + lastName + " (" + target.Email + ")",
                         MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
-                        _editTarget.Id.ToString());
+                        target.Id.ToString());
                     ClosePanel_Click(null, null);
                     _lastLoadedTime = DateTime.MinValue;
                     await LoadUsersAsync(forceRefresh: true);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[UserAdmin] Update user error: {ex.Message}");
+                    TxtFormError.Text = "Something went wrong while saving. Please try again.";
+                    FormErrorBanner.Visibility = Visibility.Visible;
                 }
                 finally
                 {
@@ -1221,6 +1344,12 @@ namespace SOLUM_UI
                     await LoadUsersAsync(forceRefresh: true);
                     AccountCreatedDialog.Show(createdName, createdEmail, createdPassword, selectedRole.ToUpper(), Window.GetWindow(this));
                 }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[UserAdmin] Create user error: {ex.Message}");
+                    TxtFormError.Text = "Something went wrong while creating the user. Please try again.";
+                    FormErrorBanner.Visibility = Visibility.Visible;
+                }
                 finally
                 {
                     if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
@@ -1249,8 +1378,7 @@ namespace SOLUM_UI
             if (PnlPassword != null)
                 PnlPassword.Visibility = editMode ? Visibility.Collapsed : Visibility.Visible;
 
-            bool isSuperAdmin = AuthApiService.Instance.IsSuperAdmin ||
-                                string.Equals(MainWindow.CurrentUserRole, "SuperAdmin", StringComparison.OrdinalIgnoreCase);
+            bool isSuperAdmin = IsCurrentUserSuperAdmin();
             if (CmbRoleItemAdmin != null)
                 CmbRoleItemAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
             if (CmbRoleItemSuperAdmin != null)

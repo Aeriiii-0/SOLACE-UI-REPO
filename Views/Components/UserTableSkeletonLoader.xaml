@@ -25,7 +25,7 @@
             <!-- Row 1 -->
             <Grid MinHeight="56" Background="White">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="140"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,1,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -58,7 +58,7 @@
             <!-- Row 2 -->
             <Grid MinHeight="56" Background="#FCF9FA">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="140"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,1,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -91,7 +91,7 @@
             <!-- Row 3 -->
             <Grid MinHeight="56" Background="White">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="140"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,1,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -124,7 +124,7 @@
             <!-- Row 4 -->
             <Grid MinHeight="56" Background="#FCF9FA">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="140"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,1,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -157,7 +157,7 @@
             <!-- Row 5 -->
             <Grid MinHeight="56" Background="White">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="140"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,1,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -190,7 +190,7 @@
             <!-- Row 6 -->
             <Grid MinHeight="56" Background="#FCF9FA">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="2.2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="1.3*"/><ColumnDefinition Width="140"/><ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Padding="20,10,12,10" VerticalAlignment="Center" BorderThickness="0,0,1,1" BorderBrush="#F2EAEF">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">

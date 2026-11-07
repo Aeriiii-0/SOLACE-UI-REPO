@@ -152,7 +152,23 @@ namespace SOLUM_UI.Services.Api
 
         public async Task<BaseResponse<RenewSoloParentResponse>> RenewSoloParentRecordAsync(Guid id, RenewSoloParentRequest request = null)
         {
-            return await ApiClient.Instance.PostAsync<object, RenewSoloParentResponse>($"api/soloparent/{id}/renew", request ?? (object)new { });
+            System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.RenewSoloParentRecordAsync] Called with ID: {id}");
+            System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.RenewSoloParentRecordAsync] Request is null: {request == null}");
+            if (request != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.RenewSoloParentRecordAsync] RenewalDate: {request.RenewalDate}");
+                System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.RenewSoloParentRecordAsync] CivilStatus: {request.CivilStatus}");
+            }
+            
+            var result = await ApiClient.Instance.PostAsync<object, RenewSoloParentResponse>($"api/soloparent/{id}/renew", request ?? (object)new { });
+            
+            System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.RenewSoloParentRecordAsync] Response Succeeded: {result?.Succeeded}");
+            if (result?.Errors != null && result.Errors.Count > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.RenewSoloParentRecordAsync] Errors: {string.Join(" | ", result.Errors)}");
+            }
+            
+            return result;
 
         }
         /// <summary>

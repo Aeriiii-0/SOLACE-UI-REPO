@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Reflection;
+using System.Windows.Media;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
 
@@ -19,31 +19,49 @@ namespace SOLUM_UI
             InitializeComponent();
             Loaded += (s, e) => PopulateProfile();
         }
+
+        /// <summary>
+        /// Clips a card to its own rounded corners so the filled decorative circles
+        /// don't spill past the card edges. Hooked to SizeChanged on HeroCard / PasswordCard.
+        /// </summary>
+        private void RoundedClip_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (sender is Border b && b.ActualWidth > 0 && b.ActualHeight > 0)
+            {
+                double r = b.CornerRadius.TopLeft;
+                b.Clip = new RectangleGeometry(new Rect(0, 0, b.ActualWidth, b.ActualHeight), r, r);
+            }
+        }
+
         /// <summary>Populate all read-only fields from current session.</summary>
         private void PopulateProfile()
         {
             string name = MainWindow.FullName;
             string role = MainWindow.CurrentUserRole;
             string barangay = MainWindow.CurrentUserBarangay;
-            string firstName = MainWindow.FirstName;
-            string lastName = MainWindow.LastName;
             string email = MainWindow.CurrentUserEmail;
             string contactNumber = MainWindow.ContactNumber;
+
+            bool isAllBarangays = string.IsNullOrWhiteSpace(barangay) ||
+                                  barangay.Equals("ALL", StringComparison.OrdinalIgnoreCase);
+
+            // Hero card
             TxtDisplayName.Text = (name ?? string.Empty).ToUpper();
             TxtDisplayRole.Text = (role ?? string.Empty).ToUpper();
             TxtDisplayEmail.Text = email;
+            TxtInitial.Text = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "U";
+            TxtScope.Text = isAllBarangays ? "All barangays" : barangay;
+
+            // Account details
             TxtFullName.Text = (name ?? string.Empty).ToUpper();
             TxtRole.Text = (role ?? string.Empty).ToUpper();
             TxtContactNumber.Text = string.IsNullOrWhiteSpace(contactNumber) ? "—" : contactNumber;
-            TxtBarangay.Text = (string.IsNullOrWhiteSpace(barangay) || barangay.Equals("ALL", StringComparison.OrdinalIgnoreCase))
-                ? "ALL BARANGAYS"
-                : barangay.ToUpper();
-            TxtInitial.Text = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "U";
+            TxtBarangay.Text = isAllBarangays ? "ALL BARANGAYS" : barangay.ToUpper();
+
+            // Session info
             TxtSessionStart.Text = _sessionStart.ToString("MMM d, yyyy  h:mm tt");
-            var infoVersion = Assembly.GetExecutingAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-            string appVersion = !string.IsNullOrWhiteSpace(infoVersion) ? ("v" + infoVersion) : ("v" + Assembly.GetExecutingAssembly().GetName().Version);
-            TxtSystemVersion.Text = "SOLUM UI " + appVersion;
         }
+
         /// <summary>Show the change password form when button is clicked.</summary>
         private void BtnChangePassword_Click(object sender, RoutedEventArgs e)
         {
@@ -51,6 +69,7 @@ namespace SOLUM_UI
             ChangePasswordFormPanel.Visibility = Visibility.Visible;
             PwdCurrentPassword.Focus();
         }
+
         /// <summary>Cancel change password and hide the form.</summary>
         private void BtnCancelChangePassword_Click(object sender, RoutedEventArgs e)
         {
@@ -58,6 +77,7 @@ namespace SOLUM_UI
             ChangePasswordFormPanel.Visibility = Visibility.Collapsed;
             ChangePasswordButtonPanel.Visibility = Visibility.Visible;
         }
+
         /// <summary>Validate and save the new password.</summary>
         private async void BtnSaveChangePassword_Click(object sender, RoutedEventArgs e)
         {
@@ -68,6 +88,7 @@ namespace SOLUM_UI
             string confirmPassword = PwdConfirmPassword.Password;
 
             bool hasErrors = false;
+
             // Validate current password
             if (string.IsNullOrWhiteSpace(currentPassword))
             {
@@ -75,6 +96,7 @@ namespace SOLUM_UI
                 ErrCurrentPassword.Visibility = Visibility.Visible;
                 hasErrors = true;
             }
+
             // Validate new password
             if (string.IsNullOrWhiteSpace(newPassword))
             {
@@ -88,6 +110,7 @@ namespace SOLUM_UI
                 ErrNewPassword.Visibility = Visibility.Visible;
                 hasErrors = true;
             }
+
             // Validate confirm password
             if (string.IsNullOrWhiteSpace(confirmPassword))
             {
@@ -107,8 +130,10 @@ namespace SOLUM_UI
                 ErrNewPassword.Visibility = Visibility.Visible;
                 hasErrors = true;
             }
+
             if (hasErrors)
                 return;
+
             BtnSaveChangePassword.IsEnabled = false;
             try
             {
@@ -121,6 +146,7 @@ namespace SOLUM_UI
                         ToastType.Success);
                     Services.AuditLogService.Instance.LogSystem(
                         "Password changed by " + MainWindow.CurrentUserName);
+
                     // Clear fields and hide form after 2 seconds
                     await Task.Delay(2000);
                     ClearChangePasswordForm();
@@ -132,6 +158,7 @@ namespace SOLUM_UI
                     string errorMsg = (resp?.Errors != null && resp.Errors.Count > 0)
                         ? string.Join("\n", resp.Errors)
                         : "Failed to change password. Please check your current password.";
+
                     // If error mentions current or old password, display under current password
                     if (errorMsg.IndexOf("current", StringComparison.OrdinalIgnoreCase) >= 0 ||
                         errorMsg.IndexOf("incorrect", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -156,6 +183,7 @@ namespace SOLUM_UI
                 BtnSaveChangePassword.IsEnabled = true;
             }
         }
+
         /// <summary>Clear all error messages.</summary>
         private void ClearErrorMessages()
         {
@@ -164,6 +192,7 @@ namespace SOLUM_UI
             ErrConfirmPassword.Visibility = Visibility.Collapsed;
             ChangePasswordSuccessBanner.Visibility = Visibility.Collapsed;
         }
+
         /// <summary>Clear all password fields.</summary>
         private void ClearChangePasswordForm()
         {

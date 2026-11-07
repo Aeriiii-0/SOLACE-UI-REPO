@@ -8,9 +8,30 @@
       mc:Ignorable="d" 
       d:DesignHeight="850" d:DesignWidth="1200"
       Title="Subsidy Recommendation"
-      Background="#FFFFFF">
+      Background="#FFFFFF"
+      TextOptions.TextRenderingMode="ClearType"
+      TextOptions.TextFormattingMode="Display">
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <!-- Global Typography Style: Sharpness & High-Contrast Text Rendering -->
+        <Style TargetType="TextBlock">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Foreground" Value="#1A1A1A"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Foreground" Value="#1A1A1A"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Foreground" Value="#1A1A1A"/>
+        </Style>
         <Style x:Key="PageTabBtn" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -18,18 +39,20 @@
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="#A06080"/>
-            <Setter Property="Padding" Value="18,0"/>
-            <Setter Property="Height" Value="44"/>
+            <Setter Property="Padding" Value="0,12,0,12"/>
+            <Setter Property="Height" Value="Auto"/>
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="TabBg" Background="Transparent" BorderBrush="Transparent" BorderThickness="0,0,0,3"
+                        <Border x:Name="TabBg" Background="Transparent" BorderBrush="Transparent" BorderThickness="0,0,0,0"
                                 Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="TabBg" Property="Background" Value="#FDF5F7"/>
+                                <Setter TargetName="TabBg" Property="Background" Value="Transparent"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.4"/>
@@ -45,119 +68,465 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <!-- Row 0: Page Title & Metrics Header -->
-        <Grid Grid.Row="0" Margin="24,16,24,8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                <TextBlock Text="Subsidy Recommendation" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <!-- Last Refreshed Timestamp Pill -->
-                <Border VerticalAlignment="Center" Background="#FAF2F5" CornerRadius="12" Padding="10,6" BorderBrush="#EBD8DE" BorderThickness="1" Margin="10,0,0,0">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
-                              Fill="#702943" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0" Opacity="0.75"/>
-                        <TextBlock Text="{Binding LastRefreshedText, FallbackValue='Updated: Just now'}" FontSize="11.5" FontFamily="Segoe UI" FontWeight="Medium" Foreground="#702943"/>
+        <!-- Row 0: CONSOLIDATED METRICS & ACTIONS HEADER CARD -->
+        <Border Grid.Row="0" Margin="24,16,24,12" Background="#FBF5F7" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="12" Padding="16,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- LEFT: Fiscal Year Selector Block -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,-3,20,0">
+                    <TextBlock Text="FISCAL YEAR" FontSize="9" FontWeight="Bold" Foreground="#5C1D38" Margin="0,0,0,4"/>
+                    <Border Background="#FFFFFF" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="16" Padding="0" Height="32">
+                        <ComboBox x:Name="FiscalYearSelector" 
+                                  ItemsSource="{Binding AvailableFiscalCycles}" 
+                                  SelectedItem="{Binding SelectedFiscalCycle, Mode=TwoWay}" 
+                                  DisplayMemberPath="DisplayName" 
+                                  Width="160" 
+                                  Height="32" 
+                                  FontSize="12" 
+                                  FontWeight="SemiBold" 
+                                  Foreground="#5C1D38" 
+                                  Background="Transparent" 
+                                  BorderThickness="0" 
+                                  Padding="10,0" 
+                                  VerticalContentAlignment="Center"
+                                  HorizontalContentAlignment="Center"
+                                  FocusVisualStyle="{x:Null}">
+                            <ComboBox.Resources>
+                                <!-- ComboBox Item Container Style - Rounded Hover -->
+                                <Style TargetType="ComboBoxItem">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Padding" Value="12,6"/>
+                                    <Setter Property="Foreground" Value="#1A1A1A"/>
+                                    <Setter Property="FontSize" Value="12"/>
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ComboBoxItem">
+                                                <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" 
+                                                        Padding="{TemplateBinding Padding}" Margin="2" CornerRadius="8">
+                                                    <ContentPresenter VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsHighlighted" Value="True">
+                                                        <Setter TargetName="ItemBorder" Property="Background" Value="#FBF5F7"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="ItemBorder" Property="Background" Value="#F5ECEE"/>
+                                                        <Setter Property="Foreground" Value="#5C1D38"/>
+                                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ComboBox.Resources>
+                            <ComboBox.Template>
+                                <ControlTemplate TargetType="ComboBox">
+                                    <Grid>
+                                        <ToggleButton x:Name="ToggleButton" Background="Transparent" BorderThickness="0" 
+                                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                      Cursor="Hand" Padding="0" FocusVisualStyle="{x:Null}">
+                                            <ToggleButton.Template>
+                                                <ControlTemplate TargetType="ToggleButton">
+                                                    <Border x:Name="ToggleBorder" Background="Transparent" BorderThickness="0">
+                                                        <ContentPresenter/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="ToggleBorder" Property="Background" Value="Transparent"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </ToggleButton.Template>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="28"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter Grid.Column="0" Content="{TemplateBinding SelectionBoxItem}" 
+                                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                                                  IsHitTestVisible="False" Margin="0" 
+                                                                  HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                                <Path Grid.Column="1" Data="M0,0 L4,4 L8,0 Z" Fill="#5C1D38" Stretch="Uniform" 
+                                                      Width="7" Height="5" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                            </Grid>
+                                        </ToggleButton>
+                                        <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" 
+                                               AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                            <Border Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="12" 
+                                                    Padding="4" MinWidth="{Binding ActualWidth, ElementName=ToggleButton}" ClipToBounds="True">
+                                                <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                                    <ItemsPresenter/>
+                                                </ScrollViewer>
+                                            </Border>
+                                        </Popup>
+                                    </Grid>
+                                </ControlTemplate>
+                            </ComboBox.Template>
+                        </ComboBox>
+                    </Border>
+                </StackPanel>
+                
+                <!-- VERTICAL SEPARATOR LINE -->
+                <Border Grid.Column="1" Width="1" Height="40" Background="#D4B6C2" Margin="20,0" VerticalAlignment="Center"/>
+                
+                <!-- CENTER: Metric Counters Row -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,20,0">
+                    <!-- TOTAL SLOTS -->
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,20,0">
+                        <TextBlock Text="TOTAL SLOTS" FontSize="9" FontWeight="Bold" Foreground="#5C1D38" HorizontalAlignment="Left"/>
+                        <TextBlock Text="{Binding GranteeSlots, FallbackValue='100'}" FontSize="20" FontWeight="Bold" Foreground="#1A1A1A" HorizontalAlignment="Left"/>
                     </StackPanel>
-                </Border>
-                <!-- Circular Refresh Button -->
-                <Button x:Name="BtnRefreshSubsidy"
-                        Width="40" Height="40" Margin="8,0,0,0"
-                        BorderThickness="0" Background="White"
-                        Cursor="Hand" ToolTip="{Binding RefreshTooltip, FallbackValue='Refresh subsidy recommendations'}"
-                        Command="{Binding RefreshCommand}">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bg" Background="{TemplateBinding Background}"
-                                    CornerRadius="20" BorderBrush="#E0D0D5" BorderThickness="1.5">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <!-- ACCEPTED RECIPIENTS -->
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,20,0" MinWidth="180">
+                        <TextBlock Text="ACCEPTED RECIPIENTS" FontSize="9" FontWeight="Bold" Foreground="#5C1D38" HorizontalAlignment="Left"/>
+                        <Grid VerticalAlignment="Top" Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding ConfirmedGranteesCount, FallbackValue='2'}" FontSize="20" FontWeight="Bold" Foreground="#1A1A1A"/>
+                            <TextBlock Grid.Column="1" Text="{Binding QuotaProgressText, FallbackValue='2 of 100 confirmed (2%)'}" FontSize="10" FontWeight="SemiBold" Foreground="#16A34A" VerticalAlignment="Bottom" Margin="6,0,0,2"/>
+                        </Grid>
+                        <!-- Dynamic Progress Bar -->
+                        <Grid Height="4" x:Name="ProgressBarContainer" Margin="0,4,0,0">
+                            <Border Background="#EDE2E6" Height="4" CornerRadius="2" HorizontalAlignment="Stretch"/>
+                            <Rectangle x:Name="ProgressBarFill" Fill="#5C1D38" Height="4" RadiusX="2" RadiusY="2" HorizontalAlignment="Left" Width="3.6"/>
+                        </Grid>
+                    </StackPanel>
+                    <!-- REMAINING -->
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,20,0">
+                        <TextBlock Text="REMAINING" FontSize="9" FontWeight="Bold" Foreground="#5C1D38" HorizontalAlignment="Left"/>
+                        <TextBlock Text="{Binding RemainingSlots, FallbackValue='98'}" FontSize="20" FontWeight="Bold" Foreground="#1A1A1A" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                    <!-- DISQUALIFIED -->
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="DISQUALIFIED" FontSize="9" FontWeight="Bold" Foreground="#5C1D38" HorizontalAlignment="Left"/>
+                        <TextBlock Text="{Binding DisqualifiedCount, FallbackValue='6'}" FontSize="20" FontWeight="Bold" Foreground="#1A1A1A" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- RIGHT: Action Buttons -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <!-- Start New Cycle Button -->
+                    <Button Height="36" Padding="16,0" Margin="0,0,8,0" Cursor="Hand" ToolTip="Initialize next fiscal year cycle" Command="{Binding StartNewCycleCommand}" Visibility="{Binding IsActiveCycle, Converter={StaticResource BoolToVis}}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1.5" CornerRadius="18" Padding="{TemplateBinding Padding}">
+                                    <TextBlock Text="Start New Cycle" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    
+                    <!-- Finalize & Lock Button -->
+                    <Button Height="36" Padding="16,0" Margin="0,0,8,0" Cursor="Hand" Command="{Binding ToggleRosterLockCommand}" Visibility="{Binding CanShowRosterLockToggle, Converter={StaticResource BoolToVis}}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="#5C1D38" BorderBrush="#5C1D38" BorderThickness="1.5" CornerRadius="18" Padding="{TemplateBinding Padding}">
+                                    <TextBlock Text="{Binding RosterLockActionText, FallbackValue='Finalize &amp; Lock'}" FontSize="12" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.9"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    
+                    <!-- Three-Dot Menu Button -->
+                    <Grid>
+                        <Button x:Name="MenuButton" Height="36" Width="36" Margin="0,0,0,0" Cursor="Hand" ToolTip="More options" Click="MenuButton_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1.5" CornerRadius="18" Padding="0">
+                                        <TextBlock Text="⋮" FontSize="16" FontWeight="Bold" Foreground="#5C1D38" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        
+                        <!-- Styled Floating Dropdown Menu - Right Aligned, Rounded, Clipped -->
+                        <Popup x:Name="MenuPopup" PlacementTarget="{Binding ElementName=MenuButton}" Placement="Bottom" HorizontalOffset="-174" VerticalOffset="4" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                            <Border Background="White" CornerRadius="12" BorderBrush="#5C1D38" BorderThickness="1" Padding="0" Width="210" Margin="0">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#5C1D38" BlurRadius="12" ShadowDepth="2" Opacity="0.12"/>
+                                </Border.Effect>
+                                <Border CornerRadius="12" ClipToBounds="True">
+                                    <StackPanel>
+                                        <!-- Edit Cycle Option with Icon -->
+                                        <Border Padding="12,12" Cursor="Hand" MouseLeftButtonDown="MenuOption_Click" Tag="EditCycle">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#FBF5F7"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                            </Style>
+                                            </Border.Style>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <!-- Edit Icon -->
+                                                <Path Data="M3,17.25V21h3.75L17.81,9.94l-3.75,-3.75L3,17.25Z M20.71,7.04c.39,-.39.39,-1.02 0,-1.41l-2.34,-2.34c-.39,-.39,-1.02,-.39,-1.41,0l-1.83,1.83 3.75,3.75 1.83,-1.83Z" 
+                                                      Fill="#5C1D38" Stretch="Uniform" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="Edit Cycle Settings" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
+                                                    <TextBlock Text="Modify cycle parameters and dates" FontSize="9" Foreground="#888888" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                        
+                                        <!-- Divider -->
+                                        <Border Height="1" Background="#EDE2E6" Margin="0,4,0,4"/>
+                                        
+                                        <!-- View Details Option with Icon -->
+                                        <Border Padding="12,12" Cursor="Hand" MouseLeftButtonDown="MenuOption_Click" Tag="ViewDetails">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#FBF5F7"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                            </Style>
+                                            </Border.Style>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <!-- Eye/Details Icon -->
+                                                <Path Data="M12,4.5C7,4.5 2.73,7.61 1,12c1.73,4.39 6,7.5 11,7.5s9.27,-3.11 11,-7.5c-1.73,-4.39 -6,-7.5 -11,-7.5zM12,17c-2.76,0 -5,-2.24 -5,-5s2.24,-5 5,-5 5,2.24 5,5 -2.24,5 -5,5zm0,-8c-1.66,0 -3,1.34 -3,3s1.34,3 3,3 3,-1.34 3,-3 -1.34,-3 -3,-3z" 
+                                                      Fill="#5C1D38" Stretch="Uniform" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="View Cycle Details" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
+                                                    <TextBlock Text="Review complete cycle metadata and metrics" FontSize="9" Foreground="#888888" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
                             </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#F5ECEE"/>
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Opacity" Value="0.45"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                    <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
-                          Fill="#702943" Stretch="Uniform" Width="16" Height="16"/>
-                </Button>
-            </StackPanel>
-        </Grid>
-        <!-- Row 1: Cycle & Fiscal Year Management Control Bar -->
-        <c:SubsidyCycleControlBar Grid.Row="1" Margin="24,0,24,10"/>
-        <!-- Row 2: Tab Navigation Bar -->
-        <Border Grid.Row="2" BorderBrush="#E8D8DE" BorderThickness="0,0,0,1" Margin="24,0,24,0">
-            <StackPanel Orientation="Horizontal">
-                <!-- Tab 0: Recommendations Queue (Active Cycle only) -->
-                <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="0"
-                        IsEnabled="{Binding CanAccessActivePipelineTabs}">
-                    <Button.ToolTip>
-                        <ToolTip Content="{Binding TabDisabledTooltipText}"/>
-                    </Button.ToolTip>
-                    <TextBlock Text="Recommendations Queue" FontSize="13">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="#A06080"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding TabRecommendationsVisible}" Value="True">
-                                        <Setter Property="Foreground" Value="#702943"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </Button>
-                <!-- Tab 1: Approved Selection & Audit (Active Cycle only) -->
-                <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="1"
-                        IsEnabled="{Binding CanAccessActivePipelineTabs}">
-                    <Button.ToolTip>
-                        <ToolTip Content="{Binding TabDisabledTooltipText}"/>
-                    </Button.ToolTip>
-                    <TextBlock Text="Approved Selection &amp; Audit" FontSize="13">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="#A06080"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding TabShortlistVisible}" Value="True">
-                                        <Setter Property="Foreground" Value="#702943"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </Button>
-                <!-- Tab 2: Final Grantees & Archive (Always Accessible) -->
-                <Button Style="{StaticResource PageTabBtn}" Command="{Binding SwitchTabCommand}" CommandParameter="2">
-                    <TextBlock Text="Final Grantees" FontSize="13">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="#A06080"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding TabFinalVisible}" Value="True">
-                                        <Setter Property="Foreground" Value="#702943"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </Button>
-            </StackPanel>
+                        </Popup>
+                    </Grid>
+                </StackPanel>
+            </Grid>
         </Border>
-        <!-- Row 3: Tab Content Area -->
-        <Grid Grid.Row="3" Margin="24,10,24,14">
+        <!-- Row 1: TAB NAVIGATION & ACTION CONTROLS -->
+        <Border Grid.Row="1" BorderBrush="Transparent" BorderThickness="0" Padding="24,0" Margin="0,12,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- LEFT: Tabs Container (Horizontal StackPanel) -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,0">
+                    <!-- Tab 0: Recommendations Queue -->
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,32,0">
+                        <Button Command="{Binding SwitchTabCommand}" CommandParameter="0"
+                                IsEnabled="{Binding CanAccessActivePipelineTabs}" Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0" VerticalAlignment="Stretch" FocusVisualStyle="{x:Null}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="Transparent" BorderThickness="0">
+                                        <ContentPresenter/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <Button.ToolTip>
+                                <ToolTip Content="{Binding TabDisabledTooltipText}"/>
+                            </Button.ToolTip>
+                            <TextBlock x:Name="Tab0Text" Text="Recommendations Queue" FontSize="13" FontWeight="SemiBold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#A06080"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TabRecommendationsVisible}" Value="True">
+                                                <Setter Property="Foreground" Value="#5C1D38"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button>
+                        <Border BorderBrush="#5C1D38" BorderThickness="0,2,0,0" VerticalAlignment="Bottom"
+                                Visibility="{Binding TabRecommendationsVisible, Converter={StaticResource BoolToVis}}" Height="2" Margin="0,8,0,0"/>
+                    </StackPanel>
+                    
+                    <!-- Tab 1: Approved Selection & Audit -->
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,32,0">
+                        <Button Command="{Binding SwitchTabCommand}" CommandParameter="1"
+                                IsEnabled="{Binding CanAccessActivePipelineTabs}" Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0" VerticalAlignment="Stretch" FocusVisualStyle="{x:Null}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="Transparent" BorderThickness="0">
+                                        <ContentPresenter/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <Button.ToolTip>
+                                <ToolTip Content="{Binding TabDisabledTooltipText}"/>
+                            </Button.ToolTip>
+                            <TextBlock x:Name="Tab1Text" Text="Approved Selection &amp; Audit" FontSize="13" FontWeight="SemiBold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#A06080"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TabShortlistVisible}" Value="True">
+                                                <Setter Property="Foreground" Value="#5C1D38"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button>
+                        <Border BorderBrush="#5C1D38" BorderThickness="0,2,0,0" VerticalAlignment="Bottom"
+                                Visibility="{Binding TabShortlistVisible, Converter={StaticResource BoolToVis}}" Height="2" Margin="0,8,0,0"/>
+                    </StackPanel>
+                    
+                    <!-- Tab 2: Final Grantees -->
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                        <Button Command="{Binding SwitchTabCommand}" CommandParameter="2" Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0" VerticalAlignment="Stretch" FocusVisualStyle="{x:Null}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="Transparent" BorderThickness="0">
+                                        <ContentPresenter/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <TextBlock x:Name="Tab2Text" Text="Final Grantees" FontSize="13" FontWeight="SemiBold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#A06080"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TabFinalVisible}" Value="True">
+                                                <Setter Property="Foreground" Value="#5C1D38"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button>
+                        <Border BorderBrush="#5C1D38" BorderThickness="0,2,0,0" VerticalAlignment="Bottom"
+                                Visibility="{Binding TabFinalVisible, Converter={StaticResource BoolToVis}}" Height="2" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- RIGHT: Action Controls -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                    <!-- Batch Select Button -->
+                    <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Batch select candidates" Command="{Binding ToggleBatchModeCommand}" Visibility="{Binding CanShowBatchControls, Converter={StaticResource BoolToVis}}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                    <TextBlock Text="Batch Select" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    
+                    <!-- Export Queue Button -->
+                    <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Export queue data" Command="{Binding ExportQueueCommand}" Visibility="{Binding CanShowExport, Converter={StaticResource BoolToVis}}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                    <TextBlock Text="Export Queue" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    
+                    <!-- Run ML Triage Button -->
+                    <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Run ML triage analysis" Command="{Binding RunMLTriageCommand}" Visibility="{Binding CanShowMLTriage, Converter={StaticResource BoolToVis}}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                    <TextBlock Text="Run ML Triage" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    
+                    <!-- Filter Dropdown Button (Reco Queue tab only) -->
+                    <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Filter options" x:Name="FilterDropBtn" Click="FilterDropBtn_Click"
+                            Visibility="{Binding TabRecommendationsVisible, Converter={StaticResource BoolToVis}}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="Filter: All" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <Path Data="M7,10L12,15L17,10H7Z" Fill="#5C1D38" Stretch="Uniform" Width="8" Height="8" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    
+                    <!-- Refresh Button (Circular) -->
+                    <Button x:Name="BtnRefreshTable" Width="32" Height="32" Margin="0,0,0,0" Cursor="Hand" ToolTip="Refresh data" Command="{Binding RefreshCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="16" Padding="0">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
+                              Fill="#5C1D38" Stretch="Uniform" Width="14" Height="14"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <!-- Row 2: TAB GRIDS CONTAINER -->
+        <Grid Grid.Row="2" Margin="24,16,24,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -176,10 +545,10 @@
                                     Visibility="{Binding IsDrawerOpen, Converter={StaticResource BoolToVis}}"/>
         </Grid>
         <!-- Outlier Rejection Modal Overlay (Spans all rows) -->
-        <c:ModalOutlierRejection Grid.RowSpan="4"/>
+        <c:ModalOutlierRejection Grid.RowSpan="3"/>
         <!-- Disqualified Candidates Audit Log Modal Overlay (Spans all rows) -->
-        <c:ModalDisqualifiedCandidates Grid.RowSpan="4"/>
+        <c:ModalDisqualifiedCandidates Grid.RowSpan="3"/>
         <!-- Loading Overlay (Disabled in favor of modern Skeleton Loader) -->
-        <c:LoadingOverlay Grid.RowSpan="4" IsLoading="False" Visibility="Collapsed" Panel.ZIndex="9999"/>
+        <c:LoadingOverlay Grid.RowSpan="5" IsLoading="False" Visibility="Collapsed" Panel.ZIndex="9999"/>
     </Grid>
 </Page>

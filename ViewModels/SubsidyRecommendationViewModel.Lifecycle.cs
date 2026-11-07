@@ -364,5 +364,150 @@ namespace SOLUM_UI.ViewModels
                 System.Diagnostics.Debug.WriteLine($"[RefreshDisqualifiedCandidatesAsync] Error: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Open Edit Cycle Dialog - triggered from menu
+        /// </summary>
+        private async void OpenEditCycleDialog()
+        {
+            try
+            {
+                if (SelectedFiscalCycle == null)
+                {
+                    ToastNotification.Show("No Cycle Selected", "Please select a fiscal cycle first.", ToastType.Warning);
+                    return;
+                }
+
+                // Create a DTO from the selected fiscal cycle
+                var cycleDto = new SubsidyCycleDto
+                {
+                    Id = SelectedFiscalCycle.CycleId ?? Guid.Empty,
+                    FiscalYear = SelectedFiscalCycle.FiscalYear,
+                    AllocatedSlots = SelectedFiscalCycle.AllocatedSlots,
+                    PerGranteeAmount = SelectedFiscalCycle.PerGranteeAmount,
+                    TotalBudget = SelectedFiscalCycle.TotalBudget,
+                    Status = SelectedFiscalCycle.Status
+                };
+
+                // Show the edit cycle dialog
+                var dialog = new EditCycleDialog(cycleDto)
+                {
+                    Owner = Application.Current?.MainWindow
+                };
+
+                if (dialog.ShowDialog() == true && dialog.IsSaved)
+                {
+                    // Save the changes - the cycleDto was updated by reference in the dialog
+                    await SaveCycleSettingsAsync(cycleDto);
+                }
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show("Error", $"Failed to open cycle editor: {ex.Message}", ToastType.Error);
+            }
+        }
+
+        /// <summary>
+        /// Save Cycle Settings - calls the API to update cycle data
+        /// </summary>
+        private async Task SaveCycleSettingsAsync(SubsidyCycleDto updatedCycle)
+        {
+            try
+            {
+                if (updatedCycle.Id == Guid.Empty)
+                {
+                    ToastNotification.Show("Invalid Cycle", "Cannot update cycle: Invalid cycle ID.", ToastType.Error);
+                    System.Diagnostics.Debug.WriteLine("[SaveCycleSettingsAsync] Invalid cycle ID (Guid.Empty)");
+                    return;
+                }
+
+                // Prepare the update request
+                var updateRequest = new UpdateSubsidyCycleRequest
+                {
+                    AllocatedSlots = updatedCycle.AllocatedSlots,
+                    PerGranteeAmount = updatedCycle.PerGranteeAmount,
+                    TotalBudget = updatedCycle.TotalBudget
+                };
+
+                // Log the request details for debugging
+                System.Diagnostics.Debug.WriteLine($"[SaveCycleSettingsAsync] Updating cycle {updatedCycle.Id}");
+                System.Diagnostics.Debug.WriteLine($"[SaveCycleSettingsAsync] AllocatedSlots: {updateRequest.AllocatedSlots}");
+                System.Diagnostics.Debug.WriteLine($"[SaveCycleSettingsAsync] PerGranteeAmount: {updateRequest.PerGranteeAmount}");
+                System.Diagnostics.Debug.WriteLine($"[SaveCycleSettingsAsync] TotalBudget: {updateRequest.TotalBudget}");
+
+                // Call the API
+                var response = await _apiService.UpdateCycleAsync(updatedCycle.Id, updateRequest);
+
+                // Log the response
+                System.Diagnostics.Debug.WriteLine($"[SaveCycleSettingsAsync] Response received. Succeeded: {response?.Succeeded}");
+                if (response?.Errors != null && response.Errors.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[SaveCycleSettingsAsync] Errors: {string.Join(", ", response.Errors)}");
+                }
+
+                if (response != null && response.Succeeded)
+                {
+                    // Update the local fiscal cycle option
+                    if (SelectedFiscalCycle != null)
+                    {
+                        SelectedFiscalCycle.AllocatedSlots = updatedCycle.AllocatedSlots;
+                        SelectedFiscalCycle.PerGranteeAmount = updatedCycle.PerGranteeAmount;
+                        SelectedFiscalCycle.TotalBudget = updatedCycle.TotalBudget;
+                    }
+
+                    // Update the ViewModel properties
+                    GranteeSlots = updatedCycle.AllocatedSlots;
+                    GrantAmountPerRecipient = (int)updatedCycle.PerGranteeAmount;
+
+                    // Refresh the UI
+                    NotifyCycleProperties();
+                    NotifyQuotaMetricsChanged();
+                    RecalculateQuotaAndFilter();
+
+                    ToastNotification.Show("Settings Updated", 
+                        $"Cycle settings for FY {updatedCycle.FiscalYear} updated successfully.\nSlots: {updatedCycle.AllocatedSlots:N0} | Amount: ₱{updatedCycle.PerGranteeAmount:N2} | Total: ₱{updatedCycle.TotalBudget:N2}", 
+                        ToastType.Success);
+                }
+                else
+                {
+                    string errorMsg = response?.Errors != null && response.Errors.Count > 0
+                        ? string.Join(", ", response.Errors)
+                        : "Failed to update cycle settings. No error details provided.";
+                    
+                    System.Diagnostics.Debug.WriteLine($"[SaveCycleSettingsAsync] Update failed: {errorMsg}");
+                    ToastNotification.Show("Update Failed", errorMsg, ToastType.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SaveCycleSettingsAsync] Exception: {ex.GetType().Name} - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[SaveCycleSettingsAsync] StackTrace: {ex.StackTrace}");
+                
+                ToastNotification.Show("Error", $"Failed to save cycle settings: {ex.Message}", ToastType.Error);
+            }
+        }
+
+        /// <summary>
+        /// Open View Details Dialog - triggered from menu to show cycle metadata
+        /// </summary>
+        private void OpenViewDetailsDialog()
+        {
+            try
+            {
+                if (SelectedFiscalCycle == null)
+                {
+                    ToastNotification.Show("No Cycle Selected", "Please select a fiscal cycle first.", ToastType.Warning);
+                    return;
+                }
+
+                // Show view details modal/dialog with cycle metadata
+                // This would integrate with a dialog service or modal component
+                ToastNotification.Show("Cycle Details", $"View details for FY {SelectedFiscalCycle.FiscalYear}: Status={SelectedFiscalCycle.Status}, Allocated Slots={SelectedFiscalCycle.AllocatedSlots}.", ToastType.Info);
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show("Error", $"Failed to open cycle details: {ex.Message}", ToastType.Error);
+            }
+        }
     }
 }

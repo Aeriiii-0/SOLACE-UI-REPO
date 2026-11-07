@@ -316,6 +316,9 @@
     <Compile Include="Views\Dialogs\NewCycleDialog.xaml.cs">
       <DependentUpon>NewCycleDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\EditCycleDialog.xaml.cs">
+      <DependentUpon>EditCycleDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\RenewalReassessmentDialog.xaml.cs">
       <DependentUpon>RenewalReassessmentDialog.xaml</DependentUpon>
     </Compile>
@@ -388,9 +391,6 @@
       <DependentUpon>TopBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserAdministrationPage.xaml.cs">
-      <DependentUpon>UserAdministrationPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\UserAdministrationPage.Paging.cs">
       <DependentUpon>UserAdministrationPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UserProfilePage.xaml.cs">
@@ -605,6 +605,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\NewCycleDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\EditCycleDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

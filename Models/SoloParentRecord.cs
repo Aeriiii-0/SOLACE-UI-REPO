@@ -214,32 +214,45 @@ namespace SOLUM_UI.Models
         }
         /// <summary>
         /// Gets the start/issue date of the current active term.
-        /// Checks the latest term in RecordTerms, then LastUpdated, then DateOfApplication, then CurrentTermExpiresAt - 1 year.
+        /// Checks DateOfApplication first (the actual application date), then the latest term in RecordTerms, then LastUpdated, then CurrentTermExpiresAt - 1 year.
         /// </summary>
         public DateTime GetActiveTermStartDate()
         {
+            // Priority 1: Use DateOfApplication if available - this is the actual application date, not encoding date
+            if (DateOfApplication != DateTime.MinValue)
+                return DateOfApplication;
+
+            // Priority 2: Check RecordTerms for the latest start date
             DateTime latestStart = DateTime.MinValue;
             if (RecordTerms != null && RecordTerms.Count > 0)
             {
                 foreach (var rt in RecordTerms)
                 {
-                    DateTime dt = rt.DateCreated ?? DateTime.MinValue;
-                    if (DateTime.TryParse(rt.StartsAt, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var s) && s > dt)
+                    DateTime dt = DateTime.MinValue;
+                    // Try parsing StartsAt field first
+                    if (DateTime.TryParse(rt.StartsAt, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var s))
                         dt = s;
-                    else if (DateTime.TryParse(rt.StartsAt, out var s2) && s2 > dt)
+                    else if (DateTime.TryParse(rt.StartsAt, out var s2))
                         dt = s2;
+                    // Fall back to DateCreated only if StartsAt is not available
+                    else if (rt.DateCreated.HasValue && rt.DateCreated.Value != DateTime.MinValue)
+                        dt = rt.DateCreated.Value;
+                    
                     if (dt > latestStart)
                         latestStart = dt;
                 }
             }
             if (latestStart != DateTime.MinValue)
                 return latestStart;
+
+            // Priority 3: Fall back to LastUpdated (record encoding/update date)
             if (LastUpdated != DateTime.MinValue)
                 return LastUpdated;
-            if (DateOfApplication != DateTime.MinValue)
-                return DateOfApplication;
+
+            // Priority 4: Calculate from CurrentTermExpiresAt
             if (CurrentTermExpiresAt.HasValue && CurrentTermExpiresAt.Value != DateTime.MinValue)
                 return CurrentTermExpiresAt.Value.AddYears(-1);
+
             return DateTime.MinValue;
         }
         /// <summary>

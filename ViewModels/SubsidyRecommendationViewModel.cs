@@ -246,6 +246,9 @@ namespace SOLUM_UI.ViewModels
             OnPropertyChanged(nameof(CanModifyGrantees));
             OnPropertyChanged(nameof(CanAccessActivePipelineTabs));
             OnPropertyChanged(nameof(CanShowRosterLockToggle));
+            OnPropertyChanged(nameof(CanShowBatchControls));
+            OnPropertyChanged(nameof(CanShowExport));
+            OnPropertyChanged(nameof(CanShowMLTriage));
             OnPropertyChanged(nameof(TabDisabledTooltipText));
             OnPropertyChanged(nameof(RosterStatusBadgeText));
             OnPropertyChanged(nameof(RosterStatusBadgeBg));
@@ -275,6 +278,9 @@ namespace SOLUM_UI.ViewModels
                     OnPropertyChanged(nameof(TabRecommendationsVisible));
                     OnPropertyChanged(nameof(TabShortlistVisible));
                     OnPropertyChanged(nameof(TabFinalVisible));
+                    OnPropertyChanged(nameof(CanShowBatchControls));
+                    OnPropertyChanged(nameof(CanShowExport));
+                    OnPropertyChanged(nameof(CanShowMLTriage));
                     if (value == 0) _ = LoadQueuePageAsync(QueueCurrentPage);
                     else if (value == 1) FilterShortlistRows();
                     else if (value == 2) UpdateFinalPaged();
@@ -343,7 +349,7 @@ namespace SOLUM_UI.ViewModels
 
         public string AuditFilterLabel => _auditFilter == "All" ? "Filter: All" : (_auditFilter == "CollegeAge" ? "Filter: City Educ" : "Filter: Cleared");
 
-        public string ShortlistAuditFilterLabel => _shortlistAuditFilter == "Pending" ? "Filter: Pending Confirmation" : (_shortlistAuditFilter == "Confirmed" ? "Filter: Confirmed Grantees" : (_shortlistAuditFilter == "CollegeAge" ? "Filter: City Educ" : (_shortlistAuditFilter == "Clean" ? "Filter: Cleared" : "Filter: All")));
+        public string ShortlistAuditFilterLabel => _shortlistAuditFilter == "Pending" ? "Not Yet Approved" : (_shortlistAuditFilter == "Confirmed" ? "Approved" : (_shortlistAuditFilter == "CollegeAge" ? "City Educ" : (_shortlistAuditFilter == "Clean" ? "Cleared" : "Filter")));
 
         public string Tab2QuotaSummary => $"Slots: {ShortlistRows.Count(x => !x.IsWaitlisted)} of {_granteeSlots} filled";
 
@@ -537,6 +543,12 @@ namespace SOLUM_UI.ViewModels
 
         public bool CanShowRosterLockToggle => SelectedFiscalCycle != null && (SelectedFiscalCycle.IsActive || SelectedFiscalCycle.IsFinalized);
 
+        public bool CanShowBatchControls => TabRecommendationsVisible && !IsRosterLocked;
+
+        public bool CanShowExport => TabRecommendationsVisible && !IsRosterLocked;
+
+        public bool CanShowMLTriage => TabRecommendationsVisible && !IsRosterLocked;
+
         public string CycleTypeBadgeText => IsActiveCycle ? "OPERATIONAL CYCLE" : (SelectedFiscalCycle != null && SelectedFiscalCycle.IsFinalized ? "FINALIZED CYCLE" : "HISTORICAL ARCHIVE");
 
         public string CycleTypeBadgeBg => IsActiveCycle ? "#DCFCE7" : (SelectedFiscalCycle != null && SelectedFiscalCycle.IsFinalized ? "#FEF3C7" : "#F3F4F6");
@@ -587,6 +599,9 @@ namespace SOLUM_UI.ViewModels
         public ICommand OpenReassessmentFormCommand { get; private set; }
 
         public ICommand RefreshCommand { get; private set; } public ICommand GenerateRecommendationsCommand { get; private set; } public ICommand ToggleRosterLockCommand { get; private set; } public ICommand StartNewCycleCommand { get; private set; } public ICommand ToggleShortlistBatchModeCommand { get; private set; } public ICommand SaveQuotaCommand { get; private set; } public ICommand ExportAllQueueCommand { get; private set; }
+        public ICommand ExportQueueCommand { get; private set; } public ICommand RunMLTriageCommand { get; private set; }
+        
+        public ICommand EditCycleCommand { get; private set; } public ICommand ViewDetailsCommand { get; private set; }
 
         private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
 

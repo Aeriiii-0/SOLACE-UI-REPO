@@ -161,8 +161,13 @@ namespace SOLUM_UI.ViewModels
             QuickPredictCandidateCommand = new RelayCommand(async p => await RunQuickPredictAsync(p as SubsidyItem ?? ActiveCandidate));
             OpenReassessmentFormCommand = new RelayCommand(async p => await OpenReassessmentFormAsync(p as SubsidyItem ?? ActiveCandidate));
             RefreshCommand = new RelayCommand(async _ => { InvalidateCache(); await RefreshDataAsync(true); }, _ => !IsLoading); GenerateRecommendationsCommand = new RelayCommand(async _ => await GenerateAndRefreshAsync(), _ => !IsLoading);
+            EditCycleCommand = new RelayCommand(_ => OpenEditCycleDialog());
+            ViewDetailsCommand = new RelayCommand(_ => OpenViewDetailsDialog());
             ToggleRosterLockCommand = new RelayCommand(_ => ToggleRosterLock()); StartNewCycleCommand = new RelayCommand(async _ => await StartNewCycleAsync()); SaveQuotaCommand = new RelayCommand(async _ => await SaveQuotaAsync());
             ExportAllQueueCommand = new RelayCommand(async _ => await ExportRecommendationsQueueAsync());
+            // Add missing command aliases for UI consistency
+            ExportQueueCommand = ExportAllQueueCommand;
+            RunMLTriageCommand = GenerateRecommendationsCommand;
         }
 
         private async Task GenerateAndRefreshAsync()

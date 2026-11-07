@@ -133,7 +133,7 @@ namespace SOLUM_UI.Views.Components
             double depW = ColDependents != null ? ColDependents.Width : 95;
             double cardStatusW = ColCardStatus != null ? ColCardStatus.Width : 90;
             double validUntilW = ColValidUntil != null ? ColValidUntil.Width : 95;
-            double actionW = 145;
+            double actionW = 177;
             if (ColAction != null) ColAction.Width = actionW;
 
             double fixedWidth = selW + rankW + scoreW + depW + cardStatusW + validUntilW + actionW;

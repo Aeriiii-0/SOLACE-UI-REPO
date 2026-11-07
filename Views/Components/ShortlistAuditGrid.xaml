@@ -12,7 +12,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Thumb}">
-                        <Border x:Name="ThumbBorder" Background="#702943" CornerRadius="2" Opacity="0.22"
+                        <Border x:Name="ThumbBorder" Background="#5C1D38" CornerRadius="2" Opacity="0.22"
                                 Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbBorder" Property="Opacity" Value="0.80"/></Trigger>
@@ -64,13 +64,13 @@
         </Style>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <Style x:Key="ColHeader" TargetType="GridViewColumnHeader">
-            <Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Background" Value="#FAF2F5"/><Setter Property="Foreground" Value="#702943"/><Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Height" Value="46"/><Setter Property="Padding" Value="4,0"/><Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="Background" Value="#FBF5F7"/><Setter Property="Foreground" Value="#5C1D38"/><Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="Bold"/><Setter Property="Height" Value="46"/><Setter Property="Padding" Value="10,0"/><Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="GridViewColumnHeader">
-                        <Border Background="#FAF2F5" BorderBrush="#EBD8DE" BorderThickness="0,0,0,1">
-                            <Border BorderBrush="#EBD8DE" BorderThickness="0,0,1,0" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" TextBlock.Foreground="#702943" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="11" TextBlock.FontWeight="SemiBold"/>
+                        <Border Background="#FBF5F7" BorderBrush="#5C1D38" BorderThickness="0,0,0,2">
+                            <Border Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" TextBlock.Foreground="#5C1D38" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="11" TextBlock.FontWeight="Bold"/>
                             </Border>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -84,7 +84,7 @@
         <Style x:Key="SelRow" TargetType="ListViewItem">
             <EventSetter Event="PreviewMouseLeftButtonDown" Handler="Row_PreviewMouseLeftButtonDown"/>
             <EventSetter Event="MouseDoubleClick" Handler="Row_MouseDoubleClick"/>
-            <Setter Property="Background" Value="White"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Setter Property="BorderBrush" Value="#F2EAEF"/><Setter Property="Padding" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Cursor" Value="Hand"/><Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Background" Value="White"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Setter Property="BorderBrush" Value="#EDE2E6"/><Setter Property="Padding" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Cursor" Value="Hand"/><Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListViewItem">
                 <Grid>
                     <Border x:Name="RowBg" Background="White" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
@@ -100,7 +100,7 @@
             </ControlTemplate></Setter.Value></Setter>
         </Style>
         <Style x:Key="PagerBtn" TargetType="Button">
-            <Setter Property="Height" Value="26"/><Setter Property="Padding" Value="10,0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Background" Value="White"/><Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="Height" Value="26"/><Setter Property="Padding" Value="10,0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Background" Value="White"/><Setter Property="Foreground" Value="#5C1D38"/>
             <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter>
             <Style.Triggers><Trigger Property="IsEnabled" Value="False"><Setter Property="Background" Value="#F1F5F9"/><Setter Property="Foreground" Value="#94A3B8"/></Trigger></Style.Triggers>
         </Style>
@@ -108,7 +108,7 @@
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
         <!-- Single Unified Compact Ribbon: Single Row Controls & Batch Selection -->
-        <Border Grid.Row="0" Background="#FBF5F7" MinHeight="48" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="14,8" Margin="0,0,0,6">
+        <Border Grid.Row="0" Background="#FBF5F7" MinHeight="48" CornerRadius="10" BorderBrush="#5C1D38" BorderThickness="1" Padding="14,8" Margin="0,-15,0,17">
             <Grid VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -124,23 +124,24 @@
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="Background" Value="White"/>
-                                            <Setter Property="BorderBrush" Value="#D4A0B0"/>
+                                            <Setter Property="BorderBrush" Value="#5C1D38"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsShortlistBatchMode}" Value="True">
-                                                    <Setter Property="Background" Value="#702943"/>
-                                                    <Setter Property="BorderBrush" Value="#702943"/>
+                                                    <Setter Property="Background" Value="#5C1D38"/>
+                                                    <Setter Property="BorderBrush" Value="#5C1D38"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <TextBlock Text="{Binding ShortlistBatchModeButtonText}" FontSize="11" FontWeight="SemiBold"
-                                               VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center">
+                                    <TextBlock Text="{Binding ShortlistBatchModeButtonText}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="#702943"/>
+                                                <Setter Property="Foreground" Value="#5C1D38"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsShortlistBatchMode}" Value="True">
                                                         <Setter Property="Foreground" Value="White"/>
+                                                        <Setter Property="FontWeight" Value="SemiBold"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -163,7 +164,7 @@
                                 IsEnabled="{Binding HasShortlistSelection}">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="#702943" CornerRadius="6" Padding="14,0">
+                                    <Border x:Name="Bg" Background="#5C1D38" CornerRadius="12" Padding="14,0">
                                         <TextBlock Text="Confirm Selected" FontSize="10.5" FontWeight="SemiBold" Foreground="White"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
                                     </Border>
@@ -179,12 +180,12 @@
                                 IsEnabled="{Binding HasShortlistSelection}" Margin="6,0,0,0">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="White" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="6" Padding="14,0">
-                                        <TextBlock Text="Revoke Selected" FontSize="10.5" FontWeight="SemiBold" Foreground="#702943"
+                                    <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1.5" CornerRadius="12" Padding="14,0">
+                                        <TextBlock Text="Revoke Selected" FontSize="10.5" FontWeight="SemiBold" Foreground="#5C1D38"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FDF2F4"/></Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/></Trigger>
                                         <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -193,7 +194,7 @@
                     </StackPanel>
                 </StackPanel>
                 <!-- Center: Search Bar -->
-                <Border Grid.Column="1" Background="White" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Height="30" Margin="14,0" VerticalAlignment="Center">
+                <Border Grid.Column="1" Background="White" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1" Height="30" Margin="14,0" VerticalAlignment="Center">
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                         <Path Grid.Column="0" Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.29,20.42L13.03,15.15C11.9,16 10.46,16.5 9.5,16.5A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" Fill="#A06080" Stretch="Uniform" Width="12" Height="12" Margin="8,0,5,0" VerticalAlignment="Center"/>
@@ -205,34 +206,70 @@
                     <!-- Filter Dropdown -->
                     <Grid Margin="0,0,8,0" VerticalAlignment="Center">
                         <Button x:Name="FilterDropBtn" Height="30" Padding="10,0" Cursor="Hand" Click="FilterDropBtn_Click">
-                            <Button.Template><ControlTemplate TargetType="Button"><Border Background="White" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                            <Button.Template><ControlTemplate TargetType="Button"><Border Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="#702943" Stretch="Uniform" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                <TextBlock Text="{Binding ShortlistAuditFilterLabel}" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="#5C1D38" Stretch="Uniform" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="{Binding ShortlistAuditFilterLabel}" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterDropBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
-                            <Border Background="White" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="6" MinWidth="220">
-                                <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.16"/></Border.Effect>
+                            <Border Background="White" CornerRadius="10" BorderBrush="#E8D5DB" BorderThickness="1" Padding="8" MinWidth="210" Margin="0,4,0,0">
+                                <Border.Effect><DropShadowEffect Color="#5C1D38" BlurRadius="14" ShadowDepth="2" Opacity="0.10"/></Border.Effect>
                                 <StackPanel>
-                                    <Border CornerRadius="6" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="All" Padding="10,6"><TextBlock Text="All Candidates" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/></Border>
-                                    <Border CornerRadius="6" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="Pending" Padding="10,6"><TextBlock Text="Yet to be Confirmed" FontSize="11" FontWeight="SemiBold" Foreground="#B45309"/></Border>
-                                    <Border CornerRadius="6" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="Confirmed" Padding="10,6"><TextBlock Text="Confirmed Grantees" FontSize="11" FontWeight="SemiBold" Foreground="#15803D"/></Border>
-                                    <Border Height="1" Background="#F0E0E6" Margin="4,2"/>
-                                    <Border CornerRadius="6" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="CollegeAge" Padding="10,6"><TextBlock Text="City Educ Scholars (17–24y)" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/></Border>
-                                    <Border CornerRadius="6" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="Clean" Padding="10,6"><TextBlock Text="Cleared Standard" FontSize="11" FontWeight="SemiBold" Foreground="#702943"/></Border>
+                                    <!-- Show All -->
+                                    <Border CornerRadius="7" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="All" Padding="10,7" Background="Transparent">
+                                        <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FBF5F7"/></Trigger></Style.Triggers></Style></Border.Style>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Width="6" Height="6" CornerRadius="3" Background="#A0728A" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Show All" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <!-- Divider + Group Label: Approval Status -->
+                                    <Border Height="1" Background="#F0E0E6" Margin="4,4,4,2"/>
+                                    <TextBlock Text="APPROVAL STATUS" FontSize="9" FontWeight="Bold" Foreground="#A0728A" Margin="10,4,0,2"/>
+                                    <Border CornerRadius="7" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="Confirmed" Padding="10,7" Background="Transparent">
+                                        <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#F0FDF4"/></Trigger></Style.Triggers></Style></Border.Style>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Width="6" Height="6" CornerRadius="3" Background="#16A34A" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Approved" FontSize="11" FontWeight="SemiBold" Foreground="#15803D"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border CornerRadius="7" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="Pending" Padding="10,7" Background="Transparent">
+                                        <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FFFBEB"/></Trigger></Style.Triggers></Style></Border.Style>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Width="6" Height="6" CornerRadius="3" Background="#D97706" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Not Yet Approved" FontSize="11" FontWeight="SemiBold" Foreground="#B45309"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <!-- Divider + Group Label: Scholar Type -->
+                                    <Border Height="1" Background="#F0E0E6" Margin="4,4,4,2"/>
+                                    <TextBlock Text="SCHOLAR TYPE" FontSize="9" FontWeight="Bold" Foreground="#A0728A" Margin="10,4,0,2"/>
+                                    <Border CornerRadius="7" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="CollegeAge" Padding="10,7" Background="Transparent">
+                                        <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FBF5F7"/></Trigger></Style.Triggers></Style></Border.Style>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Width="6" Height="6" CornerRadius="3" Background="#7C3AED" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="City Educ (17–24 yrs)" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border CornerRadius="7" Cursor="Hand" MouseLeftButtonDown="FilterOpt_Click" Tag="Clean" Padding="10,7" Background="Transparent">
+                                        <Border.Style><Style TargetType="Border"><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FBF5F7"/></Trigger></Style.Triggers></Style></Border.Style>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Width="6" Height="6" CornerRadius="3" Background="#0891B2" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Cleared Standard" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38"/>
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
                             </Border>
                         </Popup>
                     </Grid>
                     <!-- Export Dropdown (Clean White & Maroon Border to match Export Queue) -->
                     <Grid>
-                        <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1">
+                        <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1">
                             <Button x:Name="ExportDropBtn" Background="Transparent" BorderThickness="0" Height="30" Padding="12,0" Cursor="Hand" Click="ExportDropBtn_Click">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                                            <TextBlock Text="Export Rosters ▾" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                            <TextBlock Text="Export Rosters ▾" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="BtnBorder" Property="Background" Value="#FDF2F4"/></Trigger>
@@ -242,10 +279,10 @@
                             </Button>
                         </Border>
                         <Popup x:Name="ExportPopup" PlacementTarget="{Binding ElementName=ExportDropBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
-                            <Border Background="White" CornerRadius="10" BorderBrush="#D4A0B0" BorderThickness="1" Padding="6" MinWidth="250">
+                            <Border Background="White" CornerRadius="10" BorderBrush="#5C1D38" BorderThickness="1" Padding="6" MinWidth="250">
                                 <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.16"/></Border.Effect>
                                 <StackPanel>
-                                    <Border CornerRadius="6" Cursor="Hand" Padding="10,7" MouseLeftButtonDown="ExportCityEducOpt_Click"><StackPanel><TextBlock Text="City Educ Roster (17–24 yrs)" FontSize="11.5" FontWeight="SemiBold" Foreground="#702943"/><TextBlock Text="Exports college students with names &amp; ages" FontSize="10" Foreground="#888888" Margin="0,1,0,0"/></StackPanel></Border>
+                                    <Border CornerRadius="6" Cursor="Hand" Padding="10,7" MouseLeftButtonDown="ExportCityEducOpt_Click"><StackPanel><TextBlock Text="City Educ Roster (17–24 yrs)" FontSize="11.5" FontWeight="SemiBold" Foreground="#5C1D38"/><TextBlock Text="Exports college students with names &amp; ages" FontSize="10" Foreground="#888888" Margin="0,1,0,0"/></StackPanel></Border>
                                     <Border Height="1" Background="#F0E0E6" Margin="4,2"/>
                                     <Border CornerRadius="6" Cursor="Hand" Padding="10,7" MouseLeftButtonDown="ExportPantawidOpt_Click"><StackPanel><TextBlock Text="4Ps Beneficiaries List" FontSize="11.5" FontWeight="SemiBold" Foreground="#1D4ED8"/><TextBlock Text="Exports all Pantawid Pamilya recipients" FontSize="10" Foreground="#888888" Margin="0,1,0,0"/></StackPanel></Border>
                                 </StackPanel>
@@ -256,9 +293,9 @@
             </Grid>
         </Border>
         <!-- Main Shortlist Table Container: Record Management Card Design with Radial Mask -->
-        <Border Grid.Row="1" CornerRadius="14" BorderBrush="#E8D4DA" BorderThickness="1.5" Background="White">
+        <Border Grid.Row="1" CornerRadius="12" BorderBrush="#5C1D38" BorderThickness="1" Background="White" TextOptions.TextRenderingMode="ClearType" TextOptions.TextFormattingMode="Display" Margin="0,-12,0,0">
             <Border.Effect>
-                <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="2" Opacity="0.06"/>
+                <DropShadowEffect Color="#5C1D38" BlurRadius="12" ShadowDepth="1" Opacity="0.08"/>
             </Border.Effect>
             <Grid x:Name="TableClipGrid">
                 <Grid.OpacityMask>
@@ -279,21 +316,21 @@
                     <ListView.View>
                         <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
                             <GridViewColumn x:Name="ColSelect" Width="0">
-                                <GridViewColumn.Header><TextBlock Text="✓" FontSize="11" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/></GridViewColumn.Header>
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColSelect}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,10"><CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Click="RowCheckBox_Click"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.Header><TextBlock Text="✓" FontSize="11" FontWeight="Bold" Foreground="#5C1D38" HorizontalAlignment="Center"/></GridViewColumn.Header>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColSelect}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,10"><CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Click="RowCheckBox_Click"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn x:Name="ColRank" Header="RANK" Width="56">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColRank}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="0,10"><TextBlock Text="{Binding Rank, StringFormat='#{0}'}" FontSize="12" FontWeight="Bold" Foreground="#000000" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColRank}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,10"><TextBlock Text="{Binding Rank, StringFormat='#{0}'}" FontSize="12" FontWeight="Bold" Foreground="#1A1A1A" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn x:Name="ColName" Header="SOLO PARENT" Width="150">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="10,10"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#000000" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Barangay}" FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderThickness="0" Padding="10,10"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Barangay}" FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 3: Vulnerability Score (Transparent cell, clean score, top-right '!' signal for concern/fallback) -->
                             <GridViewColumn x:Name="ColScore" Header="SCORE" Width="78">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColScore}" Margin="-6,0,-6,0"
-                                                BorderBrush="#F2EAEF" BorderThickness="0,0,1,0"
+                                                BorderThickness="0"
                                                 Background="Transparent" Padding="4,6"
                                                 ToolTip="{Binding ScoreCellTooltip}">
                                             <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -312,14 +349,14 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn x:Name="ColCrossCheck" Header="COMPLIANCE FLAGS" Width="135">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColCrossCheck}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="8,10"><TextBlock Text="{Binding CrossCheckText}" FontSize="11" FontWeight="SemiBold" Foreground="#000000" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColCrossCheck}" Margin="-6,0,-6,0" BorderThickness="0" Padding="8,10"><TextBlock Text="{Binding CrossCheckText}" FontSize="11" FontWeight="SemiBold" Foreground="#1A1A1A" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col Dependents (Dedicated count column) -->
                             <GridViewColumn x:Name="ColDependents" Header="DEPENDENTS" Width="95">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Width="{Binding ActualWidth, ElementName=ColDependents}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="4,10">
-                                            <TextBlock Text="{Binding Dependants}" FontSize="12" FontWeight="SemiBold" Foreground="#000000" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Border Width="{Binding ActualWidth, ElementName=ColDependents}" Margin="-6,0,-6,0" BorderThickness="0" Padding="4,10">
+                                            <TextBlock Text="{Binding Dependants}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
@@ -328,20 +365,20 @@
                             <GridViewColumn x:Name="ColCompliance" Header="AUDIT &amp; COMPLIANCE DETAIL" Width="230">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Width="{Binding ActualWidth, ElementName=ColCompliance}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="10,8">
-                                            <TextBlock Text="{Binding AuditFlagsSummary}" FontSize="10.5" FontWeight="SemiBold" Foreground="#000000" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding AuditFlagsSummary}"/>
+                                        <Border Width="{Binding ActualWidth, ElementName=ColCompliance}" Margin="-6,0,-6,0" BorderThickness="0" Padding="10,8">
+                                            <TextBlock Text="{Binding AuditFlagsSummary}" FontSize="10.5" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding AuditFlagsSummary}"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn x:Name="ColValidUntil" Header="VALID UNTIL" Width="95">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColValidUntil}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="8,10"><TextBlock Text="{Binding ValidUntilFormatted}" FontSize="11" Foreground="#000000" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColValidUntil}" Margin="-6,0,-6,0" BorderThickness="0" Padding="8,10"><TextBlock Text="{Binding ValidUntilFormatted}" FontSize="11" Foreground="#1A1A1A" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col: Solo Parent ID Card Validity (Clean text, no pill) -->
                             <GridViewColumn x:Name="ColCardStatus" Header="VALIDITY" Width="90">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Width="{Binding ActualWidth, ElementName=ColCardStatus}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="4,10">
+                                        <Border Width="{Binding ActualWidth, ElementName=ColCardStatus}" Margin="-6,0,-6,0" BorderThickness="0" Padding="4,10">
                                             <TextBlock Text="{Binding CardStatusText}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding CardStatusFg}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                     </DataTemplate>
@@ -351,7 +388,7 @@
                             <GridViewColumn x:Name="ColSubsidyStatus" Header="SUBSIDY STATUS" Width="110">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Width="{Binding ActualWidth, ElementName=ColSubsidyStatus}" Margin="-6,0,-6,0" BorderBrush="#F2EAEF" BorderThickness="0,0,1,0" Padding="4,10">
+                                        <Border Width="{Binding ActualWidth, ElementName=ColSubsidyStatus}" Margin="-6,0,-6,0" BorderThickness="0" Padding="4,10">
                                             <Border Background="{Binding SubsidyStatusBg}" BorderBrush="{Binding SubsidyStatusBorder}" BorderThickness="1" CornerRadius="10" Padding="8,3" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding SubsidyStatusText}" FontSize="10.5" FontWeight="SemiBold" Foreground="{Binding SubsidyStatusFg}" HorizontalAlignment="Center"/>
                                             </Border>
@@ -362,8 +399,46 @@
                             <!-- ColAction: Final column - No trailing vertical divider line -->
                             <GridViewColumn x:Name="ColAction" Header="ACTIONS" Width="150">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColAction}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,10"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Button Height="26" Padding="10,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="{Binding ConfirmButtonToolTip}" IsEnabled="{Binding DataContext.CanModifyGrantees, RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.ConfirmShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="{Binding ConfirmButtonBg}" BorderBrush="{Binding ConfirmButtonBorder}" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="{Binding ConfirmButtonText}" FontSize="10.5" FontWeight="Bold" Foreground="{Binding ConfirmButtonFg}" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
-                                    <Button Height="26" Padding="10,0" Cursor="Hand" ToolTip="Revoke Grant / Selection" IsEnabled="{Binding DataContext.CanModifyGrantees, RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.RevokeShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="White" BorderBrush="#D4A0B0" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="Revoke" FontSize="10.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FDF2F4"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
+                                    <!-- Confirm/Revert Button - Green for Confirm, Yellow-Orange for Revert -->
+                                    <Button Height="26" Padding="10,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="{Binding ConfirmButtonToolTip}" IsEnabled="{Binding DataContext.CanModifyGrantees, RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.ConfirmShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Bg" Background="Transparent" BorderThickness="1.5" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="BorderBrush" Value="#16A34A"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ConfirmButtonText}" Value="Revert">
+                                                                    <Setter Property="BorderBrush" Value="#F59E0B"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding ConfirmButtonText}" FontSize="10.5" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#16A34A"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ConfirmButtonText}" Value="Revert">
+                                                                        <Setter Property="Foreground" Value="#F59E0B"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter TargetName="Bg" Property="Opacity" Value="0.45"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bg" Property="Background" Value="#FFFBEB"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                    <Button Height="26" Padding="10,0" Cursor="Hand" ToolTip="Revoke Grant / Selection" IsEnabled="{Binding DataContext.CanModifyGrantees, RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.RevokeShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="Transparent" BorderBrush="#DC2626" BorderThickness="1.5" CornerRadius="12" Padding="{TemplateBinding Padding}"><TextBlock Text="Revoke" FontSize="10.5" FontWeight="SemiBold" Foreground="#DC2626" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FEF2F2"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
                                 </StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                         </GridView>
@@ -371,10 +446,10 @@
                 </ListView>
                 <!-- Dynamic Floating Scroll-Down Arrow (Visible only while actively scrolling when more content exists) -->
                 <Border x:Name="ScrollHintIndicator" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10"
-                        Background="#702943" CornerRadius="12" Width="24" Height="24"
+                        Background="#5C1D38" CornerRadius="12" Width="24" Height="24"
                         Opacity="0.85" Visibility="Collapsed" IsHitTestVisible="False">
                     <Border.Effect>
-                        <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="1" Opacity="0.25"/>
+                        <DropShadowEffect Color="#5C1D38" BlurRadius="8" ShadowDepth="1" Opacity="0.25"/>
                     </Border.Effect>
                     <Path Data="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"
                           Fill="White" Width="11" Height="11" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>

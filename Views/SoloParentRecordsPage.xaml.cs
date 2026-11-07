@@ -1174,16 +1174,25 @@ namespace SOLUM_UI
 
         private async Task RenewRecordAsync(SoloParentRecord original, SoloParentRecord updated, SoloParentDto existingDto = null)
         {
+            System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Starting renewal process...");
+            System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Original ID: {original?.Id}");
+            System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Original Name: {original?.Name}");
+            
             if (!Guid.TryParse(original.Id, out var guid))
             {
+                System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] ERROR: Invalid record ID format");
                 Views.Dialogs.ActionConfirmDialog.Warning(
                     "Renew",
                     "Cannot renew: invalid record ID.");
                 return;
 
             }
+            
+            System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Parsed GUID: {guid}");
+            
             if (!original.CanRenew(out string renewReason, out _))
             {
+                System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] ERROR: Cannot renew - {renewReason}");
                 Views.Dialogs.ActionConfirmDialog.Warning(
                     "Renewal Not Available",
                     renewReason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
@@ -1191,26 +1200,53 @@ namespace SOLUM_UI
                 return;
 
             }
+            
+            System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Eligibility check passed");
             PageLoadingOverlay.Visibility = Visibility.Visible;
             try
             {
                 if (existingDto == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Fetching existing DTO from API...");
                     var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
                     if (fetch.Succeeded && fetch.Data != null)
                     {
                         existingDto = fetch.Data;
-
+                        System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Existing DTO fetched successfully");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] WARNING: Failed to fetch existing DTO - Succeeded: {fetch.Succeeded}");
                     }
 
                 }
+                
+                System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Mapping renewal request...");
                 var renewReq = SoloParentApiService.Instance.MapToRenewRequest(guid, updated, existingDto);
+                System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Request mapped - RenewalDate: {renewReq?.RenewalDate}");
+                System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Request mapped - CivilStatus: {renewReq?.CivilStatus}");
+                System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Request mapped - Family Members: {renewReq?.FamilyMembers?.ExistingFamilyMembers?.Count ?? 0} existing, {renewReq?.FamilyMembers?.NewFamilyMembers?.Count ?? 0} new");
+                
+                System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Calling API: POST api/soloparent/{guid}/renew");
                 var renewResp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid, renewReq);
+                
+                System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] API Response - Succeeded: {renewResp?.Succeeded}");
+                if (renewResp?.Errors != null && renewResp.Errors.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] API Errors: {string.Join(" | ", renewResp.Errors)}");
+                }
+                if (renewResp?.Data != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Response Data - ID: {renewResp.Data.Id}");
+                    System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Response Data - StartsAt: {renewResp.Data.StartsAt}");
+                    System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Response Data - ExpiresAt: {renewResp.Data.ExpiresAt}");
+                }
+                
                 if (!renewResp.Succeeded)
                 {
-
                     string err = renewResp.Errors != null && renewResp.Errors.Count > 0
                         ? string.Join("\n", renewResp.Errors) : "Failed to renew record.";
+                    System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] RENEWAL FAILED: {err}");
                     Views.Dialogs.ActionConfirmDialog.Error(
                         "Renew Failed",
                         err);
@@ -1221,32 +1257,51 @@ namespace SOLUM_UI
                 string newExpiry = (renewResp.Data != null && DateTime.TryParse(renewResp.Data.ExpiresAt, out var expDt))
                     ? expDt.ToString("MMMM d, yyyy")
                     : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
+                System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] SUCCESS! New expiry: {newExpiry}");
+                
                 ShowNotification("Record Renewed",
                     $"{original.Name} — valid until {newExpiry}.", true);
                 var changeService = new ChangeTrackingService();
                 var changes = changeService.DetectChanges(original, updated);
                 if (changes.Count > 0)
                 {
+                    System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Detected {changes.Count} changes for audit log");
                     AuditLogService.Instance.LogUpdateWithChanges(original.Id, original.Name, GetCurrentUser(), CurrentUserRole, changes);
 
                 }
                 else
                 {
+                    System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] No changes detected, logging simple renewal");
                     AuditLogService.Instance.LogUpdate(original.Id, original.Name,
                         GetCurrentUser(), CurrentUserRole, $"Record renewed. Valid until {newExpiry}.");
 
                 }
+                
+                System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Clearing page caches...");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
                 if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
                 _currentPage = 1;
+                
+                System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Reloading records...");
                 await LoadRecordsAsync();
+                System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Renewal process completed successfully!");
 
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] EXCEPTION: {ex.GetType().Name} - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] Stack trace: {ex.StackTrace}");
+                
+                Views.Dialogs.ActionConfirmDialog.Error(
+                    "Renewal Error",
+                    $"An error occurred during renewal: {ex.Message}");
             }
             finally
             {
                 PageLoadingOverlay.Visibility = Visibility.Collapsed;
+                System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Loading overlay hidden");
 
             }
 
