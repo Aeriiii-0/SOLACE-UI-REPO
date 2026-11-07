@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -150,6 +150,16 @@ namespace SOLUM_UI.Services.Api
 
         }
 
+                public void InvalidateDetailCache(Guid id)
+        {
+            _soloParentDetailCache.TryRemove(id, out _);
+        }
+
+        public void ClearAllDetailCache()
+        {
+            _soloParentDetailCache.Clear();
+        }
+
         public async Task<BaseResponse<RenewSoloParentResponse>> RenewSoloParentRecordAsync(Guid id, RenewSoloParentRequest request = null)
         {
             System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.RenewSoloParentRecordAsync] Called with ID: {id}");
@@ -160,7 +170,12 @@ namespace SOLUM_UI.Services.Api
                 System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.RenewSoloParentRecordAsync] CivilStatus: {request.CivilStatus}");
             }
             
+                        _soloParentDetailCache.TryRemove(id, out _);
             var result = await ApiClient.Instance.PostAsync<object, RenewSoloParentResponse>($"api/soloparent/{id}/renew", request ?? (object)new { });
+            if (result != null && result.Succeeded)
+            {
+                _soloParentDetailCache.TryRemove(id, out _);
+            }
             
             System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.RenewSoloParentRecordAsync] Response Succeeded: {result?.Succeeded}");
             if (result?.Errors != null && result.Errors.Count > 0)
