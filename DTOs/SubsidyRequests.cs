@@ -26,16 +26,27 @@ namespace SOLUM_UI.DTOs
     public class CreateSubsidyCycleRequest
     {
         public int FiscalYear { get; set; }
+        public int? CycleNumber { get; set; }
+        public string Name { get; set; }
         public decimal TotalBudget { get; set; } = 100000.00m;
         public decimal PerGranteeAmount { get; set; } = 1000.00m;
         public int? AllocatedSlots { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string Description { get; set; }
     }
 
     public class UpdateSubsidyCycleRequest
     {
+        public int? FiscalYear { get; set; }
+        public int? CycleNumber { get; set; }
+        public string Name { get; set; }
         public int AllocatedSlots { get; set; }
         public decimal PerGranteeAmount { get; set; }
         public decimal TotalBudget { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string Description { get; set; }
     }
 
     public class RevokeGrantRequest

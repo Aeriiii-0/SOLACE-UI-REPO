@@ -576,7 +576,10 @@ namespace SOLUM_UI.ViewModels
                         {
                             AllocatedSlots = GranteeSlots,
                             PerGranteeAmount = GrantAmountPerRecipient,
-                            TotalBudget = GranteeSlots * (decimal)GrantAmountPerRecipient
+                            TotalBudget = GranteeSlots * (decimal)GrantAmountPerRecipient,
+                            FiscalYear = SelectedFiscalCycle.FiscalYear,
+                            CycleNumber = SelectedFiscalCycle.CycleNumber,
+                            Name = SelectedFiscalCycle.Name
                         });
                     }
                     catch { }

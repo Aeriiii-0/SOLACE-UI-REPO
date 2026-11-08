@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using SOLUM_UI.Models;
 using SOLUM_UI.Models.Api;
@@ -19,6 +19,7 @@ namespace SOLUM_UI.Services.Interfaces
         Task<BaseResponse<bool>> UpdateSoloParentAsync(Guid id, UpdateSoloParentRequest request);
         Task<BaseResponse<bool>> DeleteSoloParentAsync(Guid id);
         Task<BaseResponse<RenewSoloParentResponse>> RenewSoloParentRecordAsync(Guid id, RenewSoloParentRequest request = null);
+        void InvalidateDetailCache(Guid id);
         // ── Mapping helpers ──────────────────────────────────────────────────
         SoloParentRecord MapToRecord(SoloParentDto dto);
         CreateSoloParentRequest MapToCreateRequest(SoloParentRecord record);

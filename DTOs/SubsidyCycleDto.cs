@@ -6,11 +6,17 @@ namespace SOLUM_UI.DTOs
     {
         public Guid Id { get; set; }
         public int FiscalYear { get; set; }
+        public int CycleNumber { get; set; } = 1;
+        public int Semester => CycleNumber;
+        public string Name { get; set; } = string.Empty;
         public decimal TotalBudget { get; set; }
         public decimal PerGranteeAmount { get; set; }
         public int AllocatedSlots { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string Description { get; set; }
 
         public int TotalEvaluated { get; set; }
         public int TotalShortlisted { get; set; }

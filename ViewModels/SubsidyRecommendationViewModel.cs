@@ -556,7 +556,7 @@ namespace SOLUM_UI.ViewModels
 
         public string CycleTypeBadgeFg => IsActiveCycle ? "#166534" : (SelectedFiscalCycle != null && SelectedFiscalCycle.IsFinalized ? "#B45309" : "#4B5563");
 
-        public string CycleSectionTitleText => IsActiveCycle ? $"Fiscal Year {ActiveCycleFiscalYear} Subsidy Allocation" : $"Fiscal Year {(SelectedFiscalCycle != null ? SelectedFiscalCycle.FiscalYear : 0)} Certified Disbursement Ledger";
+        public string CycleSectionTitleText => SelectedFiscalCycle != null && !string.IsNullOrWhiteSpace(SelectedFiscalCycle.Name) ? SelectedFiscalCycle.Name : (IsActiveCycle ? $"Fiscal Year {ActiveCycleFiscalYear} Subsidy Allocation" : $"Fiscal Year {(SelectedFiscalCycle != null ? SelectedFiscalCycle.FiscalYear : 0)} Certified Disbursement Ledger");
 
         public string CycleSectionSubtitleText => IsActiveCycle
             ? (IsRosterLocked ? "Roster is finalized & locked for official disbursement (click 'Unlock Roster' to amend)." : "Active pipeline open for staff review, shortlisting, and candidate approvals.")
@@ -578,7 +578,7 @@ namespace SOLUM_UI.ViewModels
 
         public string RosterLockActionBg => "#702943"; public string RosterLockActionFg => "#FFFFFF";
 
-        public int ActiveCycleFiscalYear => _activeCycleFiscalYear; public string ActiveCycleHeaderBadgeText => $"Active Cycle: FY {ActiveCycleFiscalYear} • {(IsRosterLocked ? "Finalized & Locked" : "Open for Review")}";
+        public int ActiveCycleFiscalYear => _activeCycleFiscalYear; public string ActiveCycleHeaderBadgeText => $"Active Cycle: FY {ActiveCycleFiscalYear}{(SelectedFiscalCycle != null && SelectedFiscalCycle.CycleNumber > 0 ? $" ({SelectedFiscalCycle.SemesterLabel})" : "")} • {(IsRosterLocked ? "Finalized & Locked" : "Open for Review")}";
 
         public ICommand SwitchTabCommand { get; private set; } public ICommand ToggleBatchModeCommand { get; private set; } public ICommand SelectTopNCommand { get; private set; } public ICommand ShortlistSelectedCommand { get; private set; }
 
@@ -637,6 +637,7 @@ namespace SOLUM_UI.ViewModels
         public async Task LoadFiscalCyclesAsync()
         {
             var cyclesResp = await _apiService.GetCyclesAsync();
+            var prevSelectedCycleId = SelectedFiscalCycle?.CycleId;
             var prevSelectedYear = SelectedFiscalCycle?.FiscalYear;
             AvailableFiscalCycles.Clear();
             FiscalCycleOption activeOption = null;
@@ -648,37 +649,38 @@ namespace SOLUM_UI.ViewModels
                     {
                         CycleId = c.Id,
                         FiscalYear = c.FiscalYear,
+                        CycleNumber = c.CycleNumber,
+                        Name = c.Name,
+                        StartDate = c.StartDate,
+                        EndDate = c.EndDate,
                         Status = c.Status,
                         AllocatedSlots = c.AllocatedSlots,
                         TotalBudget = c.TotalBudget,
                         PerGranteeAmount = c.PerGranteeAmount
-
                     };
                     AvailableFiscalCycles.Add(opt);
                     if (opt.IsActive && activeOption == null) activeOption = opt;
-
                 }
-
             }
             FiscalCycleOption target = null;
-            if (prevSelectedYear.HasValue)
+            if (prevSelectedCycleId.HasValue)
+            {
+                target = AvailableFiscalCycles.FirstOrDefault(c => c.CycleId == prevSelectedCycleId.Value);
+            }
+            if (target == null && prevSelectedYear.HasValue)
             {
                 target = AvailableFiscalCycles.FirstOrDefault(c => c.FiscalYear == prevSelectedYear.Value);
-
             }
             if (target == null)
             {
                 target = activeOption ?? AvailableFiscalCycles.FirstOrDefault();
-
             }
             if (target != null)
             {
                 _selectedFiscalCycle = target;
                 OnPropertyChanged(nameof(SelectedFiscalCycle));
-
             }
             NotifyCycleProperties();
-
         }
 
         public async Task RefreshDataAsync(bool forceReloadCycles = false)
@@ -710,17 +712,18 @@ namespace SOLUM_UI.ViewModels
                         {
                             CycleId = c.Id,
                             FiscalYear = c.FiscalYear,
+                            CycleNumber = c.CycleNumber,
+                            Name = c.Name,
+                            StartDate = c.StartDate,
+                            EndDate = c.EndDate,
                             Status = c.Status,
                             AllocatedSlots = c.AllocatedSlots,
                             TotalBudget = c.TotalBudget,
                             PerGranteeAmount = c.PerGranteeAmount
-
                         };
                         AvailableFiscalCycles.Add(opt);
                         if (opt.IsActive && activeOption == null) activeOption = opt;
-
                     }
-
                 }
                 var target = activeOption ?? AvailableFiscalCycles.FirstOrDefault();
                 _selectedFiscalCycle = target;

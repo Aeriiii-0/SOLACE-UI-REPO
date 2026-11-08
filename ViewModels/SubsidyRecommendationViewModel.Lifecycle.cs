@@ -78,8 +78,8 @@ namespace SOLUM_UI.ViewModels
             IsRosterLocked = cycle.IsFinalized || string.Equals(cycle.Status, "Finalized", StringComparison.OrdinalIgnoreCase) || !cycle.IsActive;
             GranteeSlots = cycle.AllocatedSlots > 0 ? cycle.AllocatedSlots : 100;
             GrantAmountPerRecipient = cycle.PerGranteeAmount > 0 ? (int)cycle.PerGranteeAmount : DefaultGrantAmount;
-            // Fetch Grantees
-            var granteesTask = _apiService.GetGranteesByFiscalYearAsync(cycle.FiscalYear);
+            // Fetch Grantees for this specific cycle and semester
+            var granteesTask = _apiService.GetGranteesAsync(cycle.FiscalYear, cycle.CycleNumber, cycle.CycleId);
             // Only fetch Shortlist, Queue, and Rejections if cycle is NOT locked
             Task<BaseResponse<List<SubsidyRecommendationDto>>> shortlistTask;
             Task<BaseResponse<List<SubsidyRecommendationDto>>> recsTask;
@@ -157,34 +157,21 @@ namespace SOLUM_UI.ViewModels
             _allItems.Clear();
             if (dtos?.Data != null && dtos.Data.Count > 0)
             {
-                QueueTotalCount = dtos.Data.Count;
-                QueueTotalPages = 1;
-                _queueCurrentPage = 1;
                 for (int i = 0; i < dtos.Data.Count; i++)
                 {
                     var item = SubsidyModelMapper.ToItem(dtos.Data[i]);
                     item.Rank = i + 1;
                     item.IsWithinQuota = (item.Rank <= _granteeSlots);
-                    PagedRecommendations.Add(item);
                     FilteredRecommendations.Add(item);
                     _allItems.Add(item);
                 }
             }
-            else
-            {
-                QueueTotalCount = 0;
-                QueueTotalPages = 1;
-                _queueCurrentPage = 1;
-            }
-            OnPropertyChanged(nameof(QueueCurrentPage));
-            OnPropertyChanged(nameof(CanQueuePrevPage));
-            OnPropertyChanged(nameof(CanQueueNextPage));
-            OnPropertyChanged(nameof(QueuePageNumberLabel));
-            OnPropertyChanged(nameof(QueuePageSummary));
-            OnPropertyChanged(nameof(RecommendationsSummary));
+            UpdateQueuePaged();
+            UpdateShortlistPaged();
+            UpdateFinalPaged();
             RecalculateSelectionCounts();
             NotifyQuotaMetricsChanged();
-            EnrichAllCandidatesFromRecordsAsync();
+            EnrichVisibleCandidatesAsync();
             LastRefreshedText = $"Updated: {DateTime.Now:h:mm tt}";
             RefreshTooltip = $"Refresh subsidy recommendations (Last refreshed: {DateTime.Now:h:mm:ss tt})";
         }
@@ -197,10 +184,16 @@ namespace SOLUM_UI.ViewModels
                 return;
             }
 
-            int nextYear = ActiveCycleFiscalYear + 1;
-            bool ok = ActionConfirmDialog.Show("Launch New Fiscal Cycle", $"Starting a new cycle will advance the active operational cycle to FY {nextYear}.\n\nThe current FY {ActiveCycleFiscalYear} certified roster will be archived.\n\nDo you wish to proceed?", "Launch Cycle", "Cancel", ConfirmThemeType.Primary);
+            int currentYear = ActiveCycleFiscalYear;
+            int currentCycleNum = SelectedFiscalCycle?.CycleNumber ?? 1;
+
+            int nextYear = currentCycleNum >= 2 ? currentYear + 1 : currentYear;
+            int nextCycleNum = currentCycleNum >= 2 ? 1 : 2;
+
+            string cycleDesc = nextCycleNum == 1 ? $"FY {nextYear} 1st Semester" : $"FY {nextYear} 2nd Semester";
+            bool ok = ActionConfirmDialog.Show("Launch New Fiscal Cycle", $"Starting a new cycle will advance the active operational cycle to {cycleDesc}.\n\nThe current certified roster will be archived.\n\nDo you wish to proceed?", "Launch Cycle", "Cancel", ConfirmThemeType.Primary);
             if (!ok) return;
-            var dlg = new NewCycleDialog(nextYear) { Owner = Application.Current?.MainWindow };
+            var dlg = new NewCycleDialog(nextYear, nextCycleNum) { Owner = Application.Current?.MainWindow };
             if (dlg.ShowDialog() == true && dlg.ResultRequest != null)
             {
                 try
@@ -216,7 +209,7 @@ namespace SOLUM_UI.ViewModels
                         IsRosterLocked = false;
                         await RefreshDataAsync(forceReloadCycles: true);
                         ActiveTabIndex = 0;
-                        ToastNotification.Show("New Cycle Active", $"Fiscal Year {dlg.ResultRequest.FiscalYear} cycle started successfully. Fresh candidate recommendations generated.", ToastType.Success);
+                        ToastNotification.Show("New Cycle Active", $"Fiscal Year {dlg.ResultRequest.FiscalYear} (Semester {dlg.ResultRequest.CycleNumber ?? 1}) cycle started successfully. Fresh candidate recommendations generated.", ToastType.Success);
                     }
                     else
                     {
@@ -259,6 +252,7 @@ namespace SOLUM_UI.ViewModels
             OnPropertyChanged(nameof(SelectedCountSummary));
             OnPropertyChanged(nameof(HasQueueSelection));
             OnPropertyChanged(nameof(RecommendationsSummary));
+            UpdateQueuePaged();
         }
 
         private void UpdateShortlistAndFinalCollections(bool enrich = true)
@@ -272,11 +266,12 @@ namespace SOLUM_UI.ViewModels
             FilterShortlistRows(); OnPropertyChanged(nameof(Tab2QuotaSummary)); OnPropertyChanged(nameof(ShortlistSummary)); OnPropertyChanged(nameof(FinalSummaryText));
         }
 
-        public void EnrichAllCandidatesFromRecordsAsync()
+        public void EnrichVisibleCandidatesAsync()
         {
-            var targets = ShortlistRows.Concat(FinalGranteesList)
+            var targets = PagedRecommendations
                 .Select(x => x.SoloParentId)
-                .Concat(FilteredRecommendations.Select(x => x.SoloParentId))
+                .Concat(PagedShortlistRows.Select(x => x.SoloParentId))
+                .Concat(PagedFinalGrantees.Select(x => x.SoloParentId))
                 .Where(id => id != Guid.Empty)
                 .Distinct()
                 .ToList();
@@ -295,9 +290,10 @@ namespace SOLUM_UI.ViewModels
                             {
                                 Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
                                 {
+                                    foreach (var row in PagedShortlistRows.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
                                     foreach (var row in ShortlistRows.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
                                     foreach (var row in FinalGranteesList.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
-                                    foreach (var item in FilteredRecommendations.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichItemFromRecord(item, resp.Data);
+                                    foreach (var item in PagedRecommendations.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichItemFromRecord(item, resp.Data);
                                     if (ActiveCandidate?.SoloParentId == id) OnPropertyChanged(nameof(ActiveCandidate));
                                 }));
                             }
@@ -309,6 +305,8 @@ namespace SOLUM_UI.ViewModels
                 }
             });
         }
+
+        public void EnrichAllCandidatesFromRecordsAsync() => EnrichVisibleCandidatesAsync();
 
         private void FilterShortlistRows()
         {
@@ -383,6 +381,8 @@ namespace SOLUM_UI.ViewModels
                 {
                     Id = SelectedFiscalCycle.CycleId ?? Guid.Empty,
                     FiscalYear = SelectedFiscalCycle.FiscalYear,
+                    CycleNumber = SelectedFiscalCycle.CycleNumber,
+                    Name = SelectedFiscalCycle.Name,
                     AllocatedSlots = SelectedFiscalCycle.AllocatedSlots,
                     PerGranteeAmount = SelectedFiscalCycle.PerGranteeAmount,
                     TotalBudget = SelectedFiscalCycle.TotalBudget,
@@ -426,7 +426,10 @@ namespace SOLUM_UI.ViewModels
                 {
                     AllocatedSlots = updatedCycle.AllocatedSlots,
                     PerGranteeAmount = updatedCycle.PerGranteeAmount,
-                    TotalBudget = updatedCycle.TotalBudget
+                    TotalBudget = updatedCycle.TotalBudget,
+                    FiscalYear = updatedCycle.FiscalYear,
+                    CycleNumber = updatedCycle.CycleNumber,
+                    Name = updatedCycle.Name
                 };
 
                 // Log the request details for debugging

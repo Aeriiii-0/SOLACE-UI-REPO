@@ -441,7 +441,7 @@ namespace SOLUM_UI.ViewModels
                 if (FilterType == "Yearly")
                     return $"Registered in {SelectedYear}: {DisplayRegisteredCount:N0}";
                 if (FilterType == "Quarterly")
-                    return $"Registered in {SelectedQuarter} {SelectedYear}: {DisplayRegisteredCount:N0}";
+                    return $"Registered in Q{SelectedQuarter} {SelectedYear}: {DisplayRegisteredCount:N0}";
                 return $"Registered in period: {DisplayRegisteredCount:N0}";
 
             }
@@ -1572,15 +1572,14 @@ namespace SOLUM_UI.ViewModels
                     InactiveRecords = dto.InactiveSoloParents;
 
             }
-            else
+            else if (FilterType == "Monthly")
             {
-                // When filter is active, strictly reflect the specific date/period (set to 0 if no records)
+                // When Monthly filter is active, reflect the specific month from monthly DTO
                 TotalSoloParents = dto.TotalSoloParents;
                 FilteredActiveRecords = dto.ActiveSoloParents;
                 FilteredInactiveRecords = dto.InactiveSoloParents;
                 FilteredNewRegistrations = dto.NewRegistrations;
                 FilteredRenewals = dto.Renewals;
-
             }
             System.Diagnostics.Debug.WriteLine($"  TotalSoloParents: {TotalSoloParents}, Active: {dto.ActiveSoloParents}, Inactive: {dto.InactiveSoloParents}, New: {dto.NewRegistrations}");
             // Female/Male from Sex dictionary (null-safe & case-insensitive)

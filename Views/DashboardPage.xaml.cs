@@ -73,6 +73,7 @@ namespace SOLUM_UI
             public string Title { get; set; }
             public string Range { get; set; }
             public int Value { get; set; }
+            public int NewCount { get; set; }
             public string DeltaText { get; set; }
             public int DeltaKind { get; set; }
             public bool IsFuture { get; set; }
@@ -98,12 +99,12 @@ namespace SOLUM_UI
             if (_mode == ChartGranularity.Monthly)
             {
                 TxtChartTitle.Text = "Monthly registrations";
-                TxtChartSubtitle.Text = "New solo parents, Jan to Dec " + year;
+                TxtChartSubtitle.Text = "Cumulative registrations & renewals, Jan to Dec " + year;
             }
             else
             {
                 TxtChartTitle.Text = "Quarterly registrations";
-                TxtChartSubtitle.Text = "New solo parents, Q1 to Q4 " + year;
+                TxtChartSubtitle.Text = "Cumulative registrations & renewals, Q1 to Q4 " + year;
             }
             DrawChart();
         }
@@ -114,19 +115,24 @@ namespace SOLUM_UI
             var result = new List<ChartPoint>();
             var today = DateTime.Today;
             int year = today.Year;
+            int runningTotal = 0;
+
             if (mode == ChartGranularity.Monthly)
             {
                 for (int m = 1; m <= 12; m++)
                 {
                     var start = new DateTime(year, m, 1);
                     var end = start.AddMonths(1).AddDays(-1);
-                    int c = list.Count(d => d.Year == year && d.Month == m);
+                    int newInMonth = list.Count(d => d.Year == year && d.Month == m);
+                    runningTotal += newInMonth;
+
                     result.Add(new ChartPoint
                     {
                         Label = start.ToString("MMM"),
                         Title = start.ToString("MMMM yyyy"),
                         Range = start.ToString("MMM d") + " – " + end.ToString("MMM d"),
-                        Value = c,
+                        Value = runningTotal,
+                        NewCount = newInMonth,
                         IsFuture = start > today
                     });
                 }
@@ -137,35 +143,35 @@ namespace SOLUM_UI
                 {
                     var qs = new DateTime(year, (q - 1) * 3 + 1, 1);
                     var qe = qs.AddMonths(3);
-                    int c = list.Count(d => d >= qs && d < qe);
+                    int newInQuarter = list.Count(d => d >= qs && d < qe);
+                    runningTotal += newInQuarter;
+
                     result.Add(new ChartPoint
                     {
                         Label = "Q" + q,
                         Title = "Q" + q + " " + year,
                         Range = qs.ToString("MMM d") + " – " + qe.AddDays(-1).ToString("MMM d"),
-                        Value = c,
+                        Value = runningTotal,
+                        NewCount = newInQuarter,
                         IsFuture = qs > today
                     });
                 }
             }
-            for (int i = 1; i < result.Count; i++)
+
+            for (int i = 0; i < result.Count; i++)
             {
-                int diff = result[i].Value - result[i - 1].Value;
-                string prev = result[i - 1].Label;
-                if (diff > 0)
+                var pt = result[i];
+                string periodUnit = mode == ChartGranularity.Monthly ? "this month" : "this quarter";
+
+                if (pt.NewCount > 0)
                 {
-                    result[i].DeltaKind = 1;
-                    result[i].DeltaText = "▲ " + diff.ToString("N0") + " more than " + prev;
-                }
-                else if (diff < 0)
-                {
-                    result[i].DeltaKind = -1;
-                    result[i].DeltaText = "▼ " + Math.Abs(diff).ToString("N0") + " fewer than " + prev;
+                    pt.DeltaKind = 1;
+                    pt.DeltaText = $"+{pt.NewCount:N0} new {periodUnit}";
                 }
                 else
                 {
-                    result[i].DeltaKind = 0;
-                    result[i].DeltaText = "● Same as " + prev;
+                    pt.DeltaKind = 0;
+                    pt.DeltaText = $"No new registrations {periodUnit}";
                 }
             }
             return result;
@@ -370,7 +376,7 @@ namespace SOLUM_UI
                         IsHitTestVisible = false,
                         Child = new TextBlock
                         {
-                            Text = _points[i].Value.ToString("N0") + " new",
+                            Text = _points[i].Value.ToString("N0") + " total",
                             FontFamily = new FontFamily("Segoe UI"),
                             FontSize = 11,
                             FontWeight = FontWeights.SemiBold,

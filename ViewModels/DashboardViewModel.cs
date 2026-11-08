@@ -359,11 +359,11 @@ namespace SOLUM_UI.ViewModels
                     var res = monthlyResponses[i];
                     if (res != null && res.Succeeded && res.Data != null)
                     {
-                        monthlyValues[i] = res.Data.NewRegistrations;
-                        // Build registration dates from monthly data
-                        // Create representative dates for each registration in the month
+                        // Total registrations processed this month includes both new applicants and renewals
+                        int monthTotal = res.Data.NewRegistrations + res.Data.Renewals;
+                        monthlyValues[i] = monthTotal;
                         int month = i + 1;
-                        for (int j = 0; j < res.Data.NewRegistrations; j++)
+                        for (int j = 0; j < monthTotal; j++)
                         {
                             // Distribute dates throughout the month (1st to 28th)
                             int day = (j % 28) + 1;
@@ -378,6 +378,12 @@ namespace SOLUM_UI.ViewModels
                     {
                         registrationDatesList.Add(new DateTime(currentYear, currentMonth, (j % 28) + 1));
                     }
+                }
+                else if (RegisteredSoloParents > 0 && registrationDatesList.Count > RegisteredSoloParents)
+                {
+                    // Guard against stale API cache or server-side double counting:
+                    // Clamp chart registration points so they never exceed the authoritative total registered count
+                    registrationDatesList = registrationDatesList.Take(RegisteredSoloParents).ToList();
                 }
                 RegistrationDates = registrationDatesList;
 

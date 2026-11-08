@@ -335,7 +335,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock x:Name="TipValue" FontFamily="{StaticResource HeadingFont}" FontSize="22"
                                                        FontWeight="Bold" Foreground="White"/>
-                                            <TextBlock Text="registered" FontFamily="Segoe UI" FontSize="10.5"
+                                            <TextBlock Text="total registered" FontFamily="Segoe UI" FontSize="10.5"
                                                        Foreground="#E8C5D1" VerticalAlignment="Bottom" Margin="6,0,0,4"/>
                                         </StackPanel>
                                         <Border x:Name="TipDeltaPill" CornerRadius="4" Padding="6,2" Margin="0,4,0,0">

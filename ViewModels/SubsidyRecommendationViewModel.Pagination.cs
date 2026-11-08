@@ -148,11 +148,11 @@ namespace SOLUM_UI.ViewModels
         {
             get
             {
-                int total = QueueTotalCount;
+                int total = FilteredRecommendations?.Count ?? 0;
                 if (total == 0) return "No candidate records found";
-                int quota = Math.Min(GranteeSlots, total);
-                int sel = FilteredRecommendations != null ? FilteredRecommendations.Count(x => x.IsSelected) : 0;
-                return $"Showing all {total} candidates • {quota} within quota • {sel} selected";
+                int start = (QueueCurrentPage - 1) * QueuePageSize + 1;
+                int end = Math.Min(QueueCurrentPage * QueuePageSize, total);
+                return $"Showing {start}–{end} of {total} candidates";
             }
         }
 
@@ -177,9 +177,9 @@ namespace SOLUM_UI.ViewModels
             {
                 int total = FilteredShortlistRows?.Count ?? 0;
                 if (total == 0) return "No shortlist records found";
-                int confirmed = FilteredShortlistRows != null ? FilteredShortlistRows.Count(x => x.IsFinalGrantee) : 0;
-                int pending = total - confirmed;
-                return $"Showing all {total} candidates • {confirmed} confirmed • {pending} pending";
+                int start = (ShortlistCurrentPage - 1) * ShortlistPageSize + 1;
+                int end = Math.Min(ShortlistCurrentPage * ShortlistPageSize, total);
+                return $"Showing {start}–{end} of {total} records";
             }
         }
         public string ShortlistPageNumberLabel => $"{ShortlistCurrentPage} / {ShortlistTotalPages}";
@@ -217,76 +217,21 @@ namespace SOLUM_UI.ViewModels
             PagedRecommendations = new ObservableCollection<SubsidyItem>();
             PagedShortlistRows = new ObservableCollection<SelectionRow>();
             PagedFinalGrantees = new ObservableCollection<SelectionRow>();
-            QueuePrevPageCommand = new RelayCommand(async _ => { if (CanQueuePrevPage) await LoadQueuePageAsync(QueueCurrentPage - 1); });
-            QueueNextPageCommand = new RelayCommand(async _ => { if (CanQueueNextPage) await LoadQueuePageAsync(QueueCurrentPage + 1); });
-            ShortlistPrevPageCommand = new RelayCommand(_ => { if (CanShortlistPrevPage) ShortlistCurrentPage--; });
-            ShortlistNextPageCommand = new RelayCommand(_ => { if (CanShortlistNextPage) ShortlistCurrentPage++; });
-            FinalPrevPageCommand = new RelayCommand(_ => { if (CanFinalPrevPage) FinalCurrentPage--; });
-            FinalNextPageCommand = new RelayCommand(_ => { if (CanFinalNextPage) FinalCurrentPage++; });
+            QueuePrevPageCommand = new RelayCommand(_ => { if (CanQueuePrevPage) { QueueCurrentPage--; UpdateQueuePaged(); EnrichVisibleCandidatesAsync(); } });
+            QueueNextPageCommand = new RelayCommand(_ => { if (CanQueueNextPage) { QueueCurrentPage++; UpdateQueuePaged(); EnrichVisibleCandidatesAsync(); } });
+            ShortlistPrevPageCommand = new RelayCommand(_ => { if (CanShortlistPrevPage) { ShortlistCurrentPage--; UpdateShortlistPaged(); EnrichVisibleCandidatesAsync(); } });
+            ShortlistNextPageCommand = new RelayCommand(_ => { if (CanShortlistNextPage) { ShortlistCurrentPage++; UpdateShortlistPaged(); EnrichVisibleCandidatesAsync(); } });
+            FinalPrevPageCommand = new RelayCommand(_ => { if (CanFinalPrevPage) { FinalCurrentPage--; UpdateFinalPaged(); EnrichVisibleCandidatesAsync(); } });
+            FinalNextPageCommand = new RelayCommand(_ => { if (CanFinalNextPage) { FinalCurrentPage++; UpdateFinalPaged(); EnrichVisibleCandidatesAsync(); } });
         }
 
         public async Task LoadQueuePageAsync(int page)
         {
             if (page < 1) page = 1;
-            IsLoading = true;
-            try
-            {
-                var req = new GetSubsidyRecommendationsRequest
-                {
-                    CycleId = _activeCycleId,
-                    SortBy = "PriorityScore",
-                    SortOrder = "desc"
-                };
-                if (_auditFilter == "CollegeAge") req.NeedsCloserReview = true;
-                var resp = await _apiService.GetAllRecommendationsAsync(req);
-                if (resp?.Data != null)
-                {
-                    QueueTotalCount = resp.Data.Count;
-                    QueueTotalPages = 1;
-                    _queueCurrentPage = 1;
-                    OnPropertyChanged(nameof(QueueCurrentPage));
-                    OnPropertyChanged(nameof(CanQueuePrevPage));
-                    OnPropertyChanged(nameof(CanQueueNextPage));
-                    OnPropertyChanged(nameof(QueuePageNumberLabel));
-                    OnPropertyChanged(nameof(QueuePageSummary));
-                    OnPropertyChanged(nameof(RecommendationsSummary));
-                    PagedRecommendations.Clear();
-                    FilteredRecommendations.Clear();
-                    for (int i = 0; i < resp.Data.Count; i++)
-                    {
-                        var item = SubsidyModelMapper.ToItem(resp.Data[i]);
-                        item.Rank = i + 1;
-                        item.IsWithinQuota = (item.Rank <= _granteeSlots);
-                        PagedRecommendations.Add(item);
-                        FilteredRecommendations.Add(item);
-                    }
-                    RecalculateSelectionCounts();
-                    EnrichAllCandidatesFromRecordsAsync();
-                }
-                else
-                {
-                    PagedRecommendations.Clear();
-                    FilteredRecommendations.Clear();
-                    QueueTotalCount = 0;
-                    QueueTotalPages = 1;
-                    _queueCurrentPage = 1;
-                    OnPropertyChanged(nameof(QueueCurrentPage));
-                    OnPropertyChanged(nameof(CanQueuePrevPage));
-                    OnPropertyChanged(nameof(CanQueueNextPage));
-                    OnPropertyChanged(nameof(QueuePageNumberLabel));
-                    OnPropertyChanged(nameof(QueuePageSummary));
-                    OnPropertyChanged(nameof(RecommendationsSummary));
-                    RecalculateSelectionCounts();
-                }
-            }
-            catch (Exception ex)
-            {
-                ToastNotification.Show("Queue Load Error", ex.Message, ToastType.Error);
-            }
-            finally
-            {
-                IsLoading = false;
-            }
+            QueueCurrentPage = page;
+            UpdateQueuePaged();
+            EnrichVisibleCandidatesAsync();
+            await Task.CompletedTask;
         }
 
         public void UpdateQueuePaged()
@@ -314,12 +259,14 @@ namespace SOLUM_UI.ViewModels
         public void UpdateShortlistPaged()
         {
             int total = FilteredShortlistRows?.Count ?? 0;
-            ShortlistTotalPages = 1;
-            _shortlistCurrentPage = 1;
+            ShortlistTotalPages = Math.Max(1, (int)Math.Ceiling(total / (double)ShortlistPageSize));
+            if (_shortlistCurrentPage > ShortlistTotalPages) _shortlistCurrentPage = ShortlistTotalPages;
+            if (_shortlistCurrentPage < 1) _shortlistCurrentPage = 1;
             PagedShortlistRows.Clear();
             if (FilteredShortlistRows != null)
             {
-                foreach (var item in FilteredShortlistRows) PagedShortlistRows.Add(item);
+                var slice = FilteredShortlistRows.Skip((_shortlistCurrentPage - 1) * ShortlistPageSize).Take(ShortlistPageSize);
+                foreach (var item in slice) PagedShortlistRows.Add(item);
             }
             OnPropertyChanged(nameof(ShortlistCurrentPage));
             OnPropertyChanged(nameof(ShortlistTotalPages));

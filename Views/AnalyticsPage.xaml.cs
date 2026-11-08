@@ -384,14 +384,14 @@ namespace SOLUM_UI
                 var dashRes = await dashboardTask;
                 if (dashRes != null && dashRes.Succeeded && dashRes.Data != null)
                     _vm.LoadDashboardDto(dashRes.Data);
-                var breakdownRes = await breakdownTask;
-                if (breakdownRes != null && breakdownRes.Succeeded && breakdownRes.Data != null)
-                    _vm.LoadBarangayBreakdownDto(breakdownRes.Data);
                 var monthRes = await monthlyTask;
                 if (monthRes != null && monthRes.Succeeded && monthRes.Data != null)
                 {
                     _vm.LoadFromAnalyticsDto(monthRes.Data);
                 }
+                var breakdownRes = await breakdownTask;
+                if (breakdownRes != null && breakdownRes.Succeeded && breakdownRes.Data != null)
+                    _vm.LoadBarangayBreakdownDto(breakdownRes.Data);
                 else
                 {
                     // Clear demographics gracefully if not returned for this custom/aggregated period

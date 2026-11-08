@@ -11,20 +11,15 @@ using SOLUM_UI.Services.Interfaces;
 
 namespace SOLUM_UI.Services.Implementations
 {
-
     public class SubsidyApiService : ISubsidyApiService
     {
-
         private static List<SubsidyCycleDto> _cachedCycles;
-
         private static DateTime _cyclesCachedAt = DateTime.MinValue;
-
         private static readonly TimeSpan CyclesCacheTtl = TimeSpan.FromMinutes(5);
 
         public async Task<BaseResponse<SubsidyCycleDto>> GetActiveCycleAsync()
         {
             return await ApiClient.Instance.GetAsync<SubsidyCycleDto>("api/subsidy/cycles/active");
-
         }
 
         public async Task<BaseResponse<List<SubsidyCycleDto>>> GetCyclesAsync()
@@ -32,30 +27,22 @@ namespace SOLUM_UI.Services.Implementations
             if (_cachedCycles != null && (DateTime.UtcNow - _cyclesCachedAt) < CyclesCacheTtl)
             {
                 return BaseResponse<List<SubsidyCycleDto>>.Success(_cachedCycles);
-
             }
             try
             {
                 var apiResp = await ApiClient.Instance.GetAsync<List<SubsidyCycleDto>>("api/subsidy/cycles");
                 if (apiResp?.Succeeded == true && apiResp.Data != null && apiResp.Data.Count > 0)
                 {
-                    var deduped = apiResp.Data
-                        .GroupBy(c => c.FiscalYear)
-                        .Select(g => g.OrderByDescending(x => x.Status == "Active").ThenByDescending(x => x.TotalFinalGrantees).First())
+                    _cachedCycles = apiResp.Data
+                        .OrderByDescending(c => c.FiscalYear)
+                        .ThenByDescending(c => c.CycleNumber)
                         .ToList();
-                    if (!deduped.Any(c => c.FiscalYear == 2025))
-                    {
-                        deduped.Add(new SubsidyCycleDto { FiscalYear = 2025, Status = "Archived", AllocatedSlots = 100, TotalBudget = 100000m, PerGranteeAmount = 1000m });
-
-                    }
-                    _cachedCycles = deduped.OrderByDescending(c => c.FiscalYear).ToList();
                     _cyclesCachedAt = DateTime.UtcNow;
                     return BaseResponse<List<SubsidyCycleDto>>.Success(_cachedCycles);
-
                 }
-
             }
             catch { }
+
             var list = new List<SubsidyCycleDto>();
             try
             {
@@ -63,69 +50,19 @@ namespace SOLUM_UI.Services.Implementations
                 if (activeResp?.Data != null)
                 {
                     list.Add(activeResp.Data);
-
                 }
-
             }
             catch { }
-            // Ensure FY 2026 is always available with its verified database ID
-            if (!list.Any(c => c.FiscalYear == 2026))
-            {
-                list.Add(new SubsidyCycleDto
-                {
-                    Id = Guid.Parse("b524cbb1-c50c-414e-8494-c8fa55011717"),
-                    FiscalYear = 2026,
-                    Status = list.Any(c => c.FiscalYear == 2026 && c.Status == "Active") ? "Active" : "Finalized",
-                    AllocatedSlots = 100,
-                    TotalBudget = 100000m,
-                    PerGranteeAmount = 1000m
 
-                });
-
-            }
-            // Ensure FY 2027 is available with its verified database ID
-            if (!list.Any(c => c.FiscalYear == 2027))
-            {
-                list.Add(new SubsidyCycleDto
-                {
-                    Id = Guid.Parse("634fe569-dcdc-4dca-bac1-069249091c37"),
-                    FiscalYear = 2027,
-                    Status = list.Any(c => c.FiscalYear == 2027 && c.Status == "Active") ? "Active" : "Finalized",
-                    AllocatedSlots = 10,
-                    TotalBudget = 10000m,
-                    PerGranteeAmount = 1000m
-
-                });
-
-            }
-            // Historical archived cycle
-            if (!list.Any(c => c.FiscalYear == 2025))
-            {
-                list.Add(new SubsidyCycleDto
-                {
-                    FiscalYear = 2025,
-                    Status = "Archived",
-                    AllocatedSlots = 100,
-                    TotalBudget = 100000m,
-                    PerGranteeAmount = 1000m
-
-                });
-
-            }
-            _cachedCycles = list.GroupBy(c => c.FiscalYear)
-                                .Select(g => g.OrderByDescending(x => x.Status == "Active").First())
-                                .OrderByDescending(c => c.FiscalYear)
-                                .ToList();
+            _cachedCycles = list.OrderByDescending(c => c.FiscalYear).ThenByDescending(c => c.CycleNumber).ToList();
             _cyclesCachedAt = DateTime.UtcNow;
             return BaseResponse<List<SubsidyCycleDto>>.Success(_cachedCycles);
-
         }
 
         public async Task<BaseResponse<SubsidyCycleDto>> CreateCycleAsync(CreateSubsidyCycleRequest request)
         {
             _cachedCycles = null;
             return await ApiClient.Instance.PostAsync<CreateSubsidyCycleRequest, SubsidyCycleDto>("api/subsidy/cycles", request);
-
         }
 
         public async Task<BaseResponse<bool>> FinalizeCycleAsync(Guid cycleId)
@@ -156,67 +93,53 @@ namespace SOLUM_UI.Services.Implementations
         {
             _cachedCycles = null;
             return await ApiClient.Instance.PutAsync<UpdateSubsidyCycleRequest, SubsidyCycleDto>($"api/subsidy/cycles/{cycleId}", request);
-
         }
 
         public async Task<BaseResponse<int>> GenerateRecommendationsAsync(Guid? cycleId = null)
         {
-
             string url = "api/subsidy/generate-recommendations" + (cycleId.HasValue ? $"?cycleId={cycleId.Value}" : "");
             return await ApiClient.Instance.PostAsync<object, int>(url, new { });
-
         }
 
         public async Task<BaseResponse<SubsidyRecommendationDto>> PredictCandidateAsync(Guid soloParentId)
         {
-
             string url = $"api/subsidy/recommendations/{soloParentId}/predict";
             return await ApiClient.Instance.PostAsync<object, SubsidyRecommendationDto>(url, new { });
-
         }
 
         public async Task<BaseResponse<PagedResult<SubsidyRecommendationDto>>> GetRecommendationsPagedAsync(GetSubsidyRecommendationsRequest request)
         {
-
             string url = "api/subsidy/recommendations" + BuildRecommendationsQueryParams(request);
             return await ApiClient.Instance.GetAsync<PagedResult<SubsidyRecommendationDto>>(url);
-
         }
 
         public async Task<BaseResponse<List<SubsidyRecommendationDto>>> GetAllRecommendationsAsync(GetSubsidyRecommendationsRequest request = null)
         {
-
             string url = "api/subsidy/recommendations/all" + BuildRecommendationsQueryParams(request);
             return await ApiClient.Instance.GetAsync<List<SubsidyRecommendationDto>>(url);
-
         }
 
         public async Task<BaseResponse<List<SubsidyRecommendationDto>>> GetRecommendationsAsync(Guid? cycleId = null)
         {
             return await GetAllRecommendationsAsync(new GetSubsidyRecommendationsRequest { CycleId = cycleId });
-
         }
 
         public async Task<BaseResponse<List<SubsidyRecommendationDto>>> GetShortlistAsync(Guid? cycleId = null)
         {
-
             string url = "api/subsidy/shortlist" + (cycleId.HasValue ? $"?cycleId={cycleId.Value}" : "");
             return await ApiClient.Instance.GetAsync<List<SubsidyRecommendationDto>>(url);
-
         }
 
         public async Task<BaseResponse<bool>> ShortlistCandidatesAsync(Guid? cycleId, List<Guid> evaluationIds)
         {
             var req = new ShortlistRequest { CycleId = cycleId, EvaluationIds = evaluationIds ?? new List<Guid>() };
             return await ApiClient.Instance.PostAsync<ShortlistRequest, bool>("api/subsidy/shortlist", req);
-
         }
 
         public async Task<BaseResponse<int>> ShortlistTopQuotaAsync(Guid? cycleId, int? topCount = null)
         {
             var req = new ShortlistTopQuotaRequest { CycleId = cycleId, TopCount = topCount };
             return await ApiClient.Instance.PostAsync<ShortlistTopQuotaRequest, int>("api/subsidy/shortlist-quota", req);
-
         }
 
         private string BuildRecommendationsQueryParams(GetSubsidyRecommendationsRequest request)
@@ -250,13 +173,11 @@ namespace SOLUM_UI.Services.Implementations
             if (request.MaxIncome.HasValue)
                 queryParams.Add($"maxIncome={request.MaxIncome.Value}");
             return queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : string.Empty;
-
         }
 
         public async Task<BaseResponse<SubsidyRecommendationDto>> RejectOutlierAsync(RejectOutlierRequest request)
         {
             return await ApiClient.Instance.PostAsync<RejectOutlierRequest, SubsidyRecommendationDto>("api/subsidy/reject-outlier", request);
-
         }
 
         public async Task<BaseResponse<List<SubsidyRecommendationDto>>> GetRejectedCandidatesAsync(Guid? cycleId = null, string search = null, string reason = null)
@@ -274,14 +195,11 @@ namespace SOLUM_UI.Services.Implementations
                 string url = "api/subsidy/rejected" + (queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "");
                 var res = await ApiClient.Instance.GetAsync<List<SubsidyRecommendationDto>>(url);
                 return res ?? new BaseResponse<List<SubsidyRecommendationDto>> { Succeeded = false, Data = new List<SubsidyRecommendationDto>() };
-
             }
             catch
             {
                 return new BaseResponse<List<SubsidyRecommendationDto>> { Succeeded = false, Data = new List<SubsidyRecommendationDto>() };
-
             }
-
         }
 
         public async Task<BaseResponse<bool>> ReinstateCandidateAsync(Guid evaluationId)
@@ -290,34 +208,48 @@ namespace SOLUM_UI.Services.Implementations
             {
                 var res = await ApiClient.Instance.PostAsync<object, bool>($"api/subsidy/evaluations/{evaluationId}/reinstate", null);
                 return res ?? new BaseResponse<bool> { Succeeded = true, Data = true };
-
             }
             catch
             {
                 return new BaseResponse<bool> { Succeeded = true, Data = true };
-
             }
-
         }
 
         public async Task<BaseResponse<int>> ConfirmGranteesAsync(Guid? cycleId, List<Guid> evaluationIds)
         {
             var req = new ConfirmGranteesRequest { CycleId = cycleId, EvaluationIds = evaluationIds ?? new List<Guid>() };
             return await ApiClient.Instance.PostAsync<ConfirmGranteesRequest, int>("api/subsidy/confirm-grantees", req);
-
         }
 
         public async Task<BaseResponse<List<GranteeDto>>> GetGranteesByFiscalYearAsync(int fiscalYear)
         {
-            return await ApiClient.Instance.GetAsync<List<GranteeDto>>($"api/subsidy/grantees?fiscalYear={fiscalYear}");
+            return await GetGranteesAsync(fiscalYear: fiscalYear);
+        }
 
+        public async Task<BaseResponse<List<GranteeDto>>> GetGranteesAsync(int? fiscalYear = null, int? cycleNumber = null, Guid? cycleId = null)
+        {
+            string url = "api/subsidy/grantees";
+            var queryParams = new List<string>();
+            if (cycleId.HasValue)
+            {
+                queryParams.Add($"cycleId={cycleId.Value}");
+            }
+            else
+            {
+                if (fiscalYear.HasValue) queryParams.Add($"fiscalYear={fiscalYear.Value}");
+                if (cycleNumber.HasValue) queryParams.Add($"cycleNumber={cycleNumber.Value}");
+            }
+            if (queryParams.Count > 0)
+            {
+                url += "?" + string.Join("&", queryParams);
+            }
+            return await ApiClient.Instance.GetAsync<List<GranteeDto>>(url);
         }
 
         public async Task<BaseResponse<bool>> RevokeGrantAsync(Guid evaluationId, string reason = null, string notes = null)
         {
             var req = new RevokeGrantRequest { Reason = reason ?? "Revocation by Admin", Remarks = notes ?? string.Empty };
             return await ApiClient.Instance.PostAsync<RevokeGrantRequest, bool>($"api/subsidy/grantees/{evaluationId}/revoke", req);
-
         }
 
         public async Task<string> ExportCityEducRosterCsvAsync(List<SelectionRow> items)
@@ -330,12 +262,9 @@ namespace SOLUM_UI.Services.Implementations
                     {
                         var resp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(r.SoloParentId);
                         if (resp?.Data != null) SubsidyModelMapper.EnrichRowFromRecord(r, resp.Data);
-
                     }
                     catch { }
-
                 }
-
             }
             var sb = new StringBuilder("\uFEFF");
             sb.AppendLine($"City Educ Scholarship Cross-Check Roster - {DateTime.Now:yyyy}");
@@ -348,22 +277,16 @@ namespace SOLUM_UI.Services.Implementations
                 {
                     foreach (var child in r.CollegeAgeDependents)
                     {
-
                         string edu = !string.IsNullOrWhiteSpace(child.EducationalLevel) ? child.EducationalLevel : "—";
                         sb.AppendLine($"{++count},\"{r.Name}\",\"{child.Name}\",{child.Age},\"{edu}\"");
-
                     }
-
                 }
                 else
                 {
                     sb.AppendLine($"{++count},\"{r.Name}\",\"Dependent (Age 17–24)\",18,\"College Level\"");
-
                 }
-
             }
             return sb.ToString();
-
         }
 
         public Task<string> ExportPantawid4PsRosterCsvAsync(List<SelectionRow> items)
@@ -373,7 +296,6 @@ namespace SOLUM_UI.Services.Implementations
             foreach (var r in items.Where(i => i.IsPantawidBeneficiary))
                 sb.AppendLine($"{r.Rank},{r.SpId},\"{r.Name}\",{r.Barangay},\"{r.IncomeLabel}\",\"{r.PerCapitaLabel}\",{r.Dependants},{r.MinorDependentsCount},\"{r.Circumstance}\",Enrolled (DSWD 4Ps),{DateTime.Now:yyyy-MM-dd HH:mm}");
             return Task.FromResult(sb.ToString());
-
         }
 
         public async Task<string> ExportFinalLedgerCsvAsync(List<SelectionRow> items, int fiscalYear)
@@ -387,12 +309,9 @@ namespace SOLUM_UI.Services.Implementations
                         var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(r.SoloParentId);
                         if (detailResp?.Data != null)
                             SubsidyModelMapper.EnrichRowFromRecord(r, detailResp.Data);
-
                     }
                     catch { }
-
                 }
-
             }
             var sb = new StringBuilder("\uFEFF");
             sb.AppendLine($"Fiscal Year {fiscalYear} - Final Grantee Ledger");
@@ -401,19 +320,13 @@ namespace SOLUM_UI.Services.Implementations
             int count = 0;
             foreach (var r in items)
             {
-
                 string contact = !string.IsNullOrWhiteSpace(r.ContactNumberFormatted) && r.ContactNumberFormatted != "—" ? r.ContactNumberFormatted : (!string.IsNullOrWhiteSpace(r.ContactNumber) ? r.ContactNumber : "—");
-
                 string addr = !string.IsNullOrWhiteSpace(r.FullAddress) && r.FullAddress != "—" ? r.FullAddress : (!string.IsNullOrWhiteSpace(r.Address) ? r.Address : "—");
-
                 string bday = !string.IsNullOrWhiteSpace(r.DateOfBirthFormatted) ? r.DateOfBirthFormatted : "—";
-
                 string status = r.IsFinalGrantee ? "Confirmed" : "Pending";
                 sb.AppendLine($"{++count},\"{r.Name}\",\"{contact}\",\"{r.Barangay}\",\"{addr}\",\"{bday}\",\"{status}\",\"₱1,000.00\"");
-
             }
             return sb.ToString();
-
         }
 
         public Task<string> ExportAllQueueCsvAsync(List<SubsidyItem> items)
@@ -423,9 +336,6 @@ namespace SOLUM_UI.Services.Implementations
             foreach (var item in items)
                 sb.AppendLine($"{item.Rank},{item.SpId},\"{item.Name}\",{item.Barangay},{item.ScoreLabel},{item.Status},\"{item.Circumstance}\",\"{item.IncomeLabel}\"");
             return Task.FromResult(sb.ToString());
-
         }
-
     }
-
 }
