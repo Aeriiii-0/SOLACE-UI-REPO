@@ -578,7 +578,7 @@
         </Style>
     </Page.Resources>
 
-    <Grid>
+    <Grid x:Name="UsersRootGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition x:Name="ColPanel" Width="0"/>
@@ -1188,6 +1188,10 @@
             </Grid>
         </Border>
 
-        <components:LoadingOverlay x:Name="UsersLoadingOverlay" Grid.RowSpan="99" Grid.ColumnSpan="99" Panel.ZIndex="9999"/>
+        <components:LoaderOverlay x:Name="UsersLoadingOverlay"
+                                  BlurTarget="{Binding ElementName=UsersRootGrid}"
+                                  Grid.RowSpan="99" Grid.ColumnSpan="99"
+                                  Message="Processing..."
+                                  Panel.ZIndex="9999"/>
     </Grid>
 </Page>

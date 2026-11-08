@@ -521,6 +521,7 @@ namespace SOLUM_UI.ViewModels
             {
                 if (SetProperty(ref _isLoading, value))
                 {
+                    System.Diagnostics.Debug.WriteLine($"[SubsidyRecommendationViewModel] IsLoading changed to: {value}");
                     System.Windows.Input.CommandManager.InvalidateRequerySuggested();
 
                 }

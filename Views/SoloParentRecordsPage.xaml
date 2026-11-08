@@ -468,7 +468,7 @@
             <Setter Property="Margin" Value="12,0"/>
         </Style>
     </Page.Resources>
-    <Grid Background="#FFFFFF">
+    <Grid Background="#FFFFFF" x:Name="RecordsRootGrid">
         <Grid.RowDefinitions>
             <RowDefinition x:Name="PageTitleRow" Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -1338,12 +1338,11 @@
                 </Border>
             </Grid>
         </Border>
-        <components:LoadingOverlay Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="99"
-                                   x:Name="PageLoadingOverlay"
-                                   IsLoading="False" Visibility="Collapsed" IsHitTestVisible="False"
-                                   HorizontalAlignment="Stretch"
-                                   VerticalAlignment="Stretch"
-                                   Panel.ZIndex="9999" Loaded="PageLoadingOverlay_Loaded"/>
+        <components:LoaderOverlay Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="99"
+                                  x:Name="PageLoadingOverlay"
+                                  BlurTarget="{Binding ElementName=RecordsRootGrid}"
+                                  Message="Loading..."
+                                  Panel.ZIndex="9999"/>
         <components:NotificationCardComponent
             Grid.Row="0" Grid.RowSpan="4"
             Panel.ZIndex="100"

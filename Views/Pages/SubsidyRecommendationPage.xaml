@@ -64,7 +64,7 @@
             </Setter>
         </Style>
     </Page.Resources>
-    <Grid>
+    <Grid x:Name="SubsidyRootGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -548,7 +548,11 @@
         <c:ModalOutlierRejection Grid.RowSpan="3"/>
         <!-- Disqualified Candidates Audit Log Modal Overlay (Spans all rows) -->
         <c:ModalDisqualifiedCandidates Grid.RowSpan="3"/>
-        <!-- Loading Overlay (Disabled in favor of modern Skeleton Loader) -->
-        <c:LoadingOverlay Grid.RowSpan="5" IsLoading="False" Visibility="Collapsed" Panel.ZIndex="9999"/>
+        <!-- Loading Overlay for action operations (export, generate, etc.) -->
+        <c:LoaderOverlay Grid.RowSpan="5"
+                         x:Name="SubsidyActionLoader"
+                         BlurTarget="{Binding ElementName=SubsidyRootGrid}"
+                         Message="Processing..."
+                         Panel.ZIndex="9999"/>
     </Grid>
 </Page>

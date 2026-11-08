@@ -770,10 +770,10 @@
                 </ScrollViewer>
             </Border>
         </Grid>
-        <components:LoadingOverlay Grid.RowSpan="99" Grid.ColumnSpan="99"
+        <components:LoaderOverlay Grid.RowSpan="99" Grid.ColumnSpan="99"
                                    x:Name="DashboardLoadingOverlay"
-                                   IsLoading="False"
-                                   Visibility="Collapsed"
+                                   BlurTarget="{Binding ElementName=DashboardScroll}"
+                                   Message="Loading dashboard..."
                                    Panel.ZIndex="9999"/>
     </Grid>
 </Page>

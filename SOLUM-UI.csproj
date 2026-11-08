@@ -196,6 +196,9 @@
     <Compile Include="Views\Components\LoadingOverlay.xaml.cs">
       <DependentUpon>LoadingOverlay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Components\LoaderOverlay.xaml.cs">
+      <DependentUpon>LoaderOverlay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Components\TableSkeletonLoader.xaml.cs">
       <DependentUpon>TableSkeletonLoader.xaml</DependentUpon>
     </Compile>
@@ -441,6 +444,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Components\LoadingOverlay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\LoaderOverlay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

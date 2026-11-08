@@ -285,7 +285,7 @@
             </Style.Triggers>
         </Style>
     </Page.Resources>
-    <Grid Background="{StaticResource PageBackground}">
+    <Grid Background="{StaticResource PageBackground}" x:Name="AnalyticsRootGrid">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="24">
                 <StackPanel.Resources>
@@ -409,9 +409,6 @@
                                 <Path x:Name="RefreshIcon"
                                       Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
                                       Fill="#7D2245" Stretch="Uniform" Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                <StackPanel x:Name="LoadingSpinner" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Text="⟳" FontSize="15" Foreground="#7D2245" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </StackPanel>
                             </Grid>
                         </Button>
                     </Border>
@@ -1083,10 +1080,10 @@
                                             Margin="24,120,24,24"
                                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
                                             Panel.ZIndex="50"/>
-        <!-- Full-Page Loading Overlay (Disabled in favor of modern Skeleton Loader) -->
-        <components:LoadingOverlay x:Name="PageLoadingOverlay"
-                                   IsLoading="False"
-                                   Visibility="Collapsed"
-                                   Panel.ZIndex="9999"/>
+        <!-- Full-Page Loading Overlay -->
+        <components:LoaderOverlay x:Name="PageLoadingOverlay"
+                                  BlurTarget="{Binding ElementName=AnalyticsRootGrid}"
+                                  Message="Loading analytics..."
+                                  Panel.ZIndex="9999"/>
     </Grid>
 </Page>

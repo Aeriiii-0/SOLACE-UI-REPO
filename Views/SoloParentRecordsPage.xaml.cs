@@ -81,7 +81,7 @@ namespace SOLUM_UI
 
         }
 
-        // ── Notification card properties ──────────────────────────────────────
+        // -- Notification card properties --------------------------------------
         private bool   _isNotificationVisible;
         private string _notificationTitle;
         private string _notificationMessage;
@@ -172,7 +172,7 @@ namespace SOLUM_UI
                 }
                 else
                 {
-                    // No filter requested, load records normally (but not for Encoders — they must search first)
+                    // No filter requested, load records normally (but not for Encoders � they must search first)
                     bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
                     if (isStale && !IsEncoder)
                     {
@@ -308,10 +308,10 @@ namespace SOLUM_UI
             if (!IsEncoder && !IsBasicUser) return;
             var show = Visibility.Visible;
             var hide = Visibility.Collapsed;
-            // Results table (Row 3) — always visible for Encoder/BasicUser
+            // Results table (Row 3) � always visible for Encoder/BasicUser
             if (RecordsClipGrid != null)
                 RecordsClipGrid.Visibility = show;
-            // Table empty state overlay — shown inside table when no search done yet
+            // Table empty state overlay � shown inside table when no search done yet
             if (TableEmptyStateOverlay != null)
                 TableEmptyStateOverlay.Visibility = showResults ? Visibility.Collapsed : Visibility.Visible;
             // If returning to landing view, hide skeleton loader
@@ -326,7 +326,7 @@ namespace SOLUM_UI
         private async Task LoadRecordsAsync()
         {
             if (_isLoading) return;
-            // Encoders must search first — don't load records without a search query
+            // Encoders must search first � don't load records without a search query
             if (IsEncoder && string.IsNullOrWhiteSpace(EncSearchQuery?.Text?.Trim()))
             {
                 SetEncoderResultsVisible(false);
@@ -347,7 +347,7 @@ namespace SOLUM_UI
             if (IsEncoder || IsBasicUser)
                 SetEncoderResultsVisible(true);
             // Hide the LoadingOverlay while loading
-            if (PageLoadingOverlay != null) PageLoadingOverlay.Visibility = Visibility.Collapsed;
+            if (PageLoadingOverlay != null) PageLoadingOverlay.IsActive = false;
             try
             {
 
@@ -511,7 +511,7 @@ namespace SOLUM_UI
 
                 };
                 // Fetch the list page, then retrieve full details in parallel (the list
-                // endpoint does not return complete PersonalInfo — detail endpoint does).
+                // endpoint does not return complete PersonalInfo � detail endpoint does).
                 var resp = await SoloParentApiService.Instance.GetSoloParentsAsync(req);
                 if (!resp.Succeeded || resp.Data == null)
                 {
@@ -549,7 +549,7 @@ namespace SOLUM_UI
                     }
                     else
                     {
-                        // Detail call failed — build a minimal record from summary fields
+                        // Detail call failed � build a minimal record from summary fields
                         rec = new SoloParentRecord
                         {
                             Id = summary.Id.ToString(),
@@ -600,7 +600,7 @@ namespace SOLUM_UI
                 _lastLoadedTime = DateTime.UtcNow;
                 _hasLoadedData = true;
                 if (TxtLastRefreshed != null)
-                    TxtLastRefreshed.Text = $"• Updated {DateTime.Now:h:mm tt}";
+                    TxtLastRefreshed.Text = $"� Updated {DateTime.Now:h:mm tt}";
                 if (BtnRefreshRecords != null)
                     BtnRefreshRecords.ToolTip = $"Refresh records (Last updated: {DateTime.Now:h:mm:ss tt})";
                 // Ensure delete is hidden for non-admin roles after every data load
@@ -631,7 +631,7 @@ namespace SOLUM_UI
                     });
 
                 }
-                if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
+                if (PageLoadingOverlay != null) PageLoadingOverlay.IsActive = false;
                 if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Collapsed;
 
             }
@@ -675,7 +675,7 @@ namespace SOLUM_UI
                 int start = _totalCount == 0 ? 0 : ((_currentPage - 1) * _pageSize) + 1;
 
                 int end = Math.Min(_totalCount, _currentPage * _pageSize);
-                TxtRecordsPageSummary.Text = $"Showing {start}–{end} of {_totalCount:N0} records";
+                TxtRecordsPageSummary.Text = $"Showing {start}�{end} of {_totalCount:N0} records";
 
             }
             if (BtnBack != null)
@@ -1002,7 +1002,7 @@ namespace SOLUM_UI
                 return;
 
             }
-            // Manual entry — open 3-step wizard (Step 1 performs validation & duplicate check)
+            // Manual entry � open 3-step wizard (Step 1 performs validation & duplicate check)
             RecordDialog dialog = new RecordDialog { Owner = Window.GetWindow(this) };
             dialog.SaveAsyncHandler = async (rec) =>
             {
@@ -1036,7 +1036,8 @@ namespace SOLUM_UI
         private async Task SaveNewRecordAsync(SoloParentRecord record)
         {
             // Show loading indicator
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            PageLoadingOverlay.Message = "Saving record...";
+            PageLoadingOverlay.IsActive = true;
             try
             {
                 record.CreatedBy = CurrentUserName;
@@ -1071,7 +1072,7 @@ namespace SOLUM_UI
             finally
             {
                 // Hide loading indicator
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+                PageLoadingOverlay.IsActive = false;
 
             }
 
@@ -1131,7 +1132,8 @@ namespace SOLUM_UI
                 if (!isConfirmed) return;
 
             }
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            PageLoadingOverlay.Message = "Processing renewal...";
+            PageLoadingOverlay.IsActive = true;
             try
             {
                 var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid, null);
@@ -1141,7 +1143,7 @@ namespace SOLUM_UI
                     string newExpiry = (resp.Data != null && DateTime.TryParse(resp.Data.ExpiresAt, out var expDt))
                         ? expDt.ToString("MMMM d, yyyy")
                         : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
-                    ShowNotification("Record Renewed", $"{record.Name} — valid until {newExpiry}.", true);
+                    ShowNotification("Record Renewed", $"{record.Name} � valid until {newExpiry}.", true);
                     AuditLogService.Instance.LogUpdate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole, $"Record quick renewed. Valid until {newExpiry}.");
                     (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
@@ -1166,7 +1168,7 @@ namespace SOLUM_UI
             }
             finally
             {
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+                PageLoadingOverlay.IsActive = false;
 
             }
 
@@ -1202,7 +1204,8 @@ namespace SOLUM_UI
             }
             
             System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Eligibility check passed");
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            PageLoadingOverlay.Message = "Renewing record...";
+            PageLoadingOverlay.IsActive = true;
             try
             {
                 if (existingDto == null)
@@ -1260,7 +1263,7 @@ namespace SOLUM_UI
                 System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] SUCCESS! New expiry: {newExpiry}");
                 
                 ShowNotification("Record Renewed",
-                    $"{original.Name} — valid until {newExpiry}.", true);
+                    $"{original.Name} � valid until {newExpiry}.", true);
                 var changeService = new ChangeTrackingService();
                 var changes = changeService.DetectChanges(original, updated);
                 if (changes.Count > 0)
@@ -1300,7 +1303,7 @@ namespace SOLUM_UI
             }
             finally
             {
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+                PageLoadingOverlay.IsActive = false;
                 System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Loading overlay hidden");
 
             }
@@ -1365,7 +1368,8 @@ namespace SOLUM_UI
             string recordName = vm != null ? vm.Name : id;
             SoloParentRecord rawRecord = vm?.RawModel;
             SoloParentDto existingDto = null;
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            PageLoadingOverlay.Message = "Opening record...";
+            PageLoadingOverlay.IsActive = true;
             try
             {
                 var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
@@ -1379,7 +1383,7 @@ namespace SOLUM_UI
             }
             finally
             {
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+                PageLoadingOverlay.IsActive = false;
 
             }
             if (rawRecord == null) rawRecord = new SoloParentRecord { Id = id, Surname = recordName };
@@ -1446,7 +1450,8 @@ namespace SOLUM_UI
                 owner: Window.GetWindow(this));
             if (!isConfirmed) return;
             // Show loading indicator
-            PageLoadingOverlay.Visibility = Visibility.Visible;
+            PageLoadingOverlay.Message = "Deleting record...";
+            PageLoadingOverlay.IsActive = true;
             try
             {
                 var deleteResp = await SoloParentApiService.Instance.DeleteSoloParentAsync(guid);
@@ -1470,7 +1475,7 @@ namespace SOLUM_UI
             finally
             {
                 // Hide loading indicator
-                PageLoadingOverlay.Visibility = Visibility.Collapsed;
+                PageLoadingOverlay.IsActive = false;
 
             }
 
@@ -1577,7 +1582,7 @@ namespace SOLUM_UI
                 return;
 
             }
-            // Manual entry — open RecordDialog Step 1 (Primary Info) directly
+            // Manual entry � open RecordDialog Step 1 (Primary Info) directly
             RecordDialog dialog = new RecordDialog() { Owner = Window.GetWindow(this) };
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
@@ -1655,7 +1660,7 @@ namespace SOLUM_UI
         }
         /// <summary>
         /// Compares two records field-by-field and returns a structured list of
-        /// <see cref="SOLUM_UI.Models.ChangeDetail"/> entries — one per changed field.
+        /// <see cref="SOLUM_UI.Models.ChangeDetail"/> entries � one per changed field.
         /// </summary>
 
         private static List<SOLUM_UI.Models.ChangeDetail> BuildChangeList(
@@ -1731,8 +1736,8 @@ namespace SOLUM_UI
             if (before.DateOfBirth != after.DateOfBirth)
                 changes.Add(new SOLUM_UI.Models.ChangeDetail(
                     "Date of Birth",
-                    before.DateOfBirth != DateTime.MinValue ? before.DateOfBirth.ToString("yyyy-MM-dd") : "—",
-                    after.DateOfBirth != DateTime.MinValue ? after.DateOfBirth.ToString("yyyy-MM-dd") : "—"));
+                    before.DateOfBirth != DateTime.MinValue ? before.DateOfBirth.ToString("yyyy-MM-dd") : "�",
+                    after.DateOfBirth != DateTime.MinValue ? after.DateOfBirth.ToString("yyyy-MM-dd") : "�"));
             return changes;
 
         }
@@ -1753,11 +1758,6 @@ namespace SOLUM_UI
                 RecordsList.ScrollIntoView(vm);
 
             }), System.Windows.Threading.DispatcherPriority.Loaded);
-
-        }
-
-        private void PageLoadingOverlay_Loaded(object sender, RoutedEventArgs e)
-        {
 
         }
         // ==================== Status Tabs & Filter Badges ====================

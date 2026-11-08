@@ -46,9 +46,15 @@ namespace SOLUM_UI.Views.Pages
                     {
                         ResetTabFontWeights();
                     }
+                    
+                    // Drive the action LoaderOverlay (fires for export, generate, cycle-load operations)
+                    if (e.PropertyName == nameof(SubsidyRecommendationViewModel.IsLoading))
+                    {
+                        if (SubsidyActionLoader != null)
+                            SubsidyActionLoader.IsActive = vm.IsLoading;
+                    }
                 };
-            }
-        }
+            }        }
 
         private void UpdateProgressBar()
         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -37,7 +37,7 @@ namespace SOLUM_UI
         public string ContactNumber { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public string Password { get; set; }
-        public string DateAdded { get; set; } = "—";
+        public string DateAdded { get; set; } = "�";
 
         public string FullName => $"{FirstName} {LastName}".Trim().ToUpper();
 
@@ -51,7 +51,7 @@ namespace SOLUM_UI
             }
         }
 
-        public string DisplayContact => string.IsNullOrWhiteSpace(ContactNumber) ? "—" : ContactNumber;
+        public string DisplayContact => string.IsNullOrWhiteSpace(ContactNumber) ? "�" : ContactNumber;
 
         public bool IsAdminUser => string.Equals(Role, "ADMIN", StringComparison.OrdinalIgnoreCase) ||
                                    string.Equals(Role, "ADMINISTRATOR", StringComparison.OrdinalIgnoreCase);
@@ -195,7 +195,7 @@ namespace SOLUM_UI
         private static readonly SolidColorBrush DefaultBorder = CreateFrozenBrush(0xD8, 0xCE, 0xD3);
         private static readonly SolidColorBrush DefaultFg = CreateFrozenBrush(0x5A, 0x4D, 0x53);
 
-        // ── Role text colors for the table (hierarchy: Barangay Secretary < Encoder < Admin < Superadmin) ──
+        // -- Role text colors for the table (hierarchy: Barangay Secretary < Encoder < Admin < Superadmin) --
         // Superadmin  : deep maroon, BOLD
         // Admin       : maroon, regular weight
         // Encoder     : black
@@ -650,7 +650,7 @@ namespace SOLUM_UI
             {
                 int start = _totalCount == 0 ? 0 : ((_currentPage - 1) * _pageSize) + 1;
                 int end = Math.Min(_totalCount, _currentPage * _pageSize);
-                TxtUsersPageSummary.Text = $"Showing {start}–{end} of {_totalCount} users";
+                TxtUsersPageSummary.Text = $"Showing {start}�{end} of {_totalCount} users";
             }
             if (BtnPrevPage != null)
                 BtnPrevPage.IsEnabled = _currentPage > 1;
@@ -765,11 +765,11 @@ namespace SOLUM_UI
             ColPanel.Width = new GridLength(324);
         }
 
-        // ─────────────────────────────────────────────────────────────
+        // -------------------------------------------------------------
         // Row helpers: always resolve the user from the button's Tag (user Id)
         // against the current _allUsers list, so a stale/reloaded row can never
         // leave a button pointing at an old object.
-        // ─────────────────────────────────────────────────────────────
+        // -------------------------------------------------------------
         private AppUser ResolveUserFromTag(object sender)
         {
             string tagStr = (sender as FrameworkElement)?.Tag?.ToString() ?? string.Empty;
@@ -846,11 +846,11 @@ namespace SOLUM_UI
             ColPanel.Width = new GridLength(324);
         }
 
-        // ─────────────────────────────────────────────────────────────
+        // -------------------------------------------------------------
         // "More" menu. The menu is now built fresh in code for the clicked row,
         // and each item captures that row's user directly. No DataContext juggling,
         // no Closed handlers, no stale state -> buttons keep working after any action.
-        // ─────────────────────────────────────────────────────────────
+        // -------------------------------------------------------------
         private void MoreActions_Click(object sender, RoutedEventArgs e)
         {
             if (!(sender is Button btn)) return;
@@ -937,7 +937,8 @@ namespace SOLUM_UI
                 customIconData: ResetPasswordIconData);
             if (!isConfirmed) return;
 
-            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
+            if (UsersLoadingOverlay != null) UsersLoadingOverlay.Message = "Resetting password...";
+            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = true;
             try
             {
                 string tempPassword = PasswordGenerator.Generate(10);
@@ -971,7 +972,7 @@ namespace SOLUM_UI
             }
             finally
             {
-                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = false;
             }
         }
 
@@ -995,7 +996,8 @@ namespace SOLUM_UI
                 owner: Window.GetWindow(this));
             if (!isConfirmed) return;
 
-            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
+            if (UsersLoadingOverlay != null) UsersLoadingOverlay.Message = "Updating user status...";
+            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = true;
             try
             {
                 var response = await UserApiService.Instance.UpdateUserStatusAsync(user.Id, newStatus);
@@ -1025,7 +1027,7 @@ namespace SOLUM_UI
             }
             finally
             {
-                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = false;
             }
         }
 
@@ -1043,7 +1045,8 @@ namespace SOLUM_UI
                 owner: Window.GetWindow(this));
             if (!isConfirmed) return;
 
-            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
+            if (UsersLoadingOverlay != null) UsersLoadingOverlay.Message = "Updating user status...";
+            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = true;
             try
             {
                 var response = await UserApiService.Instance.DeleteApplicationUserAsync(user.Id);
@@ -1061,7 +1064,7 @@ namespace SOLUM_UI
                     MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
                     user.Id.ToString());
 
-                // Force a reload — a non-forced call would return the stale cached list
+                // Force a reload � a non-forced call would return the stale cached list
                 _lastLoadedTime = DateTime.MinValue;
                 await LoadUsersAsync(forceRefresh: true);
             }
@@ -1072,7 +1075,7 @@ namespace SOLUM_UI
             }
             finally
             {
-                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = false;
             }
         }
 
@@ -1107,7 +1110,7 @@ namespace SOLUM_UI
                 ErrFirstName.Visibility = Visibility.Visible;
                 ok = false;
             }
-            else if (!Regex.IsMatch(firstName, @"^[a-zA-ZñÑ\.\s\-]+$"))
+            else if (!Regex.IsMatch(firstName, @"^[a-zA-Z��\.\s\-]+$"))
             {
                 ErrFirstName.Text = "Only letters, spaces, hyphens, and '.' are allowed.";
                 ErrFirstName.Visibility = Visibility.Visible;
@@ -1126,13 +1129,13 @@ namespace SOLUM_UI
                 ErrLastName.Visibility = Visibility.Visible;
                 ok = false;
             }
-            else if (!Regex.IsMatch(lastName, @"^[a-zA-ZñÑ\.\s\-]+$"))
+            else if (!Regex.IsMatch(lastName, @"^[a-zA-Z��\.\s\-]+$"))
             {
                 ErrLastName.Text = "Only letters, spaces, hyphens, and '.' are allowed.";
                 ErrLastName.Visibility = Visibility.Visible;
                 ok = false;
             }
-            else if (!Regex.IsMatch(lastName, @"^[a-zA-ZñÑ\.\s]+$"))
+            else if (!Regex.IsMatch(lastName, @"^[a-zA-Z��\.\s]+$"))
             {
                 ErrLastName.Text = "Only letters, spaces, and '.' are allowed.";
                 ErrLastName.Visibility = Visibility.Visible;
@@ -1157,7 +1160,7 @@ namespace SOLUM_UI
                 }
             }
 
-            // Email & Role validation only matter for CREATE — locked/read-only in edit mode
+            // Email & Role validation only matter for CREATE � locked/read-only in edit mode
             if (_editTarget == null)
             {
                 string selRole = (CmbRole?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Caseworker";
@@ -1213,7 +1216,8 @@ namespace SOLUM_UI
                     customIconData: "M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.07,6.19L3,17.25Z");
                 if (!isConfirmed) return;
 
-                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.Message = "Saving changes...";
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = true;
                 try
                 {
                     var updateReq = new UpdateApplicationUserRequest
@@ -1272,7 +1276,7 @@ namespace SOLUM_UI
                 }
                 finally
                 {
-                    if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
+                    if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = false;
                 }
             }
             else
@@ -1299,7 +1303,8 @@ namespace SOLUM_UI
                     owner: Window.GetWindow(this));
                 if (!confirmed) return;
 
-                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = true;
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.Message = "Creating user...";
+                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = true;
                 try
                 {
                     BaseResponse<RegisterResponse> response;
@@ -1352,7 +1357,7 @@ namespace SOLUM_UI
                 }
                 finally
                 {
-                    if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsLoading = false;
+                    if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = false;
                 }
             }
         }
@@ -1527,8 +1532,8 @@ namespace SOLUM_UI
                 e.Handled = true;
                 return;
             }
-            // Allow letters (including Filipino ñ/Ñ), spaces, hyphens, and period '.'
-            e.Handled = !Regex.IsMatch(e.Text, @"^[a-zA-ZñÑ\.\s\-]+$");
+            // Allow letters (including Filipino �/�), spaces, hyphens, and period '.'
+            e.Handled = !Regex.IsMatch(e.Text, @"^[a-zA-Z��\.\s\-]+$");
         }
 
         private void NamePasteHandler(object sender, DataObjectPastingEventArgs e)
@@ -1537,7 +1542,7 @@ namespace SOLUM_UI
             {
                 string text = ((string)e.DataObject.GetData(typeof(string))) ?? "";
                 text = text.Trim();
-                if (!Regex.IsMatch(text, @"^[a-zA-ZñÑ\.\s\-]+$"))
+                if (!Regex.IsMatch(text, @"^[a-zA-Z��\.\s\-]+$"))
                 {
                     e.CancelCommand();
                 }

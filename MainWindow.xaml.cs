@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
@@ -86,7 +86,7 @@ namespace SOLUM_UI
         }
 
         private Dictionary<string, Button> _navButtons = new Dictionary<string, Button>();
-        private Dictionary<string, Page> _pageCache = new Dictionary<string, Page>(); // NEW Ã¢â‚¬â€ one instance per page tag
+        private Dictionary<string, Page> _pageCache = new Dictionary<string, Page>(); // NEW â€” one instance per page tag
 
         public MainWindow(ApplicationUserDTO user)
         {
@@ -105,7 +105,7 @@ namespace SOLUM_UI
             };
             SetCurrentUser(user);
         }
-        // NEW Ã¢â‚¬â€ returns the cached page instance for this tag, creating it once on first use
+        // NEW â€” returns the cached page instance for this tag, creating it once on first use
         private Page GetOrCreatePage(string tag, Func<Page> factory)
         {
             if (!_pageCache.TryGetValue(tag, out var page))
@@ -167,7 +167,7 @@ namespace SOLUM_UI
             while (MainFrame.CanGoForward)
                 MainFrame.RemoveBackEntry();
         }
-        // CHANGED Ã¢â‚¬â€ simplified now that caching handles "don't rebuild the same page" for us.
+        // CHANGED â€” simplified now that caching handles "don't rebuild the same page" for us.
         // This just avoids re-navigating the Frame to the exact same instance it's already showing.
         private void NavigatePage(Page page)
         {
@@ -261,7 +261,7 @@ namespace SOLUM_UI
             _isExiting = true;
             if (LogoutLoadingOverlay != null)
             {
-                LogoutLoadingOverlay.Visibility = Visibility.Visible;
+                LogoutLoadingOverlay.IsActive = true;
             }
             try
             {
@@ -393,7 +393,7 @@ namespace SOLUM_UI
 
             if (!isConfirmed) return;
 
-            LogoutLoadingOverlay.Visibility = Visibility.Visible;
+            LogoutLoadingOverlay.IsActive = true;
             PerformLogoutAsync();
         }
 
@@ -438,7 +438,7 @@ namespace SOLUM_UI
         private async void LogoutConfirm_Click(object sender, RoutedEventArgs e)
         {
             LogoutOverlay.Visibility = Visibility.Collapsed;
-            LogoutLoadingOverlay.Visibility = Visibility.Visible;
+            LogoutLoadingOverlay.IsActive = true;
             try
             {
                 await AuthApiService.Instance.LogoutAsync();

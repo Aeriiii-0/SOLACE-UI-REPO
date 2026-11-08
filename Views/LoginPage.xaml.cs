@@ -228,35 +228,13 @@ namespace SOLUM_UI
             }
             _isLoggingIn = true;               // NEW
             BtnLogin.IsEnabled = false;
-            LoadingOverlay.Visibility = Visibility.Visible;
+            LoadingOverlay.IsActive = true;
             // Show splash screen
             SplashScreenWindow splash = null;
-            // Start progress animation
-            var progressPercentage = FindName("ProgressPercentage") as TextBlock;
-            var progressBarFill = FindName("ProgressBarFill") as Border;
-            var progressTimer = new System.Timers.Timer(100);
-
-            int progress = 0;
             try
             {
                 splash = new SplashScreenWindow();
                 splash.Show();
-                if (progressPercentage != null && progressBarFill != null)
-                {
-                    progressTimer.Elapsed += (s, e) =>
-                    {
-                        Dispatcher.Invoke(() =>
-                        {
-                            progress = Math.Min(progress + 5, 95);  // Cap at 95% until complete
-                            progressPercentage.Text = $"{progress}%";
-                            progressBarFill.Width = (progress / 100.0) * 240;
-
-                        });
-
-                    };
-                    progressTimer.Start();
-
-                }
                 var loginResponse = await AuthApiService.Instance.LoginAsync(email, password);
                 if (!loginResponse.Succeeded || loginResponse.Data == null || string.IsNullOrWhiteSpace(loginResponse.Data.Token))
                 {
@@ -284,7 +262,6 @@ namespace SOLUM_UI
                         splash = null;
 
                     }
-                    progressTimer.Stop();
                     var forceDialog = new ForceChangePasswordDialog(MainWindow.CurrentUserName, password)
                     {
                         Owner = this
@@ -335,13 +312,6 @@ namespace SOLUM_UI
                     loggedInUser.Role = assignedRole;
 
                 }
-                // Complete the progress bar
-                if (progressPercentage != null && progressBarFill != null)
-                {
-                    progressPercentage.Text = "100%";
-                    progressBarFill.Width = 240;
-
-                }
                 var mainWindow = new MainWindow(loggedInUser);
                 Application.Current.MainWindow = mainWindow;
                 mainWindow.Show();
@@ -350,8 +320,6 @@ namespace SOLUM_UI
                 splash?.Close();
                 splash = null;
                 // Close and dispose the login window immediately to free resources
-                progressTimer?.Stop();
-                progressTimer?.Dispose();
                 // Clear all visual elements and event handlers
                 this.DataContext = null;
                 this.Content = null;
@@ -380,15 +348,9 @@ namespace SOLUM_UI
                     splash = null;
 
                 }
-                if (progressTimer != null)
-                {
-                    progressTimer.Stop();
-                    progressTimer.Dispose();
-                    progressTimer = null;
-                }
                 _isLoggingIn = false;
                 BtnLogin.IsEnabled = true;
-                LoadingOverlay.Visibility = Visibility.Collapsed;
+                LoadingOverlay.IsActive = false;
 
             }
 

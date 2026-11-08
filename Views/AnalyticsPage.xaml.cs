@@ -439,7 +439,7 @@ namespace SOLUM_UI
             {
                 if (_vm != null) _vm.IsLoading = false;
                 if (AnalyticsSkeleton != null) AnalyticsSkeleton.Visibility = Visibility.Collapsed;
-                if (PageLoadingOverlay != null) PageLoadingOverlay.IsLoading = false;
+                if (PageLoadingOverlay != null) PageLoadingOverlay.IsActive = false;
             }
         }
 
@@ -1190,12 +1190,10 @@ namespace SOLUM_UI
                 if (refreshBtn.Content is Grid contentGrid)
                 {
                     var refreshIcon = contentGrid.Children.OfType<System.Windows.Shapes.Path>().FirstOrDefault();
-                    var loadingSpinner = contentGrid.Children.OfType<StackPanel>().FirstOrDefault();
                     if (refreshIcon != null)
                         refreshIcon.Visibility = Visibility.Collapsed;
-                    if (loadingSpinner != null)
-                        loadingSpinner.Visibility = Visibility.Visible;
                 }
+                if (PageLoadingOverlay != null) { PageLoadingOverlay.Message = "Refreshing analytics..."; PageLoadingOverlay.IsActive = true; }
                 await LoadDataAsync();
                 ToastNotification.Show("Analytics Refreshed", "Analytics data refreshed successfully.", ToastType.Success);
             }
@@ -1212,11 +1210,8 @@ namespace SOLUM_UI
                     if (refreshBtn != null && refreshBtn.Content is Grid contentGrid)
                     {
                         var refreshIcon = contentGrid.Children.OfType<System.Windows.Shapes.Path>().FirstOrDefault();
-                        var loadingSpinner = contentGrid.Children.OfType<StackPanel>().FirstOrDefault();
                         if (refreshIcon != null)
                             refreshIcon.Visibility = Visibility.Visible;
-                        if (loadingSpinner != null)
-                            loadingSpinner.Visibility = Visibility.Collapsed;
                         _ = Task.Run(async () =>
                         {
                             var elapsed = DateTime.UtcNow - _lastRefreshClickTime;

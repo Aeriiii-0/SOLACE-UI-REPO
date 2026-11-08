@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SOLUM_UI"
+        xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
         mc:Ignorable="d"
         Title="Solace"
         MinHeight="420" MinWidth="680"
@@ -493,46 +494,10 @@
             </Button>
         </StackPanel>
 
-        <!-- Loading overlay (unchanged) -->
-        <Grid x:Name="LoadingOverlay" Visibility="Collapsed" Panel.ZIndex="30">
-            <Rectangle Fill="#AA1A0A14"/>
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Grid Width="240" Margin="0,0,0,20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="8"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <Border Grid.Row="0" Background="#E0E0E0" CornerRadius="8" Height="12">
-                        <Border x:Name="ProgressBarFill" Background="#702943" CornerRadius="8"
-                                HorizontalAlignment="Left" Width="0" Height="12">
-                            <Border.RenderTransform>
-                                <ScaleTransform ScaleX="1"/>
-                            </Border.RenderTransform>
-                            <Border.Triggers>
-                                <EventTrigger RoutedEvent="Loaded">
-                                    <BeginStoryboard>
-                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                            <DoubleAnimation Storyboard.TargetName="ProgressBarFill"
-                                                             Storyboard.TargetProperty="(Border.Width)"
-                                                             From="0" To="240" Duration="0:0:3"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </EventTrigger>
-                            </Border.Triggers>
-                        </Border>
-                    </Border>
-
-                    <TextBlock Grid.Row="2" x:Name="ProgressPercentage" Text="0%"
-                               FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
-                               Foreground="#702943" HorizontalAlignment="Center"/>
-                </Grid>
-
-                <TextBlock Text="Signing in..." FontFamily="Segoe UI" FontSize="12"
-                           Foreground="White" HorizontalAlignment="Center"/>
-            </StackPanel>
-        </Grid>
+        <!-- Loading overlay -->
+        <components:LoaderOverlay x:Name="LoadingOverlay"
+                                  Message="Signing in..."
+                                  Panel.ZIndex="30"/>
 
         <!-- Error Modal Overlay -->
         <Grid x:Name="ErrorModalOverlay" Visibility="Collapsed" Panel.ZIndex="20">
