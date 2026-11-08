@@ -118,7 +118,16 @@ namespace SOLUM_UI.Views.Components
 
         private void UpdateDynamicPageSize()
         {
-            // Continuous virtualized scrolling active across all candidate records.
+            double availableHeight = QueueListView.ActualHeight;
+            if (availableHeight <= 100) return;
+            // ColHeader is 46px, each queue row is ~48px
+            double rowsHeight = availableHeight - 46.0;
+            int calculated = (int)Math.Floor(rowsHeight / 48.0);
+            int optimal = Math.Max(4, Math.Min(40, calculated));
+            if (DataContext is SubsidyRecommendationViewModel vm && optimal != vm.QueuePageSize)
+            {
+                _ = vm.UpdateQueuePageSizeAsync(optimal);
+            }
         }
 
         private void AdjustColumnWidths()
@@ -242,6 +251,60 @@ namespace SOLUM_UI.Views.Components
                 vm.OpenExplainDrawerCommand.Execute(candidate);
                 e.Handled = true;
             }
+        }
+
+        // ── Search & Filter handlers ──────────────────────────────────────────
+
+        private void FilterPill_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (QueueFilterPopup != null)
+                QueueFilterPopup.IsOpen = !QueueFilterPopup.IsOpen;
+        }
+
+        private void FilterOpt_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Border b && b.Tag is string tag
+                && DataContext is SubsidyRecommendationViewModel vm)
+            {
+                vm.ApplyAuditFilter(tag);
+            }
+            // Close the popup after selection
+            if (QueueFilterPopup != null)
+                QueueFilterPopup.IsOpen = false;
+        }
+
+        private void FilterOptReset_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (DataContext is SubsidyRecommendationViewModel vm)
+            {
+                vm.ClearAuditFilter();
+            }
+            // Close the popup after reset
+            if (QueueFilterPopup != null)
+                QueueFilterPopup.IsOpen = false;
+        }
+
+        private void ClearQueueSearch_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is SubsidyRecommendationViewModel vm)
+                vm.QueueSearchText = string.Empty;
+            if (TxtQueueSearch != null) TxtQueueSearch.Focus();
+        }
+
+        private void ClearQueueFilter_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is SubsidyRecommendationViewModel vm)
+                vm.ApplyAuditFilter("All");
+        }
+
+        private void ClearAllQueueFilters_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is SubsidyRecommendationViewModel vm)
+            {
+                vm.QueueSearchText = string.Empty;
+                vm.ApplyAuditFilter("All");
+            }
+            if (TxtQueueSearch != null) TxtQueueSearch.Focus();
         }
     }
 }

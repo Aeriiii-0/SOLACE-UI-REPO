@@ -385,7 +385,7 @@
                             </Border>
                             <!-- Action filter -->
                             <ComboBox Grid.Column="2" Height="40"
-                                      ItemsSource="{Binding ActionFilters}"
+                                      ItemsSource="{Binding VisibleActionFilters}"
                                       SelectedItem="{Binding SelectedFilter}"
                                       FontFamily="Segoe UI" FontSize="13"
                                       Template="{StaticResource StyledComboTemplate}"

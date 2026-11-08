@@ -15,10 +15,13 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="#FBEFF3"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        TextOptions.TextRenderingMode="Auto"
+        RenderOptions.BitmapScalingMode="HighQuality"
         KeyDown="Window_KeyDown">
 
     <Window.Resources>
-        <!-- Feature chip (maroon border) -->
         <Style x:Key="FeatureChip" TargetType="Border">
             <Setter Property="Background" Value="#E6FFFFFF"/>
             <Setter Property="BorderBrush" Value="#6D1F40"/>
@@ -27,36 +30,32 @@
             <Setter Property="Padding" Value="16,13"/>
             <Setter Property="Margin" Value="0,0,14,0"/>
             <Setter Property="Width" Value="210"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
         </Style>
     </Window.Resources>
 
-    <Grid MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+    <Grid MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" SnapsToDevicePixels="True" UseLayoutRounding="True">
 
-        <!-- Full background (circles / boxes are already baked into the image) -->
         <Image Source="pack://application:,,,/Assets/login.png"
                Stretch="UniformToFill"
                HorizontalAlignment="Center"
-               VerticalAlignment="Center"/>
+               VerticalAlignment="Center"
+               RenderOptions.BitmapScalingMode="HighQuality"/>
 
-        <!--
-            Everything (brand, hero, card, footer) lives on ONE canvas inside the Viewbox.
-            The Viewbox margin is the same on the left and right, and the canvas is centered,
-            so the space on both sides is always equal and the whole thing scales to fit.
-            To make everything bigger/smaller overall: lower/raise the margin below.
-            To change the canvas proportions: change Width/Height of the inner Grid.
-        -->
         <Viewbox Stretch="Uniform"
                  HorizontalAlignment="Center"
                  VerticalAlignment="Center"
-                 Margin="48,44,48,36">
-            <Grid Width="1360" Height="980">
+                 Margin="48,44,48,36"
+                 SnapsToDevicePixels="True"
+                 UseLayoutRounding="True">
+            <Grid Width="1360" Height="980" SnapsToDevicePixels="True" UseLayoutRounding="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="96"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="56"/>
                 </Grid.RowDefinitions>
 
-                <!-- Brand (top-left of the canvas, lines up with the hero text) -->
                 <StackPanel Grid.Row="0"
                             Orientation="Horizontal"
                             HorizontalAlignment="Left"
@@ -79,26 +78,24 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Main content -->
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="620"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- LEFT: hero text -->
                     <StackPanel Grid.Column="0"
                                 VerticalAlignment="Center"
                                 Margin="0,0,56,0">
 
-                        <!-- Authorized pill -->
                         <Border HorizontalAlignment="Left"
                                 Background="#66FFFFFF"
                                 BorderBrush="#6D1F40"
                                 BorderThickness="1.2"
                                 CornerRadius="22"
                                 Padding="16,8"
-                                Margin="0,0,0,30">
+                                Margin="0,0,0,30"
+                                SnapsToDevicePixels="True">
                             <StackPanel Orientation="Horizontal">
                                 <Grid Width="20" Height="20" Margin="0,0,10,0" VerticalAlignment="Center">
                                     <Ellipse Stroke="#6D1F40" StrokeThickness="1.8"/>
@@ -113,7 +110,6 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Headline -->
                         <TextBlock Text="A secure gateway to"
                                    FontFamily="Georgia"
                                    FontSize="56"
@@ -128,7 +124,6 @@
                                    LineHeight="66"
                                    Margin="0,0,0,26"/>
 
-                        <!-- Description -->
                         <TextBlock Text="Sign in to manage solo parent records, monitor program operations, and access beneficiary data through the unified management system of the Biñan City Social Welfare and Development Office."
                                    FontFamily="Segoe UI"
                                    FontSize="20"
@@ -139,11 +134,10 @@
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,42"/>
 
-                        <!-- Feature chips -->
                         <StackPanel Orientation="Horizontal">
                             <Border Style="{StaticResource FeatureChip}">
                                 <StackPanel Orientation="Horizontal">
-                                    <Border Width="42" Height="42" CornerRadius="21" Background="#F6DCE6" Margin="0,0,12,0">
+                                    <Border Width="42" Height="42" CornerRadius="21" Background="#F6DCE6" Margin="0,0,12,0" SnapsToDevicePixels="True">
                                         <TextBlock Text="&#xEA18;" FontFamily="Segoe MDL2 Assets" FontSize="17"
                                                    Foreground="#6D1F40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
@@ -155,7 +149,7 @@
                             </Border>
                             <Border Style="{StaticResource FeatureChip}">
                                 <StackPanel Orientation="Horizontal">
-                                    <Border Width="42" Height="42" CornerRadius="21" Background="#F6DCE6" Margin="0,0,12,0">
+                                    <Border Width="42" Height="42" CornerRadius="21" Background="#F6DCE6" Margin="0,0,12,0" SnapsToDevicePixels="True">
                                         <TextBlock Text="&#xE8FD;" FontFamily="Segoe MDL2 Assets" FontSize="17"
                                                    Foreground="#6D1F40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
@@ -167,7 +161,7 @@
                             </Border>
                             <Border Style="{StaticResource FeatureChip}">
                                 <StackPanel Orientation="Horizontal">
-                                    <Border Width="42" Height="42" CornerRadius="21" Background="#F6DCE6" Margin="0,0,12,0">
+                                    <Border Width="42" Height="42" CornerRadius="21" Background="#F6DCE6" Margin="0,0,12,0" SnapsToDevicePixels="True">
                                         <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="17"
                                                    Foreground="#6D1F40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
@@ -180,23 +174,22 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- RIGHT: login card (wider + taller) -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
 
-                        <!-- Opaque background + soft, low-opacity shadow = clean edges -->
                         <Border Background="White"
                                 BorderBrush="#6D1F40"
                                 BorderThickness="1.5"
                                 CornerRadius="22"
                                 Padding="56,72,56,56"
-                                SnapsToDevicePixels="True" Width="592">
+                                SnapsToDevicePixels="True"
+                                UseLayoutRounding="True"
+                                Width="552">
                             <Border.Effect>
                                 <DropShadowEffect Color="#6D1F40" BlurRadius="32" ShadowDepth="6" Direction="270" Opacity="0.14" RenderingBias="Quality"/>
                             </Border.Effect>
 
                             <StackPanel>
 
-                                <!-- Card header: title only -->
                                 <Grid Margin="0,0,0,44" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <TextBlock Text="Welcome back"
@@ -214,7 +207,6 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <!-- Email label -->
                                 <TextBlock Text="Email"
                                            FontFamily="Segoe UI"
                                            FontSize="19"
@@ -222,13 +214,14 @@
                                            Foreground="#2B0D1A"
                                            Margin="0,0,0,10"/>
 
-                                <!-- Email field -->
                                 <Border x:Name="BorderEmail"
                                         Background="White"
                                         BorderBrush="#6D1F40"
                                         BorderThickness="1"
                                         CornerRadius="12"
-                                        Padding="20,0">
+                                        Padding="20,0"
+                                        SnapsToDevicePixels="True"
+                                        UseLayoutRounding="True">
                                     <Grid Height="72">
                                         <TextBlock x:Name="PlaceholderEmail"
                                                    Text="Enter your email address"
@@ -249,7 +242,6 @@
                                     </Grid>
                                 </Border>
 
-                                <!-- Email inline validation error -->
                                 <TextBlock x:Name="ErrEmail"
                                            FontFamily="Segoe UI"
                                            FontSize="13"
@@ -258,7 +250,6 @@
                                            TextWrapping="Wrap"
                                            Visibility="Collapsed"/>
 
-                                <!-- Password label -->
                                 <TextBlock Text="Password"
                                            FontFamily="Segoe UI"
                                            FontSize="19"
@@ -266,13 +257,14 @@
                                            Foreground="#2B0D1A"
                                            Margin="0,26,0,10"/>
 
-                                <!-- Password field -->
                                 <Border x:Name="BorderPassword"
                                         Background="White"
                                         BorderBrush="#6D1F40"
                                         BorderThickness="1"
                                         CornerRadius="12"
-                                        Padding="20,0,14,0">
+                                        Padding="20,0,14,0"
+                                        SnapsToDevicePixels="True"
+                                        UseLayoutRounding="True">
                                     <Grid Height="72">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -330,7 +322,6 @@
                                     </Grid>
                                 </Border>
 
-                                <!-- Password inline validation error -->
                                 <TextBlock x:Name="ErrPassword"
                                            FontFamily="Segoe UI"
                                            FontSize="13"
@@ -339,7 +330,6 @@
                                            TextWrapping="Wrap"
                                            Visibility="Collapsed"/>
 
-                                <!-- Forgot password -->
                                 <TextBlock HorizontalAlignment="Right" Margin="0,14,0,20">
                                     <Hyperlink x:Name="LinkForgotPassword"
                                                Foreground="#7A2650"
@@ -350,7 +340,6 @@
                                                Click="LinkForgotPassword_Click">Forgot password?</Hyperlink>
                                 </TextBlock>
 
-                                <!-- Login button -->
                                 <Button x:Name="BtnLogin"
                                         Content="Sign in securely"
                                         Height="74"
@@ -361,11 +350,14 @@
                                         Cursor="Hand"
                                         BorderThickness="0"
                                         Margin="0,30,0,0"
+                                        SnapsToDevicePixels="True"
+                                        UseLayoutRounding="True"
                                         Click="BtnLogin_Click">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Border x:Name="ButtonBorder" CornerRadius="12"
-                                                    BorderBrush="#4A1229" BorderThickness="1">
+                                                    BorderBrush="#4A1229" BorderThickness="1"
+                                                    SnapsToDevicePixels="True">
                                                 <Border.Background>
                                                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                                                         <GradientStop Color="#8A2D58" Offset="0"/>
@@ -389,7 +381,6 @@
                                     </Button.Template>
                                 </Button>
 
-                                <!-- Terms -->
                                 <TextBlock HorizontalAlignment="Center" Margin="0,16,0,0">
                                     <Run Text="By signing in you agree to our " Foreground="#8A5068" FontFamily="Segoe UI" FontSize="12.5"/>
                                     <Hyperlink x:Name="LinkTerms"
@@ -409,7 +400,6 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Below-card notice -->
                         <TextBlock HorizontalAlignment="Center"
                                    TextAlignment="Center"
                                    FontFamily="Segoe UI"
@@ -422,7 +412,6 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- Copyright (bottom-left of the canvas) -->
                 <TextBlock Grid.Row="2"
                            Text="© 2026 Biñan City Social Welfare and Development Office. All rights reserved."
                            FontFamily="Segoe UI"
@@ -433,7 +422,6 @@
             </Grid>
         </Viewbox>
 
-        <!-- Title bar controls -->
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
@@ -494,16 +482,15 @@
             </Button>
         </StackPanel>
 
-        <!-- Loading overlay -->
         <components:LoaderOverlay x:Name="LoadingOverlay"
                                   Message="Signing in..."
                                   Panel.ZIndex="30"/>
 
-        <!-- Error Modal Overlay -->
         <Grid x:Name="ErrorModalOverlay" Visibility="Collapsed" Panel.ZIndex="20">
             <Rectangle Fill="#66000000"/>
             <Border Background="White" CornerRadius="14" Padding="28,24" Width="360"
                     BorderBrush="#6D1F40" BorderThickness="1.5"
+                    SnapsToDevicePixels="True" UseLayoutRounding="True"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border.Effect>
                     <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="4" Opacity="0.18" RenderingBias="Quality"/>
@@ -524,7 +511,7 @@
                     <Button Content="Close" Height="40" Cursor="Hand" Click="BtnErrorClose_Click">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
-                                <Border Background="#6D1F40" CornerRadius="10" Padding="0,10">
+                                <Border Background="#6D1F40" CornerRadius="10" Padding="0,10" SnapsToDevicePixels="True">
                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
                                                       TextElement.Foreground="White"
                                                       TextElement.FontFamily="Segoe UI"
@@ -543,11 +530,11 @@
             </Border>
         </Grid>
 
-        <!-- Terms and Conditions Overlay -->
         <Grid x:Name="TermsOverlay" Visibility="Collapsed" Panel.ZIndex="20">
             <Rectangle Fill="#66000000"/>
             <Border Background="White" CornerRadius="14" Padding="0" Width="400" MaxHeight="480"
                     BorderBrush="#6D1F40" BorderThickness="1.5"
+                    SnapsToDevicePixels="True" UseLayoutRounding="True"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border.Effect>
                     <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="4" Opacity="0.18" RenderingBias="Quality"/>
@@ -559,7 +546,7 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Border Grid.Row="0" CornerRadius="14,14,0,0" Padding="24,18,24,14"
-                            BorderBrush="#EBD3DC" BorderThickness="0,0,0,1">
+                            BorderBrush="#EBD3DC" BorderThickness="0,0,0,1" SnapsToDevicePixels="True">
                         <Grid>
                             <TextBlock Text="Terms and Conditions" FontFamily="Segoe UI"
                                        FontSize="14" FontWeight="Bold" Foreground="#6D1F40"/>
@@ -568,7 +555,7 @@
                                     Click="BtnTermsClose_Click">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Cbg" Background="Transparent" CornerRadius="14">
+                                        <Border x:Name="Cbg" Background="Transparent" CornerRadius="14" SnapsToDevicePixels="True">
                                             <TextBlock Text="✕" FontSize="13" Foreground="#AAAAAA"
                                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
@@ -610,11 +597,11 @@
                         </StackPanel>
                     </ScrollViewer>
                     <Border Grid.Row="2" CornerRadius="0,0,14,14" Padding="24,14"
-                            BorderBrush="#EBD3DC" BorderThickness="0,1,0,0">
+                            BorderBrush="#EBD3DC" BorderThickness="0,1,0,0" SnapsToDevicePixels="True">
                         <Button Content="Close" Height="38" Cursor="Hand" Click="BtnTermsClose_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border Background="#6D1F40" CornerRadius="10" Padding="0,8">
+                                    <Border Background="#6D1F40" CornerRadius="10" Padding="0,8" SnapsToDevicePixels="True">
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
                                                           TextElement.Foreground="White"
                                                           TextElement.FontFamily="Segoe UI"

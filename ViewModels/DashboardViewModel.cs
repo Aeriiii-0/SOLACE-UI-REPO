@@ -350,6 +350,11 @@ namespace SOLUM_UI.ViewModels
                     foreach (var dto in logsResponse.Data.Items)
                         RecentLogs.Add(MapDtoToLog(dto));
                 }
+                else if (logsResponse != null && !logsResponse.Succeeded && logsResponse.Errors?.Count > 0)
+                {
+                    // Capture error from failed logs request so user sees why recent activity is empty
+                    ErrorMessage = string.Join(Environment.NewLine, logsResponse.Errors);
+                }
                 // 2. Await monthly chart data and populate the chart bars
                 var monthlyResponses = await Task.WhenAll(monthlyTasks);
                 var monthlyValues = new int[12];

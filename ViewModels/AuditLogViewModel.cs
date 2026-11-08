@@ -105,6 +105,27 @@ namespace SOLUM_UI.ViewModels
             "CREATE_SUBSIDY_CYCLE", "GENERATE_SUBSIDY_RECOMMENDATIONS", "SHORTLIST_SUBSIDY_CANDIDATES",
             "REJECT_SUBSIDY_OUTLIER", "CONFIRM_SUBSIDY_GRANTEES", "REVOKE_SUBSIDY_GRANT"
         };
+
+        /// <summary>
+        /// Action filter list scoped to what an encoder can actually do:
+        /// record CRUD, renewal/revocation, and their own login/logout.
+        /// Admin-only actions (user management, subsidy, etc.) are excluded.
+        /// </summary>
+        public List<string> EncoderActionFilters { get; } = new List<string>
+        {
+            "All",
+            "CREATE_SOLO_PARENT",
+            "UPDATE_SOLO_PARENT",
+            "DELETE_SOLO_PARENT",
+            "RENEW_SOLO_PARENT_RECORD",
+            "REVOKE_SOLO_PARENT_RECORD",
+            "LOGIN",
+            "LOGOUT",
+            "CHANGE_PASSWORD",
+        };
+
+        /// <summary>Returns the correct action filter list based on the current user's role.</summary>
+        public List<string> VisibleActionFilters => IsEncoder ? EncoderActionFilters : ActionFilters;
         // ── Cursor-based pagination ────────────────────────────────────────────
         private readonly List<(DateTimeOffset? CursorTs, string CursorId)> _pageStack
             = new List<(DateTimeOffset?, string)>();

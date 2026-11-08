@@ -8,7 +8,6 @@ namespace SOLUM_UI.Views.Pages
 {
     public partial class SubsidyRecommendationPage : Page
     {
-        private Popup _filterPopup;
 
         public SubsidyRecommendationPage(SubsidyRecommendationViewModel viewModel = null)
         {
@@ -201,100 +200,21 @@ namespace SOLUM_UI.Views.Pages
                     {
                         vm.ViewDetailsCommand.Execute(null);
                     }
+                    else if (option == "ViewDisqualified" && vm.OpenDisqualifiedModalCommand?.CanExecute(null) == true)
+                    {
+                        vm.OpenDisqualifiedModalCommand.Execute(null);
+                    }
                 }
             }
         }
 
         private void FilterDropBtn_Click(object sender, RoutedEventArgs e)
         {
-            // Create filter popup if not already created
-            if (_filterPopup == null)
-            {
-                _filterPopup = new Popup();
-                _filterPopup.PlacementTarget = FilterDropBtn;
-                _filterPopup.Placement = PlacementMode.Bottom;
-                _filterPopup.StaysOpen = false;
-                _filterPopup.AllowsTransparency = true;
-
-                var border = new Border
-                {
-                    Background = System.Windows.Media.Brushes.White,
-                    CornerRadius = new CornerRadius(12),
-                    BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 92, 29, 56)), // Maroon #5C1D38
-                    BorderThickness = new Thickness(1),
-                    Padding = new Thickness(6),
-                    Child = CreateFilterContent()
-                };
-
-                // Add drop shadow effect
-                border.Effect = new System.Windows.Media.Effects.DropShadowEffect
-                {
-                    Color = System.Windows.Media.Color.FromArgb(255, 92, 29, 56),
-                    BlurRadius = 12,
-                    ShadowDepth = 3,
-                    Opacity = 0.15
-                };
-
-                _filterPopup.Child = border;
-            }
-
-            _filterPopup.IsOpen = true;
+            // Filter is now handled inside RecommendationQueueGrid directly
         }
 
-        private StackPanel CreateFilterContent()
-        {
-            var stack = new StackPanel();
-            
-            var allOption = CreateFilterOption("All Records", "All");
-            var clearedOption = CreateFilterOption("Cleared (Standard)", "Clean");
-            var collegeOption = CreateFilterOption("City Educ Check (17–24y)", "CollegeAge");
+        private StackPanel CreateFilterContent() => new StackPanel();
 
-            stack.Children.Add(allOption);
-            stack.Children.Add(clearedOption);
-            stack.Children.Add(collegeOption);
-
-            return stack;
-        }
-
-        private Border CreateFilterOption(string label, string tag)
-        {
-            var border = new Border
-            {
-                CornerRadius = new CornerRadius(6),
-                Padding = new Thickness(10, 6, 10, 6),
-                Cursor = System.Windows.Input.Cursors.Hand,
-                Tag = tag,
-                Background = System.Windows.Media.Brushes.Transparent
-            };
-
-            border.MouseLeftButtonDown += (s, e) =>
-            {
-                if (_filterPopup != null)
-                    _filterPopup.IsOpen = false;
-                // Filter logic can be added here or in ViewModel
-            };
-
-            // Add hover effect
-            border.MouseEnter += (s, e) =>
-            {
-                border.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 245, 236, 238)); // #F5ECEE
-            };
-
-            border.MouseLeave += (s, e) =>
-            {
-                border.Background = System.Windows.Media.Brushes.Transparent;
-            };
-
-            var text = new TextBlock
-            {
-                Text = label,
-                FontSize = 11,
-                FontWeight = FontWeights.SemiBold,
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 92, 29, 56)) // Maroon #5C1D38
-            };
-
-            border.Child = text;
-            return border;
-        }
+        private Border CreateFilterOption(string label, string tag) => new Border();
     }
 }

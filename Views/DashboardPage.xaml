@@ -6,12 +6,27 @@
       xmlns:converters="clr-namespace:SOLUM_UI.Converters"
       xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
       Background="White"
-      Title="Dashboard">
+      Title="Dashboard"
+      TextOptions.TextRenderingMode="ClearType"
+      TextOptions.TextFormattingMode="Display"
+      UseLayoutRounding="True"
+      SnapsToDevicePixels="True">
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
         <DropShadowEffect x:Key="CardShadow" Color="#702943" BlurRadius="16" ShadowDepth="2" Opacity="0.06" Direction="270"/>
         <FontFamily x:Key="HeadingFont">Georgia</FontFamily>
+        
+        <!-- Global Typography Style: Crispy Text Rendering -->
+        <Style TargetType="TextBlock">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        </Style>
+        
         <Style x:Key="SlimProgress" TargetType="ProgressBar">
             <Setter Property="Height" Value="8"/>
             <Setter Property="Minimum" Value="0"/>
@@ -20,10 +35,10 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ProgressBar">
                         <Grid>
-                            <Border Background="{TemplateBinding Background}" CornerRadius="4"/>
+                            <Border Background="{TemplateBinding Background}" CornerRadius="4" UseLayoutRounding="True" SnapsToDevicePixels="True"/>
                             <Border x:Name="PART_Track"/>
                             <Border x:Name="PART_Indicator" HorizontalAlignment="Left"
-                                    Background="{TemplateBinding Foreground}" CornerRadius="4"/>
+                                    Background="{TemplateBinding Foreground}" CornerRadius="4" UseLayoutRounding="True" SnapsToDevicePixels="True"/>
                         </Grid>
                     </ControlTemplate>
                 </Setter.Value>
@@ -38,7 +53,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="Bg" Background="Transparent" CornerRadius="14" Padding="14,5">
+                        <Border x:Name="Bg" Background="Transparent" CornerRadius="14" Padding="14,5" UseLayoutRounding="True" SnapsToDevicePixels="True">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -61,7 +76,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bg" Background="Transparent" CornerRadius="8">
+                        <Border x:Name="Bg" Background="Transparent" CornerRadius="8" UseLayoutRounding="True" SnapsToDevicePixels="True">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -98,7 +113,7 @@
                 </Grid.RowDefinitions>
                 <Border Grid.Row="0" Grid.ColumnSpan="3" CornerRadius="22" Margin="0,0,0,16"
                         BorderBrush="#702943" BorderThickness="1.5"
-                        Effect="{StaticResource CardShadow}">
+                        Effect="{StaticResource CardShadow}" UseLayoutRounding="True" SnapsToDevicePixels="True">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                             <GradientStop Color="#FFFFFF" Offset="0"/>
@@ -218,7 +233,7 @@
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" Background="White" CornerRadius="20"
                                 BorderBrush="#702943" BorderThickness="1.5" Padding="20,18"
-                                Effect="{StaticResource CardShadow}">
+                                Effect="{StaticResource CardShadow}" UseLayoutRounding="True" SnapsToDevicePixels="True">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <Border Width="34" Height="34" CornerRadius="10" Background="#FBE3EA">
@@ -241,7 +256,7 @@
                         </Border>
                         <Border Grid.Column="2" Background="White" CornerRadius="20"
                                 BorderBrush="#702943" BorderThickness="1.5" Padding="20,18"
-                                Effect="{StaticResource CardShadow}">
+                                Effect="{StaticResource CardShadow}" UseLayoutRounding="True" SnapsToDevicePixels="True">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <Border Width="34" Height="34" CornerRadius="10" Background="#E3F5EE">
@@ -264,7 +279,7 @@
                         <Border Grid.Column="4" Background="White" CornerRadius="20"
                                 BorderBrush="#702943" BorderThickness="1.5" Padding="20,18"
                                 ToolTip="{Binding InactiveSubtext}"
-                                Effect="{StaticResource CardShadow}">
+                                Effect="{StaticResource CardShadow}" UseLayoutRounding="True" SnapsToDevicePixels="True">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <Border Width="34" Height="34" CornerRadius="10" Background="#FDEBC8">
@@ -286,7 +301,7 @@
                         </Border>
                     </Grid>
                     <Border Grid.Row="1" Background="White" CornerRadius="20" Padding="24,20" Margin="0,0,0,16"
-                            BorderBrush="#702943" BorderThickness="1" Effect="{StaticResource CardShadow}">
+                            BorderBrush="#702943" BorderThickness="1" Effect="{StaticResource CardShadow}" UseLayoutRounding="True" SnapsToDevicePixels="True">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -348,7 +363,7 @@
                         </Grid>
                     </Border>
                     <Border Grid.Row="2" Background="White" CornerRadius="18" Padding="18,14"
-                            BorderBrush="#E8B04A" BorderThickness="1">
+                            BorderBrush="#E8B04A" BorderThickness="1" UseLayoutRounding="True" SnapsToDevicePixels="True">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>

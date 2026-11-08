@@ -93,7 +93,7 @@
                 </Grid.OpacityMask>
                 <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <!-- ListView (Row 0: Column headers start immediately at top) -->
-                <ListView Grid.Row="0" x:Name="FinalGranteesListView" ItemsSource="{Binding PagedFinalGrantees}"
+                <ListView Grid.Row="0" x:Name="FinalGranteesListView" ItemsSource="{Binding FinalGranteesList}"
                           BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource SelRow}"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
                           SizeChanged="FinalGranteesListView_SizeChanged">
@@ -130,70 +130,10 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-                <!-- Integrated Card Footer for Pagination -->
+                <!-- Summary footer (no pagination) -->
                 <Border Grid.Row="1" Background="#FAF6F8" BorderBrush="#EFE4E8" BorderThickness="0,1.2,0,0" Padding="18,10">
-                    <Grid VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding FinalSummaryText}" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
-                            <TextBlock Text=" • " FontFamily="Segoe UI" FontSize="12" Foreground="#CBD5E1" Margin="4,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding FinalPageSummary}" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Button Width="105" Height="34" Cursor="Hand" Command="{Binding FinalPrevPageCommand}" IsEnabled="{Binding CanFinalPrevPage}" ToolTip="Previous page" Margin="0,0,10,0">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Bg" Background="White" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1.5">
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
-                                                      Fill="#5C1D38" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
-                                                <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
-                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#5C1D38"/>
-                                            </Trigger>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                            <Border Background="#FBF5F7" CornerRadius="8" Padding="14,6"
-                                    BorderBrush="#EDE2E6" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding FinalPageNumberLabel}" FontFamily="Segoe UI" FontSize="12"
-                                           FontWeight="SemiBold" Foreground="#5C1D38"/>
-                            </Border>
-                            <Button Width="105" Height="34" Cursor="Hand" Command="{Binding FinalNextPageCommand}" IsEnabled="{Binding CanFinalNextPage}" ToolTip="Next page">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Bg" Background="White" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1.5">
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
-                                                <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
-                                                      Fill="#5C1D38" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
-                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#5C1D38"/>
-                                            </Trigger>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
+                    <TextBlock Text="{Binding FinalSummaryText}" FontFamily="Segoe UI" FontSize="12"
+                               Foreground="#64748B" VerticalAlignment="Center"/>
                 </Border>
             </Grid>
         </Border>

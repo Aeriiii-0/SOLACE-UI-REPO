@@ -1829,6 +1829,5 @@ namespace SOLUM_UI
             AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
             OpenViewDialog(vm);
         }
-
     }
 }

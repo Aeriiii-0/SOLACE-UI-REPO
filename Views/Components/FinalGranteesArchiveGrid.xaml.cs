@@ -51,16 +51,7 @@ namespace SOLUM_UI.Views.Components
 
         private void UpdateDynamicPageSize()
         {
-            double availableHeight = FinalGranteesListView.ActualHeight;
-            if (availableHeight <= 100) return;
-            // GridViewColumnHeader is 46px, each final grantee row is ~48px
-            double rowsHeight = availableHeight - 46.0;
-            int calculated = (int)Math.Floor(rowsHeight / 48.0);
-            int optimal = Math.Max(4, Math.Min(40, calculated));
-            if (DataContext is SubsidyRecommendationViewModel vm && optimal != vm.FinalPageSize)
-            {
-                vm.UpdateFinalPageSize(optimal);
-            }
+            // No pagination on Final Grantees — all records shown directly
         }
 
         private void AdjustColumnWidths()

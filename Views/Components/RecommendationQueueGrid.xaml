@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:c="clr-namespace:SOLUM_UI.Views.Components"
+             xmlns:local="clr-namespace:SOLUM_UI.Converters"
              mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="1100">
     <UserControl.Resources>
         <!-- Reusable Sleek Translucent Maroon ScrollBar -->
@@ -64,6 +65,7 @@
             </Style.Triggers>
         </Style>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <local:StringNotEmptyToVisibilityConverter x:Key="NotEmptyToVis"/>
         <Style x:Key="ColHeader" TargetType="GridViewColumnHeader">
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="Background" Value="#FBF5F7"/>
@@ -145,6 +147,225 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
+        <!-- Row 0: Search bar ribbon -->
+        <Border Grid.Row="0" Background="#FBF5F7" MinHeight="48" CornerRadius="10"
+                BorderBrush="#5C1D38" BorderThickness="1" Padding="14,8" Margin="0,-15,0,17">
+            <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <!-- Search box -->
+                <Border Grid.Column="0" Background="White" CornerRadius="20"
+                        BorderBrush="#D4B6C2" BorderThickness="1.2" Height="34" Margin="0,0,10,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Path Grid.Column="0" Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"
+                              Fill="#A06080" Stretch="Uniform" Width="13" Height="13" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" x:Name="TxtQueueSearch"
+                                 Text="{Binding QueueSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 BorderThickness="0" Background="Transparent"
+                                 FontFamily="Segoe UI" FontSize="12.5" Foreground="#333333"
+                                 VerticalAlignment="Center" Padding="8,0,8,0">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="TextBox">
+                                                <Grid>
+                                                    <TextBlock Text="Search by name, SP ID, or barangay…"
+                                                               Foreground="#BBA0B0" FontSize="12.5"
+                                                               VerticalAlignment="Center" Padding="8,0"
+                                                               IsHitTestVisible="False">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                        <!-- Clear search button (only when text present) -->
+                        <Button Grid.Column="2" Width="22" Height="22" Margin="0,0,6,0"
+                                Cursor="Hand" VerticalAlignment="Center"
+                                Visibility="{Binding QueueSearchText, Converter={StaticResource NotEmptyToVis}, FallbackValue=Collapsed}"
+                                Click="ClearQueueSearch_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="Transparent" CornerRadius="11">
+                                        <TextBlock Text="✕" FontSize="10" Foreground="#A06080"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Border>
+                <!-- Filter pill button (bound label) -->
+                <Border Grid.Column="1" x:Name="FilterPillBtn" CornerRadius="16"
+                        BorderBrush="#5C1D38" BorderThickness="1.2" Padding="12,0" Height="34"
+                        Cursor="Hand" MouseLeftButtonDown="FilterPill_Click">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="White"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FBF5F7"/>
+                                </Trigger>
+                                <DataTrigger Binding="{Binding IsQueueFilterActive}" Value="True">
+                                    <Setter Property="Background" Value="#5C1D38"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M3,2H21V4.172L13,12.172V19.343L11,21.343V12.172L3,4.172V2Z"
+                              Stretch="Uniform" Width="11" Height="11" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <Path.Style>
+                                <Style TargetType="Path">
+                                    <Setter Property="Fill" Value="#5C1D38"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsQueueFilterActive}" Value="True">
+                                            <Setter Property="Fill" Value="White"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
+                        <TextBlock Text="{Binding AuditFilterLabel, Mode=OneWay, FallbackValue='Filter'}" 
+                                   FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#5C1D38"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsQueueFilterActive}" Value="True">
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                    <!-- Inline filter popup -->
+                    <Border.ContextMenu>
+                        <ContextMenu/>
+                    </Border.ContextMenu>
+                </Border>
+                <!-- Filter Popup (anchored to FilterPillBtn) -->
+                <Popup Grid.Column="1" x:Name="QueueFilterPopup"
+                       PlacementTarget="{Binding ElementName=FilterPillBtn}"
+                       Placement="Bottom" HorizontalOffset="-80" VerticalOffset="4"
+                       StaysOpen="True" AllowsTransparency="True" PopupAnimation="Fade">
+                    <Border Background="White" CornerRadius="12" BorderBrush="#5C1D38" BorderThickness="1"
+                            Padding="6" Width="200">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#5C1D38" BlurRadius="14" ShadowDepth="3" Opacity="0.13"/>
+                        </Border.Effect>
+                        <StackPanel>
+                            <!-- All -->
+                            <Border x:Name="FilterOptAll" CornerRadius="8" Padding="12,9" Cursor="Hand"
+                                    MouseLeftButtonDown="FilterOpt_Click" Tag="All">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FBF5F7"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <StackPanel>
+                                    <TextBlock Text="All Candidates" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
+                                    <TextBlock Text="Show all evaluated candidates" FontSize="10" Foreground="#888888" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <!-- Divider -->
+                            <Border Height="1" Background="#F0E0E6" Margin="4,2"/>
+                            <!-- City Educ Check -->
+                            <Border x:Name="FilterOptCollegeAge" CornerRadius="8" Padding="12,9" Cursor="Hand"
+                                    MouseLeftButtonDown="FilterOpt_Click" Tag="CollegeAge">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FBF5F7"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <StackPanel>
+                                    <TextBlock Text="City Educ Check (17–24y)" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
+                                    <TextBlock Text="Has college-age dependent" FontSize="10" Foreground="#888888" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <!-- Divider -->
+                            <Border Height="1" Background="#F0E0E6" Margin="4,2"/>
+                            <!-- Cleared Only -->
+                            <Border x:Name="FilterOptClean" CornerRadius="8" Padding="12,9" Cursor="Hand"
+                                    MouseLeftButtonDown="FilterOpt_Click" Tag="Clean">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FBF5F7"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <StackPanel>
+                                    <TextBlock Text="Cleared Only" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
+                                    <TextBlock Text="No college-age dependents" FontSize="10" Foreground="#888888" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <!-- Reset Filter Option (Styled differently) -->
+                            <Border x:Name="FilterOptReset" CornerRadius="8" Padding="12,9" Cursor="Hand"
+                                    MouseLeftButtonDown="FilterOptReset_Click" Background="#F9F5F7" BorderBrush="#E8D8DD" BorderThickness="1" Margin="0,4,0,0">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#F9F5F7"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#F0E6EB"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path Data="M12,4C14.1,4 16.1,4.8 17.6,6.3C20.7,9.4 20.7,14.6 17.6,17.7C16.1,19.2 14.1,20 12,20C9.9,20 7.9,19.2 6.4,17.7C3.3,14.6 3.3,9.4 6.4,6.3C7.9,4.8 9.9,4 12,4M12,2C6.5,2 2,6.5 2,12C2,17.5 6.5,22 12,22C17.5,22 22,17.5 22,12C22,6.5 17.5,2 12,2M13,7H11V13L16.2,16.2L17,14.9L13,12.3V7Z"
+                                          Fill="#888888" Stretch="Uniform" Width="13" Height="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <StackPanel>
+                                        <TextBlock Text="Reset filter" FontSize="12" FontWeight="SemiBold" Foreground="#666666"/>
+                                        <TextBlock Text="Clear filter and show all" FontSize="10" Foreground="#999999" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </Popup>
+            </Grid>
+        </Border>
+
+
+
         <!-- Main Queue Table Container: Record Management Card Design with Radial Mask -->
         <Border Grid.Row="2" CornerRadius="12" BorderBrush="#5C1D38" BorderThickness="1" Background="White" TextOptions.TextRenderingMode="ClearType" TextOptions.TextFormattingMode="Display" Margin="0,-12,0,0">
             <Border.Effect>
@@ -276,6 +497,38 @@
                     </Border.Effect>
                     <Path Data="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"
                           Fill="White" Width="11" Height="11" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <!-- Empty state (shown when filter/search returns zero results) -->
+                <Border Grid.Row="0" Background="White"
+                        Visibility="{Binding HasNoQueueResults, Converter={StaticResource BoolToVis}}"
+                        Panel.ZIndex="5">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,60,0,60">
+                        <Border Width="52" Height="52" CornerRadius="26" Background="#F8EDF1" HorizontalAlignment="Center" Margin="0,0,0,14">
+                            <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"
+                                  Fill="#D4A0B0" Stretch="Uniform" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="No matching candidates" FontFamily="Segoe UI" FontSize="14" FontWeight="Bold"
+                                   Foreground="#1E293B" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                        <TextBlock Text="{Binding QueueEmptyStateMessage}" FontFamily="Segoe UI" FontSize="12"
+                                   Foreground="#64748B" HorizontalAlignment="Center" TextAlignment="Center"
+                                   TextWrapping="Wrap" MaxWidth="380"/>
+                        <Button Margin="0,18,0,0" Height="34" Padding="18,0" Cursor="Hand"
+                                HorizontalAlignment="Center" Click="ClearAllQueueFilters_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#5C1D38" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                        <TextBlock Text="Clear all filters" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="White" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
                 </Border>
                 <!-- Integrated Card Footer for Pagination -->
                 <Border Grid.Row="1" Background="#FAF6F8" BorderBrush="#EFE4E8" BorderThickness="0,1.2,0,0" Padding="18,10">

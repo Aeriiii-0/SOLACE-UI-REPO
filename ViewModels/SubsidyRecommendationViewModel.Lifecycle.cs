@@ -36,6 +36,8 @@ namespace SOLUM_UI.ViewModels
                     QueueTotalCount = 0;
                     ShortlistRows.Clear();
                     FilteredShortlistRows.Clear();
+                    OnPropertyChanged(nameof(HasNoQueueResults));
+                    OnPropertyChanged(nameof(QueueEmptyStateMessage));
                     NotifyCycleProperties();
                     ToastNotification.Show("Roster Finalized", $"FY {yr} roster locked for official disbursement.", ToastType.Success);
                 }
@@ -152,9 +154,9 @@ namespace SOLUM_UI.ViewModels
                 }
             }
             UpdateShortlistAndFinalCollections(enrich: false);
-            PagedRecommendations.Clear();
-            FilteredRecommendations.Clear();
+            // Load _allItems then apply any active filter (search/status) to build FilteredRecommendations
             _allItems.Clear();
+            FilteredRecommendations.Clear();
             if (dtos?.Data != null && dtos.Data.Count > 0)
             {
                 for (int i = 0; i < dtos.Data.Count; i++)
@@ -162,11 +164,15 @@ namespace SOLUM_UI.ViewModels
                     var item = SubsidyModelMapper.ToItem(dtos.Data[i]);
                     item.Rank = i + 1;
                     item.IsWithinQuota = (item.Rank <= _granteeSlots);
-                    FilteredRecommendations.Add(item);
                     _allItems.Add(item);
                 }
             }
-            UpdateQueuePaged();
+            // Reset queue filter state on fresh data load
+            _auditFilter = "All";
+            _queueSearchText = string.Empty;
+            OnPropertyChanged(nameof(AuditFilterLabel));
+            OnPropertyChanged(nameof(QueueSearchText));
+            ApplyQueueFilter();
             UpdateShortlistPaged();
             UpdateFinalPaged();
             RecalculateSelectionCounts();
@@ -224,35 +230,75 @@ namespace SOLUM_UI.ViewModels
             }
         }
 
-        public async void ApplyAuditFilter(string filter) { _auditFilter = filter; OnPropertyChanged(nameof(AuditFilterLabel)); await LoadQueuePageAsync(1); }
         public void ApplyShortlistAuditFilter(string filter) { _shortlistAuditFilter = filter; OnPropertyChanged(nameof(ShortlistAuditFilterLabel)); FilterShortlistRows(); }
         public void RecalculateSelectionCounts() { OnPropertyChanged(nameof(SelectedCountSummary)); OnPropertyChanged(nameof(SelectTopNLabel)); OnPropertyChanged(nameof(SelectAllQueueButtonText)); OnPropertyChanged(nameof(HasQueueSelection)); }
 
+        public void ApplyAuditFilter(string filter) { _auditFilter = filter; OnPropertyChanged(nameof(AuditFilterLabel)); ApplyQueueFilter(); }
+
+        public void ClearAuditFilter() { _auditFilter = "All"; OnPropertyChanged(nameof(AuditFilterLabel)); ApplyQueueFilter(); }
+
+        /// <summary>
+        /// Filters _allItems into FilteredRecommendations based on _auditFilter and QueueSearchText,
+        /// re-ranks, resets to page 1, and updates pagination.
+        /// </summary>
+        public void ApplyQueueFilter()
+        {
+            IEnumerable<SubsidyItem> q = _allItems;
+
+            // Apply status/circumstance filter
+            if (_auditFilter == "CollegeAge")
+                q = q.Where(x => x.HasCollegeAgeDependent);
+            else if (_auditFilter == "Clean")
+                q = q.Where(x => !x.HasCollegeAgeDependent);
+            // "All" → no filter
+
+            // Apply search text
+            if (!string.IsNullOrWhiteSpace(_queueSearchText))
+            {
+                string t = _queueSearchText.Trim().ToLowerInvariant();
+                q = q.Where(x =>
+                    (x.Name != null && x.Name.ToLowerInvariant().Contains(t)) ||
+                    (x.SpId != null && x.SpId.ToLowerInvariant().Contains(t)) ||
+                    (x.Barangay != null && x.Barangay.ToLowerInvariant().Contains(t)) ||
+                    (x.Priority != null && x.Priority.ToLowerInvariant().Contains(t)));
+            }
+
+            FilteredRecommendations.Clear();
+            int rank = 1;
+            foreach (var item in q)
+            {
+                item.Rank = rank;
+                item.IsWithinQuota = rank <= _granteeSlots;
+                FilteredRecommendations.Add(item);
+                rank++;
+            }
+
+            QueueTotalCount = FilteredRecommendations.Count;
+            OnPropertyChanged(nameof(HasNoQueueResults));
+            OnPropertyChanged(nameof(IsQueueFilterActive));
+            OnPropertyChanged(nameof(QueueEmptyStateMessage));
+            _queueCurrentPage = 1;
+            UpdateQueuePaged();
+            RecalculateSelectionCounts();
+            NotifyQuotaMetricsChanged();
+        }
+
         private void RecalculateQuotaAndFilter()
         {
-            if (FilteredRecommendations != null)
-            {
-                for (int i = 0; i < FilteredRecommendations.Count; i++)
-                {
-                    FilteredRecommendations[i].Rank = i + 1;
-                    FilteredRecommendations[i].IsWithinQuota = (i + 1 <= _granteeSlots);
-                }
-            }
-            if (PagedRecommendations != null && PagedRecommendations != FilteredRecommendations)
+            // Re-run filter to re-rank all items with the new slot count
+            ApplyQueueFilter();
+            // Update paged recommendations within-quota flags
+            if (PagedRecommendations != null)
             {
                 foreach (var item in PagedRecommendations)
-                {
                     item.IsWithinQuota = (item.Rank <= _granteeSlots);
-                }
             }
-            QueueTotalCount = FilteredRecommendations?.Count ?? 0;
             OnPropertyChanged(nameof(GranteeSlotsText));
             OnPropertyChanged(nameof(SelectTopNLabel));
             OnPropertyChanged(nameof(SelectAllQueueButtonText));
             OnPropertyChanged(nameof(SelectedCountSummary));
             OnPropertyChanged(nameof(HasQueueSelection));
             OnPropertyChanged(nameof(RecommendationsSummary));
-            UpdateQueuePaged();
         }
 
         private void UpdateShortlistAndFinalCollections(bool enrich = true)
@@ -271,7 +317,7 @@ namespace SOLUM_UI.ViewModels
             var targets = PagedRecommendations
                 .Select(x => x.SoloParentId)
                 .Concat(PagedShortlistRows.Select(x => x.SoloParentId))
-                .Concat(PagedFinalGrantees.Select(x => x.SoloParentId))
+                .Concat(FinalGranteesList.Select(x => x.SoloParentId))
                 .Where(id => id != Guid.Empty)
                 .Distinct()
                 .ToList();

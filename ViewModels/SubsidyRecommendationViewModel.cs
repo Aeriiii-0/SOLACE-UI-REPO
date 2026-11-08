@@ -268,6 +268,52 @@ namespace SOLUM_UI.ViewModels
 
         public string ShortlistSearchText { get => _shortlistSearchText; set { if (SetProperty(ref _shortlistSearchText, value)) FilterShortlistRows(); } }
 
+        private string _queueSearchText = string.Empty;
+        public string QueueSearchText
+        {
+            get => _queueSearchText;
+            set
+            {
+                if (SetProperty(ref _queueSearchText, value))
+                {
+                    if (_queueSearchDebounceTimer == null)
+                    {
+                        _queueSearchDebounceTimer = new System.Windows.Threading.DispatcherTimer
+                        {
+                            Interval = TimeSpan.FromMilliseconds(280)
+                        };
+                        _queueSearchDebounceTimer.Tick += (s, e) =>
+                        {
+                            _queueSearchDebounceTimer.Stop();
+                            ApplyQueueFilter();
+                        };
+                    }
+                    _queueSearchDebounceTimer.Stop();
+                    _queueSearchDebounceTimer.Start();
+                }
+            }
+        }
+
+        private System.Windows.Threading.DispatcherTimer _queueSearchDebounceTimer;
+
+        public bool HasNoQueueResults => FilteredRecommendations?.Count == 0 && _allItems?.Count > 0;
+        public bool IsQueueFilterActive => _auditFilter != "All";
+        public string QueueEmptyStateMessage
+        {
+            get
+            {
+                bool hasSearch = !string.IsNullOrWhiteSpace(_queueSearchText);
+                bool hasFilter = _auditFilter != "All";
+                if (hasSearch && hasFilter)
+                    return $"No candidates match \"{_queueSearchText}\" with the current filter. Try clearing the search or changing the filter.";
+                if (hasSearch)
+                    return $"No candidates match \"{_queueSearchText}\". Try a different name, ID, or barangay.";
+                if (hasFilter)
+                    return $"No candidates match the current filter ({AuditFilterLabel}). Try selecting a different filter.";
+                return "No candidates in the queue for this cycle.";
+            }
+        }
+
         public int ActiveTabIndex
         {
             get => _activeTabIndex;
@@ -347,7 +393,7 @@ namespace SOLUM_UI.ViewModels
 
         }
 
-        public string AuditFilterLabel => _auditFilter == "All" ? "Filter: All" : (_auditFilter == "CollegeAge" ? "Filter: City Educ" : "Filter: Cleared");
+        public string AuditFilterLabel => _auditFilter == "All" ? "Filter: All" : (_auditFilter == "CollegeAge" ? "City Educ Check" : "Cleared Only");
 
         public string ShortlistAuditFilterLabel => _shortlistAuditFilter == "Pending" ? "Not Yet Approved" : (_shortlistAuditFilter == "Confirmed" ? "Approved" : (_shortlistAuditFilter == "CollegeAge" ? "City Educ" : (_shortlistAuditFilter == "Clean" ? "Cleared" : "Filter")));
 

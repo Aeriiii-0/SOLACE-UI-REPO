@@ -324,6 +324,32 @@
                                                 </StackPanel>
                                             </StackPanel>
                                         </Border>
+                                        
+                                        <!-- Divider -->
+                                        <Border Height="1" Background="#EDE2E6" Margin="0,4,0,4"/>
+                                        
+                                        <!-- View Disqualified Records Option with Icon -->
+                                        <Border Padding="12,12" Cursor="Hand" MouseLeftButtonDown="MenuOption_Click" Tag="ViewDisqualified">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#FBF5F7"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                            </Style>
+                                            </Border.Style>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <!-- Disqualified/Warning Icon -->
+                                                <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,13.85 19.38,15.55 18.32,16.91L7.09,5.68C8.45,4.62 10.15,4 12,4M4,12C4,10.15 4.62,8.45 5.68,7.09L16.91,18.32C15.55,19.38 13.85,20 12,20A8,8 0 0,1 4,12Z" 
+                                                      Fill="#B91C1C" Stretch="Uniform" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="View Disqualified Records" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
+                                                    <TextBlock Text="Review rejection reasons and audit trail" FontSize="9" Foreground="#888888" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
                                     </StackPanel>
                                 </Border>
                             </Border>
@@ -475,26 +501,6 @@
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
                                     <TextBlock Text="Run ML Triage" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                    
-                    <!-- Filter Dropdown Button (Reco Queue tab only) -->
-                    <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Filter options" x:Name="FilterDropBtn" Click="FilterDropBtn_Click"
-                            Visibility="{Binding TabRecommendationsVisible, Converter={StaticResource BoolToVis}}">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="Filter: All" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                        <Path Data="M7,10L12,15L17,10H7Z" Fill="#5C1D38" Stretch="Uniform" Width="8" Height="8" VerticalAlignment="Center"/>
-                                    </StackPanel>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">

@@ -116,7 +116,16 @@ namespace SOLUM_UI.Views.Components
 
         private void UpdateDynamicPageSize()
         {
-            // Continuous virtualized scrolling active across all candidate records.
+            double availableHeight = ShortlistListView.ActualHeight;
+            if (availableHeight <= 100) return;
+            // ColHeader is 46px, each shortlist row is ~48px
+            double rowsHeight = availableHeight - 46.0;
+            int calculated = (int)Math.Floor(rowsHeight / 48.0);
+            int optimal = Math.Max(4, Math.Min(40, calculated));
+            if (DataContext is SubsidyRecommendationViewModel vm && optimal != vm.ShortlistPageSize)
+            {
+                vm.UpdateShortlistPageSize(optimal);
+            }
         }
 
         private void AdjustColumnWidths()
