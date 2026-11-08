@@ -71,7 +71,8 @@ namespace SOLUM_UI.Views
             _cycleData = cycleData ?? throw new ArgumentNullException(nameof(cycleData));
 
             // Initialize fields with current cycle data
-            TxtFiscalYear.Text = $"Fiscal Year {_cycleData.FiscalYear}";
+            string semLabel = _cycleData.CycleNumber == 1 ? "1st Semester" : _cycleData.CycleNumber == 2 ? "2nd Semester" : $"Cycle {_cycleData.CycleNumber}";
+            TxtFiscalYear.Text = !string.IsNullOrWhiteSpace(_cycleData.Name) ? _cycleData.Name : $"Fiscal Year {_cycleData.FiscalYear} - {semLabel}";
             TargetGrantees = _cycleData.AllocatedSlots;
             GrantAmountPerRecipient = _cycleData.PerGranteeAmount;
 

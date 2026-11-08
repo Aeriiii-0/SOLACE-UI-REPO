@@ -8,6 +8,9 @@ namespace SOLUM_UI.DTOs
         public Guid CycleId { get; set; }
         public Guid SoloParentId { get; set; }
         public int FiscalYear { get; set; }
+        public int CycleNumber { get; set; } = 1;
+        public int Semester => CycleNumber;
+        public string CycleName { get; set; }
 
         public string FullName { get; set; } = string.Empty;
         public string Barangay { get; set; } = string.Empty;

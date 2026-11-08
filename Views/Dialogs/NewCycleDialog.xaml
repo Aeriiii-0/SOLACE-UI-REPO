@@ -4,7 +4,7 @@
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Width="480" SizeToContent="Height">
+        Width="500" SizeToContent="Height">
     <Border Background="Transparent" Padding="16">
         <Border Background="White" CornerRadius="16"
                 BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True">
@@ -25,23 +25,46 @@
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Start New Subsidy Cycle" FontSize="18" FontWeight="Bold" Foreground="#702943"/>
-                            <TextBlock Text="Archives the current cycle and sets up a new funding quota" FontSize="11" Foreground="#666666" Margin="0,2,0,0"/>
+                            <TextBlock Text="Concludes previous cycle and initializes funding quota" FontSize="11" Foreground="#666666" Margin="0,2,0,0"/>
                         </StackPanel>
                     </StackPanel>
                     <Separator Margin="0,14,0,0" Background="#F0E2E7"/>
                 </StackPanel>
                 <!-- Form Fields -->
                 <StackPanel Grid.Row="1" Margin="28,16,28,20">
-                    <!-- Fiscal Year -->
-                    <TextBlock Text="Fiscal Year" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,0,0,4"/>
-                    <TextBox x:Name="TxtFiscalYear" Height="34" VerticalContentAlignment="Center" Padding="8,0"
+                    <!-- Fiscal Year and Semester side-by-side -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Fiscal Year" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,0,0,4"/>
+                            <TextBox x:Name="TxtFiscalYear" Height="34" VerticalContentAlignment="Center" Padding="8,0"
+                                     FontSize="12.5" BorderBrush="#D4A0B0" BorderThickness="1" TextChanged="Inputs_Changed"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Semester / Tranche" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,0,0,4"/>
+                            <ComboBox x:Name="CmbSemester" Height="34" VerticalContentAlignment="Center"
+                                      FontSize="12" BorderBrush="#D4A0B0" BorderThickness="1" SelectionChanged="CmbSemester_SelectionChanged">
+                                <ComboBoxItem Content="1st Semester (Mid-Year)" IsSelected="True"/>
+                                <ComboBoxItem Content="2nd Semester (Year-End)"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+                    <!-- Cycle Title / Name (Optional) -->
+                    <TextBlock Text="Cycle Name / Label" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,0,0,4"/>
+                    <TextBox x:Name="TxtCycleName" Height="34" VerticalContentAlignment="Center" Padding="8,0"
                              FontSize="12.5" BorderBrush="#D4A0B0" BorderThickness="1"/>
+                    <TextBlock Text="Leave empty to auto-generate (e.g., 'FY 2026 - 1st Semester')" FontSize="10" Foreground="#888888" Margin="0,2,0,12"/>
+
                     <!-- Target Beneficiary Quota -->
-                    <TextBlock Text="Target Beneficiary Quota (Number of Grantees)" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,12,0,4"/>
+                    <TextBlock Text="Target Beneficiary Quota (Number of Grantees)" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,0,0,4"/>
                     <TextBox x:Name="TxtGrantees" Height="34" VerticalContentAlignment="Center" Padding="8,0"
                              FontSize="12.5" BorderBrush="#D4A0B0" BorderThickness="1" TextChanged="Inputs_Changed"/>
                     <!-- Per Grantee Allowance -->
-                    <TextBlock Text="Monthly Allowance Per Beneficiary (₱)" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,12,0,4"/>
+                    <TextBlock Text="Allowance Per Beneficiary (₱)" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,12,0,4"/>
                     <TextBox x:Name="TxtPerGrantee" Height="34" VerticalContentAlignment="Center" Padding="8,0"
                              FontSize="12.5" BorderBrush="#D4A0B0" BorderThickness="1" TextChanged="Inputs_Changed"/>
                     <!-- Computed Total Budget Preview -->

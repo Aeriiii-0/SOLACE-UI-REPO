@@ -7,6 +7,12 @@ namespace SOLUM_UI.Models
     {
         public Guid? CycleId { get; set; }
         public int FiscalYear { get; set; }
+        public int CycleNumber { get; set; } = 1;
+        public int Semester => CycleNumber;
+        public string Name { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+
         private string _status = "Archived";
         public string Status
         {
@@ -28,10 +34,21 @@ namespace SOLUM_UI.Models
         public bool IsActive => string.Equals(Status, "Active", StringComparison.OrdinalIgnoreCase);
         public bool IsFinalized => string.Equals(Status, "Finalized", StringComparison.OrdinalIgnoreCase);
 
-        public string DisplayName =>
-            IsActive ? $"{FiscalYear} (Active Cycle)" :
-            IsFinalized ? $"{FiscalYear} (Finalized)" :
-            $"{FiscalYear} (Archived)";
+        public string SemesterLabel => CycleNumber == 1 ? "1st Sem" : CycleNumber == 2 ? "2nd Sem" : $"Cycle {CycleNumber}";
+
+        public string DisplayName
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(Name))
+                {
+                    return $"{Name} ({(IsActive ? "Active" : Status)})";
+                }
+                return IsActive ? $"{FiscalYear} - {SemesterLabel} (Active)" :
+                       IsFinalized ? $"{FiscalYear} - {SemesterLabel} (Finalized)" :
+                       $"{FiscalYear} - {SemesterLabel} (Archived)";
+            }
+        }
 
         public override string ToString() => DisplayName;
 
@@ -39,16 +56,18 @@ namespace SOLUM_UI.Models
         {
             if (obj is FiscalCycleOption other)
             {
-                return FiscalYear == other.FiscalYear &&
-                       ((CycleId == null && other.CycleId == null) ||
-                        (CycleId != null && other.CycleId != null && CycleId.Value == other.CycleId.Value));
+                if (CycleId.HasValue && other.CycleId.HasValue)
+                {
+                    return CycleId.Value == other.CycleId.Value;
+                }
+                return FiscalYear == other.FiscalYear && CycleNumber == other.CycleNumber;
             }
             return false;
         }
 
         public override int GetHashCode()
         {
-            return FiscalYear.GetHashCode() ^ (CycleId?.GetHashCode() ?? 0);
+            return (CycleId?.GetHashCode() ?? (FiscalYear.GetHashCode() ^ CycleNumber.GetHashCode()));
         }
     }
 }
