@@ -675,7 +675,7 @@ namespace SOLUM_UI
                 int start = _totalCount == 0 ? 0 : ((_currentPage - 1) * _pageSize) + 1;
 
                 int end = Math.Min(_totalCount, _currentPage * _pageSize);
-                TxtRecordsPageSummary.Text = $"Showing {start}�{end} of {_totalCount:N0} records";
+                TxtRecordsPageSummary.Text = $"Showing {start} - {end} of {_totalCount:N0} records";
 
             }
             if (BtnBack != null)

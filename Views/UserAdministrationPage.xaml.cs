@@ -37,7 +37,7 @@ namespace SOLUM_UI
         public string ContactNumber { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public string Password { get; set; }
-        public string DateAdded { get; set; } = "�";
+        public string DateAdded { get; set; } = "-";
 
         public string FullName => $"{FirstName} {LastName}".Trim().ToUpper();
 
@@ -51,7 +51,7 @@ namespace SOLUM_UI
             }
         }
 
-        public string DisplayContact => string.IsNullOrWhiteSpace(ContactNumber) ? "�" : ContactNumber;
+        public string DisplayContact => string.IsNullOrWhiteSpace(ContactNumber) ? "-" : ContactNumber;
 
         public bool IsAdminUser => string.Equals(Role, "ADMIN", StringComparison.OrdinalIgnoreCase) ||
                                    string.Equals(Role, "ADMINISTRATOR", StringComparison.OrdinalIgnoreCase);
@@ -650,7 +650,7 @@ namespace SOLUM_UI
             {
                 int start = _totalCount == 0 ? 0 : ((_currentPage - 1) * _pageSize) + 1;
                 int end = Math.Min(_totalCount, _currentPage * _pageSize);
-                TxtUsersPageSummary.Text = $"Showing {start}�{end} of {_totalCount} users";
+                TxtUsersPageSummary.Text = $"Showing {start} - {end} of {_totalCount} users";
             }
             if (BtnPrevPage != null)
                 BtnPrevPage.IsEnabled = _currentPage > 1;
@@ -1110,7 +1110,7 @@ namespace SOLUM_UI
                 ErrFirstName.Visibility = Visibility.Visible;
                 ok = false;
             }
-            else if (!Regex.IsMatch(firstName, @"^[a-zA-Z��\.\s\-]+$"))
+            else if (!Regex.IsMatch(firstName, @"^[a-zA-ZñÑ\.\s\-]+$"))
             {
                 ErrFirstName.Text = "Only letters, spaces, hyphens, and '.' are allowed.";
                 ErrFirstName.Visibility = Visibility.Visible;
@@ -1129,13 +1129,13 @@ namespace SOLUM_UI
                 ErrLastName.Visibility = Visibility.Visible;
                 ok = false;
             }
-            else if (!Regex.IsMatch(lastName, @"^[a-zA-Z��\.\s\-]+$"))
+            else if (!Regex.IsMatch(lastName, @"^[a-zA-ZñÑ\.\s\-]+$"))
             {
                 ErrLastName.Text = "Only letters, spaces, hyphens, and '.' are allowed.";
                 ErrLastName.Visibility = Visibility.Visible;
                 ok = false;
             }
-            else if (!Regex.IsMatch(lastName, @"^[a-zA-Z��\.\s]+$"))
+            else if (!Regex.IsMatch(lastName, @"^[a-zA-ZñÑ\.\s]+$"))
             {
                 ErrLastName.Text = "Only letters, spaces, and '.' are allowed.";
                 ErrLastName.Visibility = Visibility.Visible;
@@ -1532,8 +1532,8 @@ namespace SOLUM_UI
                 e.Handled = true;
                 return;
             }
-            // Allow letters (including Filipino �/�), spaces, hyphens, and period '.'
-            e.Handled = !Regex.IsMatch(e.Text, @"^[a-zA-Z��\.\s\-]+$");
+            // Allow letters (including Filipino ñ/Ñ), spaces, hyphens, and period '.'
+            e.Handled = !Regex.IsMatch(e.Text, @"^[a-zA-ZñÑ\.\s\-]+$");
         }
 
         private void NamePasteHandler(object sender, DataObjectPastingEventArgs e)
@@ -1542,7 +1542,7 @@ namespace SOLUM_UI
             {
                 string text = ((string)e.DataObject.GetData(typeof(string))) ?? "";
                 text = text.Trim();
-                if (!Regex.IsMatch(text, @"^[a-zA-Z��\.\s\-]+$"))
+                if (!Regex.IsMatch(text, @"^[a-zA-ZñÑ\.\s\-]+$"))
                 {
                     e.CancelCommand();
                 }

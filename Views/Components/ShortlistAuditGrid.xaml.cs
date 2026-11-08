@@ -11,21 +11,11 @@ namespace SOLUM_UI.Views.Components
 {
     public partial class ShortlistAuditGrid : UserControl
     {
-        private readonly DispatcherTimer _resizeDebounceTimer;
         private readonly DispatcherTimer _scrollHintTimer;
 
         public ShortlistAuditGrid()
         {
             InitializeComponent();
-            _resizeDebounceTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(200)
-            };
-            _resizeDebounceTimer.Tick += (s, e) =>
-            {
-                _resizeDebounceTimer.Stop();
-                UpdateDynamicPageSize();
-            };
             _scrollHintTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(1200)
@@ -41,7 +31,6 @@ namespace SOLUM_UI.Views.Components
             {
                 UpdateBatchColumn();
                 AdjustColumnWidths();
-                UpdateDynamicPageSize();
             };
             IsVisibleChanged += (s, e) =>
             {
@@ -49,7 +38,6 @@ namespace SOLUM_UI.Views.Components
                 {
                     UpdateBatchColumn();
                     AdjustColumnWidths();
-                    UpdateDynamicPageSize();
                 }
             };
         }
@@ -62,7 +50,6 @@ namespace SOLUM_UI.Views.Components
             {
                 newVm.PropertyChanged += OnViewModelPropertyChanged;
                 UpdateBatchColumn();
-                UpdateDynamicPageSize();
             }
         }
 
@@ -75,7 +62,7 @@ namespace SOLUM_UI.Views.Components
         private void UpdateBatchColumn()
         {
             if (DataContext is SubsidyRecommendationViewModel vm)
-                ColSelect.Width = vm.IsShortlistBatchMode ? 38 : 0;
+                ColSelect.Width = vm.IsShortlistBatchMode ? 34 : 0;
             else
                 ColSelect.Width = 0;
             AdjustColumnWidths();
@@ -83,48 +70,41 @@ namespace SOLUM_UI.Views.Components
 
         private void ShortlistListView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (e.WidthChanged)
-                AdjustColumnWidths();
-            if (e.HeightChanged)
-            {
-                _resizeDebounceTimer.Stop();
-                _resizeDebounceTimer.Start();
-            }
+            AdjustColumnWidths();
         }
 
         private void ShortlistListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (ScrollHintIndicator == null) return;
-            if (Math.Abs(e.VerticalChange) > 0.01)
+            var sv = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(ShortlistListView);
+            if (sv != null)
             {
-                var sv = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(ShortlistListView);
-                if (sv != null && sv.ScrollableHeight > 0 && sv.VerticalOffset < sv.ScrollableHeight - 8)
+                // Infinite scrolling: trigger fetch of next batch when approaching bottom of current loaded items
+                if (e.VerticalChange > 0 && sv.ScrollableHeight > 0)
                 {
-                    ScrollHintIndicator.Visibility = Visibility.Visible;
-                    _scrollHintTimer.Stop();
-                    _scrollHintTimer.Start();
-                    return;
-                }
-            }
-            var scrollV = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(ShortlistListView);
-            if (scrollV != null && (scrollV.ScrollableHeight <= 0 || scrollV.VerticalOffset >= scrollV.ScrollableHeight - 8))
-            {
-                _scrollHintTimer.Stop();
-                ScrollHintIndicator.Visibility = Visibility.Collapsed;
-            }
-        }
+                    bool nearBottom = sv.VerticalOffset >= (sv.ScrollableHeight - 5) ||
+                                      (sv.VerticalOffset + sv.ViewportHeight >= sv.ExtentHeight - 120);
 
-        private void UpdateDynamicPageSize()
-        {
-            double availableHeight = ShortlistListView.ActualHeight;
-            if (availableHeight <= 100) return;
-            // ColHeader is 46px, each shortlist row is ~48px
-            double rowsHeight = availableHeight - 46.0;
-            int calculated = (int)Math.Floor(rowsHeight / 48.0);
-            int optimal = Math.Max(4, Math.Min(40, calculated));
-            if (DataContext is SubsidyRecommendationViewModel vm && optimal != vm.ShortlistPageSize)
-            {
-                vm.UpdateShortlistPageSize(optimal);
+                    if (nearBottom && DataContext is SubsidyRecommendationViewModel vm && vm.CanShortlistLoadMore)
+                    {
+                        _ = vm.LoadNextShortlistPageAsync();
+                    }
+                }
+
+                // Dynamic Floating Scroll-Down Arrow
+                if (ScrollHintIndicator != null)
+                {
+                    if (Math.Abs(e.VerticalChange) > 0.01 && sv.ScrollableHeight > 0 && sv.VerticalOffset < sv.ScrollableHeight - 8)
+                    {
+                        ScrollHintIndicator.Visibility = Visibility.Visible;
+                        _scrollHintTimer.Stop();
+                        _scrollHintTimer.Start();
+                    }
+                    else if (sv.ScrollableHeight <= 0 || sv.VerticalOffset >= sv.ScrollableHeight - 8)
+                    {
+                        _scrollHintTimer.Stop();
+                        ScrollHintIndicator.Visibility = Visibility.Collapsed;
+                    }
+                }
             }
         }
 
@@ -133,35 +113,43 @@ namespace SOLUM_UI.Views.Components
             double totalWidth = ShortlistListView.ActualWidth;
             if (totalWidth <= 0) return;
 
-            double scrollMargin = GetScrollMargin();
-            double selW = ColSelect != null ? ColSelect.Width : 0;
-            double rankW = ColRank != null ? ColRank.Width : 56;
-            double scoreW = ColScore != null ? ColScore.Width : 78;
-            double crossW = ColCrossCheck != null ? ColCrossCheck.Width : 135;
-            double depW = ColDependents != null ? ColDependents.Width : 95;
-            double validW = ColValidUntil != null ? ColValidUntil.Width : 95;
-            double cardStatusW = ColCardStatus != null ? ColCardStatus.Width : 90;
-            double subStatusW = ColSubsidyStatus != null ? ColSubsidyStatus.Width : 110;
-            double actionW = 150;
+            // Reserve room for vertical scrollbar and prevent horizontal overflow
+            double scrollMargin = 20.0;
+            double selW = (ColSelect != null && ColSelect.Width > 0) ? 34.0 : 0.0;
+            if (ColSelect != null) ColSelect.Width = selW;
+
+            double rankW = 58.0;
+            if (ColRank != null) ColRank.Width = rankW;
+
+            double scoreW = 62.0;
+            if (ColScore != null) ColScore.Width = scoreW;
+
+            double crossW = 115.0;
+            if (ColCrossCheck != null) ColCrossCheck.Width = crossW;
+
+            double depW = 60.0;
+            if (ColDependents != null) ColDependents.Width = depW;
+
+            double cardStatusW = 74.0;
+            if (ColCardStatus != null) ColCardStatus.Width = cardStatusW;
+
+            double validW = 82.0;
+            if (ColValidUntil != null) ColValidUntil.Width = validW;
+
+            double subStatusW = 100.0;
+            if (ColSubsidyStatus != null) ColSubsidyStatus.Width = subStatusW;
+
+            double actionW = 140.0;
             if (ColAction != null) ColAction.Width = actionW;
 
-            double fixedWidth = selW + rankW + scoreW + crossW + depW + validW + cardStatusW + subStatusW + actionW;
-            double minFlexible = 400;
-            double availableFlexible = totalWidth - fixedWidth - scrollMargin;
-            double flexibleWidth = Math.Max(minFlexible, availableFlexible);
+            double fixedWidth = selW + rankW + scoreW + crossW + depW + cardStatusW + validW + subStatusW + actionW;
+            double availableFlexible = Math.Max(100.0, totalWidth - fixedWidth - scrollMargin);
 
-            double wName = Math.Max(140, Math.Floor(flexibleWidth * 0.38));
-            double wCompliance = Math.Max(220, flexibleWidth - wName);
+            double wName = Math.Floor(availableFlexible * 0.38);
+            double wCompliance = Math.Max(40.0, availableFlexible - wName);
+
             if (ColName != null) ColName.Width = wName;
             if (ColCompliance != null) ColCompliance.Width = wCompliance;
-        }
-
-        private double GetScrollMargin()
-        {
-            var sv = FindVisualChild<ScrollViewer>(ShortlistListView);
-            return (sv != null && sv.ComputedVerticalScrollBarVisibility == Visibility.Visible)
-                ? SystemParameters.VerticalScrollBarWidth
-                : 2.0;
         }
 
         private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject

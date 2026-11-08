@@ -11,7 +11,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SOLUM-UI")]
-[assembly: AssemblyCopyright("Copyright �  2026")]
+[assembly: AssemblyCopyright("Copyright (c)  2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 // Setting ComVisible to false makes the types in this assembly not visible

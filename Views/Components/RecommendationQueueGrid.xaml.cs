@@ -9,21 +9,11 @@ namespace SOLUM_UI.Views.Components
 {
     public partial class RecommendationQueueGrid : UserControl
     {
-        private readonly DispatcherTimer _resizeDebounceTimer;
         private readonly DispatcherTimer _scrollHintTimer;
 
         public RecommendationQueueGrid()
         {
             InitializeComponent();
-            _resizeDebounceTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(250)
-            };
-            _resizeDebounceTimer.Tick += (s, e) =>
-            {
-                _resizeDebounceTimer.Stop();
-                UpdateDynamicPageSize();
-            };
             _scrollHintTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(1200)
@@ -38,14 +28,12 @@ namespace SOLUM_UI.Views.Components
             Loaded += (s, e) =>
             {
                 AdjustColumnWidths();
-                UpdateDynamicPageSize();
             };
             IsVisibleChanged += (s, e) =>
             {
                 if (IsVisible)
                 {
                     AdjustColumnWidths();
-                    UpdateDynamicPageSize();
                 }
             };
         }
@@ -58,7 +46,6 @@ namespace SOLUM_UI.Views.Components
             {
                 newVm.PropertyChanged += OnViewModelPropertyChanged;
                 UpdateBatchColumn(newVm.IsBatchMode);
-                UpdateDynamicPageSize();
             }
         }
 
@@ -73,7 +60,7 @@ namespace SOLUM_UI.Views.Components
 
         private void UpdateBatchColumn(bool isBatch)
         {
-            ColSelect.Width = isBatch ? 38 : 0;
+            ColSelect.Width = isBatch ? 34 : 0;
             AdjustColumnWidths();
         }
 
@@ -85,48 +72,41 @@ namespace SOLUM_UI.Views.Components
 
         private void QueueListView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (e.WidthChanged)
-                AdjustColumnWidths();
-            if (e.HeightChanged)
-            {
-                _resizeDebounceTimer.Stop();
-                _resizeDebounceTimer.Start();
-            }
+            AdjustColumnWidths();
         }
 
         private void QueueListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (ScrollHintIndicator == null) return;
-            if (Math.Abs(e.VerticalChange) > 0.01)
+            var sv = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(QueueListView);
+            if (sv != null)
             {
-                var sv = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(QueueListView);
-                if (sv != null && sv.ScrollableHeight > 0 && sv.VerticalOffset < sv.ScrollableHeight - 8)
+                // Infinite scrolling: trigger fetch of next batch when approaching bottom of current loaded items
+                if (e.VerticalChange > 0 && sv.ScrollableHeight > 0)
                 {
-                    ScrollHintIndicator.Visibility = Visibility.Visible;
-                    _scrollHintTimer.Stop();
-                    _scrollHintTimer.Start();
-                    return;
-                }
-            }
-            var scrollV = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(QueueListView);
-            if (scrollV != null && (scrollV.ScrollableHeight <= 0 || scrollV.VerticalOffset >= scrollV.ScrollableHeight - 8))
-            {
-                _scrollHintTimer.Stop();
-                ScrollHintIndicator.Visibility = Visibility.Collapsed;
-            }
-        }
+                    bool nearBottom = sv.VerticalOffset >= (sv.ScrollableHeight - 5) ||
+                                      (sv.VerticalOffset + sv.ViewportHeight >= sv.ExtentHeight - 120);
 
-        private void UpdateDynamicPageSize()
-        {
-            double availableHeight = QueueListView.ActualHeight;
-            if (availableHeight <= 100) return;
-            // ColHeader is 46px, each queue row is ~48px
-            double rowsHeight = availableHeight - 46.0;
-            int calculated = (int)Math.Floor(rowsHeight / 48.0);
-            int optimal = Math.Max(4, Math.Min(40, calculated));
-            if (DataContext is SubsidyRecommendationViewModel vm && optimal != vm.QueuePageSize)
-            {
-                _ = vm.UpdateQueuePageSizeAsync(optimal);
+                    if (nearBottom && DataContext is SubsidyRecommendationViewModel vm && vm.CanQueueLoadMore)
+                    {
+                        _ = vm.LoadNextQueuePageAsync();
+                    }
+                }
+
+                // Dynamic Floating Scroll-Down Arrow
+                if (ScrollHintIndicator != null)
+                {
+                    if (Math.Abs(e.VerticalChange) > 0.01 && sv.ScrollableHeight > 0 && sv.VerticalOffset < sv.ScrollableHeight - 8)
+                    {
+                        ScrollHintIndicator.Visibility = Visibility.Visible;
+                        _scrollHintTimer.Stop();
+                        _scrollHintTimer.Start();
+                    }
+                    else if (sv.ScrollableHeight <= 0 || sv.VerticalOffset >= sv.ScrollableHeight - 8)
+                    {
+                        _scrollHintTimer.Stop();
+                        ScrollHintIndicator.Visibility = Visibility.Collapsed;
+                    }
+                }
             }
         }
 
@@ -135,39 +115,44 @@ namespace SOLUM_UI.Views.Components
             double totalWidth = QueueListView.ActualWidth;
             if (totalWidth <= 0) return;
 
-            double scrollMargin = GetScrollMargin();
-            double selW = ColSelect != null ? ColSelect.Width : 0;
-            double rankW = ColRank != null ? ColRank.Width : 56;
-            double scoreW = ColScore != null ? ColScore.Width : 78;
-            double depW = ColDependents != null ? ColDependents.Width : 95;
-            double cardStatusW = ColCardStatus != null ? ColCardStatus.Width : 90;
-            double validUntilW = ColValidUntil != null ? ColValidUntil.Width : 95;
-            double actionW = 177;
+            // Reserve room for vertical scrollbar and prevent horizontal overflow
+            double scrollMargin = 20.0;
+            double selW = (ColSelect != null && ColSelect.Width > 0) ? 34.0 : 0.0;
+            if (ColSelect != null) ColSelect.Width = selW;
+
+            double rankW = 58.0;
+            if (ColRank != null) ColRank.Width = rankW;
+
+            double scoreW = 62.0;
+            if (ColScore != null) ColScore.Width = scoreW;
+
+            double depW = 60.0;
+            if (ColDependents != null) ColDependents.Width = depW;
+
+            double cardStatusW = 74.0;
+            if (ColCardStatus != null) ColCardStatus.Width = cardStatusW;
+
+            double validUntilW = 82.0;
+            if (ColValidUntil != null) ColValidUntil.Width = validUntilW;
+
+            double actionW = 144.0;
             if (ColAction != null) ColAction.Width = actionW;
 
             double fixedWidth = selW + rankW + scoreW + depW + cardStatusW + validUntilW + actionW;
-            double minFlexible = 650;
-            double availableFlexible = totalWidth - fixedWidth - scrollMargin;
-            double flexibleWidth = Math.Max(minFlexible, availableFlexible);
+            double availableFlexible = Math.Max(100.0, totalWidth - fixedWidth - scrollMargin);
 
-            double wName = Math.Max(140, Math.Floor(flexibleWidth * 0.22));
-            double wIncome = Math.Max(115, Math.Floor(flexibleWidth * 0.17));
-            double wCare = Math.Max(125, Math.Floor(flexibleWidth * 0.19));
-            double wCirc = Math.Max(130, Math.Floor(flexibleWidth * 0.20));
-            double wNeeds = Math.Max(140, flexibleWidth - (wName + wIncome + wCare + wCirc));
+            // Proportional allocation across flexible columns so their sum exactly equals availableFlexible
+            double wName = Math.Floor(availableFlexible * 0.24);
+            double wIncome = Math.Floor(availableFlexible * 0.18);
+            double wCare = Math.Floor(availableFlexible * 0.19);
+            double wCirc = Math.Floor(availableFlexible * 0.20);
+            double wNeeds = Math.Max(20.0, availableFlexible - (wName + wIncome + wCare + wCirc));
+
             if (ColName != null) ColName.Width = wName;
             if (ColIncome != null) ColIncome.Width = wIncome;
             if (ColCare != null) ColCare.Width = wCare;
             if (ColCircumstance != null) ColCircumstance.Width = wCirc;
             if (ColNeeds != null) ColNeeds.Width = wNeeds;
-        }
-
-        private double GetScrollMargin()
-        {
-            var sv = FindVisualChild<ScrollViewer>(QueueListView);
-            return (sv != null && sv.ComputedVerticalScrollBarVisibility == Visibility.Visible)
-                ? SystemParameters.VerticalScrollBarWidth
-                : 2.0;
         }
 
         private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject

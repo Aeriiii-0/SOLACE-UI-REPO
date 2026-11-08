@@ -68,7 +68,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="GridViewColumnHeader">
-                        <Border Background="#FBF5F7" BorderBrush="#5C1D38" BorderThickness="0,0,0,2">
+                        <Border Background="#FBF5F7" BorderBrush="#5C1D38" BorderThickness="0,0,0,2" ClipToBounds="True">
                             <Border Padding="{TemplateBinding Padding}">
                                 <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" TextBlock.Foreground="#5C1D38" TextBlock.FontFamily="Segoe UI" TextBlock.FontSize="11" TextBlock.FontWeight="Bold"/>
                             </Border>
@@ -316,18 +316,43 @@
                           VirtualizingStackPanel.IsVirtualizing="True"
                           VirtualizingStackPanel.VirtualizationMode="Recycling"
                           ScrollViewer.IsDeferredScrollingEnabled="False"
-                          ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.ScrollChanged="ShortlistListView_ScrollChanged" SizeChanged="ShortlistListView_SizeChanged">
+                          VirtualizingPanel.ScrollUnit="Pixel"
+                          ScrollViewer.CanContentScroll="True"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.ScrollChanged="ShortlistListView_ScrollChanged" SizeChanged="ShortlistListView_SizeChanged">
                     <ListView.View>
                         <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
                             <GridViewColumn x:Name="ColSelect" Width="0">
-                                <GridViewColumn.Header><TextBlock Text="✓" FontSize="11" FontWeight="Bold" Foreground="#5C1D38" HorizontalAlignment="Center"/></GridViewColumn.Header>
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColSelect}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,10"><CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Click="RowCheckBox_Click"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.Header>
+                                    <Grid Visibility="{Binding DataContext.IsShortlistBatchMode, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}">
+                                        <TextBlock Text="✓" FontSize="11" FontWeight="Bold" Foreground="#5C1D38" HorizontalAlignment="Center"/>
+                                    </Grid>
+                                </GridViewColumn.Header>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid Visibility="{Binding DataContext.IsShortlistBatchMode, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}">
+                                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Click="RowCheckBox_Click"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn x:Name="ColRank" Header="RANK" Width="56">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColRank}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,10"><TextBlock Text="{Binding Rank, StringFormat='#{0}'}" FontSize="12" FontWeight="Bold" Foreground="#1A1A1A" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
+                            <GridViewColumn x:Name="ColRank" Header="RANK" Width="58">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="4,0">
+                                            <TextBlock Text="{Binding Rank, StringFormat='#{0}'}" FontSize="12" FontWeight="Bold" Foreground="#1A1A1A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn x:Name="ColName" Header="SOLO PARENT" Width="150">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderThickness="0" Padding="10,10"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Barangay}" FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Margin="8,0">
+                                            <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding Barangay}" FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 3: Vulnerability Score (Transparent cell, clean score, top-right '!' signal for concern/fallback) -->
                             <GridViewColumn x:Name="ColScore" Header="SCORE" Width="78">
@@ -458,7 +483,7 @@
                     <Path Data="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"
                           Fill="White" Width="11" Height="11" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
-                <!-- Integrated Card Footer for Pagination -->
+                <!-- Integrated Card Footer for Infinite Scroll & Counts -->
                 <Border Grid.Row="1" Background="#FAF6F8" BorderBrush="#EFE4E8" BorderThickness="0,1.2,0,0" Padding="18,10">
                     <Grid VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
@@ -466,53 +491,35 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding ShortlistPageSummary}" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding ShortlistSummaryText}" FontFamily="Segoe UI" FontSize="12" Foreground="#64748B" VerticalAlignment="Center"/>
+                            <TextBlock Text=" • " FontFamily="Segoe UI" FontSize="12" Foreground="#CBD5E1" Margin="4,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding ShortlistPageSummary}" FontFamily="Segoe UI" FontSize="12" Foreground="#5C1D38" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Button Width="105" Height="34" Cursor="Hand" Command="{Binding ShortlistPrevPageCommand}" IsEnabled="{Binding CanShortlistPrevPage}" ToolTip="Previous page" Margin="0,0,10,0">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Bg" Background="White" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1.5">
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"
-                                                      Fill="#5C1D38" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
-                                                <TextBlock Text="Previous" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
-                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#5C1D38"/>
-                                            </Trigger>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                            <Border Background="#FBF5F7" CornerRadius="8" Padding="14,6"
-                                    BorderBrush="#EDE2E6" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding ShortlistPageNumberLabel}" FontFamily="Segoe UI" FontSize="12"
-                                           FontWeight="SemiBold" Foreground="#5C1D38"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <!-- Loading Indicator when fetching more records -->
+                            <Border Visibility="{Binding IsLoadingMoreShortlist, Converter={StaticResource BoolToVis}}" 
+                                    Background="#F5ECEE" CornerRadius="12" Padding="12,5" Margin="0,0,10,0">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="Loading more records..." FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center"/>
+                                </StackPanel>
                             </Border>
-                            <Button Width="105" Height="34" Cursor="Hand" Command="{Binding ShortlistNextPageCommand}" IsEnabled="{Binding CanShortlistNextPage}" ToolTip="Next page">
+                            <!-- Load More button -->
+                            <Button Height="30" Padding="14,0" Cursor="Hand" 
+                                    Command="{Binding LoadNextShortlistPageCommand}" 
+                                    Visibility="{Binding CanShortlistLoadMore, Converter={StaticResource BoolToVis}}"
+                                    ToolTip="Load next batch of records">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
-                                        <Border x:Name="Bg" Background="White" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1.5">
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#5C1D38"/>
-                                                <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
-                                                      Fill="#5C1D38" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
+                                        <Border x:Name="Bg" Background="White" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1.2" Padding="{TemplateBinding Padding}">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="Load More" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center"/>
+                                                <Path Data="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"
+                                                      Fill="#5C1D38" Stretch="Uniform" Width="9" Height="9" Margin="6,0,0,0" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
-                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#5C1D38"/>
-                                            </Trigger>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>

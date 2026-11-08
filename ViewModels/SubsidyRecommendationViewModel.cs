@@ -216,7 +216,7 @@ namespace SOLUM_UI.ViewModels
                 int start = (DisqualifiedCurrentPage - 1) * DisqualifiedPageSize + 1;
 
                 int end = Math.Min(DisqualifiedCurrentPage * DisqualifiedPageSize, total);
-                return $"Showing {start}–{end} of {total} records";
+                return $"Showing {start} - {end} of {total} records";
 
             }
 

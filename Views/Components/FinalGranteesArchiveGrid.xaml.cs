@@ -8,50 +8,25 @@ namespace SOLUM_UI.Views.Components
 {
     public partial class FinalGranteesArchiveGrid : UserControl
     {
-        private readonly DispatcherTimer _resizeDebounceTimer;
-
         public FinalGranteesArchiveGrid()
         {
             InitializeComponent();
-            _resizeDebounceTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(200)
-            };
-            _resizeDebounceTimer.Tick += (s, e) =>
-            {
-                _resizeDebounceTimer.Stop();
-                UpdateDynamicPageSize();
-            };
-            DataContextChanged += (s, e) => UpdateDynamicPageSize();
             Loaded += (s, e) =>
             {
                 AdjustColumnWidths();
-                UpdateDynamicPageSize();
             };
             IsVisibleChanged += (s, e) =>
             {
                 if (IsVisible)
                 {
                     AdjustColumnWidths();
-                    UpdateDynamicPageSize();
                 }
             };
         }
 
         private void FinalGranteesListView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (e.WidthChanged)
-                AdjustColumnWidths();
-            if (e.HeightChanged)
-            {
-                _resizeDebounceTimer.Stop();
-                _resizeDebounceTimer.Start();
-            }
-        }
-
-        private void UpdateDynamicPageSize()
-        {
-            // No pagination on Final Grantees — all records shown directly
+            AdjustColumnWidths();
         }
 
         private void AdjustColumnWidths()
@@ -59,27 +34,26 @@ namespace SOLUM_UI.Views.Components
             double totalWidth = FinalGranteesListView.ActualWidth;
             if (totalWidth <= 0) return;
 
-            double scrollMargin = GetScrollMargin();
-            // Fixed columns: CONTACT(130) + EM_PHONE(130) + STATUS(90) = 350px
-            double fixedWidth = 130 + 130 + 90;
-            double flexibleWidth = Math.Max(450, totalWidth - fixedWidth - scrollMargin);
+            double scrollMargin = 20.0;
+            double wContact = 120.0;
+            double wEmergencyPhone = 120.0;
+            double wStatus = 85.0;
+            if (ColContact != null) ColContact.Width = wContact;
+            if (ColEmergencyPhone != null) ColEmergencyPhone.Width = wEmergencyPhone;
+            if (ColStatus != null) ColStatus.Width = wStatus;
 
-            double wName = Math.Max(150, Math.Floor(flexibleWidth * 0.28));
-            double wBarangay = Math.Max(110, Math.Floor(flexibleWidth * 0.18));
-            double wAddress = Math.Max(150, Math.Floor(flexibleWidth * 0.30));
-            double wEmergencyName = Math.Max(130, flexibleWidth - (wName + wBarangay + wAddress));
-            ColName.Width = wName;
-            ColBarangay.Width = wBarangay;
-            ColAddress.Width = wAddress;
-            ColEmergencyName.Width = wEmergencyName;
-        }
+            double fixedWidth = wContact + wEmergencyPhone + wStatus;
+            double availableFlexible = Math.Max(100.0, totalWidth - fixedWidth - scrollMargin);
 
-        private double GetScrollMargin()
-        {
-            var sv = FindVisualChild<ScrollViewer>(FinalGranteesListView);
-            return (sv != null && sv.ComputedVerticalScrollBarVisibility == Visibility.Visible)
-                ? SystemParameters.VerticalScrollBarWidth
-                : 2.0;
+            double wName = Math.Floor(availableFlexible * 0.28);
+            double wBarangay = Math.Floor(availableFlexible * 0.18);
+            double wAddress = Math.Floor(availableFlexible * 0.30);
+            double wEmergencyName = Math.Max(20.0, availableFlexible - (wName + wBarangay + wAddress));
+
+            if (ColName != null) ColName.Width = wName;
+            if (ColBarangay != null) ColBarangay.Width = wBarangay;
+            if (ColAddress != null) ColAddress.Width = wAddress;
+            if (ColEmergencyName != null) ColEmergencyName.Width = wEmergencyName;
         }
 
         private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
