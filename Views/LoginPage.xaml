@@ -7,6 +7,7 @@
         xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
         mc:Ignorable="d"
         Title="Solace"
+        Icon="/Assets/app.ico"
         MinHeight="420" MinWidth="680"
         Height="450" Width="800"
         WindowStartupLocation="CenterScreen"

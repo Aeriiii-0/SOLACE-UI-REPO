@@ -5,6 +5,7 @@
         xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
         xmlns:local="clr-namespace:SOLUM_UI"
         Title="Solum" Height="700" Width="1200"
+        Icon="Assets/app.ico"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Background="#FFFFFF"

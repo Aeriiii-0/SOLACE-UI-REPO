@@ -2,7 +2,7 @@
 ; Compiled with Inno Setup
 
 #define MyAppName "SOLUM UI"
-#define MyAppVersion "0.0.3-beta"
+#define MyAppVersion "0.0.4-beta"
 #define MyAppPublisher "CSWDO - City of Biñan"
 #define MyAppExeName "SOLUM-UI.exe"
 
@@ -18,6 +18,7 @@ DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 OutputDir=..\Output
 OutputBaseFilename=SolumSetup
+SetupIconFile=..\Assets\app.ico
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
