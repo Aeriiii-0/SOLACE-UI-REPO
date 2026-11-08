@@ -126,8 +126,23 @@ namespace SOLUM_UI.Services.Implementations
 
         public async Task<BaseResponse<List<SubsidyRecommendationDto>>> GetShortlistAsync(Guid? cycleId = null)
         {
-            string url = "api/subsidy/shortlist" + (cycleId.HasValue ? $"?cycleId={cycleId.Value}" : "");
+            string url = "api/subsidy/shortlist/all" + (cycleId.HasValue ? $"?cycleId={cycleId.Value}" : "");
             return await ApiClient.Instance.GetAsync<List<SubsidyRecommendationDto>>(url);
+        }
+
+        public async Task<BaseResponse<PagedResult<SubsidyRecommendationDto>>> GetShortlistPagedAsync(GetSubsidyShortlistRequest request)
+        {
+            string url = "api/subsidy/shortlist";
+            var queryParams = new List<string>();
+            if (request.CycleId.HasValue) queryParams.Add($"cycleId={request.CycleId.Value}");
+            queryParams.Add($"page={request.Page}");
+            queryParams.Add($"pageSize={request.PageSize}");
+            if (!string.IsNullOrWhiteSpace(request.Search)) queryParams.Add($"search={Uri.EscapeDataString(request.Search)}");
+            if (!string.IsNullOrWhiteSpace(request.Status)) queryParams.Add($"status={Uri.EscapeDataString(request.Status)}");
+            if (!string.IsNullOrWhiteSpace(request.SortBy)) queryParams.Add($"sortBy={Uri.EscapeDataString(request.SortBy)}");
+            if (!string.IsNullOrWhiteSpace(request.SortOrder)) queryParams.Add($"sortOrder={Uri.EscapeDataString(request.SortOrder)}");
+            url += "?" + string.Join("&", queryParams);
+            return await ApiClient.Instance.GetAsync<PagedResult<SubsidyRecommendationDto>>(url);
         }
 
         public async Task<BaseResponse<bool>> ShortlistCandidatesAsync(Guid? cycleId, List<Guid> evaluationIds)
@@ -228,7 +243,7 @@ namespace SOLUM_UI.Services.Implementations
 
         public async Task<BaseResponse<List<GranteeDto>>> GetGranteesAsync(int? fiscalYear = null, int? cycleNumber = null, Guid? cycleId = null)
         {
-            string url = "api/subsidy/grantees";
+            string url = "api/subsidy/grantees/all";
             var queryParams = new List<string>();
             if (cycleId.HasValue)
             {
@@ -244,6 +259,22 @@ namespace SOLUM_UI.Services.Implementations
                 url += "?" + string.Join("&", queryParams);
             }
             return await ApiClient.Instance.GetAsync<List<GranteeDto>>(url);
+        }
+
+        public async Task<BaseResponse<PagedResult<GranteeDto>>> GetGranteesPagedAsync(GetGranteesRequest request)
+        {
+            string url = "api/subsidy/grantees";
+            var queryParams = new List<string>();
+            if (request.CycleId.HasValue) queryParams.Add($"cycleId={request.CycleId.Value}");
+            if (request.FiscalYear.HasValue) queryParams.Add($"fiscalYear={request.FiscalYear.Value}");
+            if (request.CycleNumber.HasValue) queryParams.Add($"cycleNumber={request.CycleNumber.Value}");
+            queryParams.Add($"page={request.Page}");
+            queryParams.Add($"pageSize={request.PageSize}");
+            if (!string.IsNullOrWhiteSpace(request.Search)) queryParams.Add($"search={Uri.EscapeDataString(request.Search)}");
+            if (!string.IsNullOrWhiteSpace(request.SortBy)) queryParams.Add($"sortBy={Uri.EscapeDataString(request.SortBy)}");
+            if (!string.IsNullOrWhiteSpace(request.SortOrder)) queryParams.Add($"sortOrder={Uri.EscapeDataString(request.SortOrder)}");
+            url += "?" + string.Join("&", queryParams);
+            return await ApiClient.Instance.GetAsync<PagedResult<GranteeDto>>(url);
         }
 
         public async Task<BaseResponse<bool>> RevokeGrantAsync(Guid evaluationId, string reason = null, string notes = null)

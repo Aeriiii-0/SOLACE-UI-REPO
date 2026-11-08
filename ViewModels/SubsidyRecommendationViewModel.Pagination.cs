@@ -80,7 +80,7 @@ namespace SOLUM_UI.ViewModels
 
             int firstVisibleItem = (_shortlistCurrentPage - 1) * oldPageSize + 1;
             _shortlistCurrentPage = Math.Max(1, (int)Math.Ceiling(firstVisibleItem / (double)_shortlistPageSize));
-            UpdateShortlistPaged();
+            _ = LoadShortlistPageAsync(_shortlistCurrentPage);
         }
 
         public void UpdateFinalPageSize(int newSize)
@@ -93,7 +93,7 @@ namespace SOLUM_UI.ViewModels
 
             int firstVisibleItem = (_finalCurrentPage - 1) * oldPageSize + 1;
             _finalCurrentPage = Math.Max(1, (int)Math.Ceiling(firstVisibleItem / (double)_finalPageSize));
-            UpdateFinalPaged();
+            _ = LoadFinalPageAsync(_finalCurrentPage);
         }
         // Tab 0: Recommendations Queue Pagination (Server-Side)
         private int _queueCurrentPage = 1;
@@ -148,7 +148,7 @@ namespace SOLUM_UI.ViewModels
         {
             get
             {
-                int total = FilteredRecommendations?.Count ?? 0;
+                int total = QueueTotalCount > 0 ? QueueTotalCount : (FilteredRecommendations?.Count ?? 0);
                 if (total == 0) return "No candidate records found";
                 int start = (QueueCurrentPage - 1) * QueuePageSize + 1;
                 int end = Math.Min(QueueCurrentPage * QueuePageSize, total);
@@ -217,21 +217,164 @@ namespace SOLUM_UI.ViewModels
             PagedRecommendations = new ObservableCollection<SubsidyItem>();
             PagedShortlistRows = new ObservableCollection<SelectionRow>();
             PagedFinalGrantees = new ObservableCollection<SelectionRow>();
-            QueuePrevPageCommand = new RelayCommand(_ => { if (CanQueuePrevPage) { QueueCurrentPage--; UpdateQueuePaged(); EnrichVisibleCandidatesAsync(); } });
-            QueueNextPageCommand = new RelayCommand(_ => { if (CanQueueNextPage) { QueueCurrentPage++; UpdateQueuePaged(); EnrichVisibleCandidatesAsync(); } });
-            ShortlistPrevPageCommand = new RelayCommand(_ => { if (CanShortlistPrevPage) { ShortlistCurrentPage--; UpdateShortlistPaged(); EnrichVisibleCandidatesAsync(); } });
-            ShortlistNextPageCommand = new RelayCommand(_ => { if (CanShortlistNextPage) { ShortlistCurrentPage++; UpdateShortlistPaged(); EnrichVisibleCandidatesAsync(); } });
-            FinalPrevPageCommand = new RelayCommand(_ => { if (CanFinalPrevPage) { FinalCurrentPage--; UpdateFinalPaged(); EnrichVisibleCandidatesAsync(); } });
-            FinalNextPageCommand = new RelayCommand(_ => { if (CanFinalNextPage) { FinalCurrentPage++; UpdateFinalPaged(); EnrichVisibleCandidatesAsync(); } });
+
+            QueuePrevPageCommand = new RelayCommand(async _ => { if (CanQueuePrevPage) await LoadQueuePageAsync(QueueCurrentPage - 1); });
+            QueueNextPageCommand = new RelayCommand(async _ => { if (CanQueueNextPage) await LoadQueuePageAsync(QueueCurrentPage + 1); });
+
+            ShortlistPrevPageCommand = new RelayCommand(async _ => { if (CanShortlistPrevPage) await LoadShortlistPageAsync(ShortlistCurrentPage - 1); });
+            ShortlistNextPageCommand = new RelayCommand(async _ => { if (CanShortlistNextPage) await LoadShortlistPageAsync(ShortlistCurrentPage + 1); });
+
+            FinalPrevPageCommand = new RelayCommand(async _ => { if (CanFinalPrevPage) await LoadFinalPageAsync(FinalCurrentPage - 1); });
+            FinalNextPageCommand = new RelayCommand(async _ => { if (CanFinalNextPage) await LoadFinalPageAsync(FinalCurrentPage + 1); });
         }
 
         public async Task LoadQueuePageAsync(int page)
         {
             if (page < 1) page = 1;
             QueueCurrentPage = page;
+            var cycleId = SelectedFiscalCycle?.CycleId ?? _activeCycleId;
+
+            if (cycleId.HasValue && !IsRosterLocked)
+            {
+                try
+                {
+                    var req = new GetSubsidyRecommendationsRequest
+                    {
+                        CycleId = cycleId.Value,
+                        Page = QueueCurrentPage,
+                        PageSize = QueuePageSize,
+                        Search = _queueSearchText,
+                        SortBy = "PriorityScore",
+                        SortOrder = "desc"
+                    };
+                    var resp = await _apiService.GetRecommendationsPagedAsync(req);
+                    if (resp?.Data != null && resp.Data.Items != null && resp.Data.Items.Count > 0)
+                    {
+                        QueueTotalPages = Math.Max(1, resp.Data.TotalPages);
+                        QueueTotalCount = resp.Data.TotalCount;
+                        PagedRecommendations.Clear();
+                        int rank = (QueueCurrentPage - 1) * QueuePageSize + 1;
+                        foreach (var d in resp.Data.Items)
+                        {
+                            var item = SubsidyModelMapper.ToItem(d); item.Rank = rank++;
+                            item.IsWithinQuota = (item.Rank <= _granteeSlots);
+                            if (FilteredRecommendations != null)
+                            {
+                                var existing = FilteredRecommendations.FirstOrDefault(x => x.SoloParentId == item.SoloParentId);
+                                if (existing != null) item.IsSelected = existing.IsSelected;
+                            }
+                            PagedRecommendations.Add(item);
+                        }
+                        OnPropertyChanged(nameof(QueueCurrentPage));
+                        OnPropertyChanged(nameof(QueueTotalPages));
+                        OnPropertyChanged(nameof(CanQueuePrevPage));
+                        OnPropertyChanged(nameof(CanQueueNextPage));
+                        OnPropertyChanged(nameof(QueuePageSummary));
+                        OnPropertyChanged(nameof(QueuePageNumberLabel));
+                        OnPropertyChanged(nameof(RecommendationsSummary));
+                        EnrichVisibleCandidatesAsync();
+                        return;
+                    }
+                }
+                catch { }
+            }
+
             UpdateQueuePaged();
             EnrichVisibleCandidatesAsync();
-            await Task.CompletedTask;
+        }
+
+        public async Task LoadShortlistPageAsync(int page)
+        {
+            if (page < 1) page = 1;
+            ShortlistCurrentPage = page;
+            var cycleId = SelectedFiscalCycle?.CycleId ?? _activeCycleId;
+
+            if (cycleId.HasValue && !IsRosterLocked)
+            {
+                try
+                {
+                    var req = new GetSubsidyShortlistRequest
+                    {
+                        CycleId = cycleId.Value,
+                        Page = ShortlistCurrentPage,
+                        PageSize = ShortlistPageSize,
+                        Status = _shortlistAuditFilter
+                    };
+                    var resp = await _apiService.GetShortlistPagedAsync(req);
+                    if (resp?.Data != null && resp.Data.Items != null && resp.Data.Items.Count > 0)
+                    {
+                        ShortlistTotalPages = Math.Max(1, resp.Data.TotalPages);
+                        PagedShortlistRows.Clear();
+                        int rank = (ShortlistCurrentPage - 1) * ShortlistPageSize + 1;
+                        foreach (var d in resp.Data.Items)
+                        {
+                            var row = SubsidyModelMapper.ToRow(d, rank++);
+                            if (FilteredShortlistRows != null)
+                            {
+                                var existing = FilteredShortlistRows.FirstOrDefault(x => x.SoloParentId == row.SoloParentId);
+                                if (existing != null) row.IsSelected = existing.IsSelected;
+                            }
+                            PagedShortlistRows.Add(row);
+                        }
+                        OnPropertyChanged(nameof(ShortlistCurrentPage));
+                        OnPropertyChanged(nameof(ShortlistTotalPages));
+                        OnPropertyChanged(nameof(CanShortlistPrevPage));
+                        OnPropertyChanged(nameof(CanShortlistNextPage));
+                        OnPropertyChanged(nameof(ShortlistPageSummary));
+                        OnPropertyChanged(nameof(ShortlistPageNumberLabel));
+                        EnrichVisibleCandidatesAsync();
+                        return;
+                    }
+                }
+                catch { }
+            }
+
+            UpdateShortlistPaged();
+            EnrichVisibleCandidatesAsync();
+        }
+
+        public async Task LoadFinalPageAsync(int page)
+        {
+            if (page < 1) page = 1;
+            FinalCurrentPage = page;
+            var cycleId = SelectedFiscalCycle?.CycleId ?? _activeCycleId;
+            int? yr = SelectedFiscalCycle?.FiscalYear ?? _activeCycleFiscalYear;
+            int? cycleNum = SelectedFiscalCycle?.CycleNumber;
+
+            try
+            {
+                var req = new GetGranteesRequest
+                {
+                    CycleId = cycleId,
+                    FiscalYear = yr,
+                    CycleNumber = cycleNum,
+                    Page = FinalCurrentPage,
+                    PageSize = FinalPageSize
+                };
+                var resp = await _apiService.GetGranteesPagedAsync(req);
+                if (resp?.Data != null && resp.Data.Items != null && resp.Data.Items.Count > 0)
+                {
+                    FinalTotalPages = Math.Max(1, resp.Data.TotalPages);
+                    PagedFinalGrantees.Clear();
+                    int rank = (FinalCurrentPage - 1) * FinalPageSize + 1;
+                    foreach (var g in resp.Data.Items)
+                    {
+                        PagedFinalGrantees.Add(SubsidyModelMapper.GranteeToRow(g, rank++));
+                    }
+                    OnPropertyChanged(nameof(FinalCurrentPage));
+                    OnPropertyChanged(nameof(FinalTotalPages));
+                    OnPropertyChanged(nameof(CanFinalPrevPage));
+                    OnPropertyChanged(nameof(CanFinalNextPage));
+                    OnPropertyChanged(nameof(FinalPageSummary));
+                    OnPropertyChanged(nameof(FinalPageNumberLabel));
+                    EnrichVisibleCandidatesAsync();
+                    return;
+                }
+            }
+            catch { }
+
+            UpdateFinalPaged();
+            EnrichVisibleCandidatesAsync();
         }
 
         public void UpdateQueuePaged()

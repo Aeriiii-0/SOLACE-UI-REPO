@@ -84,14 +84,16 @@ namespace SOLUM_UI.ViewModels
             var granteesTask = _apiService.GetGranteesAsync(cycle.FiscalYear, cycle.CycleNumber, cycle.CycleId);
             // Only fetch Shortlist, Queue, and Rejections if cycle is NOT locked
             Task<BaseResponse<List<SubsidyRecommendationDto>>> shortlistTask;
-            Task<BaseResponse<List<SubsidyRecommendationDto>>> recsTask;
+            Task<BaseResponse<PagedResult<SubsidyRecommendationDto>>> recsTask;
             Task<BaseResponse<List<SubsidyRecommendationDto>>> rejTask;
             if (!IsRosterLocked && cycle.CycleId.HasValue)
             {
                 shortlistTask = _apiService.GetShortlistAsync(cycle.CycleId);
-                recsTask = _apiService.GetAllRecommendationsAsync(new SOLUM_UI.DTOs.GetSubsidyRecommendationsRequest
+                recsTask = _apiService.GetRecommendationsPagedAsync(new SOLUM_UI.DTOs.GetSubsidyRecommendationsRequest
                 {
                     CycleId = cycle.CycleId,
+                    Page = 1,
+                    PageSize = QueuePageSize,
                     SortBy = "PriorityScore",
                     SortOrder = "desc"
                 });
@@ -100,13 +102,13 @@ namespace SOLUM_UI.ViewModels
             else
             {
                 shortlistTask = Task.FromResult<BaseResponse<List<SubsidyRecommendationDto>>>(null);
-                recsTask = Task.FromResult<BaseResponse<List<SubsidyRecommendationDto>>>(null);
+                recsTask = Task.FromResult<BaseResponse<PagedResult<SubsidyRecommendationDto>>>(null);
                 rejTask = Task.FromResult<BaseResponse<List<SubsidyRecommendationDto>>>(null);
             }
             await Task.WhenAll(granteesTask, shortlistTask, recsTask, rejTask);
             var grResp = await granteesTask;
             var slResp = await shortlistTask;
-            var dtos = await recsTask;
+            var pagedRecs = await recsTask;
             var rejResp = await rejTask;
             DisqualifiedCandidates.Clear();
             if (rejResp?.Data != null && rejResp.Data.Count > 0)
@@ -154,25 +156,47 @@ namespace SOLUM_UI.ViewModels
                 }
             }
             UpdateShortlistAndFinalCollections(enrich: false);
-            // Load _allItems then apply any active filter (search/status) to build FilteredRecommendations
+            // Load paged recommendations directly from server-side paged result
             _allItems.Clear();
             FilteredRecommendations.Clear();
-            if (dtos?.Data != null && dtos.Data.Count > 0)
+            PagedRecommendations.Clear();
+            _queueCurrentPage = 1;
+
+            if (pagedRecs?.Data != null && pagedRecs.Data.Items != null && pagedRecs.Data.Items.Count > 0)
             {
-                for (int i = 0; i < dtos.Data.Count; i++)
+                QueueTotalPages = Math.Max(1, pagedRecs.Data.TotalPages);
+                QueueTotalCount = pagedRecs.Data.TotalCount;
+                for (int i = 0; i < pagedRecs.Data.Items.Count; i++)
                 {
-                    var item = SubsidyModelMapper.ToItem(dtos.Data[i]);
+                    var item = SubsidyModelMapper.ToItem(pagedRecs.Data.Items[i]);
                     item.Rank = i + 1;
                     item.IsWithinQuota = (item.Rank <= _granteeSlots);
                     _allItems.Add(item);
+                    FilteredRecommendations.Add(item);
+                    PagedRecommendations.Add(item);
                 }
             }
+            else
+            {
+                QueueTotalPages = 1;
+                QueueTotalCount = 0;
+            }
+
             // Reset queue filter state on fresh data load
             _auditFilter = "All";
             _queueSearchText = string.Empty;
             OnPropertyChanged(nameof(AuditFilterLabel));
             OnPropertyChanged(nameof(QueueSearchText));
-            ApplyQueueFilter();
+            OnPropertyChanged(nameof(QueueCurrentPage));
+            OnPropertyChanged(nameof(QueueTotalPages));
+            OnPropertyChanged(nameof(CanQueuePrevPage));
+            OnPropertyChanged(nameof(CanQueueNextPage));
+            OnPropertyChanged(nameof(QueuePageSummary));
+            OnPropertyChanged(nameof(QueuePageNumberLabel));
+            OnPropertyChanged(nameof(RecommendationsSummary));
+            OnPropertyChanged(nameof(HasNoQueueResults));
+            OnPropertyChanged(nameof(IsQueueFilterActive));
+            OnPropertyChanged(nameof(QueueEmptyStateMessage));
             UpdateShortlistPaged();
             UpdateFinalPaged();
             RecalculateSelectionCounts();

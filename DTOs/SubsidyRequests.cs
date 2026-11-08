@@ -77,4 +77,27 @@ namespace SOLUM_UI.DTOs
         public Guid? CycleId { get; set; }
         public int? TopCount { get; set; }
     }
+
+    public class GetSubsidyShortlistRequest
+    {
+        public Guid? CycleId { get; set; }
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string Search { get; set; }
+        public string Status { get; set; }
+        public string SortBy { get; set; } = "SelectionRank";
+        public string SortOrder { get; set; } = "asc";
+    }
+
+    public class GetGranteesRequest
+    {
+        public int? FiscalYear { get; set; }
+        public int? CycleNumber { get; set; }
+        public Guid? CycleId { get; set; }
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string Search { get; set; }
+        public string SortBy { get; set; } = "ConfirmedAt";
+        public string SortOrder { get; set; } = "desc";
+    }
 }
