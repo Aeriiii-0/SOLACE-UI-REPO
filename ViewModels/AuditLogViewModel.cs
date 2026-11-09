@@ -178,6 +178,7 @@ namespace SOLUM_UI.ViewModels
         public bool CanGoPrev => _currentPageIndex > 0 && IsNotLoading;
         public bool CanGoNext => _hasMore && IsNotLoading;
         // ── Commands ───────────────────────────────────────────────────────────
+        public ICommand FirstPageCommand    { get; }
         public ICommand PrevPageCommand     { get; }
         public ICommand NextPageCommand     { get; }
         public ICommand SearchCommand       { get; }
@@ -197,6 +198,7 @@ namespace SOLUM_UI.ViewModels
         public AuditLogViewModel()
         {
             _pageStack.Add((null, null));
+            FirstPageCommand    = new RelayCommand(_ => FireAndForget(GoToFirstPageAsync),       _ => CanGoPrev);
             PrevPageCommand     = new RelayCommand(_ => FireAndForget(GoToPrevPageAsync),        _ => CanGoPrev);
             NextPageCommand     = new RelayCommand(_ => FireAndForget(GoToNextPageAsync),        _ => CanGoNext);
             SearchCommand       = new RelayCommand(_ => FireAndForget(ResetAndLoadAsync),        _ => IsNotLoading);
@@ -219,6 +221,13 @@ namespace SOLUM_UI.ViewModels
         // ── Helpers ────────────────────────────────────────────────────────────
         private static void FireAndForget(Func<Task> asyncAction) => asyncAction();
         // ── Navigation ─────────────────────────────────────────────────────────
+        private async Task GoToFirstPageAsync()
+        {
+            if (_currentPageIndex <= 0) return;
+            _currentPageIndex = 0;
+            await FetchPageAsync(_pageStack[0]);
+        }
+
         private async Task GoToPrevPageAsync()
         {
             if (_currentPageIndex <= 0) return;

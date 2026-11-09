@@ -23,7 +23,18 @@ namespace SOLUM_UI.ViewModels
                     ActiveTabIndex = tab;
                 }
             });
-            ToggleBatchModeCommand = new RelayCommand(_ => { IsBatchMode = !IsBatchMode; if (!IsBatchMode) { foreach (var item in FilteredRecommendations) item.IsSelected = false; RecalculateSelectionCounts(); } });
+            ToggleBatchModeCommand = new RelayCommand(_ =>
+            {
+                if (TabRecommendationsVisible)
+                {
+                    IsBatchMode = !IsBatchMode;
+                }
+                else if (TabShortlistVisible)
+                {
+                    IsShortlistBatchMode = !IsShortlistBatchMode;
+                }
+                OnPropertyChanged(nameof(IsActiveTabBatchMode));
+            });
             SelectTopNCommand = new RelayCommand(_ => SelectTopN());
             ToggleShortlistBatchModeCommand = new RelayCommand(_ => IsShortlistBatchMode = !IsShortlistBatchMode);
             ShortlistSelectedCommand = new RelayCommand(_ => MoveSelectedToShortlist());
@@ -76,7 +87,7 @@ namespace SOLUM_UI.ViewModels
             });
             BatchRejectQueueCommand = new RelayCommand(_ =>
             {
-                var selected = FilteredRecommendations.Where(x => x.IsSelected).ToList();
+                var selected = SelectedQueueItems;
                 if (selected.Count == 0)
                 {
                     ToastNotification.Show("No Selection", "Please check candidate boxes to reject.", ToastType.Info);
@@ -139,6 +150,7 @@ namespace SOLUM_UI.ViewModels
             ConfirmShortlistCandidateCommand = new RelayCommand(p => { if (p is SelectionRow r) ToggleGrantee(r, !r.IsFinalGrantee); });
             RevokeShortlistCandidateCommand = new RelayCommand(p => PromptRevokeShortlist(p as SelectionRow));
             BatchConfirmShortlistCommand = new RelayCommand(_ => BatchConfirmShortlist());
+            BatchRevertShortlistCommand = new RelayCommand(_ => BatchRevertShortlist());
             BatchRevokeShortlistCommand = new RelayCommand(_ => BatchRevokeShortlist());
             SelectAllShortlistCommand = new RelayCommand(_ => { bool all = FilteredShortlistRows.Count > 0 && FilteredShortlistRows.All(x => x.IsSelected); foreach (var r in FilteredShortlistRows) r.IsSelected = !all; RecalculateShortlistSelectionCounts(); });
             ExportCityEducCommand = new RelayCommand(async _ => {
@@ -158,6 +170,7 @@ namespace SOLUM_UI.ViewModels
                 await ExportCsvAsync($"Final_Grantee_Ledger_FY{yr}", _apiService.ExportFinalLedgerCsvAsync(FinalGranteesList.ToList(), yr), $"Final grantee ledger for FY {yr} exported successfully.");
             });
             ViewFullRecordCommand = new RelayCommand(async p => await OpenFullRecordViewAsync(p as SubsidyItem ?? ActiveCandidate));
+            ExecuteQueueBackendSearchCommand = new RelayCommand(async _ => await ExecuteQueueBackendSearchAsync());
             QuickPredictCandidateCommand = new RelayCommand(async p => await RunQuickPredictAsync(p as SubsidyItem ?? ActiveCandidate));
             OpenReassessmentFormCommand = new RelayCommand(async p => await OpenReassessmentFormAsync(p as SubsidyItem ?? ActiveCandidate));
             RefreshCommand = new RelayCommand(async _ => { InvalidateCache(); await RefreshDataAsync(true); }, _ => !IsLoading); GenerateRecommendationsCommand = new RelayCommand(async _ => await GenerateAndRefreshAsync(), _ => !IsLoading);
@@ -182,8 +195,7 @@ namespace SOLUM_UI.ViewModels
                 "Cancel",
                 ConfirmThemeType.Primary);
             if (!confirmed) return;
-            IsActionProcessing = true;
-            ActionProcessingMessage = "Generating candidate recommendations...";
+            IsLoading = true;
             try
             {
                 var res = await _apiService.GenerateRecommendationsAsync(_activeCycleId);
@@ -195,7 +207,7 @@ namespace SOLUM_UI.ViewModels
                 }
             }
             catch (Exception ex) { ToastNotification.Show("Generation Error", ex.Message, ToastType.Error); }
-            finally { IsActionProcessing = false; }
+            finally { IsLoading = false; }
         }
 
         private void SelectTopN()
@@ -208,7 +220,7 @@ namespace SOLUM_UI.ViewModels
 
         private async void MoveSelectedToShortlist()
         {
-            var selected = FilteredRecommendations.Where(x => x.IsSelected).ToList();
+            var selected = SelectedQueueItems;
             if (selected.Count == 0) { ToastNotification.Show("No Selection", "Please select at least one pending candidate.", ToastType.Warning); return; }
 
             bool ok = ActionConfirmDialog.Show("Shortlist Selected", $"Move {selected.Count} selected candidate(s) to Approved Selection & Audit for FY {ActiveCycleFiscalYear}?", "Shortlist All", "Cancel", ConfirmThemeType.Primary);
@@ -222,6 +234,13 @@ namespace SOLUM_UI.ViewModels
             {
                 item.Status = "Approved";
                 item.IsSelected = false;
+                if (PagedRecommendations != null && PagedRecommendations.Contains(item))
+                    PagedRecommendations.Remove(item);
+                if (FilteredRecommendations != null && FilteredRecommendations.Contains(item))
+                    FilteredRecommendations.Remove(item);
+                if (_allItems != null && _allItems.Contains(item))
+                    _allItems.Remove(item);
+
                 if (!ShortlistRows.Any(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId)
                                          || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId)
                                          || (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId)
@@ -351,8 +370,20 @@ namespace SOLUM_UI.ViewModels
 
         private async void BatchConfirmShortlist()
         {
-            var targets = FilteredShortlistRows.Where(x => x.IsSelected).ToList();
-            if (targets.Count == 0) { ToastNotification.Show("No Selection", "Please check candidate boxes to confirm.", ToastType.Info); return; }
+            var allSelected = SelectedShortlistRows.ToList();
+            var targets = allSelected.Where(x => !x.IsFinalGrantee).ToList();
+            if (targets.Count == 0)
+            {
+                if (allSelected.Count > 0)
+                {
+                    ToastNotification.Show("Already Confirmed", "All selected candidate(s) are already confirmed final grantees.", ToastType.Info);
+                }
+                else
+                {
+                    ToastNotification.Show("No Selection", "Please check candidate boxes to confirm.", ToastType.Info);
+                }
+                return;
+            }
             var expiredTargets = targets.Where(x => x.IsCardExpired).ToList();
             var validTargets = targets.Where(x => !x.IsCardExpired).ToList();
             if (validTargets.Count == 0)
@@ -381,9 +412,46 @@ namespace SOLUM_UI.ViewModels
             ToastNotification.Show("Batch Confirmed", $"{validTargets.Count} candidate(s) confirmed as final grantees." + (expiredTargets.Count > 0 ? $" ({expiredTargets.Count} skipped due to expired cards)" : ""), ToastType.Success);
         }
 
+        private void BatchRevertShortlist()
+        {
+            var allSelected = SelectedShortlistRows.ToList();
+            var targets = allSelected.Where(x => x.IsFinalGrantee).ToList();
+            if (targets.Count == 0)
+            {
+                if (allSelected.Count > 0)
+                {
+                    ToastNotification.Show("No Confirmed Grantees", "None of the selected candidates are confirmed final grantees to revert.", ToastType.Info);
+                }
+                else
+                {
+                    ToastNotification.Show("No Selection", "Please check candidate boxes to revert.", ToastType.Info);
+                }
+                return;
+            }
+
+            bool ok = ActionConfirmDialog.Show(
+                "Revert Selected Grantees",
+                $"Revert {targets.Count} confirmed grantee(s) back to pending shortlist audit for FY {ActiveCycleFiscalYear}?",
+                "Revert All",
+                "Cancel",
+                ConfirmThemeType.Warning);
+            if (!ok) return;
+
+            foreach (var r in targets)
+            {
+                r.IsFinalGrantee = false;
+                r.IsSelected = false;
+            }
+            IsShortlistBatchMode = false;
+            UpdateShortlistAndFinalCollections();
+            RecalculateShortlistSelectionCounts();
+            NotifyQuotaMetricsChanged();
+            ToastNotification.Show("Batch Reverted", $"{targets.Count} candidate(s) reverted to pending shortlist.", ToastType.Info);
+        }
+
         private void BatchRevokeShortlist()
         {
-            var targets = FilteredShortlistRows.Where(x => x.IsSelected).ToList();
+            var targets = SelectedShortlistRows.ToList();
             if (targets.Count == 0) { ToastNotification.Show("No Selection", "Please check candidate boxes to revoke.", ToastType.Info); return; }
             _shortlistRevokeTargets = targets; OutlierTarget = null;
             OutlierModalTitle = $"Revoke {targets.Count} Candidate(s)"; OutlierTargetNameAndId = $"{targets.Count} candidate(s) selected from Approved Selection";

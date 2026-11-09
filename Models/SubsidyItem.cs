@@ -165,6 +165,7 @@ namespace SOLUM_UI.Models
                 if (SetProperty(ref _childrenDetails, value))
                 {
                     OnPropertyChanged(nameof(HasChildrenDetails));
+                    OnPropertyChanged(nameof(DependentsExpanderHeader));
                     OnPropertyChanged(nameof(Children0To6Count));
                     OnPropertyChanged(nameof(Children7To22Count));
                     OnPropertyChanged(nameof(Children7To22Text));
@@ -181,6 +182,7 @@ namespace SOLUM_UI.Models
             }
         }
         public bool HasChildrenDetails => ChildrenDetails != null && ChildrenDetails.Count > 0;
+        public string DependentsExpanderHeader => $"Dependents List ({(ChildrenDetails != null && ChildrenDetails.Count > 0 ? ChildrenDetails.Count : Dependants)})";
         // Cross-Check Overlap Flags (1-3 words, clean text, no emojis)
         public bool HasCollegeAgeDependent => CollegeAgeDependentsCount > 0;
         public bool IsPantawidBeneficiary { get; set; }

@@ -1,4 +1,4 @@
-﻿<Page x:Class="SOLUM_UI.UserAdministrationPage"
+<Page x:Class="SOLUM_UI.UserAdministrationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
@@ -940,8 +940,11 @@
                                 <TextBlock x:Name="TxtUsersSummary" Visibility="Collapsed"/>
                             </StackPanel>
 
-                            <!-- Pager: [Previous] (1) (2) (3) [Next] — max 3 numbers, window slides -->
+                            <!-- Pager: [«] [Previous] (1) (2) (3) [Next] [»] — max 3 numbers, window slides -->
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button x:Name="BtnFirstPage" Style="{StaticResource PagerNavBtn}" Click="BtnFirstPage_Click" Width="36" Padding="0" Margin="0,0,8,0" ToolTip="First Page">
+                                    <TextBlock Text="«" FontSize="14" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                                </Button>
                                 <Button x:Name="BtnPrevPage" Style="{StaticResource PagerNavBtn}" Click="BtnPrevPage_Click" Margin="0,0,8,0">
                                     <StackPanel Orientation="Horizontal">
                                         <Path Data="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="0,0,6,0"/>
@@ -954,6 +957,9 @@
                                         <TextBlock Text="Next" FontSize="12" FontWeight="SemiBold" Foreground="#702943"/>
                                         <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
                                     </StackPanel>
+                                </Button>
+                                <Button x:Name="BtnLastPage" Style="{StaticResource PagerNavBtn}" Click="BtnLastPage_Click" Width="36" Padding="0" Margin="8,0,0,0" ToolTip="Last Page">
+                                    <TextBlock Text="»" FontSize="14" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
                                 </Button>
                             </StackPanel>
                         </Grid>

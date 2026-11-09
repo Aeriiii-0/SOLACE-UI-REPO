@@ -327,7 +327,7 @@ namespace SOLUM_UI.ViewModels
 
         private void UpdateShortlistAndFinalCollections(bool enrich = true)
         {
-            var sorted = ShortlistRows.OrderByDescending(x => x.Score).ToList();
+            var sorted = ShortlistRows.OrderBy(x => x.IsFinalGrantee).ThenByDescending(x => x.Score).ToList();
             ShortlistRows.Clear();
             for (int i = 0; i < sorted.Count; i++) { sorted[i].Rank = i + 1; sorted[i].IsWaitlisted = !sorted[i].IsFinalGrantee && (i >= _granteeSlots); ShortlistRows.Add(sorted[i]); }
             FinalGranteesList.Clear(); foreach (var r in ShortlistRows.Where(x => x.IsFinalGrantee).OrderBy(x => x.Name)) FinalGranteesList.Add(r);
@@ -390,6 +390,7 @@ namespace SOLUM_UI.ViewModels
                 string t = _shortlistSearchText.Trim().ToLowerInvariant();
                 q = q.Where(x => (x.Name != null && x.Name.ToLowerInvariant().Contains(t)) || (x.SpId != null && x.SpId.ToLowerInvariant().Contains(t)) || (x.Barangay != null && x.Barangay.ToLowerInvariant().Contains(t)) || (x.CrossCheckText != null && x.CrossCheckText.ToLowerInvariant().Contains(t)) || (x.ComplianceRemark != null && x.ComplianceRemark.ToLowerInvariant().Contains(t)));
             }
+            q = q.OrderBy(x => x.IsFinalGrantee).ThenByDescending(x => x.Score);
             FilteredShortlistRows.Clear(); foreach (var r in q) FilteredShortlistRows.Add(r);
             UpdateShortlistPaged();
             RecalculateShortlistSelectionCounts();

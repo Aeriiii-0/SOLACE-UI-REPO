@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,8 +17,8 @@ namespace SOLUM_UI.ViewModels
         public ObservableCollection<SelectionRow> PagedShortlistRows { get; private set; }
         public ObservableCollection<SelectionRow> PagedFinalGrantees { get; private set; }
 
-        // Dynamic batch sizes - default 30 for smooth initial vertical scroll room
-        private int _queuePageSize = 30;
+        // Batch size for paginated infinite scrolling (20 candidates per batch)
+        private int _queuePageSize = 20;
         public int QueuePageSize
         {
             get => _queuePageSize;
@@ -31,7 +32,7 @@ namespace SOLUM_UI.ViewModels
             }
         }
 
-        private int _shortlistPageSize = 30;
+        private int _shortlistPageSize = 20;
         public int ShortlistPageSize
         {
             get => _shortlistPageSize;
@@ -149,8 +150,7 @@ namespace SOLUM_UI.ViewModels
         }
 
         public bool CanQueueLoadMore => !_isLoadingMoreQueue && (
-            QueueCurrentPage < QueueTotalPages ||
-            (FilteredRecommendations != null && PagedRecommendations.Count < FilteredRecommendations.Count)
+            (QueueTotalCount > 0 ? PagedRecommendations.Count < QueueTotalCount : QueueCurrentPage < QueueTotalPages)
         );
 
         public bool CanQueuePrevPage => QueueCurrentPage > 1;
@@ -334,6 +334,156 @@ namespace SOLUM_UI.ViewModels
             EnrichVisibleCandidatesAsync();
         }
 
+        public async Task ExecuteQueueBackendSearchAsync()
+        {
+            IsLoading = true;
+            try
+            {
+                var cycleId = SelectedFiscalCycle?.CycleId ?? _activeCycleId;
+                if (cycleId.HasValue && !IsRosterLocked)
+                {
+                    var req = new GetSubsidyRecommendationsRequest
+                    {
+                        CycleId = cycleId.Value,
+                        Page = 1,
+                        PageSize = QueuePageSize,
+                        Search = string.IsNullOrWhiteSpace(_queueSearchText) ? null : _queueSearchText.Trim(),
+                        SortBy = "PriorityScore",
+                        SortOrder = "desc"
+                    };
+                    var resp = await _apiService.GetRecommendationsPagedAsync(req);
+                    if (resp?.Data != null)
+                    {
+                        QueueCurrentPage = 1;
+                        QueueTotalPages = Math.Max(1, resp.Data.TotalPages);
+                        QueueTotalCount = resp.Data.TotalCount;
+                        PagedRecommendations.Clear();
+                        int rank = 1;
+                        if (resp.Data.Items != null)
+                        {
+                            foreach (var d in resp.Data.Items)
+                            {
+                                var item = SubsidyModelMapper.ToItem(d);
+                                item.Rank = rank++;
+                                item.IsWithinQuota = (item.Rank <= _granteeSlots);
+                                PagedRecommendations.Add(item);
+                            }
+                        }
+                        OnPropertyChanged(nameof(QueueCurrentPage));
+                        OnPropertyChanged(nameof(QueueTotalPages));
+                        OnPropertyChanged(nameof(CanQueuePrevPage));
+                        OnPropertyChanged(nameof(CanQueueNextPage));
+                        OnPropertyChanged(nameof(CanQueueLoadMore));
+                        OnPropertyChanged(nameof(QueuePageSummary));
+                        OnPropertyChanged(nameof(QueuePageNumberLabel));
+                        OnPropertyChanged(nameof(RecommendationsSummary));
+                        OnPropertyChanged(nameof(HasNoQueueResults));
+                        EnrichVisibleCandidatesAsync();
+                        return;
+                    }
+                }
+
+                // In-memory fallback
+                ApplyQueueFilter();
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show("Search Error", ex.Message, ToastType.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        public async Task RefreshQueueWithRetainedCountAsync()
+        {
+            int loadedCount = PagedRecommendations != null && PagedRecommendations.Count > 0
+                ? PagedRecommendations.Count
+                : QueuePageSize;
+
+            var cycleId = SelectedFiscalCycle?.CycleId ?? _activeCycleId;
+            if (cycleId.HasValue && !IsRosterLocked)
+            {
+                try
+                {
+                    var selectedIds = new HashSet<Guid>(SelectedQueueItems.Select(x => x.SoloParentId));
+                    var newItems = new List<SubsidyItem>();
+                    int pageSizeToUse = Math.Min(100, Math.Max(QueuePageSize, loadedCount));
+                    int pagesToFetch = (int)Math.Ceiling((double)loadedCount / pageSizeToUse);
+
+                    int totalCount = 0;
+                    int totalPages = 1;
+                    int rank = 1;
+
+                    for (int p = 1; p <= pagesToFetch; p++)
+                    {
+                        var req = new GetSubsidyRecommendationsRequest
+                        {
+                            CycleId = cycleId.Value,
+                            Page = p,
+                            PageSize = pageSizeToUse,
+                            Search = string.IsNullOrWhiteSpace(_queueSearchText) ? null : _queueSearchText.Trim(),
+                            SortBy = "PriorityScore",
+                            SortOrder = "desc"
+                        };
+                        var resp = await _apiService.GetRecommendationsPagedAsync(req);
+                        if (resp?.Data != null && resp.Data.Items != null && resp.Data.Items.Count > 0)
+                        {
+                            totalCount = resp.Data.TotalCount;
+                            totalPages = resp.Data.TotalPages;
+                            foreach (var d in resp.Data.Items)
+                            {
+                                var it = SubsidyModelMapper.ToItem(d);
+                                it.Rank = rank++;
+                                it.IsWithinQuota = (it.Rank <= _granteeSlots);
+                                if (selectedIds.Contains(it.SoloParentId)) it.IsSelected = true;
+                                newItems.Add(it);
+                            }
+                            if (newItems.Count >= loadedCount || newItems.Count >= totalCount) break;
+                        }
+                        else break;
+                    }
+
+                    if (newItems.Count > 0)
+                    {
+                        QueueTotalPages = Math.Max(1, totalPages);
+                        QueueTotalCount = totalCount;
+                        QueueCurrentPage = (int)Math.Ceiling((double)newItems.Count / QueuePageSize);
+
+                        PagedRecommendations.Clear();
+                        foreach (var item in newItems)
+                            PagedRecommendations.Add(item);
+
+                        OnPropertyChanged(nameof(QueuePageSummary));
+                        OnPropertyChanged(nameof(RecommendationsSummary));
+                        OnPropertyChanged(nameof(CanQueueLoadMore));
+                        RecalculateSelectionCounts();
+                        NotifyQuotaMetricsChanged();
+                        EnrichVisibleCandidatesAsync();
+                        return;
+                    }
+                }
+                catch { }
+            }
+
+            // In-memory fallback
+            ApplyQueueFilter();
+            int countToTake = Math.Max(QueuePageSize, loadedCount);
+            PagedRecommendations.Clear();
+            if (FilteredRecommendations != null)
+            {
+                foreach (var item in FilteredRecommendations.Take(countToTake))
+                    PagedRecommendations.Add(item);
+            }
+            OnPropertyChanged(nameof(QueuePageSummary));
+            OnPropertyChanged(nameof(RecommendationsSummary));
+            OnPropertyChanged(nameof(CanQueueLoadMore));
+            RecalculateSelectionCounts();
+            NotifyQuotaMetricsChanged();
+            EnrichVisibleCandidatesAsync();
+        }
+
         public async Task LoadNextQueuePageAsync()
         {
             if (_isLoadingMoreQueue) return;
@@ -352,7 +502,7 @@ namespace SOLUM_UI.ViewModels
                         CycleId = cycleId.Value,
                         Page = nextPage,
                         PageSize = QueuePageSize,
-                        Search = _queueSearchText,
+                        Search = string.IsNullOrWhiteSpace(_queueSearchText) ? null : _queueSearchText.Trim(),
                         SortBy = "PriorityScore",
                         SortOrder = "desc"
                     };
@@ -378,6 +528,9 @@ namespace SOLUM_UI.ViewModels
                                 PagedRecommendations.Add(item);
                             }
                         }
+                        OnPropertyChanged(nameof(QueueCurrentPage));
+                        OnPropertyChanged(nameof(QueueTotalPages));
+                        OnPropertyChanged(nameof(CanQueueLoadMore));
                         OnPropertyChanged(nameof(QueuePageSummary));
                         OnPropertyChanged(nameof(RecommendationsSummary));
                         EnrichVisibleCandidatesAsync();
@@ -470,7 +623,7 @@ namespace SOLUM_UI.ViewModels
             IsLoadingMoreShortlist = true;
             try
             {
-                int nextPage = ShortlistCurrentPage + 1;
+                int nextPage = (PagedShortlistRows.Count / ShortlistPageSize) + 1;
                 var cycleId = SelectedFiscalCycle?.CycleId ?? _activeCycleId;
 
                 if (cycleId.HasValue && !IsRosterLocked)

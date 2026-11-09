@@ -93,7 +93,7 @@
                 </Grid.OpacityMask>
                 <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <!-- ListView (Row 0: Column headers start immediately at top) -->
-                <ListView Grid.Row="0" x:Name="FinalGranteesListView" ItemsSource="{Binding FinalGranteesList}"
+                <ListView Grid.Row="0" x:Name="FinalGranteesListView" SelectionMode="Single" ItemsSource="{Binding FinalGranteesList}"
                           BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource SelRow}"
                           VirtualizingStackPanel.IsVirtualizing="True"
                           VirtualizingStackPanel.VirtualizationMode="Recycling"

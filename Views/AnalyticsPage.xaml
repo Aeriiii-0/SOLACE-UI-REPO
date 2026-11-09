@@ -1077,7 +1077,6 @@
         </Grid>
         <!-- Analytics Skeleton Loader -->
         <components:AnalyticsSkeletonLoader x:Name="AnalyticsSkeleton"
-                                            Margin="24,120,24,24"
                                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
                                             Panel.ZIndex="50"/>
         <!-- Full-Page Loading Overlay -->

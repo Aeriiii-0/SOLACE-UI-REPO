@@ -652,11 +652,31 @@ namespace SOLUM_UI
                 int end = Math.Min(_totalCount, _currentPage * _pageSize);
                 TxtUsersPageSummary.Text = $"Showing {start} - {end} of {_totalCount} users";
             }
+            if (BtnFirstPage != null)
+                BtnFirstPage.IsEnabled = _currentPage > 1;
             if (BtnPrevPage != null)
                 BtnPrevPage.IsEnabled = _currentPage > 1;
             if (BtnNextPage != null)
                 BtnNextPage.IsEnabled = _currentPage < _totalPages;
+            if (BtnLastPage != null)
+                BtnLastPage.IsEnabled = _currentPage < _totalPages;
             BuildPageButtons();
+        }
+
+        private void BtnFirstPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPage <= 1) return;
+            _currentPage = 1;
+            RefreshList();
+            UpdatePagingControls();
+        }
+
+        private void BtnLastPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPage >= _totalPages) return;
+            _currentPage = _totalPages;
+            RefreshList();
+            UpdatePagingControls();
         }
 
         // Builds the numbered pager: circle buttons, max 3 visible, sliding window.

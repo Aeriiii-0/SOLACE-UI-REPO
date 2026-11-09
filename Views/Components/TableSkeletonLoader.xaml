@@ -53,8 +53,8 @@
         <!-- Static Table Header Preview (matches 6-column GvHeader style) -->
         <Grid Grid.Row="0" Background="#FAF2F5">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="220"/>
-                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="6*"/>
+                <ColumnDefinition Width="4*"/>
                 <ColumnDefinition Width="135"/>
                 <ColumnDefinition Width="135"/>
                 <ColumnDefinition Width="120"/>
@@ -85,8 +85,8 @@
                 <!-- Row 1 -->
                 <Grid Height="44" Background="White">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="220"/>
-                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="6*"/>
+                        <ColumnDefinition Width="4*"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="120"/>
@@ -117,8 +117,8 @@
                 <!-- Row 2 -->
                 <Grid Height="44" Background="#FCF9FA">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="220"/>
-                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="6*"/>
+                        <ColumnDefinition Width="4*"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="120"/>
@@ -149,8 +149,8 @@
                 <!-- Row 3 -->
                 <Grid Height="44" Background="White">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="220"/>
-                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="6*"/>
+                        <ColumnDefinition Width="4*"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="120"/>
@@ -181,8 +181,8 @@
                 <!-- Row 4 -->
                 <Grid Height="44" Background="#FCF9FA">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="220"/>
-                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="6*"/>
+                        <ColumnDefinition Width="4*"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="120"/>
@@ -213,8 +213,8 @@
                 <!-- Row 5 -->
                 <Grid Height="44" Background="White">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="220"/>
-                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="6*"/>
+                        <ColumnDefinition Width="4*"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="120"/>
@@ -245,8 +245,8 @@
                 <!-- Row 6 -->
                 <Grid Height="44" Background="#FCF9FA">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="220"/>
-                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="6*"/>
+                        <ColumnDefinition Width="4*"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="135"/>
                         <ColumnDefinition Width="120"/>

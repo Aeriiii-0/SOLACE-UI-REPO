@@ -129,23 +129,29 @@ namespace SOLUM_UI.Views.Dialogs
         private void ApplySize()
         {
             double screenW, screenH, screenLeft, screenTop;
-            double workW = SystemParameters.WorkArea.Width;
-            double workH = SystemParameters.WorkArea.Height;
-            double workLeft = SystemParameters.WorkArea.Left;
-            double workTop = SystemParameters.WorkArea.Top;
-            if (Owner != null && Owner.WindowState != WindowState.Maximized && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
+            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
             {
-                screenW = Math.Min(Owner.ActualWidth, workW);
-                screenH = Math.Min(Owner.ActualHeight, workH);
-                screenLeft = Math.Max(workLeft, Owner.Left);
-                screenTop = Math.Max(workTop, Owner.Top);
+                if (Owner.WindowState == WindowState.Maximized)
+                {
+                    screenW = Math.Max(Owner.ActualWidth, SystemParameters.PrimaryScreenWidth);
+                    screenH = Math.Max(Owner.ActualHeight, SystemParameters.PrimaryScreenHeight);
+                    screenLeft = Math.Min(Owner.Left, 0);
+                    screenTop = Math.Min(Owner.Top, 0);
+                }
+                else
+                {
+                    screenW = Owner.ActualWidth;
+                    screenH = Owner.ActualHeight;
+                    screenLeft = Owner.Left;
+                    screenTop = Owner.Top;
+                }
             }
             else
             {
-                screenW = workW;
-                screenH = workH;
-                screenLeft = workLeft;
-                screenTop = workTop;
+                screenW = SystemParameters.PrimaryScreenWidth;
+                screenH = SystemParameters.PrimaryScreenHeight;
+                screenLeft = 0;
+                screenTop = 0;
             }
             if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
             if (Math.Abs(Height - screenH) > 0.5) Height = screenH;

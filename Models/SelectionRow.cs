@@ -88,6 +88,8 @@ namespace SOLUM_UI.Models
         public string NeedsAndProblems { get => _needsAndProblems; set { if (SetProperty(ref _needsAndProblems, value)) OnPropertyChanged(nameof(NeedsAndProblemsDisplay)); } }
         public string NeedsAndProblemsDisplay => !string.IsNullOrWhiteSpace(NeedsAndProblems) && !NeedsAndProblems.Equals("None", StringComparison.OrdinalIgnoreCase) ? NeedsAndProblems : "—";
         public List<ChildDetailItem> ChildrenDetails { get; set; } = new List<ChildDetailItem>();
+        public bool HasChildrenDetails => ChildrenDetails != null && ChildrenDetails.Count > 0;
+        public string DependentsExpanderHeader => $"Dependents List ({(ChildrenDetails != null && ChildrenDetails.Count > 0 ? ChildrenDetails.Count : Dependants)})";
         public List<ChildDetailItem> CollegeAgeDependents { get; set; } = new List<ChildDetailItem>();
 
         public string CrossCheckText =>

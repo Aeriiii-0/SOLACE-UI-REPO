@@ -465,16 +465,139 @@
                 
                 <!-- RIGHT: Action Controls -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
-                    <!-- Batch Select Button -->
+                    <!-- Batch Action Controls: Recommendations Queue Tab -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,6,0"
+                                Visibility="{Binding CanShowQueueBatchActions, Converter={StaticResource BoolToVis}}">
+                        <!-- Selection Count Badge -->
+                        <Border Background="#EAF6F0" CornerRadius="6" Padding="8,0" Height="32" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding SelectedCountSummary}" FontSize="10.5" FontWeight="Bold" Foreground="#27AE60"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Shortlist Selected Button -->
+                        <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" Command="{Binding ShortlistSelectedCommand}"
+                                IsEnabled="{Binding HasQueueSelection}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#5C1D38" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <TextBlock Text="Shortlist Selected" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#702943"/></Trigger>
+                                        <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <!-- Disqualify Selected Button -->
+                        <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" Command="{Binding BatchRejectQueueCommand}"
+                                IsEnabled="{Binding HasQueueSelection}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="White" BorderBrush="#DC2626" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <TextBlock Text="Disqualify Selected" FontSize="11" FontWeight="SemiBold" Foreground="#DC2626" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FEF2F2"/></Trigger>
+                                        <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Batch Action Controls: Shortlist Audit Tab (Revert, Confirm, Revoke) -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,6,0"
+                                Visibility="{Binding CanShowShortlistBatchActions, Converter={StaticResource BoolToVis}}">
+                        <!-- Selection Count Badge -->
+                        <Border Background="#EAF6F0" CornerRadius="6" Padding="8,0" Height="32" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ShortlistBatchActionLabel}" FontSize="10.5" FontWeight="Bold" Foreground="#27AE60"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Revert Selected Button -->
+                        <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" Command="{Binding BatchRevertShortlistCommand}"
+                                IsEnabled="{Binding HasShortlistSelection}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="White" BorderBrush="#D97706" BorderThickness="1.2" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <TextBlock Text="Revert Selected" FontSize="11" FontWeight="SemiBold" Foreground="#D97706" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FFFBEB"/></Trigger>
+                                        <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <!-- Confirm Selected Button -->
+                        <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" Command="{Binding BatchConfirmShortlistCommand}"
+                                IsEnabled="{Binding HasShortlistSelection}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="#5C1D38" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <TextBlock Text="Confirm Selected" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#702943"/></Trigger>
+                                        <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <!-- Revoke Selected Button -->
+                        <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" Command="{Binding BatchRevokeShortlistCommand}"
+                                IsEnabled="{Binding HasShortlistSelection}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="White" BorderBrush="#DC2626" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <TextBlock Text="Revoke Selected" FontSize="11" FontWeight="SemiBold" Foreground="#DC2626" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FEF2F2"/></Trigger>
+                                        <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Batch Select Button (Unified Top Action Bar: Maroon default, White when active) -->
                     <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Batch select candidates" Command="{Binding ToggleBatchModeCommand}" Visibility="{Binding CanShowBatchControls, Converter={StaticResource BoolToVis}}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
-                                <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                    <TextBlock Text="Batch Select" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center"/>
+                                <Border x:Name="Bg" BorderThickness="1.5" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="#5C1D38"/>
+                                            <Setter Property="BorderBrush" Value="#5C1D38"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsActiveTabBatchMode}" Value="True">
+                                                    <Setter Property="Background" Value="White"/>
+                                                    <Setter Property="BorderBrush" Value="#5C1D38"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock x:Name="TxtBatch" Text="Batch Select" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActiveTabBatchMode}" Value="True">
+                                                        <Setter Property="Foreground" Value="#5C1D38"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                        <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -545,7 +668,6 @@
                          x:Name="SubsidyActionLoader"
                          IsActive="{Binding IsActionProcessing}"
                          Message="{Binding ActionProcessingMessage, FallbackValue='Processing...'}"
-                         BlurTarget="{Binding ElementName=SubsidyRootGrid}"
                          Panel.ZIndex="9999"/>
     </Grid>
 </Page>

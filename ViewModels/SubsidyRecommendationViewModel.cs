@@ -216,7 +216,7 @@ namespace SOLUM_UI.ViewModels
                 int start = (DisqualifiedCurrentPage - 1) * DisqualifiedPageSize + 1;
 
                 int end = Math.Min(DisqualifiedCurrentPage * DisqualifiedPageSize, total);
-                return $"Showing {start} - {end} of {total} records";
+                return $"Showing {start}–{end} of {total} records";
 
             }
 
@@ -247,6 +247,7 @@ namespace SOLUM_UI.ViewModels
             OnPropertyChanged(nameof(CanAccessActivePipelineTabs));
             OnPropertyChanged(nameof(CanShowRosterLockToggle));
             OnPropertyChanged(nameof(CanShowBatchControls));
+            OnPropertyChanged(nameof(IsActiveTabBatchMode));
             OnPropertyChanged(nameof(CanShowExport));
             OnPropertyChanged(nameof(CanShowMLTriage));
             OnPropertyChanged(nameof(TabDisabledTooltipText));
@@ -272,31 +273,10 @@ namespace SOLUM_UI.ViewModels
         public string QueueSearchText
         {
             get => _queueSearchText;
-            set
-            {
-                if (SetProperty(ref _queueSearchText, value))
-                {
-                    if (_queueSearchDebounceTimer == null)
-                    {
-                        _queueSearchDebounceTimer = new System.Windows.Threading.DispatcherTimer
-                        {
-                            Interval = TimeSpan.FromMilliseconds(280)
-                        };
-                        _queueSearchDebounceTimer.Tick += (s, e) =>
-                        {
-                            _queueSearchDebounceTimer.Stop();
-                            ApplyQueueFilter();
-                        };
-                    }
-                    _queueSearchDebounceTimer.Stop();
-                    _queueSearchDebounceTimer.Start();
-                }
-            }
+            set => SetProperty(ref _queueSearchText, value);
         }
 
-        private System.Windows.Threading.DispatcherTimer _queueSearchDebounceTimer;
-
-        public bool HasNoQueueResults => FilteredRecommendations?.Count == 0 && _allItems?.Count > 0;
+        public bool HasNoQueueResults => PagedRecommendations?.Count == 0;
         public bool IsQueueFilterActive => _auditFilter != "All";
         public string QueueEmptyStateMessage
         {
@@ -325,6 +305,9 @@ namespace SOLUM_UI.ViewModels
                     OnPropertyChanged(nameof(TabShortlistVisible));
                     OnPropertyChanged(nameof(TabFinalVisible));
                     OnPropertyChanged(nameof(CanShowBatchControls));
+                    OnPropertyChanged(nameof(IsActiveTabBatchMode));
+                    OnPropertyChanged(nameof(CanShowQueueBatchActions));
+                    OnPropertyChanged(nameof(CanShowShortlistBatchActions));
                     OnPropertyChanged(nameof(CanShowExport));
                     OnPropertyChanged(nameof(CanShowMLTriage));
                     if (value == 0) _ = LoadQueuePageAsync(QueueCurrentPage);
@@ -339,7 +322,32 @@ namespace SOLUM_UI.ViewModels
 
         public bool TabRecommendationsVisible => ActiveTabIndex == 0; public bool TabShortlistVisible => ActiveTabIndex == 1; public bool TabFinalVisible => ActiveTabIndex == 2;
 
-        public bool IsBatchMode { get => _isBatchMode; set { if (SetProperty(ref _isBatchMode, value)) { OnPropertyChanged(nameof(BatchSelectColumnWidth)); OnPropertyChanged(nameof(BatchModeButtonText)); } } }
+        public bool CanShowQueueBatchActions => TabRecommendationsVisible && IsBatchMode;
+        public bool CanShowShortlistBatchActions => TabShortlistVisible && IsShortlistBatchMode;
+
+        public bool IsBatchMode
+        {
+            get => _isBatchMode;
+            set
+            {
+                if (SetProperty(ref _isBatchMode, value))
+                {
+                    OnPropertyChanged(nameof(BatchSelectColumnWidth));
+                    OnPropertyChanged(nameof(BatchModeButtonText));
+                    OnPropertyChanged(nameof(IsActiveTabBatchMode));
+                    OnPropertyChanged(nameof(CanShowQueueBatchActions));
+                    if (!value)
+                    {
+                        if (_allItems != null) { foreach (var item in _allItems.ToList()) if (item != null) item.IsSelected = false; }
+                        if (FilteredRecommendations != null) { foreach (var item in FilteredRecommendations.ToList()) if (item != null) item.IsSelected = false; }
+                        if (PagedRecommendations != null) { foreach (var item in PagedRecommendations.ToList()) if (item != null) item.IsSelected = false; }
+                        RecalculateSelectionCounts();
+                    }
+                }
+            }
+        }
+
+        public bool IsActiveTabBatchMode => TabRecommendationsVisible ? IsBatchMode : (TabShortlistVisible ? IsShortlistBatchMode : false);
 
         public double BatchSelectColumnWidth => IsBatchMode ? 38 : 0; public string BatchModeButtonText => IsBatchMode ? "Batch Mode: On" : "Batch Select";
 
@@ -366,13 +374,92 @@ namespace SOLUM_UI.ViewModels
 
         public string CommittedBudgetText => $"₱{_budgetAmount:N0}"; public string GranteeSlotsText => $"{_granteeSlots} target slots";
 
-        public string SelectedCountSummary => $"{FilteredRecommendations.Count(x => x.IsSelected)} selected";
+        public List<SubsidyItem> SelectedQueueItems
+        {
+            get
+            {
+                var dict = new Dictionary<Guid, SubsidyItem>();
+                if (PagedRecommendations != null)
+                {
+                    foreach (var x in PagedRecommendations)
+                    {
+                        if (x != null && x.IsSelected)
+                        {
+                            var id = x.SoloParentId != Guid.Empty ? x.SoloParentId : (x.EvaluationId != Guid.Empty ? x.EvaluationId : Guid.NewGuid());
+                            dict[id] = x;
+                        }
+                    }
+                }
+                if (FilteredRecommendations != null)
+                {
+                    foreach (var x in FilteredRecommendations)
+                    {
+                        if (x != null && x.IsSelected)
+                        {
+                            var id = x.SoloParentId != Guid.Empty ? x.SoloParentId : (x.EvaluationId != Guid.Empty ? x.EvaluationId : Guid.NewGuid());
+                            if (!dict.ContainsKey(id)) dict[id] = x;
+                        }
+                    }
+                }
+                return dict.Values.ToList();
+            }
+        }
 
-        public string SelectTopNLabel => (FilteredRecommendations.Count > 0 && FilteredRecommendations.All(x => x.IsSelected)) ? "Deselect All" : "Select All";
+        public int QueueSelectedCount => SelectedQueueItems.Count;
 
-        public string SelectAllQueueButtonText => SelectTopNLabel; public bool HasQueueSelection => FilteredRecommendations.Any(x => x.IsSelected);
+        public string SelectedCountSummary => $"{QueueSelectedCount} selected";
 
-        public int ConfirmedGranteesCount => FinalGranteesList.Count; public int RemainingSlots => Math.Max(0, GranteeSlots - ConfirmedGranteesCount);
+        public string SelectTopNLabel => (FilteredRecommendations != null && FilteredRecommendations.Count > 0 && FilteredRecommendations.All(x => x != null && x.IsSelected)) ? "Deselect All" : "Select All";
+
+        public string SelectAllQueueButtonText => SelectTopNLabel;
+
+        public bool HasQueueSelection => QueueSelectedCount > 0;
+
+        public void SyncQueueItemSelection(SubsidyItem item, bool isSelected)
+        {
+            if (item == null) return;
+            item.IsSelected = isSelected;
+            if (FilteredRecommendations != null)
+            {
+                var f = FilteredRecommendations.FirstOrDefault(x => (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId) || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId));
+                if (f != null && f != item) f.IsSelected = isSelected;
+            }
+            if (_allItems != null)
+            {
+                var a = _allItems.FirstOrDefault(x => (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId) || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId));
+                if (a != null && a != item) a.IsSelected = isSelected;
+            }
+            if (PagedRecommendations != null)
+            {
+                var p = PagedRecommendations.FirstOrDefault(x => (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId) || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId));
+                if (p != null && p != item) p.IsSelected = isSelected;
+            }
+            RecalculateSelectionCounts();
+        }
+
+        public void SyncShortlistRowSelection(SelectionRow row, bool isSelected)
+        {
+            if (row == null) return;
+            row.IsSelected = isSelected;
+            if (FilteredShortlistRows != null)
+            {
+                var f = FilteredShortlistRows.FirstOrDefault(x => (row.SoloParentId != Guid.Empty && x.SoloParentId == row.SoloParentId) || (row.EvaluationId != Guid.Empty && x.EvaluationId == row.EvaluationId));
+                if (f != null && f != row) f.IsSelected = isSelected;
+            }
+            if (ShortlistRows != null)
+            {
+                var s = ShortlistRows.FirstOrDefault(x => (row.SoloParentId != Guid.Empty && x.SoloParentId == row.SoloParentId) || (row.EvaluationId != Guid.Empty && x.EvaluationId == row.EvaluationId));
+                if (s != null && s != row) s.IsSelected = isSelected;
+            }
+            if (PagedShortlistRows != null)
+            {
+                var p = PagedShortlistRows.FirstOrDefault(x => (row.SoloParentId != Guid.Empty && x.SoloParentId == row.SoloParentId) || (row.EvaluationId != Guid.Empty && x.EvaluationId == row.EvaluationId));
+                if (p != null && p != row) p.IsSelected = isSelected;
+            }
+            RecalculateShortlistSelectionCounts();
+        }
+
+        public int ConfirmedGranteesCount => FinalGranteesList != null ? FinalGranteesList.Count : 0; public int RemainingSlots => Math.Max(0, GranteeSlots - ConfirmedGranteesCount);
 
         public double QuotaFillPercentage => GranteeSlots > 0 ? Math.Min(100.0, ((double)ConfirmedGranteesCount / GranteeSlots) * 100.0) : 0.0;
 
@@ -390,32 +477,114 @@ namespace SOLUM_UI.ViewModels
             OnPropertyChanged(nameof(FinalSummaryText));
             OnPropertyChanged(nameof(Tab2QuotaSummary));
             OnPropertyChanged(nameof(ShortlistSummary));
-
         }
 
         public string AuditFilterLabel => _auditFilter == "All" ? "Filter: All" : (_auditFilter == "CollegeAge" ? "City Educ Check" : "Cleared Only");
 
         public string ShortlistAuditFilterLabel => _shortlistAuditFilter == "Pending" ? "Not Yet Approved" : (_shortlistAuditFilter == "Confirmed" ? "Approved" : (_shortlistAuditFilter == "CollegeAge" ? "City Educ" : (_shortlistAuditFilter == "Clean" ? "Cleared" : "Filter")));
 
-        public string Tab2QuotaSummary => $"Slots: {ShortlistRows.Count(x => !x.IsWaitlisted)} of {_granteeSlots} filled";
+        public string Tab2QuotaSummary
+        {
+            get
+            {
+                try
+                {
+                    int count = ShortlistRows != null ? ShortlistRows.Where(x => x != null).Count(x => !x.IsWaitlisted) : 0;
+                    return $"Slots: {count} of {_granteeSlots} filled";
+                }
+                catch { return $"Slots: 0 of {_granteeSlots} filled"; }
+            }
+        }
 
-        public string ShortlistSummary => $"{ShortlistRows.Count(x => !x.IsWaitlisted)} of {_granteeSlots} slots allocated • ₱{ShortlistRows.Count(x => !x.IsWaitlisted) * _grantAmountPerRecipient:N0} committed";
+        public string ShortlistSummary
+        {
+            get
+            {
+                try
+                {
+                    int count = ShortlistRows != null ? ShortlistRows.Where(x => x != null).Count(x => !x.IsWaitlisted) : 0;
+                    return $"{count} of {_granteeSlots} slots allocated • ₱{count * _grantAmountPerRecipient:N0} committed";
+                }
+                catch { return $"0 of {_granteeSlots} slots allocated"; }
+            }
+        }
 
-        public string FinalSummaryText => $"{FinalGranteesList.Count} official grantees confirmed";
+        public string FinalSummaryText
+        {
+            get
+            {
+                try
+                {
+                    int count = FinalGranteesList != null ? FinalGranteesList.Count : 0;
+                    return $"{count} official grantees confirmed";
+                }
+                catch { return "0 official grantees confirmed"; }
+            }
+        }
 
-        public bool IsAllShortlistSelected { get => FilteredShortlistRows.Count > 0 && FilteredShortlistRows.All(x => x.IsSelected); set { foreach (var r in FilteredShortlistRows) r.IsSelected = value; OnPropertyChanged(); RecalculateShortlistSelectionCounts(); } }
+        public bool IsAllShortlistSelected { get => FilteredShortlistRows != null && FilteredShortlistRows.Count > 0 && FilteredShortlistRows.All(x => x != null && x.IsSelected); set { if (FilteredShortlistRows != null) { foreach (var r in FilteredShortlistRows) if (r != null) r.IsSelected = value; } OnPropertyChanged(); RecalculateShortlistSelectionCounts(); } }
 
-        public int ShortlistSelectedCount => FilteredShortlistRows.Count(x => x.IsSelected);
+        public List<SelectionRow> SelectedShortlistRows
+        {
+            get
+            {
+                var dict = new Dictionary<Guid, SelectionRow>();
+                if (PagedShortlistRows != null)
+                {
+                    foreach (var x in PagedShortlistRows)
+                    {
+                        if (x != null && x.IsSelected)
+                        {
+                            var id = x.SoloParentId != Guid.Empty ? x.SoloParentId : (x.EvaluationId != Guid.Empty ? x.EvaluationId : Guid.NewGuid());
+                            dict[id] = x;
+                        }
+                    }
+                }
+                if (FilteredShortlistRows != null)
+                {
+                    foreach (var x in FilteredShortlistRows)
+                    {
+                        if (x != null && x.IsSelected)
+                        {
+                            var id = x.SoloParentId != Guid.Empty ? x.SoloParentId : (x.EvaluationId != Guid.Empty ? x.EvaluationId : Guid.NewGuid());
+                            if (!dict.ContainsKey(id)) dict[id] = x;
+                        }
+                    }
+                }
+                return dict.Values.ToList();
+            }
+        }
+
+        public int ShortlistSelectedCount => SelectedShortlistRows.Count;
 
         public bool HasShortlistSelection => ShortlistSelectedCount > 0;
 
         public string ShortlistBatchActionLabel => $"{ShortlistSelectedCount} selected";
 
-        public string SelectAllShortlistButtonText => (FilteredShortlistRows.Count > 0 && FilteredShortlistRows.All(x => x.IsSelected)) ? "Deselect All" : "Select All";
+        public string SelectAllShortlistButtonText => (FilteredShortlistRows != null && FilteredShortlistRows.Count > 0 && FilteredShortlistRows.All(x => x != null && x.IsSelected)) ? "Deselect All" : "Select All";
 
         private bool _isShortlistBatchMode;
 
-        public bool IsShortlistBatchMode { get => _isShortlistBatchMode; set { if (SetProperty(ref _isShortlistBatchMode, value)) { OnPropertyChanged(nameof(ShortlistBatchModeButtonText)); if (!value) { foreach (var r in FilteredShortlistRows) r.IsSelected = false; RecalculateShortlistSelectionCounts(); } } } }
+        public bool IsShortlistBatchMode
+        {
+            get => _isShortlistBatchMode;
+            set
+            {
+                if (SetProperty(ref _isShortlistBatchMode, value))
+                {
+                    OnPropertyChanged(nameof(ShortlistBatchModeButtonText));
+                    OnPropertyChanged(nameof(IsActiveTabBatchMode));
+                    OnPropertyChanged(nameof(CanShowShortlistBatchActions));
+                    if (!value)
+                    {
+                        if (ShortlistRows != null) { foreach (var r in ShortlistRows.ToList()) if (r != null) r.IsSelected = false; }
+                        if (FilteredShortlistRows != null) { foreach (var r in FilteredShortlistRows.ToList()) if (r != null) r.IsSelected = false; }
+                        if (PagedShortlistRows != null) { foreach (var r in PagedShortlistRows.ToList()) if (r != null) r.IsSelected = false; }
+                        RecalculateShortlistSelectionCounts();
+                    }
+                }
+            }
+        }
 
         public string ShortlistBatchModeButtonText => IsShortlistBatchMode ? "Batch Mode: ON" : "Batch Select";
 
@@ -453,7 +622,7 @@ namespace SOLUM_UI.ViewModels
         {
             get
             {
-                if (IsLoading || ActiveCandidate == null) return false;
+                if (IsLoading || ActiveCandidate == null || IsReassessingCandidate) return false;
                 Guid targetId = ActiveCandidate.SoloParentId != Guid.Empty ? ActiveCandidate.SoloParentId : (Guid.TryParse(ActiveCandidate.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
                 if (targetId != Guid.Empty && _reassessmentCooldowns.TryGetValue(targetId, out var lastTime))
                 {
@@ -470,6 +639,7 @@ namespace SOLUM_UI.ViewModels
         {
             get
             {
+                if (IsReassessingCandidate) return "Re-assessing candidate vulnerability...";
                 if (ActiveCandidate != null)
                 {
                     Guid targetId = ActiveCandidate.SoloParentId != Guid.Empty ? ActiveCandidate.SoloParentId : (Guid.TryParse(ActiveCandidate.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
@@ -548,6 +718,23 @@ namespace SOLUM_UI.ViewModels
 
         }
 
+        private bool _isDrawerLoading;
+        public bool IsDrawerLoading { get => _isDrawerLoading; set => SetProperty(ref _isDrawerLoading, value); }
+
+        private bool _isReassessingCandidate;
+        public bool IsReassessingCandidate
+        {
+            get => _isReassessingCandidate;
+            set
+            {
+                if (SetProperty(ref _isReassessingCandidate, value))
+                {
+                    OnPropertyChanged(nameof(CanReassessActiveCandidate));
+                    OnPropertyChanged(nameof(ActiveCandidateReassessmentTooltip));
+                }
+            }
+        }
+
         public bool IsDrawerOpen { get => _isDrawerOpen; set => SetProperty(ref _isDrawerOpen, value); } public bool IsOutlierModalOpen { get => _isOutlierModalOpen; set => SetProperty(ref _isOutlierModalOpen, value); }
 
         public string OutlierModalTitle { get => _outlierModalTitle; set => SetProperty(ref _outlierModalTitle, value); } public string OutlierModalConfirmButtonText => (_shortlistRevokeTargets != null && _shortlistRevokeTargets.Count > 0) ? "Confirm Revocation" : "Confirm Rejection";
@@ -604,7 +791,7 @@ namespace SOLUM_UI.ViewModels
 
         public bool CanShowRosterLockToggle => SelectedFiscalCycle != null && (SelectedFiscalCycle.IsActive || SelectedFiscalCycle.IsFinalized);
 
-        public bool CanShowBatchControls => TabRecommendationsVisible && !IsRosterLocked;
+        public bool CanShowBatchControls => (TabRecommendationsVisible || TabShortlistVisible) && !IsRosterLocked;
 
         public bool CanShowExport => TabRecommendationsVisible && !IsRosterLocked;
 
@@ -651,9 +838,10 @@ namespace SOLUM_UI.ViewModels
         public ICommand DisqualifiedPrevPageCommand { get; private set; } public ICommand DisqualifiedNextPageCommand { get; private set; } public ICommand RefreshDisqualifiedCommand { get; private set; }
 
         public ICommand ConfirmGranteeCommand { get; private set; } public ICommand RevokeGranteeCommand { get; private set; } public ICommand ConfirmShortlistCandidateCommand { get; private set; } public ICommand RevokeShortlistCandidateCommand { get; private set; } public ICommand BatchRejectQueueCommand { get; private set; }
-        public ICommand BatchConfirmShortlistCommand { get; private set; } public ICommand BatchRevokeShortlistCommand { get; private set; } public ICommand SelectAllShortlistCommand { get; private set; }
+        public ICommand BatchConfirmShortlistCommand { get; private set; } public ICommand BatchRevertShortlistCommand { get; private set; } public ICommand BatchRevokeShortlistCommand { get; private set; } public ICommand SelectAllShortlistCommand { get; private set; }
 
         public ICommand ExportCityEducCommand { get; private set; } public ICommand ExportPantawid4PsCommand { get; private set; } public ICommand ExportFinalLedgerCommand { get; private set; } public ICommand ViewFullRecordCommand { get; private set; }
+        public ICommand ExecuteQueueBackendSearchCommand { get; private set; }
 
         public ICommand QuickPredictCandidateCommand { get; private set; }
 

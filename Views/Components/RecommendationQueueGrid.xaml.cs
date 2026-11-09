@@ -61,51 +61,57 @@ namespace SOLUM_UI.Views.Components
         private void UpdateBatchColumn(bool isBatch)
         {
             ColSelect.Width = isBatch ? 34 : 0;
+            if (!isBatch && QueueListView != null)
+            {
+                QueueListView.SelectedItem = null;
+            }
             AdjustColumnWidths();
         }
 
         private void RowCheckBox_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is SubsidyRecommendationViewModel vm)
-                vm.RecalculateSelectionCounts();
+            if (sender is CheckBox cb && cb.DataContext is Models.SubsidyItem item && DataContext is SubsidyRecommendationViewModel vm)
+            {
+                vm.SyncQueueItemSelection(item, cb.IsChecked == true);
+            }
+            else if (DataContext is SubsidyRecommendationViewModel vm2)
+            {
+                vm2.RecalculateSelectionCounts();
+            }
         }
 
         private void QueueListView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            AdjustColumnWidths();
+            if (e.WidthChanged)
+                AdjustColumnWidths();
         }
 
         private void QueueListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             var sv = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(QueueListView);
-            if (sv != null)
+            if (sv == null) return;
+
+            if (ScrollHintIndicator != null)
             {
-                // Infinite scrolling: trigger fetch of next batch when approaching bottom of current loaded items
-                if (e.VerticalChange > 0 && sv.ScrollableHeight > 0)
+                if (Math.Abs(e.VerticalChange) > 0.01 && sv.ScrollableHeight > 0 && sv.VerticalOffset < sv.ScrollableHeight - 8)
                 {
-                    bool nearBottom = sv.VerticalOffset >= (sv.ScrollableHeight - 5) ||
-                                      (sv.VerticalOffset + sv.ViewportHeight >= sv.ExtentHeight - 120);
-
-                    if (nearBottom && DataContext is SubsidyRecommendationViewModel vm && vm.CanQueueLoadMore)
-                    {
-                        _ = vm.LoadNextQueuePageAsync();
-                    }
+                    ScrollHintIndicator.Visibility = Visibility.Visible;
+                    _scrollHintTimer.Stop();
+                    _scrollHintTimer.Start();
                 }
-
-                // Dynamic Floating Scroll-Down Arrow
-                if (ScrollHintIndicator != null)
+                else if (sv.ScrollableHeight <= 0 || sv.VerticalOffset >= sv.ScrollableHeight - 8)
                 {
-                    if (Math.Abs(e.VerticalChange) > 0.01 && sv.ScrollableHeight > 0 && sv.VerticalOffset < sv.ScrollableHeight - 8)
-                    {
-                        ScrollHintIndicator.Visibility = Visibility.Visible;
-                        _scrollHintTimer.Stop();
-                        _scrollHintTimer.Start();
-                    }
-                    else if (sv.ScrollableHeight <= 0 || sv.VerticalOffset >= sv.ScrollableHeight - 8)
-                    {
-                        _scrollHintTimer.Stop();
-                        ScrollHintIndicator.Visibility = Visibility.Collapsed;
-                    }
+                    _scrollHintTimer.Stop();
+                    ScrollHintIndicator.Visibility = Visibility.Collapsed;
+                }
+            }
+
+            // Infinite scrolling: load next batch when scrolled near bottom (within 45px)
+            if (sv.ScrollableHeight > 0 && sv.VerticalOffset >= sv.ScrollableHeight - 45)
+            {
+                if (DataContext is SubsidyRecommendationViewModel vm && vm.CanQueueLoadMore && !vm.IsLoadingMoreQueue)
+                {
+                    _ = vm.LoadNextQueuePageAsync();
                 }
             }
         }
@@ -115,44 +121,39 @@ namespace SOLUM_UI.Views.Components
             double totalWidth = QueueListView.ActualWidth;
             if (totalWidth <= 0) return;
 
-            // Reserve room for vertical scrollbar and prevent horizontal overflow
-            double scrollMargin = 20.0;
-            double selW = (ColSelect != null && ColSelect.Width > 0) ? 34.0 : 0.0;
-            if (ColSelect != null) ColSelect.Width = selW;
-
-            double rankW = 58.0;
-            if (ColRank != null) ColRank.Width = rankW;
-
-            double scoreW = 62.0;
-            if (ColScore != null) ColScore.Width = scoreW;
-
-            double depW = 60.0;
-            if (ColDependents != null) ColDependents.Width = depW;
-
-            double cardStatusW = 74.0;
-            if (ColCardStatus != null) ColCardStatus.Width = cardStatusW;
-
-            double validUntilW = 82.0;
-            if (ColValidUntil != null) ColValidUntil.Width = validUntilW;
-
-            double actionW = 144.0;
+            double scrollMargin = GetScrollMargin();
+            double selW = ColSelect != null ? ColSelect.Width : 0;
+            double rankW = ColRank != null ? ColRank.Width : 56;
+            double scoreW = ColScore != null ? ColScore.Width : 78;
+            double depW = ColDependents != null ? ColDependents.Width : 95;
+            double cardStatusW = ColCardStatus != null ? ColCardStatus.Width : 90;
+            double validUntilW = ColValidUntil != null ? ColValidUntil.Width : 95;
+            double actionW = 177;
             if (ColAction != null) ColAction.Width = actionW;
 
             double fixedWidth = selW + rankW + scoreW + depW + cardStatusW + validUntilW + actionW;
-            double availableFlexible = Math.Max(100.0, totalWidth - fixedWidth - scrollMargin);
+            double minFlexible = 650;
+            double availableFlexible = totalWidth - fixedWidth - scrollMargin;
+            double flexibleWidth = Math.Max(minFlexible, availableFlexible);
 
-            // Proportional allocation across flexible columns so their sum exactly equals availableFlexible
-            double wName = Math.Floor(availableFlexible * 0.24);
-            double wIncome = Math.Floor(availableFlexible * 0.18);
-            double wCare = Math.Floor(availableFlexible * 0.19);
-            double wCirc = Math.Floor(availableFlexible * 0.20);
-            double wNeeds = Math.Max(20.0, availableFlexible - (wName + wIncome + wCare + wCirc));
-
+            double wName = Math.Max(140, Math.Floor(flexibleWidth * 0.22));
+            double wIncome = Math.Max(115, Math.Floor(flexibleWidth * 0.17));
+            double wCare = Math.Max(125, Math.Floor(flexibleWidth * 0.19));
+            double wCirc = Math.Max(130, Math.Floor(flexibleWidth * 0.20));
+            double wNeeds = Math.Max(140, flexibleWidth - (wName + wIncome + wCare + wCirc));
             if (ColName != null) ColName.Width = wName;
             if (ColIncome != null) ColIncome.Width = wIncome;
             if (ColCare != null) ColCare.Width = wCare;
             if (ColCircumstance != null) ColCircumstance.Width = wCirc;
             if (ColNeeds != null) ColNeeds.Width = wNeeds;
+        }
+
+        private double GetScrollMargin()
+        {
+            var sv = FindVisualChild<ScrollViewer>(QueueListView);
+            return (sv != null && sv.ComputedVerticalScrollBarVisibility == Visibility.Visible)
+                ? SystemParameters.VerticalScrollBarWidth
+                : 2.0;
         }
 
         private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
@@ -181,50 +182,78 @@ namespace SOLUM_UI.Views.Components
 
         private void Row_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (DataContext is SubsidyRecommendationViewModel vm && vm.IsBatchMode)
+            if (DataContext is SubsidyRecommendationViewModel vm)
             {
-                var dep = e.OriginalSource as DependencyObject;
-                if (dep != null)
+                if (vm.IsBatchMode)
                 {
-                    if (FindVisualParent<Button>(dep) != null)
+                    var dep = e.OriginalSource as DependencyObject;
+                    if (dep != null)
                     {
-                        return;
-                    }
-                    if (FindVisualParent<CheckBox>(dep) != null)
-                    {
-                        if (sender is ListViewItem lviBox && lviBox.DataContext is Models.SubsidyItem itemBox)
+                        if (FindVisualParent<Button>(dep) != null)
                         {
-                            _lastClickedQueueItem = itemBox;
+                            return;
                         }
-                        return;
-                    }
-                }
-                if (sender is ListViewItem lvi && lvi.DataContext is Models.SubsidyItem item)
-                {
-                    bool isShiftDown = (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Shift) == System.Windows.Input.ModifierKeys.Shift;
-                    if (isShiftDown && _lastClickedQueueItem != null && vm.FilteredRecommendations != null)
-                    {
-                        int fromIndex = vm.FilteredRecommendations.IndexOf(_lastClickedQueueItem);
-                        int toIndex = vm.FilteredRecommendations.IndexOf(item);
-                        if (fromIndex >= 0 && toIndex >= 0)
+                        if (FindVisualParent<CheckBox>(dep) != null)
                         {
-                            int start = Math.Min(fromIndex, toIndex);
-                            int end = Math.Max(fromIndex, toIndex);
-                            bool targetState = !item.IsSelected;
-                            for (int i = start; i <= end; i++)
+                            if (sender is ListViewItem lviBox && lviBox.DataContext is Models.SubsidyItem itemBox)
                             {
-                                vm.FilteredRecommendations[i].IsSelected = targetState;
+                                _lastClickedQueueItem = itemBox;
                             }
-                            _lastClickedQueueItem = item;
-                            vm.RecalculateSelectionCounts();
-                            e.Handled = true;
                             return;
                         }
                     }
-                    item.IsSelected = !item.IsSelected;
-                    _lastClickedQueueItem = item;
-                    vm.RecalculateSelectionCounts();
-                    e.Handled = true;
+                    if (sender is ListViewItem lvi && lvi.DataContext is Models.SubsidyItem item)
+                    {
+                        bool isShiftDown = (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Shift) == System.Windows.Input.ModifierKeys.Shift;
+                        var sourceList = vm.PagedRecommendations ?? vm.FilteredRecommendations;
+                        if (isShiftDown && _lastClickedQueueItem != null && sourceList != null)
+                        {
+                            int fromIndex = sourceList.IndexOf(_lastClickedQueueItem);
+                            int toIndex = sourceList.IndexOf(item);
+                            if (fromIndex >= 0 && toIndex >= 0)
+                            {
+                                int start = Math.Min(fromIndex, toIndex);
+                                int end = Math.Max(fromIndex, toIndex);
+                                bool targetState = !item.IsSelected;
+                                for (int i = start; i <= end; i++)
+                                {
+                                    vm.SyncQueueItemSelection(sourceList[i], targetState);
+                                }
+                                _lastClickedQueueItem = item;
+                                e.Handled = true;
+                                return;
+                            }
+                        }
+                        vm.SyncQueueItemSelection(item, !item.IsSelected);
+                        _lastClickedQueueItem = item;
+                        e.Handled = true;
+                    }
+                }
+                else
+                {
+                    _lastClickedQueueItem = null;
+                    var dep = e.OriginalSource as DependencyObject;
+                    if (dep != null && (FindVisualParent<Button>(dep) != null || FindVisualParent<CheckBox>(dep) != null))
+                    {
+                        return;
+                    }
+                    if (sender is ListViewItem lvi && lvi.DataContext is Models.SubsidyItem item)
+                    {
+                        var sourceList = vm.PagedRecommendations ?? vm.FilteredRecommendations;
+                        if (sourceList != null)
+                        {
+                            foreach (var it in sourceList)
+                            {
+                                if (it != item && it.IsSelected) vm.SyncQueueItemSelection(it, false);
+                            }
+                        }
+                        vm.SyncQueueItemSelection(item, false);
+
+                        if (vm.IsDrawerOpen)
+                        {
+                            vm.OpenExplainDrawerCommand.Execute(item);
+                        }
+                    }
                 }
             }
         }
@@ -269,10 +298,25 @@ namespace SOLUM_UI.Views.Components
                 QueueFilterPopup.IsOpen = false;
         }
 
+        private void TxtQueueSearch_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                if (DataContext is SubsidyRecommendationViewModel vm)
+                {
+                    vm.ExecuteQueueBackendSearchCommand?.Execute(null);
+                }
+                e.Handled = true;
+            }
+        }
+
         private void ClearQueueSearch_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is SubsidyRecommendationViewModel vm)
+            {
                 vm.QueueSearchText = string.Empty;
+                vm.ExecuteQueueBackendSearchCommand?.Execute(null);
+            }
             if (TxtQueueSearch != null) TxtQueueSearch.Focus();
         }
 

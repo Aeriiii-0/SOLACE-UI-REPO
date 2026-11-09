@@ -659,7 +659,7 @@ namespace SOLUM_UI
 
                     {
 
-                        if (!subVm.IsDataFresh)
+                        if (!subVm.IsDataFresh && !subVm.IsLoading && !subVm.IsActionProcessing)
 
                         {
 

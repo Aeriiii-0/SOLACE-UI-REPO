@@ -62,48 +62,52 @@ namespace SOLUM_UI.Views.Components
         private void UpdateBatchColumn()
         {
             if (DataContext is SubsidyRecommendationViewModel vm)
-                ColSelect.Width = vm.IsShortlistBatchMode ? 34 : 0;
+            {
+                ColSelect.Width = vm.IsShortlistBatchMode ? 38 : 0;
+                if (!vm.IsShortlistBatchMode && ShortlistListView != null)
+                {
+                    ShortlistListView.SelectedItem = null;
+                }
+            }
             else
+            {
                 ColSelect.Width = 0;
+            }
             AdjustColumnWidths();
         }
 
         private void ShortlistListView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            AdjustColumnWidths();
+            if (e.WidthChanged)
+                AdjustColumnWidths();
         }
 
         private void ShortlistListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             var sv = e.OriginalSource as ScrollViewer ?? FindVisualChild<ScrollViewer>(ShortlistListView);
-            if (sv != null)
+            if (sv == null) return;
+
+            if (ScrollHintIndicator != null)
             {
-                // Infinite scrolling: trigger fetch of next batch when approaching bottom of current loaded items
-                if (e.VerticalChange > 0 && sv.ScrollableHeight > 0)
+                if (Math.Abs(e.VerticalChange) > 0.01 && sv.ScrollableHeight > 0 && sv.VerticalOffset < sv.ScrollableHeight - 8)
                 {
-                    bool nearBottom = sv.VerticalOffset >= (sv.ScrollableHeight - 5) ||
-                                      (sv.VerticalOffset + sv.ViewportHeight >= sv.ExtentHeight - 120);
-
-                    if (nearBottom && DataContext is SubsidyRecommendationViewModel vm && vm.CanShortlistLoadMore)
-                    {
-                        _ = vm.LoadNextShortlistPageAsync();
-                    }
+                    ScrollHintIndicator.Visibility = Visibility.Visible;
+                    _scrollHintTimer.Stop();
+                    _scrollHintTimer.Start();
                 }
-
-                // Dynamic Floating Scroll-Down Arrow
-                if (ScrollHintIndicator != null)
+                else if (sv.ScrollableHeight <= 0 || sv.VerticalOffset >= sv.ScrollableHeight - 8)
                 {
-                    if (Math.Abs(e.VerticalChange) > 0.01 && sv.ScrollableHeight > 0 && sv.VerticalOffset < sv.ScrollableHeight - 8)
-                    {
-                        ScrollHintIndicator.Visibility = Visibility.Visible;
-                        _scrollHintTimer.Stop();
-                        _scrollHintTimer.Start();
-                    }
-                    else if (sv.ScrollableHeight <= 0 || sv.VerticalOffset >= sv.ScrollableHeight - 8)
-                    {
-                        _scrollHintTimer.Stop();
-                        ScrollHintIndicator.Visibility = Visibility.Collapsed;
-                    }
+                    _scrollHintTimer.Stop();
+                    ScrollHintIndicator.Visibility = Visibility.Collapsed;
+                }
+            }
+
+            // Infinite scrolling: load next batch when scrolled near bottom (within 45px)
+            if (sv.ScrollableHeight > 0 && sv.VerticalOffset >= sv.ScrollableHeight - 45)
+            {
+                if (DataContext is SubsidyRecommendationViewModel vm && vm.CanShortlistLoadMore && !vm.IsLoadingMoreShortlist)
+                {
+                    _ = vm.LoadNextShortlistPageAsync();
                 }
             }
         }
@@ -113,43 +117,35 @@ namespace SOLUM_UI.Views.Components
             double totalWidth = ShortlistListView.ActualWidth;
             if (totalWidth <= 0) return;
 
-            // Reserve room for vertical scrollbar and prevent horizontal overflow
-            double scrollMargin = 20.0;
-            double selW = (ColSelect != null && ColSelect.Width > 0) ? 34.0 : 0.0;
-            if (ColSelect != null) ColSelect.Width = selW;
-
-            double rankW = 58.0;
-            if (ColRank != null) ColRank.Width = rankW;
-
-            double scoreW = 62.0;
-            if (ColScore != null) ColScore.Width = scoreW;
-
-            double crossW = 115.0;
-            if (ColCrossCheck != null) ColCrossCheck.Width = crossW;
-
-            double depW = 60.0;
-            if (ColDependents != null) ColDependents.Width = depW;
-
-            double cardStatusW = 74.0;
-            if (ColCardStatus != null) ColCardStatus.Width = cardStatusW;
-
-            double validW = 82.0;
-            if (ColValidUntil != null) ColValidUntil.Width = validW;
-
-            double subStatusW = 100.0;
-            if (ColSubsidyStatus != null) ColSubsidyStatus.Width = subStatusW;
-
-            double actionW = 140.0;
+            double scrollMargin = GetScrollMargin();
+            double selW = ColSelect != null ? ColSelect.Width : 0;
+            double rankW = ColRank != null ? ColRank.Width : 56;
+            double scoreW = ColScore != null ? ColScore.Width : 78;
+            double crossW = ColCrossCheck != null ? ColCrossCheck.Width : 135;
+            double depW = ColDependents != null ? ColDependents.Width : 95;
+            double validW = ColValidUntil != null ? ColValidUntil.Width : 95;
+            double cardStatusW = ColCardStatus != null ? ColCardStatus.Width : 90;
+            double subStatusW = ColSubsidyStatus != null ? ColSubsidyStatus.Width : 110;
+            double actionW = 150;
             if (ColAction != null) ColAction.Width = actionW;
 
-            double fixedWidth = selW + rankW + scoreW + crossW + depW + cardStatusW + validW + subStatusW + actionW;
-            double availableFlexible = Math.Max(100.0, totalWidth - fixedWidth - scrollMargin);
+            double fixedWidth = selW + rankW + scoreW + crossW + depW + validW + cardStatusW + subStatusW + actionW;
+            double minFlexible = 400;
+            double availableFlexible = totalWidth - fixedWidth - scrollMargin;
+            double flexibleWidth = Math.Max(minFlexible, availableFlexible);
 
-            double wName = Math.Floor(availableFlexible * 0.38);
-            double wCompliance = Math.Max(40.0, availableFlexible - wName);
-
+            double wName = Math.Max(140, Math.Floor(flexibleWidth * 0.38));
+            double wCompliance = Math.Max(220, flexibleWidth - wName);
             if (ColName != null) ColName.Width = wName;
             if (ColCompliance != null) ColCompliance.Width = wCompliance;
+        }
+
+        private double GetScrollMargin()
+        {
+            var sv = FindVisualChild<ScrollViewer>(ShortlistListView);
+            return (sv != null && sv.ComputedVerticalScrollBarVisibility == Visibility.Visible)
+                ? SystemParameters.VerticalScrollBarWidth
+                : 2.0;
         }
 
         private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
@@ -178,50 +174,78 @@ namespace SOLUM_UI.Views.Components
 
         private void Row_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (DataContext is SubsidyRecommendationViewModel vm && vm.IsShortlistBatchMode)
+            if (DataContext is SubsidyRecommendationViewModel vm)
             {
-                var dep = e.OriginalSource as DependencyObject;
-                if (dep != null)
+                if (vm.IsShortlistBatchMode)
                 {
-                    if (FindVisualParent<Button>(dep) != null)
+                    var dep = e.OriginalSource as DependencyObject;
+                    if (dep != null)
                     {
-                        return;
-                    }
-                    if (FindVisualParent<CheckBox>(dep) != null)
-                    {
-                        if (sender is ListViewItem lviBox && lviBox.DataContext is SelectionRow rowBox)
+                        if (FindVisualParent<Button>(dep) != null)
                         {
-                            _lastClickedShortlistRow = rowBox;
+                            return;
                         }
-                        return;
-                    }
-                }
-                if (sender is ListViewItem lvi && lvi.DataContext is SelectionRow row)
-                {
-                    bool isShiftDown = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
-                    if (isShiftDown && _lastClickedShortlistRow != null && vm.FilteredShortlistRows != null)
-                    {
-                        int fromIndex = vm.FilteredShortlistRows.IndexOf(_lastClickedShortlistRow);
-                        int toIndex = vm.FilteredShortlistRows.IndexOf(row);
-                        if (fromIndex >= 0 && toIndex >= 0)
+                        if (FindVisualParent<CheckBox>(dep) != null)
                         {
-                            int start = Math.Min(fromIndex, toIndex);
-                            int end = Math.Max(fromIndex, toIndex);
-                            bool targetState = !row.IsSelected;
-                            for (int i = start; i <= end; i++)
+                            if (sender is ListViewItem lviBox && lviBox.DataContext is SelectionRow rowBox)
                             {
-                                vm.FilteredShortlistRows[i].IsSelected = targetState;
+                                _lastClickedShortlistRow = rowBox;
                             }
-                            _lastClickedShortlistRow = row;
-                            vm.RecalculateShortlistSelectionCounts();
-                            e.Handled = true;
                             return;
                         }
                     }
-                    row.IsSelected = !row.IsSelected;
-                    _lastClickedShortlistRow = row;
-                    vm.RecalculateShortlistSelectionCounts();
-                    e.Handled = true;
+                    if (sender is ListViewItem lvi && lvi.DataContext is SelectionRow row)
+                    {
+                        bool isShiftDown = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
+                        var sourceList = vm.PagedShortlistRows ?? vm.FilteredShortlistRows;
+                        if (isShiftDown && _lastClickedShortlistRow != null && sourceList != null)
+                        {
+                            int fromIndex = sourceList.IndexOf(_lastClickedShortlistRow);
+                            int toIndex = sourceList.IndexOf(row);
+                            if (fromIndex >= 0 && toIndex >= 0)
+                            {
+                                int start = Math.Min(fromIndex, toIndex);
+                                int end = Math.Max(fromIndex, toIndex);
+                                bool targetState = !row.IsSelected;
+                                for (int i = start; i <= end; i++)
+                                {
+                                    vm.SyncShortlistRowSelection(sourceList[i], targetState);
+                                }
+                                _lastClickedShortlistRow = row;
+                                e.Handled = true;
+                                return;
+                            }
+                        }
+                        vm.SyncShortlistRowSelection(row, !row.IsSelected);
+                        _lastClickedShortlistRow = row;
+                        e.Handled = true;
+                    }
+                }
+                else
+                {
+                    _lastClickedShortlistRow = null;
+                    var dep = e.OriginalSource as DependencyObject;
+                    if (dep != null && (FindVisualParent<Button>(dep) != null || FindVisualParent<CheckBox>(dep) != null))
+                    {
+                        return;
+                    }
+                    if (sender is ListViewItem lvi && lvi.DataContext is SelectionRow row)
+                    {
+                        var sourceList = vm.PagedShortlistRows ?? vm.FilteredShortlistRows;
+                        if (sourceList != null)
+                        {
+                            foreach (var r in sourceList)
+                            {
+                                if (r != row && r.IsSelected) vm.SyncShortlistRowSelection(r, false);
+                            }
+                        }
+                        vm.SyncShortlistRowSelection(row, false);
+
+                        if (vm.IsDrawerOpen)
+                        {
+                            vm.OpenExplainDrawerCommand.Execute(row);
+                        }
+                    }
                 }
             }
         }
@@ -237,8 +261,14 @@ namespace SOLUM_UI.Views.Components
 
         private void RowCheckBox_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is SubsidyRecommendationViewModel vm)
-                vm.RecalculateShortlistSelectionCounts();
+            if (sender is CheckBox cb && cb.DataContext is SelectionRow row && DataContext is SubsidyRecommendationViewModel vm)
+            {
+                vm.SyncShortlistRowSelection(row, cb.IsChecked == true);
+            }
+            else if (DataContext is SubsidyRecommendationViewModel vm2)
+            {
+                vm2.RecalculateShortlistSelectionCounts();
+            }
         }
 
         private void FilterDropBtn_Click(object sender, RoutedEventArgs e) => FilterPopup.IsOpen = !FilterPopup.IsOpen;

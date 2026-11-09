@@ -1,4 +1,4 @@
-﻿using System.Windows.Threading;
+using System.Windows.Threading;
 using SOLUM_UI.Models;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
@@ -678,19 +678,44 @@ namespace SOLUM_UI
                 TxtRecordsPageSummary.Text = $"Showing {start} - {end} of {_totalCount:N0} records";
 
             }
+            if (BtnFirst != null)
+            {
+                BtnFirst.Visibility = Visibility.Visible;
+                BtnFirst.IsEnabled = _currentPage > 1;
+            }
             if (BtnBack != null)
             {
                 BtnBack.Visibility = Visibility.Visible;
                 BtnBack.IsEnabled = _currentPage > 1;
-
             }
             if (BtnNext != null)
             {
                 BtnNext.Visibility = Visibility.Visible;
                 BtnNext.IsEnabled = _currentPage < TotalPages;
-
             }
+            if (BtnLast != null)
+            {
+                BtnLast.Visibility = Visibility.Visible;
+                BtnLast.IsEnabled = _currentPage < TotalPages;
+            }
+        }
 
+        private void BtnFirst_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPage > 1)
+            {
+                _currentPage = 1;
+                _ = LoadRecordsAsync();
+            }
+        }
+
+        private void BtnLast_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPage < TotalPages)
+            {
+                _currentPage = TotalPages;
+                _ = LoadRecordsAsync();
+            }
         }
 
         private void BtnNext_Click(object sender, RoutedEventArgs e)

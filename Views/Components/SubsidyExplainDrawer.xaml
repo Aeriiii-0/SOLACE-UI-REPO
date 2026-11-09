@@ -13,9 +13,65 @@
              d:DesignHeight="700" d:DesignWidth="360">
 
     <UserControl.Resources>
-
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
+        <!-- Reusable Sleek Translucent Maroon ScrollBar -->
+        <Style x:Key="SolumScrollBarThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border x:Name="ThumbBorder" Background="#5C1D38" CornerRadius="2" Opacity="0.22"
+                                Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbBorder" Property="Opacity" Value="0.80"/></Trigger>
+                            <Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbBorder" Property="Opacity" Value="1.0"/><Setter TargetName="ThumbBorder" Property="Background" Value="#5C1D38"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type ScrollBar}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Vertical">
+                    <Setter Property="Width" Value="3"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ScrollBar}">
+                                <Grid x:Name="Bg" Background="Transparent" SnapsToDevicePixels="True">
+                                    <Track x:Name="PART_Track" IsDirectionReversed="True" HorizontalAlignment="Stretch">
+                                        <Track.Thumb><Thumb Style="{StaticResource SolumScrollBarThumb}"/></Track.Thumb>
+                                    </Track>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True"><Setter Property="Width" Value="7"/></Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="Height" Value="3"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ScrollBar}">
+                                <Grid x:Name="Bg" Background="Transparent" SnapsToDevicePixels="True">
+                                    <Track x:Name="PART_Track" HorizontalAlignment="Stretch">
+                                        <Track.Thumb><Thumb Style="{StaticResource SolumScrollBarThumb}"/></Track.Thumb>
+                                    </Track>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True"><Setter Property="Height" Value="7"/></Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Border Width="360" Background="#FFFFFF" CornerRadius="16" BorderBrush="#5C1D38" BorderThickness="1" ClipToBounds="True">
@@ -67,8 +123,7 @@
             </Border>
 
             <!-- Drawer Scrollable Content -->
-
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="16,14">
+            <ScrollViewer x:Name="DrawerScrollViewer" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="16,14">
 
                 <StackPanel>
 
@@ -306,149 +361,184 @@
 
                     </Border>
 
-                    <!-- 4-Dimension Breakdown Section with Prominent Content -->
+                    <!-- Needs & Other Income (Prominently Placed at Top) -->
+                    <Border Background="#FDF8FA" CornerRadius="10" BorderBrush="#E8D8DF" BorderThickness="1.2" Padding="14,14" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="Needs &amp; Other Income" FontSize="13" FontWeight="Bold" Foreground="#5C1D38" Margin="0,0,0,10"/>
 
+                            <TextBlock Text="PROBLEM PRESENTED (SOLO PARENT)" FontSize="10.5" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,4"/>
+                            <TextBlock Text="{Binding ActiveCandidate.ProblemPresentedDisplay}" FontSize="12.5" Foreground="#111827" TextWrapping="Wrap" Margin="0,0,0,12" LineHeight="17"/>
+
+                            <TextBlock Text="NEEDS AND PROBLEMS" FontSize="10.5" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,4"/>
+                            <TextBlock Text="{Binding ActiveCandidate.NeedsAndProblemsDisplay}" FontSize="12.5" Foreground="#111827" TextWrapping="Wrap" Margin="0,0,0,12" LineHeight="17"/>
+
+                            <TextBlock Text="OTHER SOURCES OF INCOME" FontSize="10.5" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,4"/>
+                            <TextBlock Text="{Binding ActiveCandidate.OtherIncomeDisplay}" FontSize="12.5" Foreground="#111827" TextWrapping="Wrap" Margin="0,0,0,2" LineHeight="17"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 4-Dimension Breakdown Section with Prominent Content -->
                     <TextBlock Text="Case Vulnerability Indicators" FontSize="12" FontWeight="Bold" Foreground="#5C1D38" Margin="0,0,0,8"/>
 
                     <!-- Dimension 1: Economic Strain -->
-
                     <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#E5D9DF" BorderThickness="1" Padding="12,10" Margin="0,0,0,8">
-
                         <StackPanel>
-
                             <TextBlock Text="1. Economic Strain" FontSize="11" FontWeight="Bold" Foreground="#5C1D38" Margin="0,0,0,4"/>
-
                             <TextBlock Text="{Binding ActiveCandidate.EcoPrimaryMetric}" FontSize="13.5" FontWeight="Bold" Foreground="#111827"/>
-
                             <TextBlock Text="{Binding ActiveCandidate.EcoSecondaryMetric}" FontSize="10.5" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,2,0,0"/>
-
                         </StackPanel>
-
                     </Border>
 
                     <!-- Dimension 2: Dependency Burden -->
-
                     <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#E5D9DF" BorderThickness="1" Padding="12,10" Margin="0,0,0,8">
-
                         <StackPanel>
-
                             <TextBlock Text="2. Dependency Burden" FontSize="11" FontWeight="Bold" Foreground="#5C1D38" Margin="0,0,0,4"/>
-
                             <TextBlock Text="{Binding ActiveCandidate.DepPrimaryMetric}" FontSize="13.5" FontWeight="Bold" Foreground="#111827"/>
+                            <TextBlock Text="{Binding ActiveCandidate.DepSecondaryMetric}" FontSize="10.5" Foreground="#555555" Margin="0,2,0,8"/>
 
-                            <TextBlock Text="{Binding ActiveCandidate.DepSecondaryMetric}" FontSize="10.5" Foreground="#555555" Margin="0,2,0,6"/>
+                            <!-- Dual Side-by-Side Cards for Dependents -->
+                            <Grid Margin="0,2,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <!-- Card 1: Aged 0–6 yrs -->
+                                <Border Grid.Column="0" Background="White" CornerRadius="8" BorderBrush="#E5D9DF" BorderThickness="1" Padding="10,8">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding ActiveCandidate.Children0To6Count}" FontSize="20" FontWeight="Bold" Foreground="#5C1D38" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Aged 0–6 yrs" FontSize="10.5" FontWeight="SemiBold" Foreground="#6B7280" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                                <!-- Card 2: Aged 7–22 yrs -->
+                                <Border Grid.Column="2" Background="White" CornerRadius="8" BorderBrush="#E5D9DF" BorderThickness="1" Padding="10,8">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding ActiveCandidate.Children7To22Count}" FontSize="20" FontWeight="Bold" Foreground="#5C1D38" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Aged 7–22 yrs" FontSize="10.5" FontWeight="SemiBold" Foreground="#6B7280" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
 
-                            <!-- Small Column for Children Age Groups -->
-
-                            <Border Background="White" CornerRadius="6" BorderBrush="#E5E7EB" BorderThickness="1" Padding="12,9" Margin="0,6,0,0">
-
-                                <StackPanel>
-
-                                    <TextBlock Text="{Binding ActiveCandidate.Children7To22Text}" FontSize="11" FontWeight="SemiBold" Foreground="#1F2937" Margin="0,1,0,3"/>
-
-                                    <Border Height="1" Background="#F3F4F6" Margin="0,2,0,4"/>
-
-                                    <TextBlock Text="{Binding ActiveCandidate.Children0To6Text}" FontSize="11" FontWeight="SemiBold" Foreground="#1F2937" Margin="0,1,0,1"/>
-
-                                </StackPanel>
-
-                            </Border>
-
-                            <!-- Small vertical list of children & ages -->
-
-                            <ItemsControl ItemsSource="{Binding ActiveCandidate.ChildrenDetails}" Margin="0,10,0,0"
-
-                                          Visibility="{Binding ActiveCandidate.HasChildrenDetails, Converter={StaticResource BoolToVis}}">
-
-                                <ItemsControl.ItemTemplate>
-
-                                    <DataTemplate>
-
-                                        <Border Background="#FDF8FA" CornerRadius="5" BorderBrush="#F0E2E7" BorderThickness="1" Padding="8,5" Margin="0,0,0,4">
-
-                                            <Grid>
-
-                                                <Grid.ColumnDefinitions>
-
-                                                    <ColumnDefinition Width="*"/>
-
-                                                    <ColumnDefinition Width="Auto"/>
-
-                                                </Grid.ColumnDefinitions>
-
-                                                <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="10.5" FontWeight="SemiBold" Foreground="#1F2937" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-
-                                                <Border Grid.Column="1" Background="#F3E5EC" BorderBrush="#D4B6C2" BorderThickness="1" CornerRadius="3" Padding="6,2" Margin="6,0,0,0" VerticalAlignment="Center">
-
-                                                    <TextBlock Text="{Binding AgeDisplay}" FontSize="9.5" FontWeight="SemiBold" Foreground="#5C1D38"/>
-
-                                                </Border>
-
-                                            </Grid>
-
-                                        </Border>
-
-                                    </DataTemplate>
-
-                                </ItemsControl.ItemTemplate>
-
-                            </ItemsControl>
-
+                            <!-- Collapsible List of Dependents -->
+                            <Expander Header="{Binding ActiveCandidate.DependentsExpanderHeader}"
+                                      IsExpanded="False"
+                                      Margin="0,8,0,0"
+                                      FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38"
+                                      Visibility="{Binding ActiveCandidate.HasChildrenDetails, Converter={StaticResource BoolToVis}}">
+                                <ItemsControl ItemsSource="{Binding ActiveCandidate.ChildrenDetails}" Margin="0,6,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#FDF8FA" CornerRadius="5" BorderBrush="#F0E2E7" BorderThickness="1" Padding="8,5" Margin="0,0,0,4">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="10.5" FontWeight="SemiBold" Foreground="#1F2937" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                    <Border Grid.Column="1" Background="#F3E5EC" BorderBrush="#D4B6C2" BorderThickness="1" CornerRadius="3" Padding="6,2" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding AgeDisplay}" FontSize="9.5" FontWeight="SemiBold" Foreground="#5C1D38"/>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Expander>
                         </StackPanel>
-
                     </Border>
 
                     <!-- Dimension 3: Care Burden (Kept only if candidate only has children aged 0-6) -->
-
                     <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#E5D9DF" BorderThickness="1" Padding="12,10" Margin="0,0,0,8"
-
                             Visibility="{Binding ActiveCandidate.ShowCareBurden, Converter={StaticResource BoolToVis}}">
-
                         <StackPanel>
-
                             <TextBlock Text="3. Care Burden" FontSize="11" FontWeight="Bold" Foreground="#5C1D38" Margin="0,0,0,4"/>
-
                             <TextBlock Text="{Binding ActiveCandidate.CarePrimaryMetric}" FontSize="13.5" FontWeight="Bold" Foreground="#111827"/>
-
                             <TextBlock Text="{Binding ActiveCandidate.CareSecondaryMetric}" FontSize="10.5" Foreground="#555555" Margin="0,2,0,0"/>
-
                             <Border Visibility="{Binding ActiveCandidate.HasSpecialNeedsDependent, Converter={StaticResource BoolToVis}}" Background="#EFF6FF" BorderBrush="#93C5FD" BorderThickness="1" CornerRadius="4" Padding="6,3" Margin="0,4,0,0" HorizontalAlignment="Left">
-
                                 <TextBlock Text="{Binding ActiveCandidate.SpecialNeedsBadgeText}" FontSize="9.5" FontWeight="Bold" Foreground="#1D4ED8"/>
-
                             </Border>
-
                         </StackPanel>
-
-                    </Border>
-
-                    <!-- Needs & Other Income (Replaced Resource Adequacy) -->
-
-                    <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#E5D9DF" BorderThickness="1" Padding="12,12" Margin="0,0,0,10">
-
-                        <StackPanel>
-
-                            <TextBlock Text="Needs &amp; Other Income" FontSize="11" FontWeight="Bold" Foreground="#5C1D38" Margin="0,0,0,8"/>
-
-                            <TextBlock Text="PROBLEM PRESENTED (SOLO PARENT)" FontSize="9.5" FontWeight="Bold" Foreground="#6B7280" Margin="0,0,0,3"/>
-
-                            <TextBlock Text="{Binding ActiveCandidate.ProblemPresentedDisplay}" FontSize="11.5" FontWeight="SemiBold" Foreground="#111827" TextWrapping="Wrap" Margin="0,0,0,10"/>
-
-                            <TextBlock Text="NEEDS AND PROBLEMS" FontSize="9.5" FontWeight="Bold" Foreground="#6B7280" Margin="0,0,0,3"/>
-
-                            <TextBlock Text="{Binding ActiveCandidate.NeedsAndProblemsDisplay}" FontSize="11.5" FontWeight="SemiBold" Foreground="#111827" TextWrapping="Wrap" Margin="0,0,0,10"/>
-
-                            <TextBlock Text="OTHER SOURCES OF INCOME" FontSize="9.5" FontWeight="Bold" Foreground="#6B7280" Margin="0,0,0,3"/>
-
-                            <TextBlock Text="{Binding ActiveCandidate.OtherIncomeDisplay}" FontSize="11.5" FontWeight="SemiBold" Foreground="#111827" TextWrapping="Wrap" Margin="0,0,0,2"/>
-
-                        </StackPanel>
-
                     </Border>
 
                 </StackPanel>
 
             </ScrollViewer>
+
+            <!-- In-Drawer Lazy / Shimmer Loader Overlay (Active when switching candidates) -->
+            <Border Grid.Row="1" Background="White"
+                    Visibility="{Binding IsDrawerLoading, Converter={StaticResource BoolToVis}}"
+                    Panel.ZIndex="5">
+                <Border.Resources>
+                    <Storyboard x:Key="DrawerPulseStoryboard" RepeatBehavior="Forever" AutoReverse="True">
+                        <DoubleAnimation Storyboard.TargetName="DrawerSkeletonContainer"
+                                         Storyboard.TargetProperty="Opacity"
+                                         From="0.95" To="0.32"
+                                         Duration="0:0:0.85">
+                            <DoubleAnimation.EasingFunction>
+                                <SineEase EasingMode="EaseInOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                    <Style x:Key="DrawerPill" TargetType="Border">
+                        <Setter Property="Background" Value="#EDE2E6"/>
+                        <Setter Property="CornerRadius" Value="4"/>
+                        <Setter Property="Height" Value="13"/>
+                    </Style>
+                </Border.Resources>
+                <Border.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard Storyboard="{StaticResource DrawerPulseStoryboard}"/>
+                    </EventTrigger>
+                </Border.Triggers>
+                <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled" Padding="16,14">
+                    <StackPanel x:Name="DrawerSkeletonContainer">
+                        <!-- Score Card Skeleton -->
+                        <Border Background="#FDF8FA" CornerRadius="12" BorderBrush="#E5D9DF" BorderThickness="1" Padding="16,16" Margin="0,0,0,12">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Border Style="{StaticResource DrawerPill}" Width="70" Height="28" CornerRadius="8" Margin="0,0,0,6"/>
+                                <Border Style="{StaticResource DrawerPill}" Width="150" Height="11" Margin="0,0,0,8"/>
+                                <Border Style="{StaticResource DrawerPill}" Width="90" Height="18" CornerRadius="6"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- Needs & Other Income Skeleton -->
+                        <Border Background="#FDF8FA" CornerRadius="10" BorderBrush="#E8D8DF" BorderThickness="1.2" Padding="14,14" Margin="0,0,0,14">
+                            <StackPanel>
+                                <Border Style="{StaticResource DrawerPill}" Width="140" Height="13" Margin="0,0,0,10"/>
+                                <Border Style="{StaticResource DrawerPill}" Width="110" Height="10" Margin="0,0,0,4"/>
+                                <Border Style="{StaticResource DrawerPill}" Width="260" Height="12" Margin="0,0,0,10"/>
+                                <Border Style="{StaticResource DrawerPill}" Width="120" Height="10" Margin="0,0,0,4"/>
+                                <Border Style="{StaticResource DrawerPill}" Width="240" Height="12" Margin="0,0,0,10"/>
+                                <Border Style="{StaticResource DrawerPill}" Width="130" Height="10" Margin="0,0,0,4"/>
+                                <Border Style="{StaticResource DrawerPill}" Width="180" Height="12"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- Case Indicators Skeleton -->
+                        <Border Style="{StaticResource DrawerPill}" Width="160" Height="12" Margin="0,0,0,8"/>
+                        <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#E5D9DF" BorderThickness="1" Padding="12,10" Margin="0,0,0,8">
+                            <StackPanel>
+                                <Border Style="{StaticResource DrawerPill}" Width="110" Height="11" Margin="0,0,0,6"/>
+                                <Border Style="{StaticResource DrawerPill}" Width="150" Height="14" Margin="0,0,0,4"/>
+                                <Border Style="{StaticResource DrawerPill}" Width="190" Height="10"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#FAFAFA" CornerRadius="8" BorderBrush="#E5D9DF" BorderThickness="1" Padding="12,10">
+                            <StackPanel>
+                                <Border Style="{StaticResource DrawerPill}" Width="120" Height="11" Margin="0,0,0,6"/>
+                                <Border Style="{StaticResource DrawerPill}" Width="160" Height="14" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Background="White" CornerRadius="8" BorderBrush="#E5D9DF" BorderThickness="1" Height="44"/>
+                                    <Border Grid.Column="2" Background="White" CornerRadius="8" BorderBrush="#E5D9DF" BorderThickness="1" Height="44"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
 
             <!-- Drawer Footer Actions -->
 

@@ -404,7 +404,7 @@ namespace SOLUM_UI.ViewModels
 
         private async Task RunQuickPredictAsync(SubsidyItem item)
         {
-            if (item == null) return;
+            if (item == null || IsReassessingCandidate) return;
             Guid targetId = item.SoloParentId != Guid.Empty ? item.SoloParentId : (Guid.TryParse(item.SpId?.Replace("SP-", ""), out var parsed) ? parsed : Guid.Empty);
             if (targetId == Guid.Empty)
             {
@@ -422,6 +422,7 @@ namespace SOLUM_UI.ViewModels
                     return;
                 }
             }
+            IsReassessingCandidate = true;
             try
             {
                 var resp = await _apiService.PredictCandidateAsync(targetId);
@@ -437,10 +438,10 @@ namespace SOLUM_UI.ViewModels
                     }
                     // Record cooldown timestamp
                     RecordReassessment(targetId);
-                    // Recalculate quota & sort to update queue order and badges
-                    RecalculateQuotaAndFilter();
+                    // Refresh queue with retained count so rankings are restarted from #1 and user stays at their loaded depth
+                    await RefreshQueueWithRetainedCountAsync();
                     ToastNotification.Show("Prediction Updated",
-                        $"{item.Name} re-scored: {item.Score:F1} ({item.Priority}) via {resp.Data.ModelVersion}.",
+                        $"{item.Name} re-scored: {item.Score:F1} ({item.Priority}) via {resp.Data.ModelVersion}. Current rank: #{item.Rank}.",
                         ToastType.Success);
                 }
                 else
@@ -452,6 +453,10 @@ namespace SOLUM_UI.ViewModels
             catch (Exception ex)
             {
                 ToastNotification.Show("Re-scoring Error", ex.Message, ToastType.Error);
+            }
+            finally
+            {
+                IsReassessingCandidate = false;
             }
         }
 
@@ -522,11 +527,16 @@ namespace SOLUM_UI.ViewModels
             if (item == null || item.SoloParentId == Guid.Empty) return;
             try
             {
+                IsDrawerLoading = true;
                 var resp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.SoloParentId);
                 if (resp?.Data != null)
                     Application.Current?.Dispatcher?.Invoke(() => { SubsidyModelMapper.EnrichItemFromRecord(item, resp.Data); if (ActiveCandidate == item) OnPropertyChanged(nameof(ActiveCandidate)); });
             }
             catch { }
+            finally
+            {
+                IsDrawerLoading = false;
+            }
         }
 
         public async Task SaveQuotaAsync()

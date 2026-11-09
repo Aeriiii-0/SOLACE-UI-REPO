@@ -1083,6 +1083,26 @@
                             <TextBlock x:Name="TxtRecordsSummary" Visibility="Collapsed"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button x:Name="BtnFirst" Width="40" Height="34" Cursor="Hand"
+                                    Click="BtnFirst_Click" Margin="0,0,8,0" ToolTip="First Page">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="White" CornerRadius="17"
+                                                BorderBrush="#E0D0D5" BorderThickness="1.2">
+                                            <TextBlock Text="«" FontSize="15" FontWeight="Bold" Foreground="#702943"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
                             <Button x:Name="BtnBack" Width="100" Height="34" Cursor="Hand"
                                     Click="BtnBack_Click" Margin="0,0,8,0">
                                 <Button.Template>
@@ -1119,6 +1139,26 @@
                                                 <Path Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
                                                       Fill="#702943" Stretch="Uniform" Width="10" Height="10" Margin="6,0,0,0"/>
                                             </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <Button x:Name="BtnLast" Width="40" Height="34" Cursor="Hand"
+                                    Click="BtnLast_Click" Margin="8,0,0,0" ToolTip="Last Page">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="White" CornerRadius="17"
+                                                BorderBrush="#E0D0D5" BorderThickness="1.2">
+                                            <TextBlock Text="»" FontSize="15" FontWeight="Bold" Foreground="#702943"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
