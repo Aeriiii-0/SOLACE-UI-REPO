@@ -869,6 +869,14 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _annulledCount, value);
 
         }
+
+        private int _separatedAnnulledCount;
+
+        public int SeparatedAnnulledCount
+        {
+            get => _separatedAnnulledCount;
+            set => SetProperty(ref _separatedAnnulledCount, value);
+        }
         // Employment percentages
 
         private double _employedPercent;
@@ -1729,6 +1737,8 @@ namespace SOLUM_UI.ViewModels
             WidowedCount = GetDictValue(civilStatus, "Widowed", "widowed", "Widow");
             SeparatedCount = GetDictValue(civilStatus, "Separated", "separated");
             AnnulledCount = GetDictValue(civilStatus, "Annulled", "annulled", "Divorced", "divorced");
+            int sepAnnCombined = GetDictValue(civilStatus, "Legally Separated / Annulled", "Separated / Annulled", "Separated/Annulled");
+            SeparatedAnnulledCount = sepAnnCombined > 0 ? sepAnnCombined : (SeparatedCount + AnnulledCount);
             // Load employment status simple text counts (null-safe & case-insensitive)
             var employment = dto.EmploymentStatus ?? new System.Collections.Generic.Dictionary<string, int>();
 
@@ -1869,8 +1879,8 @@ namespace SOLUM_UI.ViewModels
             }
             // Load Civil Status Collection
             CivilStatusData.Clear();
-            var civilStatusOrder = new[] { "Single", "Married", "Widowed", "Separated", "Annulled" };
-            var civilStatusCounts = new[] { SingleCount, MarriedCount, WidowedCount, SeparatedCount, AnnulledCount };
+            var civilStatusOrder = new[] { "Single", "Married", "Widowed", "Separated / Annulled" };
+            var civilStatusCounts = new[] { SingleCount, MarriedCount, WidowedCount, SeparatedAnnulledCount };
             for (int i = 0; i < civilStatusOrder.Length; i++)
             {
                 CivilStatusData.Add(new ListItem { Label = civilStatusOrder[i], Value = civilStatusCounts[i] });
@@ -2000,6 +2010,7 @@ namespace SOLUM_UI.ViewModels
             WidowedCount = 0;
             SeparatedCount = 0;
             AnnulledCount = 0;
+            SeparatedAnnulledCount = 0;
             LgbtCount = 0;
             PantawidBeneficiaryCount = 0;
             IndigenousCount = 0;

@@ -490,7 +490,7 @@ namespace SOLUM_UI
             return list;
         }
 
-        private static TextBlock MakeText(string text, double size, Brush brush, FontWeight weight)
+        private static TextBlock MakeText(string text, double size, Brush brush, FontWeight weight, TextAlignment align = TextAlignment.Left)
         {
             var tb = new TextBlock
             {
@@ -498,6 +498,7 @@ namespace SOLUM_UI
                 FontSize = size,
                 Foreground = brush,
                 FontWeight = weight,
+                TextAlignment = align,
                 FontFamily = new FontFamily("Segoe UI")
             };
             tb.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
@@ -536,13 +537,16 @@ namespace SOLUM_UI
                     (selfEmployed, B("#E3BF2E")),
                     (notEmployed, B("#A89AA0"))
                 });
+                double sepAnn = N("SeparatedAnnulledCount");
+                if (sepAnn == 0 && (N("SeparatedCount") > 0 || N("AnnulledCount") > 0))
+                    sepAnn = N("SeparatedCount") + N("AnnulledCount");
+
                 DrawBars(FindName("CvCivilBars") as Canvas, new List<(string, double, Brush)>
                 {
                     ("Single", N("SingleCount"), B("#7D2245")),
                     ("Married", N("MarriedCount"), B("#E3BF2E")),
                     ("Widowed", N("WidowedCount"), B("#7DBB57")),
-                    ("Separated", N("SeparatedCount"), B("#4FB0C6")),
-                    ("Annulled", N("AnnulledCount"), B("#A89AA0"))
+                    ("Separated /\nAnnulled", sepAnn, B("#4FB0C6"))
                 });
             }
             catch (Exception ex)
@@ -672,7 +676,7 @@ namespace SOLUM_UI
             double h = c.ActualHeight;
             if (w <= 0 || h <= 0 || items.Count == 0)
                 return;
-            const double top = 26, bottom = 30, side = 8;
+            const double top = 26, bottom = 36, side = 8;
             double pw = w - side * 2;
             double ph = h - top - bottom;
             if (pw <= 0 || ph <= 0)
@@ -706,7 +710,7 @@ namespace SOLUM_UI
                     Height = barH,
                     Background = items[i].Fill,
                     CornerRadius = new CornerRadius(6, 6, 0, 0),
-                    ToolTip = $"{items[i].Label}: {items[i].Value:N0}"
+                    ToolTip = $"{items[i].Label.Replace("\n", " ")}: {items[i].Value:N0}"
                 };
                 Canvas.SetLeft(bar, x);
                 Canvas.SetTop(bar, y);
@@ -715,9 +719,9 @@ namespace SOLUM_UI
                 Canvas.SetLeft(val, x + (barW - val.DesiredSize.Width) / 2);
                 Canvas.SetTop(val, y - val.DesiredSize.Height - 3);
                 c.Children.Add(val);
-                var lbl = MakeText(items[i].Label, 10, textBrush, FontWeights.Normal);
+                var lbl = MakeText(items[i].Label, 9.5, textBrush, FontWeights.Normal, TextAlignment.Center);
                 Canvas.SetLeft(lbl, side + slot * i + (slot - lbl.DesiredSize.Width) / 2);
-                Canvas.SetTop(lbl, top + ph + 8);
+                Canvas.SetTop(lbl, top + ph + 6);
                 c.Children.Add(lbl);
             }
         }
