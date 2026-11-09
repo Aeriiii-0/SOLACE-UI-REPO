@@ -175,10 +175,10 @@ namespace SOLUM_UI.Models
             get
             {
                 if (string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase))
-                    return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEE2E2"));
+                    return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9"));
                 if (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase))
                     return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7"));
-                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E0F2FE"));
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEE2E2"));
             }
         }
 
@@ -187,10 +187,10 @@ namespace SOLUM_UI.Models
             get
             {
                 if (string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase))
-                    return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B91C1C"));
+                    return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
                 if (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase))
                     return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309"));
-                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0369A1"));
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B91C1C"));
             }
         }
     }

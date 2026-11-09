@@ -12,7 +12,8 @@
         <Border x:Name="Shell" Background="White" CornerRadius="18"
                 BorderBrush="#702943" BorderThickness="1.5"
                 ClipToBounds="True" Width="460"
-                VerticalAlignment="Center" HorizontalAlignment="Center">
+                VerticalAlignment="Center" HorizontalAlignment="Center"
+                UseLayoutRounding="True" SnapsToDevicePixels="True">
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="48" ShadowDepth="0" Opacity="0.24"/>
             </Border.Effect>

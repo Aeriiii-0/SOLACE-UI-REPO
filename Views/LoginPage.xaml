@@ -18,11 +18,26 @@
         Background="#FBEFF3"
         SnapsToDevicePixels="True"
         UseLayoutRounding="True"
-        TextOptions.TextRenderingMode="Auto"
+        TextOptions.TextRenderingMode="ClearType"
+        TextOptions.TextFormattingMode="Display"
         RenderOptions.BitmapScalingMode="HighQuality"
         KeyDown="Window_KeyDown">
 
     <Window.Resources>
+        <!-- Global Typography Style: Crispy Text Rendering -->
+        <Style TargetType="TextBlock">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        </Style>
+        <Style TargetType="PasswordBox">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        </Style>
+        
         <Style x:Key="FeatureChip" TargetType="Border">
             <Setter Property="Background" Value="#E6FFFFFF"/>
             <Setter Property="BorderBrush" Value="#6D1F40"/>

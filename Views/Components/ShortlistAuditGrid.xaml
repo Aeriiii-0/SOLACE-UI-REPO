@@ -199,7 +199,7 @@
                                 </Button.Template>
                             </Button>
                         </Border>
-                        <Popup x:Name="ExportPopup" PlacementTarget="{Binding ElementName=ExportDropBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                        <Popup x:Name="ExportPopup" PlacementTarget="{Binding ElementName=ExportDropBtn}" Placement="Bottom" HorizontalOffset="-160" VerticalOffset="3" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
                             <Border Background="White" CornerRadius="10" BorderBrush="#5C1D38" BorderThickness="1" Padding="6" MinWidth="250">
                                 <Border.Effect><DropShadowEffect Color="#C0A0AA" BlurRadius="12" ShadowDepth="3" Opacity="0.16"/></Border.Effect>
                                 <StackPanel>
