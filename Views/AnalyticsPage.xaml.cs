@@ -1170,10 +1170,16 @@ namespace SOLUM_UI
                     periodLabel = $"{DateTime.Today:MMMM yyyy}".ToUpperInvariant();
                 }
 
+                string timeStamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                string bgyPart = (selectedBarangay != null && selectedBarangay != "ALL") 
+                    ? $"_{selectedBarangay.Replace(" ", "_")}" 
+                    : "";
+
                 var saveDialog = new System.Windows.Forms.SaveFileDialog
                 {
                     Filter = "Excel Files (*.xlsx)|*.xlsx|CSV Files (*.csv)|*.csv|All Files (*.*)|*.*",
-                    FileName = $"LGU_SUMMARY_SOLO_PARENTS_{periodLabel.Replace(" ", "_")}.xlsx",
+                    DefaultExt = "xlsx",
+                    FileName = $"LGU_SUMMARY_SOLO_PARENTS_{periodLabel.Replace(" ", "_")}{bgyPart}_{timeStamp}.xlsx",
                     InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
                 };
                 if (saveDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)

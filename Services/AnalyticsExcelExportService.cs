@@ -16,15 +16,12 @@ namespace SOLUM_UI.Services
     /// </summary>
     public static class AnalyticsExcelExportService
     {
-        private const string FontName = "Segoe UI";
+        private const string FontName = "Arial";
 
-        private static class ReportColors
+        private class CategoryBlock
         {
-            public static readonly Color MaroonPrimary = Color.FromArgb(0x70, 0x29, 0x43);
-            public static readonly Color TextDark = Color.FromArgb(0x1F, 0x1F, 0x1F);
-            public static readonly Color TextMuted = Color.FromArgb(0x55, 0x55, 0x55);
-            public static readonly Color BorderSubtle = Color.FromArgb(0xD4, 0xD4, 0xD4);
-            public static readonly Color HeaderSoft = Color.FromArgb(0xF8, 0xF2, 0xF4);
+            public string CategoryName { get; set; }
+            public List<(string Label, int? Count)> Items { get; set; } = new List<(string Label, int? Count)>();
         }
 
         private class ReportMetrics
@@ -69,9 +66,9 @@ namespace SOLUM_UI.Services
             public int CatE { get; set; }
             public int CatF { get; set; }
 
-            public int SpicNew { get; set; }
-            public int SpicRenewed { get; set; }
-            public int SpicTerminated { get; set; }
+            public int? SpicNew { get; set; }
+            public int? SpicRenewed { get; set; }
+            public int? SpicTerminated { get; set; }
 
             public int PantawidYes { get; set; }
             public int PantawidNo { get; set; }
@@ -199,10 +196,10 @@ namespace SOLUM_UI.Services
             sb.AppendLine($",e. Relative,{m.CatE}");
             sb.AppendLine($",f. Pregnant woman,{m.CatF}");
 
-            // Solo Parent Identification Card
-            sb.AppendLine($"Solo Parent Identification Card,Newly issued SPIC,{m.SpicNew}");
-            sb.AppendLine($",Renewed SPIC,{m.SpicRenewed}");
-            sb.AppendLine($",Terminated SPIC,{m.SpicTerminated}");
+            // Solo Parent Identification Card (Out of scope - left empty)
+            sb.AppendLine("Solo Parent Identification Card,Newly issued SPIC,");
+            sb.AppendLine(",Renewed SPIC,");
+            sb.AppendLine(",Terminated SPIC,");
 
             // Pantawid Beneficiary
             sb.AppendLine($"Pantawid Beneficiary,Yes,{m.PantawidYes}");
@@ -268,152 +265,181 @@ namespace SOLUM_UI.Services
         {
             var ws = pkg.Workbook.Worksheets.Add("LGU Summary");
             ws.Cells.Style.Font.Name = FontName;
-            ws.Cells.Style.Font.Size = 10;
+            ws.Cells.Style.Font.Size = 12;
             ws.View.ShowGridLines = true;
 
-            int row = 1;
+            // Row 1: Document Header Title (Merged A1:C1)
+            ws.Row(1).Height = 15.0;
+            ws.Cells[1, 1, 1, 3].Merge = true;
+            ws.Cells[1, 1].Value = "LGU SUMMARY OF SOLO PARENTS";
+            ws.Cells[1, 1].Style.Font.Name = FontName;
+            ws.Cells[1, 1].Style.Font.Size = 12;
+            ws.Cells[1, 1].Style.Font.Bold = true;
+            ws.Cells[1, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[1, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
 
-            // Title
-            ws.Cells[row, 1].Value = "LGU SUMMARY OF SOLO PARENTS";
-            ws.Cells[row, 1].Style.Font.Size = 12;
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 1].Style.Font.Color.SetColor(ReportColors.MaroonPrimary);
-            row++;
+            // Row 2: Subtitle Period (Merged A2:C2)
+            ws.Row(2).Height = 15.0;
+            ws.Cells[2, 1, 2, 3].Merge = true;
+            ws.Cells[2, 1].Value = "As of " + periodLabel;
+            ws.Cells[2, 1].Style.Font.Name = FontName;
+            ws.Cells[2, 1].Style.Font.Size = 12;
+            ws.Cells[2, 1].Style.Font.Bold = true;
+            ws.Cells[2, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[2, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
 
-            // Period
-            ws.Cells[row, 1].Value = "As of " + periodLabel;
-            ws.Cells[row, 1].Style.Font.Size = 10;
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 1].Style.Font.Color.SetColor(ReportColors.TextMuted);
-            row += 2; // Row 3 empty
+            // Row 3: Blank
+            ws.Row(3).Height = 11.25;
 
-            // Location
-            ws.Cells[row, 1].Value = "City / Municipality / Province";
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 2].Value = municipality;
-            ws.Cells[row, 2].Style.Font.Bold = true;
-            row++;
+            // Row 4: Municipality Location
+            ws.Row(4).Height = 18.75;
+            ws.Cells[4, 1].Value = "City / Municipality / Province";
+            ws.Cells[4, 1].Style.Font.Name = FontName;
+            ws.Cells[4, 1].Style.Font.Size = 12;
+            ws.Cells[4, 1].Style.Font.Bold = true;
+            ws.Cells[4, 2].Value = municipality;
+            ws.Cells[4, 2].Style.Font.Name = FontName;
+            ws.Cells[4, 2].Style.Font.Size = 12;
+            ws.Cells[4, 2].Style.Font.Bold = false;
+            ws.Cells[4, 2].Style.WrapText = true;
 
-            ws.Cells[row, 1].Value = "Region";
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 2].Value = region;
-            ws.Cells[row, 2].Style.Font.Bold = true;
-            row += 2; // Row 6 empty
+            // Row 5: Region
+            ws.Row(5).Height = 21.75;
+            ws.Cells[5, 1].Value = "Region";
+            ws.Cells[5, 1].Style.Font.Name = FontName;
+            ws.Cells[5, 1].Style.Font.Size = 12;
+            ws.Cells[5, 1].Style.Font.Bold = true;
+            ws.Cells[5, 2].Value = region;
+            ws.Cells[5, 2].Style.Font.Name = FontName;
+            ws.Cells[5, 2].Style.Font.Size = 12;
+            ws.Cells[5, 2].Style.Font.Bold = false;
+            ws.Cells[5, 2].Style.WrapText = true;
 
-            // Total Served
-            int dataStartRow = row;
-            ws.Cells[row, 1].Value = $"Number of Solo Parents served for {year}";
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 3].Value = m.TotalServed;
-            ws.Cells[row, 3].Style.Font.Bold = true;
-            ws.Cells[row, 3].Style.Numberformat.Format = "#,##0";
-            row++;
+            // Row 6: Blank
+            ws.Row(6).Height = 12.75;
 
-            // Age
-            AddDataRow(ws, ref row, "Age", "19 years old and below", m.Age19Below);
-            AddDataRow(ws, ref row, "", "20-39 years old", m.Age20To39);
-            AddDataRow(ws, ref row, "", "40-59 years old", m.Age40To59);
-            AddDataRow(ws, ref row, "", "60 and above", m.Age60Above);
+            // Row 7: Total Served Header (Merged A7:B7 with C7 count)
+            ws.Row(7).Height = 17.25;
+            ws.Cells[7, 1, 7, 2].Merge = true;
+            ws.Cells[7, 1].Value = $"Number of Solo Parents served for {year}";
+            ws.Cells[7, 1].Style.Font.Name = FontName;
+            ws.Cells[7, 1].Style.Font.Size = 12;
+            ws.Cells[7, 1].Style.Font.Bold = true;
+            ws.Cells[7, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+            ws.Cells[7, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+            ws.Cells[7, 1].Style.WrapText = true;
+            ApplyBoxBorder(ws, 7, 1, 7, 2);
 
-            // Sex
-            AddDataRow(ws, ref row, "Sex", "Male", m.MaleCount);
-            AddDataRow(ws, ref row, "", "Female", m.FemaleCount);
+            ws.Cells[7, 3].Value = m.TotalServed;
+            ws.Cells[7, 3].Style.Font.Name = FontName;
+            ws.Cells[7, 3].Style.Font.Size = 12;
+            ws.Cells[7, 3].Style.Font.Bold = false;
+            ws.Cells[7, 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[7, 3].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            ws.Cells[7, 3].Style.Numberformat.Format = "#,##0";
+            ApplyCellBorder(ws.Cells[7, 3]);
 
-            // Civil Status
-            AddDataRow(ws, ref row, "Civil Status", "Single", m.CivilSingle);
-            AddDataRow(ws, ref row, "", "Married", m.CivilMarried);
-            AddDataRow(ws, ref row, "", "Widowed", m.CivilWidowed);
-            AddDataRow(ws, ref row, "", "Legally Separated / Annulled", m.CivilSeparatedAnnulled);
-
-            // Employment Status
-            AddDataRow(ws, ref row, "Employment Status", "Employed (public & private)", m.EmpEmployed);
-            AddDataRow(ws, ref row, "", "Self employed", m.EmpSelfEmployed);
-            AddDataRow(ws, ref row, "", "Not employed", m.EmpNotEmployed);
-
-            // Monthly Income
-            AddDataRow(ws, ref row, "Monthly Income", "below minimum wage", m.IncomeBelowMin);
-            AddDataRow(ws, ref row, "", "Minimum wage +1 to Php 20833", m.IncomeMinPlus);
-            AddDataRow(ws, ref row, "", "Php 20834 and above", m.IncomeAbove20833);
-
-            // Dependents
-            AddDataRow(ws, ref row, "No. of Children / Dependent", "6 years old and below", m.DepBelow6);
-            AddDataRow(ws, ref row, "", "7 -22 years old", m.Dep7To22);
-            AddDataRow(ws, ref row, "", "22 years old and above", m.DepAbove22);
-
-            // Category
-            AddDataRow(ws, ref row, "Category", "a1. Consequence of rape", m.CatA1);
-            AddDataRow(ws, ref row, "", "a2. Widow/widower", m.CatA2);
-            AddDataRow(ws, ref row, "", "a3. Spouse of PDL", m.CatA3);
-            AddDataRow(ws, ref row, "", "a4. Spouse of PWD", m.CatA4);
-            AddDataRow(ws, ref row, "", "a5. Separated or de facto separated", m.CatA5);
-            AddDataRow(ws, ref row, "", "a6. Annulled ", m.CatA6);
-            AddDataRow(ws, ref row, "", "a7. Abandoned", m.CatA7);
-            AddDataRow(ws, ref row, "", "b. Spouse/Relative of OFW", m.CatB);
-            AddDataRow(ws, ref row, "", "c. Unmarried person", m.CatC);
-            AddDataRow(ws, ref row, "", "d. Legal Guardian, Adoptive or Foster Parent", m.CatD);
-            AddDataRow(ws, ref row, "", "e. Relative", m.CatE);
-            AddDataRow(ws, ref row, "", "f. Pregnant woman", m.CatF);
-
-            // SPIC
-            AddDataRow(ws, ref row, "Solo Parent Identification Card", "Newly issued SPIC", m.SpicNew);
-            AddDataRow(ws, ref row, "", "Renewed SPIC", m.SpicRenewed);
-            AddDataRow(ws, ref row, "", "Terminated SPIC", m.SpicTerminated);
-
-            // Pantawid
-            AddDataRow(ws, ref row, "Pantawid Beneficiary", "Yes", m.PantawidYes);
-            AddDataRow(ws, ref row, "", "No", m.PantawidNo);
-
-            // Indigenous Person
-            AddDataRow(ws, ref row, "Indigenous Person", "Yes", m.IpYes);
-            AddDataRow(ws, ref row, "", "No", m.IpNo);
-
-            // LGBTQ+
-            AddDataRow(ws, ref row, "LGBTQ+", "Yes", m.LgbtYes);
-            AddDataRow(ws, ref row, "", "No", m.LgbtNo);
-
-            int dataEndRow = row - 1;
-
-            // Apply light borders to table region
-            for (int r = dataStartRow; r <= dataEndRow; r++)
+            // Rows 8-47: Exact 11 category blocks with vertically merged Column A
+            int currentRow = 8;
+            var blocks = GetCategoryBlocks(m);
+            foreach (var block in blocks)
             {
-                for (int c = 1; c <= 3; c++)
+                int startRow = currentRow;
+                int endRow = startRow + block.Items.Count - 1;
+
+                // Vertically merged Category cell in Column A
+                var catRange = ws.Cells[startRow, 1, endRow, 1];
+                catRange.Merge = true;
+                catRange.Value = block.CategoryName;
+                catRange.Style.Font.Name = FontName;
+                catRange.Style.Font.Size = 12;
+                catRange.Style.Font.Bold = true;
+                catRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                catRange.Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+                catRange.Style.WrapText = true;
+                ApplyBoxBorder(ws, startRow, 1, endRow, 1);
+
+                // Subcategories and value rows
+                for (int i = 0; i < block.Items.Count; i++)
                 {
-                    var cell = ws.Cells[r, c];
-                    cell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                    cell.Style.Border.Top.Color.SetColor(ReportColors.BorderSubtle);
-                    cell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                    cell.Style.Border.Bottom.Color.SetColor(ReportColors.BorderSubtle);
-                    cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                    cell.Style.Border.Left.Color.SetColor(ReportColors.BorderSubtle);
-                    cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                    cell.Style.Border.Right.Color.SetColor(ReportColors.BorderSubtle);
+                    int r = startRow + i;
+                    ws.Row(r).Height = 15.0;
+
+                    var item = block.Items[i];
+
+                    // Column B: Subcategory label
+                    var bCell = ws.Cells[r, 2];
+                    bCell.Value = item.Label;
+                    bCell.Style.Font.Name = FontName;
+                    bCell.Style.Font.Size = 12;
+                    bCell.Style.Font.Bold = true;
+                    bCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                    bCell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    bCell.Style.WrapText = true;
+                    ApplyCellBorder(bCell);
+
+                    // Column C: Count
+                    var cCell = ws.Cells[r, 3];
+                    if (item.Count.HasValue)
+                    {
+                        cCell.Value = item.Count.Value;
+                        cCell.Style.Numberformat.Format = "#,##0";
+                    }
+                    else
+                    {
+                        cCell.Value = null;
+                    }
+                    cCell.Style.Font.Name = FontName;
+                    cCell.Style.Font.Size = 12;
+                    cCell.Style.Font.Bold = false;
+                    cCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    cCell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    ApplyCellBorder(cCell);
                 }
+
+                currentRow = endRow + 1;
             }
 
-            // Footer / Signature Section
-            row++; // Blank row
-            ws.Cells[row, 1].Value = "Submitted by:";
-            ws.Cells[row, 1].Style.Font.Italic = true;
-            row += 2;
+            // Footer / Signatures
+            ws.Row(48).Height = 12.75; // Blank row 48
 
-            ws.Cells[row, 1].Value = focalPersonName;
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 1].Style.Font.Size = 11;
-            row++;
+            ws.Row(49).Height = 12.75;
+            ws.Cells[49, 1].Value = "Submitted by:";
+            ws.Cells[49, 1].Style.Font.Name = FontName;
+            ws.Cells[49, 1].Style.Font.Size = 12;
+            ws.Cells[49, 1].Style.Font.Bold = true;
 
-            ws.Cells[row, 1].Value = "Name of Solo Parent Focal Person:";
-            ws.Cells[row, 1].Style.Font.Color.SetColor(ReportColors.TextMuted);
-            ws.Cells[row, 1].Style.Font.Size = 9.5f;
-            row++;
+            ws.Row(50).Height = 12.75; // Blank row 50
 
-            ws.Cells[row, 1].Value = $"Date of Submission: {DateTime.Today:MMMM d, yyyy}";
-            ws.Cells[row, 1].Style.Font.Color.SetColor(ReportColors.TextMuted);
-            ws.Cells[row, 1].Style.Font.Size = 9.5f;
+            ws.Row(51).Height = 19.5;
+            ws.Cells[51, 1, 51, 2].Merge = true;
+            ws.Cells[51, 1].Value = focalPersonName;
+            ws.Cells[51, 1].Style.Font.Name = FontName;
+            ws.Cells[51, 1].Style.Font.Size = 12;
+            ws.Cells[51, 1].Style.Font.Bold = true;
+            ws.Cells[51, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
-            // Column Widths
-            ws.Column(1).Width = 34;
-            ws.Column(2).Width = 46;
-            ws.Column(3).Width = 16;
+            ws.Row(52).Height = 18.0;
+            ws.Cells[52, 1, 52, 2].Merge = true;
+            ws.Cells[52, 1].Value = "Name of Solo Parent Focal Person:";
+            ws.Cells[52, 1].Style.Font.Name = FontName;
+            ws.Cells[52, 1].Style.Font.Size = 12;
+            ws.Cells[52, 1].Style.Font.Bold = false;
+            ws.Cells[52, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+            ws.Row(53).Height = 21.75;
+            ws.Cells[53, 1, 53, 2].Merge = true;
+            ws.Cells[53, 1].Value = $"Date of Submission: {DateTime.Today:MMMM d, yyyy}";
+            ws.Cells[53, 1].Style.Font.Name = FontName;
+            ws.Cells[53, 1].Style.Font.Size = 12;
+            ws.Cells[53, 1].Style.Font.Bold = false;
+            ws.Cells[53, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+            // Column Widths matching official template
+            ws.Column(1).Width = 36.45;
+            ws.Column(2).Width = 33.18;
+            ws.Column(3).Width = 18.54;
+            ws.Column(4).Width = 9.18;
         }
 
         private static void BuildRegionalProvincialSheet(
@@ -425,213 +451,438 @@ namespace SOLUM_UI.Services
             string periodLabel,
             int year)
         {
-            var ws = pkg.Workbook.Worksheets.Add("Regional-Provincial Summary");
+            var ws = pkg.Workbook.Worksheets.Add("ProvinceRegional Summary");
             ws.Cells.Style.Font.Name = FontName;
             ws.Cells.Style.Font.Size = 10;
             ws.View.ShowGridLines = true;
 
-            int row = 1;
-
-            // Title
-            ws.Cells[row, 1].Value = "REGIONAL / PROVINCIAL SUMMARY OF SOLO PARENTS";
-            ws.Cells[row, 1].Style.Font.Size = 12;
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 1].Style.Font.Color.SetColor(ReportColors.MaroonPrimary);
-            row++;
-
-            // Period
-            ws.Cells[row, 1].Value = "As of " + periodLabel;
-            ws.Cells[row, 1].Style.Font.Size = 10;
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 1].Style.Font.Color.SetColor(ReportColors.TextMuted);
-            row++;
-
-            // Province
-            ws.Cells[row, 5].Value = "LAGUNA";
-            ws.Cells[row, 5].Style.Font.Bold = true;
-            ws.Cells[row, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            row++;
-
-            // Region/Province Header
-            ws.Cells[row, 1].Value = "Region/Province";
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 5].Value = "BINAN";
-            ws.Cells[row, 5].Style.Font.Bold = true;
-            ws.Cells[row, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            ws.Cells[row, 6].Value = "LGU 2";
-            ws.Cells[row, 6].Style.Font.Color.SetColor(ReportColors.TextMuted);
-            ws.Cells[row, 7].Value = "LGU 3";
-            ws.Cells[row, 7].Style.Font.Color.SetColor(ReportColors.TextMuted);
-            row++;
-
-            ws.Cells[row, 1].Value = "Number of LGUs submitted Summary";
-            ws.Cells[row, 5].Value = 1;
-            ws.Cells[row, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            row++;
-
-            ws.Cells[row, 1].Value = "Total Number of LGUs in the Region/Province";
-            ws.Cells[row, 5].Value = 1;
-            ws.Cells[row, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            row += 2; // Row 7 empty
-
-            // Total Served
-            int dataStartRow = row;
-            ws.Cells[row, 1].Value = $"Number of Solo Parents served for {year}";
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 3].Value = m.TotalServed;
-            ws.Cells[row, 3].Style.Font.Bold = true;
-            ws.Cells[row, 3].Style.Numberformat.Format = "#,##0";
-            ws.Cells[row, 5].Value = m.TotalServed;
-            ws.Cells[row, 5].Style.Font.Bold = true;
-            ws.Cells[row, 5].Style.Numberformat.Format = "#,##0";
-            ws.Cells[row, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
-            row++;
-
-            // Age
-            AddRegionalDataRow(ws, ref row, "Age", "19 years old and below", m.Age19Below);
-            AddRegionalDataRow(ws, ref row, "", "20-39 years old", m.Age20To39);
-            AddRegionalDataRow(ws, ref row, "", "40-59 years old", m.Age40To59);
-            AddRegionalDataRow(ws, ref row, "", "60 and above", m.Age60Above);
-
-            // Sex
-            AddRegionalDataRow(ws, ref row, "Sex", "Male", m.MaleCount);
-            AddRegionalDataRow(ws, ref row, "", "Female", m.FemaleCount);
-
-            // Civil Status
-            AddRegionalDataRow(ws, ref row, "Civil Status", "Single", m.CivilSingle);
-            AddRegionalDataRow(ws, ref row, "", "Married", m.CivilMarried);
-            AddRegionalDataRow(ws, ref row, "", "Widowed", m.CivilWidowed);
-            AddRegionalDataRow(ws, ref row, "", "Legally Separated / Annulled", m.CivilSeparatedAnnulled);
-
-            // Employment Status
-            AddRegionalDataRow(ws, ref row, "Employment Status", "Employed (public & private)", m.EmpEmployed);
-            AddRegionalDataRow(ws, ref row, "", "Self employed", m.EmpSelfEmployed);
-            AddRegionalDataRow(ws, ref row, "", "Not employed", m.EmpNotEmployed);
-
-            // Monthly Income
-            AddRegionalDataRow(ws, ref row, "Monthly Income", "below minimum wage", m.IncomeBelowMin);
-            AddRegionalDataRow(ws, ref row, "", "Minimum wage +1 to Php 20833", m.IncomeMinPlus);
-            AddRegionalDataRow(ws, ref row, "", "Php 20834 and above", m.IncomeAbove20833);
-
-            // Dependents
-            AddRegionalDataRow(ws, ref row, "No. of Children / Dependent", "6 years old and below", m.DepBelow6);
-            AddRegionalDataRow(ws, ref row, "", "7 -22 years old", m.Dep7To22);
-            AddRegionalDataRow(ws, ref row, "", "22 years old and above", m.DepAbove22);
-
-            // Category
-            AddRegionalDataRow(ws, ref row, "Category", "a1. Consequence of rape", m.CatA1);
-            AddRegionalDataRow(ws, ref row, "", "a2. Widow/widower", m.CatA2);
-            AddRegionalDataRow(ws, ref row, "", "a3. Spouse of PDL", m.CatA3);
-            AddRegionalDataRow(ws, ref row, "", "a4. Spouse of PWD", m.CatA4);
-            AddRegionalDataRow(ws, ref row, "", "a5. Separated or de facto separated", m.CatA5);
-            AddRegionalDataRow(ws, ref row, "", "a6. Annulled ", m.CatA6);
-            AddRegionalDataRow(ws, ref row, "", "a7. Abandoned", m.CatA7);
-            AddRegionalDataRow(ws, ref row, "", "b. Spouse/Relative of OFW", m.CatB);
-            AddRegionalDataRow(ws, ref row, "", "c. Unmarried person", m.CatC);
-            AddRegionalDataRow(ws, ref row, "", "d. Legal Guardian, Adoptive or Foster Parent", m.CatD);
-            AddRegionalDataRow(ws, ref row, "", "e. Relative", m.CatE);
-            AddRegionalDataRow(ws, ref row, "", "f. Pregnant woman", m.CatF);
-
-            // SPIC
-            AddRegionalDataRow(ws, ref row, "Solo Parent Identification Card", "Newly issued SPIC", m.SpicNew);
-            AddRegionalDataRow(ws, ref row, "", "Renewed SPIC", m.SpicRenewed);
-            AddRegionalDataRow(ws, ref row, "", "Terminated SPIC", m.SpicTerminated);
-
-            // Pantawid
-            AddRegionalDataRow(ws, ref row, "Pantawid Beneficiary", "Yes", m.PantawidYes);
-            AddRegionalDataRow(ws, ref row, "", "No", m.PantawidNo);
-
-            // Indigenous Person
-            AddRegionalDataRow(ws, ref row, "Indigenous Person", "Yes", m.IpYes);
-            AddRegionalDataRow(ws, ref row, "", "No", m.IpNo);
-
-            // LGBTQ+
-            AddRegionalDataRow(ws, ref row, "LGBTQ+", "Yes", m.LgbtYes);
-            AddRegionalDataRow(ws, ref row, "", "No", m.LgbtNo);
-
-            int dataEndRow = row - 1;
-
-            // Apply light borders to table region
-            for (int r = dataStartRow; r <= dataEndRow; r++)
+            string cityName = municipality;
+            string provinceName = "LAGUNA";
+            if (!string.IsNullOrWhiteSpace(municipality))
             {
-                for (int c = 1; c <= 5; c++)
+                var parts = municipality.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 2)
                 {
-                    var cell = ws.Cells[r, c];
-                    cell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                    cell.Style.Border.Top.Color.SetColor(ReportColors.BorderSubtle);
-                    cell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                    cell.Style.Border.Bottom.Color.SetColor(ReportColors.BorderSubtle);
-                    cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                    cell.Style.Border.Left.Color.SetColor(ReportColors.BorderSubtle);
-                    cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                    cell.Style.Border.Right.Color.SetColor(ReportColors.BorderSubtle);
+                    cityName = parts[0].Trim().ToUpperInvariant();
+                    provinceName = parts[1].Trim().ToUpperInvariant();
+                }
+                else
+                {
+                    cityName = municipality.Trim().ToUpperInvariant();
                 }
             }
 
-            // Footer / Signature Section
-            row++;
-            ws.Cells[row, 1].Value = "Submitted by:";
-            ws.Cells[row, 1].Style.Font.Italic = true;
-            row += 2;
+            // Row 1: Document Header Title (Merged A1:C1)
+            ws.Row(1).Height = 12.75;
+            ws.Cells[1, 1, 1, 3].Merge = true;
+            ws.Cells[1, 1].Value = "REGIONAL / PROVINCIAL SUMMARY OF SOLO PARENTS";
+            ws.Cells[1, 1].Style.Font.Name = FontName;
+            ws.Cells[1, 1].Style.Font.Size = 11;
+            ws.Cells[1, 1].Style.Font.Bold = true;
+            ws.Cells[1, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[1, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
 
-            ws.Cells[row, 1].Value = focalPersonName;
-            ws.Cells[row, 1].Style.Font.Bold = true;
-            ws.Cells[row, 1].Style.Font.Size = 11;
-            row++;
+            // Row 2: Subtitle Period (Merged A2:C2)
+            ws.Row(2).Height = 12.75;
+            ws.Cells[2, 1, 2, 3].Merge = true;
+            ws.Cells[2, 1].Value = "As of " + periodLabel;
+            ws.Cells[2, 1].Style.Font.Name = FontName;
+            ws.Cells[2, 1].Style.Font.Size = 11;
+            ws.Cells[2, 1].Style.Font.Bold = true;
+            ws.Cells[2, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[2, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
 
-            ws.Cells[row, 1].Value = "Name of Solo Parent Focal Person:";
-            ws.Cells[row, 1].Style.Font.Color.SetColor(ReportColors.TextMuted);
-            ws.Cells[row, 1].Style.Font.Size = 9.5f;
-            row++;
+            // Row 3: Province
+            ws.Row(3).Height = 11.25;
+            ws.Cells[3, 5].Value = provinceName;
+            ws.Cells[3, 5].Style.Font.Name = FontName;
+            ws.Cells[3, 5].Style.Font.Size = 10;
+            ws.Cells[3, 5].Style.Font.Bold = false;
+            ws.Cells[3, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
-            ws.Cells[row, 1].Value = $"Date of Submission: {DateTime.Today:MMMM d, yyyy}";
-            ws.Cells[row, 1].Style.Font.Color.SetColor(ReportColors.TextMuted);
-            ws.Cells[row, 1].Style.Font.Size = 9.5f;
+            // Rows 4-6: Header with rotated LGU names
+            ws.Row(4).Height = 15.0;
+            ws.Row(5).Height = 15.0;
+            ws.Row(6).Height = 15.0;
+
+            // Row 4: Region/Province
+            ws.Cells[4, 1, 4, 3].Merge = true;
+            ws.Cells[4, 1].Value = "Region/Province";
+            ws.Cells[4, 1].Style.Font.Name = FontName;
+            ws.Cells[4, 1].Style.Font.Size = 10;
+            ws.Cells[4, 1].Style.Font.Bold = false;
+            ApplyBoxBorder(ws, 4, 1, 4, 3);
+
+            // Columns 5+: LGU headers rotated 90 degrees
+            ws.Cells[4, 5, 6, 5].Merge = true;
+            ws.Cells[4, 5].Value = cityName;
+            ws.Cells[4, 5].Style.Font.Name = FontName;
+            ws.Cells[4, 5].Style.Font.Size = 8;
+            ws.Cells[4, 5].Style.Font.Bold = false;
+            ws.Cells[4, 5].Style.TextRotation = 90;
+            ws.Cells[4, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[4, 5].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            ApplyBoxBorder(ws, 4, 5, 6, 5);
+
+            ws.Cells[4, 6, 6, 6].Merge = true;
+            ws.Cells[4, 6].Value = "LGU 2";
+            ws.Cells[4, 6].Style.Font.Name = FontName;
+            ws.Cells[4, 6].Style.Font.Size = 8;
+            ws.Cells[4, 6].Style.Font.Bold = false;
+            ws.Cells[4, 6].Style.TextRotation = 90;
+            ws.Cells[4, 6].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[4, 6].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            ApplyBoxBorder(ws, 4, 6, 6, 6);
+
+            ws.Cells[4, 7, 6, 7].Merge = true;
+            ws.Cells[4, 7].Value = "LGU 3";
+            ws.Cells[4, 7].Style.Font.Name = FontName;
+            ws.Cells[4, 7].Style.Font.Size = 8;
+            ws.Cells[4, 7].Style.Font.Bold = false;
+            ws.Cells[4, 7].Style.TextRotation = 90;
+            ws.Cells[4, 7].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[4, 7].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+            ApplyBoxBorder(ws, 4, 7, 6, 7);
+
+            // Row 5: Number of LGUs submitted
+            ws.Cells[5, 1, 5, 3].Merge = true;
+            ws.Cells[5, 1].Value = "Number of LGUs submitted Summary";
+            ws.Cells[5, 1].Style.Font.Name = FontName;
+            ws.Cells[5, 1].Style.Font.Size = 10;
+            ws.Cells[5, 1].Style.Font.Bold = false;
+            ApplyBoxBorder(ws, 5, 1, 5, 3);
+
+            // Row 6: Total LGUs
+            ws.Cells[6, 1, 6, 3].Merge = true;
+            ws.Cells[6, 1].Value = "Total Number of LGUs in the Region/Province";
+            ws.Cells[6, 1].Style.Font.Name = FontName;
+            ws.Cells[6, 1].Style.Font.Size = 10;
+            ws.Cells[6, 1].Style.Font.Bold = false;
+            ApplyBoxBorder(ws, 6, 1, 6, 3);
+
+            // Row 7: Blank
+            ws.Row(7).Height = 12.75;
+
+            // Row 8: Number of Solo Parents served for year
+            ws.Row(8).Height = 14.25;
+            ws.Cells[8, 1, 8, 2].Merge = true;
+            ws.Cells[8, 1].Value = $"Number of Solo Parents served for {year}";
+            ws.Cells[8, 1].Style.Font.Name = FontName;
+            ws.Cells[8, 1].Style.Font.Size = 11;
+            ws.Cells[8, 1].Style.Font.Bold = true;
+            ws.Cells[8, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+            ApplyBoxBorder(ws, 8, 1, 8, 2);
+
+            ws.Cells[8, 3].Value = m.TotalServed;
+            ws.Cells[8, 3].Style.Font.Name = FontName;
+            ws.Cells[8, 3].Style.Font.Size = 11;
+            ws.Cells[8, 3].Style.Font.Bold = false;
+            ws.Cells[8, 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[8, 3].Style.Numberformat.Format = "#,##0";
+            ApplyCellBorder(ws.Cells[8, 3]);
+
+            ws.Cells[8, 5].Value = m.TotalServed;
+            ws.Cells[8, 5].Style.Font.Name = FontName;
+            ws.Cells[8, 5].Style.Font.Size = 11;
+            ws.Cells[8, 5].Style.Font.Bold = false;
+            ws.Cells[8, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ws.Cells[8, 5].Style.Numberformat.Format = "#,##0";
+            ApplyCellBorder(ws.Cells[8, 5]);
+
+            // Rows 9-48: 11 category blocks matching template
+            int currentRow = 9;
+            var blocks = GetCategoryBlocks(m);
+            foreach (var block in blocks)
+            {
+                int startRow = currentRow;
+                int endRow = startRow + block.Items.Count - 1;
+
+                bool isBoldCategory = (block.CategoryName == "Employment Status" ||
+                                       block.CategoryName == "Monthly Income" ||
+                                       block.CategoryName == "Category" ||
+                                       block.CategoryName == "Solo Parent Identification Card");
+
+                // Merged Category column A
+                var catRange = ws.Cells[startRow, 1, endRow, 1];
+                catRange.Merge = true;
+                catRange.Value = block.CategoryName;
+                catRange.Style.Font.Name = FontName;
+                catRange.Style.Font.Size = 8;
+                catRange.Style.Font.Bold = isBoldCategory;
+                catRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                catRange.Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+                catRange.Style.WrapText = true;
+                ApplyBoxBorder(ws, startRow, 1, endRow, 1);
+
+                for (int i = 0; i < block.Items.Count; i++)
+                {
+                    int r = startRow + i;
+                    ws.Row(r).Height = 15.0;
+
+                    var item = block.Items[i];
+
+                    // Column B: Subcategory
+                    var bCell = ws.Cells[r, 2];
+                    bCell.Value = item.Label;
+                    bCell.Style.Font.Name = FontName;
+                    bCell.Style.Font.Size = 8;
+                    bCell.Style.Font.Bold = isBoldCategory;
+                    bCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                    bCell.Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+                    bCell.Style.WrapText = true;
+                    ApplyCellBorder(bCell);
+
+                    // Column C: Total
+                    var cCell = ws.Cells[r, 3];
+                    if (item.Count.HasValue)
+                    {
+                        cCell.Value = item.Count.Value;
+                        cCell.Style.Numberformat.Format = "#,##0";
+                    }
+                    else
+                    {
+                        cCell.Value = null;
+                    }
+                    cCell.Style.Font.Name = FontName;
+                    cCell.Style.Font.Size = 11;
+                    cCell.Style.Font.Bold = false;
+                    cCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    cCell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    ApplyCellBorder(cCell);
+
+                    // Column E: City count
+                    var eCell = ws.Cells[r, 5];
+                    if (item.Count.HasValue)
+                    {
+                        eCell.Value = item.Count.Value;
+                        eCell.Style.Numberformat.Format = "#,##0";
+                    }
+                    else
+                    {
+                        eCell.Value = null;
+                    }
+                    eCell.Style.Font.Name = FontName;
+                    eCell.Style.Font.Size = 11;
+                    eCell.Style.Font.Bold = false;
+                    eCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    eCell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    ApplyCellBorder(eCell);
+                }
+
+                currentRow = endRow + 1;
+            }
+
+            // Footer
+            ws.Row(49).Height = 12.75; // Blank
+
+            ws.Row(50).Height = 12.75;
+            ws.Cells[50, 1].Value = "Submitted by:";
+            ws.Cells[50, 1].Style.Font.Name = FontName;
+            ws.Cells[50, 1].Style.Font.Size = 10;
+            ws.Cells[50, 1].Style.Font.Bold = false;
+
+            ws.Row(51).Height = 12.75; // Blank
+            ws.Row(52).Height = 12.75; // Blank
+
+            ws.Row(53).Height = 12.75;
+            ws.Cells[53, 1, 53, 2].Merge = true;
+            ws.Cells[53, 1].Value = focalPersonName;
+            ws.Cells[53, 1].Style.Font.Name = FontName;
+            ws.Cells[53, 1].Style.Font.Size = 10;
+            ws.Cells[53, 1].Style.Font.Bold = true;
+            ws.Cells[53, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+            ws.Row(54).Height = 12.75;
+            ws.Cells[54, 1, 54, 2].Merge = true;
+            ws.Cells[54, 1].Value = "Name of Solo Parent Focal Person:";
+            ws.Cells[54, 1].Style.Font.Name = FontName;
+            ws.Cells[54, 1].Style.Font.Size = 10;
+            ws.Cells[54, 1].Style.Font.Bold = false;
+            ws.Cells[54, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+            ws.Row(55).Height = 12.75;
+            ws.Cells[55, 1, 55, 2].Merge = true;
+            ws.Cells[55, 1].Value = $"Date of Submission: {DateTime.Today:MMMM d, yyyy}";
+            ws.Cells[55, 1].Style.Font.Name = FontName;
+            ws.Cells[55, 1].Style.Font.Size = 10;
+            ws.Cells[55, 1].Style.Font.Bold = false;
+            ws.Cells[55, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
             // Column Widths
-            ws.Column(1).Width = 34;
-            ws.Column(2).Width = 46;
-            ws.Column(3).Width = 14;
-            ws.Column(4).Width = 10;
-            ws.Column(5).Width = 16;
-            ws.Column(6).Width = 14;
-            ws.Column(7).Width = 14;
+            ws.Column(1).Width = 22.73;
+            ws.Column(2).Width = 38.45;
+            ws.Column(3).Width = 20.73;
+            ws.Column(4).Width = 9.18;
+            ws.Column(5).Width = 10.0;
+            ws.Column(6).Width = 8.5;
+            ws.Column(7).Width = 8.5;
         }
 
-        private static void AddDataRow(ExcelWorksheet ws, ref int row, string category, string subCategory, int count)
+        private static void ApplyCellBorder(ExcelRange cell)
         {
-            if (!string.IsNullOrWhiteSpace(category))
-            {
-                ws.Cells[row, 1].Value = category;
-                ws.Cells[row, 1].Style.Font.Bold = true;
-            }
-
-            ws.Cells[row, 2].Value = subCategory;
-
-            var valCell = ws.Cells[row, 3];
-            valCell.Value = count;
-            valCell.Style.Numberformat.Format = "#,##0";
-            valCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
-
-            row++;
+            cell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+            cell.Style.Border.Top.Color.SetColor(Color.Black);
+            cell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+            cell.Style.Border.Bottom.Color.SetColor(Color.Black);
+            cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            cell.Style.Border.Left.Color.SetColor(Color.Black);
+            cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+            cell.Style.Border.Right.Color.SetColor(Color.Black);
         }
 
-        private static void AddRegionalDataRow(ExcelWorksheet ws, ref int row, string category, string subCategory, int count)
+        private static void ApplyBoxBorder(ExcelWorksheet ws, int fromRow, int fromCol, int toRow, int toCol)
         {
-            if (!string.IsNullOrWhiteSpace(category))
+            for (int r = fromRow; r <= toRow; r++)
             {
-                ws.Cells[row, 1].Value = category;
-                ws.Cells[row, 1].Style.Font.Bold = true;
+                for (int c = fromCol; c <= toCol; c++)
+                {
+                    var cell = ws.Cells[r, c];
+                    if (r == fromRow)
+                    {
+                        cell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                        cell.Style.Border.Top.Color.SetColor(Color.Black);
+                    }
+                    if (r == toRow)
+                    {
+                        cell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                        cell.Style.Border.Bottom.Color.SetColor(Color.Black);
+                    }
+                    if (c == fromCol)
+                    {
+                        cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                        cell.Style.Border.Left.Color.SetColor(Color.Black);
+                    }
+                    if (c == toCol)
+                    {
+                        cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                        cell.Style.Border.Right.Color.SetColor(Color.Black);
+                    }
+                }
             }
+        }
 
-            ws.Cells[row, 2].Value = subCategory;
-
-            var valCell = ws.Cells[row, 5];
-            valCell.Value = count;
-            valCell.Style.Numberformat.Format = "#,##0";
-            valCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
-
-            row++;
+        private static List<CategoryBlock> GetCategoryBlocks(ReportMetrics m)
+        {
+            return new List<CategoryBlock>
+            {
+                new CategoryBlock
+                {
+                    CategoryName = "Age",
+                    Items = new List<(string, int?)>
+                    {
+                        ("19 years old and below", m.Age19Below),
+                        ("20-39 years old", m.Age20To39),
+                        ("40-59 years old", m.Age40To59),
+                        ("60 and above", m.Age60Above)
+                    }
+                },
+                new CategoryBlock
+                {
+                    CategoryName = "Sex",
+                    Items = new List<(string, int?)>
+                    {
+                        ("Male", m.MaleCount),
+                        ("Female", m.FemaleCount)
+                    }
+                },
+                new CategoryBlock
+                {
+                    CategoryName = "Civil Status",
+                    Items = new List<(string, int?)>
+                    {
+                        ("Single", m.CivilSingle),
+                        ("Married", m.CivilMarried),
+                        ("Widowed", m.CivilWidowed),
+                        ("Legally Separated / Annulled", m.CivilSeparatedAnnulled)
+                    }
+                },
+                new CategoryBlock
+                {
+                    CategoryName = "Employment Status",
+                    Items = new List<(string, int?)>
+                    {
+                        ("Employed (public & private)", m.EmpEmployed),
+                        ("Self employed", m.EmpSelfEmployed),
+                        ("Not employed", m.EmpNotEmployed)
+                    }
+                },
+                new CategoryBlock
+                {
+                    CategoryName = "Monthly Income",
+                    Items = new List<(string, int?)>
+                    {
+                        ("below minimum wage", m.IncomeBelowMin),
+                        ("Minimum wage +1 to Php 20833", m.IncomeMinPlus),
+                        ("Php 20834 and above", m.IncomeAbove20833)
+                    }
+                },
+                new CategoryBlock
+                {
+                    CategoryName = "No. of Children / Dependent",
+                    Items = new List<(string, int?)>
+                    {
+                        ("6 years old and below", m.DepBelow6),
+                        ("7 -22 years old", m.Dep7To22),
+                        ("22 years old and above", m.DepAbove22)
+                    }
+                },
+                new CategoryBlock
+                {
+                    CategoryName = "Category",
+                    Items = new List<(string, int?)>
+                    {
+                        ("a1. Consequence of rape", m.CatA1),
+                        ("a2. Widow/widower", m.CatA2),
+                        ("a3. Spouse of PDL", m.CatA3),
+                        ("a4. Spouse of PWD", m.CatA4),
+                        ("a5. Separated or de facto separated", m.CatA5),
+                        ("a6. Annulled ", m.CatA6),
+                        ("a7. Abandoned", m.CatA7),
+                        ("b. Spouse/Relative of OFW", m.CatB),
+                        ("c. Unmarried person", m.CatC),
+                        ("d. Legal Guardian, Adoptive or Foster Parent", m.CatD),
+                        ("e. Relative", m.CatE),
+                        ("f. Pregnant woman", m.CatF)
+                    }
+                },
+                new CategoryBlock
+                {
+                    CategoryName = "Solo Parent Identification Card",
+                    Items = new List<(string, int?)>
+                    {
+                        ("Newly issued SPIC", null),
+                        ("Renewed SPIC", null),
+                        ("Terminated SPIC", null)
+                    }
+                },
+                new CategoryBlock
+                {
+                    CategoryName = "Pantawid Beneficiary",
+                    Items = new List<(string, int?)>
+                    {
+                        ("Yes", m.PantawidYes),
+                        ("No", m.PantawidNo)
+                    }
+                },
+                new CategoryBlock
+                {
+                    CategoryName = "Indigenous Person",
+                    Items = new List<(string, int?)>
+                    {
+                        ("Yes", m.IpYes),
+                        ("No", m.IpNo)
+                    }
+                },
+                new CategoryBlock
+                {
+                    CategoryName = "LGBTQ+",
+                    Items = new List<(string, int?)>
+                    {
+                        ("Yes", m.LgbtYes),
+                        ("No", m.LgbtNo)
+                    }
+                }
+            };
         }
 
         private static ReportMetrics ExtractReportMetrics(MonthlyAnalyticsDto data, int year)
@@ -693,10 +944,10 @@ namespace SOLUM_UI.Services
             m.CatE = GetCount(data.Categories, "E", "e", "e. Relative");
             m.CatF = GetCount(data.Categories, "F", "f", "f. Pregnant woman");
 
-            // SPIC
-            m.SpicNew = data.NewRegistrations;
-            m.SpicRenewed = data.Renewals;
-            m.SpicTerminated = data.InactiveSoloParents;
+            // SPIC (Out of scope - left empty)
+            m.SpicNew = null;
+            m.SpicRenewed = null;
+            m.SpicTerminated = null;
 
             // Pantawid
             m.PantawidYes = GetCount(data.PantawidBeneficiary, "Yes", "Beneficiary", "yes", "true", "4Ps");
