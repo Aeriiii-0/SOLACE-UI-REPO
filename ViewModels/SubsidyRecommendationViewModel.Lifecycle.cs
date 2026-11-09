@@ -267,7 +267,7 @@ namespace SOLUM_UI.ViewModels
         /// </summary>
         public void ApplyQueueFilter()
         {
-            IEnumerable<SubsidyItem> q = _allItems;
+            IEnumerable<SubsidyItem> q = _allItems.OrderByDescending(x => x.Score);
 
             // Apply status/circumstance filter
             if (_auditFilter == "CollegeAge")
