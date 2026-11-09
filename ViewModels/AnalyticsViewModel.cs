@@ -423,7 +423,8 @@ namespace SOLUM_UI.ViewModels
             {
                 if (!IsFilterActive) return "Total registered";
                 if (FilterType == "Yearly") return $"Total in {SelectedYear}";
-                if (FilterType == "CustomRange" && EndDate.HasValue) return $"Total as of {EndDate.Value:MMM yyyy}";
+                if (FilterType == "Quarterly") return $"Total as of Q{SelectedQuarter} {SelectedYear}";
+                if (FilterType == "CustomRange") return "Registered in window";
                 return "Total registered";
 
             }
@@ -434,6 +435,8 @@ namespace SOLUM_UI.ViewModels
         {
             get
             {
+                if (FilterType == "CustomRange" && StartDate.HasValue && EndDate.HasValue)
+                    return $"{DisplayRegisteredCount:N0} registered ({StartDate.Value:MMM d} – {EndDate.Value:MMM d, yyyy})";
                 if (HasPreviousYearComparison && _previousYearComparison.PreviousYearTotal > 0)
                     return $"{_previousYearComparison.PreviousYearTotal:N0} in {_previousYearComparison.PreviousYear} ({GrowthPercentageDisplay} YoY)";
                 if (!IsFilterActive)
@@ -464,6 +467,40 @@ namespace SOLUM_UI.ViewModels
 
             }
 
+        }
+
+        public bool IsCustomRangeActive => IsFilterActive && string.Equals(FilterType, "CustomRange", StringComparison.OrdinalIgnoreCase);
+
+        public string CustomRangeIndicatorTitle
+        {
+            get
+            {
+                if (StartDate.HasValue && EndDate.HasValue)
+                    return $"Filtered to Specific Timeframe: {StartDate.Value:MMMM d, yyyy} – {EndDate.Value:MMMM d, yyyy}";
+                if (StartDate.HasValue)
+                    return $"Filtered to Specific Timeframe: From {StartDate.Value:MMMM d, yyyy}";
+                return "Filtered to Specific Timeframe";
+            }
+        }
+
+        public string CustomRangeIndicatorMessage
+        {
+            get
+            {
+                if (StartDate.HasValue && EndDate.HasValue)
+                    return $"Showing records registered strictly within this window ({StartDate.Value:MMM d, yyyy} to {EndDate.Value:MMM d, yyyy}). Historical records registered before {StartDate.Value:MMM d, yyyy} or after {EndDate.Value:MMM d, yyyy} are excluded.";
+                return "Showing records registered strictly within this selected window. Historical records registered before the start date are excluded.";
+            }
+        }
+
+        public string BarangayChartSubtitle
+        {
+            get
+            {
+                if (IsCustomRangeActive && StartDate.HasValue && EndDate.HasValue)
+                    return $"Ranked by registrations between {StartDate.Value:MMM d, yyyy} and {EndDate.Value:MMM d, yyyy}, 10 barangays per page.";
+                return "Ranked by solo parent count, 10 barangays per page. Hover a point for the count.";
+            }
         }
 
         public string DisplayRegisteredLabel
@@ -527,6 +564,12 @@ namespace SOLUM_UI.ViewModels
                 OnPropertyChanged(nameof(DisplayRegisteredCount));
                 OnPropertyChanged(nameof(AddedThisMonthCount));
                 OnPropertyChanged(nameof(DisplayRegisteredLabel));
+                OnPropertyChanged(nameof(IsCustomRangeActive));
+                OnPropertyChanged(nameof(CustomRangeIndicatorTitle));
+                OnPropertyChanged(nameof(CustomRangeIndicatorMessage));
+                OnPropertyChanged(nameof(BarangayChartSubtitle));
+                OnPropertyChanged(nameof(Card1Label));
+                OnPropertyChanged(nameof(Card1Subtitle));
 
             }
 
@@ -542,6 +585,12 @@ namespace SOLUM_UI.ViewModels
             {
                 SetProperty(ref _filterType, value);
                 OnPropertyChanged(nameof(DisplayRegisteredLabel));
+                OnPropertyChanged(nameof(IsCustomRangeActive));
+                OnPropertyChanged(nameof(CustomRangeIndicatorTitle));
+                OnPropertyChanged(nameof(CustomRangeIndicatorMessage));
+                OnPropertyChanged(nameof(BarangayChartSubtitle));
+                OnPropertyChanged(nameof(Card1Label));
+                OnPropertyChanged(nameof(Card1Subtitle));
 
             }
 
@@ -972,7 +1021,16 @@ namespace SOLUM_UI.ViewModels
         public DateTime? StartDate
         {
             get => _startDate;
-            set => SetProperty(ref _startDate, value);
+            set
+            {
+                SetProperty(ref _startDate, value);
+                OnPropertyChanged(nameof(IsCustomRangeActive));
+                OnPropertyChanged(nameof(CustomRangeIndicatorTitle));
+                OnPropertyChanged(nameof(CustomRangeIndicatorMessage));
+                OnPropertyChanged(nameof(BarangayChartSubtitle));
+                OnPropertyChanged(nameof(Card1Label));
+                OnPropertyChanged(nameof(Card1Subtitle));
+            }
 
         }
 
@@ -981,7 +1039,16 @@ namespace SOLUM_UI.ViewModels
         public DateTime? EndDate
         {
             get => _endDate;
-            set => SetProperty(ref _endDate, value);
+            set
+            {
+                SetProperty(ref _endDate, value);
+                OnPropertyChanged(nameof(IsCustomRangeActive));
+                OnPropertyChanged(nameof(CustomRangeIndicatorTitle));
+                OnPropertyChanged(nameof(CustomRangeIndicatorMessage));
+                OnPropertyChanged(nameof(BarangayChartSubtitle));
+                OnPropertyChanged(nameof(Card1Label));
+                OnPropertyChanged(nameof(Card1Subtitle));
+            }
 
         }
 
@@ -1349,6 +1416,12 @@ namespace SOLUM_UI.ViewModels
 
             bool isNotDefaultType = !string.Equals(FilterType, "Monthly", StringComparison.OrdinalIgnoreCase);
             IsFilterActive = isCustomBarangay || isCustomDate || isNotDefaultType;
+            OnPropertyChanged(nameof(IsCustomRangeActive));
+            OnPropertyChanged(nameof(CustomRangeIndicatorTitle));
+            OnPropertyChanged(nameof(CustomRangeIndicatorMessage));
+            OnPropertyChanged(nameof(BarangayChartSubtitle));
+            OnPropertyChanged(nameof(Card1Label));
+            OnPropertyChanged(nameof(Card1Subtitle));
 
         }
         /// <summary>
