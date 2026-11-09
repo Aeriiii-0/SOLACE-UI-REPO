@@ -605,7 +605,7 @@
                     </Button>
                     
                     <!-- Reassess Records Button -->
-                    <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Re-evaluate applicant records for subsidy recommendation" Command="{Binding RunMLTriageCommand}" Visibility="{Binding CanShowMLTriage, Converter={StaticResource BoolToVis}}">
+                    <Button Height="32" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Re-evaluate Queue applicants (Active card &amp; dependent eligibility check)" Command="{Binding RunMLTriageCommand}" Visibility="{Binding CanShowMLTriage, Converter={StaticResource BoolToVis}}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">

@@ -31,7 +31,7 @@
                     <!-- Run ML Evaluations Button -->
                     <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#D4A0B0" BorderThickness="1" Margin="0,0,8,0"
                             Visibility="{Binding CanModifyGrantees, Converter={StaticResource BoolToVis}}">
-                        <Button Background="Transparent" BorderThickness="0" Cursor="Hand" Height="30" Padding="10,0" Command="{Binding GenerateRecommendationsCommand}" ToolTip="Re-evaluate applicant records for subsidy recommendation">
+                        <Button Background="Transparent" BorderThickness="0" Cursor="Hand" Height="30" Padding="10,0" Command="{Binding GenerateRecommendationsCommand}" ToolTip="Re-evaluate Queue applicants (Active card &amp; dependent eligibility check)">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}">

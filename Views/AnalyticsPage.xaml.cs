@@ -639,7 +639,7 @@ namespace SOLUM_UI
                 c.Children.Add(empty);
                 return;
             }
-            const double left = 44, right = 20, top = 14, bottom = 78;
+            const double left = 44, right = 20, top = 30, bottom = 78;
             double pw = w - left - right;
             double ph = h - top - bottom;
             if (pw <= 0 || ph <= 0)

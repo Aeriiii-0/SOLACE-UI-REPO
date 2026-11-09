@@ -189,8 +189,8 @@ namespace SOLUM_UI.ViewModels
 
             int yr = SelectedFiscalCycle?.FiscalYear ?? ActiveCycleFiscalYear;
             bool confirmed = ActionConfirmDialog.Show(
-                "Re-Assess All Candidates",
-                $"This will re-evaluate all candidates for Fiscal Year {yr} using the latest subsidy recommendation model.\n\nDepending on the number of applicants, this may take a moment to process. Do you want to continue?",
+                "Re-Assess Queue Candidates",
+                $"This will re-evaluate pending applicants in the Queue for FY {yr}.\n\nRecords will be checked for:\n• Active status (valid, non-expired Solo Parent ID)\n• Dependent eligibility (minor or special needs dependents)\n\nApproved shortlist selections will not be affected. Do you want to continue?",
                 "Re-Assess",
                 "Cancel",
                 ConfirmThemeType.Primary);
@@ -198,12 +198,28 @@ namespace SOLUM_UI.ViewModels
             IsLoading = true;
             try
             {
-                var res = await _apiService.GenerateRecommendationsAsync(_activeCycleId);
+                var targetCycleId = SelectedFiscalCycle?.CycleId ?? _activeCycleId;
+                var res = await _apiService.GenerateRecommendationsAsync(targetCycleId, reassess: true);
                 if (res != null && res.Succeeded)
                 {
-                    ToastNotification.Show("Evaluations Generated", $"{res.Data} candidate(s) processed.", ToastType.Success);
+                    if (res.Data > 0)
+                    {
+                        ToastNotification.Show("Reassessment Complete", $"{res.Data} candidate(s) processed and updated for FY {yr}.", ToastType.Success);
+                    }
+                    else
+                    {
+                        ToastNotification.Show("Reassessment Up-to-Date", $"All candidates in the Queue are already evaluated and up to date for FY {yr}.", ToastType.Info);
+                    }
+
                     if (SelectedFiscalCycle != null) await LoadCycleDataInternalAsync(SelectedFiscalCycle);
                     else await RefreshDataAsync();
+                }
+                else
+                {
+                    string err = res?.Errors != null && res.Errors.Count > 0
+                        ? string.Join(", ", res.Errors)
+                        : "Failed to complete candidate re-assessment. Please try again.";
+                    ToastNotification.Show("Reassessment Failed", err, ToastType.Error);
                 }
             }
             catch (Exception ex) { ToastNotification.Show("Generation Error", ex.Message, ToastType.Error); }

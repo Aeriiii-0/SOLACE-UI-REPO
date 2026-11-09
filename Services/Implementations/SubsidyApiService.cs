@@ -95,9 +95,13 @@ namespace SOLUM_UI.Services.Implementations
             return await ApiClient.Instance.PutAsync<UpdateSubsidyCycleRequest, SubsidyCycleDto>($"api/subsidy/cycles/{cycleId}", request);
         }
 
-        public async Task<BaseResponse<int>> GenerateRecommendationsAsync(Guid? cycleId = null)
+        public async Task<BaseResponse<int>> GenerateRecommendationsAsync(Guid? cycleId = null, bool reassess = false)
         {
-            string url = "api/subsidy/generate-recommendations" + (cycleId.HasValue ? $"?cycleId={cycleId.Value}" : "");
+            var queryParams = new List<string>();
+            if (cycleId.HasValue) queryParams.Add($"cycleId={cycleId.Value}");
+            if (reassess) queryParams.Add("reassess=true");
+            string query = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
+            string url = "api/subsidy/generate-recommendations" + query;
             return await ApiClient.Instance.PostAsync<object, int>(url, new { });
         }
 

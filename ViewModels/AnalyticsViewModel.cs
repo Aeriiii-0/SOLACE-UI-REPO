@@ -476,10 +476,10 @@ namespace SOLUM_UI.ViewModels
             get
             {
                 if (StartDate.HasValue && EndDate.HasValue)
-                    return $"Filtered to Specific Timeframe: {StartDate.Value:MMMM d, yyyy} – {EndDate.Value:MMMM d, yyyy}";
+                    return $"Record Timeframe: {StartDate.Value:MMMM d, yyyy} – {EndDate.Value:MMMM d, yyyy}";
                 if (StartDate.HasValue)
-                    return $"Filtered to Specific Timeframe: From {StartDate.Value:MMMM d, yyyy}";
-                return "Filtered to Specific Timeframe";
+                    return $"Record Timeframe: From {StartDate.Value:MMMM d, yyyy}";
+                return "Record Timeframe";
             }
         }
 
@@ -488,8 +488,8 @@ namespace SOLUM_UI.ViewModels
             get
             {
                 if (StartDate.HasValue && EndDate.HasValue)
-                    return $"Showing records registered strictly within this window ({StartDate.Value:MMM d, yyyy} to {EndDate.Value:MMM d, yyyy}). Historical records registered before {StartDate.Value:MMM d, yyyy} or after {EndDate.Value:MMM d, yyyy} are excluded.";
-                return "Showing records registered strictly within this selected window. Historical records registered before the start date are excluded.";
+                    return $"Only showing records registered from {StartDate.Value:MMM d, yyyy} to {EndDate.Value:MMM d, yyyy}.";
+                return "Showing records registered within this selected window.";
             }
         }
 
