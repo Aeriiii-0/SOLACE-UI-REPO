@@ -182,7 +182,8 @@ namespace SOLUM_UI.ViewModels
                 "Cancel",
                 ConfirmThemeType.Primary);
             if (!confirmed) return;
-            IsLoading = true;
+            IsActionProcessing = true;
+            ActionProcessingMessage = "Generating candidate recommendations...";
             try
             {
                 var res = await _apiService.GenerateRecommendationsAsync(_activeCycleId);
@@ -194,7 +195,7 @@ namespace SOLUM_UI.ViewModels
                 }
             }
             catch (Exception ex) { ToastNotification.Show("Generation Error", ex.Message, ToastType.Error); }
-            finally { IsLoading = false; }
+            finally { IsActionProcessing = false; }
         }
 
         private void SelectTopN()

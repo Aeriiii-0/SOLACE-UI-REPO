@@ -747,7 +747,7 @@ namespace SOLUM_UI
                     break;
                 case "AUTO":
                 default:
-                    SearchPlaceholder = "Search records (name, PhilSys ID, record ID)...";
+                    SearchPlaceholder = "Search records (name, PhilSys ID)...";
                     break;
 
             }

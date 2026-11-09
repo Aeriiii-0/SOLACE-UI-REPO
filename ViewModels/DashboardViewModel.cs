@@ -169,7 +169,7 @@ namespace SOLUM_UI.ViewModels
         }
         public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
-        private string _chartSubtitle = $"New solo parents registered — Jan to Dec {DateTime.Now.Year}";
+        private string _chartSubtitle = $"Cumulative solo parents registered — Jan to Dec {DateTime.Now.Year}";
         public string ChartSubtitle
         {
             get => _chartSubtitle;
@@ -315,7 +315,7 @@ namespace SOLUM_UI.ViewModels
                 string effectiveUserId = isEncoder && !string.IsNullOrWhiteSpace(currentUserId) ? currentUserId : null;
 
                 int currentYear = DateTime.Now.Year;
-                ChartSubtitle = $"New solo parents registered — Jan to Dec {currentYear}";
+                ChartSubtitle = $"Cumulative solo parents registered — Jan to Dec {currentYear}";
                 // 1. Fetch primary KPI stats and recent logs
                 var statsTask = AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
                 var logsTask  = AuditLogApiService.Instance.GetLogsAsync(pageSize: 10, userId: effectiveUserId);
@@ -382,6 +382,17 @@ namespace SOLUM_UI.ViewModels
                     for (int j = 0; j < RegisteredSoloParents; j++)
                     {
                         registrationDatesList.Add(new DateTime(currentYear, currentMonth, (j % 28) + 1));
+                    }
+                }
+                else if (RegisteredSoloParents > registrationDatesList.Count)
+                {
+                    // Pre-existing records registered in prior years form the baseline count at the start of the current year,
+                    // ensuring cumulative growth accurately accounts for all registered solo parents in the system.
+                    int baselineCount = RegisteredSoloParents - registrationDatesList.Count;
+                    var priorYearDate = new DateTime(currentYear - 1, 12, 31);
+                    for (int b = 0; b < baselineCount; b++)
+                    {
+                        registrationDatesList.Add(priorYearDate);
                     }
                 }
                 else if (RegisteredSoloParents > 0 && registrationDatesList.Count > RegisteredSoloParents)

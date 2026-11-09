@@ -99,12 +99,12 @@ namespace SOLUM_UI
             if (_mode == ChartGranularity.Monthly)
             {
                 TxtChartTitle.Text = "Monthly registrations";
-                TxtChartSubtitle.Text = "Cumulative registrations & renewals, Jan to Dec " + year;
+                TxtChartSubtitle.Text = "Cumulative solo parents registered, Jan to Dec " + year;
             }
             else
             {
                 TxtChartTitle.Text = "Quarterly registrations";
-                TxtChartSubtitle.Text = "Cumulative registrations & renewals, Q1 to Q4 " + year;
+                TxtChartSubtitle.Text = "Cumulative solo parents registered, Q1 to Q4 " + year;
             }
             DrawChart();
         }
@@ -115,7 +115,8 @@ namespace SOLUM_UI
             var result = new List<ChartPoint>();
             var today = DateTime.Today;
             int year = today.Year;
-            int runningTotal = 0;
+            // Start running total from baseline records registered prior to the current year
+            int runningTotal = list.Count(d => d < new DateTime(year, 1, 1));
 
             if (mode == ChartGranularity.Monthly)
             {
@@ -133,7 +134,7 @@ namespace SOLUM_UI
                         Range = start.ToString("MMM d") + " – " + end.ToString("MMM d"),
                         Value = runningTotal,
                         NewCount = newInMonth,
-                        IsFuture = start > today
+                        IsFuture = start > today && newInMonth == 0
                     });
                 }
             }
@@ -143,7 +144,7 @@ namespace SOLUM_UI
                 {
                     var qs = new DateTime(year, (q - 1) * 3 + 1, 1);
                     var qe = qs.AddMonths(3);
-                    int newInQuarter = list.Count(d => d >= qs && d < qe);
+                    int newInQuarter = list.Count(d => d.Year == year && d >= qs && d < qe);
                     runningTotal += newInQuarter;
 
                     result.Add(new ChartPoint
@@ -153,7 +154,7 @@ namespace SOLUM_UI
                         Range = qs.ToString("MMM d") + " – " + qe.AddDays(-1).ToString("MMM d"),
                         Value = runningTotal,
                         NewCount = newInQuarter,
-                        IsFuture = qs > today
+                        IsFuture = qs > today && newInQuarter == 0
                     });
                 }
             }
@@ -183,7 +184,7 @@ namespace SOLUM_UI
             double step = max / 2.0;
             double mag = Math.Pow(10, Math.Floor(Math.Log10(step)));
             double norm = step / mag;
-            double nice = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10;
+            double nice = norm <= 1 ? 1 : norm <= 1.5 ? 1.5 : norm <= 2 ? 2 : norm <= 3 ? 3 : norm <= 5 ? 5 : 10;
             return nice * mag * 2;
         }
 
@@ -450,14 +451,12 @@ namespace SOLUM_UI
 
         private void ViewAllLogs_Click(object sender, RoutedEventArgs e)
         {
-            DashboardScroll.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 6 };
             OverlayRoot.Visibility = Visibility.Visible;
         }
 
         private void LogsOverlay_CloseRequested(object sender, RoutedEventArgs e)
         {
             OverlayRoot.Visibility = Visibility.Collapsed;
-            DashboardScroll.Effect = null;
         }
 
         private void ReviewExpiring_Click(object sender, RoutedEventArgs e)

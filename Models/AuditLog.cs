@@ -82,14 +82,50 @@ namespace SOLUM_UI.Models
         public bool HasTargetId => !IsAuthAction && !string.IsNullOrWhiteSpace(RecordId);
         public bool HasTarget => !IsAuthAction && ((!string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, "—")) || !string.IsNullOrWhiteSpace(RecordId));
 
+        public bool IsSubsidyAction =>
+            string.Equals(TargetType, "Subsidy", StringComparison.OrdinalIgnoreCase) ||
+            (!string.IsNullOrWhiteSpace(RawActionType) && RawActionType.IndexOf("SUBSIDY", StringComparison.OrdinalIgnoreCase) >= 0);
+
+        private static bool IsRawGuid(string s) =>
+            !string.IsNullOrWhiteSpace(s) && Guid.TryParse(s.Trim(), out _);
+
+        public string SubsidyFallbackTitle
+        {
+            get
+            {
+                string raw = (RawActionType ?? string.Empty).ToUpperInvariant();
+                if (raw.Contains("GENERATE")) return "Subsidy Recommendations";
+                if (raw.Contains("SHORTLIST")) return "Candidate Shortlist";
+                if (raw.Contains("CONFIRM")) return "Final Grantee Roster";
+                if (raw.Contains("REJECT")) return "Candidate Evaluation";
+                if (raw.Contains("REVOKE")) return "Grantee Evaluation";
+                if (raw.Contains("REINSTATE")) return "Candidate Evaluation";
+                if (raw.Contains("CYCLE")) return "Subsidy Cycle";
+                return "Subsidy Assistance";
+            }
+        }
+
         public string TargetDisplay
         {
             get
             {
                 if (IsAuthAction) return "—";
-                return !string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, "—")
-                    ? RecordName
-                    : (!string.IsNullOrWhiteSpace(RecordId) ? RecordId : "—");
+
+                if (!string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, "—"))
+                {
+                    if (IsRawGuid(RecordName) && IsSubsidyAction)
+                        return SubsidyFallbackTitle;
+                    return RecordName;
+                }
+
+                if (!string.IsNullOrWhiteSpace(RecordId))
+                {
+                    if (IsSubsidyAction)
+                        return SubsidyFallbackTitle;
+                    return RecordId;
+                }
+
+                return "—";
             }
         }
 
@@ -103,7 +139,8 @@ namespace SOLUM_UI.Models
         public bool HasTargetName => !IsAuthAction
             && !string.IsNullOrWhiteSpace(RecordName)
             && !string.Equals(RecordName, RecordId, StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(RecordName, TargetType, StringComparison.OrdinalIgnoreCase);
+            && !string.Equals(RecordName, TargetType, StringComparison.OrdinalIgnoreCase)
+            && !IsRawGuid(RecordName);
 
         public bool HasTargetType => !IsAuthAction && !string.IsNullOrWhiteSpace(TargetType);
 
@@ -377,10 +414,12 @@ namespace SOLUM_UI.Models
             }
         }
 
-        private static string LabelTextForRaw(string raw)
+        public static string LabelTextForRaw(string raw)
         {
-            switch (raw.ToUpperInvariant())
+            if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
+            switch (raw.Trim().ToUpperInvariant())
             {
+                case "ALL":                              return "All Actions";
                 case "LOGIN":                            return "Login";
                 case "LOGOUT":                           return "Logout";
                 case "REFRESH_TOKEN":                    return "Refresh Token";
@@ -400,11 +439,15 @@ namespace SOLUM_UI.Models
                 case "RENEW_SOLO_PARENT_RECORD":         return "Renew Solo Parent";
                 case "REVOKE_SOLO_PARENT_RECORD":        return "Revoke Solo Parent";
                 case "CREATE_SUBSIDY_CYCLE":             return "Create Subsidy Cycle";
+                case "UPDATE_SUBSIDY_CYCLE":             return "Update Subsidy Cycle";
+                case "FINALIZE_SUBSIDY_CYCLE":           return "Finalize Subsidy Cycle";
+                case "UNLOCK_SUBSIDY_CYCLE":             return "Unlock Subsidy Cycle";
                 case "GENERATE_SUBSIDY_RECOMMENDATIONS": return "Generate Recommendations";
                 case "SHORTLIST_SUBSIDY_CANDIDATES":     return "Shortlist Candidates";
                 case "REJECT_SUBSIDY_OUTLIER":           return "Reject Outlier";
                 case "CONFIRM_SUBSIDY_GRANTEES":         return "Confirm Grantees";
                 case "REVOKE_SUBSIDY_GRANT":             return "Revoke Grant";
+                case "REINSTATE_SUBSIDY_CANDIDATE":      return "Reinstate Candidate";
                 default:
                     return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(
                         raw.Replace('_', ' ').ToLowerInvariant());

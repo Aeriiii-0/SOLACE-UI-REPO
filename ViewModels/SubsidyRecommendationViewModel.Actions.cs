@@ -347,7 +347,8 @@ namespace SOLUM_UI.ViewModels
 
         public async Task ExportRecommendationsQueueAsync()
         {
-            IsLoading = true;
+            IsActionProcessing = true;
+            ActionProcessingMessage = "Exporting recommendations queue...";
             try
             {
                 var resp = await _apiService.GetAllRecommendationsAsync(new GetSubsidyRecommendationsRequest { CycleId = _activeCycleId });
@@ -372,7 +373,7 @@ namespace SOLUM_UI.ViewModels
             }
             finally
             {
-                IsLoading = false;
+                IsActionProcessing = false;
             }
         }
 

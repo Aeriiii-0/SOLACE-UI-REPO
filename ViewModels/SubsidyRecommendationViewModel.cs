@@ -576,6 +576,20 @@ namespace SOLUM_UI.ViewModels
 
         }
 
+        private bool _isActionProcessing;
+        public bool IsActionProcessing
+        {
+            get => _isActionProcessing;
+            set => SetProperty(ref _isActionProcessing, value);
+        }
+
+        private string _actionProcessingMessage = "Processing...";
+        public string ActionProcessingMessage
+        {
+            get => _actionProcessingMessage;
+            set => SetProperty(ref _actionProcessingMessage, value);
+        }
+
         public int SelectedFiscalYearIndex { get => _selectedFiscalYearIndex; set { if (SetProperty(ref _selectedFiscalYearIndex, value)) { OnPropertyChanged(nameof(CanModifyGrantees)); OnPropertyChanged(nameof(CanAccessActivePipelineTabs)); OnPropertyChanged(nameof(TabDisabledTooltipText)); } } }
 
         private bool _isRosterLocked; private int _activeCycleFiscalYear = 2026;

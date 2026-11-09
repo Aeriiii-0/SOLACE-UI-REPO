@@ -543,8 +543,9 @@
         <!-- Loading Overlay for action operations (export, generate, etc.) -->
         <c:LoaderOverlay Grid.RowSpan="5"
                          x:Name="SubsidyActionLoader"
+                         IsActive="{Binding IsActionProcessing}"
+                         Message="{Binding ActionProcessingMessage, FallbackValue='Processing...'}"
                          BlurTarget="{Binding ElementName=SubsidyRootGrid}"
-                         Message="Processing..."
                          Panel.ZIndex="9999"/>
     </Grid>
 </Page>
