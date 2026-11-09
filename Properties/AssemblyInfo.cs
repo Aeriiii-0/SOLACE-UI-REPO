@@ -6,11 +6,11 @@ using System.Windows;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SOLUM-UI")]
+[assembly: AssemblyTitle("Solace")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SOLUM-UI")]
+[assembly: AssemblyProduct("Solace")]
 [assembly: AssemblyCopyright("Copyright (c)  2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -39,7 +39,7 @@ namespace SOLUM_UI.Views.Dialogs
             {
                 using (var client = new WebClient())
                 {
-                    client.Headers.Add("User-Agent", "SOLUM-UI-Updater");
+                    client.Headers.Add("User-Agent", "Solace-Updater");
                     string html = await client.DownloadStringTaskAsync(_args.ChangelogURL);
                     // Convert basic HTML to readable plain text for the release notes card
                     string clean = Regex.Replace(html, "<style.*?</style>", string.Empty, RegexOptions.Singleline | RegexOptions.IgnoreCase);
@@ -54,7 +54,7 @@ namespace SOLUM_UI.Views.Dialogs
             }
             catch
             {
-                TxtChangelog.Text = "SOLUM UI update with recent improvements and fixes.";
+                TxtChangelog.Text = "Solace update with recent improvements and fixes.";
             }
         }
 
@@ -97,7 +97,7 @@ namespace SOLUM_UI.Views.Dialogs
         {
             if (string.IsNullOrWhiteSpace(_args.DownloadURL))
             {
-                MessageBox.Show("Unable to find download package for this update. SOLUM UI will now exit.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Unable to find download package for this update. Solace will now exit.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 ExitApplication();
                 return;
             }
@@ -107,7 +107,7 @@ namespace SOLUM_UI.Views.Dialogs
                 if (string.IsNullOrEmpty(extension)) extension = ".zip";
                 _downloadedFilePath = Path.Combine(Path.GetTempPath(), $"SOLUM_Update_{Guid.NewGuid():N}{extension}");
                 _webClient = new WebClient();
-                _webClient.Headers.Add("User-Agent", "SOLUM-UI-Updater");
+                _webClient.Headers.Add("User-Agent", "Solace-Updater");
                 _webClient.DownloadProgressChanged += OnDownloadProgressChanged;
                 _webClient.DownloadFileCompleted += OnDownloadFileCompleted;
                 TxtDownloadStatus.Text = "Contacting server and downloading update package...";
@@ -115,7 +115,7 @@ namespace SOLUM_UI.Views.Dialogs
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to begin download: {ex.Message}. SOLUM UI will now exit.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Failed to begin download: {ex.Message}. Solace will now exit.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 ExitApplication();
             }
         }
@@ -153,7 +153,7 @@ namespace SOLUM_UI.Views.Dialogs
                 if (e.Error != null)
                 {
                     var retry = MessageBox.Show(
-                        $"Failed to download the mandatory update: {e.Error.Message}\n\nWould you like to retry the download?\n(Selecting 'No' will exit SOLUM UI)",
+                        $"Failed to download the mandatory update: {e.Error.Message}\n\nWould you like to retry the download?\n(Selecting 'No' will exit Solace)",
                         "Update Error",
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Error);
@@ -168,7 +168,7 @@ namespace SOLUM_UI.Views.Dialogs
                     return;
                 }
                 // Download completed successfully
-                TxtDownloadStatus.Text = "Download complete! Applying update and restarting SOLUM UI...";
+                TxtDownloadStatus.Text = "Download complete! Applying update and restarting Solace...";
                 UpdateProgressBar.Value = 100;
                 TxtProgressPercent.Text = "100%";
                 BtnCancelDownload.IsEnabled = false;
@@ -244,7 +244,7 @@ del ""%~f0"" 2>nul
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Could not apply update: {ex.Message}. SOLUM UI will now exit.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Could not apply update: {ex.Message}. Solace will now exit.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 ExitApplication();
             }
         }
@@ -252,7 +252,7 @@ del ""%~f0"" 2>nul
         private void BtnCancelDownload_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show(
-                "Cancelling the update will close SOLUM UI, as this update is mandatory to continue.\n\nAre you sure you want to exit?",
+                "Cancelling the update will close Solace, as this update is mandatory to continue.\n\nAre you sure you want to exit?",
                 "Mandatory Update",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);

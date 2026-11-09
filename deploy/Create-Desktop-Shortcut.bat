@@ -1,6 +1,6 @@
 @echo off
 setlocal
-echo Creating Desktop Shortcut for SOLUM UI...
+echo Creating Desktop Shortcut for Solace...
 
 set "TARGET_DIR=%~dp0"
 if "%TARGET_DIR:~-1%"=="\" set "TARGET_DIR=%TARGET_DIR:~0,-1%"
@@ -18,7 +18,7 @@ if exist "%TARGET_DIR%\SOLUM-UI.exe" (
     exit /b 1
 )
 
-powershell -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut([System.IO.Path]::Combine([System.Environment]::GetFolderPath('Desktop'), 'SOLUM UI.lnk')); $s.TargetPath = '%EXE_PATH%'; $s.WorkingDirectory = '%WORK_DIR%'; $s.Description = 'SOLUM UI - Solo Parent Registry System'; $s.Save()"
+powershell -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut([System.IO.Path]::Combine([System.Environment]::GetFolderPath('Desktop'), 'Solace.lnk')); $s.TargetPath = '%EXE_PATH%'; $s.WorkingDirectory = '%WORK_DIR%'; $s.Description = 'Solace - Solo Parent Registry System'; $s.Save()"
 
 echo Success! Desktop shortcut created.
 pause

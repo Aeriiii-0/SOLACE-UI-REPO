@@ -1,6 +1,6 @@
-# Deploying Updates via GitHub for SOLUM UI
+# Deploying Updates via GitHub for Solace
 
-This setup connects **SOLUM UI** directly to your GitHub repository (**Aeriiii-0/SOLACE-UI-REPO**). Every time you publish a new release on GitHub, all installed desktop clients will automatically detect and download it.
+This setup connects **Solace** directly to your GitHub repository (**Aeriiii-0/SOLACE-UI-REPO**). Every time you publish a new release on GitHub, all installed desktop clients will automatically detect and download it.
 
 ---
 
@@ -11,7 +11,7 @@ This setup connects **SOLUM UI** directly to your GitHub repository (**Aeriiii-0
 2. **Changelog**: `SOLUM-UI.exe` displays release notes from:
    `https://raw.githubusercontent.com/Aeriiii-0/SOLACE-UI-REPO/master/deploy/changelog.html`
 3. **Download**: When the user clicks **Update Now**, it downloads the release archive directly from:
-   `https://github.com/Aeriiii-0/SOLACE-UI-REPO/releases/download/v{version}/SOLUM-UI-v{version}.zip`
+   `https://github.com/Aeriiii-0/SOLACE-UI-REPO/releases/download/v{version}/Solace-v{version}.zip`
 
 ---
 
@@ -33,7 +33,7 @@ Run this in PowerShell from your project root:
 & "C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe" SOLUM-UI.csproj /t:Build /p:Configuration=Release /v:minimal
 
 # 2. Compress the output into a ZIP file (ready for GitHub Releases)
-Compress-Archive -Path bin\Release\* -DestinationPath SOLUM-UI-v1.0.1.zip -Force
+Compress-Archive -Path bin\Release\* -DestinationPath Solace-v1.0.1.zip -Force
 ```
 
 ---
@@ -42,8 +42,8 @@ Compress-Archive -Path bin\Release\* -DestinationPath SOLUM-UI-v1.0.1.zip -Force
 1. Open your repository: **https://github.com/Aeriiii-0/SOLACE-UI-REPO/releases**
 2. Click **"Draft a new release"**.
 3. Set **Tag version**: `v1.0.1` (make sure it has the letter `v`).
-4. Set **Release title**: `SOLUM UI v1.0.1`.
-5. Attach the **`SOLUM-UI-v1.0.1.zip`** file generated in Step 2 to the release assets.
+4. Set **Release title**: `Solace v1.0.1`.
+5. Attach the **`Solace-v1.0.1.zip`** file generated in Step 2 to the release assets.
 6. Click **"Publish release"**.
 
 ---
@@ -55,7 +55,7 @@ In your local repository:
    <?xml version="1.0" encoding="utf-8"?>
    <item>
        <version>1.0.1</version>
-       <url>https://github.com/Aeriiii-0/SOLACE-UI-REPO/releases/download/v1.0.1/SOLUM-UI-v1.0.1.zip</url>
+       <url>https://github.com/Aeriiii-0/SOLACE-UI-REPO/releases/download/v1.0.1/Solace-v1.0.1.zip</url>
        <changelog>https://raw.githubusercontent.com/Aeriiii-0/SOLACE-UI-REPO/master/deploy/changelog.html</changelog>
        <mandatory mode="2">false</mandatory>
    </item>
@@ -72,5 +72,5 @@ In your local repository:
 
 ### Step 5: That's It!
 The moment `deploy/update.xml` is pushed to GitHub:
-- Any user opening SOLUM UI will see the **"New Update Available"** window with your changelog.
+- Any user opening Solace will see the **"New Update Available"** window with your changelog.
 - Clicking **Update** will download the zip, replace the files, and restart the app automatically in ~5 seconds.

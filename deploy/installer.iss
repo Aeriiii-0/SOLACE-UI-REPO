@@ -1,7 +1,7 @@
-; Script generated for SOLUM UI Installer
+; Script generated for Solace Installer
 ; Compiled with Inno Setup
 
-#define MyAppName "SOLUM UI"
+#define MyAppName "Solace"
 #define MyAppVersion "0.0.5-beta"
 #define MyAppPublisher "CSWDO - City of Biñan"
 #define MyAppExeName "SOLUM-UI.exe"
@@ -11,13 +11,13 @@ AppId={{D37F27B8-9A8A-4D78-BC84-5C32E909B11A}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={localappdata}\Programs\Solum
+DefaultDirName={localappdata}\Programs\Solace
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 ; "PrivilegesRequired=lowest" installs to %LocalAppData% so standard users never need an Administrator password!
 PrivilegesRequired=lowest
 OutputDir=..\Output
-OutputBaseFilename=SolumSetup
+OutputBaseFilename=SolaceSetup
 SetupIconFile=..\Assets\app.ico
 Compression=lzma2/max
 SolidCompression=yes
