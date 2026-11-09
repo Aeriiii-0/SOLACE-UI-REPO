@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
         Title="Solace — OCR Document Ingestion &amp; Verification"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -11,12 +11,170 @@
         ShowInTaskbar="False"
         SizeChanged="Window_SizeChanged"
         Closing="Window_Closing"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextRenderingMode="ClearType"
         Width="1380" Height="860">
-    <!-- Outer Shadow and Dialog Shell -->
+    <Window.Resources>
+        <CornerRadius x:Key="R11">11</CornerRadius>
+        <CornerRadius x:Key="R12">12</CornerRadius>
+        <CornerRadius x:Key="R13">13</CornerRadius>
+        <CornerRadius x:Key="R15">15</CornerRadius>
+        <CornerRadius x:Key="R17">17</CornerRadius>
+        <CornerRadius x:Key="R18">18</CornerRadius>
+        <CornerRadius x:Key="R19">19</CornerRadius>
+        <CornerRadius x:Key="R21">21</CornerRadius>
+
+        <Style x:Key="PillBase" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Tag">
+                <Setter.Value>
+                    <CornerRadius>20</CornerRadius>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding Tag}" Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PillOutline" TargetType="Button" BasedOn="{StaticResource PillBase}">
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#702943"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FBF3F5"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#F3E3E8"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="PillPrimary" TargetType="Button" BasedOn="{StaticResource PillBase}">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#702943"/>
+            <Setter Property="BorderBrush" Value="#702943"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#5A1F35"/>
+                    <Setter Property="BorderBrush" Value="#5A1F35"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#491829"/>
+                    <Setter Property="BorderBrush" Value="#491829"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="IconCircle" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#6B4A54"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Tag">
+                <Setter.Value>
+                    <CornerRadius>14</CornerRadius>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding Tag}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F3E3E8"/>
+                    <Setter Property="Foreground" Value="#702943"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="RingButton" TargetType="Button">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E2C6CE"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="18" SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FBF3F5"/>
+                    <Setter Property="BorderBrush" Value="#702943"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CloseCircle" TargetType="Button">
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Width="34" Height="34">
+                            <Ellipse x:Name="Ring" Width="34" Height="34" Fill="White" Stroke="#E2C6CE" StrokeThickness="1.5"/>
+                            <Path x:Name="Cross" Data="M0,0 L10,10 M10,0 L0,10" Stroke="#8A6B75" StrokeThickness="1.8"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="10" Height="10" Stretch="None"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Ring" Property="Fill" Value="#FBF3F5"/>
+                                <Setter TargetName="Ring" Property="Stroke" Value="#702943"/>
+                                <Setter TargetName="Cross" Property="Stroke" Value="#702943"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Border Background="#66000000" Padding="0">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-            <!-- Shadow Layer: Sibling with NO children. Rendered once into GPU cache -->
-            <Border Background="White" CornerRadius="16"
+            <Border Background="White" CornerRadius="24"
                     IsHitTestVisible="False"
                     Visibility="{Binding Visibility, ElementName=DialogShell}">
                 <Border.RenderTransform>
@@ -30,44 +188,36 @@
                     <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="0" Opacity="0.22" RenderingBias="Performance"/>
                 </Border.Effect>
             </Border>
-            <!-- DialogShell: Clean container -->
-            <Border x:Name="DialogShell" Background="White" CornerRadius="16"
+            <Border x:Name="DialogShell" Background="White" CornerRadius="24"
                     ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center"
                     TextOptions.TextFormattingMode="Display"
                     RenderOptions.ClearTypeHint="Enabled"
                     SnapsToDevicePixels="True"
-                    BorderBrush="#C8E6C9" BorderThickness="2">
+                    BorderBrush="#3FA66B" BorderThickness="2">
                 <Border.RenderTransform>
                     <TranslateTransform x:Name="DialogShellTransform"/>
                 </Border.RenderTransform>
                 <Grid>
                     <Grid.RowDefinitions>
-                        <!-- Row 0: Top Header -->
                         <RowDefinition Height="Auto"/>
-                        <!-- Row 1: Mode Stripe -->
                         <RowDefinition Height="Auto"/>
-                        <!-- Row 2: Main Body (Split Viewport + Form) -->
                         <RowDefinition Height="*"/>
-                        <!-- Row 3: Footer Actions -->
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <!-- TOP HEADER -->
-                    <Border x:Name="HeaderBorder" Grid.Row="0" Background="White" CornerRadius="16,16,0,0"
-                            BorderBrush="#EEEEEE" BorderThickness="0,0,0,1" Padding="28,16">
+                    <Border x:Name="HeaderBorder" Grid.Row="0" Background="White" CornerRadius="22,22,0,0" Padding="32,22,28,10">
                         <Grid VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock x:Name="FormSubtitle" Text="Solo Parent Application Form" FontSize="19" FontWeight="Bold" Foreground="#111111"/>
-                                <TextBlock x:Name="FormStepHint" Text="{Binding StepHintText}" FontSize="13" Foreground="#666666" Margin="0,3,0,0"/>
+                                <TextBlock x:Name="FormSubtitle" Text="Solo Parent Application Form" FontSize="22" FontWeight="Bold" Foreground="#2B1B20"/>
+                                <TextBlock x:Name="FormStepHint" Text="{Binding StepHintText}" FontSize="13" Foreground="#7A6068" Margin="0,4,0,0"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <!-- Engine Status Badge Pill -->
                                 <Border x:Name="PillEngineStatus"
-                                        Background="#FBF5F7" BorderBrush="#EDE0E5" BorderThickness="1"
-                                        CornerRadius="14" Padding="12,5" Margin="0,0,14,0"
+                                        Background="#FBF5F7" BorderBrush="#EDE0E5" BorderThickness="1.5"
+                                        Height="32" CornerRadius="16" Padding="16,0" Margin="0,0,14,0"
                                         Cursor="Hand" VerticalAlignment="Center"
                                         PreviewMouseLeftButtonDown="PillEngineStatus_PreviewMouseLeftButtonDown"
                                         MouseLeftButtonUp="ServerStatusBadge_MouseLeftButtonUp"
@@ -76,91 +226,57 @@
                                         ToolTipService.InitialShowDelay="150"
                                         ToolTip="{Binding EngineStatusTooltip}">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Border x:Name="ServerStatusBadge"
+                                        <Border x:Name="ServerStatusBadge" Visibility="Collapsed"
                                                 Width="9" Height="9" CornerRadius="4.5"
-                                                Background="{Binding EngineStatusDotBrush}" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                Background="{Binding EngineStatusDotBrush}">
                                             <Border.Effect>
                                                 <DropShadowEffect x:Name="BadgeGlow" Color="#FFA500" BlurRadius="6" ShadowDepth="0" Opacity="0.8"/>
                                             </Border.Effect>
                                         </Border>
                                         <TextBlock x:Name="TxtHeaderEngineStatus" Text="{Binding EngineStatusHeader}"
-                                                   FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                                                   FontSize="12" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
-                                <!-- Circular Close Button -->
-                                <Button HorizontalAlignment="Right" VerticalAlignment="Center"
-                                        Width="32" Height="32" Background="Transparent"
-                                        BorderThickness="0" Cursor="Hand" Click="Close_Click">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="CloseBg" Background="Transparent" CornerRadius="16">
-                                                <TextBlock Text="✕" FontSize="14" Foreground="#888888" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="CloseBg" Property="Background" Value="#F0F0F0"/>
-                                                    <Setter Property="Foreground" Value="#222222"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
+                                <Button Style="{StaticResource CloseCircle}" VerticalAlignment="Center" Click="Close_Click"/>
                             </StackPanel>
                         </Grid>
                     </Border>
-                    <!-- MODE STRIPE -->
-                    <Border x:Name="ModeStripe" Grid.Row="1"
-                            Background="#F0FAF1" BorderBrush="#C8E6C9" BorderThickness="0,0,0,1"
-                            Padding="28,8,28,8">
-                        <Grid>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Path x:Name="ModeStripeIcon"
-                                      Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
-                                      Fill="#2E7D32" Stretch="Uniform" Width="13" Height="13"
-                                      VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBlock x:Name="ModeStripeLabel" Text="New Registration"
-                                           FontSize="12" FontWeight="Bold" Foreground="#2E7D32" VerticalAlignment="Center"/>
-                                <TextBlock x:Name="ModeStripeHint"
-                                           Text="{Binding ModeStripeHintText}"
-                                           FontSize="12" Foreground="#558B5A" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Grid>
+                    <Border x:Name="ModeStripe" Grid.Row="1" Background="#EEF8F2" CornerRadius="14" Margin="32,6,32,0" Padding="18,11">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path x:Name="ModeStripeIcon" Visibility="Collapsed"
+                                  Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+                                  Fill="#1F7A47" Stretch="Uniform" Width="13" Height="13"/>
+                            <TextBlock x:Name="ModeStripeLabel" Text="New Registration"
+                                       FontSize="13" FontWeight="Bold" Foreground="#1F7A47" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="ModeStripeHint" Text="{Binding ModeStripeHintText}" Margin="6,0,0,0"
+                                       FontSize="13" Foreground="#3F8A5F" VerticalAlignment="Center"/>
+                        </StackPanel>
                     </Border>
-                    <!-- MAIN WORKSPACE -->
-                    <Grid Grid.Row="2" Margin="16,12">
+                    <Grid Grid.Row="2" Margin="32,18,32,18">
                         <Grid.ColumnDefinitions>
-                            <!-- Left: Document Viewport (Resizable) -->
                             <ColumnDefinition Width="540" MinWidth="380" MaxWidth="850"/>
-                            <ColumnDefinition Width="10"/>
-                            <!-- Right: Partitioned Record Verification -->
+                            <ColumnDefinition Width="18"/>
                             <ColumnDefinition Width="*" MinWidth="460"/>
                         </Grid.ColumnDefinitions>
-                        <!-- LEFT: INTERACTIVE LIVE DOCUMENT VIEWPORT COMPONENT -->
                         <components:OcrDocumentViewportComponent x:Name="DocumentViewport" Grid.Column="0"/>
-                        <!-- DRAGGABLE WORKSPACE SPLITTER -->
-                        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                        <GridSplitter Grid.Column="1" Width="18" HorizontalAlignment="Center" VerticalAlignment="Stretch"
                                       Background="Transparent" Cursor="SizeWE" ShowsPreview="False">
                             <GridSplitter.Template>
                                 <ControlTemplate TargetType="GridSplitter">
-                                    <Border Background="Transparent" Width="10" HorizontalAlignment="Center">
-                                        <Border Width="2" Background="#E2D4D8" CornerRadius="1" HorizontalAlignment="Center"
-                                                VerticalAlignment="Stretch" Margin="0,12"/>
+                                    <Border Background="Transparent">
+                                        <Border Width="4" Height="44" Background="#E2C6CE" CornerRadius="2"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                 </ControlTemplate>
                             </GridSplitter.Template>
                         </GridSplitter>
-                        <!-- RIGHT: 1:1 RECORD VERIFICATION WITH 3-STEP WIZARD -->
-                        <Border Grid.Column="2" Background="White" BorderBrush="#DDD0D5" BorderThickness="1" CornerRadius="10" Padding="0" ClipToBounds="True">
+                        <Border Grid.Column="2" Background="White" BorderBrush="#EBD5DB" BorderThickness="1.5" CornerRadius="20" Padding="0">
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <!-- Step Wizard Indicator -->
                                     <RowDefinition Height="Auto"/>
-                                    <!-- Partitioned Content Components -->
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-                                <!-- STEP INDICATOR HEADER (3-STEP WIZARD) -->
-                                <Border Grid.Row="0" Background="#FDFAFB" BorderBrush="#EDE0E5"
-                                        BorderThickness="0,0,0,1" Padding="20,10">
+                                <Border Grid.Row="0" Background="#FBF6F8" CornerRadius="18,18,0,0" Padding="22,14">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -169,54 +285,40 @@
                                             <ColumnDefinition Width="28"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <!-- Step 1: Primary Info -->
                                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Cursor="Hand" MouseLeftButtonUp="Step1Header_Click">
-                                            <Border x:Name="Step1Dot" Width="26" Height="26" CornerRadius="13"
-                                                    Background="#702943">
-                                                <TextBlock x:Name="Step1DotLabel" Text="1" Foreground="White" FontSize="12" FontWeight="Bold"
+                                            <Border x:Name="Step1Dot" Width="28" Height="28" CornerRadius="14" Background="#702943">
+                                                <TextBlock x:Name="Step1DotLabel" Text="1" Foreground="White" FontSize="12.5" FontWeight="Bold"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
-                                            <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
-                                                <TextBlock x:Name="Step1Title" Text="Primary Info" FontSize="12" FontWeight="Bold"
-                                                           Foreground="#702943"/>
-                                                <TextBlock Text="Identity &amp; verification" FontSize="10" Foreground="#888888"/>
+                                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock x:Name="Step1Title" Text="Primary Info" FontSize="12.5" FontWeight="Bold" Foreground="#702943"/>
+                                                <TextBlock Text="Identity &amp; verification" FontSize="10.5" Foreground="#9A8089"/>
                                             </StackPanel>
                                         </StackPanel>
-                                        <Border Grid.Column="1" Height="2" Background="#E0E0E0"
-                                                VerticalAlignment="Center" Margin="4,0"/>
-                                        <!-- Step 2: Secondary Info -->
+                                        <Border Grid.Column="1" Height="3" CornerRadius="1.5" Background="#EBD5DB" VerticalAlignment="Center" Margin="4,0"/>
                                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Cursor="Hand" MouseLeftButtonUp="Step2Header_Click">
-                                            <Border x:Name="Step2Dot" Width="26" Height="26" CornerRadius="13"
-                                                    Background="#E0E0E0">
-                                                <TextBlock x:Name="Step2DotLabel" Text="2" Foreground="#AAAAAA"
-                                                           FontSize="12" FontWeight="Bold"
+                                            <Border x:Name="Step2Dot" Width="28" Height="28" CornerRadius="14" Background="#E0E0E0">
+                                                <TextBlock x:Name="Step2DotLabel" Text="2" Foreground="#AAAAAA" FontSize="12.5" FontWeight="Bold"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
-                                            <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
-                                                <TextBlock x:Name="Step2Title" Text="Secondary Info"
-                                                           FontSize="12" FontWeight="Bold" Foreground="#AAAAAA"/>
-                                                <TextBlock Text="Address &amp; background" FontSize="10" Foreground="#AAAAAA"/>
+                                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock x:Name="Step2Title" Text="Secondary Info" FontSize="12.5" FontWeight="Bold" Foreground="#AAAAAA"/>
+                                                <TextBlock Text="Address &amp; background" FontSize="10.5" Foreground="#AAAAAA"/>
                                             </StackPanel>
                                         </StackPanel>
-                                        <Border Grid.Column="3" Height="2" Background="#E0E0E0"
-                                                VerticalAlignment="Center" Margin="4,0"/>
-                                        <!-- Step 3: Circumstances & Family -->
+                                        <Border Grid.Column="3" Height="3" CornerRadius="1.5" Background="#EBD5DB" VerticalAlignment="Center" Margin="4,0"/>
                                         <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" Cursor="Hand" MouseLeftButtonUp="Step3Header_Click">
-                                            <Border x:Name="Step3Dot" Width="26" Height="26" CornerRadius="13"
-                                                    Background="#E0E0E0">
-                                                <TextBlock x:Name="Step3DotLabel" Text="3" Foreground="#AAAAAA"
-                                                           FontSize="12" FontWeight="Bold"
+                                            <Border x:Name="Step3Dot" Width="28" Height="28" CornerRadius="14" Background="#E0E0E0">
+                                                <TextBlock x:Name="Step3DotLabel" Text="3" Foreground="#AAAAAA" FontSize="12.5" FontWeight="Bold"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
-                                            <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
-                                                <TextBlock x:Name="Step3Title" Text="Circumstances"
-                                                           FontSize="12" FontWeight="Bold" Foreground="#AAAAAA"/>
-                                                <TextBlock Text="Family &amp; circumstance" FontSize="10" Foreground="#AAAAAA"/>
+                                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock x:Name="Step3Title" Text="Circumstances" FontSize="12.5" FontWeight="Bold" Foreground="#AAAAAA"/>
+                                                <TextBlock Text="Family &amp; circumstance" FontSize="10.5" Foreground="#AAAAAA"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
-                                <!-- STEP CONTENT AREA (3 COMPONENTS) -->
                                 <Grid Grid.Row="1">
                                     <components:OcrPrimaryInfoComponent x:Name="PrimaryInfoSection" Visibility="Visible"/>
                                     <components:OcrSecondaryInfoComponent x:Name="SecondaryInfoSection" Visibility="Collapsed"/>
@@ -225,52 +327,33 @@
                             </Grid>
                         </Border>
                     </Grid>
-                    <!-- FOOTER ACTIONS -->
-                    <Border Grid.Row="3" Background="White" BorderBrush="#EEEEEE"
-                            BorderThickness="0,1,0,0" Padding="28,12" CornerRadius="0,0,16,16">
+                    <Border Grid.Row="3" Background="White" Padding="32,6,32,24" CornerRadius="0,0,22,22">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock x:Name="ValidationMessage"
-                                           Text=""
-                                           FontSize="12" Foreground="#E53935"
-                                           TextWrapping="Wrap"
-                                           Visibility="Collapsed" Margin="0,0,12,0"/>
-                                <Border Background="#F9F2F4" CornerRadius="12" Padding="10,4" BorderBrush="#EBD6DC" BorderThickness="1">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z"
-                                              Fill="#702943" Stretch="Uniform" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <TextBlock x:Name="TxtOverallConfBadge"
-                                                   Text="{Binding OverallConfidenceText}"
-                                                   FontSize="11" Foreground="#702943" FontWeight="SemiBold"
-                                                   VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                <TextBlock x:Name="ValidationMessage" Text="" FontSize="12.5" FontWeight="SemiBold" Foreground="#D32F2F"
+                                           TextWrapping="Wrap" Visibility="Collapsed" Margin="0,0,12,0"/>
+                                <Border Background="#F8ECEF" Height="32" CornerRadius="16" Padding="16,0">
+                                    <TextBlock x:Name="TxtOverallConfBadge" Text="{Binding OverallConfidenceText}"
+                                               FontSize="12" Foreground="#702943" FontWeight="Bold" VerticalAlignment="Center"/>
                                 </Border>
-                                <!-- OCR Duration Badge -->
-                                <Border x:Name="BadgeOcrDuration" Background="#F0F4F8" CornerRadius="12" Padding="10,4"
-                                        BorderBrush="#D9E2EC" BorderThickness="1" Margin="8,0,0,0" Visibility="Collapsed"
+                                <Border x:Name="BadgeOcrDuration" Background="#EEF3F8" Height="32" CornerRadius="16" Padding="16,0"
+                                        Margin="8,0,0,0" Visibility="Collapsed"
                                         ToolTip="Total processing time taken by the OCR engine">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
-                                              Fill="#334E68" Stretch="Uniform" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <TextBlock x:Name="TxtOcrDuration"
-                                                   Text="0.0s"
-                                                   FontSize="11" Foreground="#334E68" FontWeight="SemiBold"
-                                                   VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <TextBlock x:Name="TxtOcrDuration" Text="0.0s" FontSize="12" Foreground="#334E68" FontWeight="Bold" VerticalAlignment="Center"/>
                                 </Border>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <Button x:Name="BtnCancel" Content="Cancel" Style="{StaticResource CancelBtn}"
-                                        Margin="0,0,8,0" Click="Close_Click"/>
-                                <Button x:Name="BtnBack" Content="&#x2190; Back" Style="{StaticResource CancelBtn}"
-                                        Margin="0,0,8,0" Click="Back_Click" Visibility="Collapsed"/>
-                                <Button x:Name="BtnNext" Content="Next &#x2192;" Style="{StaticResource SaveBtn}"
+                                <Button x:Name="BtnCancel" Content="Cancel" Style="{StaticResource PillOutline}" Width="110"
+                                        Margin="0,0,10,0" Click="Close_Click"/>
+                                <Button x:Name="BtnBack" Content="Back" Style="{StaticResource PillOutline}" Width="110"
+                                        Margin="0,0,10,0" Click="Back_Click" Visibility="Collapsed"/>
+                                <Button x:Name="BtnNext" Content="Next" Style="{StaticResource PillPrimary}" Width="130"
                                         Click="Next_Click"/>
-                                <Button x:Name="BtnSave" Content="Save Record" Style="{StaticResource SaveBtn}"
+                                <Button x:Name="BtnSave" Content="Save Record" Style="{StaticResource PillPrimary}" Width="150"
                                         Click="Save_Click" Visibility="Collapsed"/>
                             </StackPanel>
                         </Grid>

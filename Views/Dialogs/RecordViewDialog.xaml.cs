@@ -59,7 +59,14 @@ namespace SOLUM_UI.Views.Dialogs
             ActionsPopup.HorizontalOffset = BtnActions.ActualWidth - 180;
         }
 
-        private void MenuRenew_Click(object sender, RoutedEventArgs e) => RunToolbarAction("renew");
+        private void MenuRenew_Click(object sender, RoutedEventArgs e)
+        {
+            // Close the profile details modal before opening renewal dialog
+            DialogResult = false;
+            Close();
+            // Trigger the renewal action on the parent page after this dialog closes
+            Dispatcher.BeginInvoke(new Action(() => RunToolbarAction("renew")), System.Windows.Threading.DispatcherPriority.Background);
+        }
 
         private void MenuEdit_Click(object sender, RoutedEventArgs e) => RunToolbarAction("edit", "update");
 

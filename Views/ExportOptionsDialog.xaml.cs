@@ -19,7 +19,39 @@ namespace SOLUM_UI
             Left   = screenLeft;
             Top    = screenTop;
             Shell.MaxHeight = screenH * 0.90;
-            TxtFileName.Text = fileName;
+            TxtFileName.Text = System.IO.Path.GetFileName(fileName);
+            KeyDown += (s, e) =>
+            {
+                if (e.Key == System.Windows.Input.Key.Escape)
+                    BtnCancel_Click(s, e);
+            };
+        }
+
+        public ExportOptionsDialog(string fileName, Window owner = null)
+        {
+            InitializeComponent();
+            var win = owner ?? Application.Current?.MainWindow;
+            if (win != null && win.IsVisible)
+            {
+                Owner = win;
+                Width = win.ActualWidth > 0 ? win.ActualWidth : 1200;
+                Height = win.ActualHeight > 0 ? win.ActualHeight : 700;
+                Left = win.Left;
+                Top = win.Top;
+            }
+            else
+            {
+                WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                Width = 1200;
+                Height = 700;
+            }
+            Shell.MaxHeight = Height * 0.90;
+            TxtFileName.Text = System.IO.Path.GetFileName(fileName);
+            KeyDown += (s, e) =>
+            {
+                if (e.Key == System.Windows.Input.Key.Escape)
+                    BtnCancel_Click(s, e);
+            };
         }
 
         private void ChkPassword_Changed(object sender, RoutedEventArgs e)
@@ -53,7 +85,7 @@ namespace SOLUM_UI
                 string pwd = _showingPlain ? PwdBoxVisible.Text : PwdBox.Password;
                 if (string.IsNullOrWhiteSpace(pwd))
                 {
-                    ToastNotification.Show("Password Required", "Enter a password or uncheck the option.", ToastType.Warning);
+                    Views.Dialogs.ActionConfirmDialog.Warning("Password Required", "Please enter a passcode or uncheck the password protection option.", this);
                     return;
                 }
                 Password = pwd;

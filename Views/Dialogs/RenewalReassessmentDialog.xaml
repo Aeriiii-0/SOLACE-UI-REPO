@@ -2,13 +2,17 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Annual Re-assessment &amp; Renewal"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
         ResizeMode="NoResize"
         SizeChanged="Window_SizeChanged"
-        Width="900" Height="760">
+        Width="900" Height="760"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextRenderingMode="ClearType"
+        TextOptions.TextFormattingMode="Display">
     <Window.Resources>
         <!-- ── Typography & Labels ── -->
         <Style x:Key="SectionHeading" TargetType="TextBlock">
@@ -456,7 +460,7 @@
                         <RowDefinition Height="Auto"/> <!-- Footer Actions -->
                     </Grid.RowDefinitions>
                     <!-- ── 1. TITLE HEADER (Maroon Brand) ── -->
-                    <Border Grid.Row="0" Background="#702943" Padding="26,14">
+                    <Border Grid.Row="0" Background="#702943" Padding="26,14" CornerRadius="16,16,0,0">
                         <Grid>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock x:Name="TxtDialogTitle" Text="Annual Re-assessment &amp; Renewal" FontSize="16" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
@@ -1214,12 +1218,12 @@
                         </ScrollViewer>
                     </Grid>
                     <!-- ── 5. FOOTER ACTIONS ── -->
-                    <Border Grid.Row="4" Background="White" BorderBrush="#EDE0E5" BorderThickness="0,1,0,0" Padding="28,14">
+                    <Border Grid.Row="4" Background="White" BorderBrush="#EDE0E5" BorderThickness="0,1,0,0" Padding="28,14" CornerRadius="0,0,16,16">
                         <Grid>
-                            <Button x:Name="BtnBack" Content="← Back" Style="{StaticResource OutlineMaroonBtn}" HorizontalAlignment="Left" Click="BtnBack_Click" Visibility="Collapsed"/>
+                            <Button x:Name="BtnBack" Content="Back" Style="{StaticResource OutlineMaroonBtn}" HorizontalAlignment="Left" Click="BtnBack_Click" Visibility="Collapsed"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                 <Button Content="Cancel" Style="{StaticResource OutlineMaroonBtn}" Margin="0,0,10,0" Click="Close_Click"/>
-                                <Button x:Name="BtnNext" Content="Next Step →" Style="{StaticResource PrimaryMaroonBtn}" Click="BtnNext_Click"/>
+                                <Button x:Name="BtnNext" Content="Next Step" Style="{StaticResource PrimaryMaroonBtn}" Click="BtnNext_Click"/>
                                 <Button x:Name="BtnSubmitRenew" Content="Confirm &amp; Renew Record" Style="{StaticResource PrimaryMaroonBtn}" Visibility="Collapsed" Click="BtnSubmitRenew_Click"/>
                             </StackPanel>
                         </Grid>

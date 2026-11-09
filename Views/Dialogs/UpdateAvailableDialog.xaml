@@ -9,9 +9,152 @@
         Background="Transparent"
         ResizeMode="NoResize"
         ShowInTaskbar="True"
-        Topmost="True">
+        Topmost="True"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="ClearType"
+        RenderOptions.ClearTypeHint="Enabled">
     <Window.Resources>
-        <!-- Modern ProgressBar Style -->
+
+        <!-- ===== Design tokens (single source of truth, no inline hard-coded values) ===== -->
+        <SolidColorBrush x:Key="BrandBrush" Color="#702943"/>
+        <SolidColorBrush x:Key="BrandHoverBrush" Color="#5C2036"/>
+        <SolidColorBrush x:Key="BrandPressedBrush" Color="#491A2B"/>
+        <SolidColorBrush x:Key="BrandTintBrush" Color="#F2E4E9"/>
+        <SolidColorBrush x:Key="BrandBorderBrush" Color="#E0D0D5"/>
+        <SolidColorBrush x:Key="HeaderDividerBrush" Color="#F0E4E9"/>
+        <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#FAF4F6"/>
+        <SolidColorBrush x:Key="SurfaceBrush" Color="White"/>
+        <SolidColorBrush x:Key="OnBrandBrush" Color="White"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#111111"/>
+        <SolidColorBrush x:Key="IconMutedBrush" Color="#8C6B79"/>
+        <SolidColorBrush x:Key="DangerBrush" Color="#C62828"/>
+        <SolidColorBrush x:Key="DangerTintBrush" Color="#FDECEC"/>
+
+        <CornerRadius x:Key="ButtonCornerRadius">20</CornerRadius>
+        <CornerRadius x:Key="CardCornerRadius">16</CornerRadius>
+        <CornerRadius x:Key="HeaderCornerRadius">14,14,0,0</CornerRadius>
+        <CornerRadius x:Key="IconBadgeCornerRadius">10</CornerRadius>
+        <CornerRadius x:Key="CloseButtonCornerRadius">16</CornerRadius>
+
+        <!-- Update / download icon (Material "download") -->
+        <Geometry x:Key="UpdateIconGeometry">M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z</Geometry>
+        <!-- Close cross -->
+        <Geometry x:Key="CloseIconGeometry">M0,0 L10,10 M10,0 L0,10</Geometry>
+
+        <!-- ===== Primary pill button (20px radius) ===== -->
+        <Style x:Key="SolumPillPrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource BrandBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource OnBrandBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource ButtonCornerRadius}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource BrandHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource BrandPressedBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ===== Secondary pill button (20px radius) ===== -->
+        <Style x:Key="SolumPillSecondaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource BrandBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BrandBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{StaticResource ButtonCornerRadius}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource SurfaceHoverBrush}"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource BrandBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource BrandTintBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ===== Header close button ===== -->
+        <Style x:Key="SolumHeaderCloseButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="Transparent"
+                                CornerRadius="{StaticResource CloseButtonCornerRadius}"
+                                SnapsToDevicePixels="True">
+                            <Path x:Name="Cross"
+                                  Data="{StaticResource CloseIconGeometry}"
+                                  Stroke="{StaticResource IconMutedBrush}"
+                                  StrokeThickness="1.6"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Width="10" Height="10"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource DangerTintBrush}"/>
+                                <Setter TargetName="Cross" Property="Stroke" Value="{StaticResource DangerBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern ProgressBar Style (unchanged) -->
         <Style x:Key="SolumProgressBarStyle" TargetType="ProgressBar">
             <Setter Property="Height" Value="10"/>
             <Setter Property="Background" Value="#F2E4E9"/>
@@ -28,43 +171,48 @@
             </Setter>
         </Style>
     </Window.Resources>
+
     <!-- Main Card Container with Drop Shadow -->
-    <Border Background="White" CornerRadius="16" BorderBrush="#E0D0D5" BorderThickness="1.5" Margin="10">
+    <Border Background="{StaticResource SurfaceBrush}"
+            CornerRadius="{StaticResource CardCornerRadius}"
+            BorderBrush="{StaticResource BrandBorderBrush}" BorderThickness="1" Margin="10">
         <Border.Effect>
             <DropShadowEffect Color="#702943" BlurRadius="22" ShadowDepth="4" Opacity="0.16"/>
         </Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="52"/>
+                <RowDefinition Height="64"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+
             <!-- 1. Header Bar (Draggable) -->
-            <Border Grid.Row="0" Background="#702943" CornerRadius="14,14,0,0" MouseLeftButtonDown="Header_MouseDown" Cursor="SizeAll">
-                <Grid Margin="18,0">
+            <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}"
+                    CornerRadius="{StaticResource HeaderCornerRadius}"
+                    BorderBrush="{StaticResource HeaderDividerBrush}" BorderThickness="0,0,0,1"
+                    MouseLeftButtonDown="Header_MouseDown" Cursor="SizeAll">
+                <Grid Margin="24,0,16,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <!-- Cloud / Update Icon -->
-                        <Path Data="M19.35,10.04C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.04C2.34,8.36 0,10.91 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.04M13,13V17H11V13H8L12,9L16,13H13Z"
-                              Fill="White" Stretch="Uniform" Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Software Update" FontFamily="Segoe UI" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                        <!-- Icon badge -->
+                        <Border Width="34" Height="34"
+                                Background="{StaticResource BrandTintBrush}"
+                                CornerRadius="{StaticResource IconBadgeCornerRadius}"
+                                Margin="0,0,12,0">
+                            <Path Data="{StaticResource UpdateIconGeometry}"
+                                  Fill="{StaticResource BrandBrush}"
+                                  Stretch="Uniform" Width="16" Height="16"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Software Update" FontFamily="Segoe UI" FontSize="15" FontWeight="Bold"
+                                   Foreground="{StaticResource BrandBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
+
                     <!-- Close / Exit Application Button -->
-                    <Button x:Name="BtnClose" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center"
-                            Background="Transparent" BorderThickness="0" Cursor="Hand" Click="BtnClose_Click" ToolTip="Exit Application">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="Bg" Background="Transparent" CornerRadius="15">
-                                    <TextBlock Text="✕" FontSize="13" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="#C62828"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+                    <Button x:Name="BtnClose" Style="{StaticResource SolumHeaderCloseButton}"
+                            Width="32" Height="32" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Click="BtnClose_Click" ToolTip="Exit Application"/>
                 </Grid>
             </Border>
+
             <!-- 2. Content Body Area -->
             <Grid Grid.Row="1" Margin="24,18,24,20">
                 <!-- VIEW A: Update Available Prompt -->
@@ -77,7 +225,7 @@
                     </Grid.RowDefinitions>
                     <!-- Title & Mandatory Notice -->
                     <StackPanel Grid.Row="0" Margin="0,0,0,12">
-                        <TextBlock Text="Mandatory Update Required" FontFamily="Segoe UI" FontSize="18" FontWeight="Bold" Foreground="#111111" Margin="0,0,0,6"/>
+                        <TextBlock Text="Mandatory Update Required" FontFamily="Segoe UI" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,6"/>
                         <Border Background="#FFF4E5" BorderBrush="#FFE0B2" BorderThickness="1" CornerRadius="8" Padding="12,8">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -114,7 +262,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="RELEASE HIGHLIGHTS" FontSize="10" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,6"/>
+                            <TextBlock Grid.Row="0" Text="RELEASE HIGHLIGHTS" FontSize="10" FontWeight="Bold" Foreground="{StaticResource BrandBrush}" Margin="0,0,0,6"/>
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                 <TextBlock x:Name="TxtChangelog" Text="Loading changelog..." FontSize="12" Foreground="#333333" TextWrapping="Wrap" LineHeight="18"/>
                             </ScrollViewer>
@@ -122,10 +270,11 @@
                     </Border>
                     <!-- Action Buttons -->
                     <Grid Grid.Row="3">
-                        <Button x:Name="BtnExitApp" Content="Exit Application" Style="{StaticResource SolumSecondaryButton}" Height="38" Padding="16,0" HorizontalAlignment="Left" Click="BtnExitApp_Click" ToolTip="Close Solace without updating"/>
-                        <Button x:Name="BtnDownloadNow" Content="Download &amp; Update Now" Style="{StaticResource SolumPrimaryButton}" Height="38" Padding="18,0" HorizontalAlignment="Right" Click="BtnDownloadNow_Click"/>
+                        <Button x:Name="BtnExitApp" Content="Exit Application" Style="{StaticResource SolumPillSecondaryButton}" Height="40" Padding="20,0" HorizontalAlignment="Left" Click="BtnExitApp_Click" ToolTip="Close Solace without updating"/>
+                        <Button x:Name="BtnDownloadNow" Content="Download &amp; Update Now" Style="{StaticResource SolumPillPrimaryButton}" Height="40" Padding="24,0" HorizontalAlignment="Right" Click="BtnDownloadNow_Click"/>
                     </Grid>
                 </Grid>
+
                 <!-- VIEW B: Custom Downloading Interface -->
                 <Grid x:Name="PnlDownloading" Visibility="Collapsed">
                     <Grid.RowDefinitions>
@@ -135,24 +284,21 @@
                     </Grid.RowDefinitions>
                     <!-- Title -->
                     <StackPanel Grid.Row="0" Margin="0,10,0,20">
-                        <TextBlock Text="Downloading Solace Update" FontFamily="Segoe UI" FontSize="18" FontWeight="Bold" Foreground="#111111"/>
+                        <TextBlock Text="Downloading Solace Update" FontFamily="Segoe UI" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
                         <TextBlock x:Name="TxtDownloadingSubtitle" Text="Please wait while the update is downloading..." FontSize="12.5" Foreground="#666666" Margin="0,4,0,0"/>
                     </StackPanel>
                     <!-- Progress Bar & Metrics -->
                     <StackPanel Grid.Row="1" VerticalAlignment="Center">
-                        <!-- Progress Percentage & Size -->
                         <Grid Margin="0,0,0,8">
-                            <TextBlock x:Name="TxtProgressPercent" Text="0%" FontFamily="Segoe UI" FontSize="14" FontWeight="Bold" Foreground="#702943"/>
+                            <TextBlock x:Name="TxtProgressPercent" Text="0%" FontFamily="Segoe UI" FontSize="14" FontWeight="Bold" Foreground="{StaticResource BrandBrush}"/>
                             <TextBlock x:Name="TxtProgressBytes" Text="Connecting..." FontFamily="Segoe UI" FontSize="12" Foreground="#777777" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         </Grid>
-                        <!-- Custom Progress Bar -->
                         <ProgressBar x:Name="UpdateProgressBar" Style="{StaticResource SolumProgressBarStyle}" Height="12" Minimum="0" Maximum="100" Value="0"/>
-                        <!-- Status Message -->
                         <TextBlock x:Name="TxtDownloadStatus" Text="Connecting to GitHub Releases..." FontSize="11.5" Foreground="#888888" Margin="0,12,0,0" TextWrapping="Wrap"/>
                     </StackPanel>
                     <!-- Cancel / Footer Action -->
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="BtnCancelDownload" Content="Cancel" Style="{StaticResource SolumSecondaryButton}" Height="36" Padding="18,0" Click="BtnCancelDownload_Click"/>
+                        <Button x:Name="BtnCancelDownload" Content="Cancel" Style="{StaticResource SolumPillSecondaryButton}" Height="40" Padding="24,0" Click="BtnCancelDownload_Click"/>
                     </StackPanel>
                 </Grid>
             </Grid>

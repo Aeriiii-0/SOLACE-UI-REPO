@@ -123,6 +123,16 @@ namespace SOLUM_UI
             _notifyTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
             _notifyTimer.Tick += (s, e) => { _notifyTimer.Stop(); IsNotificationVisible = false; };
             _notifyTimer.Start();
+
+            var owner = Window.GetWindow(this) ?? Application.Current.MainWindow;
+            if (isSuccess)
+            {
+                Views.Dialogs.ActionConfirmDialog.Success(title, message, owner);
+            }
+            else
+            {
+                Views.Dialogs.ActionConfirmDialog.Error(title, message, owner);
+            }
         }
 
         private bool IsAdmin => string.Equals(CurrentUserRole, "Administrator", StringComparison.OrdinalIgnoreCase) ||
@@ -975,7 +985,7 @@ namespace SOLUM_UI
                 }
 
             }
-            var view = new RecordViewDialog(recordToView) { Owner = Window.GetWindow(this) };
+            var view = new RecordViewDialog(recordToView) { Owner = Application.Current.MainWindow };
             view.ShowDialog();
             if (view.OpenedRenew)
             {
@@ -1001,7 +1011,7 @@ namespace SOLUM_UI
             }
             if (view.OpenedDelete)
             {
-                await DeleteRecordAsync(recordToView.Id, recordToView.Name);
+                await DeleteRecordAsync(recordToView.Id, recordToView.Name, skipConfirmation: true);
 
             }
 
@@ -1009,7 +1019,7 @@ namespace SOLUM_UI
 
         private async void AddNewRecord_Click(object sender, RoutedEventArgs e)
         {
-            var methodDialog = new EntryMethodDialog { Owner = Window.GetWindow(this) };
+            var methodDialog = new EntryMethodDialog { Owner = Application.Current.MainWindow };
             bool? picked = methodDialog.ShowDialog();
             if (picked != true || methodDialog.Selected == EntryMethod.None)
             {
@@ -1018,7 +1028,7 @@ namespace SOLUM_UI
             }
             if (methodDialog.Selected == EntryMethod.Scan)
             {
-                var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Window.GetWindow(this) };
+                var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Application.Current.MainWindow };
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
                     await SaveNewRecordAsync(ocr.Result);
@@ -1028,7 +1038,7 @@ namespace SOLUM_UI
 
             }
             // Manual entry � open 3-step wizard (Step 1 performs validation & duplicate check)
-            RecordDialog dialog = new RecordDialog { Owner = Window.GetWindow(this) };
+            RecordDialog dialog = new RecordDialog { Owner = Application.Current.MainWindow };
             dialog.SaveAsyncHandler = async (rec) =>
             {
                 rec.CreatedBy = CurrentUserName;
@@ -1349,7 +1359,7 @@ namespace SOLUM_UI
                 }
 
             }
-            RecordDialog dialog = new RecordDialog(rawRecord) { Owner = Window.GetWindow(this) };
+            RecordDialog dialog = new RecordDialog(rawRecord) { Owner = Application.Current.MainWindow };
             dialog.SaveAsyncHandler = async (rec) =>
             {
                 if (Guid.TryParse(rawRecord.Id, out var guid))
@@ -1423,7 +1433,7 @@ namespace SOLUM_UI
             }
             var dialog = new RenewalReassessmentDialog(rawRecord, existingDto)
             {
-                Owner = Window.GetWindow(this)
+                Owner = Application.Current.MainWindow
 
             };
             if (dialog.ShowDialog() == true && dialog.UpdatedRecord != null)
@@ -1451,7 +1461,7 @@ namespace SOLUM_UI
 
         }
 
-        private async Task DeleteRecordAsync(string id, string recordName)
+        private async Task DeleteRecordAsync(string id, string recordName, bool skipConfirmation = false)
         {
             if (!IsAdmin)
             {
@@ -1466,14 +1476,19 @@ namespace SOLUM_UI
 
             }
 
-            bool isConfirmed = ActionConfirmDialog.Show(
-                title: "Delete Record",
-                message: $"Are you sure you want to permanently delete the record for {recordName}? This action cannot be undone.",
-                confirmText: "Delete Record",
-                cancelText: "Cancel",
-                theme: ConfirmThemeType.Danger,
-                owner: Window.GetWindow(this));
-            if (!isConfirmed) return;
+            // Only show confirmation dialog if not already confirmed (e.g., from RecordViewDialog)
+            if (!skipConfirmation)
+            {
+                bool isConfirmed = ActionConfirmDialog.Show(
+                    title: "Delete Record",
+                    message: $"Are you sure you want to permanently delete the record for {recordName}? This action cannot be undone.",
+                    confirmText: "Delete Record",
+                    cancelText: "Cancel",
+                    theme: ConfirmThemeType.Danger,
+                    owner: Window.GetWindow(this));
+                if (!isConfirmed) return;
+            }
+            
             // Show loading indicator
             PageLoadingOverlay.Message = "Deleting record...";
             PageLoadingOverlay.IsActive = true;
@@ -1492,7 +1507,7 @@ namespace SOLUM_UI
                     return;
 
                 }
-                ShowNotification("Record Deleted", "The record was removed.", false);
+                ShowNotification("Record Deleted", $"{recordName} was removed successfully.", true);
                 AuditLogService.Instance.LogDelete(id, recordName, GetCurrentUser(), CurrentUserRole);
                 await LoadRecordsAsync();
 
@@ -1523,16 +1538,18 @@ namespace SOLUM_UI
             try
             {
                 SOLUM_UI.Services.SoloParentExportService.ExportToPdf(dlg.FileName, vm.RawModel);
-                Views.Dialogs.ActionConfirmDialog.Success(
+                ShowNotification(
                     "Export Complete",
-                    "Record exported to:\n" + dlg.FileName);
+                    "Record exported to:\n" + System.IO.Path.GetFileName(dlg.FileName),
+                    true);
 
             }
             catch (Exception ex)
             {
-                Views.Dialogs.ActionConfirmDialog.Error(
+                ShowNotification(
                     "Export Error",
-                    "Export failed:\n" + ex.Message);
+                    "Export failed:\n" + ex.Message,
+                    false);
 
             }
 
@@ -1589,7 +1606,7 @@ namespace SOLUM_UI
 
         private async void BasicUserAddRecord_Click(object sender, RoutedEventArgs e)
         {
-            var methodDialog = new EntryMethodDialog { Owner = Window.GetWindow(this) };
+            var methodDialog = new EntryMethodDialog { Owner = Application.Current.MainWindow };
             bool? picked = methodDialog.ShowDialog();
             if (picked != true || methodDialog.Selected == EntryMethod.None)
             {
@@ -1598,7 +1615,7 @@ namespace SOLUM_UI
             }
             if (methodDialog.Selected == EntryMethod.Scan)
             {
-                var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Window.GetWindow(this) };
+                var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Application.Current.MainWindow };
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
                     await SaveNewRecordAsync(ocr.Result);
@@ -1608,7 +1625,7 @@ namespace SOLUM_UI
 
             }
             // Manual entry � open RecordDialog Step 1 (Primary Info) directly
-            RecordDialog dialog = new RecordDialog() { Owner = Window.GetWindow(this) };
+            RecordDialog dialog = new RecordDialog() { Owner = Application.Current.MainWindow };
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
                 await SaveNewRecordAsync(dialog.Result);

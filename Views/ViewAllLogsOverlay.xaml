@@ -579,14 +579,14 @@
                                     Command="{Binding FirstPageCommand}"
                                     IsEnabled="{Binding CanGoPrev}"
                                     Margin="0,0,12,0"/>
-                            <Button Content="← Previous" Style="{StaticResource NavBtn}"
+                            <Button Content="Previous" Style="{StaticResource NavBtn}"
                                     Command="{Binding PrevPageCommand}"
                                     IsEnabled="{Binding CanGoPrev}"/>
                         </StackPanel>
                         <TextBlock Grid.Column="1" Text="{Binding PageInfo}"
                                    FontFamily="Segoe UI" FontSize="13" Foreground="#702943" FontWeight="SemiBold"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <Button Grid.Column="2" Content="Next →" Style="{StaticResource NavBtn}"
+                        <Button Grid.Column="2" Content="Next" Style="{StaticResource NavBtn}"
                                 Command="{Binding NextPageCommand}"
                                 IsEnabled="{Binding CanGoNext}"/>
                     </Grid>

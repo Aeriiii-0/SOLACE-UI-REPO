@@ -168,7 +168,7 @@
             <!-- ═══════════════ HERO CARD ═══════════════ -->
             <Grid x:Name="HeroCard" Height="160" Margin="0,0,0,20">
                 <!-- Background with decorative circles (lowest layer) -->
-                <Border Background="#F4E8EC" CornerRadius="22" Panel.ZIndex="0" ClipToBounds="True">
+                <Border x:Name="HeroCardBg" Background="#F4E8EC" CornerRadius="22" Panel.ZIndex="0" ClipToBounds="True" SizeChanged="RoundedClip_SizeChanged">
                     <Canvas IsHitTestVisible="False">
                         <Ellipse Width="384" Height="384" Fill="#ECD7DF" Canvas.Right="-88" Canvas.Top="-152"/>
                         <Ellipse Width="240" Height="240" Fill="#E8D0DA" Canvas.Right="120" Canvas.Bottom="-120"/>
@@ -270,7 +270,8 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- ───────── Left: Account Details ───────── -->
-                <Border Grid.Column="0" Style="{StaticResource SectionCard}">
+                <Border x:Name="AccountDetailsCard" Grid.Column="0" Style="{StaticResource SectionCard}"
+                        VerticalAlignment="Top" MinHeight="392">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -280,7 +281,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Text="Account details" Style="{StaticResource SectionTitle}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="0" Text="Account details" Style="{StaticResource SectionTitle}" Margin="0,0,0,10"/>
 
                         <!-- Full name -->
                         <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -336,10 +337,10 @@
                 <StackPanel Grid.Column="2">
 
                     <!-- Password -->
-                    <Border x:Name="PasswordCard" Style="{StaticResource SectionCard}" Padding="0">
+                    <Border x:Name="PasswordCard" Style="{StaticResource SectionCard}" Padding="0" SizeChanged="PasswordCard_SizeChanged">
                         <Grid>
                             <!-- Background circle (behind content) -->
-                            <Border Background="Transparent" CornerRadius="22" Panel.ZIndex="0" ClipToBounds="True">
+                            <Border x:Name="PasswordCardBg" Background="Transparent" CornerRadius="20.5" Panel.ZIndex="0" ClipToBounds="True" SizeChanged="RoundedClip_SizeChanged">
                                 <Canvas IsHitTestVisible="False">
                                     <Ellipse Width="168" Height="168" Fill="#F4E8EC" Canvas.Right="-40" Canvas.Top="-48"/>
                                 </Canvas>
@@ -428,7 +429,7 @@
                     </Border>
 
                     <!-- Session Info -->
-                    <Border Style="{StaticResource SectionCard}">
+                    <Border x:Name="SessionInfoCard" Style="{StaticResource SectionCard}" SizeChanged="SessionInfoCard_SizeChanged">
                         <StackPanel>
                             <TextBlock Text="Session info" Style="{StaticResource SectionTitle}" Margin="0,0,0,16"/>
 

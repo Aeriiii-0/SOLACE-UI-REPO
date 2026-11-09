@@ -3,11 +3,27 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
-        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Width="500" SizeToContent="Height">
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen"
+        Width="500" SizeToContent="Height"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextRenderingMode="ClearType"
+        TextOptions.TextFormattingMode="Display">
+    <Window.Resources>
+        <!-- Global crispy text rendering for all TextBlocks and TextBoxes -->
+        <Style TargetType="TextBlock">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        </Style>
+    </Window.Resources>
     <Border Background="Transparent" Padding="16">
         <Border Background="White" CornerRadius="16"
-                BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True">
+                BorderBrush="#702943" BorderThickness="1.5" ClipToBounds="True"
+                UseLayoutRounding="True" SnapsToDevicePixels="True">
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="4" Opacity="0.18"/>
             </Border.Effect>
@@ -19,14 +35,9 @@
                 </Grid.RowDefinitions>
                 <!-- Header / Title -->
                 <StackPanel Grid.Row="0" Margin="28,24,28,0">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Width="38" Height="38" CornerRadius="19" Background="#F0E8EC" Margin="0,0,12,0">
-                            <TextBlock Text="+" FontSize="18" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Start New Subsidy Cycle" FontSize="18" FontWeight="Bold" Foreground="#702943"/>
-                            <TextBlock Text="Concludes previous cycle and initializes funding quota" FontSize="11" Foreground="#666666" Margin="0,2,0,0"/>
-                        </StackPanel>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Start New Subsidy Cycle" FontSize="18" FontWeight="Bold" Foreground="#5C1D38"/>
+                        <TextBlock Text="Concludes previous cycle and initializes funding quota" FontSize="11" Foreground="#666666" Margin="0,4,0,0"/>
                     </StackPanel>
                     <Separator Margin="0,14,0,0" Background="#F0E2E7"/>
                 </StackPanel>
@@ -41,13 +52,108 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Fiscal Year" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,0,0,4"/>
-                            <TextBox x:Name="TxtFiscalYear" Height="34" VerticalContentAlignment="Center" Padding="8,0"
-                                     FontSize="12.5" BorderBrush="#D4A0B0" BorderThickness="1" TextChanged="Inputs_Changed"/>
+                            <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
+                                <TextBox x:Name="TxtFiscalYear" Height="34" VerticalContentAlignment="Center" Padding="10,0"
+                                         FontSize="12.5" BorderThickness="0" Background="Transparent" TextChanged="Inputs_Changed"/>
+                            </Border>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Semester / Tranche" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,0,0,4"/>
                             <ComboBox x:Name="CmbSemester" Height="34" VerticalContentAlignment="Center"
-                                      FontSize="12" BorderBrush="#D4A0B0" BorderThickness="1" SelectionChanged="CmbSemester_SelectionChanged">
+                                      FontSize="12" BorderBrush="#D4A0B0" BorderThickness="1.5" 
+                                      SelectionChanged="CmbSemester_SelectionChanged">
+                                <ComboBox.Resources>
+                                    <Style TargetType="ComboBox">
+                                        <Setter Property="Background" Value="White"/>
+                                        <Setter Property="Foreground" Value="#333333"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ComboBox">
+                                                    <Grid>
+                                                        <ToggleButton x:Name="ToggleButton"
+                                                                      Grid.Column="2"
+                                                                      Focusable="False"
+                                                                      Background="White"
+                                                                      IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                      ClickMode="Press">
+                                                            <ToggleButton.Template>
+                                                                <ControlTemplate TargetType="ToggleButton">
+                                                                    <Border x:Name="Border" Background="White"
+                                                                            BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8">
+                                                                        <Grid>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="*"/>
+                                                                                <ColumnDefinition Width="32"/>
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <Path x:Name="Arrow" Grid.Column="1"
+                                                                                  Fill="#702943" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                                  Data="M0,0 L4,4 L8,0 Z" Width="8" Height="4"/>
+                                                                        </Grid>
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter TargetName="Border" Property="Background" Value="#FBF5F7"/>
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </ToggleButton.Template>
+                                                        </ToggleButton>
+                                                        <ContentPresenter Name="ContentSite" IsHitTestVisible="False"
+                                                                          Content="{TemplateBinding SelectionBoxItem}"
+                                                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                                          Margin="10,0,32,0"
+                                                                          VerticalAlignment="Center"
+                                                                          HorizontalAlignment="Left"/>
+                                                        <Popup Name="Popup"
+                                                               Placement="Bottom"
+                                                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                                                               AllowsTransparency="True"
+                                                               Focusable="False"
+                                                               PopupAnimation="Slide">
+                                                            <Grid Name="DropDown" SnapsToDevicePixels="True"
+                                                                  MinWidth="{TemplateBinding ActualWidth}"
+                                                                  MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                                                <Border x:Name="DropDownBorder" Background="White"
+                                                                        BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Margin="0,4,0,0">
+                                                                    <Border.Effect>
+                                                                        <DropShadowEffect Color="#000000" BlurRadius="16" ShadowDepth="2" Opacity="0.15"/>
+                                                                    </Border.Effect>
+                                                                    <ScrollViewer Margin="4" SnapsToDevicePixels="True">
+                                                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                                                    </ScrollViewer>
+                                                                </Border>
+                                                            </Grid>
+                                                        </Popup>
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                    <Style TargetType="ComboBoxItem">
+                                        <Setter Property="Padding" Value="10,8"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="#333333"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ComboBoxItem">
+                                                    <Border x:Name="ItemBorder" Background="{TemplateBinding Background}"
+                                                            Padding="{TemplateBinding Padding}" CornerRadius="6" Margin="2">
+                                                        <ContentPresenter/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsHighlighted" Value="True">
+                                                            <Setter TargetName="ItemBorder" Property="Background" Value="#FBF5F7"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="ItemBorder" Property="Background" Value="#F3E3E8"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ComboBox.Resources>
                                 <ComboBoxItem Content="1st Semester (Mid-Year)" IsSelected="True"/>
                                 <ComboBoxItem Content="2nd Semester (Year-End)"/>
                             </ComboBox>
@@ -55,20 +161,26 @@
                     </Grid>
                     <!-- Cycle Title / Name (Optional) -->
                     <TextBlock Text="Cycle Name / Label" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,0,0,4"/>
-                    <TextBox x:Name="TxtCycleName" Height="34" VerticalContentAlignment="Center" Padding="8,0"
-                             FontSize="12.5" BorderBrush="#D4A0B0" BorderThickness="1"/>
+                    <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
+                        <TextBox x:Name="TxtCycleName" Height="34" VerticalContentAlignment="Center" Padding="10,0"
+                                 FontSize="12.5" BorderThickness="0" Background="Transparent"/>
+                    </Border>
                     <TextBlock Text="Leave empty to auto-generate (e.g., 'FY 2026 - 1st Semester')" FontSize="10" Foreground="#888888" Margin="0,2,0,12"/>
 
                     <!-- Target Beneficiary Quota -->
                     <TextBlock Text="Target Beneficiary Quota (Number of Grantees)" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,0,0,4"/>
-                    <TextBox x:Name="TxtGrantees" Height="34" VerticalContentAlignment="Center" Padding="8,0"
-                             FontSize="12.5" BorderBrush="#D4A0B0" BorderThickness="1" TextChanged="Inputs_Changed"/>
+                    <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
+                        <TextBox x:Name="TxtGrantees" Height="34" VerticalContentAlignment="Center" Padding="10,0"
+                                 FontSize="12.5" BorderThickness="0" Background="Transparent" TextChanged="Inputs_Changed"/>
+                    </Border>
                     <!-- Per Grantee Allowance -->
                     <TextBlock Text="Allowance Per Beneficiary (₱)" FontSize="11.5" FontWeight="SemiBold" Foreground="#444444" Margin="0,12,0,4"/>
-                    <TextBox x:Name="TxtPerGrantee" Height="34" VerticalContentAlignment="Center" Padding="8,0"
-                             FontSize="12.5" BorderBrush="#D4A0B0" BorderThickness="1" TextChanged="Inputs_Changed"/>
+                    <Border BorderBrush="#D4A0B0" BorderThickness="1.5" CornerRadius="8" Background="White">
+                        <TextBox x:Name="TxtPerGrantee" Height="34" VerticalContentAlignment="Center" Padding="10,0"
+                                 FontSize="12.5" BorderThickness="0" Background="Transparent" TextChanged="Inputs_Changed"/>
+                    </Border>
                     <!-- Computed Total Budget Preview -->
-                    <Border Background="#FDF8FA" CornerRadius="8" BorderBrush="#E5D5DC" BorderThickness="1" Padding="12,10" Margin="0,16,0,0">
+                    <Border Background="#FDF8FA" CornerRadius="10" BorderBrush="#E5D5DC" BorderThickness="1.5" Padding="12,10" Margin="0,16,0,0">
                         <Grid>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="Calculated Total Budget" FontSize="11" Foreground="#888888"/>
@@ -89,18 +201,28 @@
                         <Button Grid.Column="0" Height="38" Cursor="Hand" Click="BtnCancel_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border Background="White" CornerRadius="8" BorderBrush="#DDDDDD" BorderThickness="1.5">
+                                    <Border x:Name="Bg" Background="White" CornerRadius="20" BorderBrush="#DDDDDD" BorderThickness="1.5">
                                         <TextBlock Text="Cancel" FontSize="12.5" FontWeight="SemiBold" Foreground="#555555" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#F9F9F9"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
                         <Button Grid.Column="2" Height="38" Cursor="Hand" Click="BtnLaunch_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border Background="#702943" CornerRadius="8">
+                                    <Border x:Name="Bg" Background="#702943" CornerRadius="20">
                                         <TextBlock Text="Launch Cycle" FontSize="12.5" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#5C1D38"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>

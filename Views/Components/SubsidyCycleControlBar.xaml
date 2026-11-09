@@ -96,7 +96,7 @@
                 <!-- Start New Cycle Button (Light app theme styling: White background, subtle border, maroon text) -->
                 <Button Height="32" Padding="12,0" Cursor="Hand"
                         Command="{Binding StartNewCycleCommand}"
-                        Visibility="{Binding IsActiveCycle, Converter={StaticResource BoolToVis}}"
+                        Visibility="{Binding IsRosterLocked, Converter={StaticResource BoolToVis}}"
                         ToolTip="Initialize next fiscal year cycle">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">

@@ -364,8 +364,7 @@ namespace SOLUM_UI.Views.Components
 
         private void ScannerSettings_Click(object sender, RoutedEventArgs e)
         {
-            var window = Window.GetWindow(this);
-            var dlg = new ScannerSettingsDialog(_scannerSettings) { Owner = window };
+            var dlg = new ScannerSettingsDialog(_scannerSettings) { Owner = Application.Current.MainWindow };
             if (dlg.ShowDialog() == true)
             {
                 _scannerSettings = dlg.Settings;
@@ -551,11 +550,10 @@ namespace SOLUM_UI.Views.Components
 
         private async void AdjustTemplate_Click(object sender, RoutedEventArgs e)
         {
-            var window = Window.GetWindow(this);
             string imgToPass = !string.IsNullOrEmpty(_currentDeskewedImagePath) && File.Exists(_currentDeskewedImagePath)
                 ? _currentDeskewedImagePath
                 : CurrentImagePath;
-            var configWin = new OcrTemplateConfigWindow(imgToPass, _lastFocusedFieldKey) { Owner = window };
+            var configWin = new OcrTemplateConfigWindow(imgToPass, _lastFocusedFieldKey) { Owner = Application.Current.MainWindow };
             bool? res = configWin.ShowDialog();
             if (res == true || configWin.TemplateSaved)
             {

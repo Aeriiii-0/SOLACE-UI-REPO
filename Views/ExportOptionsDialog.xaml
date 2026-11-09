@@ -3,9 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
-        WindowStartupLocation="Manual">
+        WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextRenderingMode="ClearType"
+        TextOptions.TextFormattingMode="Display">
     <Border Background="#66000000">
         <Border x:Name="Shell" Background="White" CornerRadius="18"
+                BorderBrush="#702943" BorderThickness="1.5"
                 ClipToBounds="True" Width="460"
                 VerticalAlignment="Center" HorizontalAlignment="Center">
             <Border.Effect>
@@ -38,7 +43,8 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,5,0,12"
+                                        HorizontalAlignment="Left" VerticalAlignment="Center">
                                 <CheckBox x:Name="ChkPassword" VerticalAlignment="Center"
                                           Checked="ChkPassword_Changed" Unchecked="ChkPassword_Changed"
                                           Cursor="Hand">
@@ -111,7 +117,8 @@
                         </Grid>
                     </Border>
                     <Border Background="#FAFAFA" CornerRadius="12" BorderBrush="#E8E0E4"
-                            BorderThickness="1" Padding="18,14" Margin="0,0,0,0">
+                            BorderThickness="1" Padding="18,14" Margin="0,0,0,0"
+                            Visibility="Collapsed">
                         <CheckBox x:Name="ChkOpenAfter" IsChecked="True" Cursor="Hand">
                             <CheckBox.Template>
                                 <ControlTemplate TargetType="CheckBox">
@@ -156,7 +163,7 @@
                         <Button Grid.Column="0" Height="46" Cursor="Hand" Click="BtnCancel_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="White" CornerRadius="10"
+                                    <Border x:Name="Bg" Background="White" CornerRadius="20"
                                             BorderBrush="#DDDDDD" BorderThickness="1.5">
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
@@ -173,7 +180,7 @@
                         <Button Grid.Column="2" Height="46" Cursor="Hand" Click="BtnExport_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="#702943" CornerRadius="10">
+                                    <Border x:Name="Bg" Background="#702943" CornerRadius="20">
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <ControlTemplate.Triggers>

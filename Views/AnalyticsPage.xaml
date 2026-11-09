@@ -1103,5 +1103,16 @@
                                   BlurTarget="{Binding ElementName=AnalyticsRootGrid}"
                                   Message="Loading analytics..."
                                   Panel.ZIndex="9999"/>
+        <!-- Notification Card -->
+        <components:NotificationCardComponent
+            x:Name="NotificationCard"
+            Panel.ZIndex="10000"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            Margin="0,24,0,0"
+            Title="{Binding NotificationTitle, RelativeSource={RelativeSource AncestorType=Page}}"
+            Message="{Binding NotificationMessage, RelativeSource={RelativeSource AncestorType=Page}}"
+            IsSuccess="{Binding IsNotificationSuccess, RelativeSource={RelativeSource AncestorType=Page}}"
+            Visibility="{Binding IsNotificationVisible, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource BoolToVisibilityConverter}}"/>
     </Grid>
 </Page>

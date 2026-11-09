@@ -34,10 +34,10 @@ namespace SOLUM_UI.Views.Components
             double totalWidth = FinalGranteesListView.ActualWidth;
             if (totalWidth <= 0) return;
 
-            double scrollMargin = 20.0;
-            double wContact = 120.0;
-            double wEmergencyPhone = 120.0;
-            double wStatus = 85.0;
+            double scrollMargin = 5.0;
+            double wContact = 135.0;
+            double wEmergencyPhone = 145.0;
+            double wStatus = 100.0;
             if (ColContact != null) ColContact.Width = wContact;
             if (ColEmergencyPhone != null) ColEmergencyPhone.Width = wEmergencyPhone;
             if (ColStatus != null) ColStatus.Width = wStatus;

@@ -569,7 +569,7 @@ namespace SOLUM_UI.Views.Components
         {
             if (FoundRecord != null)
             {
-                var viewer = new RecordViewDialog(FoundRecord) { Owner = Window.GetWindow(this) };
+                var viewer = new RecordViewDialog(FoundRecord) { Owner = Application.Current.MainWindow };
                 viewer.ShowDialog();
             }
         }

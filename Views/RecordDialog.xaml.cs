@@ -1818,7 +1818,7 @@ namespace SOLUM_UI
         {
             if (_foundRecord != null)
             {
-                var viewer = new SOLUM_UI.Views.Dialogs.RecordViewDialog(_foundRecord) { Owner = this };
+                var viewer = new SOLUM_UI.Views.Dialogs.RecordViewDialog(_foundRecord) { Owner = Application.Current.MainWindow };
                 viewer.ShowDialog();
             }
         }
@@ -2026,11 +2026,14 @@ namespace SOLUM_UI
             }
             if (SaveAsyncHandler != null)
             {
+                // Show loading overlay
+                RecordSaveLoader.IsActive = true;
                 try
                 {
                     var saveResult = await SaveAsyncHandler(preview);
                     if (saveResult != null && !saveResult.Succeeded)
                     {
+                        RecordSaveLoader.IsActive = false;
                         DialogShell.Visibility = Visibility.Visible;
                         if (saveResult.StatusCode == 409 || (saveResult.Errors != null && saveResult.Errors.Any(err => err.IndexOf("PhilSys", StringComparison.OrdinalIgnoreCase) >= 0)))
                         {
@@ -2048,9 +2051,14 @@ namespace SOLUM_UI
                 }
                 catch (Exception ex)
                 {
+                    RecordSaveLoader.IsActive = false;
                     DialogShell.Visibility = Visibility.Visible;
                     Views.Dialogs.ActionConfirmDialog.Error("Save Error", "An error occurred while saving: " + ex.Message);
                     return;
+                }
+                finally
+                {
+                    RecordSaveLoader.IsActive = false;
                 }
             }
             try

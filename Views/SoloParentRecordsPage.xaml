@@ -513,7 +513,7 @@
                     </ComboBox>
                     <TextBox x:Name="SearchName" Grid.Column="1"
                              BorderThickness="0" Background="Transparent"
-                             FontSize="12.5" Foreground="#1F2937" VerticalAlignment="Center"
+                             FontSize="14" Foreground="#1F2937" VerticalAlignment="Center"
                              Margin="12,0,0,0"
                              TextChanged="SearchFields_TextChanged"
                              KeyDown="SearchBox_KeyDown">
@@ -524,7 +524,7 @@
                                         <ControlTemplate TargetType="TextBox">
                                             <Grid>
                                                 <TextBlock Text="{Binding SearchPlaceholder, RelativeSource={RelativeSource AncestorType=Page}}"
-                                                           Foreground="#B098A0" FontSize="12.5"
+                                                           Foreground="#B098A0" FontSize="14"
                                                            VerticalAlignment="Center" IsHitTestVisible="False">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
@@ -1200,7 +1200,7 @@
                                    Foreground="#702943" VerticalAlignment="Center" Margin="14,0,8,0"/>
                         <TextBox x:Name="BasicSearchName" Grid.Column="1"
                                  BorderThickness="0" Background="Transparent"
-                                 FontSize="13" Foreground="#333333" VerticalAlignment="Center"
+                                 FontSize="14" Foreground="#333333" VerticalAlignment="Center"
                                  ToolTip="Full name searches require exact matches (e.g., 'Juan Dela Cruz')"
                                  TextChanged="BasicSearchName_TextChanged"
                                  KeyDown="SearchBox_KeyDown">
@@ -1210,7 +1210,7 @@
                                         <Setter.Value>
                                             <ControlTemplate TargetType="TextBox">
                                                 <Grid>
-                                                    <TextBlock Text="Search exact full name..." Foreground="#C0A8B0" FontSize="13"
+                                                    <TextBlock Text="Search exact full name..." Foreground="#C0A8B0" FontSize="14"
                                                                VerticalAlignment="Center" IsHitTestVisible="False">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
@@ -1332,14 +1332,14 @@
                             <ComboBoxItem Content="PhilSys ID" Tag="PHILSYS_ID"/>
                         </ComboBox>
                         <Rectangle Grid.Column="1" Fill="#D4A0B0" Width="1.5" Margin="8,12,8,12"/>
-                        <TextBox x:Name="EncSearchQuery" Grid.Column="2" BorderThickness="0" Background="Transparent" FontFamily="Segoe UI" FontSize="13" Foreground="#333333" Padding="16,0" VerticalAlignment="Center" TextChanged="EncoderFields_TextChanged" KeyDown="SearchBox_KeyDown">
+                        <TextBox x:Name="EncSearchQuery" Grid.Column="2" BorderThickness="0" Background="Transparent" FontFamily="Segoe UI" FontSize="14" Foreground="#333333" Padding="16,0" VerticalAlignment="Center" TextChanged="EncoderFields_TextChanged" KeyDown="SearchBox_KeyDown">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="TextBox">
                                                 <Grid>
-                                                    <TextBlock Text="Search records (name, PhilSys ID)..." Foreground="#C0A8B0" FontSize="13" VerticalAlignment="Center" Padding="16,0" IsHitTestVisible="False">
+                                                    <TextBlock Text="Search records (name, PhilSys ID)..." Foreground="#C0A8B0" FontSize="14" VerticalAlignment="Center" Padding="16,0" IsHitTestVisible="False">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
                                                                 <Setter Property="Visibility" Value="Collapsed"/>

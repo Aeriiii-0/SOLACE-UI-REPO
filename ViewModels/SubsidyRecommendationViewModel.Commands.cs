@@ -155,17 +155,17 @@ namespace SOLUM_UI.ViewModels
             SelectAllShortlistCommand = new RelayCommand(_ => { bool all = FilteredShortlistRows.Count > 0 && FilteredShortlistRows.All(x => x.IsSelected); foreach (var r in FilteredShortlistRows) r.IsSelected = !all; RecalculateShortlistSelectionCounts(); });
             ExportCityEducCommand = new RelayCommand(async _ => {
                 var c = ShortlistRows.Where(i => i.HasCollegeAgeDependent).ToList();
-                if (c.Count == 0) { ToastNotification.Show("No Flagged Records", "No applicants have college-age dependents.", ToastType.Info); return; }
+                if (c.Count == 0) { Views.Dialogs.ActionConfirmDialog.Warning("No Flagged Records", "No applicants have college-age dependents."); return; }
                 await ExportCsvAsync($"CityEduc_College_Dependents_{DateTime.Now:yyyy}", _apiService.ExportCityEducRosterCsvAsync(ShortlistRows.ToList()), $"{c.Count} candidate(s) exported for City Educ cross-check.");
             });
             ExportPantawid4PsCommand = new RelayCommand(async _ => {
                 var list = ShortlistRows.Where(i => i.IsPantawidBeneficiary).ToList();
                 if (list.Count == 0) list = _allItems.Where(i => i.IsPantawidBeneficiary).Select(it => new SelectionRow { Rank = it.Rank, SpId = it.SpId, Name = it.Name, Barangay = it.Barangay, MonthlyIncome = it.MonthlyIncome, IncomePerCapita = it.IncomePerCapita, Dependants = it.Dependants, MinorDependentsCount = it.MinorDependentsCount, Circumstance = it.Circumstance, IsPantawidBeneficiary = true }).ToList();
-                if (list.Count == 0) { ToastNotification.Show("No Records", "No applicants are tagged as 4Ps beneficiaries.", ToastType.Info); return; }
+                if (list.Count == 0) { Views.Dialogs.ActionConfirmDialog.Warning("No Records", "No applicants are tagged as 4Ps beneficiaries."); return; }
                 await ExportCsvAsync($"Pantawid_4Ps_Beneficiaries_{DateTime.Now:yyyyMMdd}", _apiService.ExportPantawid4PsRosterCsvAsync(list), $"{list.Count} 4Ps candidate(s) exported successfully.");
             });
             ExportFinalLedgerCommand = new RelayCommand(async _ => {
-                if (FinalGranteesList.Count == 0) { ToastNotification.Show("Ledger Empty", "No confirmed grantees to export.", ToastType.Warning); return; }
+                if (FinalGranteesList.Count == 0) { Views.Dialogs.ActionConfirmDialog.Warning("Ledger Empty", "No confirmed grantees to export."); return; }
                 int yr = SelectedFiscalCycle?.FiscalYear ?? ActiveCycleFiscalYear;
                 await ExportCsvAsync($"Final_Grantee_Ledger_FY{yr}", _apiService.ExportFinalLedgerCsvAsync(FinalGranteesList.ToList(), yr), $"Final grantee ledger for FY {yr} exported successfully.");
             });

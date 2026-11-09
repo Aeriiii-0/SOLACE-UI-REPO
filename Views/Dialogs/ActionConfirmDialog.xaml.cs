@@ -20,6 +20,16 @@ namespace SOLUM_UI.Views.Dialogs
         public ActionConfirmDialog()
         {
             InitializeComponent();
+            KeyDown += (s, e) =>
+            {
+                if (e.Key == System.Windows.Input.Key.Escape)
+                {
+                    if (BtnCancel.Visibility == Visibility.Visible)
+                        BtnCancel_Click(s, e);
+                    else
+                        BtnConfirm_Click(s, e);
+                }
+            };
         }
         /// <summary>
         /// Show a confirmation modal dialog with customizable theme and options.
@@ -80,27 +90,44 @@ namespace SOLUM_UI.Views.Dialogs
             ConfirmThemeType theme = ConfirmThemeType.Primary,
             Window owner = null)
         {
-            var dialog = new ActionConfirmDialog();
-            if (owner != null)
+            void DoAlert()
             {
-                dialog.Owner = owner;
+                var dialog = new ActionConfirmDialog();
+                if (owner != null && owner.IsVisible)
+                {
+                    dialog.Owner = owner;
+                }
+                else if (Application.Current?.MainWindow != null && Application.Current.MainWindow.IsVisible)
+                {
+                    dialog.Owner = Application.Current.MainWindow;
+                }
+                dialog.TxtTitle.Text = title;
+                dialog.TxtMessage.Text = message;
+                dialog.TxtConfirmBtn.Text = "OK";
+                dialog.TxtCancelBtn.Text = "";
+                dialog.BtnCancel.Visibility = Visibility.Collapsed;
+                // Center the single confirmation/OK button across the footer
+                Grid.SetColumn(dialog.BtnConfirm, 0);
+                Grid.SetColumnSpan(dialog.BtnConfirm, 3);
+                dialog.BtnConfirm.HorizontalAlignment = HorizontalAlignment.Center;
+                dialog.BtnConfirm.Width = 180;
+                dialog.ApplyTheme(theme);
+                if (theme == ConfirmThemeType.Danger)
+                {
+                    // Use error circle-X icon for error alert notifications
+                    dialog.IconPath.Data = Geometry.Parse("M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z");
+                }
+                dialog.ShowDialog();
             }
-            else if (Application.Current?.MainWindow != null && Application.Current.MainWindow.IsVisible)
+
+            if (Application.Current != null && Application.Current.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
             {
-                dialog.Owner = Application.Current.MainWindow;
+                Application.Current.Dispatcher.Invoke(DoAlert);
             }
-            dialog.TxtTitle.Text = title;
-            dialog.TxtMessage.Text = message;
-            dialog.TxtConfirmBtn.Text = "OK";
-            dialog.TxtCancelBtn.Text = "";
-            dialog.BtnCancel.Visibility = Visibility.Collapsed;
-            // Center the single confirmation/OK button across the footer
-            Grid.SetColumn(dialog.BtnConfirm, 0);
-            Grid.SetColumnSpan(dialog.BtnConfirm, 3);
-            dialog.BtnConfirm.HorizontalAlignment = HorizontalAlignment.Center;
-            dialog.BtnConfirm.Width = 180;
-            dialog.ApplyTheme(theme);
-            dialog.ShowDialog();
+            else
+            {
+                DoAlert();
+            }
         }
         /// <summary>
         /// Show a success notification.

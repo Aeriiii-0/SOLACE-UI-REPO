@@ -240,7 +240,7 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            <Button x:Name="BtnContinueAnyway" Content="Continue to Step 2 &#x2192;"
+                            <Button x:Name="BtnContinueAnyway" Content="Continue to Step 2"
                                     Height="32" Padding="14,0" Background="#33FFFFFF" Foreground="White"
                                     FontSize="12" FontWeight="SemiBold" BorderBrush="White" BorderThickness="1"
                                     Cursor="Hand" Click="ContinueAnyway_Click">

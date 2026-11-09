@@ -7,11 +7,293 @@
         AllowsTransparency="True"
         Background="Transparent"
         ResizeMode="NoResize"
-        ShowInTaskbar="False">
+        ShowInTaskbar="False"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType">
+    <Window.Resources>
+        <CornerRadius x:Key="R11">11</CornerRadius>
+        <CornerRadius x:Key="R12">12</CornerRadius>
+        <CornerRadius x:Key="R13">13</CornerRadius>
+        <CornerRadius x:Key="R15">15</CornerRadius>
+        <CornerRadius x:Key="R17">17</CornerRadius>
+        <CornerRadius x:Key="R18">18</CornerRadius>
+        <CornerRadius x:Key="R19">19</CornerRadius>
+        <CornerRadius x:Key="R21">21</CornerRadius>
+
+        <Style x:Key="PillBase" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Tag">
+                <Setter.Value>
+                    <CornerRadius>20</CornerRadius>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding Tag}" Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PillOutline" TargetType="Button" BasedOn="{StaticResource PillBase}">
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#702943"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FBF3F5"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#F3E3E8"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="PillPrimary" TargetType="Button" BasedOn="{StaticResource PillBase}">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#702943"/>
+            <Setter Property="BorderBrush" Value="#702943"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#5A1F35"/>
+                    <Setter Property="BorderBrush" Value="#5A1F35"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#491829"/>
+                    <Setter Property="BorderBrush" Value="#491829"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="PillGreen" TargetType="Button" BasedOn="{StaticResource PillBase}">
+            <Setter Property="Foreground" Value="#1F7A47"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#1F7A47"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#EEF8F2"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#DDF0E5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="PillWarn" TargetType="Button" BasedOn="{StaticResource PillBase}">
+            <Setter Property="Foreground" Value="#C2410C"/>
+            <Setter Property="Background" Value="#FFF4EC"/>
+            <Setter Property="BorderBrush" Value="#C2410C"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFE6D5"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FFD6BC"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CloseCircle" TargetType="Button">
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Width="34" Height="34">
+                            <Ellipse x:Name="Ring" Width="34" Height="34" Fill="White"
+                                     Stroke="#E2C6CE" StrokeThickness="1.5"/>
+                            <Path x:Name="Cross" Data="M0,0 L10,10 M10,0 L0,10"
+                                  Stroke="#8A6B75" StrokeThickness="1.8"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Width="10" Height="10" Stretch="None"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Ring" Property="Fill" Value="#FBF3F5"/>
+                                <Setter TargetName="Ring" Property="Stroke" Value="#702943"/>
+                                <Setter TargetName="Cross" Property="Stroke" Value="#702943"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="IconCircle" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#6B4A54"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Tag">
+                <Setter.Value>
+                    <CornerRadius>14</CornerRadius>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding Tag}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F3E3E8"/>
+                    <Setter Property="Foreground" Value="#702943"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="NudgeBtn" TargetType="Button">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E2C6CE"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10" SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FBF3F5"/>
+                    <Setter Property="BorderBrush" Value="#702943"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="FormCombo" TargetType="ComboBox">
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#2B1B20"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E2C6CE"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid HorizontalAlignment="Stretch">
+                            <Border x:Name="ComboBg" Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="12" SnapsToDevicePixels="True">
+                                <Grid Margin="12,0,32,0">
+                                    <ContentPresenter x:Name="ContentSite"
+                                                      Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                      VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                    <TextBlock x:Name="Placeholder" Text="Select..."
+                                               Foreground="#B9A0A8" FontSize="13"
+                                               VerticalAlignment="Center" IsHitTestVisible="False"
+                                               Visibility="Collapsed"/>
+                                </Grid>
+                            </Border>
+                            <ToggleButton HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                          Background="Transparent" BorderThickness="0"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Focusable="False" Opacity="0"/>
+                            <Path HorizontalAlignment="Right" VerticalAlignment="Center"
+                                  Margin="0,0,14,0" Data="M0,0 L5,5 L10,0"
+                                  Stroke="#702943" StrokeThickness="1.8"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="10" Height="5" Stretch="None"
+                                  IsHitTestVisible="False"/>
+                            <Popup x:Name="Popup" Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Focusable="False" PopupAnimation="None">
+                                <Border Background="White" CornerRadius="12" BorderBrush="#E2C6CE"
+                                        BorderThickness="1.5" MinWidth="{TemplateBinding ActualWidth}"
+                                        MaxHeight="260" Margin="0,4,0,8" SnapsToDevicePixels="True">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#702943" BlurRadius="14" ShadowDepth="2" Opacity="0.14" RenderingBias="Quality"/>
+                                    </Border.Effect>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,4">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="SelectedIndex" Value="-1">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#C79AA8"/>
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#702943"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Resources>
+                <Style TargetType="ComboBoxItem">
+                    <Setter Property="Padding" Value="12,8"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="Foreground" Value="#2B1B20"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ComboBoxItem">
+                                <Border x:Name="ItemBg" Background="Transparent"
+                                        Padding="{TemplateBinding Padding}" CornerRadius="8" Margin="4,1">
+                                    <ContentPresenter/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#FBF3F5"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#F3E3E8"/>
+                                        <Setter Property="Foreground" Value="#702943"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Style.Resources>
+        </Style>
+    </Window.Resources>
     <Border x:Name="BackdropBorder" Background="#66000000">
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-            <!-- Shadow Layer: Sibling with NO children. Rendered once into GPU cache -->
-            <Border x:Name="ShadowLayer" Background="White" CornerRadius="16"
+            <Border x:Name="ShadowLayer" Background="White" CornerRadius="24"
                     IsHitTestVisible="False"
                     Width="{Binding ActualWidth, ElementName=DialogShell}"
                     Height="{Binding ActualHeight, ElementName=DialogShell}">
@@ -26,226 +308,133 @@
                     <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="4" Opacity="0.25" RenderingBias="Performance"/>
                 </Border.Effect>
             </Border>
-            <!-- Main Interactive Shell Layer (Clean, ZERO DropShadowEffect on visual tree) -->
-            <Border x:Name="DialogShell" Background="White" CornerRadius="16"
+            <Border x:Name="DialogShell" Background="White" CornerRadius="24"
                     BorderBrush="#702943" BorderThickness="1.5"
                     SnapsToDevicePixels="True">
                 <Border.RenderTransform>
                     <TranslateTransform x:Name="DialogShellTransform"/>
                 </Border.RenderTransform>
                 <Grid>
-                <Grid.RowDefinitions>
-                    <!-- Header -->
-                    <RowDefinition Height="60"/>
-                    <!-- Main Body -->
-                    <RowDefinition Height="*"/>
-                    <!-- Footer -->
-                    <RowDefinition Height="64"/>
-                </Grid.RowDefinitions>
-                <!-- HEADER -->
-                <Border x:Name="HeaderBorder" Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="24,0">
-                    <Grid VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="📐" FontSize="22" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <StackPanel>
-                                <TextBlock Text="OCR Template Field Box Calibration" FontSize="16" FontWeight="Bold" Foreground="White"/>
-                                <TextBlock Text="Visually reposition and resize bounding boxes for CSWDO-066-2 Application Form" FontSize="11" Foreground="#E0B8C4"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="76"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="72"/>
+                    </Grid.RowDefinitions>
+                    <Border x:Name="HeaderBorder" Grid.Row="0" Background="White" CornerRadius="24,24,0,0" Padding="32,0,28,0"
+                            BorderBrush="#F0E2E6" BorderThickness="0,0,0,1">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="OCR Template Field Box Calibration" FontSize="20" FontWeight="Bold" Foreground="#702943"/>
+                                <TextBlock Text="Visually reposition and resize bounding boxes for CSWDO-066-2 Application Form" FontSize="12.5" Foreground="#7A6068" Margin="0,4,0,0"/>
                             </StackPanel>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Content="🔄 Revert to Default" Click="ResetToDefault_Click"
-                                    Height="32" Padding="14,0" Background="#903554" Foreground="White"
-                                    BorderThickness="1" BorderBrush="#B86580" Cursor="Hand" Margin="0,0,12,0">
-                                <Button.Resources>
-                                    <Style TargetType="Border">
-                                        <Setter Property="CornerRadius" Value="8"/>
-                                    </Style>
-                                </Button.Resources>
-                            </Button>
-                            <Button Click="Close_Click" Background="Transparent" BorderThickness="0" Cursor="Hand" Width="32" Height="32">
-                                <TextBlock Text="✕" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-                <!-- MAIN WORKSPACE -->
-                <Grid Grid.Row="1" Margin="16,12">
-                    <Grid.ColumnDefinitions>
-                        <!-- Interactive Canvas Viewport -->
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="16"/>
-                        <!-- Field Properties & Calibration Sidebar -->
-                        <ColumnDefinition Width="380"/>
-                    </Grid.ColumnDefinitions>
-                    <!-- LEFT: INTERACTIVE DOCUMENT CANVAS -->
-                    <Border Grid.Column="0" Background="#2B2B2B" BorderBrush="#D8C8CC" BorderThickness="1" CornerRadius="12" ClipToBounds="True">
-                        <Grid>
-                            <!-- Scrollable & Zoomable Viewport with Native Scroll + Pan + Cursor-Centered Zoom -->
-                            <ScrollViewer x:Name="CanvasScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                                          Background="#2B2B2B"
-                                          PreviewMouseWheel="CanvasScrollViewer_PreviewMouseWheel"
-                                          MouseDown="CanvasScrollViewer_MouseDown"
-                                          MouseMove="CanvasScrollViewer_MouseMove"
-                                          MouseUp="CanvasScrollViewer_MouseUp">
-                                <Grid x:Name="CanvasContainer" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <!-- Scanned Document Image -->
-                                    <Image x:Name="ImgDocument" Stretch="Fill"
-                                           Width="{Binding Width, ElementName=OverlayCanvas}"
-                                           Height="{Binding Height, ElementName=OverlayCanvas}"
-                                           RenderOptions.BitmapScalingMode="HighQuality"/>
-                                    <!-- Overlay Canvas for Field Boxes -->
-                                    <Canvas x:Name="OverlayCanvas" Background="Transparent"
-                                            MouseDown="OverlayCanvas_MouseDown"
-                                            MouseMove="OverlayCanvas_MouseMove"
-                                            MouseUp="OverlayCanvas_MouseUp"/>
-                                </Grid>
-                            </ScrollViewer>
-                            <!-- FLOATING UNDO / REDO DOCK (Top-Left) -->
-                            <Border HorizontalAlignment="Left" VerticalAlignment="Top"
-                                    Margin="16,14,0,0" Background="#F8FFFFFF" BorderBrush="#D0C0C6" BorderThickness="1"
-                                    CornerRadius="16" Padding="6,4" SnapsToDevicePixels="True">
-                                <Border.Effect>
-                                    <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.16"/>
-                                </Border.Effect>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Button x:Name="BtnUndo" Content="↩ Undo" Click="Undo_Click" Height="24" Padding="8,0"
-                                            Background="Transparent" BorderThickness="0" Cursor="Hand" FontWeight="SemiBold" FontSize="11" Foreground="#444444" ToolTip="Undo Last Change (Ctrl+Z)"/>
-                                    <Border Width="1" Height="14" Background="#E0D0D5" Margin="4,0"/>
-                                    <Button x:Name="BtnRedo" Content="↪ Redo" Click="Redo_Click" Height="24" Padding="8,0"
-                                            Background="Transparent" BorderThickness="0" Cursor="Hand" FontWeight="SemiBold" FontSize="11" Foreground="#444444" ToolTip="Redo Last Change (Ctrl+Y)"/>
-                                    <Border Width="1" Height="14" Background="#E0D0D5" Margin="4,0"/>
-                                    <TextBlock Text="💡 Shift+Click to multi-select • Drag empty space to pan • Ctrl+Wheel to zoom" FontSize="10" Foreground="#666666" Margin="4,0,6,0" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
-                            <!-- FLOATING NAVIGATION DOCK (Bottom-Right, shifted left to clear scrollbars) -->
-                            <Border x:Name="FloatingNavDock" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                    Margin="0,0,48,24" Background="#F4FFFFFF" BorderBrush="#D0C0C6" BorderThickness="1"
-                                    CornerRadius="16" Padding="6,3" SnapsToDevicePixels="True">
-                                <Border.Effect>
-                                    <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.16"/>
-                                </Border.Effect>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <!-- Zoom Out -->
-                                    <Button x:Name="BtnFloatZoomOut" Click="ZoomOut_Click" Width="24" Height="24"
-                                            Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
-                                            ToolTip="Zoom Out (−)">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
-                                                    <TextBlock Text="−" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
-                                                        <Setter Property="Foreground" Value="#702943"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
-                                    <!-- Zoom Percentage Readout / Reset -->
-                                    <Border x:Name="PillZoomLevel" Background="Transparent" CornerRadius="8" Padding="5,2"
-                                            Cursor="Hand" MouseLeftButtonUp="ZoomReset_Click" ToolTip="Click to reset zoom to 100%">
-                                        <TextBlock x:Name="TxtZoomLevel" Text="100%" FontSize="10.5" FontWeight="Bold" Foreground="#702943"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
-                                    <!-- Zoom In -->
-                                    <Button x:Name="BtnFloatZoomIn" Click="ZoomIn_Click" Width="24" Height="24"
-                                            Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
-                                            ToolTip="Zoom In (+)">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
-                                                    <TextBlock Text="+" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
-                                                        <Setter Property="Foreground" Value="#702943"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
-                                    <!-- Vertical Separator -->
-                                    <Border Width="1" Height="14" Background="#E0D0D5" Margin="4,0"/>
-                                    <!-- Fit Page in View -->
-                                    <Button x:Name="BtnFloatZoomFit" Click="ZoomFit_Click" Width="24" Height="24"
-                                            Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
-                                            ToolTip="Fit Entire Page in View">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
-                                                    <Viewbox Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                        <Canvas Width="24" Height="24">
-                                                            <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                                                  Data="M5,5H10V7H7V10H5V5M14,5H19V10H17V7H14V5M17,14H19V19H14V17H17V14M10,17V19H5V14H7V17H10Z"/>
-                                                        </Canvas>
-                                                    </Viewbox>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
-                                                        <Setter Property="Foreground" Value="#702943"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
-                                    <!-- 1:1 Actual Size -->
-                                    <Button x:Name="BtnFloatZoomReset" Click="ZoomReset1to1_Click" Width="24" Height="24"
-                                            Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
-                                            ToolTip="Reset to 1:1 (100% Actual Size)">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
-                                                    <TextBlock Text="1:1" FontSize="9.5" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
-                                                        <Setter Property="Foreground" Value="#702943"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
-                                </StackPanel>
-                            </Border>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Content="Revert to Default" Click="ResetToDefault_Click" Style="{StaticResource PillWarn}" Margin="0,0,14,0"/>
+                                <Button Click="Close_Click" Style="{StaticResource CloseCircle}"/>
+                            </StackPanel>
                         </Grid>
                     </Border>
-                    <!-- RIGHT: STREAMLINED CALIBRATION SIDEBAR -->
-                    <Border Grid.Column="2" Background="#FAFAFA" BorderBrush="#E5D8DC" BorderThickness="1" CornerRadius="12" Padding="14">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Grid.Row="1" Margin="24,18,24,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="390"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="#2B2B2B" CornerRadius="20" SnapsToDevicePixels="True">
+                            <Grid>
+                                <Border x:Name="CanvasMaskSource" Background="#2B2B2B" CornerRadius="20"/>
+                                <ScrollViewer x:Name="CanvasScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                              Background="Transparent"
+                                              PreviewMouseWheel="CanvasScrollViewer_PreviewMouseWheel"
+                                              MouseDown="CanvasScrollViewer_MouseDown"
+                                              MouseMove="CanvasScrollViewer_MouseMove"
+                                              MouseUp="CanvasScrollViewer_MouseUp">
+                                    <ScrollViewer.OpacityMask>
+                                        <VisualBrush Visual="{Binding ElementName=CanvasMaskSource}"/>
+                                    </ScrollViewer.OpacityMask>
+                                    <Grid x:Name="CanvasContainer" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Image x:Name="ImgDocument" Stretch="Fill"
+                                               Width="{Binding Width, ElementName=OverlayCanvas}"
+                                               Height="{Binding Height, ElementName=OverlayCanvas}"
+                                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                                        <Canvas x:Name="OverlayCanvas" Background="Transparent"
+                                                MouseDown="OverlayCanvas_MouseDown"
+                                                MouseMove="OverlayCanvas_MouseMove"
+                                                MouseUp="OverlayCanvas_MouseUp"/>
+                                    </Grid>
+                                </ScrollViewer>
+                                <Border HorizontalAlignment="Left" VerticalAlignment="Top"
+                                        Margin="16,16,0,0" Background="#F8FFFFFF" CornerRadius="21" Padding="6" SnapsToDevicePixels="True">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.2" RenderingBias="Quality"/>
+                                    </Border.Effect>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button x:Name="BtnUndo" Content="Undo" Click="Undo_Click" Height="30" Padding="14,0" FontSize="11.5" Tag="{StaticResource R15}"
+                                                Style="{StaticResource PillOutline}" BorderThickness="0" ToolTip="Undo Last Change (Ctrl+Z)"/>
+                                        <Button x:Name="BtnRedo" Content="Redo" Click="Redo_Click" Height="30" Padding="14,0" FontSize="11.5" Tag="{StaticResource R15}" Margin="4,0,0,0"
+                                                Style="{StaticResource PillOutline}" BorderThickness="0" ToolTip="Redo Last Change (Ctrl+Y)"/>
+                                        <TextBlock Text="Shift+Click to multi-select  •  Drag empty space to pan  •  Ctrl+Wheel to zoom" FontSize="11" Foreground="#6B4A54" Margin="14,0,12,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border x:Name="FloatingNavDock" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                        Margin="0,0,48,24" Background="#F8FFFFFF" CornerRadius="20" Padding="6" SnapsToDevicePixels="True">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.2" RenderingBias="Quality"/>
+                                    </Border.Effect>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button x:Name="BtnFloatZoomOut" Click="ZoomOut_Click" Style="{StaticResource IconCircle}" ToolTip="Zoom Out (−)">
+                                            <TextBlock Text="−" FontSize="16" FontWeight="Bold"/>
+                                        </Button>
+                                        <Border x:Name="PillZoomLevel" Background="Transparent" Height="24" CornerRadius="12" Padding="8,0"
+                                                Cursor="Hand" MouseLeftButtonUp="ZoomReset_Click" ToolTip="Click to reset zoom to 100%">
+                                            <TextBlock x:Name="TxtZoomLevel" Text="100%" FontSize="12" FontWeight="Bold" Foreground="#702943"
+                                                       VerticalAlignment="Center"/>
+                                        </Border>
+                                        <Button x:Name="BtnFloatZoomIn" Click="ZoomIn_Click" Style="{StaticResource IconCircle}" ToolTip="Zoom In (+)">
+                                            <TextBlock Text="+" FontSize="15" FontWeight="Bold"/>
+                                        </Button>
+                                        <Border Width="1" Height="16" Background="#E2C6CE" Margin="6,0"/>
+                                        <Button x:Name="BtnFloatZoomFit" Click="ZoomFit_Click" Style="{StaticResource IconCircle}" ToolTip="Fit Entire Page in View">
+                                            <Viewbox Width="13" Height="13">
+                                                <Canvas Width="24" Height="24">
+                                                    <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                          Data="M5,5H10V7H7V10H5V5M14,5H19V10H17V7H14V5M17,14H19V19H14V17H17V14M10,17V19H5V14H7V17H10Z"/>
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Button>
+                                        <Button x:Name="BtnFloatZoomReset" Click="ZoomReset1to1_Click" Style="{StaticResource IconCircle}" ToolTip="Reset to 1:1 (100% Actual Size)">
+                                            <TextBlock Text="1:1" FontSize="10.5" FontWeight="Bold"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <!-- CARD 1: ACTIVE FIELD & POSITION READOUT -->
-                                <Border Background="White" BorderBrush="#E5D8DC" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,12">
+                                <Border Background="White" BorderBrush="#EBD5DB" BorderThickness="1.5" CornerRadius="18" Padding="16" Margin="0,0,0,14">
                                     <StackPanel>
-                                        <TextBlock Text="Field Selector" FontSize="11" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,6"/>
+                                        <TextBlock Text="Field Selector" FontSize="12.5" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,8"/>
                                         <ComboBox x:Name="CmbFields" Style="{StaticResource FormCombo}"
-                                                  SelectionChanged="CmbFields_SelectionChanged" Height="34" Margin="0,0,0,10">
+                                                  SelectionChanged="CmbFields_SelectionChanged" Height="42" Margin="0,0,0,12">
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding Name}" FontSize="12" Foreground="#222222"/>
+                                                    <TextBlock Text="{Binding Name}" FontSize="13" Foreground="#2B1B20"/>
                                                 </DataTemplate>
                                             </ComboBox.ItemTemplate>
                                         </ComboBox>
-                                        <!-- Compact Key & Category Pill -->
-                                        <Grid Margin="0,0,0,8">
+                                        <Grid Margin="0,0,0,10">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock x:Name="TxtFieldKey" Text="field_key" FontSize="11" FontWeight="SemiBold" Foreground="#333333" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                                            <Border Grid.Column="1" Background="#F3EBF0" CornerRadius="4" Padding="6,2">
-                                                <TextBlock x:Name="TxtFieldCategory" Text="Section I" FontSize="10" FontWeight="SemiBold" Foreground="#702943"/>
+                                            <TextBlock x:Name="TxtFieldKey" Text="field_key" FontSize="12" FontWeight="SemiBold" Foreground="#6B4A54" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                            <Border Grid.Column="1" Background="#F8ECEF" Height="24" CornerRadius="12" Padding="12,0">
+                                                <TextBlock x:Name="TxtFieldCategory" Text="Section I" FontSize="11" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
                                             </Border>
                                         </Grid>
-                                        <!-- Coordinate Badge Pills (2x2 Grid) -->
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto"/>
@@ -253,232 +442,179 @@
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="6"/>
+                                                <ColumnDefinition Width="8"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <!-- X -->
-                                            <Border Grid.Row="0" Grid.Column="0" Background="#F7F5F6" BorderBrush="#E8DFE2" BorderThickness="1" CornerRadius="6" Padding="8,4" Margin="0,0,0,6">
+                                            <Border Grid.Row="0" Grid.Column="0" Background="#FBF6F7" CornerRadius="12" Padding="12,9" Margin="0,0,0,8">
                                                 <Grid>
-                                                    <TextBlock Text="X (Left)" FontSize="9.5" Foreground="#777777" VerticalAlignment="Center"/>
-                                                    <TextBlock x:Name="TxtValX" Text="0.000" FontSize="11" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="X (Left)" FontSize="11" Foreground="#7A6068" VerticalAlignment="Center"/>
+                                                    <TextBlock x:Name="TxtValX" Text="0.000" FontSize="12" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 </Grid>
                                             </Border>
-                                            <!-- Y -->
-                                            <Border Grid.Row="0" Grid.Column="2" Background="#F7F5F6" BorderBrush="#E8DFE2" BorderThickness="1" CornerRadius="6" Padding="8,4" Margin="0,0,0,6">
+                                            <Border Grid.Row="0" Grid.Column="2" Background="#FBF6F7" CornerRadius="12" Padding="12,9" Margin="0,0,0,8">
                                                 <Grid>
-                                                    <TextBlock Text="Y (Top)" FontSize="9.5" Foreground="#777777" VerticalAlignment="Center"/>
-                                                    <TextBlock x:Name="TxtValY" Text="0.000" FontSize="11" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Y (Top)" FontSize="11" Foreground="#7A6068" VerticalAlignment="Center"/>
+                                                    <TextBlock x:Name="TxtValY" Text="0.000" FontSize="12" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 </Grid>
                                             </Border>
-                                            <!-- Width -->
-                                            <Border Grid.Row="1" Grid.Column="0" Background="#F7F5F6" BorderBrush="#E8DFE2" BorderThickness="1" CornerRadius="6" Padding="8,4">
+                                            <Border Grid.Row="1" Grid.Column="0" Background="#FBF6F7" CornerRadius="12" Padding="12,9">
                                                 <Grid>
-                                                    <TextBlock Text="Width" FontSize="9.5" Foreground="#777777" VerticalAlignment="Center"/>
-                                                    <TextBlock x:Name="TxtValW" Text="0.000" FontSize="11" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Width" FontSize="11" Foreground="#7A6068" VerticalAlignment="Center"/>
+                                                    <TextBlock x:Name="TxtValW" Text="0.000" FontSize="12" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 </Grid>
                                             </Border>
-                                            <!-- Height -->
-                                            <Border Grid.Row="1" Grid.Column="2" Background="#F7F5F6" BorderBrush="#E8DFE2" BorderThickness="1" CornerRadius="6" Padding="8,4">
+                                            <Border Grid.Row="1" Grid.Column="2" Background="#FBF6F7" CornerRadius="12" Padding="12,9">
                                                 <Grid>
-                                                    <TextBlock Text="Height" FontSize="9.5" Foreground="#777777" VerticalAlignment="Center"/>
-                                                    <TextBlock x:Name="TxtValH" Text="0.000" FontSize="11" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Height" FontSize="11" Foreground="#7A6068" VerticalAlignment="Center"/>
+                                                    <TextBlock x:Name="TxtValH" Text="0.000" FontSize="12" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 </Grid>
                                             </Border>
                                         </Grid>
                                     </StackPanel>
                                 </Border>
-                                <!-- CARD 2: POSITION FINE-TUNING & MICRO-NUDGE -->
-                                <Border Background="White" BorderBrush="#E5D8DC" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,12">
+                                <Border Background="White" BorderBrush="#EBD5DB" BorderThickness="1.5" CornerRadius="18" Padding="16" Margin="0,0,0,14">
                                     <StackPanel>
-                                        <Grid Margin="0,0,0,8">
+                                        <Grid Margin="0,0,0,10">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Position Nudge &amp; Sizing" FontSize="11" FontWeight="Bold" Foreground="#333333" VerticalAlignment="Center"/>
-                                            <!-- Step Size Toggle (1px fine vs 5px normal) -->
+                                            <TextBlock Text="Position Nudge &amp; Sizing" FontSize="12.5" FontWeight="Bold" Foreground="#2B1B20" VerticalAlignment="Center"/>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                <RadioButton x:Name="RbStepFine" Content="1px" IsChecked="True" FontSize="10" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                                <RadioButton x:Name="RbStepNormal" Content="5px" FontSize="10" VerticalAlignment="Center"/>
+                                                <RadioButton x:Name="RbStepFine" Content="1px" IsChecked="True" FontSize="11.5" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,12,0" VerticalAlignment="Center" Cursor="Hand"/>
+                                                <RadioButton x:Name="RbStepNormal" Content="5px" FontSize="11.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" Cursor="Hand"/>
                                             </StackPanel>
                                         </Grid>
-                                        <!-- Clean Directional D-Pad -->
-                                        <Grid HorizontalAlignment="Center" Margin="0,4,0,8">
+                                        <Grid HorizontalAlignment="Center" Margin="0,4,0,12">
                                             <Grid.RowDefinitions>
-                                                <RowDefinition Height="30"/>
-                                                <RowDefinition Height="30"/>
-                                                <RowDefinition Height="30"/>
+                                                <RowDefinition Height="38"/>
+                                                <RowDefinition Height="38"/>
+                                                <RowDefinition Height="38"/>
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="42"/>
-                                                <ColumnDefinition Width="42"/>
-                                                <ColumnDefinition Width="42"/>
+                                                <ColumnDefinition Width="52"/>
+                                                <ColumnDefinition Width="52"/>
+                                                <ColumnDefinition Width="52"/>
                                             </Grid.ColumnDefinitions>
-                                            <!-- Up -->
                                             <Button x:Name="BtnNudgeUp" Grid.Row="0" Grid.Column="1" Click="Nudge_Click" Tag="Up"
-                                                    Background="White" BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Up (Arrow Up)">
+                                                    Style="{StaticResource NudgeBtn}" ToolTip="Nudge Up (Arrow Up)">
                                                 <Path Data="M4,9 L10,3 L16,9" Stroke="#702943" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                                       Width="12" Height="7" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Button>
-                                            <!-- Left -->
                                             <Button x:Name="BtnNudgeLeft" Grid.Row="1" Grid.Column="0" Click="Nudge_Click" Tag="Left"
-                                                    Background="White" BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Left (Arrow Left)">
+                                                    Style="{StaticResource NudgeBtn}" ToolTip="Nudge Left (Arrow Left)">
                                                 <Path Data="M9,4 L3,10 L9,16" Stroke="#702943" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                                       Width="7" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Button>
-                                            <!-- Center: Bullseye removed for a clean, distraction-free D-pad -->
-                                            <!-- Right -->
                                             <Button x:Name="BtnNudgeRight" Grid.Row="1" Grid.Column="2" Click="Nudge_Click" Tag="Right"
-                                                    Background="White" BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Right (Arrow Right)">
+                                                    Style="{StaticResource NudgeBtn}" ToolTip="Nudge Right (Arrow Right)">
                                                 <Path Data="M5,4 L11,10 L5,16" Stroke="#702943" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                                       Width="7" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Button>
-                                            <!-- Down -->
                                             <Button x:Name="BtnNudgeDown" Grid.Row="2" Grid.Column="1" Click="Nudge_Click" Tag="Down"
-                                                    Background="White" BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" ToolTip="Nudge Down (Arrow Down)">
+                                                    Style="{StaticResource NudgeBtn}" ToolTip="Nudge Down (Arrow Down)">
                                                 <Path Data="M4,5 L10,11 L16,5" Stroke="#702943" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                                       Width="12" Height="7" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Button>
                                         </Grid>
-                                        <!-- Box Sizing Quick Buttons (Expand / Shrink) -->
-                                        <Grid Margin="0,2,0,8">
+                                        <Grid Margin="0,0,0,12">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="6"/>
+                                                <ColumnDefinition Width="8"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <Button Content="➕ Expand Box" Click="ExpandBox_Click" Height="26" FontSize="10.5" Background="#FAFAFA" BorderBrush="#D0C0C6" Cursor="Hand" ToolTip="Expand width &amp; height by 1px"/>
-                                            <Button Grid.Column="2" Content="➖ Shrink Box" Click="ShrinkBox_Click" Height="26" FontSize="10.5" Background="#FAFAFA" BorderBrush="#D0C0C6" Cursor="Hand" ToolTip="Shrink width &amp; height by 1px"/>
+                                            <Button Content="Expand Box" Click="ExpandBox_Click" Height="36" FontSize="12" Tag="{StaticResource R18}" Style="{StaticResource PillOutline}" ToolTip="Expand width &amp; height by 1px"/>
+                                            <Button Grid.Column="2" Content="Shrink Box" Click="ShrinkBox_Click" Height="36" FontSize="12" Tag="{StaticResource R18}" Style="{StaticResource PillOutline}" ToolTip="Shrink width &amp; height by 1px"/>
                                         </Grid>
-                                        <!-- Keyboard Shortcut Hint -->
-                                        <Border Background="#F9F8F9" CornerRadius="6" Padding="8,4">
-                                            <TextBlock Text="💡 Shift+Click boxes to multi-select &amp; resize together. Arrow keys micro-nudge." FontSize="9.5" Foreground="#777777" TextWrapping="Wrap"/>
+                                        <Border Background="#FBF6F7" CornerRadius="12" Padding="12,9">
+                                            <TextBlock Text="Shift+Click boxes to multi-select &amp; resize together. Arrow keys micro-nudge." FontSize="11" Foreground="#7A6068" TextWrapping="Wrap"/>
                                         </Border>
                                     </StackPanel>
                                 </Border>
-                                <!-- CARD 3: REAL-TIME LIVE OCR TEST -->
-                                <Border Background="White" BorderBrush="#E5D8DC" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,12">
+                                <Border Background="White" BorderBrush="#EBD5DB" BorderThickness="1.5" CornerRadius="18" Padding="16" Margin="0,0,0,14">
                                     <StackPanel>
-                                        <Button x:Name="BtnTestOcr" Click="TestOcr_Click" Height="36" Background="#702943" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Margin="0,0,0,10">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="8"/>
-                                                </Style>
-                                            </Button.Resources>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <TextBlock Text="⚡" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                                <TextBlock Text="Test Box OCR" FontSize="12" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </Button>
-                                        <Border Background="#FDF8FA" BorderBrush="#ECDCE1" BorderThickness="1" CornerRadius="8" Padding="10">
+                                        <Button x:Name="BtnTestOcr" Content="Test Box OCR" Click="TestOcr_Click" Height="42" FontSize="13" Tag="{StaticResource R21}"
+                                                Style="{StaticResource PillPrimary}" Margin="0,0,0,12"/>
+                                        <Border Background="#FBF3F5" CornerRadius="14" Padding="14,12">
                                             <StackPanel>
-                                                <TextBlock Text="Extraction Result:" FontSize="10" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,4"/>
-                                                <TextBlock x:Name="TxtLiveOcrResult" Text="(Click 'Test Box OCR' to run AI extraction)" FontSize="11" FontWeight="SemiBold" Foreground="#333333" TextWrapping="Wrap"/>
+                                                <TextBlock Text="Extraction Result:" FontSize="11.5" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,5"/>
+                                                <TextBlock x:Name="TxtLiveOcrResult" Text="(Click 'Test Box OCR' to run AI extraction)" FontSize="12" FontWeight="SemiBold" Foreground="#2B1B20" TextWrapping="Wrap"/>
                                             </StackPanel>
                                         </Border>
                                     </StackPanel>
                                 </Border>
-                                <!-- CARD 4: ADVANCED GLOBAL CALIBRATION EXPANDER (COLLAPSED BY DEFAULT) -->
-                                <Expander Header="🌐 Advanced: Calibrate All Boxes" FontWeight="SemiBold" FontSize="11" Foreground="#702943" Background="#FDF8FA" BorderBrush="#E5D8DC" BorderThickness="1" Margin="0,0,0,8">
-                                    <StackPanel Margin="10,8">
-                                        <TextBlock Text="Shift or scale all 50+ boxes simultaneously to adapt to scanner variations:" FontSize="10" Foreground="#666666" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                                        <!-- Step Size Toggle (1px fine vs 5px normal) -->
-                                        <Grid Margin="0,0,0,6">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Nudge All Boxes:" FontSize="10.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                <RadioButton x:Name="RbGlobalStepFine" Content="1px" IsChecked="True" FontSize="10" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                                <RadioButton x:Name="RbGlobalStepNormal" Content="5px" FontSize="10" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </Grid>
-                                        <!-- Nudge All D-Pad with clean chevrons -->
-                                        <Grid HorizontalAlignment="Center" Margin="0,0,0,8">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="26"/>
-                                                <RowDefinition Height="26"/>
-                                                <RowDefinition Height="26"/>
-                                            </Grid.RowDefinitions>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="42"/>
-                                                <ColumnDefinition Width="42"/>
-                                                <ColumnDefinition Width="42"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Button Grid.Row="0" Grid.Column="1" Content="▲ Up" Click="GlobalNudgeUp_Click" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Height="24" Cursor="Hand" ToolTip="Nudge all boxes up"/>
-                                            <Button Grid.Row="1" Grid.Column="0" Content="◀ Left" Click="GlobalNudgeLeft_Click" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Height="24" Cursor="Hand" ToolTip="Nudge all boxes left"/>
-                                            <Button Grid.Row="1" Grid.Column="2" Content="Right ▶" Click="GlobalNudgeRight_Click" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Height="24" Cursor="Hand" ToolTip="Nudge all boxes right"/>
-                                            <Button Grid.Row="2" Grid.Column="1" Content="▼ Down" Click="GlobalNudgeDown_Click" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Height="24" Cursor="Hand" ToolTip="Nudge all boxes down"/>
-                                        </Grid>
-                                        <!-- Scale All -->
-                                        <TextBlock Text="Scale All Boxes Size:" FontSize="10.5" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,0,4"/>
-                                        <Grid Margin="0,0,0,4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="4"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Button Grid.Column="0" Content="➖ Shrink All" Click="GlobalScaleShrink_Click" Height="24" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Cursor="Hand" ToolTip="Scale all boxes smaller by 1%"/>
-                                            <Button Grid.Column="2" Content="➕ Expand All" Click="GlobalScaleExpand_Click" Height="24" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Cursor="Hand" ToolTip="Scale all boxes larger by 1%"/>
-                                        </Grid>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="4"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Button Grid.Column="0" Content="↔ Stretch W" Click="GlobalScaleWidth_Click" Height="24" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Cursor="Hand" ToolTip="Stretch width by 1%"/>
-                                            <Button Grid.Column="2" Content="↕ Stretch H" Click="GlobalScaleHeight_Click" Height="24" FontSize="9.5" Background="White" BorderBrush="#D0C0C6" Foreground="#444444" Cursor="Hand" ToolTip="Stretch height by 1%"/>
-                                        </Grid>
-                                    </StackPanel>
-                                </Expander>
+                                <Border Background="White" BorderBrush="#EBD5DB" BorderThickness="1.5" CornerRadius="18" Padding="12,4" Margin="0,0,0,8">
+                                    <Expander Header="Advanced: Calibrate All Boxes" FontWeight="Bold" FontSize="12.5" Foreground="#702943" Background="Transparent" BorderThickness="0">
+                                        <StackPanel Margin="4,10,4,8">
+                                            <TextBlock Text="Shift or scale all 50+ boxes simultaneously to adapt to scanner variations:" FontSize="11" Foreground="#7A6068" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Nudge All Boxes:" FontSize="12" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <RadioButton x:Name="RbGlobalStepFine" Content="1px" IsChecked="True" FontSize="11.5" FontWeight="SemiBold" Foreground="#702943" Margin="0,0,12,0" VerticalAlignment="Center" Cursor="Hand"/>
+                                                    <RadioButton x:Name="RbGlobalStepNormal" Content="5px" FontSize="11.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center" Cursor="Hand"/>
+                                                </StackPanel>
+                                            </Grid>
+                                            <Grid HorizontalAlignment="Center" Margin="0,0,0,12">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="36"/>
+                                                    <RowDefinition Height="36"/>
+                                                    <RowDefinition Height="36"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="76"/>
+                                                    <ColumnDefinition Width="76"/>
+                                                    <ColumnDefinition Width="76"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Row="0" Grid.Column="1" Content="Up" Click="GlobalNudgeUp_Click" FontSize="11.5" FontWeight="Bold" Foreground="#702943" Style="{StaticResource NudgeBtn}" ToolTip="Nudge all boxes up"/>
+                                                <Button Grid.Row="1" Grid.Column="0" Content="Left" Click="GlobalNudgeLeft_Click" FontSize="11.5" FontWeight="Bold" Foreground="#702943" Style="{StaticResource NudgeBtn}" ToolTip="Nudge all boxes left"/>
+                                                <Button Grid.Row="1" Grid.Column="2" Content="Right" Click="GlobalNudgeRight_Click" FontSize="11.5" FontWeight="Bold" Foreground="#702943" Style="{StaticResource NudgeBtn}" ToolTip="Nudge all boxes right"/>
+                                                <Button Grid.Row="2" Grid.Column="1" Content="Down" Click="GlobalNudgeDown_Click" FontSize="11.5" FontWeight="Bold" Foreground="#702943" Style="{StaticResource NudgeBtn}" ToolTip="Nudge all boxes down"/>
+                                            </Grid>
+                                            <TextBlock Text="Scale All Boxes Size:" FontSize="12" FontWeight="Bold" Foreground="#702943" Margin="0,0,0,8"/>
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="0" Content="Shrink All" Click="GlobalScaleShrink_Click" Height="34" FontSize="11.5" Tag="{StaticResource R17}" Style="{StaticResource PillOutline}" ToolTip="Scale all boxes smaller by 1%"/>
+                                                <Button Grid.Column="2" Content="Expand All" Click="GlobalScaleExpand_Click" Height="34" FontSize="11.5" Tag="{StaticResource R17}" Style="{StaticResource PillOutline}" ToolTip="Scale all boxes larger by 1%"/>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="0" Content="Stretch W" Click="GlobalScaleWidth_Click" Height="34" FontSize="11.5" Tag="{StaticResource R17}" Style="{StaticResource PillOutline}" ToolTip="Stretch width by 1%"/>
+                                                <Button Grid.Column="2" Content="Stretch H" Click="GlobalScaleHeight_Click" Height="34" FontSize="11.5" Tag="{StaticResource R17}" Style="{StaticResource PillOutline}" ToolTip="Stretch height by 1%"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Expander>
+                                </Border>
                             </StackPanel>
                         </ScrollViewer>
+                    </Grid>
+                    <Border Grid.Row="2" Background="White" BorderBrush="#F0E2E6" BorderThickness="0,1,0,0" CornerRadius="0,0,24,24" Padding="32,0,28,0">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="TxtStatusMessage" Text="Ready to calibrate field positions." FontSize="12.5" Foreground="#7A6068" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Button Content="Cancel" Click="Close_Click" Width="110" Style="{StaticResource PillOutline}" Margin="0,0,10,0"/>
+                                <Button Content="Save as Template" Click="SaveTemplate_Click" Width="160" Style="{StaticResource PillGreen}" Margin="0,0,10,0"/>
+                                <Button Content="Apply &amp; Re-Extract" Click="ApplyAndReExtract_Click" Width="170" Style="{StaticResource PillPrimary}"/>
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
-                <!-- FOOTER -->
-                <Border Grid.Row="2" Background="#F9F6F7" BorderBrush="#E5D8DC" BorderThickness="0,1,0,0" CornerRadius="0,0,16,16" Padding="24,0">
-                    <Grid VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock x:Name="TxtStatusMessage" Text="● Ready to calibrate field positions." FontSize="12" Foreground="#666666"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="Cancel" Click="Close_Click" Width="100" Height="36" Background="White"
-                                    BorderBrush="#D0C0C6" BorderThickness="1" Cursor="Hand" Margin="0,0,10,0">
-                                <Button.Resources>
-                                    <Style TargetType="Border">
-                                        <Setter Property="CornerRadius" Value="8"/>
-                                    </Style>
-                                </Button.Resources>
-                            </Button>
-                            <Button Content="💾 Save as Template" Click="SaveTemplate_Click" Width="170" Height="36"
-                                    Background="#2E7D32" Foreground="White" FontWeight="Bold" BorderThickness="0"
-                                    Cursor="Hand" Margin="0,0,10,0">
-                                <Button.Resources>
-                                    <Style TargetType="Border">
-                                        <Setter Property="CornerRadius" Value="8"/>
-                                    </Style>
-                                </Button.Resources>
-                            </Button>
-                            <Button Content="✓ Apply &amp; Re-Extract" Click="ApplyAndReExtract_Click" Width="170" Height="36"
-                                    Background="#702943" Foreground="White" FontWeight="Bold" BorderThickness="0"
-                                    Cursor="Hand">
-                                <Button.Resources>
-                                    <Style TargetType="Border">
-                                        <Setter Property="CornerRadius" Value="8"/>
-                                    </Style>
-                                </Button.Resources>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-            </Grid>
-        </Border>
+            </Border>
         </Grid>
     </Border>
 </Window>

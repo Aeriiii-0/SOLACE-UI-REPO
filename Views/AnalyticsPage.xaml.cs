@@ -19,7 +19,7 @@ using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
 {
-    public partial class AnalyticsPage : Page
+    public partial class AnalyticsPage : Page, INotifyPropertyChanged
     {
         private AnalyticsViewModel _vm;
         private bool _redrawPending;
@@ -30,6 +30,57 @@ namespace SOLUM_UI
         private DateTime _lastLoadedTime = DateTime.MinValue;
         private DateTime _lastRefreshClickTime = DateTime.MinValue;
         private bool _hasLoadedData = false;
+
+        // -- Notification card properties --------------------------------------
+        private bool   _isNotificationVisible;
+        private string _notificationTitle;
+        private string _notificationMessage;
+        private bool   _isNotificationSuccess;
+        private DispatcherTimer _notifyTimer;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public bool   IsNotificationVisible
+        {
+            get => _isNotificationVisible;
+            private set { _isNotificationVisible = value; OnPropertyChanged(nameof(IsNotificationVisible)); }
+        }
+        public string NotificationTitle
+        {
+            get => _notificationTitle;
+            private set { _notificationTitle = value; OnPropertyChanged(nameof(NotificationTitle)); }
+        }
+        public string NotificationMessage
+        {
+            get => _notificationMessage;
+            private set { _notificationMessage = value; OnPropertyChanged(nameof(NotificationMessage)); }
+        }
+        public bool IsNotificationSuccess
+        {
+            get => _isNotificationSuccess;
+            private set { _isNotificationSuccess = value; OnPropertyChanged(nameof(IsNotificationSuccess)); }
+        }
+
+        private void OnPropertyChanged(string propertyName)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        public void ShowNotification(string title, string message, bool isSuccess)
+        {
+            NotificationTitle     = title;
+            NotificationMessage   = message;
+            IsNotificationSuccess = isSuccess;
+            IsNotificationVisible = false;
+
+            var owner = Window.GetWindow(this) ?? Application.Current.MainWindow;
+            if (isSuccess)
+            {
+                ActionConfirmDialog.Success(title, message, owner);
+            }
+            else
+            {
+                ActionConfirmDialog.Error(title, message, owner);
+            }
+        }
 
         private static readonly string[] AgeLabels = { "19 & below", "20-39", "40-59", "60 & above" };
         private static readonly string[] AgeProps = { "ParentAge19Below", "ParentAge20_39", "ParentAge40_59", "ParentAge60Above" };
@@ -1188,13 +1239,17 @@ namespace SOLUM_UI
                 };
                 if (saveDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    string municipality = selectedBarangay != "ALL" 
-                        ? $"{selectedBarangay.ToUpperInvariant()}, BINAN, LAGUNA" 
-                        : "BINAN, LAGUNA";
-                    string region = "IV-A";
+                    var owner = Window.GetWindow(this) ?? Application.Current.MainWindow;
+                    var optDialog = new ExportOptionsDialog(saveDialog.FileName, owner);
+                    optDialog.ShowDialog();
+                    if (!optDialog.Confirmed)
+                    {
+                        return;
+                    }
+
+                    string municipality = selectedBarangay != "ALL" ? selectedBarangay : "Biñan City";
+                    string region = "CALABARZON (IV-A)";
                     string focalPersonName = MainWindow.FullName;
-                    if (string.IsNullOrWhiteSpace(focalPersonName))
-                        focalPersonName = "CHRISTINE R. RIZARRE, RSW";
 
                     AnalyticsExcelExportService.ExportAnalyticsReport(
                         saveDialog.FileName,
@@ -1202,14 +1257,30 @@ namespace SOLUM_UI
                         municipality,
                         region,
                         focalPersonName,
-                        periodLabel: periodLabel);
+                        optDialog.Password);
 
-                    ToastNotification.Show(
-                        "Export Successful",
-                        $"Analytics report exported to:\n{System.IO.Path.GetFileName(saveDialog.FileName)}",
-                        ToastType.Success);
                     Services.AuditLogService.Instance.LogSystem(
-                        $"Analytics report exported ({periodLabel}) for {municipality} by {focalPersonName}");
+                        $"Analytics report exported for {municipality} by {focalPersonName}");
+
+                    bool openFile = ActionConfirmDialog.Show(
+                        "Export Successful",
+                        $"Analytics report exported successfully to:\n{System.IO.Path.GetFileName(saveDialog.FileName)}\n\nWould you like to open the file now?",
+                        "Open File",
+                        "Close",
+                        ConfirmThemeType.Success,
+                        owner);
+
+                    if (openFile)
+                    {
+                        try
+                        {
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(saveDialog.FileName) { UseShellExecute = true });
+                        }
+                        catch (Exception pEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Failed to open exported file: {pEx.Message}");
+                        }
+                    }
                 }
             }
             catch (Exception ex)

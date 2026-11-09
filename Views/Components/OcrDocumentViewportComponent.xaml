@@ -1,418 +1,370 @@
 <UserControl x:Class="SOLUM_UI.Views.Components.OcrDocumentViewportComponent"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="520">
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="520"
+             UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <UserControl.Resources>
+        <CornerRadius x:Key="R11">11</CornerRadius>
+        <CornerRadius x:Key="R12">12</CornerRadius>
+        <CornerRadius x:Key="R13">13</CornerRadius>
+        <CornerRadius x:Key="R15">15</CornerRadius>
+        <CornerRadius x:Key="R17">17</CornerRadius>
+        <CornerRadius x:Key="R18">18</CornerRadius>
+        <CornerRadius x:Key="R19">19</CornerRadius>
+        <CornerRadius x:Key="R21">21</CornerRadius>
+
+        <Style x:Key="PillBase" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Tag">
+                <Setter.Value>
+                    <CornerRadius>20</CornerRadius>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding Tag}" Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PillOutline" TargetType="Button" BasedOn="{StaticResource PillBase}">
+            <Setter Property="Foreground" Value="#702943"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#702943"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FBF3F5"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#F3E3E8"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="PillPrimary" TargetType="Button" BasedOn="{StaticResource PillBase}">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#702943"/>
+            <Setter Property="BorderBrush" Value="#702943"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#5A1F35"/>
+                    <Setter Property="BorderBrush" Value="#5A1F35"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#491829"/>
+                    <Setter Property="BorderBrush" Value="#491829"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="IconCircle" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#6B4A54"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Tag">
+                <Setter.Value>
+                    <CornerRadius>14</CornerRadius>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding Tag}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F3E3E8"/>
+                    <Setter Property="Foreground" Value="#702943"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="RingButton" TargetType="Button">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E2C6CE"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="18" SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FBF3F5"/>
+                    <Setter Property="BorderBrush" Value="#702943"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
     <Grid>
-        <!-- INTERACTIVE LIVE DOCUMENT VIEWPORT BORDER -->
-        <Border Background="#F8F4F6" BorderBrush="#DDD0D5" BorderThickness="1" CornerRadius="10" Padding="10">
+        <Border Background="#FBF6F8" BorderBrush="#EBD5DB" BorderThickness="1.5" CornerRadius="20" Padding="14">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <!-- OCR ENGINE WARMUP / PROGRESS BANNER -->
                 <Border x:Name="OcrWarmupBanner" Grid.Row="0"
-                        Background="#FFF5F7" BorderBrush="#E0B8C4" BorderThickness="1" CornerRadius="8"
-                        Padding="12,10" Margin="0,0,0,10" Visibility="Collapsed">
+                        Background="#FFF5F7" BorderBrush="#E0B8C4" BorderThickness="1.5" CornerRadius="16"
+                        Padding="14,12" Margin="0,0,0,12" Visibility="Collapsed">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <!-- Header: Icon, Title, and Estimated Time / Controls -->
                         <Grid Grid.Row="0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <!-- Warmup Status Icon / Spinner Badge -->
-                            <Border x:Name="IconWarmupBadge" Width="22" Height="22" CornerRadius="11"
-                                    Background="#702943" VerticalAlignment="Center" Margin="0,0,8,0"
+                            <Border x:Name="IconWarmupBadge" Width="24" Height="24" CornerRadius="12"
+                                    Background="#702943" VerticalAlignment="Center" Margin="0,0,10,0"
                                     RenderTransformOrigin="0.5,0.5">
                                 <Border.RenderTransform>
                                     <RotateTransform x:Name="WarmupIconRotate" Angle="0"/>
                                 </Border.RenderTransform>
                                 <Viewbox Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Canvas Width="24" Height="24">
-                                        <Path x:Name="IconWarmupPath" Fill="White"
-                                              Data="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
+                                        <Path x:Name="IconWarmupPath" Fill="White" Data="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z"/>
                                     </Canvas>
                                 </Viewbox>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock x:Name="TxtWarmupTitle" Text="AI OCR Engine Warming Up..."
-                                           FontSize="12" FontWeight="Bold" Foreground="#702943"/>
+                                <TextBlock x:Name="TxtWarmupTitle" Text="AI OCR Engine Warming Up..." FontSize="12.5" FontWeight="Bold" Foreground="#702943"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border x:Name="BadgeWarmupTime" Background="#F3E5EB" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
-                                    <TextBlock x:Name="TxtWarmupEstimatedTime" Text="~6s remaining"
-                                               FontSize="10" FontWeight="SemiBold" Foreground="#702943"/>
+                                <Border x:Name="BadgeWarmupTime" Background="#F3E5EB" Height="22" CornerRadius="11" Padding="10,0" Margin="0,0,6,0">
+                                    <TextBlock x:Name="TxtWarmupEstimatedTime" Text="~6s remaining" FontSize="10.5" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
                                 </Border>
                                 <Button x:Name="BtnWarmupRetry" Content="Retry" Click="WarmupRetry_Click" Visibility="Collapsed"
-                                        Background="#702943" Foreground="White" FontSize="10" FontWeight="Bold"
-                                        Padding="8,2" BorderThickness="0" Cursor="Hand">
-                                    <Button.Resources>
-                                        <Style TargetType="Border">
-                                            <Setter Property="CornerRadius" Value="4"/>
-                                        </Style>
-                                    </Button.Resources>
-                                </Button>
+                                        Style="{StaticResource PillPrimary}" Height="26" Padding="12,0" FontSize="10.5" Tag="{StaticResource R13}"/>
                                 <Button x:Name="BtnDismissWarmup" Content="✕" Click="DismissWarmup_Click" Visibility="Collapsed"
-                                        Background="Transparent" Foreground="#888888" FontSize="11" FontWeight="Bold"
-                                        Width="20" Height="20" BorderThickness="0" Cursor="Hand"/>
+                                        Style="{StaticResource IconCircle}" Width="24" Height="24" FontSize="11" FontWeight="Bold" Tag="{StaticResource R12}"/>
                             </StackPanel>
                         </Grid>
-                        <!-- Current Active Process Step Description -->
-                        <Grid Grid.Row="1" Margin="0,6,0,6">
+                        <Grid Grid.Row="1" Margin="0,8,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="TxtWarmupStepDetail"
-                                       Text="Initializing local AI background service &amp; OpenVINO models..."
-                                       FontSize="11" Foreground="#444444" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock x:Name="TxtWarmupElapsed" Grid.Column="1" Text="0.0s elapsed"
-                                       FontSize="10" Foreground="#888888" Margin="8,0,0,0"/>
+                            <TextBlock x:Name="TxtWarmupStepDetail" Text="Initializing local AI background service &amp; OpenVINO models..."
+                                       FontSize="11.5" Foreground="#6B4A54" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock x:Name="TxtWarmupElapsed" Grid.Column="1" Text="0.0s elapsed" FontSize="10.5" Foreground="#9A8089" Margin="8,0,0,0"/>
                         </Grid>
-                        <!-- Warmup Progress Bar -->
-                        <ProgressBar x:Name="WarmupProgressBar" Grid.Row="2" Height="5" Minimum="0" Maximum="100" Value="15"
+                        <ProgressBar x:Name="WarmupProgressBar" Grid.Row="2" Height="6" Minimum="0" Maximum="100" Value="15"
                                      Foreground="#702943" Background="#EBD6DC" BorderThickness="0">
                             <ProgressBar.Resources>
                                 <Style TargetType="Border">
-                                    <Setter Property="CornerRadius" Value="2.5"/>
+                                    <Setter Property="CornerRadius" Value="3"/>
                                 </Style>
                             </ProgressBar.Resources>
                         </ProgressBar>
                     </Grid>
                 </Border>
-                <!-- Viewport Toolbar -->
-                <Grid Grid.Row="1" Margin="0,0,0,8">
+                <Grid Grid.Row="1" Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
-                        <!-- Left: Scan & Upload Actions -->
                         <ColumnDefinition Width="Auto"/>
-                        <!-- Middle: Viewport Hint -->
                         <ColumnDefinition Width="*"/>
-                        <!-- Right: Icon-Only Settings Button & Popover -->
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <!-- Left: Scan & Upload Actions -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <!-- 1. Scan Document -->
                         <Button x:Name="BtnScanHardware" Content="Scan Document" Click="ScanHardware_Click"
-                                Height="28" Padding="12,0" Background="#702943" Foreground="White" FontWeight="SemiBold"
-                                FontSize="11" BorderThickness="0" Cursor="Hand">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                        <!-- 2. Upload File -->
+                                Style="{StaticResource PillPrimary}" Height="36" Padding="18,0" FontSize="12" Tag="{StaticResource R18}"/>
                         <Button x:Name="BtnSelectImage" Content="Upload File" Click="SelectImage_Click"
-                                Height="28" Padding="10,0" Background="White" Foreground="#702943" FontWeight="SemiBold"
-                                FontSize="11" BorderBrush="#D0B8C0" BorderThickness="1" Cursor="Hand" Margin="6,0,0,0">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
+                                Style="{StaticResource PillOutline}" Height="36" Padding="18,0" FontSize="12" Tag="{StaticResource R18}" Margin="8,0,0,0"/>
                     </StackPanel>
-                    <!-- Middle: Viewport Hint -->
-                    <TextBlock Grid.Column="1" Text="🖱️ Scroll to pan • Ctrl+Wheel to zoom • Click box to inspect"
-                               FontSize="10.5" Foreground="#888888" VerticalAlignment="Center" Margin="10,0,10,0"
+                    <TextBlock Grid.Column="1" Text="Scroll to pan • Ctrl+Wheel to zoom • Click box to inspect"
+                               FontSize="11" Foreground="#9A8089" VerticalAlignment="Center" Margin="14,0,10,0"
                                TextTrimming="CharacterEllipsis"/>
-                    <!-- Right: Icon-Only Settings Button & Popover -->
                     <Grid Grid.Column="2" HorizontalAlignment="Right">
-                        <Button x:Name="BtnOcrSettings" Click="BtnOcrSettings_Click"
-                                Width="28" Height="28" Padding="0" Background="White" Foreground="#702943"
-                                BorderBrush="#D0B8C0" BorderThickness="1" Cursor="Hand" ToolTip="OCR &amp; Scanner Settings">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#FDF0F3"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                            <!-- Sleek Vector Gear Icon -->
+                        <Button x:Name="BtnOcrSettings" Click="BtnOcrSettings_Click" Style="{StaticResource RingButton}"
+                                ToolTip="OCR &amp; Scanner Settings">
                             <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"
-                                  Fill="#702943" Stretch="Uniform" Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                  Fill="#702943" Stretch="Uniform" Width="15" Height="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Button>
-                        <!-- Clean Contextual Settings Popover (Right-aligned with HorizontalOffset="-232") -->
                         <Popup x:Name="OcrSettingsPopup" PlacementTarget="{Binding ElementName=BtnOcrSettings}"
-                               Placement="Bottom" HorizontalOffset="-232" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade"
-                               VerticalOffset="4">
-                            <Border Background="White" CornerRadius="10" BorderBrush="#D0B8C0" BorderThickness="1"
-                                    Padding="6" Width="260">
+                               Placement="Bottom" HorizontalOffset="-224" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade"
+                               VerticalOffset="6">
+                            <Border Background="White" CornerRadius="18" BorderBrush="#E2C6CE" BorderThickness="1.5"
+                                    Padding="8" Width="260" Margin="0,0,12,14">
                                 <Border.Effect>
-                                    <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="4" Opacity="0.14"/>
+                                    <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="4" Opacity="0.14" RenderingBias="Quality"/>
                                 </Border.Effect>
                                 <StackPanel>
-                                    <!-- Header Label -->
-                                    <Border Padding="10,6,10,4">
-                                        <TextBlock Text="OCR &amp; SCANNER TOOLS" FontSize="9.5" FontWeight="Bold" Foreground="#999999"/>
+                                    <Border Padding="12,8,12,4">
+                                        <TextBlock Text="OCR &amp; SCANNER TOOLS" FontSize="10" FontWeight="Bold" Foreground="#9A8089"/>
                                     </Border>
-                                    <!-- 1. Scanner Settings -->
-                                    <Border x:Name="ItemScannerSettings" CornerRadius="6" Cursor="Hand" Padding="10,8"
+                                    <Border x:Name="ItemScannerSettings" CornerRadius="12" Cursor="Hand" Padding="12,9"
                                             MouseLeftButtonDown="MenuScannerSettings_Click" Background="Transparent">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#FDF5F7"/>
+                                                        <Setter Property="Background" Value="#FBF3F5"/>
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="26"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Path Grid.Column="0" Data="M19,8H5C3.34,8 2,9.34 2,11V17H6V21H18V17H22V11C22,9.34 20.66,8 19,8M16,19H8V15H16V19M19,12C18.45,12 18,11.55 18,11C18,10.45 18.45,10 19,10C19.55,10 20,10.45 20,11C20,11.55 19.55,12 19,12M18,3H6V7H18V3Z"
-                                                  Fill="#702943" Stretch="Uniform" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                <TextBlock Text="Scanner Configuration" FontSize="11.5" FontWeight="SemiBold" Foreground="#222222"/>
-                                                <TextBlock x:Name="TxtMenuScannerSub" Text="Resolution (DPI), color &amp; device" FontSize="10" Foreground="#777777" Margin="0,1,0,0"/>
-                                            </StackPanel>
-                                        </Grid>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Scanner Configuration" FontSize="12" FontWeight="Bold" Foreground="#2B1B20"/>
+                                            <TextBlock x:Name="TxtMenuScannerSub" Text="Resolution (DPI), color &amp; device" FontSize="10.5" Foreground="#7A6068" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
                                     </Border>
-                                    <!-- Separator -->
-                                    <Border Height="1" Background="#F0E4E8" Margin="6,2"/>
-                                    <!-- 2. Adjust Template Boxes -->
-                                    <Border x:Name="ItemAdjustBoxes" CornerRadius="6" Cursor="Hand" Padding="10,8"
+                                    <Border x:Name="ItemAdjustBoxes" CornerRadius="12" Cursor="Hand" Padding="12,9"
                                             MouseLeftButtonDown="MenuAdjustBoxes_Click" Background="Transparent">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#FDF5F7"/>
+                                                        <Setter Property="Background" Value="#FBF3F5"/>
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="26"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Path Grid.Column="0" Data="M3,3V9H5V5H9V3H3M15,3V5H19V9H21V3H15M3,15V21H9V19H5V15H3M19,15V19H15V21H21V15H19M8,8H16V16H8V8Z"
-                                                  Fill="#702943" Stretch="Uniform" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                <TextBlock Text="Adjust Template Boxes" FontSize="11.5" FontWeight="SemiBold" Foreground="#222222"/>
-                                                <TextBlock Text="Fine-tune box coordinates &amp; sizing" FontSize="10" Foreground="#777777" Margin="0,1,0,0"/>
-                                            </StackPanel>
-                                        </Grid>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Adjust Template Boxes" FontSize="12" FontWeight="Bold" Foreground="#2B1B20"/>
+                                            <TextBlock Text="Fine-tune box coordinates &amp; sizing" FontSize="10.5" Foreground="#7A6068" Margin="0,2,0,0"/>
+                                        </StackPanel>
                                     </Border>
-                                    <!-- Separator -->
-                                    <Border Height="1" Background="#F0E4E8" Margin="6,2"/>
-                                    <!-- 3. View AI Detection Boxes -->
-                                    <Border x:Name="ItemViewAiBoxes" CornerRadius="6" Cursor="Hand" Padding="10,8"
+                                    <Border x:Name="ItemViewAiBoxes" CornerRadius="12" Cursor="Hand" Padding="12,9"
                                             MouseLeftButtonDown="MenuViewAiBoxes_Click" Background="Transparent">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#FDF5F7"/>
+                                                        <Setter Property="Background" Value="#FBF3F5"/>
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="26"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Path Grid.Column="0" Data="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"
-                                                  Fill="#702943" Stretch="Uniform" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                <TextBlock Text="View AI Detection Boxes" FontSize="11.5" FontWeight="SemiBold" Foreground="#222222"/>
-                                                <TextBlock Text="Inspect neural detection overlay" FontSize="10" Foreground="#777777" Margin="0,1,0,0"/>
-                                            </StackPanel>
-                                        </Grid>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="View AI Detection Boxes" FontSize="12" FontWeight="Bold" Foreground="#2B1B20"/>
+                                            <TextBlock Text="Inspect neural detection overlay" FontSize="10.5" Foreground="#7A6068" Margin="0,2,0,0"/>
+                                        </StackPanel>
                                     </Border>
                                 </StackPanel>
                             </Border>
                         </Popup>
                     </Grid>
                 </Grid>
-                <!-- Scrollable Pan & Zoom Document Canvas -->
-                <Border Grid.Row="2" Background="#E8E2E4" CornerRadius="8" ClipToBounds="True" BorderBrush="#D0C0C6" BorderThickness="1">
+                <Border Grid.Row="2" Background="#EFE8EB" CornerRadius="16" SnapsToDevicePixels="True">
                     <Grid>
+                        <Border x:Name="CanvasMaskSource" Background="#EFE8EB" CornerRadius="16"/>
                         <ScrollViewer x:Name="DocScrollViewer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                      Background="Transparent"
                                       PreviewMouseLeftButtonDown="DocScrollViewer_PreviewMouseLeftButtonDown"
                                       PreviewMouseMove="DocScrollViewer_PreviewMouseMove"
                                       PreviewMouseLeftButtonUp="DocScrollViewer_PreviewMouseLeftButtonUp"
                                       PreviewMouseWheel="DocScrollViewer_PreviewMouseWheel"
                                       Cursor="Hand">
+                            <ScrollViewer.OpacityMask>
+                                <VisualBrush Visual="{Binding ElementName=CanvasMaskSource}"/>
+                            </ScrollViewer.OpacityMask>
                             <Grid x:Name="CanvasContainer" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <Image x:Name="ImgDocument" Stretch="Uniform"
-                                       RenderOptions.BitmapScalingMode="Linear"/>
+                                <Image x:Name="ImgDocument" Stretch="Uniform" RenderOptions.BitmapScalingMode="Linear"/>
                                 <Canvas x:Name="HighlightCanvas" IsHitTestVisible="False"
                                         Width="{Binding ActualWidth, ElementName=ImgDocument}"
                                         Height="{Binding ActualHeight, ElementName=ImgDocument}"/>
                             </Grid>
                         </ScrollViewer>
-                        <!-- FLOATING CONCISE NAVIGATION DOCK (Shifted left to fully clear scrollbars) -->
                         <Border x:Name="FloatingNavDock" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                Margin="0,0,48,24" Background="#F4FFFFFF" BorderBrush="#D0C0C6" BorderThickness="1"
-                                CornerRadius="16" Padding="6,3" SnapsToDevicePixels="True">
+                                Margin="0,0,34,14" Background="#F8FFFFFF" CornerRadius="20" Padding="6" SnapsToDevicePixels="True">
                             <Border.Effect>
-                                <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.16"/>
+                                <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.2" RenderingBias="Quality"/>
                             </Border.Effect>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <!-- Zoom Out -->
-                                <Button x:Name="BtnFloatZoomOut" Click="ZoomOut_Click" Width="24" Height="24"
-                                        Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
-                                        ToolTip="Zoom Out (−)">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
-                                                <TextBlock Text="−" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
-                                                    <Setter Property="Foreground" Value="#702943"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
+                                <Button x:Name="BtnFloatZoomOut" Click="ZoomOut_Click" Style="{StaticResource IconCircle}" ToolTip="Zoom Out (−)">
+                                    <TextBlock Text="−" FontSize="16" FontWeight="Bold"/>
                                 </Button>
-                                <!-- Zoom Percentage Readout / Reset -->
-                                <Border x:Name="PillZoomLevel" Background="Transparent" CornerRadius="8" Padding="5,2"
+                                <Border x:Name="PillZoomLevel" Background="Transparent" CornerRadius="12" Padding="8,3"
                                         Cursor="Hand" MouseLeftButtonUp="ZoomReset_Click" ToolTip="Click to reset zoom to 100%">
-                                    <TextBlock x:Name="TxtZoomLevel" Text="100%" FontSize="10.5" FontWeight="Bold" Foreground="#702943"
-                                               VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtZoomLevel" Text="100%" FontSize="12" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
                                 </Border>
-                                <!-- Zoom In -->
-                                <Button x:Name="BtnFloatZoomIn" Click="ZoomIn_Click" Width="24" Height="24"
-                                        Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
-                                        ToolTip="Zoom In (+)">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
-                                                <TextBlock Text="+" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
-                                                    <Setter Property="Foreground" Value="#702943"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
+                                <Button x:Name="BtnFloatZoomIn" Click="ZoomIn_Click" Style="{StaticResource IconCircle}" ToolTip="Zoom In (+)">
+                                    <TextBlock Text="+" FontSize="15" FontWeight="Bold"/>
                                 </Button>
-                                <!-- Vertical Separator -->
-                                <Border Width="1" Height="14" Background="#E0D0D5" Margin="4,0"/>
-                                <!-- Fit Page in View -->
-                                <Button x:Name="BtnFloatZoomFit" Click="ZoomFit_Click" Width="24" Height="24"
-                                        Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
-                                        ToolTip="Fit Entire Page in View">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
-                                                <Viewbox Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <Canvas Width="24" Height="24">
-                                                        <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                                              Data="M5,5H10V7H7V10H5V5M14,5H19V10H17V7H14V5M17,14H19V19H14V17H17V14M10,17V19H5V14H7V17H10Z"/>
-                                                    </Canvas>
-                                                </Viewbox>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
-                                                    <Setter Property="Foreground" Value="#702943"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
+                                <Border Width="1" Height="16" Background="#E2C6CE" Margin="6,0"/>
+                                <Button x:Name="BtnFloatZoomFit" Click="ZoomFit_Click" Style="{StaticResource IconCircle}" ToolTip="Fit Entire Page in View">
+                                    <Viewbox Width="13" Height="13">
+                                        <Canvas Width="24" Height="24">
+                                            <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                  Data="M5,5H10V7H7V10H5V5M14,5H19V10H17V7H14V5M17,14H19V19H14V17H17V14M10,17V19H5V14H7V17H10Z"/>
+                                        </Canvas>
+                                    </Viewbox>
                                 </Button>
-                                <!-- Rotate 90° Clockwise -->
-                                <Button x:Name="BtnFloatRotate" Click="RotateDocument_Click" Width="24" Height="24"
-                                        Background="Transparent" Foreground="#555555" BorderThickness="0" Cursor="Hand"
-                                        ToolTip="Rotate 90° Clockwise">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="BtnBg" Background="{TemplateBinding Background}" CornerRadius="12">
-                                                <Viewbox Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <Canvas Width="24" Height="24">
-                                                        <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                                              Data="M7.11,8.53L5.7,7.11C4.8,8.27 4.24,9.61 4.07,11.05H6.09C6.25,10.13 6.6,9.27 7.11,8.53M16.89,8.53C17.4,9.27 17.75,10.13 17.91,11.05H19.93C19.76,9.61 19.2,8.27 18.3,7.11L16.89,8.53M12,4A8,8 0 0,0 4,12H1L4.89,15.89L8.78,12H5.78C5.78,8.57 8.57,5.78 12,5.78C15.43,5.78 18.22,8.57 18.22,12C18.22,15.43 15.43,18.22 12,18.22C10.54,18.22 9.19,17.72 8.12,16.88L6.7,18.3C8.16,19.46 9.99,20.22 12,20.22A8.22,8.22 0 0,0 20.22,12A8.22,8.22 0 0,0 12,4Z"/>
-                                                    </Canvas>
-                                                </Viewbox>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="BtnBg" Property="Background" Value="#F3EBF0"/>
-                                                    <Setter Property="Foreground" Value="#702943"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Button.Template>
+                                <Button x:Name="BtnFloatRotate" Click="RotateDocument_Click" Style="{StaticResource IconCircle}" ToolTip="Rotate 90° Clockwise">
+                                    <Viewbox Width="13" Height="13">
+                                        <Canvas Width="24" Height="24">
+                                            <Path Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                  Data="M7.11,8.53L5.7,7.11C4.8,8.27 4.24,9.61 4.07,11.05H6.09C6.25,10.13 6.6,9.27 7.11,8.53M16.89,8.53C17.4,9.27 17.75,10.13 17.91,11.05H19.93C19.76,9.61 19.2,8.27 18.3,7.11L16.89,8.53M12,4A8,8 0 0,0 4,12H1L4.89,15.89L8.78,12H5.78C5.78,8.57 8.57,5.78 12,5.78C15.43,5.78 18.22,8.57 18.22,12C18.22,15.43 15.43,18.22 12,18.22C10.54,18.22 9.19,17.72 8.12,16.88L6.7,18.3C8.16,19.46 9.99,20.22 12,20.22A8.22,8.22 0 0,0 20.22,12A8.22,8.22 0 0,0 12,4Z"/>
+                                        </Canvas>
+                                    </Viewbox>
                                 </Button>
                             </StackPanel>
                         </Border>
-                        <!-- Empty State Canvas Graphic -->
                         <Grid x:Name="EmptyCanvasState" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20" Visibility="Visible">
-                            <Border Background="White" CornerRadius="12" Padding="22,18" BorderBrush="#D0C0C6" BorderThickness="1" MaxWidth="360">
+                            <Border Background="White" CornerRadius="22" Padding="28,26" BorderBrush="#EBD5DB" BorderThickness="1.5" MaxWidth="380">
                                 <StackPanel HorizontalAlignment="Center">
-                                    <Border Width="44" Height="44" CornerRadius="22" Background="#FBF6F8" BorderBrush="#E5D8DC" BorderThickness="1" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                        <Viewbox Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Border Width="56" Height="56" CornerRadius="28" Background="#F8ECEF" HorizontalAlignment="Center" Margin="0,0,0,14">
+                                        <Viewbox Width="26" Height="26" HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <Canvas Width="24" Height="24">
                                                 <Path Fill="#702943" Data="M19,8H5C3.34,8 2,9.34 2,11V17H6V21H18V17H22V11C22,9.34 20.66,8 19,8M16,19H8V15H16V19M19,12C18.45,12 18,11.55 18,11C18,10.45 18.45,10 19,10C19.55,10 20,10.45 20,11C20,11.55 19.55,12 19,12M18,3H6V7H18V3Z"/>
                                             </Canvas>
                                         </Viewbox>
                                     </Border>
-                                    <TextBlock Text="Document Scanner Ready" FontSize="14" FontWeight="Bold" Foreground="#333333" HorizontalAlignment="Center" Margin="0,0,0,3"/>
-                                    <TextBlock Text="Place application form on scanner glass and click Scan Document, or select an existing file."
-                                               FontSize="11" Foreground="#777777" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,12"/>
-                                    <Border Background="#F9F5F6" CornerRadius="6" Padding="8,5" Margin="0,0,0,12" BorderBrush="#EADCE0" BorderThickness="1">
-                                        <TextBlock x:Name="TxtScannerStatusBadge" Text="Status: Scanner Ready (300 DPI)" FontSize="10" FontWeight="SemiBold" Foreground="#702943" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="Ready to scan" FontSize="18" FontWeight="Bold" Foreground="#2B1B20" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                    <TextBlock Text="Place the application form on the scanner glass and click Scan Document, or select an existing file."
+                                               FontSize="12.5" Foreground="#7A6068" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,14"/>
+                                    <Border Background="#F8ECEF" Height="28" CornerRadius="14" Padding="14,0" Margin="0,0,0,16" HorizontalAlignment="Center">
+                                        <TextBlock x:Name="TxtScannerStatusBadge" Text="Status: Scanner Ready (300 DPI)" FontSize="11" FontWeight="Bold" Foreground="#702943" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                                     </Border>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Content="Scan Document" Click="ScanHardware_Click" Height="28" Padding="12,0"
-                                                Background="#702943" Foreground="White" FontWeight="Bold" FontSize="11" BorderThickness="0" Cursor="Hand" Margin="0,0,6,0">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="6"/>
-                                                </Style>
-                                            </Button.Resources>
-                                        </Button>
-                                        <Button Content="Upload File" Click="SelectImage_Click" Height="28" Padding="10,0"
-                                                Background="#F6F0F2" Foreground="#702943" BorderBrush="#D0B8C0" BorderThickness="1"
-                                                FontWeight="SemiBold" FontSize="11" Cursor="Hand">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="6"/>
-                                                </Style>
-                                            </Button.Resources>
-                                        </Button>
+                                        <Button Content="Scan Document" Click="ScanHardware_Click" Style="{StaticResource PillPrimary}" Height="38" Padding="22,0" Tag="{StaticResource R19}" Margin="0,0,8,0"/>
+                                        <Button Content="Upload File" Click="SelectImage_Click" Style="{StaticResource PillOutline}" Height="38" Padding="22,0" Tag="{StaticResource R19}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -421,82 +373,55 @@
                 </Border>
             </Grid>
         </Border>
-        <!-- OCR PROCESSING MODAL OVERLAY -->
-        <Grid x:Name="OverlayProcessing" Visibility="Collapsed" Background="#77000000">
-            <Border Background="White" CornerRadius="16" Width="430" Padding="26,22" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Border x:Name="OverlayProcessing" Visibility="Collapsed" Background="#88000000" CornerRadius="20">
+            <Border Background="White" CornerRadius="28" Width="400" Padding="34,30" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border.Effect>
-                    <DropShadowEffect Color="#000000" BlurRadius="25" ShadowDepth="4" Opacity="0.3"/>
+                    <DropShadowEffect Color="#702943" BlurRadius="30" ShadowDepth="6" Opacity="0.25" RenderingBias="Quality"/>
                 </Border.Effect>
                 <StackPanel HorizontalAlignment="Stretch">
-                    <!-- Top Icon & Phase Pill Badge -->
-                    <Border Width="52" Height="52" CornerRadius="26" Background="#F9F2F4" BorderBrush="#EAD8DF" BorderThickness="1" HorizontalAlignment="Center" Margin="0,0,0,10">
-                        <Viewbox Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Canvas Width="24" Height="24">
-                                <Path x:Name="PathProcessingIcon" Fill="#702943" Data="M19,8H5C3.34,8 2,9.34 2,11V17H6V21H18V17H22V11C22,9.34 20.66,8 19,8M16,19H8V15H16V19M19,12C18.45,12 18,11.55 18,11C18,10.45 18.45,10 19,10C19.55,10 20,10.45 20,11C20,11.55 19.55,12 19,12M18,3H6V7H18V3Z"/>
-                            </Canvas>
-                        </Viewbox>
+                    <Path x:Name="PathProcessingIcon" Visibility="Collapsed"
+                          Data="M19,8H5C3.34,8 2,9.34 2,11V17H6V21H18V17H22V11C22,9.34 20.66,8 19,8M16,19H8V15H16V19M19,12C18.45,12 18,11.55 18,11C18,10.45 18.45,10 19,10C19.55,10 20,10.45 20,11C20,11.55 19.55,12 19,12M18,3H6V7H18V3Z"/>
+                    <Border x:Name="ProcessingPhaseBadge" Background="Transparent" HorizontalAlignment="Center" Margin="0,0,0,10">
+                        <TextBlock x:Name="TxtProcessingPhaseBadge" Text="PHASE 1 OF 2 • OPTICAL HARDWARE SCAN" FontSize="10.5" FontWeight="Bold" Foreground="#9A8089" HorizontalAlignment="Center"/>
                     </Border>
-                    <Border x:Name="ProcessingPhaseBadge" Background="#FDF3F6" BorderBrush="#E5C8D2" BorderThickness="1" CornerRadius="10" Padding="10,3" HorizontalAlignment="Center" Margin="0,0,0,8">
-                        <TextBlock x:Name="TxtProcessingPhaseBadge" Text="PHASE 1 OF 2 • OPTICAL HARDWARE SCAN" FontSize="9.5" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center"/>
-                    </Border>
-                    <TextBlock x:Name="TxtProcessingTitle" Text="Scanning Document from Printer..." FontSize="15" FontWeight="Bold" Foreground="#222222" HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                    <!-- Animated Step Subtitle Container (Slide Left / Slide Right) -->
-                    <Grid ClipToBounds="True" Height="20" Margin="0,0,0,12">
-                        <TextBlock x:Name="TxtProcessingStep" Text="Acquiring Scanner Hardware Feed..." FontSize="11.5" Foreground="#702943" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Value, ElementName=OcrStageProgressBar, StringFormat={}{0:0}%}"
+                               FontSize="52" FontWeight="Bold" Foreground="#702943" HorizontalAlignment="Center" Margin="0,0,0,4">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsIndeterminate, ElementName=OcrStageProgressBar}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock x:Name="TxtProcessingTitle" Text="Scanning Document from Printer..." FontSize="17" FontWeight="Bold" Foreground="#2B1B20" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                    <Grid ClipToBounds="True" Height="22" Margin="0,0,0,4">
+                        <TextBlock x:Name="TxtProcessingStep" Text="Acquiring Scanner Hardware Feed..." FontSize="12.5" Foreground="#702943" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <TextBlock.RenderTransform>
                                 <TranslateTransform x:Name="StepTextTransform" X="0"/>
                             </TextBlock.RenderTransform>
                         </TextBlock>
                     </Grid>
-                    <ProgressBar x:Name="OcrStageProgressBar" Height="6" Minimum="0" Maximum="100" Value="15" Foreground="#702943" Background="#F0E8EA" BorderThickness="0" Margin="0,0,0,14"/>
-                    <!-- Animated Active Status Message Ticker (Slide Out Left / Slide In Right) -->
-                    <Border Background="#FAF7F8" CornerRadius="8" Padding="12,9" BorderBrush="#EADCE0" BorderThickness="1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
-                                <Ellipse Width="6" Height="6" Fill="#702943" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                <TextBlock Text="Status:" FontSize="10.5" FontWeight="Bold" Foreground="#702943" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <Grid Grid.Column="1" ClipToBounds="True" VerticalAlignment="Center">
-                                <TextBlock x:Name="TxtCurrentExtractingField" Text="Connecting to scanner device..." FontSize="10.5" FontWeight="Medium" Foreground="#444444" TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
-                                    <TextBlock.RenderTransform>
-                                        <TranslateTransform x:Name="TaskTextTransform" X="0"/>
-                                    </TextBlock.RenderTransform>
-                                </TextBlock>
-                            </Grid>
-                        </Grid>
-                    </Border>
-                    <!-- Cancel / Force Exit Scan Button -->
-                    <Button x:Name="BtnCancelOcr" Margin="0,14,0,0"
-                            Height="32" Padding="16,0"
-                            Background="#FFF0F2" BorderBrush="#F8D7DA" BorderThickness="1"
-                            Cursor="Hand" HorizontalAlignment="Center"
-                            Click="CancelOcr_Click">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="BtnBorder" Background="{TemplateBinding Background}"
-                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                        CornerRadius="8" Padding="{TemplateBinding Padding}">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock Text="✕" FontSize="11" FontWeight="Bold" Foreground="#702943" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Cancel Scan" FontSize="11" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="BtnBorder" Property="Background" Value="#FCE4E6"/>
-                                        <Setter TargetName="BtnBorder" Property="BorderBrush" Value="#702943"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+                    <Grid ClipToBounds="True" Height="20" Margin="0,0,0,18">
+                        <TextBlock x:Name="TxtCurrentExtractingField" Text="Connecting to scanner device..." FontSize="11.5" Foreground="#7A6068" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock.RenderTransform>
+                                <TranslateTransform x:Name="TaskTextTransform" X="0"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </Grid>
+                    <ProgressBar x:Name="OcrStageProgressBar" Height="8" Minimum="0" Maximum="100" Value="15" Foreground="#702943" Background="#F0E2E6" BorderThickness="0" Margin="0,0,0,24">
+                        <ProgressBar.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="4"/>
+                            </Style>
+                        </ProgressBar.Resources>
+                    </ProgressBar>
+                    <Button x:Name="BtnCancelOcr" Content="Cancel Scan" Click="CancelOcr_Click" Style="{StaticResource PillOutline}"
+                            Height="40" Padding="28,0" HorizontalAlignment="Center"/>
                 </StackPanel>
             </Border>
-        </Grid>
+        </Border>
     </Grid>
 </UserControl>

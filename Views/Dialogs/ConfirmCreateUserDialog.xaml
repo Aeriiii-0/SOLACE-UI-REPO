@@ -3,12 +3,28 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
-        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
-        Width="500" SizeToContent="Height">
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen"
+        Width="500" SizeToContent="Height"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextRenderingMode="ClearType"
+        TextOptions.TextFormattingMode="Display">
+    <Window.Resources>
+        <!-- Global crispy text rendering -->
+        <Style TargetType="TextBlock">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        </Style>
+    </Window.Resources>
     <Border Background="Transparent" Padding="16">
         <Border Background="White" CornerRadius="16"
                 BorderBrush="#702943" BorderThickness="1.5"
-                ClipToBounds="True">
+                ClipToBounds="True"
+                UseLayoutRounding="True" SnapsToDevicePixels="True">
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="4" Opacity="0.18"/>
             </Border.Effect>
@@ -127,7 +143,7 @@
                         <Button x:Name="BtnCancel" Grid.Column="0" Height="44" Cursor="Hand" Click="BtnCancel_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="White" CornerRadius="10"
+                                    <Border x:Name="Bg" Background="White" CornerRadius="20"
                                             BorderBrush="#D0D0D0" BorderThickness="1.5">
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
@@ -146,7 +162,7 @@
                         <Button x:Name="BtnConfirm" Grid.Column="2" Height="44" Cursor="Hand" Click="BtnConfirm_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="#702943" CornerRadius="10">
+                                    <Border x:Name="Bg" Background="#702943" CornerRadius="20">
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <ControlTemplate.Triggers>

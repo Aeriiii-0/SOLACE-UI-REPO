@@ -263,7 +263,7 @@ namespace SOLUM_UI.ViewModels
             }
             catch (Exception ex)
             {
-                ToastNotification.Show("Reinstatement Error", ex.Message, ToastType.Error);
+                Views.Dialogs.ActionConfirmDialog.Error("Reinstatement Error", ex.Message);
             }
         }
 
@@ -272,7 +272,7 @@ namespace SOLUM_UI.ViewModels
             var itemsToExport = FilteredDisqualifiedCandidates.ToList();
             if (itemsToExport.Count == 0)
             {
-                ToastNotification.Show("No Records", "No disqualified candidate records match the current filter.", ToastType.Info);
+                Views.Dialogs.ActionConfirmDialog.Warning("No Records", "No disqualified candidate records match the current filter.");
                 return;
             }
             var dlg = new Microsoft.Win32.SaveFileDialog
@@ -290,8 +290,31 @@ namespace SOLUM_UI.ViewModels
                     string cleanNotes = (c.RejectionNotes ?? string.Empty).Replace("\"", "\"\"");
                     sb.AppendLine($"\"{c.SpId}\",\"{c.FullName}\",\"{c.Barangay}\",\"{c.MonthlyIncome:F2}\",\"{c.PriorityScore:F2}\",\"{c.Priority}\",\"{c.Dependents}\",\"{c.RejectionReason}\",\"{cleanNotes}\",\"{c.DisqualifiedBy}\",\"{c.FormattedDisqualifiedAt}\"");
                 }
-                System.IO.File.WriteAllText(dlg.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
-                ToastNotification.Show("Export Complete", $"Exported {itemsToExport.Count} disqualified candidate record(s) to CSV.", ToastType.Success);
+                try
+                {
+                    System.IO.File.WriteAllText(dlg.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
+                    bool openFile = Views.Dialogs.ActionConfirmDialog.Show(
+                        "Export Complete",
+                        $"Exported {itemsToExport.Count} disqualified candidate record(s) to CSV.\n\nFile saved to:\n{System.IO.Path.GetFileName(dlg.FileName)}\n\nWould you like to open the file now?",
+                        "Open File",
+                        "Close",
+                        Views.Dialogs.ConfirmThemeType.Success);
+                    if (openFile)
+                    {
+                        try
+                        {
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dlg.FileName) { UseShellExecute = true });
+                        }
+                        catch (Exception pEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Failed to open exported file: {pEx.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Views.Dialogs.ActionConfirmDialog.Error("Export Error", "Export failed:\n" + ex.Message);
+                }
             }
         }
 
@@ -302,10 +325,9 @@ namespace SOLUM_UI.ViewModels
             {
                 if (row.IsCardExpired)
                 {
-                    ToastNotification.Show(
+                    Views.Dialogs.ActionConfirmDialog.Error(
                         "Card Expired",
-                        $"Cannot confirm {row.Name} to Final Grantees because their Solo Parent ID expired on {row.CardValidityDisplay}. Please renew their card first.",
-                        ToastType.Error);
+                        $"Cannot confirm {row.Name} to Final Grantees because their Solo Parent ID expired on {row.CardValidityDisplay}. Please renew their card first.");
                     return;
                 }
 
@@ -332,7 +354,7 @@ namespace SOLUM_UI.ViewModels
                 await _apiService.ConfirmGranteesAsync(_activeCycleId, new List<Guid> { row.EvaluationId });
             UpdateShortlistAndFinalCollections();
             NotifyQuotaMetricsChanged();
-            ToastNotification.Show(confirm ? "Confirmed" : "Unconfirmed", $"{row.Name} {(confirm ? "confirmed as final grantee." : "reverted to pending shortlist.")}", confirm ? ToastType.Success : ToastType.Info);
+            if (confirm) Views.Dialogs.ActionConfirmDialog.Success("Confirmed", $"{row.Name} confirmed as final grantee."); else Views.Dialogs.ActionConfirmDialog.Alert("Unconfirmed", $"{row.Name} reverted to pending shortlist.");
         }
 
         private async Task ExportCsvAsync(string name, Task<string> generator, string msg)
@@ -340,8 +362,31 @@ namespace SOLUM_UI.ViewModels
             var dlg = new SaveFileDialog { FileName = name, DefaultExt = ".csv", Filter = "CSV file (*.csv)|*.csv" };
             if (dlg.ShowDialog() == true)
             {
-                File.WriteAllText(dlg.FileName, await generator, new System.Text.UTF8Encoding(true));
-                ToastNotification.Show("Export Complete", msg, ToastType.Success);
+                try
+                {
+                    File.WriteAllText(dlg.FileName, await generator, new System.Text.UTF8Encoding(true));
+                    bool openFile = Views.Dialogs.ActionConfirmDialog.Show(
+                        "Export Complete",
+                        $"{msg}\n\nFile saved to:\n{System.IO.Path.GetFileName(dlg.FileName)}\n\nWould you like to open the file now?",
+                        "Open File",
+                        "Close",
+                        Views.Dialogs.ConfirmThemeType.Success);
+                    if (openFile)
+                    {
+                        try
+                        {
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dlg.FileName) { UseShellExecute = true });
+                        }
+                        catch (Exception pEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Failed to open exported file: {pEx.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Views.Dialogs.ActionConfirmDialog.Error("Export Error", "Export failed:\n" + ex.Message);
+                }
             }
         }
 
@@ -354,7 +399,7 @@ namespace SOLUM_UI.ViewModels
                 var resp = await _apiService.GetAllRecommendationsAsync(new GetSubsidyRecommendationsRequest { CycleId = _activeCycleId });
                 if (resp?.Data == null || resp.Data.Count == 0)
                 {
-                    ToastNotification.Show("No Records", "No recommendations found to export.", ToastType.Info);
+                    Views.Dialogs.ActionConfirmDialog.Warning("No Records", "No recommendations found to export.");
                     return;
                 }
                 var items = resp.Data.Select((d, idx) =>
@@ -369,7 +414,7 @@ namespace SOLUM_UI.ViewModels
             }
             catch (Exception ex)
             {
-                ToastNotification.Show("Export Error", ex.Message, ToastType.Error);
+                Views.Dialogs.ActionConfirmDialog.Error("Export Error", ex.Message);
             }
             finally
             {

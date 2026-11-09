@@ -29,6 +29,34 @@ namespace SOLUM_UI.Services
         // ------------------------------------------------------------------
         private const double RefW = 877.5;
         private const double RefH = 1311.0;
+
+        // ------------------------------------------------------------------
+        // Section II detail fields. Each list is the property names the export
+        // will look for on SoloParentRecord (first one that exists wins).
+        // If your model uses a different name, add it to the matching list.
+        // ------------------------------------------------------------------
+        private static readonly string[] CauseOfDeathNames =
+            { "CircumstanceA2Cause", "CauseOfDeath", "A2CauseOfDeath", "SpouseCauseOfDeath", "DeathCause" };
+        private static readonly string[] DateOfDeathNames =
+            { "CircumstanceA2Date", "DateOfDeath", "A2Date", "DeathDate", "SpouseDateOfDeath", "DateOfSpouseDeath" };
+        private static readonly string[] DisabilityNames =
+            { "CircumstanceA4Disability", "TypeOfDisability", "DisabilityType", "A4Disability", "SpouseDisability", "DisabilityOfSpouse" };
+        private static readonly string[] SeparationNames =
+            { "CircumstanceA5Period", "PeriodOfSeparation", "SeparationPeriod", "A5Period", "A5PeriodOfSeparation" };
+        private static readonly string[] StayAbroadNames =
+            { "CircumstanceBStayAbroad", "LengthOfStayAbroad", "LengthOfStay", "OfwLengthOfStay", "StayAbroad", "BLengthOfStay" };
+        // A6 tick boxes (bool)
+        private static readonly string[] NullityNames =
+            { "CircumstanceA6Nullity", "DeclarationOfNullity", "A6Nullity", "IsNullity", "Nullity", "IsDeclarationOfNullity", "A6DeclarationOfNullity" };
+        private static readonly string[] AnnulmentNames =
+            { "CircumstanceA6Annulment", "AnnulmentOfMarriage", "A6Annulment", "IsAnnulment", "Annulment", "IsAnnulmentOfMarriage", "A6AnnulmentOfMarriage" };
+
+        // A6 bullets: "• nullity   or   • annulment of marriage" (reference points).
+        // Run the export with debugBoxes = true to see these and nudge if needed.
+        private const double A6NullityX = 384.0;
+        private const double A6AnnulmentX = 468.0;
+        private const double A6BulletY = 479.5;
+
         /// <param name="debugBoxes">
         /// true = also draw a thin red outline of every field box so you can see
         /// exactly where text will land. Leave false for the real export.
@@ -123,24 +151,23 @@ namespace SOLUM_UI.Services
             Cell(p, r.EmergencyAddress, 443.2, 666.8, R5, 10);
             Cell(p, r.EmergencyContactNumber, 666.8, 846.0, R5, 10);
             // ---- II. Circumstance code(s): draw a circle around them ----
+            // (includes codes inferred from filled-in details, see BuildCircumstanceCodes)
             foreach (var code in SplitCodes(BuildCircumstanceCodes(r)))
                 if (_codeCenters.TryGetValue(code, out var c))
                     p.Circle(c.X, c.Y, code.Length > 1 ? 13.0 : 11.0);   // true circle (rx = ry)
             // ---- II. "Specify" blanks (text sits on each underline) ------
             // A2  Cause of death ____ (x 168-226.5)   Date ____ (x 269.5-311)   line y = 484
-            p.OnLine(Prop(r, "CauseOfDeath", "A2CauseOfDeath", "SpouseCauseOfDeath", "DeathCause"),
-                     168.0, 226.5, 484.0, 8, Align.Center);
-            p.OnLine(Prop(r, "DateOfDeath", "A2Date", "DeathDate", "SpouseDateOfDeath", "DateOfSpouseDeath"),
-                     269.5, 311.0, 484.0, 8, Align.Center);
+            p.OnLineWrapped(Prop(r, CauseOfDeathNames), 168.0, 226.5, 484.0, 8);   // wraps to 2 lines if long
+            p.OnLine(Prop(r, DateOfDeathNames), 269.5, 311.0, 484.0, 8, Align.Center);
             // A4  Type of disability ____ (x 171-253.5, line y = 551.5)
-            p.OnLine(Prop(r, "TypeOfDisability", "DisabilityType", "A4Disability", "SpouseDisability", "DisabilityOfSpouse"),
-                     171.0, 253.5, 551.5, 8, Align.Center);
+            p.OnLine(Prop(r, DisabilityNames), 171.0, 253.5, 551.5, 8, Align.Center);
             // A5  Period of separation ____ (x 488-576, line y = 451)
-            p.OnLine(Prop(r, "PeriodOfSeparation", "SeparationPeriod", "A5Period", "A5PeriodOfSeparation"),
-                     488.0, 576.0, 451.0, 8, Align.Center);
+            p.OnLine(Prop(r, SeparationNames), 488.0, 576.0, 451.0, 8, Align.Center);
             // B   Length of stay abroad ____ (x 496-579, line y = 551.5)
-            p.OnLine(Prop(r, "LengthOfStayAbroad", "LengthOfStay", "OfwLengthOfStay", "StayAbroad", "BLengthOfStay"),
-                     496.0, 579.0, 551.5, 8, Align.Center);
+            p.OnLine(Prop(r, StayAbroadNames), 496.0, 579.0, 551.5, 8, Align.Center);
+            // A6  "• nullity   or   • annulment of marriage"
+            if (Flag(r, NullityNames)) p.Check(A6NullityX, A6BulletY, 3.5);
+            if (Flag(r, AnnulmentNames)) p.Check(A6AnnulmentX, A6BulletY, 3.5);
             // ---- III. Family composition (5 rows) ------------------------
             // row lines: 615.8 | 636.0 | 656.8 | 677.5 | 697.5 | 718.2
             double[] rowLines = { 615.8, 636.0, 656.8, 677.5, 697.5, 718.2 };
@@ -181,6 +208,12 @@ namespace SOLUM_UI.Services
             (s ?? "").Split(new[] { ",", ";", " ", "/" }, StringSplitOptions.RemoveEmptyEntries)
                      .Select(x => x.Trim().TrimEnd('.'));
 
+        /// <summary>
+        /// Codes to circle = the circumstances the user ticked PLUS any code whose
+        /// detail was filled in (applicants often write the detail but forget to
+        /// tick the circumstance), so the printed form never shows details with
+        /// no circled code.
+        /// </summary>
         private static string BuildCircumstanceCodes(SoloParentRecord r)
         {
             var codes = new List<string>();
@@ -196,11 +229,26 @@ namespace SOLUM_UI.Services
             if (r.CircumstanceD) codes.Add("D");
             if (r.CircumstanceE) codes.Add("E");
             if (r.CircumstanceF) codes.Add("F");
+
+            void Infer(string code, bool hasDetail)
+            {
+                if (hasDetail && !codes.Contains(code, StringComparer.OrdinalIgnoreCase))
+                    codes.Add(code);
+            }
+
+            Infer("A2", Has(Prop(r, CauseOfDeathNames)) || Has(Prop(r, DateOfDeathNames)));
+            Infer("A4", Has(Prop(r, DisabilityNames)));
+            Infer("A5", Has(Prop(r, SeparationNames)));
+            Infer("A6", Flag(r, NullityNames) || Flag(r, AnnulmentNames));
+            Infer("B", Has(Prop(r, StayAbroadNames)));
+
             return string.Join(",", codes);
         }
         // ------------------------------------------------------------------
         // Helpers
         // ------------------------------------------------------------------
+        private static bool Has(string s) => !string.IsNullOrWhiteSpace(s);
+
         private static string Date(DateTime d, string fmt) =>
             d == DateTime.MinValue ? "" : d.ToString(fmt);
 
@@ -219,7 +267,6 @@ namespace SOLUM_UI.Services
         /// Reads the first property of the record that exists under one of the given names
         /// (so this compiles even if your model uses a slightly different name).
         /// DateTime values are formatted MM/dd/yyyy; DateTime.MinValue / null = "".
-        /// Add your real property name to the call in Fill() if none of the guesses match.
         /// </summary>
         private static string Prop(SoloParentRecord r, params string[] names)
         {
@@ -233,6 +280,25 @@ namespace SOLUM_UI.Services
                 return v.ToString() ?? "";
             }
             return "";
+        }
+
+        /// <summary>
+        /// Reads a tick-box property (bool, bool?, or text like "true"/"yes"/"1")
+        /// under the first matching name. Missing property = false.
+        /// </summary>
+        private static bool Flag(SoloParentRecord r, params string[] names)
+        {
+            foreach (var n in names)
+            {
+                var pi = typeof(SoloParentRecord).GetProperty(n);
+                if (pi == null) continue;
+                var v = pi.GetValue(r);
+                if (v == null) return false;
+                if (v is bool b) return b;
+                var s = v.ToString()?.Trim().ToLowerInvariant();
+                return s == "true" || s == "yes" || s == "1" || s == "y" || s == "x";
+            }
+            return false;
         }
 
         private static string ResolveTemplatePath()
@@ -343,6 +409,108 @@ namespace SOLUM_UI.Services
                 double baseline = (yLine - 3.5) * _sy;   // 3.5 pt above the line
                 _g.DrawString(text, f, Ink, new XPoint(tx, baseline), XStringFormats.BaseLineLeft);
             }
+
+            /// <summary>
+            /// Like OnLine, but if the text doesn't fit on one line (at >= minSinglePt) it wraps
+            /// onto up to maxLines lines stacked upward from the underline. Only if it still
+            /// doesn't fit at the smallest font is the last line trimmed with an ellipsis.
+            /// </summary>
+            public void OnLineWrapped(string text, double x0, double x1, double yLine, double maxPt,
+                                      int maxLines = 3, double minSinglePt = 7.0)
+            {
+                var rect = Rect(x0, yLine - 14.0, x1 - x0, 14.0);
+                if (_debug) _g.DrawRectangle(_dbgPen, rect);
+                if (string.IsNullOrWhiteSpace(text)) return;
+                text = text.Trim();
+                double avail = rect.Width - 2.0;
+                double bottomBase = (yLine - 3.5) * _sy;
+
+                // 1) single line, if it fits without getting too small
+                for (double size = maxPt; size >= minSinglePt; size -= 0.25)
+                {
+                    var f = Font(size);
+                    double tw = _g.MeasureString(text, f).Width;
+                    if (tw <= avail)
+                    {
+                        _g.DrawString(text, f, Ink, new XPoint(rect.X + (rect.Width - tw) / 2, bottomBase),
+                                      XStringFormats.BaseLineLeft);
+                        return;
+                    }
+                }
+
+                // 2) expand one line at a time: try 2 lines, then 3 lines, ...
+                //    Each step first tries the normal font (shrinking only a little)
+                //    before moving on to the next number of lines.
+                const double MinWrapPt = 6.5;
+                for (int n = 2; n <= maxLines; n++)
+                {
+                    for (double size = maxPt; size >= MinWrapPt; size -= 0.25)
+                    {
+                        var f = Font(size);
+                        var lines = WrapToWidth(text, f, avail);
+                        if (lines.Count <= n)
+                        {
+                            DrawStacked(lines, f, rect, avail, bottomBase);
+                            return;
+                        }
+                    }
+                }
+
+                // 3) still too long: use all maxLines at the smallest font, trim the last line with "…"
+                {
+                    var f = Font(MinWrapPt);
+                    var lines = WrapToWidth(text, f, avail);
+                    if (lines.Count > maxLines)
+                    {
+                        lines = lines.Take(maxLines).ToList();
+                        string t = lines[maxLines - 1];
+                        while (t.Length > 1 && _g.MeasureString(t + "…", f).Width > avail)
+                            t = t.Substring(0, t.Length - 1);
+                        lines[maxLines - 1] = t.TrimEnd() + "…";
+                    }
+                    DrawStacked(lines, f, rect, avail, bottomBase);
+                }
+            }
+
+            /// <summary>Draws centred lines stacked upward so the LAST line sits on the underline.</summary>
+            private void DrawStacked(List<string> lines, XFont f, XRect rect, double avail, double bottomBase)
+            {
+                double lh = f.Size * 1.05;
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    double tw = _g.MeasureString(lines[i], f).Width;
+                    double baseline = bottomBase - (lines.Count - 1 - i) * lh;
+                    _g.DrawString(lines[i], f, Ink,
+                        new XPoint(rect.X + (rect.Width - tw) / 2, baseline), XStringFormats.BaseLineLeft);
+                }
+            }
+
+            /// <summary>Word-wraps to a width; a single word wider than the width is broken by characters.</summary>
+            private List<string> WrapToWidth(string text, XFont f, double maxWidth)
+            {
+                var result = new List<string>();
+                string line = "";
+                foreach (var word in text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    string test = line.Length == 0 ? word : line + " " + word;
+                    if (_g.MeasureString(test, f).Width <= maxWidth) { line = test; continue; }
+
+                    if (line.Length > 0) { result.Add(line); line = ""; }
+
+                    string rest = word;
+                    while (_g.MeasureString(rest, f).Width > maxWidth && rest.Length > 1)
+                    {
+                        int n = rest.Length;
+                        while (n > 1 && _g.MeasureString(rest.Substring(0, n), f).Width > maxWidth) n--;
+                        result.Add(rest.Substring(0, n));
+                        rest = rest.Substring(n);
+                    }
+                    line = rest;
+                }
+                if (line.Length > 0) result.Add(line);
+                return result;
+            }
+
             /// <summary>Multi-line text that wraps and shrinks to fit the box height.</summary>
             public void Wrapped(string text, double x, double y, double w, double h, double maxPt)
             {
@@ -395,6 +563,7 @@ namespace SOLUM_UI.Services
             {
                 double x1 = (cx - half) * _sx, x2 = (cx + half) * _sx;
                 double y1 = (cy - half) * _sy, y2 = (cy + half) * _sy;
+                if (_debug) _g.DrawRectangle(_dbgPen, new XRect(x1, y1, x2 - x1, y2 - y1));
                 _g.DrawLine(_markPen, x1, y1, x2, y2);
                 _g.DrawLine(_markPen, x1, y2, x2, y1);
             }

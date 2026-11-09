@@ -427,11 +427,11 @@ namespace SOLUM_UI.ViewModels
             {
                 string err = createResp.Errors != null && createResp.Errors.Count > 0
                     ? string.Join("\n", createResp.Errors) : "Failed to create record on the server.";
-                MessageBox.Show(err, "Creation Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Views.Dialogs.ActionConfirmDialog.Error("Creation Failed", err);
                 return;
             }
             record.Id = createResp.Data.ToString();
-            ToastNotification.Show("Record Added", record.Name + " was added successfully.", ToastType.Success);
+            Views.Dialogs.ActionConfirmDialog.Success("Record Added", record.Name + " was added successfully.");
             _auditLog.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
             (System.Windows.Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
             await LoadRecordsAsync();
@@ -446,10 +446,10 @@ namespace SOLUM_UI.ViewModels
             {
                 string err = updateResp.Errors != null && updateResp.Errors.Count > 0
                     ? string.Join("\n", updateResp.Errors) : "Failed to update record on the server.";
-                MessageBox.Show(err, "Update Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Views.Dialogs.ActionConfirmDialog.Error("Update Failed", err);
                 return;
             }
-            ToastNotification.Show("Record Updated", editedRecord.Name + " was updated.", ToastType.Info);
+            Views.Dialogs.ActionConfirmDialog.Success("Record Updated", editedRecord.Name + " was updated successfully.");
             // Track all field-level changes for detailed audit trail
             var changeService = new ChangeTrackingService();
             var changes = changeService.DetectChanges(rawRecord, editedRecord);
@@ -461,7 +461,7 @@ namespace SOLUM_UI.ViewModels
         {
             if (!Guid.TryParse(original.Id, out var guid))
             {
-                MessageBox.Show("Cannot renew: invalid record ID.", "Renew", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Views.Dialogs.ActionConfirmDialog.Warning("Renew", "Cannot renew: invalid record ID.");
                 return;
             }
             var fetch = await _api.GetSoloParentByIdAsync(guid);
@@ -472,14 +472,14 @@ namespace SOLUM_UI.ViewModels
             {
                 string err = renewResp.Errors != null && renewResp.Errors.Count > 0
                     ? string.Join("\n", renewResp.Errors) : "Failed to renew record.";
-                MessageBox.Show(err, "Renew Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Views.Dialogs.ActionConfirmDialog.Error("Renew Failed", err);
                 return;
             }
 
             string newExpiry = (renewResp.Data != null && DateTime.TryParse(renewResp.Data.ExpiresAt, out var expDt))
                 ? expDt.ToString("MMMM d, yyyy")
                 : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
-            ToastNotification.Show("Record Renewed", original.Name + " — valid until " + newExpiry + ".", ToastType.Success);
+            Views.Dialogs.ActionConfirmDialog.Success("Record Renewed", original.Name + " — valid until " + newExpiry + ".");
             // Track changes made during renewal
             var changeService = new ChangeTrackingService();
             var changes = changeService.DetectChanges(original, updated);
@@ -511,12 +511,12 @@ namespace SOLUM_UI.ViewModels
         {
             if (!IsAdmin)
             {
-                ToastNotification.Show("Access Denied", "Encoders cannot delete records. Only administrators have permission to delete records.", ToastType.Warning);
+                Views.Dialogs.ActionConfirmDialog.Warning("Access Denied", "Encoders cannot delete records. Only administrators have permission to delete records.");
                 return;
             }
             if (!Guid.TryParse(id, out var guid))
             {
-                ToastNotification.Show("Invalid ID", "Cannot delete record without a valid ID.", ToastType.Warning);
+                Views.Dialogs.ActionConfirmDialog.Warning("Invalid ID", "Cannot delete record without a valid ID.");
                 return;
             }
             var vm = _allRecords.Find(r => r.Id == id);
@@ -526,10 +526,10 @@ namespace SOLUM_UI.ViewModels
             {
                 string err = deleteResp.Errors != null && deleteResp.Errors.Count > 0
                     ? string.Join("\n", deleteResp.Errors) : "Failed to delete record from server.";
-                MessageBox.Show(err, "Delete Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Views.Dialogs.ActionConfirmDialog.Error("Delete Failed", err);
                 return;
             }
-            ToastNotification.Show("Record Deleted", "The record was removed.", ToastType.Warning);
+            Views.Dialogs.ActionConfirmDialog.Success("Record Deleted", $"{recordName} was removed successfully.");
             _auditLog.LogDelete(id, recordName, GetCurrentUser(), CurrentUserRole);
             await LoadRecordsAsync();
         }

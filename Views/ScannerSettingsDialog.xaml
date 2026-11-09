@@ -3,21 +3,123 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
-        WindowStartupLocation="CenterOwner"
-        ShowInTaskbar="False">
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
+        TextOptions.TextHintingMode="Fixed"
+        RenderOptions.ClearTypeHint="Enabled">
     <Window.Resources>
-        <!-- FormCombo: Adapted from RecordDialog.xaml for polished, responsive dropdowns -->
-        <Style x:Key="FormCombo" TargetType="ComboBox">
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="FontSize" Value="12.5"/>
-            <Setter Property="Foreground" Value="#111111"/>
+        <Style x:Key="PillOutline" TargetType="Button">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Padding" Value="22,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#702943"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#C0A0AA"/>
-            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="BorderBrush" Value="#702943"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="22" Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#FBF3F5"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#F3E3E8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PillPrimary" TargetType="Button" BasedOn="{StaticResource PillOutline}">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#702943"/>
+            <Setter Property="BorderBrush" Value="#702943"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="22" Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#5A1F35"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#5A1F35"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#491829"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#491829"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CloseCircle" TargetType="Button">
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="MinWidth" Value="34"/>
+            <Setter Property="MinHeight" Value="34"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Width="34" Height="34">
+                            <Ellipse x:Name="Ring" Width="34" Height="34" Fill="White"
+                                     Stroke="#E2C6CE" StrokeThickness="1.5"
+                                     SnapsToDevicePixels="True"/>
+                            <Path x:Name="Cross" Data="M0,0 L10,10 M10,0 L0,10"
+                                  Stroke="#8A6B75" StrokeThickness="1.8"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Width="10" Height="10" Stretch="None"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Ring" Property="Fill" Value="#FBF3F5"/>
+                                <Setter TargetName="Ring" Property="Stroke" Value="#702943"/>
+                                <Setter TargetName="Cross" Property="Stroke" Value="#702943"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="FormCombo" TargetType="ComboBox">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#2B1B20"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E2C6CE"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
             <Setter Property="Padding" Value="10,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
@@ -25,14 +127,14 @@
                             <Border x:Name="ComboBg" Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="6">
-                                <Grid Margin="10,0,28,0">
+                                    CornerRadius="12" SnapsToDevicePixels="True">
+                                <Grid Margin="12,0,32,0">
                                     <ContentPresenter x:Name="ContentSite"
                                                       Content="{TemplateBinding SelectionBoxItem}"
                                                       ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                                       VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                     <TextBlock x:Name="Placeholder" Text="Select..."
-                                               Foreground="#BBBBBB" FontSize="12"
+                                               Foreground="#B9A0A8" FontSize="13"
                                                VerticalAlignment="Center" IsHitTestVisible="False"
                                                Visibility="Collapsed"/>
                                 </Grid>
@@ -42,19 +144,21 @@
                                           IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                           Focusable="False" Opacity="0"/>
                             <Path HorizontalAlignment="Right" VerticalAlignment="Center"
-                                  Margin="0,0,10,0" Data="M7,10L12,15L17,10H7Z"
-                                  Fill="#702943" Stretch="Uniform" Width="11" Height="11"
+                                  Margin="0,0,14,0" Data="M0,0 L5,5 L10,0"
+                                  Stroke="#702943" StrokeThickness="1.8"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="10" Height="5" Stretch="None"
                                   IsHitTestVisible="False"/>
                             <Popup x:Name="Popup" Placement="Bottom"
                                    IsOpen="{TemplateBinding IsDropDownOpen}"
                                    AllowsTransparency="True" Focusable="False" PopupAnimation="None">
-                                <Border Background="White" CornerRadius="8" BorderBrush="#C0A0AA"
-                                        BorderThickness="1.2" MinWidth="{TemplateBinding ActualWidth}"
-                                        MaxHeight="200" Margin="0,2,0,0">
+                                <Border Background="White" CornerRadius="12" BorderBrush="#E2C6CE"
+                                        BorderThickness="1.5" MinWidth="{TemplateBinding ActualWidth}"
+                                        MaxHeight="200" Margin="0,4,0,8" SnapsToDevicePixels="True">
                                     <Border.Effect>
-                                        <DropShadowEffect Color="#000000" BlurRadius="10" ShadowDepth="2" Opacity="0.10" RenderingBias="Performance"/>
+                                        <DropShadowEffect Color="#702943" BlurRadius="14" ShadowDepth="2" Opacity="0.14" RenderingBias="Quality"/>
                                     </Border.Effect>
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,4">
                                         <ItemsPresenter/>
                                     </ScrollViewer>
                                 </Border>
@@ -65,11 +169,10 @@
                                 <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#A08090"/>
+                                <Setter TargetName="ComboBg" Property="BorderBrush" Value="#C79AA8"/>
                             </Trigger>
                             <Trigger Property="IsDropDownOpen" Value="True">
                                 <Setter TargetName="ComboBg" Property="BorderBrush" Value="#702943"/>
-                                <Setter TargetName="ComboBg" Property="BorderThickness" Value="1.5"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -77,24 +180,25 @@
             </Setter>
             <Style.Resources>
                 <Style TargetType="ComboBoxItem">
-                    <Setter Property="Padding" Value="12,8"/>
-                    <Setter Property="FontSize" Value="12"/>
-                    <Setter Property="Foreground" Value="#222222"/>
+                    <Setter Property="Padding" Value="12,9"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="Foreground" Value="#2B1B20"/>
+                    <Setter Property="SnapsToDevicePixels" Value="True"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ComboBoxItem">
                                 <Border x:Name="ItemBg" Background="Transparent"
-                                        Padding="{TemplateBinding Padding}" CornerRadius="5" Margin="3,1">
+                                        Padding="{TemplateBinding Padding}" CornerRadius="8" Margin="4,1">
                                     <ContentPresenter/>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="ItemBg" Property="Background" Value="#FDF0F3"/>
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#FBF3F5"/>
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="ItemBg" Property="Background" Value="#F0E4E8"/>
+                                        <Setter TargetName="ItemBg" Property="Background" Value="#F3E3E8"/>
                                         <Setter Property="Foreground" Value="#702943"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -105,14 +209,15 @@
         </Style>
     </Window.Resources>
     <Border x:Name="BackdropBorder" Background="#66000000" MouseLeftButtonDown="Backdrop_MouseLeftButtonDown">
-        <Border x:Name="DialogShell" Background="White" CornerRadius="16" Width="500"
+        <Border x:Name="DialogShell" Background="White" CornerRadius="24" Width="540"
                 VerticalAlignment="Center" HorizontalAlignment="Center"
-                BorderBrush="#702943" BorderThickness="1.5">
+                BorderBrush="#702943" BorderThickness="1.5"
+                SnapsToDevicePixels="True" UseLayoutRounding="True">
             <Border.RenderTransform>
                 <TranslateTransform x:Name="DialogShellTransform"/>
             </Border.RenderTransform>
             <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="16" ShadowDepth="2" Opacity="0.18" RenderingBias="Performance"/>
+                <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="4" Opacity="0.22" RenderingBias="Quality"/>
             </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
@@ -120,125 +225,102 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <!-- Header (Draggable) -->
-                <Border Grid.Row="0" x:Name="HeaderBorder" Background="#FDFBFC" CornerRadius="16,16,0,0" Padding="24,18"
-                        BorderBrush="#EFE6E9" BorderThickness="0,0,0,1" Cursor="SizeAll"
+                <Border Grid.Row="0" x:Name="HeaderBorder" Background="White" CornerRadius="24,24,0,0" Padding="28,24,24,8"
+                        Cursor="SizeAll"
                         MouseLeftButtonDown="Header_MouseLeftButtonDown"
                         MouseMove="Header_MouseMove"
                         MouseLeftButtonUp="Header_MouseLeftButtonUp">
                     <Grid>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Scanner Configuration" FontSize="18" FontWeight="Bold" Foreground="#702943"/>
-                            <TextBlock Text="Configure hardware device, resolution, and scan preferences" FontSize="12" Foreground="#888888" Margin="0,3,0,0"/>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Scanner Configuration" FontSize="21" FontWeight="Bold" Foreground="#702943"/>
+                            <TextBlock Text="Configure hardware device, resolution, and scan preferences" FontSize="12.5" Foreground="#7A6068" Margin="0,4,0,0"/>
                         </StackPanel>
-                        <Button HorizontalAlignment="Right" VerticalAlignment="Top"
-                                Width="28" Height="28" Background="Transparent"
-                                BorderThickness="0" Cursor="Hand" Click="BtnCancel_Click">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="14">
-                                        <TextBlock Text="&#x2715;" FontSize="13" Foreground="#AAAAAA"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#F0F0F0"/>
-                                            <Setter Property="Foreground" Value="#333333"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
+                        <Button Grid.Column="1" VerticalAlignment="Top" Style="{StaticResource CloseCircle}" Click="BtnCancel_Click"/>
                     </Grid>
                 </Border>
-                <!-- Settings Content -->
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,18">
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="28,16">
                     <StackPanel>
-                        <!-- Device Selection -->
-                        <TextBlock Text="Active Scanner Device" FontSize="13" FontWeight="SemiBold" Foreground="#333333" Margin="0,0,0,6"/>
+                        <TextBlock Text="Active Scanner Device" FontSize="13" FontWeight="Bold" Foreground="#2B1B20" Margin="0,0,0,8"/>
                         <Grid Margin="0,0,0,16">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <ComboBox x:Name="CmbDevices" Grid.Column="0" Style="{StaticResource FormCombo}"/>
-                            <Button Grid.Column="2" Content="Refresh Devices" Height="38" Padding="14,0"
-                                    Background="#F6F0F2" Foreground="#702943" BorderBrush="#C0A0AA" BorderThickness="1.2"
-                                    FontWeight="SemiBold" FontSize="11.5" Cursor="Hand" Click="BtnRefreshDevices_Click">
-                                <Button.Resources>
-                                    <Style TargetType="Border">
-                                        <Setter Property="CornerRadius" Value="6"/>
-                                    </Style>
-                                </Button.Resources>
-                            </Button>
+                            <Button Grid.Column="2" Content="Refresh Devices" Style="{StaticResource PillOutline}" Click="BtnRefreshDevices_Click"/>
                         </Grid>
-                        <TextBlock x:Name="TxtDeviceStatus" Text="Detecting devices..." FontSize="11" Foreground="#666666" Margin="0,-10,0,18"/>
-                        <!-- Resolution (DPI) -->
-                        <TextBlock Text="Resolution (DPI)" FontSize="13" FontWeight="SemiBold" Foreground="#333333" Margin="0,0,0,8"/>
-                        <Grid Margin="0,0,0,20">
+                        <TextBlock x:Name="TxtDeviceStatus" Text="Detecting devices..." FontSize="12" Foreground="#7A6068" Margin="0,-8,0,22" TextWrapping="Wrap"/>
+                        <TextBlock Text="Resolution (DPI)" FontSize="13" FontWeight="Bold" Foreground="#2B1B20" Margin="0,0,0,10"/>
+                        <Grid Margin="0,0,0,22">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="12"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <!-- 200 DPI (Recommended) -->
-                            <RadioButton x:Name="Rb200Dpi" Grid.Column="0" GroupName="DpiGroup" IsChecked="True" Cursor="Hand">
+                            <RadioButton x:Name="Rb200Dpi" Grid.Column="0" GroupName="DpiGroup" IsChecked="True" Cursor="Hand" Focusable="False">
                                 <RadioButton.Template>
                                     <ControlTemplate TargetType="RadioButton">
-                                        <Border x:Name="Card" Background="White" BorderBrush="#D0B8C0" BorderThickness="1.5" CornerRadius="8" Padding="14,14">
+                                        <Border x:Name="Card" Background="White" BorderBrush="#E2C6CE" BorderThickness="2" CornerRadius="16" Padding="14,16" SnapsToDevicePixels="True">
                                             <StackPanel HorizontalAlignment="Center">
-                                                <TextBlock Text="200 DPI" FontWeight="Bold" FontSize="14" Foreground="#702943" HorizontalAlignment="Center"/>
-                                                <TextBlock Text="Recommended" FontSize="11" Foreground="#27AE60" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                                <TextBlock Text="200 DPI" FontWeight="Bold" FontSize="15" Foreground="#702943" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="Recommended" FontSize="11.5" Foreground="#1F7A47" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                                             </StackPanel>
                                         </Border>
                                         <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Card" Property="BorderBrush" Value="#C79AA8"/>
+                                            </Trigger>
                                             <Trigger Property="IsChecked" Value="True">
                                                 <Setter TargetName="Card" Property="BorderBrush" Value="#702943"/>
-                                                <Setter TargetName="Card" Property="Background" Value="#FBF6F8"/>
+                                                <Setter TargetName="Card" Property="Background" Value="#FBF3F5"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </RadioButton.Template>
                             </RadioButton>
-                            <!-- 300 DPI (High Detail) -->
-                            <RadioButton x:Name="Rb300Dpi" Grid.Column="2" GroupName="DpiGroup" Cursor="Hand">
+                            <RadioButton x:Name="Rb300Dpi" Grid.Column="2" GroupName="DpiGroup" Cursor="Hand" Focusable="False">
                                 <RadioButton.Template>
                                     <ControlTemplate TargetType="RadioButton">
-                                        <Border x:Name="Card" Background="White" BorderBrush="#D0B8C0" BorderThickness="1.5" CornerRadius="8" Padding="14,14">
+                                        <Border x:Name="Card" Background="White" BorderBrush="#E2C6CE" BorderThickness="2" CornerRadius="16" Padding="14,16" SnapsToDevicePixels="True">
                                             <StackPanel HorizontalAlignment="Center">
-                                                <TextBlock Text="300 DPI" FontWeight="Bold" FontSize="14" Foreground="#333333" HorizontalAlignment="Center"/>
-                                                <TextBlock Text="High Detail" FontSize="11" Foreground="#2980B9" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                                <TextBlock x:Name="Title" Text="300 DPI" FontWeight="Bold" FontSize="15" Foreground="#2B1B20" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="High Detail" FontSize="11.5" Foreground="#7A6068" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                                             </StackPanel>
                                         </Border>
                                         <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Card" Property="BorderBrush" Value="#C79AA8"/>
+                                            </Trigger>
                                             <Trigger Property="IsChecked" Value="True">
                                                 <Setter TargetName="Card" Property="BorderBrush" Value="#702943"/>
-                                                <Setter TargetName="Card" Property="Background" Value="#FBF6F8"/>
+                                                <Setter TargetName="Card" Property="Background" Value="#FBF3F5"/>
+                                                <Setter TargetName="Title" Property="Foreground" Value="#702943"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </RadioButton.Template>
                             </RadioButton>
                         </Grid>
-                        <!-- Color Mode & Paper Source -->
                         <Grid Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="14"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <!-- Color Mode -->
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Color Mode" FontSize="13" FontWeight="SemiBold" Foreground="#333333" Margin="0,0,0,6"/>
+                                <TextBlock Text="Color Mode" FontSize="13" FontWeight="Bold" Foreground="#2B1B20" Margin="0,0,0,8"/>
                                 <ComboBox x:Name="CmbColorMode" Style="{StaticResource FormCombo}">
                                     <ComboBoxItem Content="Full Color (24-bit)" IsSelected="True"/>
                                     <ComboBoxItem Content="Grayscale (8-bit) - Recommended"/>
                                 </ComboBox>
                             </StackPanel>
-                            <!-- Paper Source -->
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Paper Source" FontSize="13" FontWeight="SemiBold" Foreground="#333333" Margin="0,0,0,6"/>
+                                <TextBlock Text="Paper Source" FontSize="13" FontWeight="Bold" Foreground="#2B1B20" Margin="0,0,0,8"/>
                                 <ComboBox x:Name="CmbPaperSource" Style="{StaticResource FormCombo}">
                                     <ComboBoxItem Content="Flatbed Glass" IsSelected="True"/>
                                     <ComboBoxItem Content="Document Feeder (ADF)"/>
@@ -247,34 +329,15 @@
                         </Grid>
                     </StackPanel>
                 </ScrollViewer>
-                <!-- Footer Buttons -->
-                <Border Grid.Row="2" Background="#FDFBFC" CornerRadius="0,0,16,16" Padding="24,16" BorderBrush="#EFE6E9" BorderThickness="0,1,0,0">
+                <Border Grid.Row="2" Background="White" CornerRadius="0,0,24,24" Padding="28,12,28,24">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="12"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Cancel" Height="38"
-                                Background="White" BorderBrush="#D0B8C0" BorderThickness="1"
-                                Foreground="#555555" FontWeight="SemiBold" FontSize="12" Cursor="Hand"
-                                Click="BtnCancel_Click">
-                            <Button.Resources>
-                                <Style TargetType="Border">
-                                    <Setter Property="CornerRadius" Value="8"/>
-                                </Style>
-                            </Button.Resources>
-                        </Button>
-                        <Button Grid.Column="2" Content="Save Settings" Height="38"
-                                Background="#702943" Foreground="White" BorderThickness="0"
-                                FontWeight="Bold" FontSize="12" Cursor="Hand"
-                                Click="BtnSave_Click">
-                            <Button.Resources>
-                                <Style TargetType="Border">
-                                    <Setter Property="CornerRadius" Value="8"/>
-                                </Style>
-                            </Button.Resources>
-                        </Button>
+                        <Button Grid.Column="0" Content="Cancel" Style="{StaticResource PillOutline}" Click="BtnCancel_Click"/>
+                        <Button Grid.Column="2" Content="Save Settings" Style="{StaticResource PillPrimary}" Click="BtnSave_Click"/>
                     </Grid>
                 </Border>
             </Grid>

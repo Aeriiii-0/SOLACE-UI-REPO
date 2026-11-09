@@ -108,7 +108,7 @@
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderThickness="0" Padding="12,10"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 2: CONTACT NUMBER -->
-                            <GridViewColumn x:Name="ColContact" Header="CONTACT NUMBER" Width="130">
+                            <GridViewColumn x:Name="ColContact" Header="CONTACT NUMBER" Width="135">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColContact}" Margin="-6,0,-6,0" BorderThickness="0" Padding="8,10"><TextBlock Text="{Binding ContactNumberFormatted}" FontSize="11.5" FontWeight="SemiBold" Foreground="#16A34A" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 3: BARANGAY -->
@@ -124,11 +124,11 @@
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColEmergencyName}" Margin="-6,0,-6,0" BorderThickness="0" Padding="10,10"><TextBlock Text="{Binding EmergencyContactName}" FontSize="11" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 6: EMERGENCY PHONE -->
-                            <GridViewColumn x:Name="ColEmergencyPhone" Header="EMERGENCY PHONE" Width="130">
+                            <GridViewColumn x:Name="ColEmergencyPhone" Header="EMERGENCY NUMBER" Width="145">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColEmergencyPhone}" Margin="-6,0,-6,0" BorderThickness="0" Padding="8,10"><TextBlock Text="{Binding EmergencyContactFormatted}" FontSize="11" Foreground="#666666" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 7: STATUS (Final column - No trailing vertical divider line) -->
-                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="90">
+                            <GridViewColumn x:Name="ColStatus" Header="STATUS" Width="105">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColStatus}" Margin="-6,0,-6,0" BorderThickness="0" Padding="6,10"><Border CornerRadius="10" Padding="8,2" Background="{Binding RecordStatusBg}" HorizontalAlignment="Center"><TextBlock Text="{Binding RecordStatus}" FontSize="10.5" FontWeight="Bold" Foreground="{Binding RecordStatusFg}"/></Border></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                         </GridView>

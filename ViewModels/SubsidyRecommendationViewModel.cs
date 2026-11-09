@@ -777,6 +777,51 @@ namespace SOLUM_UI.ViewModels
             set => SetProperty(ref _actionProcessingMessage, value);
         }
 
+        // -- Notification card properties --------------------------------------
+        private bool _isNotificationVisible;
+        private string _notificationTitle;
+        private string _notificationMessage;
+        private bool _isNotificationSuccess;
+        private System.Windows.Threading.DispatcherTimer _notifyTimer;
+
+        public bool IsNotificationVisible
+        {
+            get => _isNotificationVisible;
+            set => SetProperty(ref _isNotificationVisible, value);
+        }
+        public string NotificationTitle
+        {
+            get => _notificationTitle;
+            set => SetProperty(ref _notificationTitle, value);
+        }
+        public string NotificationMessage
+        {
+            get => _notificationMessage;
+            set => SetProperty(ref _notificationMessage, value);
+        }
+        public bool IsNotificationSuccess
+        {
+            get => _isNotificationSuccess;
+            set => SetProperty(ref _isNotificationSuccess, value);
+        }
+
+        public void ShowNotification(string title, string message, bool isSuccess)
+        {
+            NotificationTitle = title;
+            NotificationMessage = message;
+            IsNotificationSuccess = isSuccess;
+            IsNotificationVisible = false;
+
+            if (isSuccess)
+            {
+                Views.Dialogs.ActionConfirmDialog.Success(title, message);
+            }
+            else
+            {
+                Views.Dialogs.ActionConfirmDialog.Error(title, message);
+            }
+        }
+
         public int SelectedFiscalYearIndex { get => _selectedFiscalYearIndex; set { if (SetProperty(ref _selectedFiscalYearIndex, value)) { OnPropertyChanged(nameof(CanModifyGrantees)); OnPropertyChanged(nameof(CanAccessActivePipelineTabs)); OnPropertyChanged(nameof(TabDisabledTooltipText)); } } }
 
         private bool _isRosterLocked; private int _activeCycleFiscalYear = 2026;

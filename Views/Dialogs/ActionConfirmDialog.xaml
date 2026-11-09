@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
-        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False" WindowStartupLocation="CenterScreen"
         Width="520" SizeToContent="Height">
     <Border Background="Transparent" Padding="16">
         <Border x:Name="Shell" Background="White" CornerRadius="16"

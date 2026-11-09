@@ -14,22 +14,76 @@ namespace SOLUM_UI
     {
         private static readonly DateTime _sessionStart = DateTime.Now;
 
+        private double _normalAccountDetailsHeight = 0;
+
         public UserProfilePage()
         {
             InitializeComponent();
-            Loaded += (s, e) => PopulateProfile();
+            Loaded += (s, e) =>
+            {
+                PopulateProfile();
+                UpdateCardClips();
+                SyncAccountDetailsHeight();
+            };
         }
 
         /// <summary>
         /// Clips a card to its own rounded corners so the filled decorative circles
-        /// don't spill past the card edges. Hooked to SizeChanged on HeroCard / PasswordCard.
+        /// don't spill past the card edges. Hooked to SizeChanged on HeroCardBg / PasswordCardBg.
         /// </summary>
         private void RoundedClip_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (sender is Border b && b.ActualWidth > 0 && b.ActualHeight > 0)
+            if (sender is Border b && e.NewSize.Width > 0 && e.NewSize.Height > 0)
             {
-                double r = b.CornerRadius.TopLeft;
-                b.Clip = new RectangleGeometry(new Rect(0, 0, b.ActualWidth, b.ActualHeight), r, r);
+                double r = b.CornerRadius.TopLeft > 0 ? b.CornerRadius.TopLeft : 22.0;
+                b.Clip = new RectangleGeometry(new Rect(0, 0, e.NewSize.Width, e.NewSize.Height), r, r);
+            }
+            else if (sender is FrameworkElement fe && e.NewSize.Width > 0 && e.NewSize.Height > 0)
+            {
+                fe.Clip = new RectangleGeometry(new Rect(0, 0, e.NewSize.Width, e.NewSize.Height), 22.0, 22.0);
+            }
+        }
+
+        private void UpdateCardClips()
+        {
+            ApplyClip(HeroCardBg, 22.0);
+            ApplyClip(PasswordCard, 22.0);
+            ApplyClip(PasswordCardBg, 20.5);
+        }
+
+        private void ApplyClip(FrameworkElement fe, double radius)
+        {
+            if (fe != null && fe.ActualWidth > 0 && fe.ActualHeight > 0)
+            {
+                fe.Clip = new RectangleGeometry(new Rect(0, 0, fe.ActualWidth, fe.ActualHeight), radius, radius);
+            }
+        }
+
+        private void SessionInfoCard_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            SyncAccountDetailsHeight();
+        }
+
+        private void PasswordCard_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            RoundedClip_SizeChanged(sender, e);
+            SyncAccountDetailsHeight();
+        }
+
+        private void SyncAccountDetailsHeight()
+        {
+            if (ChangePasswordFormPanel != null && ChangePasswordFormPanel.Visibility == Visibility.Visible)
+                return; // Do not expand left column when change password form expands
+
+            if (PasswordCard != null && SessionInfoCard != null &&
+                PasswordCard.ActualHeight > 0 && SessionInfoCard.ActualHeight > 0)
+            {
+                double targetHeight = PasswordCard.ActualHeight + 20.0 + SessionInfoCard.ActualHeight;
+                if (targetHeight > 250)
+                {
+                    _normalAccountDetailsHeight = targetHeight;
+                    AccountDetailsCard.Height = targetHeight;
+                }
             }
         }
 
@@ -65,6 +119,11 @@ namespace SOLUM_UI
         /// <summary>Show the change password form when button is clicked.</summary>
         private void BtnChangePassword_Click(object sender, RoutedEventArgs e)
         {
+            if (AccountDetailsCard.ActualHeight > 200)
+            {
+                _normalAccountDetailsHeight = AccountDetailsCard.ActualHeight;
+                AccountDetailsCard.Height = _normalAccountDetailsHeight;
+            }
             ChangePasswordButtonPanel.Visibility = Visibility.Collapsed;
             ChangePasswordFormPanel.Visibility = Visibility.Visible;
             PwdCurrentPassword.Focus();
@@ -76,6 +135,11 @@ namespace SOLUM_UI
             ClearChangePasswordForm();
             ChangePasswordFormPanel.Visibility = Visibility.Collapsed;
             ChangePasswordButtonPanel.Visibility = Visibility.Visible;
+            if (_normalAccountDetailsHeight > 200)
+            {
+                AccountDetailsCard.Height = _normalAccountDetailsHeight;
+            }
+            Dispatcher.BeginInvoke(new Action(SyncAccountDetailsHeight), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         /// <summary>Validate and save the new password.</summary>
@@ -152,6 +216,11 @@ namespace SOLUM_UI
                     ClearChangePasswordForm();
                     ChangePasswordFormPanel.Visibility = Visibility.Collapsed;
                     ChangePasswordButtonPanel.Visibility = Visibility.Visible;
+                    if (_normalAccountDetailsHeight > 200)
+                    {
+                        AccountDetailsCard.Height = _normalAccountDetailsHeight;
+                    }
+                    Dispatcher.BeginInvoke(new Action(SyncAccountDetailsHeight), System.Windows.Threading.DispatcherPriority.Loaded);
                 }
                 else
                 {

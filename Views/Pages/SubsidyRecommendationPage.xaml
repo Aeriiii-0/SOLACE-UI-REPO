@@ -222,7 +222,7 @@
                 <!-- RIGHT: Action Buttons -->
                 <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <!-- Start New Cycle Button -->
-                    <Button Height="36" Padding="16,0" Margin="0,0,8,0" Cursor="Hand" ToolTip="Initialize next fiscal year cycle" Command="{Binding StartNewCycleCommand}" Visibility="{Binding IsActiveCycle, Converter={StaticResource BoolToVis}}">
+                    <Button Height="36" Padding="16,0" Margin="0,0,8,0" Cursor="Hand" ToolTip="Initialize next fiscal year cycle" Command="{Binding StartNewCycleCommand}" Visibility="{Binding IsRosterLocked, Converter={StaticResource BoolToVis}}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1.5" CornerRadius="18" Padding="{TemplateBinding Padding}">
@@ -669,5 +669,16 @@
                          IsActive="{Binding IsActionProcessing}"
                          Message="{Binding ActionProcessingMessage, FallbackValue='Processing...'}"
                          Panel.ZIndex="9999"/>
+        <!-- Notification Card -->
+        <c:NotificationCardComponent
+            Grid.RowSpan="5"
+            Panel.ZIndex="10000"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            Margin="0,24,0,0"
+            Title="{Binding NotificationTitle}"
+            Message="{Binding NotificationMessage}"
+            IsSuccess="{Binding IsNotificationSuccess}"
+            Visibility="{Binding IsNotificationVisible, Converter={StaticResource BoolToVis}}"/>
     </Grid>
 </Page>
