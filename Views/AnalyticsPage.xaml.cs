@@ -366,8 +366,10 @@ namespace SOLUM_UI
                         break;
                 }
                 int? queryYear = (filterType == "CustomRange") ? (int?)null : targetYear;
+                DateTime? monthlyStart = (filterType == "CustomRange") ? start : null;
+                DateTime? monthlyEnd = (filterType == "CustomRange") ? end : null;
                 var dashboardTask = AnalyticsApiService.Instance.GetDashboardAnalyticsAsync();
-                var monthlyTask = AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(targetYear, targetMonth, barangay, start, end);
+                var monthlyTask = AnalyticsApiService.Instance.GetMonthlyAnalyticsAsync(targetYear, targetMonth, barangay, monthlyStart, monthlyEnd);
                 var breakdownTask = AnalyticsApiService.Instance.GetBarangayBreakdownAsync(
                     quarter: queryQuarter,
                     year: queryYear,
@@ -1142,29 +1144,62 @@ namespace SOLUM_UI
                         "No analytics data loaded. Please refresh the data first.");
                     return;
                 }
+
+                // Format dynamic period label matching DSWD official submission (e.g. "MARCH 2025", "JUNE 2025", "SEPTEMBER 2025")
+                string periodLabel;
+                if (_vm.FilterType == "Quarterly")
+                {
+                    int endMonth = Math.Max(1, Math.Min(12, _vm.SelectedQuarter * 3));
+                    string mName = new DateTime(_vm.SelectedYear, endMonth, 1).ToString("MMMM").ToUpperInvariant();
+                    periodLabel = $"{mName} {_vm.SelectedYear}";
+                }
+                else if (_vm.FilterType == "Monthly")
+                {
+                    int m = Math.Max(1, Math.Min(12, _vm.SelectedMonth));
+                    int y = _vm.SelectedYear > 0 ? _vm.SelectedYear : DateTime.Today.Year;
+                    string mName = new DateTime(y, m, 1).ToString("MMMM").ToUpperInvariant();
+                    periodLabel = $"{mName} {y}";
+                }
+                else if (_vm.FilterType == "Yearly")
+                {
+                    int y = _vm.SelectedYear > 0 ? _vm.SelectedYear : DateTime.Today.Year;
+                    periodLabel = $"DECEMBER {y}";
+                }
+                else
+                {
+                    periodLabel = $"{DateTime.Today:MMMM yyyy}".ToUpperInvariant();
+                }
+
                 var saveDialog = new System.Windows.Forms.SaveFileDialog
                 {
-                    Filter = "Excel Files (*.xlsx)|*.xlsx|All Files (*.*)|*.*",
-                    FileName = $"Solo_Parents_Analytics_{DateTime.Today:yyyyMMdd}.xlsx",
+                    Filter = "Excel Files (*.xlsx)|*.xlsx|CSV Files (*.csv)|*.csv|All Files (*.*)|*.*",
+                    FileName = $"LGU_SUMMARY_SOLO_PARENTS_{periodLabel.Replace(" ", "_")}.xlsx",
                     InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
                 };
                 if (saveDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    string municipality = selectedBarangay != "ALL" ? selectedBarangay : "Biñan City";
-                    string region = "CALABARZON (IV-A)";
+                    string municipality = selectedBarangay != "ALL" 
+                        ? $"{selectedBarangay.ToUpperInvariant()}, BINAN, LAGUNA" 
+                        : "BINAN, LAGUNA";
+                    string region = "IV-A";
                     string focalPersonName = MainWindow.FullName;
+                    if (string.IsNullOrWhiteSpace(focalPersonName))
+                        focalPersonName = "CHRISTINE R. RIZARRE, RSW";
+
                     AnalyticsExcelExportService.ExportAnalyticsReport(
                         saveDialog.FileName,
                         _vm.AnalyticsData,
                         municipality,
                         region,
-                        focalPersonName);
+                        focalPersonName,
+                        periodLabel: periodLabel);
+
                     ToastNotification.Show(
                         "Export Successful",
                         $"Analytics report exported to:\n{System.IO.Path.GetFileName(saveDialog.FileName)}",
                         ToastType.Success);
                     Services.AuditLogService.Instance.LogSystem(
-                        $"Analytics report exported for {municipality} by {focalPersonName}");
+                        $"Analytics report exported ({periodLabel}) for {municipality} by {focalPersonName}");
                 }
             }
             catch (Exception ex)
