@@ -27,16 +27,16 @@ if %ERRORLEVEL% neq 0 (
 :: 3. Generate Release ZIP Archive
 echo.
 echo [3/3] Creating Release ZIP package...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path '%~dp0..\bin\Release\*' -DestinationPath '%~dp0..\Output\Solace-v0.0.7-beta.zip' -Force"
-copy /y "%~dp0..\Output\Solace-v0.0.7-beta.zip" "%~dp0..\Output\SOLUM-UI-v0.0.7-beta.zip" >nul
-copy /y "%~dp0..\Output\Solace-v0.0.7-beta.zip" "%~dp0..\Output\SOLUM-UI-Update.zip" >nul
-copy /y "%~dp0..\Output\Solace-v0.0.7-beta.zip" "%~dp0..\Solace-v0.0.7-beta.zip" >nul
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path '%~dp0..\bin\Release\*' -DestinationPath '%~dp0..\Output\Solace-v0.0.8-beta.zip' -Force"
+copy /y "%~dp0..\Output\Solace-v0.0.8-beta.zip" "%~dp0..\Output\SOLUM-UI-v0.0.8-beta.zip" >nul
+copy /y "%~dp0..\Output\Solace-v0.0.8-beta.zip" "%~dp0..\Output\SOLUM-UI-Update.zip" >nul
+copy /y "%~dp0..\Output\Solace-v0.0.8-beta.zip" "%~dp0..\Solace-v0.0.8-beta.zip" >nul
 
 echo.
 echo ========================================================
 echo   SUCCESS! Files ready in Output folder:
 echo   - SOLACE-UI-REPO\Output\SolaceSetup.exe
-echo   - SOLACE-UI-REPO\Output\Solace-v0.0.7-beta.zip
+echo   - SOLACE-UI-REPO\Output\Solace-v0.0.8-beta.zip
 echo ========================================================
 echo.
 pause
