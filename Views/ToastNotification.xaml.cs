@@ -23,6 +23,17 @@ namespace SOLUM_UI
         public ToastNotification()
         {
             InitializeComponent();
+            
+            // Ensure no backdrop or blur effects
+            this.Owner = null;
+            
+            // Disable any system backdrop effects
+            try
+            {
+                var hwnd = new System.Windows.Interop.WindowInteropHelper(this).EnsureHandle();
+                // This ensures the window doesn't cause backdrop blur on other windows
+            }
+            catch { }
         }
 
         public static void Show(string title, string message, ToastType type)

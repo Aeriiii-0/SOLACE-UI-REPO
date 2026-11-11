@@ -424,7 +424,7 @@
         </Style>
     </Window.Resources>
     <!-- Dimmed Modal Backdrop -->
-    <Border Background="#55000000">
+    <Border Background="{DynamicResource ModalOverlayBrush}">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <!-- Shadow Layer: Sibling with NO children. Rendered once into GPU cache, NEVER invalidated by typing inside DialogShell -->
             <Border Background="#FAFAFA" CornerRadius="16"
@@ -997,7 +997,10 @@
                                                         </StackPanel>
                                                         <StackPanel Grid.Column="2">
                                                             <TextBlock Text="Date" Style="{StaticResource FieldLabelSm}"/>
-                                                            <DatePicker x:Name="DpA2Date" Style="{StaticResource FormDateSm}"/>
+                                                            <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="8" Background="White">
+                                                                <DatePicker x:Name="DpA2Date" Style="{StaticResource FormDateSm}"
+                                                                            BorderThickness="0" Background="Transparent"/>
+                                                            </Border>
                                                         </StackPanel>
                                                     </Grid>
                                                 </StackPanel>

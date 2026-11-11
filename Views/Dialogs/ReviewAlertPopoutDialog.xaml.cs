@@ -59,11 +59,24 @@ namespace SOLUM_UI.Views.Dialogs
         {
             if (pendingCount <= 0) return;
             var mainWin = owner as MainWindow;
-            var dlg = new ReviewAlertPopoutDialog(pendingCount, mainWin)
+            var dlg = new ReviewAlertPopoutDialog(pendingCount, mainWin);
+            try
             {
-                Owner = owner
-            };
-            dlg.ShowDialog();
+                if (owner != null && owner.IsVisible)
+                {
+                    dlg.Owner = owner;
+                }
+                else if (Application.Current?.MainWindow != null && Application.Current.MainWindow.IsVisible)
+                {
+                    dlg.Owner = Application.Current.MainWindow;
+                }
+            }
+            catch { }
+            SOLUM_UI.Core.WindowPositionHelper.CenterOnOwner(dlg, dlg.Owner);
+            using (MainWindow.ModalScope(true))
+            {
+                dlg.ShowDialog();
+            }
         }
 
         public static void ShowIfReviewsNeeded(Window owner, int expiringCount, int inactiveCount, int pendingCount = 0)

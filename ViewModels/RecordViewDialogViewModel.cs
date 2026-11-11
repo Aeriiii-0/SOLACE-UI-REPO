@@ -37,7 +37,7 @@ namespace SOLUM_UI.ViewModels
         // ── Result signals (inspected by caller after ShowDialog()) ──────────
         public bool OpenedEdit    { get; private set; }
         public bool Renewed       { get; private set; }   // kept for compat
-        public bool OpenedRenew   { get; private set; }
+        public bool OpenedRenew   { get; set; }
         public bool OpenedDelete  { get; private set; }
         public SoloParentRecord RenewalResult { get; private set; }
         // ── Colour palette (presentation constants) ──────────────────────────
@@ -284,6 +284,13 @@ namespace SOLUM_UI.ViewModels
                 "The solo parent record has been successfully renewed.", true,
                 closeDelaySecs: 1.2, dialogResult: true);
         }
+        /// <summary>Signals the parent page to open the record in renewal mode.</summary>
+        public void HandleRenew()
+        {
+            OpenedRenew = true;
+            RequestClose?.Invoke(true);
+        }
+
         /// <summary>Signals the parent page to open the record in edit mode.</summary>
         public void HandleEdit()
         {

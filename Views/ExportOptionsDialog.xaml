@@ -3,12 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterOwner"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
         TextOptions.TextRenderingMode="ClearType"
         TextOptions.TextFormattingMode="Display">
-    <Border Background="#66000000">
+    <Border Background="{DynamicResource ModalOverlayBrush}">
         <Border x:Name="Shell" Background="White" CornerRadius="18"
                 BorderBrush="#702943" BorderThickness="1.5"
                 ClipToBounds="True" Width="460"

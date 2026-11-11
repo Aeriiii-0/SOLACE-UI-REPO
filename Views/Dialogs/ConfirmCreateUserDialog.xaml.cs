@@ -28,15 +28,13 @@ namespace SOLUM_UI.Views.Dialogs
         private void BtnConfirm_Click(object sender, RoutedEventArgs e)
         {
             Confirmed = true;
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             Confirmed = false;
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
 
         public static bool Show(
@@ -50,16 +48,22 @@ namespace SOLUM_UI.Views.Dialogs
         {
             var dlg = new ConfirmCreateUserDialog(fullName, email, role, contactNumber, scope, password);
 
-            if (owner != null)
+            try
             {
-                dlg.Owner = owner;
+                var targetOwner = (owner != null && owner.IsVisible)
+                    ? owner
+                    : (Application.Current?.MainWindow != null && Application.Current.MainWindow.IsVisible ? Application.Current.MainWindow : null);
+                if (targetOwner != null && targetOwner.IsVisible)
+                {
+                    dlg.Owner = targetOwner;
+                }
             }
-            else if (Application.Current?.MainWindow != null && Application.Current.MainWindow.IsVisible)
+            catch { }
+            SOLUM_UI.Core.WindowPositionHelper.CenterOnOwner(dlg, dlg.Owner);
+            using (MainWindow.ModalScope(true))
             {
-                dlg.Owner = Application.Current.MainWindow;
+                dlg.ShowDialog();
             }
-
-            dlg.ShowDialog();
             return dlg.Confirmed;
         }
     }

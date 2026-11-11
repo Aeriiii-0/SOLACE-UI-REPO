@@ -860,7 +860,7 @@
         </ScrollViewer>
         <Grid x:Name="FilterModalOverlay"
               Visibility="Collapsed"
-              Background="#66000000"
+              Background="{DynamicResource ModalOverlayBrush}"
               Panel.ZIndex="100"
               MouseDown="FilterModalOverlay_MouseDown">
             <Border Background="White" CornerRadius="16"

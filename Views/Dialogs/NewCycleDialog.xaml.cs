@@ -69,8 +69,7 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
 
         private void BtnLaunch_Click(object sender, RoutedEventArgs e)
@@ -108,8 +107,7 @@ namespace SOLUM_UI.Views.Dialogs
                 PerGranteeAmount = perGrantee,
                 AllocatedSlots = grantees
             };
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
     }
 }

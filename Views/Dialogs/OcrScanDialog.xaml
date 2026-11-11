@@ -172,7 +172,7 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Border Background="#66000000" Padding="0">
+    <Border Background="{DynamicResource ModalOverlayBrush}" Padding="0">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <Border Background="White" CornerRadius="24"
                     IsHitTestVisible="False"

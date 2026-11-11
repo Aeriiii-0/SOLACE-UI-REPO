@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
-        ShowInTaskbar="False" WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         FontFamily="Segoe UI"
         Width="520" SizeToContent="Height">
     <Border Background="Transparent" Padding="16">

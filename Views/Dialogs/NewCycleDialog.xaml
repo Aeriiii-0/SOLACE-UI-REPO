@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
-        ShowInTaskbar="False" WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Width="500" SizeToContent="Height"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"

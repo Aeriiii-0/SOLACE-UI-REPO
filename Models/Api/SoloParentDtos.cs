@@ -255,6 +255,8 @@ namespace SOLUM_UI.Models.Api
         public string CreatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public string LastModifiedBy { get; set; }
+        public DateTime? CurrentTermExpiresAt { get; set; }
+        public List<RecordTermDto> RecordTerms { get; set; } = new List<RecordTermDto>();
     }
 
     public class SoloParentListItemDto
@@ -288,6 +290,8 @@ namespace SOLUM_UI.Models.Api
         public string LastModifiedBy { get; set; }
         public bool IsActive { get; set; }
         public string Status { get; set; }
+        public DateTime? CurrentTermExpiresAt { get; set; }
+        public List<RecordTermDto> RecordTerms { get; set; } = new List<RecordTermDto>();
     }
     /// <summary>
     /// Matches SoloParentDetailDto returned by GET /api/soloparent/{id}
@@ -361,5 +365,13 @@ namespace SOLUM_UI.Models.Api
         public string ExpiresAt { get; set; }
         public string Type { get; set; }
         public DateTime? DateCreated { get; set; }
+    }
+    /// <summary>
+    /// Request payload for POST /api/soloparent/{id}/cancel (Cancel/Revoke application).
+    /// </summary>
+    public class CancelSoloParentRequest
+    {
+        public string Reason { get; set; } = string.Empty;
+        public string Remarks { get; set; } = string.Empty;
     }
 }

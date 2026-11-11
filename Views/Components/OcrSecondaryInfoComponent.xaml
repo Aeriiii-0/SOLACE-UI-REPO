@@ -349,6 +349,7 @@
                                      PreviewTextInput="Phone_PreviewTextInput"
                                      PreviewKeyDown="Phone_PreviewKeyDown"
                                      TextChanged="TxtEmergencyNumber_TextChanged"/>
+                            <TextBlock x:Name="ErrEmergencyNumber" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
                     </Grid>
                     <!-- ROW 2: Emergency Address -->

@@ -258,21 +258,53 @@ namespace SOLUM_UI.Models
         /// <summary>
         /// Determines whether the record is eligible for renewal.
         /// Rule: Solo parents cannot renew if their record is active for less than 1 month since its issue/start date.
-        /// Expired or inactive records can always be renewed.
+        /// Expired, inactive, cancelled, or expiring records can always be renewed.
         /// </summary>
         public bool CanRenew(out string failureReason, out DateTime? earliestRenewalDate)
         {
             failureReason = null;
             earliestRenewalDate = null;
 
-            bool isExpired = CurrentTermExpiresAt.HasValue && CurrentTermExpiresAt.Value.Date < DateTime.Today;
+            // Resolve effective expiry date from all available sources
+            DateTime? expiry = CurrentTermExpiresAt;
+            if (!expiry.HasValue && RecordTerms != null && RecordTerms.Count > 0)
+            {
+                foreach (var rt in RecordTerms)
+                {
+                    if (DateTime.TryParse(rt.ExpiresAt, out var exp) && (!expiry.HasValue || exp > expiry.Value))
+                        expiry = exp;
+                }
+            }
+            if (!expiry.HasValue && LastUpdated != DateTime.MinValue)
+            {
+                expiry = LastUpdated.AddYears(1);
+            }
+            if (!expiry.HasValue && DateOfApplication != DateTime.MinValue)
+            {
+                expiry = DateOfApplication.AddYears(1);
+            }
+
+            bool isExpired = expiry.HasValue && expiry.Value.Date < DateTime.Today;
             bool isStatusInactive = string.Equals(Status, "Inactive", StringComparison.OrdinalIgnoreCase) ||
-                                    string.Equals(Status, "Expired", StringComparison.OrdinalIgnoreCase);
-            // Expired or inactive records are always eligible for renewal
-            if (isExpired || isStatusInactive)
+                                    string.Equals(Status, "Expired", StringComparison.OrdinalIgnoreCase) ||
+                                    string.Equals(Status, "Cancelled", StringComparison.OrdinalIgnoreCase);
+            bool isStatusExpiring = string.Equals(Status, "Expiring", StringComparison.OrdinalIgnoreCase) ||
+                                    string.Equals(Status, "ExpiringSoon", StringComparison.OrdinalIgnoreCase);
+            
+            // Check if record is expiring (within 60 days of expiry or explicitly marked expiring)
+            bool isExpiringSoon = false;
+            if (expiry.HasValue && !isExpired)
+            {
+                double daysUntilExpiry = (expiry.Value.Date - DateTime.Today).TotalDays;
+                isExpiringSoon = daysUntilExpiry <= 60;
+            }
+            
+            // Expired, inactive, cancelled, or expiring records are always eligible for renewal
+            if (isExpired || isStatusInactive || isStatusExpiring || isExpiringSoon)
             {
                 return true;
             }
+            
             DateTime startDate = GetActiveTermStartDate();
             if (startDate != DateTime.MinValue)
             {

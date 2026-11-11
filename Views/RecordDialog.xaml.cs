@@ -621,28 +621,7 @@ namespace SOLUM_UI
 
         private void ApplySize()
         {
-            double screenW, screenH, screenLeft, screenTop;
-            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
-            {
-                screenW    = Owner.ActualWidth;
-                screenH    = Owner.ActualHeight;
-                screenLeft = Owner.Left;
-                screenTop  = Owner.Top;
-            }
-            else
-            {
-                screenW    = SystemParameters.WorkArea.Width;
-                screenH    = SystemParameters.WorkArea.Height;
-                screenLeft = SystemParameters.WorkArea.Left;
-                screenTop  = SystemParameters.WorkArea.Top;
-            }
-            if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
-            if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
-            if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
-            if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
-            DialogShell.MaxHeight = screenH * 0.90;
-            DialogShell.Width     = Math.Min(screenW * 0.88, 1320);
-            DialogShell.MinWidth  = Math.Max(screenW * 0.60, 680);
+            SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, DialogShell);
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
@@ -1460,6 +1439,7 @@ namespace SOLUM_UI
         private void TxtEmergencyNumber_TextChanged(object sender, TextChangedEventArgs e)
         {
             FormatPhoneBox(TxtEmergencyNumber);
+            ClearFieldError(TxtEmergencyNumber, ErrEmergencyNumber);
         }
         private void TxtPlaceOfBirth_TextChanged(object sender, TextChangedEventArgs e)   { ToUpperBox(TxtPlaceOfBirth); ClearFieldError(TxtPlaceOfBirth, ErrPlaceOfBirth); }
         private void TxtPhilSys_TextChanged(object sender, TextChangedEventArgs e)
@@ -1651,6 +1631,19 @@ namespace SOLUM_UI
             { MarkError(TxtContact, ErrContact, "Required."); missing.Add("Contact Number"); ok = false; }
             else if (contactDigits.Length != 11)
             { MarkError(TxtContact, ErrContact, "Must be 11 digits."); missing.Add("Contact Number (11 digits)"); ok = false; }
+            else if (!contactDigits.StartsWith("09"))
+            { MarkError(TxtContact, ErrContact, "Must start with 09."); missing.Add("Contact Number (must start with 09)"); ok = false; }
+
+            // Validate emergency contact number if provided
+            string emergencyDigits = Regex.Replace(TxtEmergencyNumber.Text ?? "", @"\D", "");
+            if (!string.IsNullOrWhiteSpace(emergencyDigits))
+            {
+                if (emergencyDigits.Length != 11)
+                { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must be 11 digits."); missing.Add("Emergency Contact Number (11 digits)"); ok = false; }
+                else if (!emergencyDigits.StartsWith("09"))
+                { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must start with 09."); missing.Add("Emergency Contact Number (must start with 09)"); ok = false; }
+            }
+
             if (!ok)
                 SetValidationMessage(missing);
             return ok;
@@ -2017,7 +2010,13 @@ namespace SOLUM_UI
                 screenW: Width, screenH: Height,
                 screenLeft: Left, screenTop: Top,
                 mode: mode
-            ) { Owner = Owner ?? this };
+            );
+            try
+            {
+                var target = Owner ?? this;
+                if (target != null && target.IsVisible) confirm.Owner = target;
+            }
+            catch { }
             confirm.ShowDialog();
             if (!confirm.Confirmed)
             {
@@ -2026,14 +2025,37 @@ namespace SOLUM_UI
             }
             if (SaveAsyncHandler != null)
             {
-                // Show loading overlay
-                RecordSaveLoader.IsActive = true;
+                // Show toast notification with appropriate message and color based on operation
+                string toastTitle;
+                string toastMessage;
+                ToastType toastType;
+                
+                if (_isRenewal)
+                {
+                    toastTitle = "Renewing Record";
+                    toastMessage = "Processing renewal for solo parent record...";
+                    toastType = ToastType.Info; // Maroon color
+                }
+                else if (isEdit)
+                {
+                    toastTitle = "Editing Record";
+                    toastMessage = "Updating solo parent record in database...";
+                    toastType = ToastType.Warning; // Yellow-orange color
+                }
+                else
+                {
+                    toastTitle = "Adding Record";
+                    toastMessage = "Saving solo parent record to database...";
+                    toastType = ToastType.Success; // Green color
+                }
+                
+                ToastNotification.Show(toastTitle, toastMessage, toastType);
+                
                 try
                 {
                     var saveResult = await SaveAsyncHandler(preview);
                     if (saveResult != null && !saveResult.Succeeded)
                     {
-                        RecordSaveLoader.IsActive = false;
                         DialogShell.Visibility = Visibility.Visible;
                         if (saveResult.StatusCode == 409 || (saveResult.Errors != null && saveResult.Errors.Any(err => err.IndexOf("PhilSys", StringComparison.OrdinalIgnoreCase) >= 0)))
                         {
@@ -2051,22 +2073,47 @@ namespace SOLUM_UI
                 }
                 catch (Exception ex)
                 {
-                    RecordSaveLoader.IsActive = false;
                     DialogShell.Visibility = Visibility.Visible;
                     Views.Dialogs.ActionConfirmDialog.Error("Save Error", "An error occurred while saving: " + ex.Message);
                     return;
-                }
-                finally
-                {
-                    RecordSaveLoader.IsActive = false;
                 }
             }
             try
             {
                 Result = preview;
                 _savedSuccessfully = true;
-                DialogResult = true;
-                Close();
+                
+                // Show success popup and close dialog after user acknowledges
+                var owner = Window.GetWindow(this) ?? Application.Current.MainWindow;
+                
+                // Close the dialog first, then show success popup
+                SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
+                
+                // Determine the appropriate success message based on operation type
+                string successTitle;
+                string successMessage;
+                
+                if (_isRenewal)
+                {
+                    successTitle = "Record Renewed Successfully";
+                    successMessage = $"Solo parent record for {preview.Name} has been renewed.";
+                }
+                else if (isEdit)
+                {
+                    successTitle = "Record Updated Successfully";
+                    successMessage = $"Changes to {preview.Name}'s record have been saved.";
+                }
+                else
+                {
+                    successTitle = "Record Added Successfully";
+                    successMessage = $"Solo parent record for {preview.Name} has been added to the database.";
+                }
+                
+                // Show success popup after dialog is closed
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    ActionConfirmDialog.Success(successTitle, successMessage, owner);
+                }), System.Windows.Threading.DispatcherPriority.Background);
             }
             catch (Exception ex)
             {

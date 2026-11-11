@@ -4,7 +4,7 @@
         Title="Edit Cycle Settings"
         Height="520"
         Width="500"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"

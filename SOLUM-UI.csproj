@@ -189,6 +189,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Core\WindowPositionHelper.cs" />
     <Compile Include="Models\Api\MonthlyAnalyticsDto.cs" />
     <Compile Include="Models\Api\UserDtos.cs" />
     <Compile Include="Models\Api\BarangayBreakdownDtos.cs" />
@@ -305,6 +306,9 @@
     <Compile Include="Views\Dialogs\ActionConfirmDialog.xaml.cs">
       <DependentUpon>ActionConfirmDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\CancelRecordDialog.xaml.cs">
+      <DependentUpon>CancelRecordDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\AccountCreatedDialog.xaml.cs">
       <DependentUpon>AccountCreatedDialog.xaml</DependentUpon>
     </Compile>
@@ -403,6 +407,7 @@
     <Compile Include="Views\ViewAllLogsOverlay.xaml.cs">
       <DependentUpon>ViewAllLogsOverlay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Behaviors\DateInputBehavior.cs" />
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Models\Roles.cs" />
     <Compile Include="Models\AuditLog.cs" />
@@ -593,6 +598,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\ActionConfirmDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\CancelRecordDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

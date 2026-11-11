@@ -14,6 +14,7 @@ namespace SOLUM_UI.Views.Pages
             InitializeComponent();
             var vm = viewModel ?? new SubsidyRecommendationViewModel();
             DataContext = vm;
+            
             Loaded += async (s, e) =>
             {
                 if (DataContext is SubsidyRecommendationViewModel activeVm && activeVm.AvailableFiscalCycles.Count == 0)
@@ -25,6 +26,12 @@ namespace SOLUM_UI.Views.Pages
                 
                 // Attach hover handlers to tab TextBlocks
                 AttachTabHoverHandlers();
+            };
+            
+            // Clean up overlays when navigating away from this page
+            Unloaded += (s, e) =>
+            {
+                MainWindow.HideDimOverlay();
             };
             
             // Subscribe to ViewModel property changes to update progress bar

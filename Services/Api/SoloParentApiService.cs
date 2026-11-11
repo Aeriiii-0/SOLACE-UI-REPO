@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -186,6 +186,38 @@ namespace SOLUM_UI.Services.Api
             return result;
 
         }
+        
+        /// <summary>
+        /// Cancels/revokes a solo parent application.
+        /// Calls POST /api/soloparent/{id}/cancel with reason and remarks.
+        /// </summary>
+        public async Task<BaseResponse<bool>> CancelSoloParentAsync(Guid id, string reason, string remarks = null)
+        {
+            System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.CancelSoloParentAsync] Called with ID: {id}, Reason: {reason}");
+            
+            _soloParentDetailCache.TryRemove(id, out _);
+            
+            var request = new CancelSoloParentRequest
+            {
+                Reason = reason ?? "Cancelled by Admin",
+                Remarks = remarks ?? string.Empty
+            };
+            
+            var result = await ApiClient.Instance.PostAsync<CancelSoloParentRequest, bool>($"api/soloparent/{id}/cancel", request);
+            
+            if (result != null && result.Succeeded)
+            {
+                _soloParentDetailCache.TryRemove(id, out _);
+                System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.CancelSoloParentAsync] Successfully cancelled record {id}");
+            }
+            else if (result?.Errors != null && result.Errors.Count > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SoloParentApiService.CancelSoloParentAsync] Errors: {string.Join(" | ", result.Errors)}");
+            }
+            
+            return result;
+        }
+        
         /// <summary>
         /// Fetches the chronological activity history / timeline for a given solo parent record.
         /// Calls GET /api/soloparent/{id}/timeline with automatic fallback to /api/soloparents/{id}/timeline
@@ -569,17 +601,51 @@ namespace SOLUM_UI.Services.Api
                 dateOfApplication = dto.DateCreated;
             }
 
+            // Resolve authoritative expiration date:
+            // Prefer the latest expiration date found across RecordTerms and CurrentTermExpiresAt
+            DateTime? finalExpiryDate = null;
+            if (validUntil != DateTime.MinValue && dto.CurrentTermExpiresAt.HasValue)
+            {
+                finalExpiryDate = validUntil > dto.CurrentTermExpiresAt.Value ? validUntil : dto.CurrentTermExpiresAt.Value;
+            }
+            else if (validUntil != DateTime.MinValue)
+            {
+                finalExpiryDate = validUntil;
+            }
+            else if (dto.CurrentTermExpiresAt.HasValue)
+            {
+                finalExpiryDate = dto.CurrentTermExpiresAt.Value;
+            }
+            else if (dateOfApplication != DateTime.MinValue)
+            {
+                finalExpiryDate = dateOfApplication.AddYears(1);
+            }
+
             string computedStatus = "Inactive";
             if (!string.IsNullOrWhiteSpace(dto.Status))
             {
                 computedStatus = dto.Status.Equals("Active", StringComparison.OrdinalIgnoreCase) ? "Valid" : dto.Status;
-
             }
             else
             {
                 computedStatus = isActive ? "Valid" : "Inactive";
-
             }
+
+            // Sync status with expiration date:
+            if (finalExpiryDate.HasValue && finalExpiryDate.Value.Date >= DateTime.Today && !dto.IsDeleted)
+            {
+                // A valid future expiry means the record is active/valid
+                computedStatus = "Valid";
+                isActive = true;
+            }
+            else if (finalExpiryDate.HasValue && finalExpiryDate.Value.Date < DateTime.Today)
+            {
+                computedStatus = "Expired";
+                isActive = false;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[MapToRecord] ID={dto.Id}, BackendStatus={dto.Status ?? "null"}, ComputedStatus={computedStatus}, CurrentTermExpiresAt={finalExpiryDate?.ToString("yyyy-MM-dd") ?? "null"}, ValidUntil={validUntil:yyyy-MM-dd}, IsActive={isActive}");
+            
             var record = new SoloParentRecord
             {
                 Id = dto.Id.ToString(),
@@ -591,7 +657,7 @@ namespace SOLUM_UI.Services.Api
                 DateCreated = dto.DateCreated != DateTime.MinValue ? dto.DateCreated : (dto.CreatedAt ?? DateTime.MinValue),
                 IsNewApplicant = isNewApplicant,
                 IsRenewal      = isRenewal,
-                CurrentTermExpiresAt = dto.CurrentTermExpiresAt ?? (validUntil != DateTime.MinValue ? (DateTime?)validUntil : null),
+                CurrentTermExpiresAt = finalExpiryDate,
                 RecordTerms = dto.RecordTerms ?? new List<RecordTermDto>(),
                 Surname = dto.PersonalInfo?.LastName ?? string.Empty,
                 FirstName = dto.PersonalInfo?.FirstName ?? string.Empty,
@@ -744,7 +810,8 @@ namespace SOLUM_UI.Services.Api
                 ApplicationDate       = dto.ApplicationDate,
                 IsActive              = dto.IsActive,
                 Status                = dto.Status,
-
+                CurrentTermExpiresAt  = dto.CurrentTermExpiresAt,
+                RecordTerms           = dto.RecordTerms ?? new List<RecordTermDto>(),
             };
             var record = MapToRecord(adapted);
             // If the name is still blank (API returns a flat fullName), use it directly

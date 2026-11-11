@@ -291,7 +291,7 @@
             </Style.Resources>
         </Style>
     </Window.Resources>
-    <Border x:Name="BackdropBorder" Background="#66000000">
+    <Border x:Name="BackdropBorder" Background="{DynamicResource ModalOverlayBrush}">
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
             <Border x:Name="ShadowLayer" Background="White" CornerRadius="24"
                     IsHitTestVisible="False"

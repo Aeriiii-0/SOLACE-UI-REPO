@@ -439,7 +439,11 @@ namespace SOLUM_UI.ViewModels
                     recordToView = new SoloParentRecord { Id = item.SpId, Name = item.Name, Barangay = item.Barangay, Sex = item.Sex, CivilStatus = item.CivilStatus, MonthlyIncome = item.MonthlyIncome.ToString("N2"), Status = "Active" };
                 var dlg = new RecordViewDialog(recordToView) { Owner = Application.Current.MainWindow };
                 dlg.ShowDialog();
-                if (dlg.Renewed || dlg.OpenedEdit || dlg.RenewalResult != null)
+                if (dlg.OpenedRenew)
+                {
+                    await RunQuickPredictAsync(item);
+                }
+                else if (dlg.Renewed || dlg.OpenedEdit || dlg.RenewalResult != null)
                 {
                     await RunQuickPredictAsync(item);
                 }

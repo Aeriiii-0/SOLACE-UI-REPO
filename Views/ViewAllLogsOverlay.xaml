@@ -594,7 +594,7 @@
             </Grid>
             <!-- ═══════════════════════ Detail overlay ══════════════════════════ -->
             <Grid Visibility="{Binding IsDetailVisible, Converter={StaticResource BoolToVisibilityConverter}}">
-                <Rectangle Fill="#66000000"/>
+                <Rectangle Fill="{DynamicResource ModalOverlayBrush}"/>
                 <Border Background="White" CornerRadius="16" Padding="36,30"
                         Width="600" HorizontalAlignment="Center" VerticalAlignment="Center"
                         MaxHeight="700">

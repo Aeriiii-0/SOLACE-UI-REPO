@@ -44,6 +44,12 @@ namespace SOLUM_UI
                 if (!_logsVm.IsInitialized)
                     _ = _logsVm.LoadAsync();
             };
+            
+            // Clean up overlays when navigating away from this page
+            Unloaded += (s, e) =>
+            {
+                MainWindow.HideDimOverlay();
+            };
         }
 
         private void Vm_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -452,11 +458,13 @@ namespace SOLUM_UI
         private void ViewAllLogs_Click(object sender, RoutedEventArgs e)
         {
             OverlayRoot.Visibility = Visibility.Visible;
+            MainWindow.ShowDimOverlay(fullWindow: false);
         }
 
         private void LogsOverlay_CloseRequested(object sender, RoutedEventArgs e)
         {
             OverlayRoot.Visibility = Visibility.Collapsed;
+            MainWindow.HideDimOverlay();
         }
 
         private void ReviewExpiring_Click(object sender, RoutedEventArgs e)

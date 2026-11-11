@@ -509,7 +509,6 @@
                         <ComboBoxItem Content="First Name" Tag="FIRST_NAME"/>
                         <ComboBoxItem Content="Last Name" Tag="LAST_NAME"/>
                         <ComboBoxItem Content="Full Name" Tag="FULL_NAME"/>
-                        <ComboBoxItem Content="PhilSys ID" Tag="PHILSYS_ID"/>
                     </ComboBox>
                     <TextBox x:Name="SearchName" Grid.Column="1"
                              BorderThickness="0" Background="Transparent"
@@ -1291,7 +1290,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="Find a solo parent" FontFamily="Segoe UI" FontSize="16" FontWeight="Bold" Foreground="#702943"/>
-                        <TextBlock Text="Search by name or PhilSys ID to open their record." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="20,2,0,0"/>
+                        <TextBlock Text="Search by name to open their record." FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" Margin="20,2,0,0"/>
                     </StackPanel>
                     <TextBlock Grid.Column="1" Text="Not registered?" FontFamily="Segoe UI" FontSize="12" Foreground="#A06080" VerticalAlignment="Center" Margin="0,0,16,0"/>
                     <Button Grid.Column="2" Height="40" Padding="18,0" Cursor="Hand" Click="BasicUserAddRecord_Click">
@@ -1329,7 +1328,6 @@
                             <ComboBoxItem Content="First Name" Tag="FIRST_NAME"/>
                             <ComboBoxItem Content="Last Name" Tag="LAST_NAME"/>
                             <ComboBoxItem Content="Full Name" Tag="FULL_NAME"/>
-                            <ComboBoxItem Content="PhilSys ID" Tag="PHILSYS_ID"/>
                         </ComboBox>
                         <Rectangle Grid.Column="1" Fill="#D4A0B0" Width="1.5" Margin="8,12,8,12"/>
                         <TextBox x:Name="EncSearchQuery" Grid.Column="2" BorderThickness="0" Background="Transparent" FontFamily="Segoe UI" FontSize="14" Foreground="#333333" Padding="16,0" VerticalAlignment="Center" TextChanged="EncoderFields_TextChanged" KeyDown="SearchBox_KeyDown">
@@ -1339,7 +1337,7 @@
                                         <Setter.Value>
                                             <ControlTemplate TargetType="TextBox">
                                                 <Grid>
-                                                    <TextBlock Text="Search records (name, PhilSys ID)..." Foreground="#C0A8B0" FontSize="14" VerticalAlignment="Center" Padding="16,0" IsHitTestVisible="False">
+                                                    <TextBlock Text="Search records (name)..." Foreground="#C0A8B0" FontSize="14" VerticalAlignment="Center" Padding="16,0" IsHitTestVisible="False">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
                                                                 <Setter Property="Visibility" Value="Collapsed"/>

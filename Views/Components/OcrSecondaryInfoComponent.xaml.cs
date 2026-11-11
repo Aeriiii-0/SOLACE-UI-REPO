@@ -311,6 +311,7 @@ namespace SOLUM_UI.Views.Components
         private void TxtEmergencyNumber_TextChanged(object sender, TextChangedEventArgs e)
         {
             FormatPhoneBox(TxtEmergencyNumber);
+            ClearFieldError(TxtEmergencyNumber, ErrEmergencyNumber);
             MarkBadgeEdited(Badge_EmergencyNumber, TxtConf_EmergencyNumber);
         }
 
@@ -470,6 +471,19 @@ namespace SOLUM_UI.Views.Components
             { MarkError(TxtContact, ErrContact, "Required."); missing.Add("Contact Number"); ok = false; }
             else if (contactDigits.Length != 11)
             { MarkError(TxtContact, ErrContact, "Must be 11 digits."); missing.Add("Contact Number (11 digits)"); ok = false; }
+            else if (!contactDigits.StartsWith("09"))
+            { MarkError(TxtContact, ErrContact, "Must start with 09."); missing.Add("Contact Number (must start with 09)"); ok = false; }
+
+            // Validate emergency contact number if provided
+            string emergencyDigits = Regex.Replace(TxtEmergencyNumber.Text ?? "", @"\D", "");
+            if (!string.IsNullOrWhiteSpace(emergencyDigits))
+            {
+                if (emergencyDigits.Length != 11)
+                { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must be 11 digits."); missing.Add("Emergency Contact Number (11 digits)"); ok = false; }
+                else if (!emergencyDigits.StartsWith("09"))
+                { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must start with 09."); missing.Add("Emergency Contact Number (must start with 09)"); ok = false; }
+            }
+
             return ok;
         }
 
@@ -481,7 +495,9 @@ namespace SOLUM_UI.Views.Components
             if (string.IsNullOrWhiteSpace(TxtAddress.Text)) { TxtAddress.Focus(); TxtAddress.BringIntoView(); return; }
             if (string.IsNullOrWhiteSpace(GetComboValue(CmbBarangay))) { CmbBarangay.Focus(); CmbBarangay.BringIntoView(); return; }
             string contactDigits = Regex.Replace(TxtContact.Text ?? "", @"\D", "");
-            if (string.IsNullOrWhiteSpace(contactDigits) || contactDigits.Length != 11) { TxtContact.Focus(); TxtContact.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(contactDigits) || contactDigits.Length != 11 || !contactDigits.StartsWith("09")) { TxtContact.Focus(); TxtContact.BringIntoView(); return; }
+            string emergencyDigits = Regex.Replace(TxtEmergencyNumber.Text ?? "", @"\D", "");
+            if (!string.IsNullOrWhiteSpace(emergencyDigits) && (emergencyDigits.Length != 11 || !emergencyDigits.StartsWith("09"))) { TxtEmergencyNumber.Focus(); TxtEmergencyNumber.BringIntoView(); return; }
         }
 
         private void MarkError(Control ctrl, TextBlock lbl, string msg)

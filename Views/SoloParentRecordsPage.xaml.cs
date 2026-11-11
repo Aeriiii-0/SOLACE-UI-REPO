@@ -182,7 +182,7 @@ namespace SOLUM_UI
                 }
                 else
                 {
-                    // No filter requested, load records normally (but not for Encoders � they must search first)
+                    // No filter requested, load records normally (but not for Encoders - they must search first)
                     bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
                     if (isStale && !IsEncoder)
                     {
@@ -318,10 +318,10 @@ namespace SOLUM_UI
             if (!IsEncoder && !IsBasicUser) return;
             var show = Visibility.Visible;
             var hide = Visibility.Collapsed;
-            // Results table (Row 3) � always visible for Encoder/BasicUser
+            // Results table (Row 3) - always visible for Encoder/BasicUser
             if (RecordsClipGrid != null)
                 RecordsClipGrid.Visibility = show;
-            // Table empty state overlay � shown inside table when no search done yet
+            // Table empty state overlay - shown inside table when no search done yet
             if (TableEmptyStateOverlay != null)
                 TableEmptyStateOverlay.Visibility = showResults ? Visibility.Collapsed : Visibility.Visible;
             // If returning to landing view, hide skeleton loader
@@ -336,7 +336,7 @@ namespace SOLUM_UI
         private async Task LoadRecordsAsync()
         {
             if (_isLoading) return;
-            // Encoders must search first � don't load records without a search query
+            // Encoders must search first - don't load records without a search query
             if (IsEncoder && string.IsNullOrWhiteSpace(EncSearchQuery?.Text?.Trim()))
             {
                 SetEncoderResultsVisible(false);
@@ -521,7 +521,7 @@ namespace SOLUM_UI
 
                 };
                 // Fetch the list page, then retrieve full details in parallel (the list
-                // endpoint does not return complete PersonalInfo � detail endpoint does).
+                // endpoint does not return complete PersonalInfo - detail endpoint does).
                 var resp = await SoloParentApiService.Instance.GetSoloParentsAsync(req);
                 if (!resp.Succeeded || resp.Data == null)
                 {
@@ -559,7 +559,7 @@ namespace SOLUM_UI
                     }
                     else
                     {
-                        // Detail call failed � build a minimal record from summary fields
+                        // Detail call failed - build a minimal record from summary fields
                         rec = new SoloParentRecord
                         {
                             Id = summary.Id.ToString(),
@@ -610,7 +610,7 @@ namespace SOLUM_UI
                 _lastLoadedTime = DateTime.UtcNow;
                 _hasLoadedData = true;
                 if (TxtLastRefreshed != null)
-                    TxtLastRefreshed.Text = $"� Updated {DateTime.Now:h:mm tt}";
+                    TxtLastRefreshed.Text = $"Updated {DateTime.Now:h:mm tt}";
                 if (BtnRefreshRecords != null)
                     BtnRefreshRecords.ToolTip = $"Refresh records (Last updated: {DateTime.Now:h:mm:ss tt})";
                 // Ensure delete is hidden for non-admin roles after every data load
@@ -975,15 +975,15 @@ namespace SOLUM_UI
         private async void OpenViewDialog(SoloParentRecordViewModel vm)
         {
             SoloParentRecord recordToView = vm.RawModel;
+            SoloParentDto existingDto = null;
             if (Guid.TryParse(vm.Id, out var id))
             {
                 var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(id);
                 if (detailResp.Succeeded && detailResp.Data != null)
                 {
-                    recordToView = SoloParentApiService.Instance.MapToRecord(detailResp.Data);
-
+                    existingDto = detailResp.Data;
+                    recordToView = SoloParentApiService.Instance.MapToRecord(existingDto);
                 }
-
             }
             var view = new RecordViewDialog(recordToView) { Owner = Application.Current.MainWindow };
             view.ShowDialog();
@@ -991,36 +991,53 @@ namespace SOLUM_UI
             {
                 if (view.RenewalResult != null)
                 {
-                    await RenewRecordAsync(recordToView, view.RenewalResult);
-
+                    await RenewRecordAsync(recordToView, view.RenewalResult, existingDto);
+                }
+                else
+                {
+                    if (!recordToView.CanRenew(out string renewalEligibilityReason, out _))
+                    {
+                        Views.Dialogs.ActionConfirmDialog.Warning(
+                            "Renewal Not Available",
+                            renewalEligibilityReason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
+                            Window.GetWindow(this));
+                        return;
+                    }
+                    var renewDialog = new Views.Dialogs.RenewalReassessmentDialog(recordToView, existingDto)
+                    {
+                        Owner = Application.Current.MainWindow
+                    };
+                    if (renewDialog.ShowDialog() == true && renewDialog.UpdatedRecord != null)
+                    {
+                        await RenewRecordAsync(recordToView, renewDialog.UpdatedRecord, existingDto);
+                    }
                 }
                 return;
-
             }
             if (view.Renewed)
             {
                 await LoadRecordsAsync();
                 return;
-
             }
             if (view.OpenedEdit)
             {
                 await EditRecordAsync(recordToView);
                 return;
-
             }
             if (view.OpenedDelete)
             {
                 await DeleteRecordAsync(recordToView.Id, recordToView.Name, skipConfirmation: true);
-
             }
-
         }
 
         private async void AddNewRecord_Click(object sender, RoutedEventArgs e)
         {
             var methodDialog = new EntryMethodDialog { Owner = Application.Current.MainWindow };
-            bool? picked = methodDialog.ShowDialog();
+            bool? picked;
+            using (MainWindow.ModalScope(true))
+            {
+                picked = methodDialog.ShowDialog();
+            }
             if (picked != true || methodDialog.Selected == EntryMethod.None)
             {
                 return;
@@ -1032,12 +1049,16 @@ namespace SOLUM_UI
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
                     await SaveNewRecordAsync(ocr.Result);
-
+                    // Show success notification for OCR flow
+                    Views.Dialogs.ActionConfirmDialog.Success(
+                        "Record Added Successfully", 
+                        $"Solo parent record for {ocr.Result.Name} has been added to the database.",
+                        Window.GetWindow(this));
                 }
                 return;
 
             }
-            // Manual entry � open 3-step wizard (Step 1 performs validation & duplicate check)
+            // Manual entry - open 3-step wizard (Step 1 performs validation & duplicate check)
             RecordDialog dialog = new RecordDialog { Owner = Application.Current.MainWindow };
             dialog.SaveAsyncHandler = async (rec) =>
             {
@@ -1056,7 +1077,7 @@ namespace SOLUM_UI
             };
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                ShowNotification("Record Added", dialog.Result.Name + " was added successfully.", true);
+                // Success popup is shown in RecordDialog, no need for notification here
                 AuditLogService.Instance.LogCreate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole);
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
@@ -1070,9 +1091,9 @@ namespace SOLUM_UI
 
         private async Task SaveNewRecordAsync(SoloParentRecord record)
         {
-            // Show loading indicator
-            PageLoadingOverlay.Message = "Saving record...";
-            PageLoadingOverlay.IsActive = true;
+            // Show toast notification instead of spinner
+            ToastNotification.Show("Adding Record", "Saving solo parent record to database...", ToastType.Info);
+            
             try
             {
                 record.CreatedBy = CurrentUserName;
@@ -1094,7 +1115,8 @@ namespace SOLUM_UI
                     return;
                 }
                 record.Id = createResp.Data.ToString();
-                ShowNotification("Record Added", record.Name + " was added successfully.", true);
+                
+                // Success popup is shown by RecordDialog or OCR components - just handle post-save logic
                 AuditLogService.Instance.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
@@ -1102,15 +1124,11 @@ namespace SOLUM_UI
                 if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
                 _currentPage = 1;
                 await LoadRecordsAsync();
-
             }
-            finally
+            catch (Exception ex)
             {
-                // Hide loading indicator
-                PageLoadingOverlay.IsActive = false;
-
+                Views.Dialogs.ActionConfirmDialog.Error("Save Error", "An error occurred while saving: " + ex.Message);
             }
-
         }
 
         private async void Edit_Click(object sender, RoutedEventArgs e)
@@ -1174,19 +1192,42 @@ namespace SOLUM_UI
                 var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid, null);
                 if (resp.Succeeded)
                 {
+                    System.Diagnostics.Debug.WriteLine($"[QuickRenew] Renewal successful for {record.Name}, invalidating cache and reloading...");
+                    
+                    DateTime parsedExpiry = (resp.Data != null && DateTime.TryParse(resp.Data.ExpiresAt, out var expDtVal))
+                        ? expDtVal
+                        : DateTime.Today.AddYears(1);
 
-                    string newExpiry = (resp.Data != null && DateTime.TryParse(resp.Data.ExpiresAt, out var expDt))
-                        ? expDt.ToString("MMMM d, yyyy")
-                        : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
-                    ShowNotification("Record Renewed", $"{record.Name} � valid until {newExpiry}.", true);
+                    record.CurrentTermExpiresAt = parsedExpiry;
+                    record.Status = "Valid";
+                    record.IsRenewal = true;
+                    record.IsNewApplicant = false;
+                    record.LastUpdated = DateTime.Now;
+
+                    // Invalidate the specific record cache
+                    SoloParentApiService.Instance.InvalidateDetailCache(guid);
+                    
+                    string newExpiry = parsedExpiry.ToString("MMMM d, yyyy");
+                    System.Diagnostics.Debug.WriteLine($"[QuickRenew] New expiry date: {newExpiry}");
+                    
+                    ShowNotification("Record Renewed", $"{record.Name} - valid until {newExpiry}.", true);
                     AuditLogService.Instance.LogUpdate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole, $"Record quick renewed. Valid until {newExpiry}.");
                     (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
-                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
-                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
-                if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
-                _currentPage = 1;
+                    (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
+                    (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
+                    if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
+                    _currentPage = 1;
+                    if (string.Equals(_statusFilter, "ExpiringSoon", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _statusFilter = "All";
+                        if (TabStatusAll != null) TabStatusAll.IsChecked = true;
+                        if (TabStatusExpiring != null) TabStatusExpiring.IsChecked = false;
+                    }
+                    // Force reload from backend to get updated status
+                    _lastLoadedTime = DateTime.MinValue;
+                    System.Diagnostics.Debug.WriteLine("[QuickRenew] Forcing complete page reload...");
                     await LoadRecordsAsync();
-
+                    System.Diagnostics.Debug.WriteLine("[QuickRenew] Page reload completed");
                 }
                 else
                 {
@@ -1292,13 +1333,33 @@ namespace SOLUM_UI
 
                 }
 
-                string newExpiry = (renewResp.Data != null && DateTime.TryParse(renewResp.Data.ExpiresAt, out var expDt))
-                    ? expDt.ToString("MMMM d, yyyy")
-                    : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
+                DateTime parsedExpiry = (renewResp.Data != null && DateTime.TryParse(renewResp.Data.ExpiresAt, out var expDtVal))
+                    ? expDtVal
+                    : DateTime.Today.AddYears(1);
+
+                original.CurrentTermExpiresAt = parsedExpiry;
+                original.Status = "Valid";
+                original.IsRenewal = true;
+                original.IsNewApplicant = false;
+                original.LastUpdated = DateTime.Now;
+
+                if (updated != null)
+                {
+                    updated.CurrentTermExpiresAt = parsedExpiry;
+                    updated.Status = "Valid";
+                    updated.IsRenewal = true;
+                    updated.IsNewApplicant = false;
+                    updated.LastUpdated = DateTime.Now;
+                }
+
+                // Invalidate detail cache for this record so any subsequent detail fetch gets the fresh record
+                SoloParentApiService.Instance.InvalidateDetailCache(guid);
+
+                string newExpiry = parsedExpiry.ToString("MMMM d, yyyy");
                 System.Diagnostics.Debug.WriteLine($"[RenewRecordAsync] SUCCESS! New expiry: {newExpiry}");
                 
                 ShowNotification("Record Renewed",
-                    $"{original.Name} � valid until {newExpiry}.", true);
+                    $"{original.Name} - valid until {newExpiry}.", true);
                 var changeService = new ChangeTrackingService();
                 var changes = changeService.DetectChanges(original, updated);
                 if (changes.Count > 0)
@@ -1321,8 +1382,16 @@ namespace SOLUM_UI
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
                 if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
                 _currentPage = 1;
+                if (string.Equals(_statusFilter, "ExpiringSoon", StringComparison.OrdinalIgnoreCase))
+                {
+                    _statusFilter = "All";
+                    if (TabStatusAll != null) TabStatusAll.IsChecked = true;
+                    if (TabStatusExpiring != null) TabStatusExpiring.IsChecked = false;
+                }
                 
-                System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Reloading records...");
+                System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Forcing fresh reload from backend...");
+                // Force reload from backend to get updated status and expiry date
+                _lastLoadedTime = DateTime.MinValue;
                 await LoadRecordsAsync();
                 System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Renewal process completed successfully!");
 
@@ -1375,7 +1444,7 @@ namespace SOLUM_UI
             };
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                ShowNotification("Record Updated", dialog.Result.Name + " was updated.", true);
+                // Success popup already shown by RecordDialog - just handle post-save logic
                 var changeList = BuildChangeList(rawRecord, dialog.Result);
                 AuditLogService.Instance.LogUpdateWithChanges(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole, changeList);
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
@@ -1607,7 +1676,11 @@ namespace SOLUM_UI
         private async void BasicUserAddRecord_Click(object sender, RoutedEventArgs e)
         {
             var methodDialog = new EntryMethodDialog { Owner = Application.Current.MainWindow };
-            bool? picked = methodDialog.ShowDialog();
+            bool? picked;
+            using (MainWindow.ModalScope(true))
+            {
+                picked = methodDialog.ShowDialog();
+            }
             if (picked != true || methodDialog.Selected == EntryMethod.None)
             {
                 return;
@@ -1619,15 +1692,20 @@ namespace SOLUM_UI
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
                     await SaveNewRecordAsync(ocr.Result);
-
+                    // Show success notification for OCR flow
+                    Views.Dialogs.ActionConfirmDialog.Success(
+                        "Record Added Successfully", 
+                        $"Solo parent record for {ocr.Result.Name} has been added to the database.",
+                        Window.GetWindow(this));
                 }
                 return;
 
             }
-            // Manual entry � open RecordDialog Step 1 (Primary Info) directly
+            // Manual entry - open RecordDialog Step 1 (Primary Info) directly
             RecordDialog dialog = new RecordDialog() { Owner = Application.Current.MainWindow };
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
+                // Success popup already shown by RecordDialog
                 await SaveNewRecordAsync(dialog.Result);
 
             }
@@ -1702,7 +1780,7 @@ namespace SOLUM_UI
         }
         /// <summary>
         /// Compares two records field-by-field and returns a structured list of
-        /// <see cref="SOLUM_UI.Models.ChangeDetail"/> entries � one per changed field.
+        /// <see cref="SOLUM_UI.Models.ChangeDetail"/> entries - one per changed field.
         /// </summary>
 
         private static List<SOLUM_UI.Models.ChangeDetail> BuildChangeList(
@@ -1778,8 +1856,8 @@ namespace SOLUM_UI
             if (before.DateOfBirth != after.DateOfBirth)
                 changes.Add(new SOLUM_UI.Models.ChangeDetail(
                     "Date of Birth",
-                    before.DateOfBirth != DateTime.MinValue ? before.DateOfBirth.ToString("yyyy-MM-dd") : "�",
-                    after.DateOfBirth != DateTime.MinValue ? after.DateOfBirth.ToString("yyyy-MM-dd") : "�"));
+                    before.DateOfBirth != DateTime.MinValue ? before.DateOfBirth.ToString("yyyy-MM-dd") : "-",
+                    after.DateOfBirth != DateTime.MinValue ? after.DateOfBirth.ToString("yyyy-MM-dd") : "-"));
             return changes;
 
         }

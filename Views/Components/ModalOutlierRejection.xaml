@@ -221,7 +221,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="#7F000000" Visibility="{Binding IsOutlierModalOpen, Converter={StaticResource BoolToVis}}">
+    <Grid Background="{DynamicResource ModalOverlayBrush}" Visibility="{Binding IsOutlierModalOpen, Converter={StaticResource BoolToVis}}">
         <Border Background="White" CornerRadius="20" BorderBrush="{StaticResource Maroon}" BorderThickness="1.5"
                 Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="30,26,30,28"
                 UseLayoutRounding="True" SnapsToDevicePixels="True">

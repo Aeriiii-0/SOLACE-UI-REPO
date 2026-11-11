@@ -327,7 +327,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="#7F000000" Visibility="{Binding IsDisqualifiedModalOpen, Converter={StaticResource BoolToVis}}" Panel.ZIndex="1000">
+    <Grid Background="{DynamicResource ModalOverlayBrush}" Visibility="{Binding IsDisqualifiedModalOpen, Converter={StaticResource BoolToVis}}" Panel.ZIndex="1000">
         <Border Background="White" CornerRadius="20" BorderBrush="{StaticResource Maroon}" BorderThickness="1.5"
                 MinWidth="960" MaxWidth="1040" MaxHeight="720" Margin="24"
                 VerticalAlignment="Center" HorizontalAlignment="Stretch" Padding="30,26,30,26"

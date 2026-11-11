@@ -89,29 +89,11 @@ namespace SOLUM_UI
 
         private void ApplySize()
         {
-            double screenW, screenH, screenLeft, screenTop;
-            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
-            {
-                screenW    = Owner.ActualWidth;
-                screenH    = Owner.ActualHeight;
-                screenLeft = Owner.Left;
-                screenTop  = Owner.Top;
-            }
-            else
-            {
-                screenW    = SystemParameters.WorkArea.Width;
-                screenH    = SystemParameters.WorkArea.Height;
-                screenLeft = SystemParameters.WorkArea.Left;
-                screenTop  = SystemParameters.WorkArea.Top;
-            }
-            if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
-            if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
-            if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
-            if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
+            SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this);
             if (DialogShell != null)
             {
-                double availW = Math.Min(screenW, SystemParameters.WorkArea.Width);
-                double availH = Math.Min(screenH, SystemParameters.WorkArea.Height);
+                double availW = Math.Min(Width, SystemParameters.WorkArea.Width);
+                double availH = Math.Min(Height, SystemParameters.WorkArea.Height);
                 DialogShell.MaxWidth  = Math.Max(800, Math.Min(availW - 30, 1480));
                 DialogShell.Width     = Math.Max(800, Math.Min(availW - 40, 1380));
                 DialogShell.MaxHeight = Math.Max(500, Math.Min(availH - 30, 920));
@@ -1151,8 +1133,7 @@ namespace SOLUM_UI
             bool ok = await SaveTemplateInternalAsync(showSuccessDialog: false);
             if (ok)
             {
-                DialogResult = true;
-                Close();
+                SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
             }
         }
 
@@ -1306,11 +1287,7 @@ namespace SOLUM_UI
         {
             if (TemplateSaved && DialogResult == null)
             {
-                try
-                {
-                    DialogResult = true;
-                }
-                catch { }
+                SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
             }
             base.OnClosing(e);
         }
@@ -1319,9 +1296,12 @@ namespace SOLUM_UI
         {
             if (TemplateSaved)
             {
-                DialogResult = true;
+                SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
             }
-            Close();
+            else
+            {
+                SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
+            }
         }
     }
 }

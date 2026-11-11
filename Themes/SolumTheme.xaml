@@ -11,6 +11,9 @@
     <SolidColorBrush x:Key="SolumPrimaryPressedBrush" Color="{StaticResource SolumPrimaryPressedColor}"/>
     <SolidColorBrush x:Key="SolumPrimaryMutedBrush" Color="{StaticResource SolumPrimaryMutedColor}"/>
     <SolidColorBrush x:Key="SolumPrimaryBorderBrush" Color="{StaticResource SolumPrimaryBorderColor}"/>
+    <!-- Modal Scrim & Backdrop Overlay (Velvet Plum Scrim replacing harsh black) -->
+    <Color x:Key="ModalOverlayColor">#4D1E1016</Color>
+    <SolidColorBrush x:Key="ModalOverlayBrush" Color="#4D1E1016"/>
     <!-- ── Neutral & Typography Colors (Slate Palette) ── -->
     <SolidColorBrush x:Key="SolumTextHeadingBrush" Color="#0F172A"/>
     <SolidColorBrush x:Key="SolumTextBodyBrush" Color="#1E293B"/>

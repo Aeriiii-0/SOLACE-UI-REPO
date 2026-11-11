@@ -1084,7 +1084,7 @@ namespace SOLUM_UI
                     MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
                     user.Id.ToString());
 
-                // Force a reload � a non-forced call would return the stale cached list
+                // Force a reload - a non-forced call would return the stale cached list
                 _lastLoadedTime = DateTime.MinValue;
                 await LoadUsersAsync(forceRefresh: true);
             }
@@ -1170,17 +1170,22 @@ namespace SOLUM_UI
             }
             else
             {
-                bool is09 = Regex.IsMatch(contactNumber, @"^09\d{9}$");
-                bool is63 = Regex.IsMatch(contactNumber, @"^\+63\d{9,10}$");
-                if (!is09 && !is63)
+                string contactDigits = Regex.Replace(contactNumber, @"\D", "");
+                if (contactDigits.Length != 11)
                 {
-                    ErrContactNumber.Text = "Must be 11 digits (starts with 09) or start with +63.";
+                    ErrContactNumber.Text = "Must be 11 digits.";
+                    ErrContactNumber.Visibility = Visibility.Visible;
+                    ok = false;
+                }
+                else if (!contactDigits.StartsWith("09"))
+                {
+                    ErrContactNumber.Text = "Must start with 09.";
                     ErrContactNumber.Visibility = Visibility.Visible;
                     ok = false;
                 }
             }
 
-            // Email & Role validation only matter for CREATE � locked/read-only in edit mode
+            // Email & Role validation only matter for CREATE - locked/read-only in edit mode
             if (_editTarget == null)
             {
                 string selRole = (CmbRole?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Caseworker";

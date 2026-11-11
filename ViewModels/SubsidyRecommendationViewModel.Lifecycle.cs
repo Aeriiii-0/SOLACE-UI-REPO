@@ -224,7 +224,12 @@ namespace SOLUM_UI.ViewModels
             bool ok = ActionConfirmDialog.Show("Launch New Fiscal Cycle", $"Starting a new cycle will advance the active operational cycle to {cycleDesc}.\n\nThe current certified roster will be archived.\n\nDo you wish to proceed?", "Launch Cycle", "Cancel", ConfirmThemeType.Primary);
             if (!ok) return;
             var dlg = new NewCycleDialog(nextYear, nextCycleNum) { Owner = Application.Current?.MainWindow };
-            if (dlg.ShowDialog() == true && dlg.ResultRequest != null)
+            bool? dlgResult;
+            using (MainWindow.ModalScope(fullWindow: true))
+            {
+                dlgResult = dlg.ShowDialog();
+            }
+            if (dlgResult == true && dlg.ResultRequest != null)
             {
                 try
                 {
@@ -466,7 +471,13 @@ namespace SOLUM_UI.ViewModels
                     Owner = Application.Current?.MainWindow
                 };
 
-                if (dialog.ShowDialog() == true && dialog.IsSaved)
+                bool? dialogResult;
+                using (MainWindow.ModalScope(fullWindow: true))
+                {
+                    dialogResult = dialog.ShowDialog();
+                }
+
+                if (dialogResult == true && dialog.IsSaved)
                 {
                     // Save the changes - the cycleDto was updated by reference in the dialog
                     await SaveCycleSettingsAsync(cycleDto);

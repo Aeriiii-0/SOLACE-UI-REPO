@@ -109,6 +109,17 @@ namespace SOLUM_UI
                 {
                     InitFilterControls();
                     HookChartCanvases();
+                    var filterOverlay = this.FindName("FilterModalOverlay") as Grid;
+                    if (filterOverlay != null)
+                    {
+                        filterOverlay.IsVisibleChanged += (fs, fe) =>
+                        {
+                            if (filterOverlay.Visibility == Visibility.Visible)
+                                MainWindow.ShowDimOverlay(fullWindow: false);
+                            else
+                                MainWindow.HideDimOverlay();
+                        };
+                    }
 
                     bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
                     if (isStale)
@@ -117,6 +128,12 @@ namespace SOLUM_UI
                         await LoadDataAsync();
                     }
                     ScheduleRedraw();
+                };
+                
+                // Clean up overlays when navigating away from this page
+                Unloaded += (s, e) =>
+                {
+                    MainWindow.HideDimOverlay();
                 };
             }
             catch (Exception ex)

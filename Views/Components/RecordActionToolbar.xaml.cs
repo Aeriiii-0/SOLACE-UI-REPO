@@ -79,45 +79,9 @@ namespace SOLUM_UI.Views.Components
             }
         }
 
-        private async void Renew_Click(object sender, RoutedEventArgs e)
+        private void Renew_Click(object sender, RoutedEventArgs e)
         {
-            if (Vm?.Record == null || string.IsNullOrWhiteSpace(Vm.Record.Id)) return;
-            var parentWindow = Window.GetWindow(this);
-            var record = Vm.Record;
-            // Pre-check with in-memory record first
-            if (!record.CanRenew(out string preCheckReason, out _))
-            {
-                ActionConfirmDialog.Warning(
-                    "Renewal Not Available",
-                    preCheckReason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
-                    parentWindow);
-                return;
-            }
-            Models.Api.SoloParentDto existingDto = null;
-            if (Guid.TryParse(record.Id, out var guid))
-            {
-                var fetch = await Services.Api.SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
-                if (fetch.Succeeded && fetch.Data != null)
-                {
-                    existingDto = fetch.Data;
-                    record = Services.Api.SoloParentApiService.Instance.MapToRecord(existingDto);
-                }
-            }
-            // Post-fetch check with latest backend data
-            if (!record.CanRenew(out string reason, out _))
-            {
-                ActionConfirmDialog.Warning(
-                    "Renewal Not Available",
-                    reason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
-                    parentWindow);
-                return;
-            }
-            var dialog = new Views.Dialogs.RenewalReassessmentDialog(record, existingDto)
-            {
-                Owner = parentWindow?.Owner ?? parentWindow
-            };
-            if (dialog.ShowDialog() != true || dialog.UpdatedRecord == null) return;
-            Vm.HandleRenewResult(dialog.UpdatedRecord);
+            Vm?.HandleRenew();
         }
         // ── Edit ──────────────────────────────────────────────────────────────
         private void Edit_Click(object sender, RoutedEventArgs e)

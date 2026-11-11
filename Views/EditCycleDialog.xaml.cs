@@ -153,22 +153,19 @@ namespace SOLUM_UI.Views
             _cycleData.TotalBudget = TotalBudget;
 
             IsSaved = true;
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             IsSaved = false;
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             IsSaved = false;
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)

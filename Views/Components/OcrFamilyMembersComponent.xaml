@@ -64,10 +64,13 @@
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="Date" Style="{StaticResource FieldLabelSm}"/>
-                                        <DatePicker x:Name="DpA2Date" Style="{StaticResource FormDateSm}" Tag="circ_a2_date"
-                                                    GotFocus="Field_GotFocus" GotKeyboardFocus="Field_GotFocus"
-                                                    PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
-                                                    DateValidationError="DatePicker_DateValidationError" LostFocus="DatePicker_LostFocus"/>
+                                        <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="8" Background="White">
+                                            <DatePicker x:Name="DpA2Date" Style="{StaticResource FormDateSm}" Tag="circ_a2_date"
+                                                        GotFocus="Field_GotFocus" GotKeyboardFocus="Field_GotFocus"
+                                                        PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
+                                                        DateValidationError="DatePicker_DateValidationError" LostFocus="DatePicker_LostFocus"
+                                                        BorderThickness="0" Background="Transparent"/>
+                                        </Border>
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>

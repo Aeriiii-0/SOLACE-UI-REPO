@@ -89,7 +89,7 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Border Background="#60000000">
+    <Border Background="{DynamicResource ModalOverlayBrush}">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <Border CornerRadius="18" Background="White" IsHitTestVisible="False">
                 <Border.Effect>
@@ -150,8 +150,18 @@
                                                            FontWeight="SemiBold" Foreground="#B45309" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                             </Button>
-                                            <Border Height="1" Background="#EDE6EA" Margin="6,4,6,4"/>
-                                            <Button Style="{StaticResource MenuItemStyle}" Click="MenuDelete_Click">
+                                            <Border x:Name="CancelSeparator" Height="1" Background="#EDE6EA" Margin="6,4,6,4"/>
+                                            <Button x:Name="MenuCancelBtn" Style="{StaticResource MenuItemStyle}" Click="MenuCancel_Click">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Path Data="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"
+                                                      Fill="#DC6A00" Stretch="Uniform" Width="13" Height="13"
+                                                      Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Cancel application" FontFamily="Segoe UI" FontSize="12.5"
+                                                           FontWeight="SemiBold" Foreground="#DC6A00" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Button>
+                                            <Border x:Name="DeleteSeparator" Height="1" Background="#EDE6EA" Margin="6,4,6,4"/>
+                                            <Button x:Name="MenuDeleteBtn" Style="{StaticResource MenuItemStyle}" Click="MenuDelete_Click">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
                                                       Fill="#C62828" Stretch="Uniform" Width="13" Height="13"

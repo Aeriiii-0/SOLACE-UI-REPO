@@ -52,13 +52,17 @@ namespace SOLUM_UI.Views.Dialogs
             string customIconData = null)
         {
             var dialog = new ActionConfirmDialog();
-            if (owner != null)
+            try
             {
-                dialog.Owner = owner;
+                var targetOwner = owner ?? (Application.Current?.MainWindow != null && Application.Current.MainWindow.IsVisible ? Application.Current.MainWindow : null);
+                if (targetOwner != null && targetOwner.IsVisible)
+                {
+                    dialog.Owner = targetOwner;
+                }
             }
-            else if (Application.Current?.MainWindow != null && Application.Current.MainWindow.IsVisible)
+            catch (Exception ex)
             {
-                dialog.Owner = Application.Current.MainWindow;
+                System.Diagnostics.Debug.WriteLine($"ActionConfirmDialog Owner error: {ex.Message}");
             }
             dialog.TxtTitle.Text = title;
             dialog.TxtMessage.Text = message;
@@ -74,7 +78,11 @@ namespace SOLUM_UI.Views.Dialogs
             {
                 dialog.IconPath.Data = Geometry.Parse(customIconData);
             }
-            dialog.ShowDialog();
+            SOLUM_UI.Core.WindowPositionHelper.CenterOnOwner(dialog, dialog.Owner);
+            using (MainWindow.ModalScope(fullWindow: true))
+            {
+                dialog.ShowDialog();
+            }
             return dialog.Confirmed;
         }
         /// <summary>
@@ -93,13 +101,19 @@ namespace SOLUM_UI.Views.Dialogs
             void DoAlert()
             {
                 var dialog = new ActionConfirmDialog();
-                if (owner != null && owner.IsVisible)
+                try
                 {
-                    dialog.Owner = owner;
+                    var targetOwner = (owner != null && owner.IsVisible) 
+                        ? owner 
+                        : (Application.Current?.MainWindow != null && Application.Current.MainWindow.IsVisible ? Application.Current.MainWindow : null);
+                    if (targetOwner != null && targetOwner.IsVisible)
+                    {
+                        dialog.Owner = targetOwner;
+                    }
                 }
-                else if (Application.Current?.MainWindow != null && Application.Current.MainWindow.IsVisible)
+                catch (Exception ex)
                 {
-                    dialog.Owner = Application.Current.MainWindow;
+                    System.Diagnostics.Debug.WriteLine($"ActionConfirmDialog Alert Owner error: {ex.Message}");
                 }
                 dialog.TxtTitle.Text = title;
                 dialog.TxtMessage.Text = message;
@@ -117,7 +131,11 @@ namespace SOLUM_UI.Views.Dialogs
                     // Use error circle-X icon for error alert notifications
                     dialog.IconPath.Data = Geometry.Parse("M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z");
                 }
-                dialog.ShowDialog();
+                SOLUM_UI.Core.WindowPositionHelper.CenterOnOwner(dialog, dialog.Owner);
+                using (MainWindow.ModalScope(fullWindow: true))
+                {
+                    dialog.ShowDialog();
+                }
             }
 
             if (Application.Current != null && Application.Current.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
@@ -205,15 +223,13 @@ namespace SOLUM_UI.Views.Dialogs
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             Confirmed = false;
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
 
         private void BtnConfirm_Click(object sender, RoutedEventArgs e)
         {
             Confirmed = true;
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
     }
 }

@@ -52,17 +52,28 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void BtnDone_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
 
         public static void Show(string fullName, string email, string password, string role = "Encoder", Window owner = null, string heading = "User Account Created", string subheading = "The user account has been registered. Share the credentials below with the employee.")
         {
-            var dlg = new AccountCreatedDialog(fullName, email, password, role, heading, subheading)
+            var dlg = new AccountCreatedDialog(fullName, email, password, role, heading, subheading);
+            try
             {
-                Owner = owner
-            };
-            dlg.ShowDialog();
+                var targetOwner = (owner != null && owner.IsVisible)
+                    ? owner
+                    : (Application.Current?.MainWindow != null && Application.Current.MainWindow.IsVisible ? Application.Current.MainWindow : null);
+                if (targetOwner != null && targetOwner.IsVisible)
+                {
+                    dlg.Owner = targetOwner;
+                }
+            }
+            catch { }
+            SOLUM_UI.Core.WindowPositionHelper.CenterOnOwner(dlg, dlg.Owner);
+            using (MainWindow.ModalScope(true))
+            {
+                dlg.ShowDialog();
+            }
         }
     }
 }

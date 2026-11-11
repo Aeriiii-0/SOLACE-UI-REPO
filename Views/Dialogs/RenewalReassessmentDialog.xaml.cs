@@ -329,8 +329,7 @@ namespace SOLUM_UI.Views.Dialogs
                         "Renewal Not Allowed",
                         failureReason ?? "This solo parent record has been active for less than a month and cannot be renewed yet.",
                         this);
-                    DialogResult = false;
-                    Close();
+                    SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
                     return;
                 }
                 if (_isReassessmentMode)
@@ -357,47 +356,12 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void ApplySize()
         {
-            double screenW, screenH, screenLeft, screenTop;
-            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
-            {
-                if (Owner.WindowState == WindowState.Maximized)
-                {
-                    screenW = Math.Max(Owner.ActualWidth, SystemParameters.PrimaryScreenWidth);
-                    screenH = Math.Max(Owner.ActualHeight, SystemParameters.PrimaryScreenHeight);
-                    screenLeft = Math.Min(Owner.Left, 0);
-                    screenTop = Math.Min(Owner.Top, 0);
-                }
-                else
-                {
-                    screenW = Owner.ActualWidth;
-                    screenH = Owner.ActualHeight;
-                    screenLeft = Owner.Left;
-                    screenTop = Owner.Top;
-                }
-            }
-            else
-            {
-                screenW = SystemParameters.PrimaryScreenWidth;
-                screenH = SystemParameters.PrimaryScreenHeight;
-                screenLeft = 0;
-                screenTop = 0;
-            }
-            if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
-            if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
-            if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
-            if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
-            if (DialogShell != null)
-            {
-                DialogShell.MaxHeight = Math.Max(500, Math.Min(screenH - 40, 840));
-                DialogShell.Width     = Math.Min(screenW * 0.88, 1320);
-                DialogShell.MinWidth  = Math.Max(screenW * 0.60, 680);
-            }
+            SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, DialogShell);
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
 
         private void NumberOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -450,8 +414,20 @@ namespace SOLUM_UI.Views.Dialogs
             TxtPhilSysNumber.Text = !string.IsNullOrWhiteSpace(_original.PhilSysNumber) ? _original.PhilSysNumber : "None";
             TxtBarangay.Text = !string.IsNullOrWhiteSpace(_original.Barangay) ? _original.Barangay : "Biñan";
 
-            string expStr = _original.CurrentTermExpiresAt.HasValue
-                ? _original.CurrentTermExpiresAt.Value.ToString("MMM d, yyyy")
+            DateTime? currentExp = _original.CurrentTermExpiresAt;
+            if (!currentExp.HasValue && _original.RecordTerms != null && _original.RecordTerms.Count > 0)
+            {
+                foreach (var rt in _original.RecordTerms)
+                {
+                    if (DateTime.TryParse(rt.ExpiresAt, out var exp) && (!currentExp.HasValue || exp > currentExp.Value))
+                        currentExp = exp;
+                }
+            }
+            if (!currentExp.HasValue && _original.LastUpdated != DateTime.MinValue)
+                currentExp = _original.LastUpdated.AddYears(1);
+
+            string expStr = currentExp.HasValue
+                ? currentExp.Value.ToString("MMM d, yyyy")
                 : DateTime.Today.ToString("MMM d, yyyy");
             TxtExpiryNotice.Text = $"Current Expiry: {expStr}";
         }
@@ -1488,8 +1464,7 @@ namespace SOLUM_UI.Views.Dialogs
                 FamilyComposition = _original.FamilyComposition,
                 AdditionalClassifications = _original.AdditionalClassifications
             };
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
     }
 }

@@ -28,7 +28,15 @@ namespace SOLUM_UI.Models
         public string Sex { get; set; } = "Female";
         public double Score { get; set; }
         public string DependantsLabel => Dependants == 1 ? "1 Dependent" : $"{Dependants} Dependents";
-        public string ScoreLabel => Score.ToString("0") + "%";
+        public string ScoreLabel
+        {
+            get
+            {
+                double val = Score;
+                if (val > 0 && val <= 1.0) val *= 100.0;
+                return val.ToString("0") + "%";
+            }
+        }
 
         public bool IsSelected { get => _isSelected; set => SetProperty(ref _isSelected, value); }
 
@@ -202,7 +210,17 @@ namespace SOLUM_UI.Models
         public string Status { get => _status; set { if (SetProperty(ref _status, value)) { OnPropertyChanged(nameof(StatusColor)); OnPropertyChanged(nameof(StatusTextColor)); } } }
         public SolidColorBrush PriorityColor => string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")) : (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8")));
         public SolidColorBrush PriorityTextColor => string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")) : (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")));
-        public SolidColorBrush ScoreBarColor => Score >= 75 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")) : (Score >= 50 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")));
+        public SolidColorBrush ScoreBarColor
+        {
+            get
+            {
+                double val = Score;
+                if (val > 0 && val <= 1.0) val *= 100.0;
+                if (val >= 70) return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")); // High score: Green
+                if (val >= 40) return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")); // Mid score: Yellow-Orange
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")); // Low score: Red
+            }
+        }
         public SolidColorBrush StatusColor => Status == "Approved" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")) : (Status == "Rejected" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8")) : (Status == "Waitlisted" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF0F5"))));
         public SolidColorBrush StatusTextColor => Status == "Approved" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")) : (Status == "Rejected" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Status == "Waitlisted" ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943"))));
         private DateTime? _cardExpiresAt;

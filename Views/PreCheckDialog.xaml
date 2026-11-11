@@ -5,7 +5,7 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Width="780" Height="620"
         ShowInTaskbar="False">
@@ -324,7 +324,7 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Border Background="#55000000">
+    <Border Background="{DynamicResource ModalOverlayBrush}">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
             <!-- Shadow Layer: Sibling with NO children. Rendered once into GPU cache, NEVER invalidated by typing inside DialogShell -->
             <Border Background="White" CornerRadius="18"

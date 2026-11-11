@@ -102,6 +102,7 @@
             <Grid Grid.Row="0"
                   Background="#FFFFFF"
                   MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Border x:Name="TitleBarDimOverlay" Background="{StaticResource ModalOverlayBrush}" Visibility="Collapsed" IsHitTestVisible="False"/>
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
@@ -224,6 +225,8 @@
                                       Data="M17,7L15.59,8.41L18.17,11H8V13H18.17L15.59,15.58L17,17L22,12M4,5H12V3H4A2,2 0 0,0 2,5V19A2,2 0 0,0 4,21H12V19H4V5Z"/>
                             </Button>
                         </StackPanel>
+                        <!-- Sidebar dim overlay for in-page modals -->
+                        <Border x:Name="SidebarDimOverlay" Background="{StaticResource ModalOverlayBrush}" CornerRadius="10" Visibility="Collapsed" IsHitTestVisible="False"/>
                     </Grid>
                 </Border>
                 <!-- Content area -->
@@ -239,6 +242,7 @@
                                      ProfileClicked="TopBarControl_ProfileClicked"
                                      ChangePasswordRequested="TopBarControl_ChangePasswordRequested"
                                      LogoutRequested="TopBarControl_LogoutRequested"/>
+                    <Border x:Name="TopBarDimOverlay" Grid.Row="0" Margin="50,0,-50,0" Background="{StaticResource ModalOverlayBrush}" Visibility="Collapsed" IsHitTestVisible="False"/>
                     <Border Grid.Row="1"
                             Background="#FFFFFF"
                             CornerRadius="0,0,16,16">
@@ -250,9 +254,11 @@
                 </Grid>
             </Grid>
         </Grid>
+        <!-- Full-window dim overlay for modal windows -->
+        <Border x:Name="RootModalDimOverlay" Background="{StaticResource ModalOverlayBrush}" Visibility="Collapsed" Panel.ZIndex="100" IsHitTestVisible="True"/>
         <!-- DEPRECATED: LogoutOverlay replaced with ActionConfirmDialog in HandleLogout() -->
         <Grid x:Name="LogoutOverlay" Visibility="Collapsed" Panel.ZIndex="50">
-            <Rectangle Fill="#88000000"/>
+            <Rectangle Fill="{StaticResource ModalOverlayBrush}"/>
             <Border Background="White" CornerRadius="16" Padding="32,28" Width="340"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border.Effect>

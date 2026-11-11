@@ -51,25 +51,39 @@ namespace SOLUM_UI.ViewModels
         {
             get
             {
+                // PRIORITY 1: Check actual expiry date first (most reliable)
+                if (_model.CurrentTermExpiresAt.HasValue)
+                {
+                    bool isExpiredByDate = _model.CurrentTermExpiresAt.Value.Date < DateTime.Today;
+                    // If we have a future expiry date, record is NOT expired regardless of status
+                    if (!isExpiredByDate)
+                        return false;
+                    // If expiry date is in the past, it's expired
+                    return true;
+                }
+                
+                // PRIORITY 2: Check fallback expiry (LastUpdated + 1 year)
+                if (_model.LastUpdated != DateTime.MinValue)
+                {
+                    bool isExpiredByLastUpdated = _model.LastUpdated.AddYears(1).Date < DateTime.Today;
+                    if (!isExpiredByLastUpdated)
+                        return false;
+                    return true;
+                }
+                
+                // PRIORITY 3: Only as last resort, check Status field
                 if (string.Equals(_model.Status, "Expired", StringComparison.OrdinalIgnoreCase) ||
                     string.Equals(_model.Status, "Inactive", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
-                if (_model.CurrentTermExpiresAt.HasValue)
-                {
-                    return _model.CurrentTermExpiresAt.Value.Date < DateTime.Today;
-                }
-                if (_model.LastUpdated != DateTime.MinValue)
-                {
-                    return _model.LastUpdated.AddYears(1).Date < DateTime.Today;
-                }
+                
                 return false;
             }
         }
 
         public SoloParentRecord RawModel => _model;
-        /// <summary>True when eligible for renewal (active >= 1 month or expired/inactive).</summary>
+        /// <summary>True when eligible for renewal (active >= 1 month, expiring within 30 days, or expired/inactive/cancelled).</summary>
         public bool CanRenew => _model.CanRenew(out _, out _);
 
         public bool IsSelected
@@ -126,12 +140,15 @@ namespace SOLUM_UI.ViewModels
                 return _isAlternate ? AlternateRowBrush : WhiteBrush;
             }
         }
-        /// <summary>True when expiration date is within 30 days from today and not yet expired.</summary>
+        /// <summary>True when expiration date is within 30 days from today (or explicitly marked expiring) and not yet expired.</summary>
         public bool IsExpiringSoon
         {
             get
             {
                 if (IsExpired) return false;
+                if (string.Equals(_model.Status, "Expiring", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(_model.Status, "ExpiringSoon", StringComparison.OrdinalIgnoreCase))
+                    return true;
                 DateTime? exp = _model.CurrentTermExpiresAt;
                 if (!exp.HasValue && _model.LastUpdated != DateTime.MinValue)
                     exp = _model.LastUpdated.AddYears(1);

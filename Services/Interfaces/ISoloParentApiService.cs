@@ -19,6 +19,7 @@ namespace SOLUM_UI.Services.Interfaces
         Task<BaseResponse<bool>> UpdateSoloParentAsync(Guid id, UpdateSoloParentRequest request);
         Task<BaseResponse<bool>> DeleteSoloParentAsync(Guid id);
         Task<BaseResponse<RenewSoloParentResponse>> RenewSoloParentRecordAsync(Guid id, RenewSoloParentRequest request = null);
+        Task<BaseResponse<bool>> CancelSoloParentAsync(Guid id, string reason, string remarks = null);
         void InvalidateDetailCache(Guid id);
         // ── Mapping helpers ──────────────────────────────────────────────────
         SoloParentRecord MapToRecord(SoloParentDto dto);

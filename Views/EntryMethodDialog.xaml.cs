@@ -16,22 +16,19 @@ namespace SOLUM_UI
         private void ManualFill_Click(object sender, RoutedEventArgs e)
         {
             Selected = EntryMethod.Manual;
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
 
         private void ScanDocument_Click(object sender, RoutedEventArgs e)
         {
             Selected = EntryMethod.Scan;
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             Selected = EntryMethod.None;
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
     }
 }

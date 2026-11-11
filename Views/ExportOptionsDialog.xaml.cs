@@ -14,44 +14,32 @@ namespace SOLUM_UI
         public ExportOptionsDialog(string fileName, double screenW, double screenH, double screenLeft, double screenTop)
         {
             InitializeComponent();
-            Width  = screenW;
-            Height = screenH;
-            Left   = screenLeft;
-            Top    = screenTop;
-            Shell.MaxHeight = screenH * 0.90;
             TxtFileName.Text = System.IO.Path.GetFileName(fileName);
+            SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, Shell);
             KeyDown += (s, e) =>
             {
                 if (e.Key == System.Windows.Input.Key.Escape)
                     BtnCancel_Click(s, e);
             };
+            Loaded += (s, e) => SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, Shell);
         }
 
         public ExportOptionsDialog(string fileName, Window owner = null)
         {
             InitializeComponent();
-            var win = owner ?? Application.Current?.MainWindow;
-            if (win != null && win.IsVisible)
+            var targetOwner = owner ?? Application.Current?.MainWindow;
+            if (targetOwner != null && targetOwner.IsVisible)
             {
-                Owner = win;
-                Width = win.ActualWidth > 0 ? win.ActualWidth : 1200;
-                Height = win.ActualHeight > 0 ? win.ActualHeight : 700;
-                Left = win.Left;
-                Top = win.Top;
+                try { Owner = targetOwner; } catch { }
             }
-            else
-            {
-                WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                Width = 1200;
-                Height = 700;
-            }
-            Shell.MaxHeight = Height * 0.90;
             TxtFileName.Text = System.IO.Path.GetFileName(fileName);
+            SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, Shell);
             KeyDown += (s, e) =>
             {
                 if (e.Key == System.Windows.Input.Key.Escape)
                     BtnCancel_Click(s, e);
             };
+            Loaded += (s, e) => SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, Shell);
         }
 
         private void ChkPassword_Changed(object sender, RoutedEventArgs e)
@@ -92,15 +80,13 @@ namespace SOLUM_UI
             }
             OpenAfter = ChkOpenAfter.IsChecked == true;
             Confirmed = true;
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             Confirmed = false;
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
     }
 }

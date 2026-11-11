@@ -208,7 +208,7 @@
             </Style.Resources>
         </Style>
     </Window.Resources>
-    <Border x:Name="BackdropBorder" Background="#66000000" MouseLeftButtonDown="Backdrop_MouseLeftButtonDown">
+    <Border x:Name="BackdropBorder" Background="{DynamicResource ModalOverlayBrush}" MouseLeftButtonDown="Backdrop_MouseLeftButtonDown">
         <Border x:Name="DialogShell" Background="White" CornerRadius="24" Width="540"
                 VerticalAlignment="Center" HorizontalAlignment="Center"
                 BorderBrush="#702943" BorderThickness="1.5"

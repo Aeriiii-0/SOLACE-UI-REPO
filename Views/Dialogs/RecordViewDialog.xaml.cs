@@ -41,8 +41,27 @@ namespace SOLUM_UI.Views.Dialogs
             InitializeComponent();
             _vm = new RecordViewDialogViewModel(record);
             DataContext = _vm;
-            _vm.RequestClose += result => { DialogResult = result; Close(); };
-            Loaded += (s, e) => { ApplySize(); BuildContent(); };
+            _vm.RequestClose += result => { SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, result); };
+            Loaded += (s, e) => { ApplySize(); BuildContent(); ConfigureRoleBasedVisibility(); };
+        }
+
+        private void ConfigureRoleBasedVisibility()
+        {
+            // Hide delete and cancel buttons for Encoders and Caseworkers
+            bool isEncoder = SOLUM_UI.Services.Api.AuthApiService.Instance.IsCaseworker || 
+                           SOLUM_UI.Services.Api.AuthApiService.Instance.IsEncoder;
+            
+            if (isEncoder)
+            {
+                if (MenuDeleteBtn != null)
+                    MenuDeleteBtn.Visibility = Visibility.Collapsed;
+                if (DeleteSeparator != null)
+                    DeleteSeparator.Visibility = Visibility.Collapsed;
+                if (MenuCancelBtn != null)
+                    MenuCancelBtn.Visibility = Visibility.Collapsed;
+                if (CancelSeparator != null)
+                    CancelSeparator.Visibility = Visibility.Collapsed;
+            }
         }
 
         private static SolidColorBrush Hex(string hex)
@@ -61,14 +80,17 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void MenuRenew_Click(object sender, RoutedEventArgs e)
         {
-            // Close the profile details modal before opening renewal dialog
-            DialogResult = false;
-            Close();
-            // Trigger the renewal action on the parent page after this dialog closes
-            Dispatcher.BeginInvoke(new Action(() => RunToolbarAction("renew")), System.Windows.Threading.DispatcherPriority.Background);
+            BtnActions.IsChecked = false;
+            _vm.HandleRenew();
         }
 
         private void MenuEdit_Click(object sender, RoutedEventArgs e) => RunToolbarAction("edit", "update");
+
+        private void MenuCancel_Click(object sender, RoutedEventArgs e)
+        {
+            BtnActions.IsChecked = false;
+            Dispatcher.BeginInvoke(new Action(async () => await HandleCancelAsync()), DispatcherPriority.Background);
+        }
 
         private void MenuDelete_Click(object sender, RoutedEventArgs e) => RunToolbarAction("delete", "trash", "remove");
 
@@ -135,39 +157,11 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void ApplySize()
         {
-            double screenW, screenH, screenLeft, screenTop;
-            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
-            {
-                if (Owner.WindowState == WindowState.Maximized)
-                {
-                    screenW = Math.Max(Owner.ActualWidth, SystemParameters.PrimaryScreenWidth);
-                    screenH = Math.Max(Owner.ActualHeight, SystemParameters.PrimaryScreenHeight);
-                    screenLeft = Math.Min(Owner.Left, 0);
-                    screenTop = Math.Min(Owner.Top, 0);
-                }
-                else
-                {
-                    screenW = Owner.ActualWidth;
-                    screenH = Owner.ActualHeight;
-                    screenLeft = Owner.Left;
-                    screenTop = Owner.Top;
-                }
-            }
-            else
-            {
-                screenW = SystemParameters.PrimaryScreenWidth;
-                screenH = SystemParameters.PrimaryScreenHeight;
-                screenLeft = 0;
-                screenTop = 0;
-            }
-            if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
-            if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
-            if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
-            if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
+            SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this);
             if (DialogShell != null)
             {
-                DialogShell.MaxHeight = Math.Floor(Math.Max(500, Math.Min(screenH - 40, 840)));
-                DialogShell.Width = Math.Round(Math.Min(Math.Max(screenW * 0.74, 950), 1040) - 70);
+                DialogShell.MaxHeight = Math.Floor(Math.Max(500, Math.Min(Height - 40, 840)));
+                DialogShell.Width = Math.Round(Math.Min(Math.Max(Width * 0.74, 950), 1040) - 70);
             }
         }
 
@@ -802,6 +796,72 @@ namespace SOLUM_UI.Views.Dialogs
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             _vm.HandleClose();
+        }
+
+        private async Task HandleCancelAsync()
+        {
+            // Show confirmation dialog with reason input
+            var dialog = new CancelRecordDialog();
+            try
+            {
+                dialog.Owner = this;
+            }
+            catch { }
+            
+            dialog.ShowDialog();
+            
+            if (!dialog.Confirmed)
+                return;
+            
+            string reason = dialog.Reason;
+            
+            // Show processing toast
+            ToastNotification.Show("Cancelling Application", "Processing cancellation request...", ToastType.Warning);
+            
+            try
+            {
+                var recordId = _vm.Record?.Id;
+                if (string.IsNullOrWhiteSpace(recordId) || !Guid.TryParse(recordId, out Guid guid))
+                {
+                    ActionConfirmDialog.Error("Invalid Record", "Unable to cancel this record. Invalid record ID.");
+                    return;
+                }
+                
+                var apiService = Services.Api.SoloParentApiService.Instance;
+                var result = await apiService.CancelSoloParentAsync(guid, reason);
+                
+                if (result.Succeeded)
+                {
+                    ToastNotification.Show("Application Cancelled", "The solo parent application has been cancelled successfully.", ToastType.Success);
+                    
+                    // Refresh the record to show updated status
+                    await Task.Delay(500);
+                    
+                    // Show success popup
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        ActionConfirmDialog.Success(
+                            "Application Cancelled",
+                            $"The application has been cancelled.\n\nReason: {reason}\n\nThe applicant can reapply after one (1) year from the cancellation date."
+                        );
+                    }), DispatcherPriority.Background);
+                    
+                    // Close the dialog to refresh parent list
+                    await Task.Delay(100);
+                    SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
+                }
+                else
+                {
+                    string errorMsg = result.Errors != null && result.Errors.Count > 0 
+                        ? string.Join("\n", result.Errors) 
+                        : "An unknown error occurred while cancelling the application.";
+                    ActionConfirmDialog.Error("Cancellation Failed", errorMsg);
+                }
+            }
+            catch (Exception ex)
+            {
+                ActionConfirmDialog.Error("Cancellation Error", $"An error occurred while cancelling the application:\n\n{ex.Message}");
+            }
         }
 
         private List<AuditLogDto> _cachedTimeline = null;

@@ -48,7 +48,15 @@ namespace SOLUM_UI.Models
             }
         }
 
-        public string ScoreLabel => Score.ToString("0") + "%";
+        public string ScoreLabel
+        {
+            get
+            {
+                double val = Score;
+                if (val > 0 && val <= 1.0) val *= 100.0;
+                return val.ToString("0") + "%";
+            }
+        }
 
         private int _dependants;
         public int Dependants
@@ -289,9 +297,19 @@ namespace SOLUM_UI.Models
                 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFDF5"))
                 : new SolidColorBrush(Colors.White);
 
-        public SolidColorBrush ScoreBarColor => Score >= 75 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")) : (Score >= 50 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")));
-        public SolidColorBrush PriorityColor => string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8")) : (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")));
-        public SolidColorBrush PriorityTextColor => string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")));
+        public SolidColorBrush ScoreBarColor
+        {
+            get
+            {
+                double val = Score;
+                if (val > 0 && val <= 1.0) val *= 100.0;
+                if (val >= 70) return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")); // High score: Green
+                if (val >= 40) return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")); // Mid score: Yellow-Orange
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")); // Low score: Red
+            }
+        }
+        public SolidColorBrush PriorityColor => string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")) : (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF8E1")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFE8E8")));
+        public SolidColorBrush PriorityTextColor => string.Equals(Priority, "High", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")) : (string.Equals(Priority, "Medium", StringComparison.OrdinalIgnoreCase) ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F57F17")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")));
         public SolidColorBrush FinalBadgeColor => IsFinalGrantee ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8F5E9")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0F0F0"));
         public string FinalBadgeText => IsFinalGrantee ? "Granted" : "Pending";
         public SolidColorBrush FinalBadgeTextColor => IsFinalGrantee ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#999999"));

@@ -156,8 +156,7 @@ namespace SOLUM_UI.Views.Dialogs
                 {
                     ToastNotification.Show("Password Changed", "Your password has been successfully updated. Welcome!", ToastType.Success);
                     Services.AuditLogService.Instance.LogSystem($"Temporary password updated on initial login by {_email}");
-                    DialogResult = true;
-                    Close();
+                    SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
                 }
                 else
                 {
@@ -179,8 +178,7 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
     }
 }

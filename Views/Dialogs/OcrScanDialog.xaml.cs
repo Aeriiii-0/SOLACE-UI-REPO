@@ -44,29 +44,11 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void ApplySize()
         {
-            double screenW, screenH, screenLeft, screenTop;
-            if (Owner != null && Owner.ActualWidth > 0 && Owner.ActualHeight > 0)
-            {
-                screenW    = Owner.ActualWidth;
-                screenH    = Owner.ActualHeight;
-                screenLeft = Owner.Left;
-                screenTop  = Owner.Top;
-            }
-            else
-            {
-                screenW    = SystemParameters.WorkArea.Width;
-                screenH    = SystemParameters.WorkArea.Height;
-                screenLeft = SystemParameters.WorkArea.Left;
-                screenTop  = SystemParameters.WorkArea.Top;
-            }
-            if (Math.Abs(Width - screenW) > 0.5) Width = screenW;
-            if (Math.Abs(Height - screenH) > 0.5) Height = screenH;
-            if (Math.Abs(Left - screenLeft) > 0.5) Left = screenLeft;
-            if (Math.Abs(Top - screenTop) > 0.5) Top = screenTop;
+            SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this);
             if (DialogShell != null)
             {
-                double availH = Math.Min(screenH, SystemParameters.WorkArea.Height);
-                double availW = Math.Min(screenW, SystemParameters.WorkArea.Width);
+                double availH = Math.Min(Height, SystemParameters.WorkArea.Height);
+                double availW = Math.Min(Width, SystemParameters.WorkArea.Width);
                 DialogShell.MaxHeight = Math.Max(500, Math.Min(availH - 30, 840));
                 DialogShell.Height    = Math.Max(500, Math.Min(availH - 45, 800));
                 DialogShell.MaxWidth  = Math.Max(800, Math.Min(availW - 30, 1440));
@@ -485,7 +467,13 @@ namespace SOLUM_UI.Views.Dialogs
                 fields,
                 screenW: Width, screenH: Height,
                 screenLeft: Left, screenTop: Top
-            ) { Owner = Owner ?? this };
+            );
+            try
+            {
+                var target = Owner ?? this;
+                if (target != null && target.IsVisible) confirm.Owner = target;
+            }
+            catch { }
             confirm.ShowDialog();
             if (!confirm.Confirmed)
             {
@@ -496,8 +484,7 @@ namespace SOLUM_UI.Views.Dialogs
             {
                 Result = preview;
                 _savedSuccessfully = true;
-                DialogResult = true;
-                Close();
+                SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
             }
             catch (Exception ex)
             {

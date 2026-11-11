@@ -209,22 +209,19 @@ namespace SOLUM_UI
             if (_foundRecord == null) return;
             ExistingRecordToView = _foundRecord;
             ProceedToFullForm = false;
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             ProceedToFullForm = false;
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             ProceedToFullForm = false;
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
         // ── Core logic ────────────────────────────────────────────────────────────
 
@@ -407,8 +404,7 @@ namespace SOLUM_UI
                 Barangay   = safeBarangay,
                 ExtensionName = (CmbExtension.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty
             };
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
         // ── Banner helpers ────────────────────────────────────────────────────────
 

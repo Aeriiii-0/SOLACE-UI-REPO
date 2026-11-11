@@ -21,22 +21,19 @@ namespace SOLUM_UI
         private void QuickRenew_Click(object sender, RoutedEventArgs e)
         {
             SelectedChoice = RenewalChoice.QuickRenew;
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
 
         private void ReassessRenew_Click(object sender, RoutedEventArgs e)
         {
             SelectedChoice = RenewalChoice.ReassessAndRenew;
-            DialogResult = true;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             SelectedChoice = RenewalChoice.Cancel;
-            DialogResult = false;
-            Close();
+            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
         }
     }
 }
