@@ -42,9 +42,9 @@
     <SolidColorBrush x:Key="DsOverlayLightPressBrush" Color="#14000000"/>
     <SolidColorBrush x:Key="DsOverlayTintHoverBrush" Color="#0D702943"/>
     <SolidColorBrush x:Key="DsOverlayTintPressBrush" Color="#1A702943"/>
-    <!-- Modal Scrim & Backdrop Overlay (Velvet Plum Scrim replacing harsh black) -->
-    <Color x:Key="ModalOverlayColor">#4D1E1016</Color>
-    <SolidColorBrush x:Key="ModalOverlayBrush" Color="#4D1E1016"/>
+    <!-- Modal Scrim & Backdrop Overlay (Semi-transparent dark tint) -->
+    <Color x:Key="ModalOverlayColor">#99000000</Color>
+    <SolidColorBrush x:Key="ModalOverlayBrush" Color="#99000000"/>
     <!-- Semantic: success / warning / danger / info / neutral -->
     <SolidColorBrush x:Key="DsSuccessBgBrush" Color="#DCFCE7"/>
     <SolidColorBrush x:Key="DsSuccessFgBrush" Color="#15803D"/>

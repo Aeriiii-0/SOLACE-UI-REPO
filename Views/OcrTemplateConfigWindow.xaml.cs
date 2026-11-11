@@ -1039,7 +1039,7 @@ namespace SOLUM_UI
                     TxtStatusMessage.Text = "✓ Template configuration saved successfully!";
                     if (showSuccessDialog)
                     {
-                        ActionConfirmDialog.Success("Template Saved", "Template coordinates saved successfully!", this);
+                        ToastNotification.Show("Template Saved", "Template coordinates saved successfully!", ToastType.Success);
                     }
                     return true;
                 }

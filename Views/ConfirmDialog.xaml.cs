@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace SOLUM_UI
@@ -11,20 +13,23 @@ namespace SOLUM_UI
     {
         public bool Confirmed { get; private set; }
 
-        private static readonly SolidColorBrush _label   = Clr(0x77, 0x77, 0x77);
-        private static readonly SolidColorBrush _value   = Clr(0x11, 0x11, 0x11);
-        private static readonly SolidColorBrush _old     = Clr(0xBB, 0xBB, 0xBB);
-        private static readonly SolidColorBrush _border  = Clr(0xE4, 0xE6, 0xEB);
-        private static readonly SolidColorBrush _accent  = Clr(0x70, 0x29, 0x43);
-        private static readonly SolidColorBrush _bg      = Clr(0xF5, 0xF6, 0xF8);
-        private static readonly SolidColorBrush _head    = Clr(0x1A, 0x1A, 0x1A);
-        private static readonly SolidColorBrush _chipBg  = Clr(0xF0, 0xE8, 0xEC);
-        private static readonly SolidColorBrush _chipTxt = Clr(0x70, 0x29, 0x43);
+        // ── Neutral colors (same in every mode) ───────────────────────────
+        private static readonly SolidColorBrush _label = Clr(0x77, 0x77, 0x77);
+        private static readonly SolidColorBrush _value = Clr(0x11, 0x11, 0x11);
+        private static readonly SolidColorBrush _oldVal = Clr(0x80, 0x80, 0x80);
+        private static readonly SolidColorBrush _bg = Clr(0xF5, 0xF6, 0xF8);
         private static readonly SolidColorBrush _divider = Clr(0xEE, 0xEE, 0xF2);
-        // Mode-specific colors
-        private SolidColorBrush _iconBg;    // icon circle background
-        private SolidColorBrush _btnColor;  // confirm button
-        private SolidColorBrush _changed;   // "after" value color for changed fields
+
+        // ── Mode colors: green = Add/Renew, yellow-orange = Edit ──────────
+        // _accent  : modal border, section header band, icon circle, confirm button
+        // _tint    : light background for changed cells / chips / badge
+        // _chipTxt : dark readable text on the tint
+        // _changed : label + highlight color for changed fields
+        private SolidColorBrush _accent;
+        private SolidColorBrush _tint;
+        private SolidColorBrush _chipTxt;
+        private SolidColorBrush _changed;
+
         private readonly ConfirmMode _mode;
         private readonly int _totalChanged;
 
@@ -38,34 +43,37 @@ namespace SOLUM_UI
                              ConfirmMode mode = ConfirmMode.Add)
         {
             InitializeComponent();
-            _mode  = mode;
+            _mode = mode;
             _totalChanged = fields != null ? fields.FindAll(f => f.IsChanged).Count : 0;
-            Width  = screenW;
+            Width = screenW;
             Height = screenH;
-            Left   = screenLeft;
-            Top    = screenTop;
-            Shell.MaxHeight = screenH * 0.90;
-            TxtTitle.Text      = title;
-            TxtSubtitle.Text   = subtitle;
+            Left = screenLeft;
+            Top = screenTop;
+
+            // Same footprint as the Profile details modal (~63% wide, max 1210; ~88% tall).
+            // Rounded to whole pixels so edges and text stay sharp.
+            double shellW = Math.Round(Math.Max(720, Math.Min(1210, screenW * 0.63)));
+            Shell.Width = shellW;
+            Shell.MaxWidth = shellW; // also clamps anything WindowPositionHelper.CoverOwnerWindow applies
+            Shell.MaxHeight = Math.Round(screenH * 0.88);
+
+            // Show dim overlay when confirm/review changes modal opens
+            Loaded += (s, e) => MainWindow.ShowDimOverlay(fullWindow: true);
+            Closed += (s, e) => MainWindow.HideDimOverlay();
+
+            TxtTitle.Text = title;
+            TxtSubtitle.Text = subtitle;
             TxtConfirmBtn.Text = confirmLabel;
-            // Apply mode colors
+
             switch (mode)
             {
-                case ConfirmMode.Renew:
-                    // Green — same as add
-                    _iconBg   = Clr(0x27, 0xAE, 0x60);
-                    _btnColor = Clr(0x27, 0xAE, 0x60);
-                    _changed  = Clr(0x1E, 0x8B, 0x4E);
-                    SetIconCircle("#27AE60", "↻");
-                    SetConfirmBtn("#27AE60");
-                    break;
                 case ConfirmMode.Edit:
-                    // Amber
-                    _iconBg   = Clr(0xF5, 0xA6, 0x23);
-                    _btnColor = Clr(0xD4, 0x7D, 0x00);
-                    _changed  = Clr(0xB3, 0x6A, 0x00);
-                    SetIconCircle("#F5A623", "✎");
-                    SetConfirmBtn("#D47D00");
+                    // Yellow-orange
+                    _accent = Clr(0xC9, 0x77, 0x00);
+                    _tint = Clr(0xFF, 0xF4, 0xE0);
+                    _chipTxt = Clr(0x7A, 0x45, 0x00);
+                    _changed = Clr(0xA8, 0x5F, 0x00);
+                    IconSymbol.Text = "✎";
                     if (_totalChanged > 0)
                     {
                         TxtSubtitle.Text = $"{_totalChanged} field{(_totalChanged == 1 ? "" : "s")} modified. Review your changes before saving.";
@@ -78,170 +86,219 @@ namespace SOLUM_UI
                         BtnConfirm.ToolTip = "No changes to save.";
                     }
                     break;
+
+                case ConfirmMode.Renew:
+                    // Green — same as Add
+                    _accent = Clr(0x1E, 0x8B, 0x4E);
+                    _tint = Clr(0xE6, 0xF6, 0xEC);
+                    _chipTxt = Clr(0x14, 0x66, 0x3A);
+                    _changed = Clr(0x1E, 0x8B, 0x4E);
+                    IconSymbol.Text = "↻";
+                    break;
+
                 default: // Add
-                    _iconBg   = Clr(0x27, 0xAE, 0x60);
-                    _btnColor = Clr(0x27, 0xAE, 0x60);
-                    _changed  = Clr(0x1E, 0x8B, 0x4E);
-                    // default XAML icon/btn already green — no change needed
+                    _accent = Clr(0x1E, 0x8B, 0x4E);
+                    _tint = Clr(0xE6, 0xF6, 0xEC);
+                    _chipTxt = Clr(0x14, 0x66, 0x3A);
+                    _changed = Clr(0x1E, 0x8B, 0x4E);
                     break;
             }
+
+            // One accent drives the whole modal
+            Shell.BorderBrush = _accent;
+            Shell.BorderThickness = new Thickness(2);
+            IconCircle.Background = _accent;
+            BtnConfirm.Background = _accent;
+
             BuildContent(fields);
         }
 
-        private void SetIconCircle(string hexColor, string symbol)
-        {
-            if (IconCircle != null)
-            {
-                IconCircle.Background = (SolidColorBrush)new BrushConverter().ConvertFrom(hexColor);
-                IconSymbol.Text       = symbol;
-            }
-        }
-
-        protected override void OnSourceInitialized(System.EventArgs e)
+        protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
             SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, Shell);
         }
 
-        private void SetConfirmBtn(string hexColor)
+        // ── Small helper so every text element is built the same way ──────
+        private static TextBlock Tb(string text, double size, FontWeight weight, Brush fg, bool wrap = false)
         {
-            // Named elements inside ControlTemplates aren't direct fields;
-            // set the Background on the Button itself and let XAML propagate it.
-            BtnConfirm.Background = (SolidColorBrush)new BrushConverter().ConvertFrom(hexColor);
-            // Also override via tag so the template border picks it up
-            BtnConfirm.Tag = hexColor;
+            return new TextBlock
+            {
+                Text = text,
+                FontSize = size,
+                FontWeight = weight,
+                Foreground = fg,
+                FontFamily = new FontFamily("Segoe UI"),
+                TextWrapping = wrap ? TextWrapping.Wrap : TextWrapping.NoWrap
+            };
+        }
+
+        // "Separated → Single" (old struck through, new bold) as one wrapping TextBlock
+        private TextBlock ChangedValue(ConfirmField sf, double size)
+        {
+            var tb = new TextBlock
+            {
+                FontSize = size,
+                FontFamily = new FontFamily("Segoe UI"),
+                TextWrapping = TextWrapping.Wrap
+            };
+            tb.Inlines.Add(new Run(string.IsNullOrEmpty(sf.OldValue) ? "—" : sf.OldValue)
+            {
+                Foreground = _oldVal,
+                TextDecorations = TextDecorations.Strikethrough
+            });
+            tb.Inlines.Add(new Run("  →  ") { Foreground = _label });
+            tb.Inlines.Add(new Run(string.IsNullOrEmpty(sf.NewValue) ? "—" : sf.NewValue)
+            {
+                Foreground = _value,
+                FontWeight = FontWeights.SemiBold
+            });
+            return tb;
+        }
+
+        // "Civil status · modified" label line
+        private TextBlock ModifiedLabel(string label)
+        {
+            var tb = new TextBlock
+            {
+                FontSize = 12,
+                FontFamily = new FontFamily("Segoe UI"),
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+            tb.Inlines.Add(new Run(label) { Foreground = _changed });
+            tb.Inlines.Add(new Run("  ·  modified") { Foreground = _changed, FontWeight = FontWeights.SemiBold });
+            return tb;
         }
 
         private void BuildContent(List<ConfirmField> fields)
         {
-            var summaryName    = fields.Find(f => f.Label == "Last Name")?.NewValue   ?? string.Empty;
-            var summaryFirst   = fields.Find(f => f.Label == "First Name")?.NewValue  ?? string.Empty;
-            var summarySex     = fields.Find(f => f.Label == "Sex")?.NewValue         ?? string.Empty;
-            var summaryAge     = fields.Find(f => f.Label == "Age")?.NewValue         ?? string.Empty;
+            var summaryName = fields.Find(f => f.Label == "Last Name")?.NewValue ?? string.Empty;
+            var summaryFirst = fields.Find(f => f.Label == "First Name")?.NewValue ?? string.Empty;
+            var summarySex = fields.Find(f => f.Label == "Sex")?.NewValue ?? string.Empty;
+            var summaryAge = fields.Find(f => f.Label == "Age")?.NewValue ?? string.Empty;
             var summaryContact = fields.Find(f => f.Label == "Contact No.")?.NewValue ?? string.Empty;
 
             string fullName = string.IsNullOrWhiteSpace(summaryName)
                 ? summaryFirst
                 : summaryName + (string.IsNullOrWhiteSpace(summaryFirst) ? "" : ", " + summaryFirst);
-            var summaryCard = new Border
-            {
-                Background      = Brushes.White,
-                CornerRadius    = new CornerRadius(14),
-                BorderBrush     = _border,
-                BorderThickness = new Thickness(1.5),
-                Padding         = new Thickness(24, 20, 24, 20),
-                Margin          = new Thickness(0, 12, 0, 20)
-            };
+
+            // ── Summary header (name + sex / age / contact), like profile details ──
+            var summaryGrid = new Grid { Margin = new Thickness(0, 18, 0, 18) };
+            summaryGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            summaryGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
             var si = new StackPanel();
-            si.Children.Add(new TextBlock
-            {
-                Text       = string.IsNullOrWhiteSpace(fullName) ? "—" : fullName,
-                FontSize   = 20, FontWeight = FontWeights.Bold,
-                Foreground = _value, FontFamily = new FontFamily("Segoe UI"),
-                Margin     = new Thickness(0, 0, 0, 5)
-            });
+            var nameTb = Tb(string.IsNullOrWhiteSpace(fullName) ? "—" : fullName.ToUpperInvariant(),
+                            26, FontWeights.SemiBold, _value, true);
+            nameTb.Margin = new Thickness(0, 0, 0, 4);
+            si.Children.Add(nameTb);
+
             string sexAgeLine = string.Empty;
             if (!string.IsNullOrWhiteSpace(summarySex) && summarySex != "—") sexAgeLine = summarySex;
             if (!string.IsNullOrWhiteSpace(summaryAge) && summaryAge != "—")
-                sexAgeLine += (sexAgeLine.Length > 0 ? ", " : "") + summaryAge + " years old";
-            if (!string.IsNullOrWhiteSpace(sexAgeLine))
-                si.Children.Add(new TextBlock { Text = sexAgeLine, FontSize = 14, Foreground = _label, FontFamily = new FontFamily("Segoe UI"), Margin = new Thickness(0, 0, 0, 3) });
+                sexAgeLine += (sexAgeLine.Length > 0 ? "  ·  " : "") + summaryAge + " years old";
             if (!string.IsNullOrWhiteSpace(summaryContact) && summaryContact != "—")
-                si.Children.Add(new TextBlock { Text = summaryContact, FontSize = 14, Foreground = _label, FontFamily = new FontFamily("Segoe UI") });
-            summaryCard.Child = si;
-            ContentPanel.Children.Add(summaryCard);
+                sexAgeLine += (sexAgeLine.Length > 0 ? "  ·  " : "") + summaryContact;
+            if (!string.IsNullOrWhiteSpace(sexAgeLine))
+                si.Children.Add(Tb(sexAgeLine, 15, FontWeights.Normal, _label));
+            Grid.SetColumn(si, 0);
+            summaryGrid.Children.Add(si);
+
+            // Mode badge (visual only)
+            var modeBadge = new Border
+            {
+                Background = _tint,
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(12, 5, 12, 5),
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(16, 4, 0, 0),
+                Child = Tb(_mode == ConfirmMode.Renew ? "RENEWAL" : (_mode == ConfirmMode.Edit ? "EDITING" : "NEW APPLICANT"),
+                           12, FontWeights.Bold, _chipTxt)
+            };
+            Grid.SetColumn(modeBadge, 1);
+            summaryGrid.Children.Add(modeBadge);
+            ContentPanel.Children.Add(summaryGrid);
+
+            // ── Sections ──────────────────────────────────────────────────
             var sections = new List<string>();
             foreach (var f in fields)
                 if (!sections.Contains(f.Section)) sections.Add(f.Section);
+
             foreach (var section in sections)
             {
                 var sectionFields = fields.FindAll(f => f.Section == section);
                 int sectionChangedCount = sectionFields.FindAll(f => f.IsChanged).Count;
+
+                // Card: accent border, header band in the SAME accent color
                 var card = new Border
                 {
-                    Background      = Brushes.White,
-                    CornerRadius    = new CornerRadius(14),
-                    BorderBrush     = sectionChangedCount > 0 ? Clr(0xF5, 0xC6, 0x7A) : _border,
-                    BorderThickness = new Thickness(sectionChangedCount > 0 ? 2 : 1.5),
-                    Padding         = new Thickness(24, 18, 24, 8),
-                    Margin          = new Thickness(0, 0, 0, 14)
+                    Background = Brushes.White,
+                    CornerRadius = new CornerRadius(12),
+                    BorderBrush = _accent,
+                    BorderThickness = new Thickness(2),
+                    Margin = new Thickness(0, 0, 0, 16)
                 };
-                var cardStack = new StackPanel();
-                var hdr = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 14) };
-                hdr.Children.Add(new Border { Width = 4, CornerRadius = new CornerRadius(2), Background = sectionChangedCount > 0 ? (_btnColor ?? _accent) : _accent, Margin = new Thickness(0, 2, 12, 2) });
-                hdr.Children.Add(new TextBlock { Text = section, FontSize = 15, FontWeight = FontWeights.Bold, Foreground = _head, FontFamily = new FontFamily("Segoe UI"), VerticalAlignment = VerticalAlignment.Center });
+                var outer = new StackPanel();
+
+                // Header band: accent background, white bold text (readable)
+                var hdr = new StackPanel { Orientation = Orientation.Horizontal };
+                var hdrText = Tb(section.ToUpperInvariant(), 13, FontWeights.Bold, Brushes.White);
+                hdrText.VerticalAlignment = VerticalAlignment.Center;
+                hdr.Children.Add(hdrText);
                 if (sectionChangedCount > 0)
                 {
-                    var secBadge = new Border
+                    hdr.Children.Add(new Border
                     {
-                        Background = Clr(0xFF, 0xF3, 0xE0),
-                        BorderBrush = Clr(0xF5, 0xC6, 0x7A),
-                        BorderThickness = new Thickness(1),
+                        Background = Brushes.White,
                         CornerRadius = new CornerRadius(5),
                         Padding = new Thickness(8, 2, 8, 2),
-                        Margin = new Thickness(10, 0, 0, 0),
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-                    secBadge.Child = new TextBlock
-                    {
-                        Text = $"{sectionChangedCount} MODIFIED",
-                        FontSize = 10,
-                        FontWeight = FontWeights.Bold,
-                        Foreground = Clr(0xB3, 0x6A, 0x00),
-                        FontFamily = new FontFamily("Segoe UI")
-                    };
-                    hdr.Children.Add(secBadge);
+                        Margin = new Thickness(12, 0, 0, 0),
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Child = Tb($"{sectionChangedCount} MODIFIED", 10, FontWeights.Bold, _chipTxt)
+                    });
                 }
-                cardStack.Children.Add(hdr);
-                cardStack.Children.Add(new Border { Height = 1, Background = _divider, Margin = new Thickness(0, 0, 0, 14) });
+                outer.Children.Add(new Border
+                {
+                    Background = _accent,
+                    CornerRadius = new CornerRadius(10, 10, 0, 0),
+                    Padding = new Thickness(20, 12, 20, 12),
+                    Child = hdr
+                });
+
+                // Body container. Chip / row sections get padding; the field grid is full-bleed.
+                var cardStack = new StackPanel { Margin = new Thickness(20, 16, 20, 8) };
+                outer.Children.Add(cardStack);
+
                 if (section == "Circumstances")
                 {
                     bool anyCircChanged = sectionFields.Exists(f => f.IsChanged);
                     if (anyCircChanged)
                     {
                         foreach (var sf in sectionFields)
-                        {
                             cardStack.Children.Add(CreateChangedRow(sf));
-                        }
                     }
                     else if (sectionFields.Count == 1 && (sectionFields[0].NewValue == "None selected" || sectionFields[0].NewValue == "—"))
                     {
-                        cardStack.Children.Add(new TextBlock
-                        {
-                            Text = "None selected", FontSize = 14, Foreground = _label,
-                            FontFamily = new FontFamily("Segoe UI"), Margin = new Thickness(0, 0, 0, 10)
-                        });
+                        var none = Tb("None selected", 15, FontWeights.Normal, _label);
+                        none.Margin = new Thickness(0, 0, 0, 10);
+                        cardStack.Children.Add(none);
                     }
                     else
                     {
                         foreach (var sf in sectionFields)
                         {
-                            var lines = (sf.NewValue ?? "").Split(new[] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
+                            var lines = (sf.NewValue ?? "").Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                             if (lines.Length == 0) lines = new[] { "None selected" };
                             foreach (var line in lines)
                             {
-                                var row = new Border
+                                cardStack.Children.Add(new Border
                                 {
-                                    Background      = _chipBg,
-                                    CornerRadius    = new CornerRadius(8),
-                                    BorderBrush     = _chipBg,
-                                    BorderThickness = new Thickness(1),
-                                    Padding         = new Thickness(14, 8, 14, 8),
-                                    Margin          = new Thickness(0, 0, 0, 6)
-                                };
-                                var rowInner = new StackPanel { Orientation = Orientation.Horizontal };
-                                rowInner.Children.Add(new TextBlock
-                                {
-                                    Text         = line,
-                                    FontSize     = 12.5,
-                                    FontWeight   = FontWeights.SemiBold,
-                                    Foreground   = _chipTxt,
-                                    FontFamily   = new FontFamily("Segoe UI"),
-                                    VerticalAlignment = VerticalAlignment.Center,
-                                    TextWrapping = TextWrapping.Wrap
+                                    Background = _tint,
+                                    CornerRadius = new CornerRadius(8),
+                                    Padding = new Thickness(14, 9, 14, 9),
+                                    Margin = new Thickness(0, 0, 0, 8),
+                                    Child = Tb(line, 14, FontWeights.SemiBold, _chipTxt, true)
                                 });
-                                row.Child = rowInner;
-                                cardStack.Children.Add(row);
                             }
                         }
                     }
@@ -254,141 +311,88 @@ namespace SOLUM_UI
                         {
                             cardStack.Children.Add(CreateChangedRow(sf));
                         }
-                        else if (sf.Label.IndexOf("Notice", System.StringComparison.OrdinalIgnoreCase) >= 0 || sf.Label.IndexOf("Eligibility", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                        else if (sf.Label.IndexOf("Notice", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                 sf.Label.IndexOf("Eligibility", StringComparison.OrdinalIgnoreCase) >= 0)
                         {
-                            var row = new Border
+                            var rowStack = new StackPanel();
+                            var l = Tb(sf.Label, 12, FontWeights.Bold, Clr(0xB4, 0x53, 0x09));
+                            l.Margin = new Thickness(0, 0, 0, 3);
+                            rowStack.Children.Add(l);
+                            rowStack.Children.Add(Tb(string.IsNullOrWhiteSpace(sf.NewValue) ? "—" : sf.NewValue,
+                                                     14, FontWeights.SemiBold, Clr(0x92, 0x40, 0x0E), true));
+                            cardStack.Children.Add(new Border
                             {
-                                Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xFB, 0xEB)),
-                                BorderBrush = new SolidColorBrush(Color.FromRgb(0xF5, 0x9E, 0x0B)),
-                                BorderThickness = new Thickness(1.2),
+                                Background = Clr(0xFF, 0xFB, 0xEB),
+                                BorderBrush = Clr(0xF5, 0x9E, 0x0B),
+                                BorderThickness = new Thickness(1),
                                 CornerRadius = new CornerRadius(8),
                                 Padding = new Thickness(14, 10, 14, 10),
-                                Margin = new Thickness(0, 0, 0, 8)
-                            };
-                            var rowStack = new StackPanel();
-                            rowStack.Children.Add(new TextBlock { Text = sf.Label, FontSize = 11.5, FontWeight = FontWeights.Bold, Foreground = new SolidColorBrush(Color.FromRgb(0xB4, 0x53, 0x09)), FontFamily = new FontFamily("Segoe UI"), Margin = new Thickness(0, 0, 0, 3) });
-                            rowStack.Children.Add(new TextBlock { Text = string.IsNullOrWhiteSpace(sf.NewValue) ? "—" : sf.NewValue, FontSize = 12.5, FontWeight = FontWeights.SemiBold, Foreground = new SolidColorBrush(Color.FromRgb(0x92, 0x40, 0x0E)), FontFamily = new FontFamily("Segoe UI"), TextWrapping = TextWrapping.Wrap });
-                            row.Child = rowStack;
-                            cardStack.Children.Add(row);
+                                Margin = new Thickness(0, 0, 0, 8),
+                                Child = rowStack
+                            });
                         }
                         else
                         {
-                            var row = new Border
-                            {
-                                Background = _bg, CornerRadius = new CornerRadius(8),
-                                Padding = new Thickness(14, 10, 14, 10), Margin = new Thickness(0, 0, 0, 8)
-                            };
                             var rowStack = new StackPanel();
-                            rowStack.Children.Add(new TextBlock { Text = sf.Label, FontSize = 11, Foreground = _label, FontFamily = new FontFamily("Segoe UI"), Margin = new Thickness(0, 0, 0, 3) });
-                            rowStack.Children.Add(new TextBlock { Text = string.IsNullOrWhiteSpace(sf.NewValue) ? "—" : sf.NewValue, FontSize = 14, FontWeight = FontWeights.SemiBold, Foreground = _value, FontFamily = new FontFamily("Segoe UI"), TextWrapping = TextWrapping.Wrap });
-                            row.Child = rowStack;
-                            cardStack.Children.Add(row);
+                            var l = Tb(sf.Label, 12, FontWeights.Normal, _label);
+                            l.Margin = new Thickness(0, 0, 0, 3);
+                            rowStack.Children.Add(l);
+                            rowStack.Children.Add(Tb(string.IsNullOrWhiteSpace(sf.NewValue) ? "—" : sf.NewValue,
+                                                     15, FontWeights.SemiBold, _value, true));
+                            cardStack.Children.Add(new Border
+                            {
+                                Background = _bg,
+                                CornerRadius = new CornerRadius(8),
+                                Padding = new Thickness(14, 10, 14, 10),
+                                Margin = new Thickness(0, 0, 0, 8),
+                                Child = rowStack
+                            });
                         }
                     }
                 }
                 else
                 {
+                    // Full-bleed 2-column label/value grid with hairline row dividers (profile-details look)
+                    cardStack.Margin = new Thickness(0);
+                    int lastRow = (sectionFields.Count - 1) / 2;
+
                     var fieldsGrid = new Grid();
                     fieldsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                     fieldsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
                     for (int i = 0; i < sectionFields.Count; i++)
                     {
-                        var sf  = sectionFields[i];
+                        var sf = sectionFields[i];
                         int row = i / 2;
                         int col = i % 2;
                         while (fieldsGrid.RowDefinitions.Count <= row)
                             fieldsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                        bool isLastRow = row == lastRow;
                         var cellContainer = new Border
                         {
-                            Margin = new Thickness(0, 0, col == 0 ? 14 : 0, 12),
-                            CornerRadius = new CornerRadius(8),
-                            Padding = sf.IsChanged ? new Thickness(10, 8, 10, 8) : new Thickness(0, 0, 0, 4),
-                            Background = sf.IsChanged ? Clr(0xFF, 0xF9, 0xE6) : Brushes.Transparent,
-                            BorderBrush = sf.IsChanged ? Clr(0xF5, 0xC6, 0x7A) : Brushes.Transparent,
-                            BorderThickness = new Thickness(sf.IsChanged ? 1.5 : 0)
+                            Padding = new Thickness(20, 12, 20, 12),
+                            Background = sf.IsChanged ? _tint : Brushes.Transparent,
+                            BorderBrush = _divider,
+                            BorderThickness = new Thickness(0, 0, 0, isLastRow ? 0 : 1),
+                            CornerRadius = isLastRow
+                                ? (col == 0 ? new CornerRadius(0, 0, 0, 10) : new CornerRadius(0, 0, 10, 0))
+                                : new CornerRadius(0)
                         };
+
                         var cell = new StackPanel();
-                        var labelRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
-                        labelRow.Children.Add(new TextBlock
-                        {
-                            Text = sf.Label,
-                            FontSize = 11,
-                            FontWeight = sf.IsChanged ? FontWeights.Bold : FontWeights.Normal,
-                            Foreground = sf.IsChanged ? Clr(0xB3, 0x6A, 0x00) : _label,
-                            FontFamily = new FontFamily("Segoe UI")
-                        });
                         if (sf.IsChanged)
                         {
-                            var badge = new Border
-                            {
-                                Background = Clr(0xF5, 0xA6, 0x23),
-                                CornerRadius = new CornerRadius(4),
-                                Padding = new Thickness(5, 1, 5, 1),
-                                Margin = new Thickness(6, 0, 0, 0),
-                                VerticalAlignment = VerticalAlignment.Center
-                            };
-                            badge.Child = new TextBlock
-                            {
-                                Text = "CHANGED",
-                                FontSize = 9,
-                                FontWeight = FontWeights.Bold,
-                                Foreground = Brushes.White,
-                                FontFamily = new FontFamily("Segoe UI")
-                            };
-                            labelRow.Children.Add(badge);
-                        }
-                        cell.Children.Add(labelRow);
-                        if (sf.IsChanged)
-                        {
-                            var prevRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 2) };
-                            prevRow.Children.Add(new TextBlock
-                            {
-                                Text = "Previous: ",
-                                FontSize = 11,
-                                Foreground = Clr(0x88, 0x88, 0x88),
-                                FontFamily = new FontFamily("Segoe UI")
-                            });
-                            prevRow.Children.Add(new TextBlock
-                            {
-                                Text = string.IsNullOrEmpty(sf.OldValue) ? "—" : sf.OldValue,
-                                FontSize = 12,
-                                Foreground = Clr(0xDC, 0x35, 0x45),
-                                TextDecorations = TextDecorations.Strikethrough,
-                                FontFamily = new FontFamily("Segoe UI"),
-                                TextWrapping = TextWrapping.Wrap
-                            });
-                            cell.Children.Add(prevRow);
-                            var newRow = new StackPanel { Orientation = Orientation.Horizontal };
-                            newRow.Children.Add(new TextBlock
-                            {
-                                Text = "New: ",
-                                FontSize = 12,
-                                FontWeight = FontWeights.SemiBold,
-                                Foreground = _changed ?? Clr(0xB3, 0x6A, 0x00),
-                                FontFamily = new FontFamily("Segoe UI")
-                            });
-                            newRow.Children.Add(new TextBlock
-                            {
-                                Text = string.IsNullOrEmpty(sf.NewValue) ? "—" : sf.NewValue,
-                                FontSize = 14,
-                                FontWeight = FontWeights.Bold,
-                                Foreground = _changed ?? Clr(0xB3, 0x6A, 0x00),
-                                FontFamily = new FontFamily("Segoe UI"),
-                                TextWrapping = TextWrapping.Wrap
-                            });
-                            cell.Children.Add(newRow);
+                            cell.Children.Add(ModifiedLabel(sf.Label));
+                            cell.Children.Add(ChangedValue(sf, 16));
                         }
                         else
                         {
-                            cell.Children.Add(new TextBlock
-                            {
-                                Text = string.IsNullOrEmpty(sf.NewValue) ? "—" : sf.NewValue,
-                                FontSize = 14,
-                                FontWeight = FontWeights.SemiBold,
-                                Foreground = _value,
-                                FontFamily = new FontFamily("Segoe UI"),
-                                TextWrapping = TextWrapping.Wrap
-                            });
+                            var l = Tb(sf.Label, 12, FontWeights.Normal, _label);
+                            l.Margin = new Thickness(0, 0, 0, 4);
+                            cell.Children.Add(l);
+                            cell.Children.Add(Tb(string.IsNullOrEmpty(sf.NewValue) ? "—" : sf.NewValue,
+                                                 16, FontWeights.Normal, _value, true));
                         }
                         cellContainer.Child = cell;
                         Grid.SetRow(cellContainer, row);
@@ -397,89 +401,28 @@ namespace SOLUM_UI
                     }
                     cardStack.Children.Add(fieldsGrid);
                 }
-                card.Child = cardStack;
+
+                card.Child = outer;
                 ContentPanel.Children.Add(card);
             }
         }
 
+        // Highlighted row for changed values in chip/row-style sections
         private Border CreateChangedRow(ConfirmField sf)
         {
-            var row = new Border
-            {
-                Background      = Clr(0xFF, 0xF9, 0xE6),
-                CornerRadius    = new CornerRadius(8),
-                BorderBrush     = Clr(0xF5, 0xC6, 0x7A),
-                BorderThickness = new Thickness(1.5),
-                Padding         = new Thickness(14, 10, 14, 10),
-                Margin          = new Thickness(0, 0, 0, 8)
-            };
             var stack = new StackPanel();
-            var hdr = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
-            hdr.Children.Add(new TextBlock
+            stack.Children.Add(ModifiedLabel(sf.Label));
+            stack.Children.Add(ChangedValue(sf, 15));
+            return new Border
             {
-                Text = sf.Label,
-                FontSize = 11,
-                FontWeight = FontWeights.Bold,
-                Foreground = Clr(0xB3, 0x6A, 0x00),
-                FontFamily = new FontFamily("Segoe UI")
-            });
-            var badge = new Border
-            {
-                Background = Clr(0xF5, 0xA6, 0x23),
-                CornerRadius = new CornerRadius(4),
-                Padding = new Thickness(5, 1, 5, 1),
-                Margin = new Thickness(8, 0, 0, 0),
-                VerticalAlignment = VerticalAlignment.Center
+                Background = _tint,
+                CornerRadius = new CornerRadius(8),
+                BorderBrush = _accent,
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(14, 10, 14, 10),
+                Margin = new Thickness(0, 0, 0, 8),
+                Child = stack
             };
-            badge.Child = new TextBlock
-            {
-                Text = "CHANGED",
-                FontSize = 9,
-                FontWeight = FontWeights.Bold,
-                Foreground = Brushes.White,
-                FontFamily = new FontFamily("Segoe UI")
-            };
-            hdr.Children.Add(badge);
-            stack.Children.Add(hdr);
-            var prevPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 2) };
-            prevPanel.Children.Add(new TextBlock
-            {
-                Text = "Previous: ",
-                FontSize = 11,
-                Foreground = Clr(0x88, 0x88, 0x88),
-                FontFamily = new FontFamily("Segoe UI")
-            });
-            prevPanel.Children.Add(new TextBlock
-            {
-                Text = string.IsNullOrEmpty(sf.OldValue) ? "—" : sf.OldValue,
-                FontSize = 12,
-                Foreground = Clr(0xDC, 0x35, 0x45),
-                TextDecorations = TextDecorations.Strikethrough,
-                FontFamily = new FontFamily("Segoe UI"),
-                TextWrapping = TextWrapping.Wrap
-            });
-            stack.Children.Add(prevPanel);
-            var newPanel = new StackPanel { Orientation = Orientation.Horizontal };
-            newPanel.Children.Add(new TextBlock
-            {
-                Text = "New: ",
-                FontSize = 12,
-                FontWeight = FontWeights.SemiBold,
-                Foreground = _changed ?? Clr(0xB3, 0x6A, 0x00),
-                FontFamily = new FontFamily("Segoe UI")
-            });
-            newPanel.Children.Add(new TextBlock
-            {
-                Text = string.IsNullOrEmpty(sf.NewValue) ? "—" : sf.NewValue,
-                FontSize = 13.5,
-                FontWeight = FontWeights.Bold,
-                Foreground = _changed ?? Clr(0xB3, 0x6A, 0x00),
-                FontFamily = new FontFamily("Segoe UI"),
-                TextWrapping = TextWrapping.Wrap
-            });
-            stack.Children.Add(newPanel);
-            row.Child = stack;
-            return row;
         }
 
         private void BtnConfirm_Click(object sender, RoutedEventArgs e)
@@ -498,10 +441,10 @@ namespace SOLUM_UI
 
     public class ConfirmField
     {
-        public string Section   { get; set; }
-        public string Label     { get; set; }
-        public string NewValue  { get; set; }
-        public string OldValue  { get; set; }
-        public bool   IsChanged { get; set; }
+        public string Section { get; set; }
+        public string Label { get; set; }
+        public string NewValue { get; set; }
+        public string OldValue { get; set; }
+        public bool IsChanged { get; set; }
     }
 }

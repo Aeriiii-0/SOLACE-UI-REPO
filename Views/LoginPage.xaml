@@ -102,6 +102,7 @@
 
                     <StackPanel Grid.Column="0"
                                 VerticalAlignment="Center"
+                                MinWidth="280"
                                 Margin="0,0,56,0">
 
                         <Border HorizontalAlignment="Left"
@@ -128,24 +129,24 @@
 
                         <TextBlock Text="A secure gateway to"
                                    FontFamily="Georgia"
-                                   FontSize="56"
+                                   FontSize="40"
                                    FontWeight="ExtraBold"
                                    Foreground="#2B0D1A"
-                                   LineHeight="66"/>
+                                   LineHeight="50"/>
                         <TextBlock Text="solo parent records."
                                    FontFamily="Georgia"
-                                   FontSize="56"
+                                   FontSize="40"
                                    FontWeight="ExtraBold"
                                    Foreground="#7A2650"
-                                   LineHeight="66"
+                                   LineHeight="50"
                                    Margin="0,0,0,26"/>
 
                         <TextBlock Text="Sign in to manage solo parent records, monitor program operations, and access beneficiary data through the unified management system of the Biñan City Social Welfare and Development Office."
                                    FontFamily="Segoe UI"
-                                   FontSize="20"
+                                   FontSize="15"
                                    Foreground="#6B4256"
                                    TextWrapping="Wrap"
-                                   LineHeight="32"
+                                   LineHeight="24"
                                    MaxWidth="680"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,42"/>
@@ -216,7 +217,7 @@
                                                    TextAlignment="Center"/>
                                         <TextBlock Text="Sign in to your SOLACE account"
                                                    FontFamily="Segoe UI"
-                                                   FontSize="20"
+                                                   FontSize="15"
                                                    Foreground="#8A5068"
                                                    Margin="0,8,0,0"
                                                    TextAlignment="Center"/>
@@ -515,7 +516,7 @@
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                         <TextBlock Text="&#xE783;"
                                    FontFamily="Segoe MDL2 Assets"
-                                   FontSize="20"
+                                   FontSize="15"
                                    Foreground="#C0392B"
                                    VerticalAlignment="Center"
                                    Margin="0,0,10,0"/>

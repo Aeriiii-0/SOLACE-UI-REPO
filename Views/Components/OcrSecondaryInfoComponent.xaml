@@ -2,7 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:behaviors="clr-namespace:SOLUM_UI.Behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="600">
     <ScrollViewer x:Name="ScrollStep2" VerticalScrollBarVisibility="Auto"
@@ -163,9 +164,7 @@
                             </Grid>
                             <TextBox x:Name="TxtContact" Style="{StaticResource FormBox}"
                                      Tag="contact_number" GotFocus="Field_GotFocus"
-                                     MaxLength="13"
-                                     PreviewTextInput="Phone_PreviewTextInput"
-                                     PreviewKeyDown="Phone_PreviewKeyDown"
+                                     behaviors:PhoneInputBehavior.IsEnabled="True"
                                      TextChanged="TxtContact_TextChanged"/>
                             <TextBlock x:Name="ErrContact" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>

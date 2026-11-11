@@ -293,23 +293,10 @@ namespace SOLUM_UI.ViewModels
                 try
                 {
                     System.IO.File.WriteAllText(dlg.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
-                    bool openFile = Views.Dialogs.ActionConfirmDialog.Show(
+                    ToastNotification.Show(
                         "Export Complete",
-                        $"Exported {itemsToExport.Count} disqualified candidate record(s) to CSV.\n\nFile saved to:\n{System.IO.Path.GetFileName(dlg.FileName)}\n\nWould you like to open the file now?",
-                        "Open File",
-                        "Close",
-                        Views.Dialogs.ConfirmThemeType.Success);
-                    if (openFile)
-                    {
-                        try
-                        {
-                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dlg.FileName) { UseShellExecute = true });
-                        }
-                        catch (Exception pEx)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Failed to open exported file: {pEx.Message}");
-                        }
-                    }
+                        $"Exported {itemsToExport.Count} disqualified candidate record(s) to CSV: {System.IO.Path.GetFileName(dlg.FileName)}",
+                        ToastType.Success);
                 }
                 catch (Exception ex)
                 {
@@ -354,7 +341,7 @@ namespace SOLUM_UI.ViewModels
                 await _apiService.ConfirmGranteesAsync(_activeCycleId, new List<Guid> { row.EvaluationId });
             UpdateShortlistAndFinalCollections();
             NotifyQuotaMetricsChanged();
-            if (confirm) Views.Dialogs.ActionConfirmDialog.Success("Confirmed", $"{row.Name} confirmed as final grantee."); else Views.Dialogs.ActionConfirmDialog.Alert("Unconfirmed", $"{row.Name} reverted to pending shortlist.");
+            if (confirm) ToastNotification.Show("Confirmed", $"{row.Name} confirmed as final grantee.", ToastType.Success); else ToastNotification.Show("Unconfirmed", $"{row.Name} reverted to pending shortlist.", ToastType.Info);
         }
 
         private async Task ExportCsvAsync(string name, Task<string> generator, string msg)
@@ -365,22 +352,26 @@ namespace SOLUM_UI.ViewModels
                 try
                 {
                     File.WriteAllText(dlg.FileName, await generator, new System.Text.UTF8Encoding(true));
-                    bool openFile = Views.Dialogs.ActionConfirmDialog.Show(
+                    ToastNotification.Show(
                         "Export Complete",
-                        $"{msg}\n\nFile saved to:\n{System.IO.Path.GetFileName(dlg.FileName)}\n\nWould you like to open the file now?",
-                        "Open File",
-                        "Close",
-                        Views.Dialogs.ConfirmThemeType.Success);
-                    if (openFile)
+                        $"{msg} Saved to: {System.IO.Path.GetFileName(dlg.FileName)}",
+                        ToastType.Success);
+
+                    // Ask user if they want to open the file
+                    var openDialog = new Views.Dialogs.OpenFilePromptDialog("Would you like to open the exported CSV file now?")
+                    {
+                        Owner = Application.Current.MainWindow
+                    };
+                    
+                    if (openDialog.ShowDialog() == true && openDialog.ShouldOpenFile)
                     {
                         try
                         {
-                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dlg.FileName) { UseShellExecute = true });
+                            System.Diagnostics.Process.Start(
+                                new System.Diagnostics.ProcessStartInfo(dlg.FileName)
+                                { UseShellExecute = true });
                         }
-                        catch (Exception pEx)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Failed to open exported file: {pEx.Message}");
-                        }
+                        catch { }
                     }
                 }
                 catch (Exception ex)

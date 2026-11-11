@@ -957,8 +957,7 @@ namespace SOLUM_UI
                 customIconData: ResetPasswordIconData);
             if (!isConfirmed) return;
 
-            if (UsersLoadingOverlay != null) UsersLoadingOverlay.Message = "Resetting password...";
-            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = true;
+            if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Visible;
             try
             {
                 string tempPassword = PasswordGenerator.Generate(10);
@@ -992,6 +991,7 @@ namespace SOLUM_UI
             }
             finally
             {
+                if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Collapsed;
                 if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = false;
             }
         }
@@ -1016,8 +1016,7 @@ namespace SOLUM_UI
                 owner: Window.GetWindow(this));
             if (!isConfirmed) return;
 
-            if (UsersLoadingOverlay != null) UsersLoadingOverlay.Message = "Updating user status...";
-            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = true;
+            if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Visible;
             try
             {
                 var response = await UserApiService.Instance.UpdateUserStatusAsync(user.Id, newStatus);
@@ -1047,6 +1046,7 @@ namespace SOLUM_UI
             }
             finally
             {
+                if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Collapsed;
                 if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = false;
             }
         }
@@ -1065,8 +1065,7 @@ namespace SOLUM_UI
                 owner: Window.GetWindow(this));
             if (!isConfirmed) return;
 
-            if (UsersLoadingOverlay != null) UsersLoadingOverlay.Message = "Updating user status...";
-            if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = true;
+            if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Visible;
             try
             {
                 var response = await UserApiService.Instance.DeleteApplicationUserAsync(user.Id);
@@ -1079,7 +1078,7 @@ namespace SOLUM_UI
                     return;
                 }
                 if (_editTarget != null && _editTarget.Id == user.Id) ClosePanel_Click(null, null);
-                ToastNotification.Show("User Deleted", user.FullName + " was removed.", ToastType.Warning);
+                ToastNotification.Show("User Deleted", user.FullName + " was removed.", ToastType.Success);
                 AuditLogService.Instance.LogUserAdmin("deleted", user.FullName + " (" + user.Email + ")",
                     MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
                     user.Id.ToString());
@@ -1095,6 +1094,7 @@ namespace SOLUM_UI
             }
             finally
             {
+                if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Collapsed;
                 if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = false;
             }
         }
@@ -1241,8 +1241,7 @@ namespace SOLUM_UI
                     customIconData: "M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.07,6.19L3,17.25Z");
                 if (!isConfirmed) return;
 
-                if (UsersLoadingOverlay != null) UsersLoadingOverlay.Message = "Saving changes...";
-                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = true;
+                if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Visible;
                 try
                 {
                     var updateReq = new UpdateApplicationUserRequest
@@ -1284,7 +1283,7 @@ namespace SOLUM_UI
                         }
                     }
 
-                    ToastNotification.Show("User Updated", firstName + " " + lastName + " was updated.", ToastType.Info);
+                    ToastNotification.Show("User Updated", firstName + " " + lastName + " was updated.", ToastType.Success);
                     AuditLogService.Instance.LogUserAdmin("updated",
                         firstName + " " + lastName + " (" + target.Email + ")",
                         MainWindow.CurrentUserName, MainWindow.CurrentUserRole,
@@ -1301,6 +1300,7 @@ namespace SOLUM_UI
                 }
                 finally
                 {
+                    if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Collapsed;
                     if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = false;
                 }
             }
@@ -1328,8 +1328,7 @@ namespace SOLUM_UI
                     owner: Window.GetWindow(this));
                 if (!confirmed) return;
 
-                if (UsersLoadingOverlay != null) UsersLoadingOverlay.Message = "Creating user...";
-                if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = true;
+                if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Visible;
                 try
                 {
                     BaseResponse<RegisterResponse> response;
@@ -1369,6 +1368,7 @@ namespace SOLUM_UI
                     string createdEmail = email;
                     string createdPassword = password;
 
+                    ToastNotification.Show("User Created", createdName + " was registered successfully.", ToastType.Success);
                     ClosePanel_Click(null, null);
                     _lastLoadedTime = DateTime.MinValue;
                     await LoadUsersAsync(forceRefresh: true);
@@ -1382,6 +1382,7 @@ namespace SOLUM_UI
                 }
                 finally
                 {
+                    if (UsersSkeletonLoader != null) UsersSkeletonLoader.Visibility = Visibility.Collapsed;
                     if (UsersLoadingOverlay != null) UsersLoadingOverlay.IsActive = false;
                 }
             }

@@ -43,6 +43,10 @@ namespace SOLUM_UI.Views.Dialogs
             DataContext = _vm;
             _vm.RequestClose += result => { SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, result); };
             Loaded += (s, e) => { ApplySize(); BuildContent(); ConfigureRoleBasedVisibility(); };
+            
+            // Show dim overlay when profile details opens
+            Loaded += (s, e) => MainWindow.ShowDimOverlay(fullWindow: true);
+            Closed += (s, e) => MainWindow.HideDimOverlay();
         }
 
         private void ConfigureRoleBasedVisibility()
@@ -834,20 +838,8 @@ namespace SOLUM_UI.Views.Dialogs
                 {
                     ToastNotification.Show("Application Cancelled", "The solo parent application has been cancelled successfully.", ToastType.Success);
                     
-                    // Refresh the record to show updated status
-                    await Task.Delay(500);
-                    
-                    // Show success popup
-                    Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        ActionConfirmDialog.Success(
-                            "Application Cancelled",
-                            $"The application has been cancelled.\n\nReason: {reason}\n\nThe applicant can reapply after one (1) year from the cancellation date."
-                        );
-                    }), DispatcherPriority.Background);
-                    
                     // Close the dialog to refresh parent list
-                    await Task.Delay(100);
+                    await Task.Delay(200);
                     SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
                 }
                 else

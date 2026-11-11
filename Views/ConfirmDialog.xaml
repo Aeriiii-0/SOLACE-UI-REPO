@@ -3,92 +3,155 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
+        RenderOptions.ClearTypeHint="Enabled"
+        RenderOptions.BitmapScalingMode="HighQuality">
     <Border Background="{DynamicResource ModalOverlayBrush}">
-        <Border x:Name="Shell" Background="White" CornerRadius="18"
-                ClipToBounds="True" Width="720"
-                VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="48" ShadowDepth="0" Opacity="0.26"/>
-            </Border.Effect>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="40,36,40,24">
-                    <Border Width="64" Height="64" CornerRadius="32"
-                            x:Name="IconCircle"
-                            Background="#27AE60" HorizontalAlignment="Center" Margin="0,0,0,20">
-                        <TextBlock x:Name="IconSymbol" Text="✓" FontSize="32" Foreground="White"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   FontWeight="Bold"/>
+        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+
+            <!-- Shadow lives on its OWN layer behind the shell.
+                 A DropShadowEffect directly on the shell rasterizes all its children
+                 and makes the text blurry. This keeps the content crisp. -->
+            <Border CornerRadius="18" Background="White" IsHitTestVisible="False"
+                    Width="{Binding ActualWidth, ElementName=Shell}"
+                    Height="{Binding ActualHeight, ElementName=Shell}">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="40" ShadowDepth="0" Opacity="0.26"/>
+                </Border.Effect>
+            </Border>
+
+            <!-- Shell: sized in code-behind to match the Profile details modal
+                 (~63% of owner width, max 1210; height capped at ~88%).
+                 BorderBrush is set in code-behind per mode (green = Add/Renew, amber = Edit). -->
+            <Border x:Name="Shell" Background="White" CornerRadius="18"
+                    BorderBrush="#1E8B4E" BorderThickness="2"
+                    ClipToBounds="True" Width="1210"
+                    VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <Border Grid.Row="0" Background="White" BorderBrush="#E8E8E8"
+                            BorderThickness="0,0,0,1" CornerRadius="16,16,0,0"
+                            Padding="28,18,24,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Width="44" Height="44" CornerRadius="22"
+                                    x:Name="IconCircle"
+                                    Background="#1E8B4E" VerticalAlignment="Center" Margin="0,0,16,0">
+                                <TextBlock x:Name="IconSymbol" Text="✓" FontSize="22" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontWeight="Bold"/>
+                            </Border>
+
+                            <!-- Title | subtitle on one row (profile-details style) -->
+                            <Grid Grid.Column="1" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="TxtTitle" Grid.Column="0" Text="Review Information"
+                                           FontSize="22" FontWeight="Bold" Foreground="#111111"
+                                           FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                                <Border Grid.Column="1" Width="1" Height="22" Background="#D0D0D0"
+                                        Margin="16,0,16,0" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="TxtSubtitle" Grid.Column="2"
+                                           Text="Please review the information before saving"
+                                           FontSize="15" Foreground="#666666"
+                                           TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                                           FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- Close (X) reuses the Cancel handler -->
+                            <Button x:Name="BtnClose" Grid.Column="2" Width="36" Height="36"
+                                    Cursor="Hand" VerticalAlignment="Center" Margin="16,0,0,0"
+                                    Click="BtnBack_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="CloseBg" Background="White" CornerRadius="18"
+                                                BorderBrush="#E4E6EB" BorderThickness="1">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="CloseBg" Property="Background" Value="#F2F2F2"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Text="✕" FontSize="13" Foreground="#666666" FontFamily="Segoe UI"/>
+                            </Button>
+                        </Grid>
                     </Border>
-                    <TextBlock x:Name="TxtTitle" Text="Review Information"
-                               FontSize="26" FontWeight="Bold" Foreground="#111111"
-                               HorizontalAlignment="Center" FontFamily="Segoe UI"/>
-                    <TextBlock x:Name="TxtSubtitle" Text="Please review the information before saving"
-                               FontSize="15" Foreground="#777777" Margin="0,8,0,0"
-                               HorizontalAlignment="Center" FontFamily="Segoe UI"/>
-                </StackPanel>
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled"
-                              Background="#F5F6F8" Padding="32,4,32,16">
-                    <StackPanel x:Name="ContentPanel"/>
-                </ScrollViewer>
-                <Border Grid.Row="2" Background="White" BorderBrush="#E8E8E8"
-                        BorderThickness="0,1,0,0" CornerRadius="0,0,18,18" Padding="32,20">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="12"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button x:Name="BtnBack" Grid.Column="0" Height="54" Cursor="Hand"
-                                Click="BtnBack_Click">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="White" CornerRadius="12"
-                                            BorderBrush="#D8D8D8" BorderThickness="1.5">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#F2F2F2"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                            <TextBlock Text="Cancel" FontSize="16" FontWeight="SemiBold"
-                                       Foreground="#444444" FontFamily="Segoe UI"/>
-                        </Button>
-                        <Button x:Name="BtnConfirm" Grid.Column="2" Height="54" Cursor="Hand"
-                                Background="#27AE60"
-                                Click="BtnConfirm_Click">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="BtnConfirmBg" Background="{TemplateBinding Background}" CornerRadius="12">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="BtnConfirmBg" Property="Opacity" Value="0.88"/>
-                                        </Trigger>
-                                        <Trigger Property="IsEnabled" Value="False">
-                                            <Setter TargetName="BtnConfirmBg" Property="Opacity" Value="0.45"/>
-                                            <Setter Property="Cursor" Value="Arrow"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                            <TextBlock x:Name="TxtConfirmBtn" Text="Confirm Save"
-                                       FontSize="16" FontWeight="Bold"
-                                       Foreground="White" FontFamily="Segoe UI"/>
-                        </Button>
-                    </Grid>
-                </Border>
-            </Grid>
-        </Border>
+
+                    <!-- Body -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Background="White" Padding="32,8,32,16">
+                        <StackPanel x:Name="ContentPanel"/>
+                    </ScrollViewer>
+
+                    <!-- Footer -->
+                    <Border Grid.Row="2" Background="White" BorderBrush="#E8E8E8"
+                            BorderThickness="0,1,0,0" CornerRadius="0,0,16,16" Padding="32,16">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button x:Name="BtnBack" Width="140" Height="46" Cursor="Hand"
+                                    Margin="0,0,12,0" Click="BtnBack_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bg" Background="White" CornerRadius="20"
+                                                BorderBrush="#D0D0D0" BorderThickness="2">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bg" Property="Background" Value="#F2F2F2"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock Text="Cancel" FontSize="15" FontWeight="SemiBold"
+                                           Foreground="#444444" FontFamily="Segoe UI"/>
+                            </Button>
+                            <Button x:Name="BtnConfirm" MinWidth="190" Height="46" Cursor="Hand"
+                                    Background="#1E8B4E"
+                                    Click="BtnConfirm_Click">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="BtnConfirmBg" Background="{TemplateBinding Background}" CornerRadius="20">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24,0"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="BtnConfirmBg" Property="Opacity" Value="0.88"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="BtnConfirmBg" Property="Opacity" Value="0.45"/>
+                                                <Setter Property="Cursor" Value="Arrow"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <TextBlock x:Name="TxtConfirmBtn" Text="Confirm Save"
+                                           FontSize="15" FontWeight="Bold"
+                                           Foreground="White" FontFamily="Segoe UI"/>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
     </Border>
 </Window>

@@ -7,7 +7,6 @@ namespace SOLUM_UI
     {
         public bool   Confirmed    { get; private set; }
         public string Password     { get; private set; }
-        public bool   OpenAfter    { get; private set; }
 
         private bool _showingPlain = false;
 
@@ -15,13 +14,33 @@ namespace SOLUM_UI
         {
             InitializeComponent();
             TxtFileName.Text = System.IO.Path.GetFileName(fileName);
-            SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, Shell);
+            
             KeyDown += (s, e) =>
             {
                 if (e.Key == System.Windows.Input.Key.Escape)
                     BtnCancel_Click(s, e);
             };
-            Loaded += (s, e) => SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, Shell);
+            
+            // Show dim overlay
+            Loaded += (s, e) => MainWindow.ShowDimOverlay(fullWindow: true);
+            Closed += (s, e) =>
+            {
+                MainWindow.HideDimOverlay();
+                try { Owner?.Activate(); } catch { }
+            };
+            
+            // Guard against custom-chrome window losing focus
+            Deactivated += (s, e) =>
+            {
+                if (IsLoaded && IsVisible)
+                {
+                    Dispatcher.BeginInvoke(new System.Action(() =>
+                    {
+                        if (IsVisible && !IsActive)
+                            Activate();
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                }
+            };
         }
 
         public ExportOptionsDialog(string fileName, Window owner = null)
@@ -33,13 +52,33 @@ namespace SOLUM_UI
                 try { Owner = targetOwner; } catch { }
             }
             TxtFileName.Text = System.IO.Path.GetFileName(fileName);
-            SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, Shell);
+            
             KeyDown += (s, e) =>
             {
                 if (e.Key == System.Windows.Input.Key.Escape)
                     BtnCancel_Click(s, e);
             };
-            Loaded += (s, e) => SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, Shell);
+            
+            // Show dim overlay
+            Loaded += (s, e) => MainWindow.ShowDimOverlay(fullWindow: true);
+            Closed += (s, e) =>
+            {
+                MainWindow.HideDimOverlay();
+                try { Owner?.Activate(); } catch { }
+            };
+            
+            // Guard against custom-chrome window losing focus
+            Deactivated += (s, e) =>
+            {
+                if (IsLoaded && IsVisible)
+                {
+                    Dispatcher.BeginInvoke(new System.Action(() =>
+                    {
+                        if (IsVisible && !IsActive)
+                            Activate();
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                }
+            };
         }
 
         private void ChkPassword_Changed(object sender, RoutedEventArgs e)
@@ -78,7 +117,6 @@ namespace SOLUM_UI
                 }
                 Password = pwd;
             }
-            OpenAfter = ChkOpenAfter.IsChecked == true;
             Confirmed = true;
             SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }

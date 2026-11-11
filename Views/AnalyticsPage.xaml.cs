@@ -32,15 +32,15 @@ namespace SOLUM_UI
         private bool _hasLoadedData = false;
 
         // -- Notification card properties --------------------------------------
-        private bool   _isNotificationVisible;
+        private bool _isNotificationVisible;
         private string _notificationTitle;
         private string _notificationMessage;
-        private bool   _isNotificationSuccess;
+        private bool _isNotificationSuccess;
         private DispatcherTimer _notifyTimer;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public bool   IsNotificationVisible
+        public bool IsNotificationVisible
         {
             get => _isNotificationVisible;
             private set { _isNotificationVisible = value; OnPropertyChanged(nameof(IsNotificationVisible)); }
@@ -66,15 +66,15 @@ namespace SOLUM_UI
 
         public void ShowNotification(string title, string message, bool isSuccess)
         {
-            NotificationTitle     = title;
-            NotificationMessage   = message;
+            NotificationTitle = title;
+            NotificationMessage = message;
             IsNotificationSuccess = isSuccess;
             IsNotificationVisible = false;
 
             var owner = Window.GetWindow(this) ?? Application.Current.MainWindow;
             if (isSuccess)
             {
-                ActionConfirmDialog.Success(title, message, owner);
+                ToastNotification.Show(title, message, ToastType.Success);
             }
             else
             {
@@ -129,7 +129,7 @@ namespace SOLUM_UI
                     }
                     ScheduleRedraw();
                 };
-                
+
                 // Clean up overlays when navigating away from this page
                 Unloaded += (s, e) =>
                 {
@@ -580,7 +580,7 @@ namespace SOLUM_UI
             try
             {
                 UpdateChildBars();
-                DrawLineChart(FindName("CvBarangay") as Canvas, ReadSeries((object)_vm.BarangayData as IEnumerable));
+                DrawBarangayBarChart(FindName("CvBarangay") as Canvas, ReadSeries((object)_vm.BarangayData as IEnumerable));
 
                 double female = N("FemaleCount");
                 double male = N("MaleCount");
@@ -638,7 +638,12 @@ namespace SOLUM_UI
             Set(FindName("PbChild2") as ProgressBar, FindName("TxtChildPct2") as TextBlock, c);
         }
 
-        private void DrawLineChart(Canvas c, List<(string Label, double Value)> data)
+        /// <summary>
+        /// Solo parents per barangay as a segmented bar chart (descending).
+        /// Each block = 5 solo parents. Top 3 barangays are highlighted in maroon,
+        /// the rest use a soft mauve. The #1 barangay gets a "Top barangay" pill.
+        /// </summary>
+        private void DrawBarangayBarChart(Canvas c, List<(string Label, double Value)> source)
         {
             if (c == null)
                 return;
@@ -648,7 +653,7 @@ namespace SOLUM_UI
             double h = c.ActualHeight;
             if (w <= 0 || h <= 0)
                 return;
-            if (data.Count == 0)
+            if (source == null || source.Count == 0)
             {
                 var empty = MakeText("No barangay data for the selected filter", 12, B("#8A6A75"), FontWeights.Normal);
                 Canvas.SetLeft(empty, (w - empty.DesiredSize.Width) / 2);
@@ -656,17 +661,28 @@ namespace SOLUM_UI
                 c.Children.Add(empty);
                 return;
             }
-            const double left = 44, right = 20, top = 30, bottom = 78;
+
+            // Always descending (highest first)
+            var data = source.OrderByDescending(d => d.Value).ToList();
+
+            const double left = 44, right = 20, top = 48, bottom = 66;
+            const double blockSize = 5;      // 1 block = 5 solo parents
+            const int topHighlightCount = 3; // highlight top 3
             double pw = w - left - right;
             double ph = h - top - bottom;
             if (pw <= 0 || ph <= 0)
                 return;
+
             const int ticks = 4;
             double max = data.Max(d => d.Value);
             double niceMax = Math.Max(ticks, Math.Ceiling(max / ticks) * ticks);
+
             var gridBrush = B("#EEE3E7");
             var textBrush = B("#8A6A75");
             var maroon = B("#7D2245");
+            var darkBrush = B("#111827");
+
+            // Grid + y-axis labels
             for (int i = 0; i <= ticks; i++)
             {
                 double y = top + ph - ph * i / ticks;
@@ -678,60 +694,121 @@ namespace SOLUM_UI
             }
 
             int n = data.Count;
-            var positions = new List<Point>();
-            for (int i = 0; i < n; i++)
+            double slot = pw / n;
+            double barW = Math.Min(70, slot * 0.62);
+            double blockH = ph * blockSize / niceMax;
+
+            Brush white = Brushes.White;
+
+            // Axis label helper (main name + smaller "(…)" sub line, like the inspiration)
+            void AddAxisLabel(string label, double centerX, double y, bool emphasize)
             {
-                double x = n == 1 ? left + pw / 2 : left + pw * i / (n - 1);
-                double y = top + ph - ph * (data[i].Value / niceMax);
-                positions.Add(new Point(x, y));
-            }
-            var area = new PointCollection { new Point(positions[0].X, top + ph) };
-            foreach (var p in positions)
-                area.Add(p);
-            area.Add(new Point(positions[n - 1].X, top + ph));
-            c.Children.Add(new Polygon
-            {
-                Points = area,
-                Fill = new LinearGradientBrush(
-                    Color.FromArgb(90, 0x7D, 0x22, 0x45),
-                    Color.FromArgb(0,  0x7D, 0x22, 0x45),
-                    90)
-            });
-            c.Children.Add(new Polyline
-            {
-                Points = new PointCollection(positions),
-                Stroke = maroon,
-                StrokeThickness = 2.5,
-                StrokeLineJoin = PenLineJoin.Round
-            });
-            for (int i = 0; i < n; i++)
-            {
-                var dot = new Ellipse
+                string main = label ?? string.Empty;
+                string sub = null;
+                int p = main.IndexOf('(');
+                if (p > 0)
                 {
-                    Width = 10,
-                    Height = 10,
-                    Fill = Brushes.White,
-                    Stroke = maroon,
-                    StrokeThickness = 2,
-                    Cursor = System.Windows.Input.Cursors.Hand,
-                    ToolTip = $"{data[i].Label}: {data[i].Value:N0} solo parents"
+                    sub = main.Substring(p).Trim();
+                    main = main.Substring(0, p).Trim();
+                }
+
+                var mainTb = MakeText(main, 10.5, emphasize ? darkBrush : textBrush,
+                    emphasize ? FontWeights.SemiBold : FontWeights.Normal, TextAlignment.Center);
+                mainTb.MaxWidth = Math.Max(20, slot - 6);
+                mainTb.TextTrimming = TextTrimming.CharacterEllipsis;
+                mainTb.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                Canvas.SetLeft(mainTb, centerX - mainTb.DesiredSize.Width / 2);
+                Canvas.SetTop(mainTb, y);
+                c.Children.Add(mainTb);
+
+                if (!string.IsNullOrEmpty(sub))
+                {
+                    var subTb = MakeText(sub, 9, textBrush, FontWeights.Normal, TextAlignment.Center);
+                    subTb.MaxWidth = Math.Max(20, slot - 6);
+                    subTb.TextTrimming = TextTrimming.CharacterEllipsis;
+                    subTb.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    Canvas.SetLeft(subTb, centerX - subTb.DesiredSize.Width / 2);
+                    Canvas.SetTop(subTb, y + mainTb.DesiredSize.Height);
+                    c.Children.Add(subTb);
+                }
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                bool isTop = i < topHighlightCount && data[i].Value > 0;
+                double value = data[i].Value;
+                double barH = value > 0 ? Math.Max(4, ph * value / niceMax) : 2;
+                double centerX = left + slot * i + slot / 2;
+                double x = centerX - barW / 2;
+                double y = top + ph - barH;
+
+                Brush fill = isTop
+                    ? new LinearGradientBrush(Color.FromRgb(0xB8, 0x48, 0x6D), Color.FromRgb(0x7D, 0x22, 0x45), 90)
+                    : new LinearGradientBrush(Color.FromRgb(0xE8, 0xC9, 0xD4), Color.FromRgb(0xD9, 0xA3, 0xB8), 90);
+
+                // Bar host: rounded clip + gradient fill + white separators => stacked "blocks"
+                var host = new Canvas
+                {
+                    Width = barW,
+                    Height = barH,
+                    Background = fill,
+                    ClipToBounds = true,
+                    Clip = new RectangleGeometry(new Rect(0, 0, barW, barH), 10, 10),
+                    ToolTip = $"{data[i].Label}: {value:N0} solo parents"
                 };
-                Canvas.SetLeft(dot, positions[i].X - 5);
-                Canvas.SetTop(dot, positions[i].Y - 5);
-                c.Children.Add(dot);
-                var valueLabel = MakeText(data[i].Value.ToString("N0"), 10, maroon, FontWeights.SemiBold);
-                Canvas.SetLeft(valueLabel, positions[i].X - valueLabel.DesiredSize.Width / 2);
-                Canvas.SetTop(valueLabel, positions[i].Y - valueLabel.DesiredSize.Height - 8);
+
+                if (blockH >= 5)
+                {
+                    for (double by = barH - blockH; by > 1; by -= blockH)
+                    {
+                        var sep = new Rectangle { Width = barW, Height = 2, Fill = white };
+                        Canvas.SetLeft(sep, 0);
+                        Canvas.SetTop(sep, by - 1);
+                        host.Children.Add(sep);
+                    }
+                }
+                Canvas.SetLeft(host, x);
+                Canvas.SetTop(host, y);
+                c.Children.Add(host);
+
+                // Value label above bar
+                var valueLabel = MakeText(value.ToString("N0"), 13, isTop ? maroon : darkBrush, FontWeights.Bold);
+                double valueTop = y - valueLabel.DesiredSize.Height - 3;
+                Canvas.SetLeft(valueLabel, centerX - valueLabel.DesiredSize.Width / 2);
+                Canvas.SetTop(valueLabel, valueTop);
                 c.Children.Add(valueLabel);
 
-                string text = data[i].Label.Length > 18 ? data[i].Label.Substring(0, 17) + "…" : data[i].Label;
-                var axis = MakeText(text, 10, textBrush, FontWeights.Normal);
-                axis.RenderTransformOrigin = new Point(1, 0);
-                axis.RenderTransform = new RotateTransform(-40);
-                Canvas.SetLeft(axis, positions[i].X - axis.DesiredSize.Width + 4);
-                Canvas.SetTop(axis, top + ph + 12);
-                c.Children.Add(axis);
+                // "Top barangay" pill above the #1 bar
+                if (i == 0 && isTop)
+                {
+                    var pill = new Border
+                    {
+                        Background = maroon,
+                        CornerRadius = new CornerRadius(9),
+                        Padding = new Thickness(8, 1, 8, 1),
+                        Child = new TextBlock
+                        {
+                            Text = "Top barangay",
+                            FontSize = 9.5,
+                            FontWeight = FontWeights.Bold,
+                            Foreground = Brushes.White,
+                            FontFamily = new FontFamily("Segoe UI")
+                        }
+                    };
+                    pill.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    Canvas.SetLeft(pill, centerX - pill.DesiredSize.Width / 2);
+                    Canvas.SetTop(pill, valueTop - pill.DesiredSize.Height - 2);
+                    c.Children.Add(pill);
+                }
+
+                AddAxisLabel(data[i].Label, centerX, top + ph + 8, isTop);
             }
+
+            // Footer note
+            var note = MakeText("Each block = 5 solo parents. Top 3 barangays are highlighted.", 11, textBrush, FontWeights.Normal);
+            Canvas.SetLeft(note, left - 20 < 0 ? 0 : left - 20);
+            Canvas.SetTop(note, h - note.DesiredSize.Height - 2);
+            c.Children.Add(note);
         }
 
         private void DrawBars(Canvas c, List<(string Label, double Value, Brush Fill)> items)
@@ -856,7 +933,8 @@ namespace SOLUM_UI
                 {
                     var bar = new Border
                     {
-                        Width = fill, Height = barH,
+                        Width = fill,
+                        Height = barH,
                         Background = i == 0 ? topBar : otherBar,
                         CornerRadius = new CornerRadius(barH / 2),
                         ToolTip = $"{categories[i].Label}: {categories[i].Value:N0} cases"
@@ -1243,8 +1321,8 @@ namespace SOLUM_UI
                 }
 
                 string timeStamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                string bgyPart = (selectedBarangay != null && selectedBarangay != "ALL") 
-                    ? $"_{selectedBarangay.Replace(" ", "_")}" 
+                string bgyPart = (selectedBarangay != null && selectedBarangay != "ALL")
+                    ? $"_{selectedBarangay.Replace(" ", "_")}"
                     : "";
 
                 var saveDialog = new System.Windows.Forms.SaveFileDialog
@@ -1279,24 +1357,26 @@ namespace SOLUM_UI
                     Services.AuditLogService.Instance.LogSystem(
                         $"Analytics report exported for {municipality} by {focalPersonName}");
 
-                    bool openFile = ActionConfirmDialog.Show(
+                    ToastNotification.Show(
                         "Export Successful",
-                        $"Analytics report exported successfully to:\n{System.IO.Path.GetFileName(saveDialog.FileName)}\n\nWould you like to open the file now?",
-                        "Open File",
-                        "Close",
-                        ConfirmThemeType.Success,
-                        owner);
+                        $"Analytics report exported successfully to {System.IO.Path.GetFileName(saveDialog.FileName)}",
+                        ToastType.Success);
 
-                    if (openFile)
+                    // Ask user if they want to open the file
+                    var openDialog = new Views.Dialogs.OpenFilePromptDialog("Would you like to open the exported analytics report now?")
+                    {
+                        Owner = Window.GetWindow(this)
+                    };
+                    
+                    if (openDialog.ShowDialog() == true && openDialog.ShouldOpenFile)
                     {
                         try
                         {
-                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(saveDialog.FileName) { UseShellExecute = true });
+                            System.Diagnostics.Process.Start(
+                                new System.Diagnostics.ProcessStartInfo(saveDialog.FileName)
+                                { UseShellExecute = true });
                         }
-                        catch (Exception pEx)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Failed to open exported file: {pEx.Message}");
-                        }
+                        catch { }
                     }
                 }
             }
@@ -1326,7 +1406,7 @@ namespace SOLUM_UI
                     if (refreshIcon != null)
                         refreshIcon.Visibility = Visibility.Collapsed;
                 }
-                if (PageLoadingOverlay != null) { PageLoadingOverlay.Message = "Refreshing analytics..."; PageLoadingOverlay.IsActive = true; }
+                if (AnalyticsSkeleton != null) AnalyticsSkeleton.Visibility = Visibility.Visible;
                 await LoadDataAsync();
                 ToastNotification.Show("Analytics Refreshed", "Analytics data refreshed successfully.", ToastType.Success);
             }

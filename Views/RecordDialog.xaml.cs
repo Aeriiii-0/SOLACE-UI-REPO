@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -416,6 +417,30 @@ namespace SOLUM_UI
                 // Show add-mode stripe when Loaded
                 Loaded += (s, e) => { ApplyModeStyle(isRenewal: false); UpdateSaveButtonState(); };
             }
+            
+            // Show dim overlay when edit modal opens
+            Loaded += (s, e) => MainWindow.ShowDimOverlay(fullWindow: true);
+            Closed += (s, e) =>
+            {
+                MainWindow.HideDimOverlay();
+                // Reactivate owner so MainWindow comes back to foreground
+                try { Owner?.Activate(); } catch { }
+            };
+
+            // Guard against WPF custom-chrome windows losing focus / minimizing
+            // when a child dialog closes. Re-activate ourselves if we're still visible.
+            Deactivated += (s, e) =>
+            {
+                if (IsLoaded && IsVisible && !_savedSuccessfully)
+                {
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        if (IsVisible && !IsActive)
+                            Activate();
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                }
+            };
+            
             // Routed event handlers to react to any input change with debounced save button state
             AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent, new TextChangedEventHandler((s, e) => ScheduleUpdateSaveButtonState()));
             AddHandler(System.Windows.Controls.Primitives.Selector.SelectionChangedEvent, new SelectionChangedEventHandler((s, e) => ScheduleUpdateSaveButtonState()));
@@ -426,6 +451,14 @@ namespace SOLUM_UI
             SOLUM_UI.Services.FormHelper.BindSameAsApplicantAddress(ChkSameAsApplicant, TxtAddress, TxtEmergencyAddress);
             DpDateOfApplication.DisplayDateEnd = DateTime.Today;
             UpdateValidityPreview();
+            Loaded += (s, e) =>
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    CaptureInitialSnapshot();
+                    UpdateSaveButtonState();
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            };
         }
         /// <summary>
         /// Opens the form in renewal mode. Identity fields are locked; only
@@ -628,7 +661,7 @@ namespace SOLUM_UI
         {
             _dirtyCheckTimer?.Stop();
             if (_savedSuccessfully) return;
-            if (!HasAnyInput()) return;
+            if (!HasUserModifications()) return;
 
             bool discard = ActionConfirmDialog.Show(
                 title: "Unsaved Changes",
@@ -642,6 +675,317 @@ namespace SOLUM_UI
                 e.Cancel = true;
                 DialogShell.Visibility = Visibility.Visible;
             }
+        }
+
+        private sealed class FamilyMemberSnapshot
+        {
+            public Guid? Id { get; set; }
+            public bool IsNew { get; set; }
+            public string MemberName { get; set; }
+            public string Relationship { get; set; }
+            public string Sex { get; set; }
+            public string Age { get; set; }
+            public string Birthdate { get; set; }
+            public string CivilStatus { get; set; }
+            public string EducationEmployment { get; set; }
+            public string Income { get; set; }
+            public bool HasSpecialNeeds { get; set; }
+            public string SpecialNeedsCategory { get; set; }
+            public string SpecialNeedsDescription { get; set; }
+        }
+
+        private sealed class FormSnapshot
+        {
+            public string LastName { get; set; }
+            public string FirstName { get; set; }
+            public string MiddleName { get; set; }
+            public string Extension { get; set; }
+            public DateTime? Birthdate { get; set; }
+            public string PlaceOfBirth { get; set; }
+            public string Sex { get; set; }
+            public string CivilStatus { get; set; }
+            public string EducationalAttainment { get; set; }
+            public string PhilSysNumber { get; set; }
+            public string Religion { get; set; }
+            public string Occupation { get; set; }
+            public string MonthlyIncome { get; set; }
+            public string EmploymentStatus { get; set; }
+            public string Address { get; set; }
+            public string Barangay { get; set; }
+            public string ContactNumber { get; set; }
+            public DateTime? DateOfApplication { get; set; }
+            public string EmergencyContactName { get; set; }
+            public string EmergencyRelationship { get; set; }
+            public string EmergencyAddress { get; set; }
+            public string EmergencyContactNumber { get; set; }
+
+            public bool CircumstanceA1 { get; set; }
+            public bool CircumstanceA2 { get; set; }
+            public string CircumstanceA2Cause { get; set; }
+            public DateTime? CircumstanceA2Date { get; set; }
+            public bool CircumstanceA3 { get; set; }
+            public bool CircumstanceA4 { get; set; }
+            public string CircumstanceA4Disability { get; set; }
+            public bool CircumstanceA5 { get; set; }
+            public string CircumstanceA5Period { get; set; }
+            public bool CircumstanceA6 { get; set; }
+            public string CircumstanceA6Declaration { get; set; }
+            public bool CircumstanceA7 { get; set; }
+            public bool CircumstanceB { get; set; }
+            public string CircumstanceBStayAbroad { get; set; }
+            public bool CircumstanceC { get; set; }
+            public bool CircumstanceD { get; set; }
+            public bool CircumstanceE { get; set; }
+            public bool CircumstanceF { get; set; }
+
+            public string NeedsAndProblems { get; set; }
+            public string OtherIncomeSource { get; set; }
+
+            public bool IsPantawid { get; set; }
+            public bool IsIndigenous { get; set; }
+            public bool IsLGBTQ { get; set; }
+
+            public List<FamilyMemberSnapshot> FamilyMembers { get; set; } = new List<FamilyMemberSnapshot>();
+            public List<Guid> RemovedFamilyMemberIds { get; set; } = new List<Guid>();
+        }
+
+        private FormSnapshot _initialSnapshot;
+
+        private static string NormalizeText(string s) => (s ?? string.Empty).Trim();
+
+        private static bool NormalizeTextEquals(string a, string b)
+        {
+            return string.Equals(NormalizeText(a), NormalizeText(b), StringComparison.Ordinal);
+        }
+
+        private static string NormalizeDigits(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return string.Empty;
+            return Regex.Replace(s, @"\D", "");
+        }
+
+        private static bool NormalizeDigitsEquals(string a, string b)
+        {
+            return string.Equals(NormalizeDigits(a), NormalizeDigits(b), StringComparison.Ordinal);
+        }
+
+        private static bool NormalizeDecimalEquals(string a, string b)
+        {
+            string cA = Regex.Replace(a ?? string.Empty, @"[^\d.]", "");
+            string cB = Regex.Replace(b ?? string.Empty, @"[^\d.]", "");
+            bool parsedA = decimal.TryParse(cA, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal valA);
+            bool parsedB = decimal.TryParse(cB, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal valB);
+
+            if (parsedA && parsedB)
+                return valA == valB;
+
+            if (!parsedA && !parsedB)
+                return true;
+
+            if (parsedA && !parsedB)
+                return valA == 0m;
+
+            if (!parsedA && parsedB)
+                return valB == 0m;
+
+            return false;
+        }
+
+        private static bool NormalizeDateEquals(DateTime? a, DateTime? b)
+        {
+            bool hasA = a.HasValue && a.Value != DateTime.MinValue;
+            bool hasB = b.HasValue && b.Value != DateTime.MinValue;
+            if (!hasA && !hasB) return true;
+            if (hasA != hasB) return false;
+            return a.Value.Date == b.Value.Date;
+        }
+
+        private static bool FamilyMembersEqual(
+            List<FamilyMemberSnapshot> initial,
+            ObservableCollection<FamilyMemberRow> current,
+            List<Guid> initialRemoved,
+            List<Guid> currentRemoved)
+        {
+            if (initial == null && current == null) return true;
+            if (initial == null || current == null) return false;
+            if (initial.Count != current.Count) return false;
+
+            int initialRemovedCount = initialRemoved != null ? initialRemoved.Count : 0;
+            int currentRemovedCount = currentRemoved != null ? currentRemoved.Count : 0;
+            if (initialRemovedCount != currentRemovedCount) return false;
+
+            for (int i = 0; i < initial.Count; i++)
+            {
+                var init = initial[i];
+                var cur = current[i];
+
+                if (init.Id != cur.Id) return false;
+                if (init.IsNew != cur.IsNew) return false;
+                if (!NormalizeTextEquals(init.MemberName, cur.MemberName)) return false;
+                if (!NormalizeTextEquals(init.Relationship, cur.Relationship)) return false;
+                if (!NormalizeTextEquals(init.Sex, cur.Sex)) return false;
+                if (!NormalizeTextEquals(init.Age, cur.Age)) return false;
+
+                SOLUM_UI.Services.OcrService.NormalizeDateString(init.Birthdate, out var dtInit);
+                SOLUM_UI.Services.OcrService.NormalizeDateString(cur.Birthdate, out var dtCur);
+                if (dtInit.HasValue && dtCur.HasValue && dtInit.Value != DateTime.MinValue && dtCur.Value != DateTime.MinValue)
+                {
+                    if (dtInit.Value.Date != dtCur.Value.Date) return false;
+                }
+                else if (!NormalizeTextEquals(init.Birthdate, cur.Birthdate))
+                {
+                    return false;
+                }
+
+                if (!NormalizeTextEquals(init.CivilStatus, cur.CivilStatus)) return false;
+                if (!NormalizeTextEquals(init.EducationEmployment, cur.EducationEmployment)) return false;
+                if (!NormalizeDecimalEquals(init.Income, cur.Income)) return false;
+                if (init.HasSpecialNeeds != cur.HasSpecialNeeds) return false;
+                if (!NormalizeTextEquals(init.SpecialNeedsCategory, cur.SpecialNeedsCategory)) return false;
+                if (!NormalizeTextEquals(init.SpecialNeedsDescription, cur.SpecialNeedsDescription)) return false;
+            }
+
+            return true;
+        }
+
+        private void CaptureInitialSnapshot()
+        {
+            var snap = new FormSnapshot
+            {
+                LastName = TxtLastName.Text,
+                FirstName = TxtFirstName.Text,
+                MiddleName = TxtMiddleName.Text,
+                Extension = GetComboValue(CmbExtension),
+                Birthdate = DpBirthdate.SelectedDate,
+                PlaceOfBirth = TxtPlaceOfBirth.Text,
+                Sex = GetComboValue(CmbSex),
+                CivilStatus = GetComboValue(CmbCivilStatus),
+                EducationalAttainment = GetComboValue(CmbEducation),
+                PhilSysNumber = TxtPhilSys.Text,
+                Religion = TxtReligion.Text,
+                Occupation = TxtOccupation.Text,
+                MonthlyIncome = TxtMonthlyIncome.Text,
+                EmploymentStatus = GetComboValue(CmbEmploymentStatus),
+                Address = TxtAddress.Text,
+                Barangay = GetComboValue(CmbBarangay),
+                ContactNumber = TxtContact.Text,
+                DateOfApplication = DpDateOfApplication.SelectedDate,
+                EmergencyContactName = TxtEmergencyContact.Text,
+                EmergencyRelationship = GetComboValue(CmbRelationship),
+                EmergencyAddress = TxtEmergencyAddress.Text,
+                EmergencyContactNumber = TxtEmergencyNumber.Text,
+
+                CircumstanceA1 = ChkA1.IsChecked == true,
+                CircumstanceA2 = ChkA2.IsChecked == true,
+                CircumstanceA2Cause = TxtA2Cause.Text,
+                CircumstanceA2Date = DpA2Date.SelectedDate,
+                CircumstanceA3 = ChkA3.IsChecked == true,
+                CircumstanceA4 = ChkA4.IsChecked == true,
+                CircumstanceA4Disability = TxtA4Disability.Text,
+                CircumstanceA5 = ChkA5.IsChecked == true,
+                CircumstanceA5Period = TxtA5Period.Text,
+                CircumstanceA6 = ChkA6.IsChecked == true,
+                CircumstanceA6Declaration = GetComboValue(CmbA6Declaration),
+                CircumstanceA7 = ChkA7.IsChecked == true,
+                CircumstanceB = ChkB.IsChecked == true,
+                CircumstanceBStayAbroad = TxtBStayAbroad.Text,
+                CircumstanceC = ChkC.IsChecked == true,
+                CircumstanceD = ChkD.IsChecked == true,
+                CircumstanceE = ChkE.IsChecked == true,
+                CircumstanceF = ChkF.IsChecked == true,
+
+                NeedsAndProblems = TxtNeeds.Text,
+                OtherIncomeSource = TxtOtherIncome.Text,
+
+                IsPantawid = ChkPantawid.IsChecked == true,
+                IsIndigenous = ChkIndigenous.IsChecked == true,
+                IsLGBTQ = ChkLGBTQ.IsChecked == true,
+
+                RemovedFamilyMemberIds = new List<Guid>(_removedFamilyMemberIds)
+            };
+
+            foreach (var row in _familyRowData)
+            {
+                snap.FamilyMembers.Add(new FamilyMemberSnapshot
+                {
+                    Id = row.Id,
+                    IsNew = row.IsNew,
+                    MemberName = row.MemberName,
+                    Relationship = row.Relationship,
+                    Sex = row.Sex,
+                    Age = row.Age,
+                    Birthdate = row.Birthdate,
+                    CivilStatus = row.CivilStatus,
+                    EducationEmployment = row.EducationEmployment,
+                    Income = row.Income,
+                    HasSpecialNeeds = row.HasSpecialNeeds,
+                    SpecialNeedsCategory = row.SpecialNeedsCategory,
+                    SpecialNeedsDescription = row.SpecialNeedsDescription
+                });
+            }
+
+            _initialSnapshot = snap;
+        }
+
+        private bool HasUserModifications()
+        {
+            if (_initialSnapshot == null) return false;
+
+            if (AddMemberSubCard != null && AddMemberSubCard.Visibility == Visibility.Visible && !string.IsNullOrWhiteSpace(TxtMemberName?.Text))
+                return true;
+
+            if (!NormalizeTextEquals(_initialSnapshot.LastName, TxtLastName.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.FirstName, TxtFirstName.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.MiddleName, TxtMiddleName.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.Extension, GetComboValue(CmbExtension))) return true;
+            if (!NormalizeDateEquals(_initialSnapshot.Birthdate, DpBirthdate.SelectedDate)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.PlaceOfBirth, TxtPlaceOfBirth.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.Sex, GetComboValue(CmbSex))) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.CivilStatus, GetComboValue(CmbCivilStatus))) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.EducationalAttainment, GetComboValue(CmbEducation))) return true;
+            if (!NormalizeDigitsEquals(_initialSnapshot.PhilSysNumber, TxtPhilSys.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.Religion, TxtReligion.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.Occupation, TxtOccupation.Text)) return true;
+            if (!NormalizeDecimalEquals(_initialSnapshot.MonthlyIncome, TxtMonthlyIncome.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.EmploymentStatus, GetComboValue(CmbEmploymentStatus))) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.Address, TxtAddress.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.Barangay, GetComboValue(CmbBarangay))) return true;
+            if (!NormalizeDigitsEquals(_initialSnapshot.ContactNumber, TxtContact.Text)) return true;
+            if (!NormalizeDateEquals(_initialSnapshot.DateOfApplication, DpDateOfApplication.SelectedDate)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.EmergencyContactName, TxtEmergencyContact.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.EmergencyRelationship, GetComboValue(CmbRelationship))) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.EmergencyAddress, TxtEmergencyAddress.Text)) return true;
+            if (!NormalizeDigitsEquals(_initialSnapshot.EmergencyContactNumber, TxtEmergencyNumber.Text)) return true;
+
+            if (_initialSnapshot.CircumstanceA1 != (ChkA1.IsChecked == true)) return true;
+            if (_initialSnapshot.CircumstanceA2 != (ChkA2.IsChecked == true)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.CircumstanceA2Cause, TxtA2Cause.Text)) return true;
+            if (!NormalizeDateEquals(_initialSnapshot.CircumstanceA2Date, DpA2Date.SelectedDate)) return true;
+            if (_initialSnapshot.CircumstanceA3 != (ChkA3.IsChecked == true)) return true;
+            if (_initialSnapshot.CircumstanceA4 != (ChkA4.IsChecked == true)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.CircumstanceA4Disability, TxtA4Disability.Text)) return true;
+            if (_initialSnapshot.CircumstanceA5 != (ChkA5.IsChecked == true)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.CircumstanceA5Period, TxtA5Period.Text)) return true;
+            if (_initialSnapshot.CircumstanceA6 != (ChkA6.IsChecked == true)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.CircumstanceA6Declaration, GetComboValue(CmbA6Declaration))) return true;
+            if (_initialSnapshot.CircumstanceA7 != (ChkA7.IsChecked == true)) return true;
+            if (_initialSnapshot.CircumstanceB != (ChkB.IsChecked == true)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.CircumstanceBStayAbroad, TxtBStayAbroad.Text)) return true;
+            if (_initialSnapshot.CircumstanceC != (ChkC.IsChecked == true)) return true;
+            if (_initialSnapshot.CircumstanceD != (ChkD.IsChecked == true)) return true;
+            if (_initialSnapshot.CircumstanceE != (ChkE.IsChecked == true)) return true;
+            if (_initialSnapshot.CircumstanceF != (ChkF.IsChecked == true)) return true;
+
+            if (!NormalizeTextEquals(_initialSnapshot.NeedsAndProblems, TxtNeeds.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.OtherIncomeSource, TxtOtherIncome.Text)) return true;
+
+            if (_initialSnapshot.IsPantawid != (ChkPantawid.IsChecked == true)) return true;
+            if (_initialSnapshot.IsIndigenous != (ChkIndigenous.IsChecked == true)) return true;
+            if (_initialSnapshot.IsLGBTQ != (ChkLGBTQ.IsChecked == true)) return true;
+
+            if (!FamilyMembersEqual(_initialSnapshot.FamilyMembers, _familyRowData, _initialSnapshot.RemovedFamilyMemberIds, _removedFamilyMemberIds)) return true;
+
+            return false;
         }
 
         private bool HasAnyInput()
@@ -1941,18 +2285,7 @@ namespace SOLUM_UI
         {
             bool isEdit = _existing != null && !string.IsNullOrEmpty(_existing.Id);
             if (!isEdit) return true;
-            if (_removedFamilyMemberIds != null && _removedFamilyMemberIds.Count > 0)
-                return true;
-            try
-            {
-                var preview = BuildRecord();
-                var fields  = BuildConfirmFields(preview);
-                return fields != null && fields.Any(f => f.IsChanged);
-            }
-            catch
-            {
-                return true;
-            }
+            return HasUserModifications();
         }
 
         public void SetPhilSysError(string msg)
@@ -2109,10 +2442,10 @@ namespace SOLUM_UI
                     successMessage = $"Solo parent record for {preview.Name} has been added to the database.";
                 }
                 
-                // Show success popup after dialog is closed
+                // Show success toast notification after dialog is closed
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    ActionConfirmDialog.Success(successTitle, successMessage, owner);
+                    ToastNotification.Show(successTitle, successMessage, ToastType.Success);
                 }), System.Windows.Threading.DispatcherPriority.Background);
             }
             catch (Exception ex)
@@ -2295,14 +2628,7 @@ namespace SOLUM_UI
                 string cNew = Regex.Replace(newVal ?? "", @"[^\d.]", "");
                 string cOld = Regex.Replace(oldVal ?? "", @"[^\d.]", "");
 
-                bool changed = false;
-                if (isEdit)
-                {
-                    if (decimal.TryParse(cNew, out var dNew) && decimal.TryParse(cOld, out var dOld))
-                        changed = dNew != dOld;
-                    else
-                        changed = !string.Equals(cNew, cOld, StringComparison.OrdinalIgnoreCase);
-                }
+                bool changed = isEdit && !NormalizeDecimalEquals(cNew, cOld);
 
                 string formattedNew = string.IsNullOrWhiteSpace(cNew) ? "—" : "₱ " + cNew;
                 string formattedOld = string.IsNullOrWhiteSpace(cOld) ? "—" : "₱ " + cOld;
@@ -2321,7 +2647,7 @@ namespace SOLUM_UI
                 bool hasNew = newDt != DateTime.MinValue;
                 bool hasOld = oldDt != DateTime.MinValue;
 
-                bool changed = isEdit && (hasNew != hasOld || (hasNew && hasOld && newDt.Date != oldDt.Date));
+                bool changed = isEdit && !NormalizeDateEquals(newDt, oldDt);
 
                 string formattedNew = hasNew ? newDt.ToString("MMMM d, yyyy") : "—";
                 string formattedOld = hasOld ? oldDt.ToString("MMMM d, yyyy") : "—";

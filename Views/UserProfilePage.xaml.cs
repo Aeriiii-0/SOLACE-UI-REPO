@@ -270,5 +270,40 @@ namespace SOLUM_UI
             PwdConfirmPassword.Clear();
             ClearErrorMessages();
         }
+    
+        private async void BtnEditProfile_Click(object sender, RoutedEventArgs e)
+        {
+            string currentFullName = TxtFullName.Text;
+            string currentEmail = TxtDisplayEmail.Text;
+            string currentContactNumber = TxtContactNumber.Text;
+            
+            var dialog = new Views.Dialogs.EditProfileDialog(currentFullName, currentEmail, currentContactNumber)
+            {
+                Owner = Window.GetWindow(this)
+            };
+            
+            if (dialog.ShowDialog() == true && dialog.Confirmed)
+            {
+                // Update the displayed values
+                TxtFullName.Text = dialog.UpdatedFullName;
+                TxtDisplayEmail.Text = dialog.UpdatedEmail;
+                TxtContactNumber.Text = string.IsNullOrWhiteSpace(dialog.UpdatedContactNumber) 
+                    ? "-" 
+                    : dialog.UpdatedContactNumber;
+                
+                TxtDisplayName.Text = dialog.UpdatedFullName;
+                
+                // Update MainWindow static properties
+                // Update initial
+                if (!string.IsNullOrWhiteSpace(dialog.UpdatedFullName))
+                {
+                    string[] parts = dialog.UpdatedFullName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length > 0)
+                    {
+                        TxtInitial.Text = parts[0].Substring(0, 1).ToUpper();
+                    }
+                }
+            }
+        }
     }
 }

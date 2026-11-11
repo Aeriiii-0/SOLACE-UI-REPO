@@ -235,6 +235,17 @@ namespace SOLUM_UI.Services.Api
             }
         }
 
+        
+        public async Task<BaseResponse<bool>> UpdateProfileAsync(UpdateProfileRequest request)
+        {
+            var resp = await ApiClient.Instance.PutAsync<UpdateProfileRequest, object>("api/auth/profile", request);
+            return new BaseResponse<bool>
+            {
+                Succeeded = resp.Succeeded,
+                Errors = resp.Errors,
+                Data = resp.Succeeded
+            };
+        }
         public static Guid? ExtractUserIdFromToken(string rawToken)
         {
             string raw = ExtractRawUserIdFromToken(rawToken);

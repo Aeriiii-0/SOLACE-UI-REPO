@@ -104,9 +104,24 @@ namespace SOLUM_UI.Core
 
             if (dialogShell != null)
             {
+                // Cap dialog at a comfortable fixed max (1050px) so it stays compact on large displays.
+                // On small screens (<1024px) it scales down proportionally but never below 540px.
+                double targetW   = Math.Min(Math.Max(screenW * 0.72, 680), 1050);
+                double minW      = Math.Min(Math.Max(screenW * 0.55, 540), targetW);
                 dialogShell.MaxHeight = Math.Max(screenH * 0.90, 480);
-                dialogShell.Width     = Math.Min(screenW * 0.88, 1320);
-                dialogShell.MinWidth  = Math.Max(screenW * 0.60, 680);
+                dialogShell.Width     = targetW;
+                dialogShell.MinWidth  = minW;
+                dialogShell.MaxWidth  = Math.Min(screenW * 0.95, 1050);
+            }
+
+            // When this dialog closes, reactivate its owner so the main window
+            // comes back to the foreground instead of minimizing or going behind.
+            if (dialog.Owner != null)
+            {
+                dialog.Closed += (s, e) =>
+                {
+                    try { dialog.Owner?.Activate(); } catch { }
+                };
             }
         }
 

@@ -11,6 +11,10 @@ namespace SOLUM_UI.Views.Dialogs
         {
             InitializeComponent();
             TxtReason.Focus();
+            
+            // Show dim overlay when cancel application modal opens
+            Loaded += (s, e) => MainWindow.ShowDimOverlay(fullWindow: true);
+            Closed += (s, e) => MainWindow.HideDimOverlay();
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)

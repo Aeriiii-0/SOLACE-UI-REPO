@@ -458,7 +458,7 @@ namespace SOLUM_UI
         private void ViewAllLogs_Click(object sender, RoutedEventArgs e)
         {
             OverlayRoot.Visibility = Visibility.Visible;
-            MainWindow.ShowDimOverlay(fullWindow: false);
+            MainWindow.ShowDimOverlay(fullWindow: true);
         }
 
         private void LogsOverlay_CloseRequested(object sender, RoutedEventArgs e)

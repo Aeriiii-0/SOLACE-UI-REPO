@@ -814,7 +814,7 @@ namespace SOLUM_UI.ViewModels
 
             if (isSuccess)
             {
-                Views.Dialogs.ActionConfirmDialog.Success(title, message);
+                ToastNotification.Show(title, message, ToastType.Success);
             }
             else
             {

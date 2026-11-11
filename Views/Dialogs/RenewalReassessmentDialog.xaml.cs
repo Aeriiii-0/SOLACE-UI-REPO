@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -321,6 +322,31 @@ namespace SOLUM_UI.Views.Dialogs
             DependentsList.ItemsSource = _dependents;
             DpRenewalDate.SelectedDate = _original.RenewalFilingDate ?? DateTime.Today;
             DpRenewalDate.DisplayDateEnd = DateTime.Today;
+            Closing += Window_Closing;
+            
+            // Show dim overlay when renewal modal opens
+            Loaded += (s, e) => MainWindow.ShowDimOverlay(fullWindow: true);
+            Closed += (s, e) =>
+            {
+                MainWindow.HideDimOverlay();
+                // Reactivate owner so MainWindow comes back to foreground
+                try { Owner?.Activate(); } catch { }
+            };
+
+            // Guard against WPF custom-chrome windows losing focus / minimizing
+            // when a child dialog closes. Re-activate ourselves if we're still visible.
+            Deactivated += (s, e) =>
+            {
+                if (IsLoaded && IsVisible)
+                {
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        if (IsVisible && !IsActive)
+                            Activate();
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                }
+            };
+            
             Loaded += (s, e) =>
             {
                 if (!_isReassessmentMode && !_original.CanRenew(out string failureReason, out _))
@@ -343,6 +369,8 @@ namespace SOLUM_UI.Views.Dialogs
                 PopulateStep2();
                 PopulateStep3();
                 UpdateStepView();
+
+                Dispatcher.BeginInvoke(new Action(CaptureInitialSnapshot), System.Windows.Threading.DispatcherPriority.Loaded);
             };
         }
 
@@ -361,7 +389,216 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
-            SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, false);
+            Close();
+        }
+
+        private sealed class DependentSnapshot
+        {
+            public Guid? Id { get; set; }
+            public bool IsNew { get; set; }
+            public bool IsRemoved { get; set; }
+            public string Name { get; set; }
+            public string Relationship { get; set; }
+            public string Sex { get; set; }
+            public DateTime Birthdate { get; set; }
+            public int Age { get; set; }
+            public string EducationalLevel { get; set; }
+            public decimal Income { get; set; }
+            public string CivilStatus { get; set; }
+            public bool HasSpecialNeeds { get; set; }
+            public string SpecialNeedsCategory { get; set; }
+            public string SpecialNeedsDescription { get; set; }
+        }
+
+        private sealed class ReassessmentSnapshot
+        {
+            public DateTime? RenewalDate { get; set; }
+            public string CivilStatus { get; set; }
+            public string EmploymentStatus { get; set; }
+            public string Occupation { get; set; }
+            public string MonthlyIncome { get; set; }
+            public string OtherIncome { get; set; }
+            public string CircumstanceTag { get; set; }
+            public string A2Cause { get; set; }
+            public DateTime? A2Date { get; set; }
+            public string A4Disability { get; set; }
+            public string A5Period { get; set; }
+            public string A6Declaration { get; set; }
+            public string BStayAbroad { get; set; }
+            public string NeedsAndProblems { get; set; }
+            public List<DependentSnapshot> Dependents { get; set; } = new List<DependentSnapshot>();
+            public List<Guid> RemovedFamilyMemberIds { get; set; } = new List<Guid>();
+        }
+
+        private ReassessmentSnapshot _initialSnapshot;
+        private bool _savedSuccessfully = false;
+
+        private static string NormalizeText(string s) => (s ?? string.Empty).Trim();
+
+        private static bool NormalizeTextEquals(string a, string b)
+        {
+            return string.Equals(NormalizeText(a), NormalizeText(b), StringComparison.Ordinal);
+        }
+
+        private static bool NormalizeDecimalEquals(string a, string b)
+        {
+            string cA = Regex.Replace(a ?? string.Empty, @"[^\d.]", "");
+            string cB = Regex.Replace(b ?? string.Empty, @"[^\d.]", "");
+            bool parsedA = decimal.TryParse(cA, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal valA);
+            bool parsedB = decimal.TryParse(cB, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal valB);
+
+            if (parsedA && parsedB)
+                return valA == valB;
+
+            if (!parsedA && !parsedB)
+                return true;
+
+            if (parsedA && !parsedB)
+                return valA == 0m;
+
+            if (!parsedA && parsedB)
+                return valB == 0m;
+
+            return false;
+        }
+
+        private static bool NormalizeDateEquals(DateTime? a, DateTime? b)
+        {
+            bool hasA = a.HasValue && a.Value != DateTime.MinValue;
+            bool hasB = b.HasValue && b.Value != DateTime.MinValue;
+            if (!hasA && !hasB) return true;
+            if (hasA != hasB) return false;
+            return a.Value.Date == b.Value.Date;
+        }
+
+        private static bool DependentsEqual(
+            List<DependentSnapshot> initial,
+            ObservableCollection<DependentItemViewModel> current,
+            List<Guid> initialRemoved,
+            List<Guid> currentRemoved)
+        {
+            if (initial == null && current == null) return true;
+            if (initial == null || current == null) return false;
+            if (initial.Count != current.Count) return false;
+
+            int initialRemovedCount = initialRemoved != null ? initialRemoved.Count : 0;
+            int currentRemovedCount = currentRemoved != null ? currentRemoved.Count : 0;
+            if (initialRemovedCount != currentRemovedCount) return false;
+
+            for (int i = 0; i < initial.Count; i++)
+            {
+                var init = initial[i];
+                var cur = current[i];
+
+                if (init.Id != cur.Id) return false;
+                if (init.IsNew != cur.IsNew) return false;
+                if (init.IsRemoved != cur.IsRemoved) return false;
+                if (!NormalizeTextEquals(init.Name, cur.Name)) return false;
+                if (!NormalizeTextEquals(init.Relationship, cur.Relationship)) return false;
+                if (!NormalizeTextEquals(init.Sex, cur.Sex)) return false;
+                if (!NormalizeDateEquals(init.Birthdate, cur.Birthdate)) return false;
+                if (init.Age != cur.Age) return false;
+                if (!NormalizeTextEquals(init.EducationalLevel, cur.EducationalLevel)) return false;
+                if (init.Income != cur.Income) return false;
+                if (!NormalizeTextEquals(init.CivilStatus, cur.CivilStatus)) return false;
+                if (init.HasSpecialNeeds != cur.HasSpecialNeeds) return false;
+                if (!NormalizeTextEquals(init.SpecialNeedsCategory, cur.SpecialNeedsCategory)) return false;
+                if (!NormalizeTextEquals(init.SpecialNeedsDescription, cur.SpecialNeedsDescription)) return false;
+            }
+
+            return true;
+        }
+
+        private void CaptureInitialSnapshot()
+        {
+            var snap = new ReassessmentSnapshot
+            {
+                RenewalDate = DpRenewalDate.SelectedDate,
+                CivilStatus = (CmbCivilStatus.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty,
+                EmploymentStatus = (CmbEmploymentStatus.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty,
+                Occupation = TxtOccupation.Text,
+                MonthlyIncome = TxtMonthlyIncome.Text,
+                OtherIncome = TxtOtherIncomeStep1?.Text ?? TxtOtherIncomeStep3?.Text ?? string.Empty,
+                CircumstanceTag = GetSelectedCircumstanceTag(),
+                A2Cause = TxtA2Cause.Text,
+                A2Date = DpA2Date.SelectedDate,
+                A4Disability = TxtA4Disability.Text,
+                A5Period = TxtA5Period.Text,
+                A6Declaration = (CmbA6Declaration.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty,
+                BStayAbroad = TxtBStayAbroad.Text,
+                NeedsAndProblems = TxtNeeds.Text,
+                RemovedFamilyMemberIds = new List<Guid>(_removedFamilyMemberIds)
+            };
+
+            foreach (var d in _dependents)
+            {
+                snap.Dependents.Add(new DependentSnapshot
+                {
+                    Id = d.Id,
+                    IsNew = d.IsNew,
+                    IsRemoved = d.IsRemoved,
+                    Name = d.Name,
+                    Relationship = d.Relationship,
+                    Sex = d.Sex,
+                    Birthdate = d.Birthdate,
+                    Age = d.Age,
+                    EducationalLevel = d.EducationalLevel,
+                    Income = d.Income,
+                    CivilStatus = d.CivilStatus,
+                    HasSpecialNeeds = d.HasSpecialNeeds,
+                    SpecialNeedsCategory = d.SpecialNeedsCategory,
+                    SpecialNeedsDescription = d.SpecialNeedsDescription
+                });
+            }
+
+            _initialSnapshot = snap;
+        }
+
+        private bool HasUserModifications()
+        {
+            if (_initialSnapshot == null) return false;
+
+            if (AddChildSubCard != null && AddChildSubCard.Visibility == Visibility.Visible && !string.IsNullOrWhiteSpace(TxtChildName?.Text))
+                return true;
+
+            if (!NormalizeDateEquals(_initialSnapshot.RenewalDate, DpRenewalDate.SelectedDate)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.CivilStatus, (CmbCivilStatus.SelectedItem as ComboBoxItem)?.Content?.ToString())) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.EmploymentStatus, (CmbEmploymentStatus.SelectedItem as ComboBoxItem)?.Content?.ToString())) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.Occupation, TxtOccupation.Text)) return true;
+            if (!NormalizeDecimalEquals(_initialSnapshot.MonthlyIncome, TxtMonthlyIncome.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.OtherIncome, TxtOtherIncomeStep1?.Text ?? TxtOtherIncomeStep3?.Text)) return true;
+
+            if (!NormalizeTextEquals(_initialSnapshot.CircumstanceTag, GetSelectedCircumstanceTag())) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.A2Cause, TxtA2Cause.Text)) return true;
+            if (!NormalizeDateEquals(_initialSnapshot.A2Date, DpA2Date.SelectedDate)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.A4Disability, TxtA4Disability.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.A5Period, TxtA5Period.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.A6Declaration, (CmbA6Declaration.SelectedItem as ComboBoxItem)?.Content?.ToString())) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.BStayAbroad, TxtBStayAbroad.Text)) return true;
+            if (!NormalizeTextEquals(_initialSnapshot.NeedsAndProblems, TxtNeeds.Text)) return true;
+
+            if (!DependentsEqual(_initialSnapshot.Dependents, _dependents, _initialSnapshot.RemovedFamilyMemberIds, _removedFamilyMemberIds)) return true;
+
+            return false;
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (_savedSuccessfully || DialogResult == true) return;
+            if (!HasUserModifications()) return;
+
+            bool discard = ActionConfirmDialog.Show(
+                title: "Unsaved Changes",
+                message: "You have unsaved changes in this renewal form. Are you sure you want to discard your changes and close?",
+                confirmText: "Discard Changes",
+                cancelText: "Keep Editing",
+                theme: ConfirmThemeType.Warning,
+                owner: this);
+            if (!discard)
+            {
+                e.Cancel = true;
+                if (DialogShell != null) DialogShell.Visibility = Visibility.Visible;
+            }
         }
 
         private void NumberOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -1464,6 +1701,7 @@ namespace SOLUM_UI.Views.Dialogs
                 FamilyComposition = _original.FamilyComposition,
                 AdditionalClassifications = _original.AdditionalClassifications
             };
+            _savedSuccessfully = true;
             SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
         }
     }

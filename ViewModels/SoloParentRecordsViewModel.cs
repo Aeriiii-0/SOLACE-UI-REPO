@@ -431,7 +431,7 @@ namespace SOLUM_UI.ViewModels
                 return;
             }
             record.Id = createResp.Data.ToString();
-            Views.Dialogs.ActionConfirmDialog.Success("Record Added", record.Name + " was added successfully.");
+            ToastNotification.Show("Record Added", record.Name + " was added successfully.", ToastType.Success);
             _auditLog.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
             (System.Windows.Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
             await LoadRecordsAsync();
@@ -449,7 +449,7 @@ namespace SOLUM_UI.ViewModels
                 Views.Dialogs.ActionConfirmDialog.Error("Update Failed", err);
                 return;
             }
-            Views.Dialogs.ActionConfirmDialog.Success("Record Updated", editedRecord.Name + " was updated successfully.");
+            ToastNotification.Show("Record Updated", editedRecord.Name + " was updated successfully.", ToastType.Success);
             // Track all field-level changes for detailed audit trail
             var changeService = new ChangeTrackingService();
             var changes = changeService.DetectChanges(rawRecord, editedRecord);
@@ -479,7 +479,7 @@ namespace SOLUM_UI.ViewModels
             string newExpiry = (renewResp.Data != null && DateTime.TryParse(renewResp.Data.ExpiresAt, out var expDt))
                 ? expDt.ToString("MMMM d, yyyy")
                 : DateTime.Today.AddYears(1).ToString("MMMM d, yyyy");
-            Views.Dialogs.ActionConfirmDialog.Success("Record Renewed", original.Name + " — valid until " + newExpiry + ".");
+            ToastNotification.Show("Record Renewed", original.Name + " — valid until " + newExpiry + ".", ToastType.Success);
             // Track changes made during renewal
             var changeService = new ChangeTrackingService();
             var changes = changeService.DetectChanges(original, updated);
@@ -529,7 +529,7 @@ namespace SOLUM_UI.ViewModels
                 Views.Dialogs.ActionConfirmDialog.Error("Delete Failed", err);
                 return;
             }
-            Views.Dialogs.ActionConfirmDialog.Success("Record Deleted", $"{recordName} was removed successfully.");
+            ToastNotification.Show("Record Deleted", $"{recordName} was removed successfully.", ToastType.Success);
             _auditLog.LogDelete(id, recordName, GetCurrentUser(), CurrentUserRole);
             await LoadRecordsAsync();
         }

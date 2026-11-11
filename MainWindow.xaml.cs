@@ -1834,31 +1834,28 @@ namespace SOLUM_UI
         #region Modal Dimming Scrim
         public void SetDimOverlayVisible(bool visible, bool fullWindow = true)
         {
-            if (fullWindow)
-            {
-                if (RootModalDimOverlay != null)
-                    RootModalDimOverlay.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-            }
-            else
-            {
-                var vis = visible ? Visibility.Visible : Visibility.Collapsed;
-                if (TitleBarDimOverlay != null) TitleBarDimOverlay.Visibility = vis;
-                if (SidebarDimOverlay != null) SidebarDimOverlay.Visibility = vis;
-                if (TopBarDimOverlay != null) TopBarDimOverlay.Visibility = vis;
-            }
+            // Dimming overlays removed per user request - keep all scrims collapsed
+            if (RootModalDimOverlay != null) RootModalDimOverlay.Visibility = Visibility.Collapsed;
+            if (TitleBarDimOverlay != null) TitleBarDimOverlay.Visibility = Visibility.Collapsed;
+            if (SidebarDimOverlay != null) SidebarDimOverlay.Visibility = Visibility.Collapsed;
+            if (TopBarDimOverlay != null) TopBarDimOverlay.Visibility = Visibility.Collapsed;
         }
 
         public static void ShowDimOverlay(bool fullWindow = true)
         {
             if (Application.Current?.MainWindow is MainWindow main)
             {
-                if (main.Dispatcher.CheckAccess())
+                Action doShow = () =>
                 {
                     main.SetDimOverlayVisible(true, fullWindow);
+                };
+                if (main.Dispatcher.CheckAccess())
+                {
+                    doShow();
                 }
                 else
                 {
-                    main.Dispatcher.Invoke(() => main.SetDimOverlayVisible(true, fullWindow));
+                    main.Dispatcher.Invoke(doShow);
                 }
             }
         }

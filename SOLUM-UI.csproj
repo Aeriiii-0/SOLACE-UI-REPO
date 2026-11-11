@@ -309,6 +309,12 @@
     <Compile Include="Views\Dialogs\CancelRecordDialog.xaml.cs">
       <DependentUpon>CancelRecordDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\EditProfileDialog.xaml.cs">
+      <DependentUpon>EditProfileDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\OpenFilePromptDialog.xaml.cs">
+      <DependentUpon>OpenFilePromptDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\AccountCreatedDialog.xaml.cs">
       <DependentUpon>AccountCreatedDialog.xaml</DependentUpon>
     </Compile>
@@ -408,6 +414,7 @@
       <DependentUpon>ViewAllLogsOverlay.xaml</DependentUpon>
     </Compile>
     <Compile Include="Behaviors\DateInputBehavior.cs" />
+    <Compile Include="Behaviors\PhoneInputBehavior.cs" />
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Models\Roles.cs" />
     <Compile Include="Models\AuditLog.cs" />
@@ -602,6 +609,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\CancelRecordDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\EditProfileDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\OpenFilePromptDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

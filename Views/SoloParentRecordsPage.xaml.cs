@@ -127,7 +127,7 @@ namespace SOLUM_UI
             var owner = Window.GetWindow(this) ?? Application.Current.MainWindow;
             if (isSuccess)
             {
-                Views.Dialogs.ActionConfirmDialog.Success(title, message, owner);
+                ToastNotification.Show(title, message, ToastType.Success);
             }
             else
             {
@@ -1048,12 +1048,13 @@ namespace SOLUM_UI
                 var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Application.Current.MainWindow };
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
+                    if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
                     await SaveNewRecordAsync(ocr.Result);
                     // Show success notification for OCR flow
-                    Views.Dialogs.ActionConfirmDialog.Success(
+                    ToastNotification.Show(
                         "Record Added Successfully", 
                         $"Solo parent record for {ocr.Result.Name} has been added to the database.",
-                        Window.GetWindow(this));
+                        ToastType.Success);
                 }
                 return;
 
@@ -1077,7 +1078,8 @@ namespace SOLUM_UI
             };
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                // Success popup is shown in RecordDialog, no need for notification here
+                if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
+                // Success toast is shown in RecordDialog, no need for notification here
                 AuditLogService.Instance.LogCreate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole);
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
@@ -1116,13 +1118,14 @@ namespace SOLUM_UI
                 }
                 record.Id = createResp.Data.ToString();
                 
-                // Success popup is shown by RecordDialog or OCR components - just handle post-save logic
+                // Success toast is shown by RecordDialog or OCR components - just handle post-save logic
                 AuditLogService.Instance.LogCreate(record.Id, record.Name, GetCurrentUser(), CurrentUserRole);
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
                 if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
                 _currentPage = 1;
+                if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
                 await LoadRecordsAsync();
             }
             catch (Exception ex)
@@ -1185,8 +1188,7 @@ namespace SOLUM_UI
                 if (!isConfirmed) return;
 
             }
-            PageLoadingOverlay.Message = "Processing renewal...";
-            PageLoadingOverlay.IsActive = true;
+            if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
             try
             {
                 var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid, null);
@@ -1280,8 +1282,7 @@ namespace SOLUM_UI
             }
             
             System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Eligibility check passed");
-            PageLoadingOverlay.Message = "Renewing record...";
-            PageLoadingOverlay.IsActive = true;
+            if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
             try
             {
                 if (existingDto == null)
@@ -1450,6 +1451,7 @@ namespace SOLUM_UI
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
                 (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
+                if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
                 await LoadRecordsAsync();
             }
 
@@ -1472,8 +1474,6 @@ namespace SOLUM_UI
             string recordName = vm != null ? vm.Name : id;
             SoloParentRecord rawRecord = vm?.RawModel;
             SoloParentDto existingDto = null;
-            PageLoadingOverlay.Message = "Opening record...";
-            PageLoadingOverlay.IsActive = true;
             try
             {
                 var fetch = await SoloParentApiService.Instance.GetSoloParentByIdAsync(guid);
@@ -1487,7 +1487,7 @@ namespace SOLUM_UI
             }
             finally
             {
-                PageLoadingOverlay.IsActive = false;
+                if (PageLoadingOverlay != null) PageLoadingOverlay.IsActive = false;
 
             }
             if (rawRecord == null) rawRecord = new SoloParentRecord { Id = id, Surname = recordName };
@@ -1558,9 +1558,8 @@ namespace SOLUM_UI
                 if (!isConfirmed) return;
             }
             
-            // Show loading indicator
-            PageLoadingOverlay.Message = "Deleting record...";
-            PageLoadingOverlay.IsActive = true;
+            // Show skeleton loader
+            if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
             try
             {
                 var deleteResp = await SoloParentApiService.Instance.DeleteSoloParentAsync(guid);
@@ -1612,6 +1611,22 @@ namespace SOLUM_UI
                     "Record exported to:\n" + System.IO.Path.GetFileName(dlg.FileName),
                     true);
 
+                // Ask user if they want to open the file
+                var openDialog = new Views.Dialogs.OpenFilePromptDialog("Would you like to open the exported PDF now?")
+                {
+                    Owner = Window.GetWindow(this)
+                };
+                
+                if (openDialog.ShowDialog() == true && openDialog.ShouldOpenFile)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(
+                            new System.Diagnostics.ProcessStartInfo(dlg.FileName)
+                            { UseShellExecute = true });
+                    }
+                    catch { }
+                }
             }
             catch (Exception ex)
             {
@@ -1691,12 +1706,13 @@ namespace SOLUM_UI
                 var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Application.Current.MainWindow };
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
+                    if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
                     await SaveNewRecordAsync(ocr.Result);
                     // Show success notification for OCR flow
-                    Views.Dialogs.ActionConfirmDialog.Success(
+                    ToastNotification.Show(
                         "Record Added Successfully", 
                         $"Solo parent record for {ocr.Result.Name} has been added to the database.",
-                        Window.GetWindow(this));
+                        ToastType.Success);
                 }
                 return;
 

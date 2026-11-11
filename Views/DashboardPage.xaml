@@ -198,11 +198,12 @@
 
         <!-- Main Content -->
 
-        <Grid x:Name="DashboardScroll"
+        <ScrollViewer x:Name="DashboardScroll"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Visibility="{Binding IsLoading,
 
-              Visibility="{Binding IsLoading,
-
-                           Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                   Converter={StaticResource InverseBoolToVisibilityConverter}}">
 
             <Grid Margin="18,10,18,12">
 
@@ -212,7 +213,7 @@
 
                     <ColumnDefinition Width="16"/>
 
-                    <ColumnDefinition Width="*" MinWidth="290" MaxWidth="380"/>
+                    <ColumnDefinition Width="*" MinWidth="200" MaxWidth="320"/>
 
                 </Grid.ColumnDefinitions>
 
@@ -278,7 +279,7 @@
 
                                 <TextBlock x:Name="TxtWelcome" Text="Welcome back!"
 
-                                           FontFamily="{StaticResource HeadingFont}" FontSize="38" FontWeight="Bold"
+                                           FontFamily="{StaticResource HeadingFont}" FontSize="26" FontWeight="Bold"
 
                                            Foreground="#702943"/>
 
@@ -490,7 +491,7 @@
 
                                 <TextBlock Text="{Binding RegisteredSoloParents, StringFormat={}{0:N0}}"
 
-                                           FontFamily="{StaticResource HeadingFont}" FontSize="42" FontWeight="Bold"
+                                           FontFamily="{StaticResource HeadingFont}" FontSize="30" FontWeight="Bold"
 
                                            Foreground="#702943" Margin="0,12,0,0"/>
 
@@ -536,7 +537,7 @@
 
                                 <TextBlock Text="{Binding ActiveSoloParents, StringFormat={}{0:N0}}"
 
-                                           FontFamily="{StaticResource HeadingFont}" FontSize="42" FontWeight="Bold"
+                                           FontFamily="{StaticResource HeadingFont}" FontSize="30" FontWeight="Bold"
 
                                            Foreground="#0F9D76" Margin="0,12,0,0"/>
 
@@ -582,7 +583,7 @@
 
                                 <TextBlock Text="{Binding InactiveRecordsCount, StringFormat={}{0:N0}}"
 
-                                           FontFamily="{StaticResource HeadingFont}" FontSize="42" FontWeight="Bold"
+                                           FontFamily="{StaticResource HeadingFont}" FontSize="30" FontWeight="Bold"
 
                                            Foreground="#E8960C" Margin="0,12,0,0"/>
 
@@ -1020,9 +1021,9 @@
 
             </Grid>
 
-        </Grid>
+        </ScrollViewer>
 
-        <Grid x:Name="OverlayRoot" Visibility="Collapsed">
+        <Grid x:Name="OverlayRoot" Visibility="Collapsed" Panel.ZIndex="999">
 
             <Rectangle Fill="{DynamicResource ModalOverlayBrush}"/>
 

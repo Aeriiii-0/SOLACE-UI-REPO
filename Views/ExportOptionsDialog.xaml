@@ -4,15 +4,15 @@
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
+        Width="450" SizeToContent="Height"
+        ShowInTaskbar="False"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
         TextOptions.TextRenderingMode="ClearType"
         TextOptions.TextFormattingMode="Display">
-    <Border Background="{DynamicResource ModalOverlayBrush}">
+    <Border Background="Transparent" Padding="16">
         <Border x:Name="Shell" Background="White" CornerRadius="18"
                 BorderBrush="#702943" BorderThickness="1.5"
-                ClipToBounds="True" Width="460"
-                VerticalAlignment="Center" HorizontalAlignment="Center"
                 UseLayoutRounding="True" SnapsToDevicePixels="True">
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="48" ShadowDepth="0" Opacity="0.24"/>
@@ -116,41 +116,6 @@
                                 </StackPanel>
                             </Border>
                         </Grid>
-                    </Border>
-                    <Border Background="#FAFAFA" CornerRadius="12" BorderBrush="#E8E0E4"
-                            BorderThickness="1" Padding="18,14" Margin="0,0,0,0"
-                            Visibility="Collapsed">
-                        <CheckBox x:Name="ChkOpenAfter" IsChecked="True" Cursor="Hand">
-                            <CheckBox.Template>
-                                <ControlTemplate TargetType="CheckBox">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Border x:Name="Box" Width="20" Height="20" CornerRadius="5"
-                                                Background="White" BorderBrush="#D0B8C0" BorderThickness="1.5"
-                                                VerticalAlignment="Center" Margin="0,0,10,0">
-                                            <Path x:Name="Check" Data="M4,9L8,13L16,5"
-                                                  Stroke="White" StrokeThickness="2.2"
-                                                  Visibility="Visible"
-                                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                        <ContentPresenter VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsChecked" Value="True">
-                                            <Setter TargetName="Box" Property="Background" Value="#702943"/>
-                                            <Setter TargetName="Box" Property="BorderBrush" Value="#702943"/>
-                                            <Setter TargetName="Check" Property="Visibility" Value="Visible"/>
-                                        </Trigger>
-                                        <Trigger Property="IsChecked" Value="False">
-                                            <Setter TargetName="Box" Property="Background" Value="White"/>
-                                            <Setter TargetName="Box" Property="BorderBrush" Value="#D0B8C0"/>
-                                            <Setter TargetName="Check" Property="Visibility" Value="Collapsed"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </CheckBox.Template>
-                            <TextBlock Text="Open file after export" FontFamily="Segoe UI"
-                                       FontSize="13" Foreground="#222222" FontWeight="SemiBold"/>
-                        </CheckBox>
                     </Border>
                 </StackPanel>
                 <Border Grid.Row="2" Background="White" BorderBrush="#EEEEEE"

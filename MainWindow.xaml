@@ -4,7 +4,7 @@
         xmlns:controls="clr-namespace:SOLUM_UI.Controls"
         xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
         xmlns:local="clr-namespace:SOLUM_UI"
-        Title="Solace" Height="700" Width="1200"
+        Title="Solace" Height="700" Width="1200" MinWidth="900" MinHeight="580"
         Icon="Assets/app.ico"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
@@ -238,11 +238,11 @@
                     <controls:TopBar x:Name="TopBarControl"
                                      Grid.Row="0"
                                      PageTitle="Dashboard"
-                                     Margin="50,0,-50,0"
+                                     Margin="16,0,-16,0"
                                      ProfileClicked="TopBarControl_ProfileClicked"
                                      ChangePasswordRequested="TopBarControl_ChangePasswordRequested"
                                      LogoutRequested="TopBarControl_LogoutRequested"/>
-                    <Border x:Name="TopBarDimOverlay" Grid.Row="0" Margin="50,0,-50,0" Background="{StaticResource ModalOverlayBrush}" Visibility="Collapsed" IsHitTestVisible="False"/>
+                    <Border x:Name="TopBarDimOverlay" Grid.Row="0" Margin="16,0,-16,0" Background="{StaticResource ModalOverlayBrush}" Visibility="Collapsed" IsHitTestVisible="False"/>
                     <Border Grid.Row="1"
                             Background="#FFFFFF"
                             CornerRadius="0,0,16,16">
