@@ -15,16 +15,37 @@ namespace SOLUM_UI
         private static readonly DateTime _sessionStart = DateTime.Now;
 
         private double _normalAccountDetailsHeight = 0;
+        private Models.Api.ApplicationUserDTO _currentProfileDto;
 
         public UserProfilePage()
         {
             InitializeComponent();
-            Loaded += (s, e) =>
+            Loaded += async (s, e) =>
             {
                 PopulateProfile();
                 UpdateCardClips();
                 SyncAccountDetailsHeight();
+                await LoadCurrentUserProfileAsync();
             };
+        }
+
+        private async Task LoadCurrentUserProfileAsync()
+        {
+            try
+            {
+                var resp = await UserApiService.Instance.GetCurrentUserProfileAsync();
+                if (resp != null && resp.Succeeded && resp.Data != null)
+                {
+                    _currentProfileDto = resp.Data;
+                    MainWindow.SetCurrentUser(resp.Data);
+                    PopulateProfile();
+                    (Application.Current.MainWindow as MainWindow)?.RefreshUserHeader();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[UserProfilePage] Failed to load profile: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -273,36 +294,36 @@ namespace SOLUM_UI
     
         private async void BtnEditProfile_Click(object sender, RoutedEventArgs e)
         {
-            string currentFullName = TxtFullName.Text;
-            string currentEmail = TxtDisplayEmail.Text;
-            string currentContactNumber = TxtContactNumber.Text;
+            string currentFirstName = _currentProfileDto?.FirstName ?? MainWindow.FirstName ?? string.Empty;
+            string currentLastName = _currentProfileDto?.LastName ?? MainWindow.LastName ?? string.Empty;
+            string currentEmail = _currentProfileDto?.Email ?? MainWindow.CurrentUserEmail ?? string.Empty;
+            string currentContactNumber = _currentProfileDto?.ContactNumber ?? MainWindow.ContactNumber ?? string.Empty;
             
-            var dialog = new Views.Dialogs.EditProfileDialog(currentFullName, currentEmail, currentContactNumber)
+            var dialog = new Views.Dialogs.EditProfileDialog(currentFirstName, currentLastName, currentEmail, currentContactNumber)
             {
                 Owner = Window.GetWindow(this)
             };
             
             if (dialog.ShowDialog() == true && dialog.Confirmed)
             {
-                // Update the displayed values
-                TxtFullName.Text = dialog.UpdatedFullName;
-                TxtDisplayEmail.Text = dialog.UpdatedEmail;
-                TxtContactNumber.Text = string.IsNullOrWhiteSpace(dialog.UpdatedContactNumber) 
-                    ? "-" 
-                    : dialog.UpdatedContactNumber;
-                
-                TxtDisplayName.Text = dialog.UpdatedFullName;
-                
-                // Update MainWindow static properties
-                // Update initial
-                if (!string.IsNullOrWhiteSpace(dialog.UpdatedFullName))
+                // Update local DTO and MainWindow static session properties
+                if (_currentProfileDto != null)
                 {
-                    string[] parts = dialog.UpdatedFullName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length > 0)
-                    {
-                        TxtInitial.Text = parts[0].Substring(0, 1).ToUpper();
-                    }
+                    _currentProfileDto.FirstName = dialog.UpdatedFirstName;
+                    _currentProfileDto.LastName = dialog.UpdatedLastName;
+                    _currentProfileDto.ContactNumber = dialog.UpdatedContactNumber;
                 }
+
+                MainWindow.FirstName = (dialog.UpdatedFirstName ?? string.Empty).ToUpper();
+                MainWindow.LastName = (dialog.UpdatedLastName ?? string.Empty).ToUpper();
+                MainWindow.CurrentUserName = $"{MainWindow.FirstName} {MainWindow.LastName}".Trim();
+                MainWindow.ContactNumber = dialog.UpdatedContactNumber ?? string.Empty;
+
+                PopulateProfile();
+                (Application.Current.MainWindow as MainWindow)?.RefreshUserHeader();
+
+                // Re-sync with backend
+                await LoadCurrentUserProfileAsync();
             }
         }
     }

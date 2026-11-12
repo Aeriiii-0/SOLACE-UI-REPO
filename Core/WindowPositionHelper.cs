@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
 
@@ -6,6 +7,7 @@ namespace SOLUM_UI.Core
 {
     public static class WindowPositionHelper
     {
+        private static readonly ConditionalWeakTable<Window, object> _coverClosedHooked = new ConditionalWeakTable<Window, object>();
         /// <summary>
         /// Centers the dialog cleanly over its Owner window (or primary work area if no owner).
         /// Safely sets Owner ONLY if the dialog is not yet shown, and sets WindowStartupLocation.CenterOwner.
@@ -116,11 +118,18 @@ namespace SOLUM_UI.Core
 
             // When this dialog closes, reactivate its owner so the main window
             // comes back to the foreground instead of minimizing or going behind.
-            if (dialog.Owner != null)
+            // Attach only once even though CoverOwnerWindow runs on SizeChanged.
+            if (dialog.Owner != null && !_coverClosedHooked.TryGetValue(dialog, out _))
             {
+                _coverClosedHooked.Add(dialog, new object());
                 dialog.Closed += (s, e) =>
                 {
-                    try { dialog.Owner?.Activate(); } catch { }
+                    try
+                    {
+                        if (dialog.Owner != null && dialog.Owner.IsVisible)
+                            dialog.Owner.Activate();
+                    }
+                    catch { }
                 };
             }
         }

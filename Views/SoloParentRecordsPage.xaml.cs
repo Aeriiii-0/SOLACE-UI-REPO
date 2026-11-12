@@ -1046,49 +1046,50 @@ namespace SOLUM_UI
             if (methodDialog.Selected == EntryMethod.Scan)
             {
                 var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Application.Current.MainWindow };
+                ocr.SaveAsyncHandler = async (rec) => await CreateSoloParentRecordAsync(rec);
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
-                    if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
-                    await SaveNewRecordAsync(ocr.Result);
-                    // Show success notification for OCR flow
-                    ToastNotification.Show(
-                        "Record Added Successfully", 
-                        $"Solo parent record for {ocr.Result.Name} has been added to the database.",
-                        ToastType.Success);
+                    await OnRecordCreatedAsync(ocr.Result);
                 }
                 return;
 
             }
             // Manual entry - open 3-step wizard (Step 1 performs validation & duplicate check)
             RecordDialog dialog = new RecordDialog { Owner = Application.Current.MainWindow };
-            dialog.SaveAsyncHandler = async (rec) =>
-            {
-                rec.CreatedBy = CurrentUserName;
-                rec.Barangay = string.IsNullOrWhiteSpace(rec.Barangay)
-                    ? (!string.IsNullOrWhiteSpace(CurrentUserBarangay) ? CurrentUserBarangay : "ALL")
-                    : rec.Barangay;
-                var createReq = SoloParentApiService.Instance.MapToCreateRequest(rec);
-                var createResp = await SoloParentApiService.Instance.CreateSoloParentAsync(createReq);
-                if (!createResp.Succeeded)
-                {
-                    return BaseResponse<object>.FailWithStatus(createResp.StatusCode, createResp.Errors != null ? createResp.Errors.ToArray() : new string[0]);
-                }
-                rec.Id = createResp.Data.ToString();
-                return BaseResponse<object>.Success(createResp.Data);
-            };
+            dialog.SaveAsyncHandler = async (rec) => await CreateSoloParentRecordAsync(rec);
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
-                // Success toast is shown in RecordDialog, no need for notification here
-                AuditLogService.Instance.LogCreate(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole);
-                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
-                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
-                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
-                if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
-                _currentPage = 1;
-                await LoadRecordsAsync();
+                await OnRecordCreatedAsync(dialog.Result);
             }
 
+        }
+
+        private async Task<BaseResponse<object>> CreateSoloParentRecordAsync(SoloParentRecord rec)
+        {
+            rec.CreatedBy = CurrentUserName;
+            rec.Barangay = string.IsNullOrWhiteSpace(rec.Barangay)
+                ? (!string.IsNullOrWhiteSpace(CurrentUserBarangay) ? CurrentUserBarangay : "ALL")
+                : rec.Barangay;
+            var createReq = SoloParentApiService.Instance.MapToCreateRequest(rec);
+            var createResp = await SoloParentApiService.Instance.CreateSoloParentAsync(createReq);
+            if (!createResp.Succeeded)
+            {
+                return BaseResponse<object>.FailWithStatus(createResp.StatusCode, createResp.Errors != null ? createResp.Errors.ToArray() : new string[0]);
+            }
+            rec.Id = createResp.Data.ToString();
+            return BaseResponse<object>.Success(createResp.Data);
+        }
+
+        private async Task OnRecordCreatedAsync(SoloParentRecord rec)
+        {
+            if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
+            AuditLogService.Instance.LogCreate(rec.Id, rec.Name, GetCurrentUser(), CurrentUserRole);
+            (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
+            (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
+            (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
+            if (SortControl != null) { SortControl.SetSort(RecordSortField.LastUpdated, false); }
+            _currentPage = 1;
+            await LoadRecordsAsync();
         }
 
         private async Task SaveNewRecordAsync(SoloParentRecord record)

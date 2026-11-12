@@ -426,20 +426,6 @@ namespace SOLUM_UI
                 // Reactivate owner so MainWindow comes back to foreground
                 try { Owner?.Activate(); } catch { }
             };
-
-            // Guard against WPF custom-chrome windows losing focus / minimizing
-            // when a child dialog closes. Re-activate ourselves if we're still visible.
-            Deactivated += (s, e) =>
-            {
-                if (IsLoaded && IsVisible && !_savedSuccessfully)
-                {
-                    Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        if (IsVisible && !IsActive)
-                            Activate();
-                    }), System.Windows.Threading.DispatcherPriority.Background);
-                }
-            };
             
             // Routed event handlers to react to any input change with debounced save button state
             AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent, new TextChangedEventHandler((s, e) => ScheduleUpdateSaveButtonState()));
@@ -1559,7 +1545,7 @@ namespace SOLUM_UI
                         {
                             dp.SelectedDate = dt;
                         }
-                        tb.Text = dt.ToString("dd/MM/yyyy");
+                        tb.Text = dt.ToString("MM/dd/yyyy");
                     }
                 }
             }
@@ -2312,8 +2298,25 @@ namespace SOLUM_UI
                 return;
             }
             if (!ValidateFields()) return;
+            // Warn if adding a new record without any family composition / dependents
+            if (!isEdit && !_isRenewal && _familyRowData.Count == 0)
+            {
+                bool proceed = ActionConfirmDialog.Show(
+                    title: "No Family Composition",
+                    message: "No family members or dependents have been added to this record.\n\nAre you sure you want to proceed with saving this record without a family composition?",
+                    confirmText: "Proceed & Save",
+                    cancelText: "Add Family Members",
+                    theme: ConfirmThemeType.Warning,
+                    owner: this
+                );
+                if (!proceed)
+                {
+                    GoToStep(3);
+                    return;
+                }
+            }
             // Dependent age threshold warning (Option C: alert admin if all dependents are 23+)
-            if (AreAllDependentsOverAge())
+            else if (AreAllDependentsOverAge())
             {
                 bool proceed = ActionConfirmDialog.Show(
                     title: "Dependent Age Threshold Warning",
@@ -2356,6 +2359,7 @@ namespace SOLUM_UI
                 DialogShell.Visibility = Visibility.Visible;
                 return;
             }
+            DialogShell.Visibility = Visibility.Visible;
             if (SaveAsyncHandler != null)
             {
                 // Show toast notification with appropriate message and color based on operation
@@ -2383,13 +2387,21 @@ namespace SOLUM_UI
                 }
                 
                 ToastNotification.Show(toastTitle, toastMessage, toastType);
+
+                var prevSaveContent = BtnSave?.Content;
+                if (BtnSave != null)
+                {
+                    BtnSave.IsEnabled = false;
+                    BtnSave.Content = "Saving...";
+                }
+                DialogShell.IsEnabled = false;
+                Cursor = Cursors.Wait;
                 
                 try
                 {
                     var saveResult = await SaveAsyncHandler(preview);
                     if (saveResult != null && !saveResult.Succeeded)
                     {
-                        DialogShell.Visibility = Visibility.Visible;
                         if (saveResult.StatusCode == 409 || (saveResult.Errors != null && saveResult.Errors.Any(err => err.IndexOf("PhilSys", StringComparison.OrdinalIgnoreCase) >= 0)))
                         {
                             string err = (saveResult.Errors != null && saveResult.Errors.Count > 0) ? saveResult.Errors[0] : "PhilSys ID is already registered to an existing record.";
@@ -2406,9 +2418,18 @@ namespace SOLUM_UI
                 }
                 catch (Exception ex)
                 {
-                    DialogShell.Visibility = Visibility.Visible;
                     Views.Dialogs.ActionConfirmDialog.Error("Save Error", "An error occurred while saving: " + ex.Message);
                     return;
+                }
+                finally
+                {
+                    Cursor = null;
+                    DialogShell.IsEnabled = true;
+                    if (BtnSave != null)
+                    {
+                        BtnSave.Content = prevSaveContent;
+                    }
+                    UpdateSaveButtonState();
                 }
             }
             try

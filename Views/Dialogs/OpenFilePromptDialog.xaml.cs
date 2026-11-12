@@ -26,19 +26,6 @@ namespace SOLUM_UI.Views.Dialogs
                 if (e.Key == System.Windows.Input.Key.Escape)
                     BtnNotNow_Click(s, e);
             };
-
-            // Guard against custom-chrome window losing focus
-            Deactivated += (s, e) =>
-            {
-                if (IsLoaded && IsVisible)
-                {
-                    Dispatcher.BeginInvoke(new System.Action(() =>
-                    {
-                        if (IsVisible && !IsActive)
-                            Activate();
-                    }), System.Windows.Threading.DispatcherPriority.Background);
-                }
-            };
         }
 
         private void BtnOpenFile_Click(object sender, RoutedEventArgs e)

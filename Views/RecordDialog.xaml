@@ -197,7 +197,7 @@
                                     </DatePickerTextBox.Style>
                                 </DatePickerTextBox>
                                 <!-- Custom clean placeholder - only visible when input is empty -->
-                                <TextBlock Text="DD/MM/YYYY" Foreground="#999999" FontSize="14"
+                                <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="14"
                                            Padding="10,0" VerticalAlignment="Center"
                                            IsHitTestVisible="False" Opacity="0.7">
                                     <TextBlock.Style>

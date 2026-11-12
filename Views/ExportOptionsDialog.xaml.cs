@@ -28,19 +28,6 @@ namespace SOLUM_UI
                 MainWindow.HideDimOverlay();
                 try { Owner?.Activate(); } catch { }
             };
-            
-            // Guard against custom-chrome window losing focus
-            Deactivated += (s, e) =>
-            {
-                if (IsLoaded && IsVisible)
-                {
-                    Dispatcher.BeginInvoke(new System.Action(() =>
-                    {
-                        if (IsVisible && !IsActive)
-                            Activate();
-                    }), System.Windows.Threading.DispatcherPriority.Background);
-                }
-            };
         }
 
         public ExportOptionsDialog(string fileName, Window owner = null)
@@ -65,19 +52,6 @@ namespace SOLUM_UI
             {
                 MainWindow.HideDimOverlay();
                 try { Owner?.Activate(); } catch { }
-            };
-            
-            // Guard against custom-chrome window losing focus
-            Deactivated += (s, e) =>
-            {
-                if (IsLoaded && IsVisible)
-                {
-                    Dispatcher.BeginInvoke(new System.Action(() =>
-                    {
-                        if (IsVisible && !IsActive)
-                            Activate();
-                    }), System.Windows.Threading.DispatcherPriority.Background);
-                }
             };
         }
 

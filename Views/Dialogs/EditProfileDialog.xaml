@@ -67,7 +67,7 @@
     <Border Background="White" CornerRadius="20" BorderBrush="{StaticResource Maroon}" 
             BorderThickness="1.5" Padding="36,20">
         <Border.Effect>
-            <DropShadowEffect Color="#000000" BlurRadius="48" ShadowDepth="0" Opacity="0.24"/>
+            <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="2" Opacity="0.20"/>
         </Border.Effect>
         
         <Grid>
@@ -105,20 +105,36 @@
 
             <!-- Form Fields -->
             <StackPanel Grid.Row="1">
-                <!-- Full Name -->
-                <StackPanel Margin="0,0,0,12">
-                    <TextBlock Text="Full Name *" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="TxtFullName" Style="{StaticResource FormInput}"/>
-                    <TextBlock x:Name="ErrFullName" Text="Full name is required" 
-                               Style="{StaticResource ErrorText}"/>
-                </StackPanel>
+                <!-- First Name & Last Name -->
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- Email -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="First Name *" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="TxtFirstName" Style="{StaticResource FormInput}"/>
+                        <TextBlock x:Name="ErrFirstName" Text="First name is required" 
+                                   Style="{StaticResource ErrorText}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Last Name *" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="TxtLastName" Style="{StaticResource FormInput}"/>
+                        <TextBlock x:Name="ErrLastName" Text="Last name is required" 
+                                   Style="{StaticResource ErrorText}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Email (Read-Only) -->
                 <StackPanel Margin="0,0,0,12">
-                    <TextBlock Text="Email Address *" Style="{StaticResource FieldLabel}"/>
-                    <TextBox x:Name="TxtEmail" Style="{StaticResource FormInput}"/>
-                    <TextBlock x:Name="ErrEmail" Text="Invalid email address" 
-                               Style="{StaticResource ErrorText}"/>
+                    <TextBlock Text="Email Address (Cannot be edited)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtEmail" Style="{StaticResource FormInput}"
+                             IsReadOnly="True" Focusable="False" IsHitTestVisible="False"
+                             Background="#F6F1F3" BorderBrush="#E2D3D9" Foreground="#7A6670"
+                             Cursor="Arrow"/>
                 </StackPanel>
 
                 <!-- Contact Number -->
@@ -153,6 +169,13 @@
                                    TextWrapping="Wrap" LineHeight="16"/>
                     </Grid>
                 </Border>
+                <!-- Inline Error Banner -->
+                <Border x:Name="ErrBanner" Visibility="Collapsed"
+                        Background="#FEE2E2" BorderBrush="#EF4444" BorderThickness="1"
+                        CornerRadius="10" Padding="12,10" Margin="0,12,0,0">
+                    <TextBlock x:Name="TxtBannerError" FontFamily="Segoe UI" FontSize="12"
+                               Foreground="#B91C1C" TextWrapping="Wrap"/>
+                </Border>
             </StackPanel>
 
             <!-- Action Buttons -->
@@ -162,6 +185,16 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+
+                <!-- Saving Indicator -->
+                <StackPanel x:Name="SavingIndicator" Grid.Column="0" Orientation="Horizontal"
+                            VerticalAlignment="Center" Visibility="Collapsed">
+                    <ProgressBar IsIndeterminate="True" Width="70" Height="4"
+                                 Foreground="{StaticResource Maroon}" Background="#F4E8EC"
+                                 BorderThickness="0" Margin="0,0,8,0"/>
+                    <TextBlock Text="Saving..." FontFamily="Segoe UI" FontSize="12"
+                               Foreground="{StaticResource MutedText}" VerticalAlignment="Center"/>
+                </StackPanel>
 
                 <!-- Cancel Button -->
                 <Button x:Name="BtnCancel" Grid.Column="1" Height="44" Padding="26,0" 
@@ -176,6 +209,9 @@
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="Bg" Property="Background" Value="#FAFAFA"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Bg" Property="Opacity" Value="0.5"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -192,8 +228,8 @@
                             <Border x:Name="Bg" Background="{StaticResource Maroon}" CornerRadius="22"
                                     Padding="{TemplateBinding Padding}">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="14" ShadowDepth="4" 
-                                                      Direction="270" Opacity="0.28" 
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" 
+                                                      Direction="270" Opacity="0.22" 
                                                       Color="#702943"/>
                                 </Border.Effect>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -208,7 +244,7 @@
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Button.Template>
-                    <TextBlock Text="Save Changes" FontFamily="Segoe UI" FontSize="13" 
+                    <TextBlock x:Name="TxtSaveBtn" Text="Save Changes" FontFamily="Segoe UI" FontSize="13" 
                                FontWeight="SemiBold" Foreground="White"/>
                 </Button>
             </Grid>

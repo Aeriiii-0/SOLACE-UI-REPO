@@ -69,6 +69,13 @@ namespace SOLUM_UI.Models.Api
         public string ContactNumber { get; set; } = string.Empty;
     }
 
+    public class UpdateUserProfileRequest
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string ContactNumber { get; set; } = string.Empty;
+    }
+
     public class UpdateUserStatusRequest
     {
         public bool IsActive { get; set; }

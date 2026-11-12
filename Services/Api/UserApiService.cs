@@ -33,6 +33,16 @@ namespace SOLUM_UI.Services.Api
             return await ApiClient.Instance.GetAsync<PagedResult<ApplicationUserDTO>>(url);
         }
 
+        public async Task<BaseResponse<ApplicationUserDTO>> GetCurrentUserProfileAsync()
+        {
+            return await ApiClient.Instance.GetAsync<ApplicationUserDTO>("api/user/profile");
+        }
+
+        public async Task<BaseResponse<bool>> UpdateCurrentUserProfileAsync(UpdateUserProfileRequest request)
+        {
+            return await ApiClient.Instance.PutAsync<UpdateUserProfileRequest, bool>("api/user/profile", request);
+        }
+
         public async Task<BaseResponse<bool>> UpdateApplicationUserAsync(UpdateApplicationUserRequest request)
         {
             return await ApiClient.Instance.PutAsync<UpdateApplicationUserRequest, bool>("api/user", request);

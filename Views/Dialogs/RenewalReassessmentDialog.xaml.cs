@@ -332,20 +332,6 @@ namespace SOLUM_UI.Views.Dialogs
                 // Reactivate owner so MainWindow comes back to foreground
                 try { Owner?.Activate(); } catch { }
             };
-
-            // Guard against WPF custom-chrome windows losing focus / minimizing
-            // when a child dialog closes. Re-activate ourselves if we're still visible.
-            Deactivated += (s, e) =>
-            {
-                if (IsLoaded && IsVisible)
-                {
-                    Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        if (IsVisible && !IsActive)
-                            Activate();
-                    }), System.Windows.Threading.DispatcherPriority.Background);
-                }
-            };
             
             Loaded += (s, e) =>
             {

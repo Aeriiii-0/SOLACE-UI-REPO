@@ -10,7 +10,7 @@
                 BorderBrush="#702943" BorderThickness="1.5"
                 ClipToBounds="True">
             <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="4" Opacity="0.18"/>
+                <DropShadowEffect Color="#000000" BlurRadius="32" ShadowDepth="4" Opacity="0.18" RenderingBias="Performance"/>
             </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>

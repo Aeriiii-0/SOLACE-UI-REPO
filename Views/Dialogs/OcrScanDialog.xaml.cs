@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using SOLUM_UI.Models;
+using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.ViewModels;
 
@@ -16,6 +18,7 @@ namespace SOLUM_UI.Views.Dialogs
     {
         public SoloParentRecord Result { get; private set; }
         public OcrScanDialogViewModel ViewModel { get; }
+        public Func<SoloParentRecord, Task<BaseResponse<object>>> SaveAsyncHandler { get; set; }
 
         private bool _savedSuccessfully = false;
 
@@ -58,8 +61,16 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            if (_savedSuccessfully) return;
-            if (!HasAnyInput()) return;
+            if (_savedSuccessfully)
+            {
+                DocumentViewport?.CancelActiveProcessing();
+                return;
+            }
+            if (!HasAnyInput())
+            {
+                DocumentViewport?.CancelActiveProcessing();
+                return;
+            }
 
             bool discard = ActionConfirmDialog.Show(
                 title: "Unsaved Changes",
@@ -69,7 +80,12 @@ namespace SOLUM_UI.Views.Dialogs
                 theme: ConfirmThemeType.Warning,
                 owner: this);
             if (!discard)
+            {
                 e.Cancel = true;
+                return;
+            }
+
+            DocumentViewport?.CancelActiveProcessing();
         }
 
         private bool HasAnyInput()
@@ -458,6 +474,22 @@ namespace SOLUM_UI.Views.Dialogs
                 return;
             }
             var preview = BuildRecord();
+            if (preview.FamilyMembers == null || preview.FamilyMembers.Count == 0)
+            {
+                bool proceed = ActionConfirmDialog.Show(
+                    title: "No Family Composition",
+                    message: "No family members or dependents have been added to this record.\n\nAre you sure you want to proceed with saving this record without a family composition?",
+                    confirmText: "Proceed & Save",
+                    cancelText: "Add Family Members",
+                    theme: ConfirmThemeType.Warning,
+                    owner: this
+                );
+                if (!proceed)
+                {
+                    GoToStep(3);
+                    return;
+                }
+            }
             var fields  = BuildConfirmFields(preview);
             DialogShell.Visibility = Visibility.Hidden;
             var confirm = new ConfirmDialog(
@@ -480,11 +512,59 @@ namespace SOLUM_UI.Views.Dialogs
                 DialogShell.Visibility = Visibility.Visible;
                 return;
             }
+            DialogShell.Visibility = Visibility.Visible;
+            if (SaveAsyncHandler != null)
+            {
+                ToastNotification.Show("Adding Record", "Saving solo parent record to database...", ToastType.Success);
+                var prevSaveContent = BtnSave?.Content;
+                if (BtnSave != null)
+                {
+                    BtnSave.IsEnabled = false;
+                    BtnSave.Content = "Saving...";
+                }
+                DialogShell.IsEnabled = false;
+                Cursor = Cursors.Wait;
+                try
+                {
+                    var saveResult = await SaveAsyncHandler(preview);
+                    if (saveResult != null && !saveResult.Succeeded)
+                    {
+                        string err = (saveResult.Errors != null && saveResult.Errors.Count > 0)
+                            ? string.Join("\n", saveResult.Errors)
+                            : "Failed to save record on the server.";
+                        bool isPhilSysConflict = saveResult.StatusCode == 409 ||
+                            (saveResult.Errors != null && saveResult.Errors.Any(er => er.IndexOf("PhilSys", StringComparison.OrdinalIgnoreCase) >= 0));
+                        ActionConfirmDialog.Error(isPhilSysConflict ? "Duplicate PhilSys ID" : "Save Failed", err, this);
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ActionConfirmDialog.Error("Save Error", "An error occurred while saving:\n\n" + ex.Message + "\n\nYour form data has been preserved.", this);
+                    return;
+                }
+                finally
+                {
+                    Cursor = null;
+                    DialogShell.IsEnabled = true;
+                    if (BtnSave != null)
+                    {
+                        BtnSave.Content = prevSaveContent;
+                    }
+                }
+            }
             try
             {
                 Result = preview;
                 _savedSuccessfully = true;
                 SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    ToastNotification.Show(
+                        "Record Added Successfully",
+                        $"Solo parent record for {preview.Name} has been added to the database.",
+                        ToastType.Success);
+                }), System.Windows.Threading.DispatcherPriority.Background);
             }
             catch (Exception ex)
             {

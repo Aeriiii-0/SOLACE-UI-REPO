@@ -400,6 +400,11 @@ namespace SOLUM_UI
 
         }
 
+        public void RefreshUserHeader()
+        {
+            TopBarControl?.SetUser(CurrentUserName, CurrentUserRole);
+        }
+
 
 
         // NEW â€” returns the cached page instance for this tag, creating it once on first use

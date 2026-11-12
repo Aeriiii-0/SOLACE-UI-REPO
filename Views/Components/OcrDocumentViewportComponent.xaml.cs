@@ -84,6 +84,7 @@ namespace SOLUM_UI.Views.Components
         {
             OcrService.WarmupProgressChanged -= OnOcrWarmupProgressChanged;
             _dismissCts?.Cancel();
+            _processCts?.Cancel();
             // Purge any temporary scans created during this session
             foreach (var f in _sessionScannedFiles)
             {
