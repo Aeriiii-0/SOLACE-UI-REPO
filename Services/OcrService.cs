@@ -26,7 +26,20 @@ namespace SOLUM_UI.Services
     public static partial class OcrService
     {
         public static string ServerUrl { get; set; } = "http://127.0.0.1:8000";
-        private static readonly HttpClient _http = new HttpClient { Timeout = TimeSpan.FromMinutes(2) };
+        private static readonly HttpClient _http;
+        private static readonly string _sessionToken;
+
+        static OcrService()
+        {
+            byte[] tokenBytes = new byte[32];
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(tokenBytes);
+            }
+            _sessionToken = BitConverter.ToString(tokenBytes).Replace("-", "").ToLowerInvariant();
+            _http = new HttpClient { Timeout = TimeSpan.FromMinutes(2) };
+            _http.DefaultRequestHeaders.Add("X-OCR-Token", _sessionToken);
+        }
 
         public static event Action<OcrWarmupProgress> WarmupProgressChanged;
 

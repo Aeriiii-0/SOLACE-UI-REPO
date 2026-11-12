@@ -192,22 +192,11 @@ def generate_debug_overlay(img_bgr: np.ndarray, fields_config: dict, all_detecti
                 cv2.rectangle(debug_img, (gx1, gy1), (gx2, gy2), (0, 255, 0), 2)
                 cv2.putText(debug_img, f"{txt[:15]} ({conf:.2f})", (gx1, max(12, gy1 - 3)), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 200, 0), 1)
 
+        if os.environ.get("SOLACE_OCR_DEBUG") != "1":
+            return ""
+
         debug_save_path = os.path.join(os.path.dirname(__file__), "debug_detections.jpg")
         cv2.imwrite(debug_save_path, debug_img)
-
-        # Also save to Windows Temp directory as solace_last_scan_detections.jpg
-        try:
-            import tempfile
-            temp_path = os.path.join(tempfile.gettempdir(), "solace_last_scan_detections.jpg")
-            cv2.imwrite(temp_path, debug_img)
-        except Exception:
-            pass
-
-        # Also save to bin/Debug and bin/x64/Debug
-        for sub in [("..", "bin", "Debug"), ("..", "bin", "x64", "Debug")]:
-            bin_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), *sub))
-            if os.path.exists(bin_dir):
-                cv2.imwrite(os.path.join(bin_dir, "debug_detections.jpg"), debug_img)
 
         print(f"[Debug Visualizer SUCCESS] Saved visual detections overlay to: {debug_save_path}")
         return debug_save_path

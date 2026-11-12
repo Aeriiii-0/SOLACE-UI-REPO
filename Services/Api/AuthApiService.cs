@@ -46,8 +46,7 @@ namespace SOLUM_UI.Services.Api
         public bool IsBarangaySecretary => CurrentRoles.Any(r => r.Equals(Roles.BarangaySecretary, StringComparison.OrdinalIgnoreCase) ||
                                                                  r.Equals("BARANGAY SECRETARY", StringComparison.OrdinalIgnoreCase));
 
-        public bool IsEncoder => CurrentRoles.Any(r => r.Equals("Encoder", StringComparison.OrdinalIgnoreCase)) ||
-                                 !IsAdmin;
+        public bool IsEncoder => IsAuthenticated && (CurrentRoles.Any(r => r.Equals("Encoder", StringComparison.OrdinalIgnoreCase)) || !IsAdmin);
 
         private AuthApiService() { }
 

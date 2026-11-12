@@ -133,9 +133,13 @@ namespace SOLUM_UI.Views.Dialogs
                 ShowError("Please enter your new password.");
                 return;
             }
-            if (newPwd.Length < 6)
+            if (newPwd.Length < 8 ||
+                !System.Linq.Enumerable.Any(newPwd, char.IsUpper) ||
+                !System.Linq.Enumerable.Any(newPwd, char.IsLower) ||
+                !System.Linq.Enumerable.Any(newPwd, char.IsDigit) ||
+                !System.Linq.Enumerable.Any(newPwd, c => !char.IsLetterOrDigit(c)))
             {
-                ShowError("New password must be at least 6 characters long.");
+                ShowError("New password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.");
                 return;
             }
             if (string.Equals(current, newPwd, StringComparison.Ordinal))

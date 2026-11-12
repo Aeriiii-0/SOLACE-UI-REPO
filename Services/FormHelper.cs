@@ -40,5 +40,23 @@ namespace SOLUM_UI.Services
                 }
             };
         }
+
+        /// <summary>
+        /// Sanitizes a CSV cell value against formula/DDE injection (CWE-1236) and escapes double quotes.
+        /// </summary>
+        public static string SanitizeCsvField(string value, bool quote = true)
+        {
+            if (string.IsNullOrEmpty(value))
+                return quote ? "\"\"" : string.Empty;
+
+            string trimmed = value.TrimStart(' ');
+            if (trimmed.Length > 0 && (trimmed[0] == '=' || trimmed[0] == '+' || trimmed[0] == '-' || trimmed[0] == '@' || trimmed[0] == '\t' || trimmed[0] == '\r'))
+            {
+                value = "'" + value;
+            }
+
+            string escaped = value.Replace("\"", "\"\"");
+            return quote ? $"\"{escaped}\"" : escaped;
+        }
     }
 }

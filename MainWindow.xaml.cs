@@ -94,7 +94,7 @@ namespace SOLUM_UI
 
 
 
-        public static string CurrentUserName { get; set; } = "ADMIN USER";
+        public static string CurrentUserName { get; set; } = string.Empty;
 
 
 
@@ -102,7 +102,7 @@ namespace SOLUM_UI
 
 
 
-        public static string CurrentUserRole { get; set; } = "ADMINISTRATOR";
+        public static string CurrentUserRole { get; set; } = string.Empty;
 
 
 

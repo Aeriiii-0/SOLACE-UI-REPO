@@ -147,7 +147,7 @@ namespace SOLUM_UI.Services
             sb.AppendLine($"As of {periodLabel},,");
             sb.AppendLine(",,");
             sb.AppendLine($"City / Municipality / Province,\"{EscapeCsv(municipality)}\",");
-            sb.AppendLine($"Region,{EscapeCsv(region)},");
+            sb.AppendLine($"Region,\"{EscapeCsv(region)}\",");
             sb.AppendLine(",,");
             sb.AppendLine($"Number of Solo Parents served for {year},,{m.TotalServed}");
 
@@ -986,8 +986,7 @@ namespace SOLUM_UI.Services
 
         private static string EscapeCsv(string str)
         {
-            if (string.IsNullOrEmpty(str)) return "";
-            return str.Replace("\"", "\"\"");
+            return FormHelper.SanitizeCsvField(str, quote: false);
         }
     }
 }

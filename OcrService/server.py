@@ -9,14 +9,13 @@ os.environ["FLAGS_enable_pir_in_executor"] = "0"
 import time
 import json
 import re
-import tempfile
 import cv2
 import numpy as np
 import uvicorn
 import paddle
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+import hmac
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Depends, Header
 from fastapi.responses import RedirectResponse
-from fastapi.middleware.cors import CORSMiddleware
 
 try:
     paddle.set_flags({"FLAGS_enable_pir_api": 0, "FLAGS_use_mkldnn": 0})
@@ -60,14 +59,13 @@ def reload_engine_modules():
 
 app = FastAPI(title="Solace OCR Engine", version="2.0")
 
-# Enable CORS for desktop app integration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+EXPECTED_OCR_TOKEN = os.environ.get("SOLACE_OCR_TOKEN", "")
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+
+def verify_ocr_token(x_ocr_token: str = Header(default="")):
+    """Enforces per-session shared token authentication when launched by the desktop client."""
+    if EXPECTED_OCR_TOKEN and not hmac.compare_digest(x_ocr_token or "", EXPECTED_OCR_TOKEN):
+        raise HTTPException(status_code=401, detail="Unauthorized OCR client.")
 
 # Initialize Ultra-Fast Lightweight CPU PaddleOCR & Native OpenVINO Recognition Engine
 ocr = None
@@ -115,24 +113,25 @@ def health_check():
     return {
         "status": "online",
         "ocr_engine_loaded": ocr is not None,
-        "ocr_init_error": ocr_init_error,
         "form_template": "CSWDO-066-2",
         "version": "2.0"
     }
 
-@app.get("/template")
+@app.get("/template", dependencies=[Depends(verify_ocr_token)])
 def get_template():
     return load_template()
 
-@app.post("/template")
+@app.post("/template", dependencies=[Depends(verify_ocr_token)])
 async def save_template(template_data: dict):
+    if not isinstance(template_data, dict) or not isinstance(template_data.get("fields"), dict):
+        raise HTTPException(status_code=400, detail="Invalid template schema: 'fields' object is required.")
     try:
         template_path = os.path.join(os.path.dirname(__file__), "cswdo_template.json")
         with open(template_path, "w", encoding="utf-8") as f:
             json.dump(template_data, f, indent=4)
         return {"status": "success", "message": "Template updated successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to save template.")
 
 def sanitize_for_json(obj):
     """Recursively converts numpy primitives and arrays to standard Python types for JSON serialization."""
@@ -150,7 +149,7 @@ def sanitize_for_json(obj):
         return obj.tolist()
     return obj
 
-@app.post("/extract-form")
+@app.post("/extract-form", dependencies=[Depends(verify_ocr_token)])
 def extract_form(file: UploadFile = File(...), mode: str = "global", include_preview: bool = True):
     """
     Full document ingestion pipeline:
@@ -160,16 +159,17 @@ def extract_form(file: UploadFile = File(...), mode: str = "global", include_pre
     """
     reload_engine_modules()
     print(f"\n=======================================================")
-    print(f"[Server] >>> New Document Ingestion Request Received: {file.filename} (mode: {mode})")
+    print(f"[Server] >>> New Document Ingestion Request Received (mode: {mode})")
     
     if ocr is None:
-        error_msg = f"PaddleOCR engine is not loaded on server. Initialization failure: {ocr_init_error}"
-        print(f"[Server ERROR] {error_msg}")
-        raise HTTPException(status_code=500, detail=error_msg)
+        print("[Server ERROR] PaddleOCR engine is not loaded on server.")
+        raise HTTPException(status_code=500, detail="OCR engine is not initialized.")
         
     t_start = time.time()
     try:
-        contents = file.file.read()
+        contents = file.file.read(MAX_UPLOAD_BYTES + 1)
+        if len(contents) > MAX_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail="Uploaded file exceeds maximum allowed size (25 MB).")
         print(f"[Server] 1. Read {len(contents)} bytes from upload.")
         
         deskewed_color, enhanced_gray, deskewed_full = preprocess_pipeline(contents, return_full=True)
@@ -179,17 +179,10 @@ def extract_form(file: UploadFile = File(...), mode: str = "global", include_pre
             
         print(f"[Server] 2. Preprocessed image. Shape: {enhanced_gray.shape} (H, W)")
         
-        # Save deskewed preview to temp for exact coordinate and visual parity across Picture Preview and Adjustable Boxes
-        temp_deskewed = os.path.join(tempfile.gettempdir(), "solace_last_deskewed_preview.jpg")
-        try:
-            cv2.imwrite(temp_deskewed, deskewed_color)
-        except Exception:
-            pass
-
         result = parse_form_with_ocr(ocr, deskewed_color, mode=mode, raw_image=deskewed_full)
         elapsed = round(time.time() - t_start, 2)
         result["execution_time_seconds"] = elapsed
-        result["preview_image_path"] = temp_deskewed
+        result["preview_image_path"] = ""
         print(f"[Server] 3. OCR Extraction ({mode}) finished in {elapsed}s. Status: {result.get('status')}, Rating: {result.get('overall_rating')}")
         
         # Serialize Base64 image payload when requested
@@ -204,15 +197,15 @@ def extract_form(file: UploadFile = File(...), mode: str = "global", include_pre
         
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         import traceback
         print(f"[Server CRITICAL ERROR in /extract-form]:")
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal OCR processing error.")
 
 
 
-@app.post("/extract-roi")
+@app.post("/extract-roi", dependencies=[Depends(verify_ocr_token)])
 def extract_roi(
     file: UploadFile = File(...),
     x: float = Form(...),
@@ -229,7 +222,9 @@ def extract_roi(
     reload_engine_modules()
     try:
         t_start = time.time()
-        contents = file.file.read()
+        contents = file.file.read(MAX_UPLOAD_BYTES + 1)
+        if len(contents) > MAX_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail="Uploaded file exceeds maximum allowed size (25 MB).")
         _, enhanced_gray, deskewed_full = preprocess_pipeline(contents, return_full=True)
         
         if enhanced_gray is None:
@@ -399,7 +394,7 @@ def extract_roi(
             )
 
         elapsed = round(time.time() - t_start, 3)
-        print(f"[ROI Extract] Field: '{field_key}' Bbox [{x:.3f}, {y:.3f}, {w:.3f}, {h:.3f}] -> Raw: '{raw_value}', Cleaned: '{cleaned}' (conf: {final_conf:.2f}, time: {elapsed}s)")
+        print(f"[ROI Extract] Field: '{field_key}' Bbox [{x:.3f}, {y:.3f}, {w:.3f}, {h:.3f}] (conf: {final_conf:.2f}, time: {elapsed}s)")
 
         return sanitize_for_json({
             "status": "success",
@@ -412,10 +407,12 @@ def extract_roi(
             "filtered_labels": filtered_labels,
             "execution_time_seconds": elapsed
         })
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal ROI extraction error.")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

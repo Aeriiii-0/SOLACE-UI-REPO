@@ -313,12 +313,12 @@ namespace SOLUM_UI.Services.Implementations
                     foreach (var child in r.CollegeAgeDependents)
                     {
                         string edu = !string.IsNullOrWhiteSpace(child.EducationalLevel) ? child.EducationalLevel : "—";
-                        sb.AppendLine($"{++count},\"{r.Name}\",\"{child.Name}\",{child.Age},\"{edu}\"");
+                        sb.AppendLine($"{++count},{FormHelper.SanitizeCsvField(r.Name)},{FormHelper.SanitizeCsvField(child.Name)},{child.Age},{FormHelper.SanitizeCsvField(edu)}");
                     }
                 }
                 else
                 {
-                    sb.AppendLine($"{++count},\"{r.Name}\",\"Dependent (Age 17–24)\",18,\"College Level\"");
+                    sb.AppendLine($"{++count},{FormHelper.SanitizeCsvField(r.Name)},\"Dependent (Age 17–24)\",18,\"College Level\"");
                 }
             }
             return sb.ToString();
@@ -329,7 +329,7 @@ namespace SOLUM_UI.Services.Implementations
             var sb = new StringBuilder("\uFEFF");
             sb.AppendLine("Rank,SP ID,Solo Parent Name,Barangay,Monthly Income,Income Per Capita,Total Dependents,Minor Dependents,Circumstance,4Ps Status,Export Timestamp");
             foreach (var r in items.Where(i => i.IsPantawidBeneficiary))
-                sb.AppendLine($"{r.Rank},{r.SpId},\"{r.Name}\",{r.Barangay},\"{r.IncomeLabel}\",\"{r.PerCapitaLabel}\",{r.Dependants},{r.MinorDependentsCount},\"{r.Circumstance}\",Enrolled (DSWD 4Ps),{DateTime.Now:yyyy-MM-dd HH:mm}");
+                sb.AppendLine($"{r.Rank},{FormHelper.SanitizeCsvField(r.SpId)},{FormHelper.SanitizeCsvField(r.Name)},{FormHelper.SanitizeCsvField(r.Barangay)},{FormHelper.SanitizeCsvField(r.IncomeLabel)},{FormHelper.SanitizeCsvField(r.PerCapitaLabel)},{r.Dependants},{r.MinorDependentsCount},{FormHelper.SanitizeCsvField(r.Circumstance)},Enrolled (DSWD 4Ps),{DateTime.Now:yyyy-MM-dd HH:mm}");
             return Task.FromResult(sb.ToString());
         }
 
@@ -359,7 +359,7 @@ namespace SOLUM_UI.Services.Implementations
                 string addr = !string.IsNullOrWhiteSpace(r.FullAddress) && r.FullAddress != "—" ? r.FullAddress : (!string.IsNullOrWhiteSpace(r.Address) ? r.Address : "—");
                 string bday = !string.IsNullOrWhiteSpace(r.DateOfBirthFormatted) ? r.DateOfBirthFormatted : "—";
                 string status = r.IsFinalGrantee ? "Confirmed" : "Pending";
-                sb.AppendLine($"{++count},\"{r.Name}\",\"{contact}\",\"{r.Barangay}\",\"{addr}\",\"{bday}\",\"{status}\",\"₱1,000.00\"");
+                sb.AppendLine($"{++count},{FormHelper.SanitizeCsvField(r.Name)},{FormHelper.SanitizeCsvField(contact)},{FormHelper.SanitizeCsvField(r.Barangay)},{FormHelper.SanitizeCsvField(addr)},{FormHelper.SanitizeCsvField(bday)},{FormHelper.SanitizeCsvField(status)},\"₱1,000.00\"");
             }
             return sb.ToString();
         }
@@ -369,7 +369,7 @@ namespace SOLUM_UI.Services.Implementations
             var sb = new StringBuilder();
             sb.AppendLine("Rank,SP ID,Name,Barangay,Score,Status,Circumstance,Income");
             foreach (var item in items)
-                sb.AppendLine($"{item.Rank},{item.SpId},\"{item.Name}\",{item.Barangay},{item.ScoreLabel},{item.Status},\"{item.Circumstance}\",\"{item.IncomeLabel}\"");
+                sb.AppendLine($"{item.Rank},{FormHelper.SanitizeCsvField(item.SpId)},{FormHelper.SanitizeCsvField(item.Name)},{FormHelper.SanitizeCsvField(item.Barangay)},{FormHelper.SanitizeCsvField(item.ScoreLabel)},{FormHelper.SanitizeCsvField(item.Status)},{FormHelper.SanitizeCsvField(item.Circumstance)},{FormHelper.SanitizeCsvField(item.IncomeLabel)}");
             return Task.FromResult(sb.ToString());
         }
     }

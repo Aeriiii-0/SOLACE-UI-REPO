@@ -142,7 +142,27 @@ namespace SOLUM_UI.Services
                     if (File.Exists(zip))
                     {
                         Directory.CreateDirectory(localAppDataDir);
-                        ZipFile.ExtractToDirectory(zip, localAppDataDir);
+                        string fullDestRoot = Path.GetFullPath(localAppDataDir);
+                        if (!fullDestRoot.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                            fullDestRoot += Path.DirectorySeparatorChar;
+                        using (var archive = ZipFile.OpenRead(zip))
+                        {
+                            foreach (var entry in archive.Entries)
+                            {
+                                string destPath = Path.GetFullPath(Path.Combine(localAppDataDir, entry.FullName));
+                                if (!destPath.StartsWith(fullDestRoot, StringComparison.OrdinalIgnoreCase))
+                                    throw new InvalidDataException("Blocked unsafe zip entry path: " + entry.FullName);
+                                if (string.IsNullOrEmpty(entry.Name))
+                                {
+                                    Directory.CreateDirectory(destPath);
+                                }
+                                else
+                                {
+                                    Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                                    entry.ExtractToFile(destPath, overwrite: true);
+                                }
+                            }
+                        }
                         Debug.WriteLine("[OcrService] Successfully unpacked bundled engine to " + localAppDataDir);
                         break;
                     }
@@ -369,6 +389,7 @@ namespace SOLUM_UI.Services
                     RedirectStandardError = true,
                     RedirectStandardOutput = true
                 };
+                psi.EnvironmentVariables["SOLACE_OCR_TOKEN"] = _sessionToken;
                 try
                 {
                     ClearServerLogs();
@@ -408,6 +429,7 @@ namespace SOLUM_UI.Services
                 RedirectStandardError = true,
                 RedirectStandardOutput = true
             };
+            pyPsi.EnvironmentVariables["SOLACE_OCR_TOKEN"] = _sessionToken;
             try
             {
                 ClearServerLogs();
@@ -483,20 +505,6 @@ namespace SOLUM_UI.Services
                 var parent = Directory.GetParent(current);
                 if (parent == null) break;
                 current = parent.FullName;
-            }
-            // 3. Check current working directory and search upwards
-            string cwd = Directory.GetCurrentDirectory();
-            for (int i = 0; i < 5; i++)
-            {
-                if (string.IsNullOrEmpty(cwd)) break;
-                string candidate = Path.Combine(cwd, "OcrService");
-                if (Directory.Exists(candidate) && (File.Exists(Path.Combine(candidate, "server.py")) || File.Exists(Path.Combine(candidate, "ocr_server.exe"))))
-                {
-                    return candidate;
-                }
-                var parent = Directory.GetParent(cwd);
-                if (parent == null) break;
-                cwd = parent.FullName;
             }
             return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OcrService");
         }

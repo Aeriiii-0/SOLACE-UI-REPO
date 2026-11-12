@@ -287,8 +287,7 @@ namespace SOLUM_UI.ViewModels
                 sb.AppendLine("Solo Parent ID,Full Name,Barangay,Monthly Income,Vulnerability Score,Priority Level,Dependents,Disqualification Reason,Audit Justification Notes,Disqualified By,Timestamp");
                 foreach (var c in itemsToExport)
                 {
-                    string cleanNotes = (c.RejectionNotes ?? string.Empty).Replace("\"", "\"\"");
-                    sb.AppendLine($"\"{c.SpId}\",\"{c.FullName}\",\"{c.Barangay}\",\"{c.MonthlyIncome:F2}\",\"{c.PriorityScore:F2}\",\"{c.Priority}\",\"{c.Dependents}\",\"{c.RejectionReason}\",\"{cleanNotes}\",\"{c.DisqualifiedBy}\",\"{c.FormattedDisqualifiedAt}\"");
+                    sb.AppendLine($"{FormHelper.SanitizeCsvField(c.SpId)},{FormHelper.SanitizeCsvField(c.FullName)},{FormHelper.SanitizeCsvField(c.Barangay)},\"{c.MonthlyIncome:F2}\",\"{c.PriorityScore:F2}\",{FormHelper.SanitizeCsvField(c.Priority)},\"{c.Dependents}\",{FormHelper.SanitizeCsvField(c.RejectionReason)},{FormHelper.SanitizeCsvField(c.RejectionNotes)},{FormHelper.SanitizeCsvField(c.DisqualifiedBy)},{FormHelper.SanitizeCsvField(c.FormattedDisqualifiedAt)}");
                 }
                 try
                 {

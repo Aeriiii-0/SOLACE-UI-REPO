@@ -1,8 +1,11 @@
 using System;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
@@ -93,25 +96,49 @@ namespace SOLUM_UI.Views.Dialogs
             StartDownload();
         }
 
+        private static bool IsTrustedDownloadUri(Uri uri)
+        {
+            if (uri == null || !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            string host = uri.Host ?? string.Empty;
+            if (string.Equals(host, "github.com", StringComparison.OrdinalIgnoreCase) ||
+                host.EndsWith(".githubusercontent.com", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            string updateXmlUrl = ConfigurationManager.AppSettings["UpdateXmlUrl"];
+            if (Uri.TryCreate(updateXmlUrl, UriKind.Absolute, out Uri feedUri) &&
+                string.Equals(host, feedUri.Host, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         private void StartDownload()
         {
-            if (string.IsNullOrWhiteSpace(_args.DownloadURL))
+            if (string.IsNullOrWhiteSpace(_args.DownloadURL) ||
+                !Uri.TryCreate(_args.DownloadURL, UriKind.Absolute, out Uri downloadUri) ||
+                !IsTrustedDownloadUri(downloadUri))
             {
-                MessageBox.Show("Unable to find download package for this update. Solace will now exit.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Untrusted or invalid update download URL. Solace will now exit.", "Update Security Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 ExitApplication();
                 return;
             }
             try
             {
-                string extension = Path.GetExtension(new Uri(_args.DownloadURL).AbsolutePath);
-                if (string.IsNullOrEmpty(extension)) extension = ".zip";
+                string extension = Path.GetExtension(downloadUri.AbsolutePath).ToLowerInvariant();
+                if (extension != ".zip" && extension != ".exe" && extension != ".msi") extension = ".zip";
                 _downloadedFilePath = Path.Combine(Path.GetTempPath(), $"SOLUM_Update_{Guid.NewGuid():N}{extension}");
                 _webClient = new WebClient();
                 _webClient.Headers.Add("User-Agent", "Solace-Updater");
                 _webClient.DownloadProgressChanged += OnDownloadProgressChanged;
                 _webClient.DownloadFileCompleted += OnDownloadFileCompleted;
                 TxtDownloadStatus.Text = "Contacting server and downloading update package...";
-                _webClient.DownloadFileAsync(new Uri(_args.DownloadURL), _downloadedFilePath);
+                _webClient.DownloadFileAsync(downloadUri, _downloadedFilePath);
             }
             catch (Exception ex)
             {
@@ -176,10 +203,58 @@ namespace SOLUM_UI.Views.Dialogs
             });
         }
 
+        private bool VerifyDownloadedChecksum()
+        {
+            if (_args.CheckSum == null || string.IsNullOrWhiteSpace(_args.CheckSum.Value))
+                return true;
+
+            string algoName = string.IsNullOrWhiteSpace(_args.CheckSum.HashingAlgorithm)
+                ? "SHA256"
+                : _args.CheckSum.HashingAlgorithm.Trim().ToUpperInvariant();
+
+            using (HashAlgorithm hasher = algoName == "SHA512" ? (HashAlgorithm)SHA512.Create()
+                : algoName == "SHA1" ? (HashAlgorithm)SHA1.Create()
+                : algoName == "MD5" ? (HashAlgorithm)MD5.Create()
+                : SHA256.Create())
+            using (var fs = File.OpenRead(_downloadedFilePath))
+            {
+                byte[] hash = hasher.ComputeHash(fs);
+                string actual = BitConverter.ToString(hash).Replace("-", string.Empty);
+                return string.Equals(actual, _args.CheckSum.Value.Trim(), StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        private static void ValidateZipEntries(string zipPath, string destinationDir)
+        {
+            string fullDestRoot = Path.GetFullPath(destinationDir);
+            if (!fullDestRoot.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                fullDestRoot += Path.DirectorySeparatorChar;
+
+            using (var archive = ZipFile.OpenRead(zipPath))
+            {
+                foreach (var entry in archive.Entries)
+                {
+                    string fullEntryPath = Path.GetFullPath(Path.Combine(destinationDir, entry.FullName));
+                    if (!fullEntryPath.StartsWith(fullDestRoot, StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidDataException("Update package contains an unsafe path traversal entry: " + entry.FullName);
+                    }
+                }
+            }
+        }
+
         private void ApplyUpdateAndRestart()
         {
             try
             {
+                if (!VerifyDownloadedChecksum())
+                {
+                    CleanTempFile();
+                    MessageBox.Show("Downloaded update failed integrity checksum verification. Solace will now exit.", "Update Security Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ExitApplication();
+                    return;
+                }
+
                 _isUpdateInitiated = true;
                 string appDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
                 var currentProc = Process.GetCurrentProcess();
@@ -188,11 +263,15 @@ namespace SOLUM_UI.Views.Dialogs
                 string extension = Path.GetExtension(_downloadedFilePath).ToLowerInvariant();
                 if (extension == ".zip")
                 {
+                    ValidateZipEntries(_downloadedFilePath, appDir);
+
                     // Create an atomic background apply-and-restart batch script that waits for PID exit
                     string batPath = Path.Combine(Path.GetTempPath(), $"solum_apply_{Guid.NewGuid():N}.bat");
                     string batContent = $@"@echo off
 setlocal
 set ""TARGET_PID={currentPid}""
+set ""SOLUM_ZIP={_downloadedFilePath}""
+set ""SOLUM_APPDIR={appDir}""
 :: Wait for application process to completely terminate and release file locks
 :wait_loop
 tasklist /fi ""PID eq %TARGET_PID%"" 2>nul | findstr /i ""%TARGET_PID%"" >nul
@@ -204,7 +283,7 @@ timeout /t 1 /nobreak >nul
 :: Extract update package with retry in case DLL locks linger
 set RETRY_COUNT=0
 :extract_loop
-powershell -NoProfile -ExecutionPolicy Bypass -Command ""Expand-Archive -Path '{_downloadedFilePath}' -DestinationPath '{appDir}' -Force""
+powershell -NoProfile -ExecutionPolicy Bypass -Command ""Expand-Archive -LiteralPath $env:SOLUM_ZIP -DestinationPath $env:SOLUM_APPDIR -Force""
 if %ERRORLEVEL% neq 0 (
     set /a RETRY_COUNT+=1
     if %RETRY_COUNT% leq 5 (
@@ -214,7 +293,7 @@ if %ERRORLEVEL% neq 0 (
 )
 :: Relaunch updated application
 start """" ""{exePath}""
-del ""{_downloadedFilePath}"" 2>nul
+del ""%SOLUM_ZIP%"" 2>nul
 del ""%~f0"" 2>nul
 ";
                     File.WriteAllText(batPath, batContent);

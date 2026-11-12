@@ -19,7 +19,7 @@ namespace SOLUM_UI.Views.Dialogs
 
         public ActionConfirmDialog()
         {
-            InitializeComponent();
+             InitializeComponent();
             KeyDown += (s, e) =>
             {
                 if (e.Key == System.Windows.Input.Key.Escape)
