@@ -27,13 +27,13 @@ if %ERRORLEVEL% neq 0 (
 :: 3. Generate Release ZIP Archive
 echo.
 echo [3/3] Creating Release ZIP package...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path '%~dp0..\bin\Release\*' -DestinationPath '%~dp0..\Output\SOLUM-UI-v0.0.9-beta.zip' -Force"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path '%~dp0..\bin\Release\*' -DestinationPath '%~dp0..\Output\SOLUM-UI-v0.1.0-beta.zip' -Force"
 
 echo.
 echo ========================================================
 echo   SUCCESS! Files ready in Output folder:
 echo   - SOLACE-UI-REPO\Output\SolaceSetup.exe
-echo   - SOLACE-UI-REPO\Output\SOLUM-UI-v0.0.9-beta.zip
+echo   - SOLACE-UI-REPO\Output\SOLUM-UI-v0.1.0-beta.zip
 echo ========================================================
 echo.
 pause

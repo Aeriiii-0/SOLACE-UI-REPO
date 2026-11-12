@@ -2,7 +2,7 @@
 ; Compiled with Inno Setup
 
 #define MyAppName "Solace"
-#define MyAppVersion "0.0.9-beta"
+#define MyAppVersion "0.1.0-beta"
 #define MyAppPublisher "CSWDO - City of Biñan"
 #define MyAppExeName "SOLUM-UI.exe"
 
