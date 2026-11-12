@@ -89,7 +89,6 @@ namespace SOLUM_UI.Views.Dialogs
             TxtFirstName.IsEnabled = !isLoading;
             TxtLastName.IsEnabled = !isLoading;
             TxtContactNumber.IsEnabled = !isLoading;
-            Cursor = isLoading ? System.Windows.Input.Cursors.Wait : System.Windows.Input.Cursors.Arrow;
         }
 
         private static void NameInput_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)

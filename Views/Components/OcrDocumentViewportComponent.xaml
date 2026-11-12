@@ -217,9 +217,6 @@
                         <Button x:Name="BtnSelectImage" Content="Upload File" Click="SelectImage_Click"
                                 Style="{StaticResource PillOutline}" Height="36" Padding="18,0" FontSize="12" Tag="{StaticResource R18}" Margin="8,0,0,0"/>
                     </StackPanel>
-                    <TextBlock Grid.Column="1" Text="Scroll to pan • Ctrl+Wheel to zoom • Click box to inspect"
-                               FontSize="11" Foreground="#9A8089" VerticalAlignment="Center" Margin="14,0,10,0"
-                               TextTrimming="CharacterEllipsis"/>
                     <Grid Grid.Column="2" HorizontalAlignment="Right">
                         <Button x:Name="BtnOcrSettings" Click="BtnOcrSettings_Click" Style="{StaticResource RingButton}"
                                 ToolTip="OCR &amp; Scanner Settings">

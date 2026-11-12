@@ -454,10 +454,12 @@ namespace SOLUM_UI.Services
                 return "Elementary";
 
             }
-            if (clean.Contains("none") || clean.Contains("wala") || clean.Contains("na"))
+            if (clean.Contains("none") || clean.Contains("wala") || clean.Contains("noschool"))
+                return "None";
+            if (clean == "na")
                 return string.Empty;
-            // Fallback similarity check against standard 5
-            string[] standardOptions = { "College", "High School", "Elementary", "Vocational", "Post Graduate" };
+            // Fallback similarity check against standard options
+            string[] standardOptions = { "None", "College", "High School", "Elementary", "Vocational", "Post Graduate" };
             foreach (var opt in standardOptions)
             {
                 if (ComputeSimilarity(clean, opt.ToLowerInvariant()) >= 0.50)

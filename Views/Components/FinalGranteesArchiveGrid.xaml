@@ -99,7 +99,7 @@
                           VirtualizingStackPanel.VirtualizationMode="Recycling"
                           VirtualizingPanel.ScrollUnit="Pixel"
                           ScrollViewer.CanContentScroll="True"
-                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"
                           SizeChanged="FinalGranteesListView_SizeChanged">
                     <ListView.View>
                         <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">

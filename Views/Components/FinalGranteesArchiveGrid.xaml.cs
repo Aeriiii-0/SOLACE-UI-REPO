@@ -26,7 +26,11 @@ namespace SOLUM_UI.Views.Components
 
         private void FinalGranteesListView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            AdjustColumnWidths();
+            if (e.WidthChanged || e.PreviousSize.Width <= 0)
+            {
+                AdjustColumnWidths();
+                Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(AdjustColumnWidths));
+            }
         }
 
         private void AdjustColumnWidths()
@@ -43,7 +47,7 @@ namespace SOLUM_UI.Views.Components
             if (ColStatus != null) ColStatus.Width = wStatus;
 
             double fixedWidth = wContact + wEmergencyPhone + wStatus;
-            double availableFlexible = Math.Max(100.0, totalWidth - fixedWidth - scrollMargin);
+            double availableFlexible = Math.Max(360.0, totalWidth - fixedWidth - scrollMargin);
 
             double wName = Math.Floor(availableFlexible * 0.28);
             double wBarangay = Math.Floor(availableFlexible * 0.18);

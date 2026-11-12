@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <item>
     <!-- Bump this version number whenever you publish a new update on GitHub -->
-    <version>0.0.8</version>
+    <version>0.0.9</version>
 
     <!-- Direct download URL to the Release ZIP attached to the GitHub Release -->
-    <url>https://github.com/Aeriiii-0/SOLACE-UI-REPO/releases/download/v0.0.8-beta/SOLUM-UI-v0.0.8-beta.zip</url>
+    <url>https://github.com/Aeriiii-0/SOLACE-UI-REPO/releases/download/v0.0.9-beta/SOLUM-UI-v0.0.9-beta.zip</url>
+
+    <!-- SHA-256 checksum of SOLUM-UI-v0.0.9-beta.zip -->
+    <checksum algorithm="SHA256">6536EDEBBC2EF165EBF88A52D7C2ADD2A5B54A0701E44A422BB4C79FF0819A55</checksum>
 
     <!-- URL to the changelog HTML in your GitHub repository -->
     <changelog>https://raw.githubusercontent.com/Aeriiii-0/SOLACE-UI-REPO/master/deploy/changelog.html</changelog>

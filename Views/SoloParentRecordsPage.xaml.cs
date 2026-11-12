@@ -1045,23 +1045,85 @@ namespace SOLUM_UI
             }
             if (methodDialog.Selected == EntryMethod.Scan)
             {
-                var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog { Owner = Application.Current.MainWindow };
-                ocr.SaveAsyncHandler = async (rec) => await CreateSoloParentRecordAsync(rec);
+                var ocr = new SOLUM_UI.Views.Dialogs.OcrScanDialog
+                {
+                    Owner = Application.Current.MainWindow,
+                    CloseImmediatelyOnSubmit = true,
+                    SaveAsyncHandler = async (rec) => await CreateSoloParentRecordAsync(rec)
+                };
                 if (ocr.ShowDialog() == true && ocr.Result != null)
                 {
-                    await OnRecordCreatedAsync(ocr.Result);
+                    _ = RunBackgroundCreateAsync(ocr.Result);
                 }
                 return;
 
             }
             // Manual entry - open 3-step wizard (Step 1 performs validation & duplicate check)
-            RecordDialog dialog = new RecordDialog { Owner = Application.Current.MainWindow };
-            dialog.SaveAsyncHandler = async (rec) => await CreateSoloParentRecordAsync(rec);
+            RecordDialog dialog = new RecordDialog
+            {
+                Owner = Application.Current.MainWindow,
+                CloseImmediatelyOnSubmit = true,
+                SaveAsyncHandler = async (rec) => await CreateSoloParentRecordAsync(rec)
+            };
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                await OnRecordCreatedAsync(dialog.Result);
+                _ = RunBackgroundCreateAsync(dialog.Result);
             }
 
+        }
+
+        private async Task RunBackgroundCreateAsync(SoloParentRecord rec)
+        {
+            try
+            {
+                var saveResult = await CreateSoloParentRecordAsync(rec);
+                if (saveResult != null && saveResult.Succeeded)
+                {
+                    await OnRecordCreatedAsync(rec);
+                    ToastNotification.Show(
+                        "Record Added Successfully",
+                        $"Solo parent record for {rec.Name} has been saved.",
+                        ToastType.Success);
+                    return;
+                }
+
+                bool isPhilSysConflict = saveResult != null && (saveResult.StatusCode == 409 ||
+                    (saveResult.Errors != null && saveResult.Errors.Any(er => er.IndexOf("PhilSys", StringComparison.OrdinalIgnoreCase) >= 0)));
+                string err = (saveResult?.Errors != null && saveResult.Errors.Count > 0)
+                    ? string.Join("\n", saveResult.Errors)
+                    : "Failed to save record on the server.";
+
+                Views.Dialogs.ActionConfirmDialog.Error(
+                    isPhilSysConflict ? "Duplicate PhilSys ID" : "Save Failed",
+                    err + "\n\nReopening the form with your entered data so you can fix and resubmit.");
+
+                var retryDialog = new RecordDialog(rec)
+                {
+                    Owner = Application.Current.MainWindow,
+                    CloseImmediatelyOnSubmit = true,
+                    SaveAsyncHandler = async (r) => await CreateSoloParentRecordAsync(r)
+                };
+                if (retryDialog.ShowDialog() == true && retryDialog.Result != null)
+                {
+                    _ = RunBackgroundCreateAsync(retryDialog.Result);
+                }
+            }
+            catch (Exception ex)
+            {
+                Views.Dialogs.ActionConfirmDialog.Error(
+                    "Save Error",
+                    "An error occurred while saving:\n\n" + ex.Message + "\n\nReopening the form with your entered data.");
+                var retryDialog = new RecordDialog(rec)
+                {
+                    Owner = Application.Current.MainWindow,
+                    CloseImmediatelyOnSubmit = true,
+                    SaveAsyncHandler = async (r) => await CreateSoloParentRecordAsync(r)
+                };
+                if (retryDialog.ShowDialog() == true && retryDialog.Result != null)
+                {
+                    _ = RunBackgroundCreateAsync(retryDialog.Result);
+                }
+            }
         }
 
         private async Task<BaseResponse<object>> CreateSoloParentRecordAsync(SoloParentRecord rec)
@@ -1430,32 +1492,91 @@ namespace SOLUM_UI
                 }
 
             }
-            RecordDialog dialog = new RecordDialog(rawRecord) { Owner = Application.Current.MainWindow };
-            dialog.SaveAsyncHandler = async (rec) =>
+            RecordDialog dialog = new RecordDialog(rawRecord)
             {
-                if (Guid.TryParse(rawRecord.Id, out var guid))
-                {
-                    var updateReq = SoloParentApiService.Instance.MapToUpdateRequest(guid, rec, existingDto);
-                    var updateResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(guid, updateReq);
-                    if (!updateResp.Succeeded)
-                    {
-                        return BaseResponse<object>.FailWithStatus(updateResp.StatusCode, updateResp.Errors != null ? updateResp.Errors.ToArray() : new string[0]);
-                    }
-                }
-                return BaseResponse<object>.Success(true);
+                Owner = Application.Current.MainWindow,
+                CloseImmediatelyOnSubmit = true,
+                SaveAsyncHandler = async (rec) => await UpdateSoloParentRecordAsync(rawRecord, rec, existingDto)
             };
             if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                // Success popup already shown by RecordDialog - just handle post-save logic
-                var changeList = BuildChangeList(rawRecord, dialog.Result);
-                AuditLogService.Instance.LogUpdateWithChanges(dialog.Result.Id, dialog.Result.Name, GetCurrentUser(), CurrentUserRole, changeList);
-                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
-                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
-                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
-                if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
-                await LoadRecordsAsync();
+                _ = RunBackgroundUpdateAsync(rawRecord, dialog.Result, existingDto);
             }
 
+        }
+
+        private async Task<BaseResponse<object>> UpdateSoloParentRecordAsync(SoloParentRecord rawRecord, SoloParentRecord rec, SoloParentDto existingDto)
+        {
+            if (Guid.TryParse(rawRecord.Id, out var guid))
+            {
+                var updateReq = SoloParentApiService.Instance.MapToUpdateRequest(guid, rec, existingDto);
+                var updateResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(guid, updateReq);
+                if (!updateResp.Succeeded)
+                {
+                    return BaseResponse<object>.FailWithStatus(updateResp.StatusCode, updateResp.Errors != null ? updateResp.Errors.ToArray() : new string[0]);
+                }
+            }
+            return BaseResponse<object>.Success(true);
+        }
+
+        private async Task RunBackgroundUpdateAsync(SoloParentRecord rawRecord, SoloParentRecord updatedRecord, SoloParentDto existingDto)
+        {
+            try
+            {
+                var saveResult = await UpdateSoloParentRecordAsync(rawRecord, updatedRecord, existingDto);
+                if (saveResult != null && saveResult.Succeeded)
+                {
+                    var changeList = BuildChangeList(rawRecord, updatedRecord);
+                    AuditLogService.Instance.LogUpdateWithChanges(updatedRecord.Id, updatedRecord.Name, GetCurrentUser(), CurrentUserRole, changeList);
+                    (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SubsidyRecommendation");
+                    (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
+                    (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
+                    if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
+                    await LoadRecordsAsync();
+                    ToastNotification.Show(
+                        "Record Updated Successfully",
+                        $"Solo parent record for {updatedRecord.Name} has been updated.",
+                        ToastType.Success);
+                    return;
+                }
+
+                bool isPhilSysConflict = saveResult != null && (saveResult.StatusCode == 409 ||
+                    (saveResult.Errors != null && saveResult.Errors.Any(er => er.IndexOf("PhilSys", StringComparison.OrdinalIgnoreCase) >= 0)));
+                string err = (saveResult?.Errors != null && saveResult.Errors.Count > 0)
+                    ? string.Join("\n", saveResult.Errors)
+                    : "Failed to update record on the server.";
+
+                Views.Dialogs.ActionConfirmDialog.Error(
+                    isPhilSysConflict ? "Duplicate PhilSys ID" : "Update Failed",
+                    err + "\n\nReopening the form with your entered data so you can fix and resubmit.");
+
+                var retryDialog = new RecordDialog(updatedRecord)
+                {
+                    Owner = Application.Current.MainWindow,
+                    CloseImmediatelyOnSubmit = true,
+                    SaveAsyncHandler = async (r) => await UpdateSoloParentRecordAsync(rawRecord, r, existingDto)
+                };
+                if (retryDialog.ShowDialog() == true && retryDialog.Result != null)
+                {
+                    _ = RunBackgroundUpdateAsync(rawRecord, retryDialog.Result, existingDto);
+                }
+            }
+            catch (Exception ex)
+            {
+                Views.Dialogs.ActionConfirmDialog.Error(
+                    "Update Error",
+                    "An error occurred while updating:\n\n" + ex.Message + "\n\nReopening the form with your entered data.");
+                var retryDialog = new RecordDialog(updatedRecord)
+                {
+                    Owner = Application.Current.MainWindow,
+                    CloseImmediatelyOnSubmit = true,
+                    SaveAsyncHandler = async (r) => await UpdateSoloParentRecordAsync(rawRecord, r, existingDto)
+                };
+                if (retryDialog.ShowDialog() == true && retryDialog.Result != null)
+                {
+                    _ = RunBackgroundUpdateAsync(rawRecord, retryDialog.Result, existingDto);
+                }
+            }
         }
 
         private async void Renew_Click(object sender, RoutedEventArgs e)

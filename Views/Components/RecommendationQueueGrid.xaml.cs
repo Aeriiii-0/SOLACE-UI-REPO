@@ -82,8 +82,11 @@ namespace SOLUM_UI.Views.Components
 
         private void QueueListView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (e.WidthChanged)
+            if (e.WidthChanged || e.PreviousSize.Width <= 0)
+            {
                 AdjustColumnWidths();
+                Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(AdjustColumnWidths));
+            }
         }
 
         private void QueueListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -132,15 +135,15 @@ namespace SOLUM_UI.Views.Components
             if (ColAction != null) ColAction.Width = actionW;
 
             double fixedWidth = selW + rankW + scoreW + depW + cardStatusW + validUntilW + actionW;
-            double minFlexible = 650;
+            double minFlexible = 420;
             double availableFlexible = totalWidth - fixedWidth - scrollMargin;
             double flexibleWidth = Math.Max(minFlexible, availableFlexible);
 
-            double wName = Math.Max(140, Math.Floor(flexibleWidth * 0.22));
-            double wIncome = Math.Max(115, Math.Floor(flexibleWidth * 0.17));
-            double wCare = Math.Max(125, Math.Floor(flexibleWidth * 0.19));
-            double wCirc = Math.Max(130, Math.Floor(flexibleWidth * 0.20));
-            double wNeeds = Math.Max(140, flexibleWidth - (wName + wIncome + wCare + wCirc));
+            double wName = Math.Max(110, Math.Floor(flexibleWidth * 0.22));
+            double wIncome = Math.Max(85, Math.Floor(flexibleWidth * 0.17));
+            double wCare = Math.Max(95, Math.Floor(flexibleWidth * 0.19));
+            double wCirc = Math.Max(95, Math.Floor(flexibleWidth * 0.20));
+            double wNeeds = Math.Max(95, flexibleWidth - (wName + wIncome + wCare + wCirc));
             if (ColName != null) ColName.Width = wName;
             if (ColIncome != null) ColIncome.Width = wIncome;
             if (ColCare != null) ColCare.Width = wCare;

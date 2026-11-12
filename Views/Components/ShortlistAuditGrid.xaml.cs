@@ -78,8 +78,11 @@ namespace SOLUM_UI.Views.Components
 
         private void ShortlistListView_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (e.WidthChanged)
+            if (e.WidthChanged || e.PreviousSize.Width <= 0)
+            {
                 AdjustColumnWidths();
+                Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(AdjustColumnWidths));
+            }
         }
 
         private void ShortlistListView_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -130,12 +133,12 @@ namespace SOLUM_UI.Views.Components
             if (ColAction != null) ColAction.Width = actionW;
 
             double fixedWidth = selW + rankW + scoreW + crossW + depW + validW + cardStatusW + subStatusW + actionW;
-            double minFlexible = 400;
+            double minFlexible = 260;
             double availableFlexible = totalWidth - fixedWidth - scrollMargin;
             double flexibleWidth = Math.Max(minFlexible, availableFlexible);
 
-            double wName = Math.Max(140, Math.Floor(flexibleWidth * 0.38));
-            double wCompliance = Math.Max(220, flexibleWidth - wName);
+            double wName = Math.Max(110, Math.Floor(flexibleWidth * 0.38));
+            double wCompliance = Math.Max(150, flexibleWidth - wName);
             if (ColName != null) ColName.Width = wName;
             if (ColCompliance != null) ColCompliance.Width = wCompliance;
         }

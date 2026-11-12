@@ -232,12 +232,19 @@ namespace SOLUM_UI.Services.Api
                     !string.IsNullOrWhiteSpace(AuthApiService.Instance.RefreshToken))
                 {
                     bool lockAcquired = false;
+                    string tokenBeforeLock = AuthApiService.Instance.Token;
                     try
                     {
                         // Use a longer timeout to avoid race conditions that trigger false session expirations
                         lockAcquired = await _refreshLock.WaitAsync(TimeSpan.FromSeconds(30));
                         if (lockAcquired)
                         {
+                            // Another concurrent request already refreshed the token while we waited
+                            if (!string.IsNullOrWhiteSpace(AuthApiService.Instance.Token) &&
+                                !string.Equals(AuthApiService.Instance.Token, tokenBeforeLock, StringComparison.Ordinal))
+                            {
+                                return await retryFunc();
+                            }
                             var refreshResult = await AuthApiService.Instance.RefreshTokenAsync();
                             if (refreshResult != null && refreshResult.Succeeded && refreshResult.Data != null && !string.IsNullOrWhiteSpace(refreshResult.Data.Token))
                             {

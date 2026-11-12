@@ -389,7 +389,6 @@ namespace SOLUM_UI.Services
                     RedirectStandardError = true,
                     RedirectStandardOutput = true
                 };
-                psi.EnvironmentVariables["SOLACE_OCR_TOKEN"] = _sessionToken;
                 try
                 {
                     ClearServerLogs();
@@ -429,7 +428,6 @@ namespace SOLUM_UI.Services
                 RedirectStandardError = true,
                 RedirectStandardOutput = true
             };
-            pyPsi.EnvironmentVariables["SOLACE_OCR_TOKEN"] = _sessionToken;
             try
             {
                 ClearServerLogs();

@@ -332,7 +332,7 @@ namespace SOLUM_UI.Services
                 {
                     if (string.Equals(prop.Name?.ToString(), propertyName, StringComparison.OrdinalIgnoreCase))
                     {
-                        return prop.get_Value()?.ToString();
+                        return prop.Value?.ToString();
                     }
                 }
             }
@@ -349,7 +349,7 @@ namespace SOLUM_UI.Services
                 {
                     if ((int)prop.PropertyID == propertyId)
                     {
-                        return prop.get_Value()?.ToString();
+                        return prop.Value?.ToString();
                     }
                 }
             }

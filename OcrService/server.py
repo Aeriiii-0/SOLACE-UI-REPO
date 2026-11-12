@@ -13,8 +13,7 @@ import cv2
 import numpy as np
 import uvicorn
 import paddle
-import hmac
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Depends, Header
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.responses import RedirectResponse
 
 try:
@@ -59,13 +58,7 @@ def reload_engine_modules():
 
 app = FastAPI(title="Solace OCR Engine", version="2.0")
 
-EXPECTED_OCR_TOKEN = os.environ.get("SOLACE_OCR_TOKEN", "")
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024
-
-def verify_ocr_token(x_ocr_token: str = Header(default="")):
-    """Enforces per-session shared token authentication when launched by the desktop client."""
-    if EXPECTED_OCR_TOKEN and not hmac.compare_digest(x_ocr_token or "", EXPECTED_OCR_TOKEN):
-        raise HTTPException(status_code=401, detail="Unauthorized OCR client.")
 
 # Initialize Ultra-Fast Lightweight CPU PaddleOCR & Native OpenVINO Recognition Engine
 ocr = None
@@ -117,11 +110,11 @@ def health_check():
         "version": "2.0"
     }
 
-@app.get("/template", dependencies=[Depends(verify_ocr_token)])
+@app.get("/template")
 def get_template():
     return load_template()
 
-@app.post("/template", dependencies=[Depends(verify_ocr_token)])
+@app.post("/template")
 async def save_template(template_data: dict):
     if not isinstance(template_data, dict) or not isinstance(template_data.get("fields"), dict):
         raise HTTPException(status_code=400, detail="Invalid template schema: 'fields' object is required.")
@@ -149,7 +142,7 @@ def sanitize_for_json(obj):
         return obj.tolist()
     return obj
 
-@app.post("/extract-form", dependencies=[Depends(verify_ocr_token)])
+@app.post("/extract-form")
 def extract_form(file: UploadFile = File(...), mode: str = "global", include_preview: bool = True):
     """
     Full document ingestion pipeline:
@@ -205,7 +198,7 @@ def extract_form(file: UploadFile = File(...), mode: str = "global", include_pre
 
 
 
-@app.post("/extract-roi", dependencies=[Depends(verify_ocr_token)])
+@app.post("/extract-roi")
 def extract_roi(
     file: UploadFile = File(...),
     x: float = Form(...),

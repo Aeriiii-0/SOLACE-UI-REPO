@@ -92,8 +92,10 @@ namespace SOLUM_UI
             SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this);
             if (DialogShell != null)
             {
-                double availW = Math.Min(Width, SystemParameters.WorkArea.Width);
-                double availH = Math.Min(Height, SystemParameters.WorkArea.Height);
+                double rawW = (!double.IsNaN(Width) && Width > 0) ? Width : (ActualWidth > 0 ? ActualWidth : SystemParameters.WorkArea.Width);
+                double rawH = (!double.IsNaN(Height) && Height > 0) ? Height : (ActualHeight > 0 ? ActualHeight : SystemParameters.WorkArea.Height);
+                double availW = Math.Min(rawW, SystemParameters.WorkArea.Width);
+                double availH = Math.Min(rawH, SystemParameters.WorkArea.Height);
                 DialogShell.MaxWidth  = Math.Max(800, Math.Min(availW - 30, 1480));
                 DialogShell.Width     = Math.Max(800, Math.Min(availW - 40, 1380));
                 DialogShell.MaxHeight = Math.Max(500, Math.Min(availH - 30, 920));

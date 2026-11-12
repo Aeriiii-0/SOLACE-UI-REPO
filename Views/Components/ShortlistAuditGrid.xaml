@@ -239,7 +239,7 @@
                           VirtualizingPanel.ScrollUnit="Pixel"
                           ScrollViewer.CanContentScroll="True"
                           ScrollViewer.IsDeferredScrollingEnabled="False"
-                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.ScrollChanged="ShortlistListView_ScrollChanged" SizeChanged="ShortlistListView_SizeChanged">
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.ScrollChanged="ShortlistListView_ScrollChanged" SizeChanged="ShortlistListView_SizeChanged">
                     <ListView.View>
                         <GridView ColumnHeaderContainerStyle="{StaticResource ColHeader}">
                             <GridViewColumn x:Name="ColSelect" Width="0">

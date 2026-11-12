@@ -19,6 +19,7 @@ namespace SOLUM_UI.Views.Dialogs
         public SoloParentRecord Result { get; private set; }
         public OcrScanDialogViewModel ViewModel { get; }
         public Func<SoloParentRecord, Task<BaseResponse<object>>> SaveAsyncHandler { get; set; }
+        public bool CloseImmediatelyOnSubmit { get; set; } = false;
 
         private bool _savedSuccessfully = false;
 
@@ -50,8 +51,10 @@ namespace SOLUM_UI.Views.Dialogs
             SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this);
             if (DialogShell != null)
             {
-                double availH = Math.Min(Height, SystemParameters.WorkArea.Height);
-                double availW = Math.Min(Width, SystemParameters.WorkArea.Width);
+                double rawH = (!double.IsNaN(Height) && Height > 0) ? Height : (ActualHeight > 0 ? ActualHeight : SystemParameters.WorkArea.Height);
+                double rawW = (!double.IsNaN(Width) && Width > 0) ? Width : (ActualWidth > 0 ? ActualWidth : SystemParameters.WorkArea.Width);
+                double availH = Math.Min(rawH, SystemParameters.WorkArea.Height);
+                double availW = Math.Min(rawW, SystemParameters.WorkArea.Width);
                 DialogShell.MaxHeight = Math.Max(500, Math.Min(availH - 30, 840));
                 DialogShell.Height    = Math.Max(500, Math.Min(availH - 45, 800));
                 DialogShell.MaxWidth  = Math.Max(800, Math.Min(availW - 30, 1440));
@@ -516,6 +519,13 @@ namespace SOLUM_UI.Views.Dialogs
             if (SaveAsyncHandler != null)
             {
                 ToastNotification.Show("Adding Record", "Saving solo parent record to database...", ToastType.Success);
+                if (CloseImmediatelyOnSubmit)
+                {
+                    Result = preview;
+                    _savedSuccessfully = true;
+                    SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
+                    return;
+                }
                 var prevSaveContent = BtnSave?.Content;
                 if (BtnSave != null)
                 {
@@ -523,7 +533,6 @@ namespace SOLUM_UI.Views.Dialogs
                     BtnSave.Content = "Saving...";
                 }
                 DialogShell.IsEnabled = false;
-                Cursor = Cursors.Wait;
                 try
                 {
                     var saveResult = await SaveAsyncHandler(preview);
@@ -545,7 +554,6 @@ namespace SOLUM_UI.Views.Dialogs
                 }
                 finally
                 {
-                    Cursor = null;
                     DialogShell.IsEnabled = true;
                     if (BtnSave != null)
                     {

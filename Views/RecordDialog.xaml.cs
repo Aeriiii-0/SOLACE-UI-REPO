@@ -372,6 +372,7 @@ namespace SOLUM_UI
     {
         public SoloParentRecord Result { get; private set; }
         public Func<SoloParentRecord, Task<BaseResponse<object>>> SaveAsyncHandler { get; set; }
+        public bool CloseImmediatelyOnSubmit { get; set; } = false;
         private readonly SoloParentRecord _existing;
         private readonly bool _isRenewal;
         private int _currentStep = 1;
@@ -1790,8 +1791,10 @@ namespace SOLUM_UI
         private void TxtBStayAbroad_TextChanged(object sender, TextChangedEventArgs e)    { }
         private void TxtNeeds_TextChanged(object sender, TextChangedEventArgs e)          { }
         private void TxtOtherIncome_TextChanged(object sender, TextChangedEventArgs e)    { }
-        private void CmbSex_SelectionChanged(object sender, SelectionChangedEventArgs e)         => ClearFieldError(CmbSex,         ErrSex);
-        private void CmbCivilStatus_SelectionChanged(object sender, SelectionChangedEventArgs e) => ClearFieldError(CmbCivilStatus, ErrCivilStatus);
+        private void CmbSex_SelectionChanged(object sender, SelectionChangedEventArgs e)              => ClearFieldError(CmbSex,              ErrSex);
+        private void CmbCivilStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)      => ClearFieldError(CmbCivilStatus,      ErrCivilStatus);
+        private void CmbEducation_SelectionChanged(object sender, SelectionChangedEventArgs e)        => ClearFieldError(CmbEducation,        ErrEducation);
+        private void CmbEmploymentStatus_SelectionChanged(object sender, SelectionChangedEventArgs e) => ClearFieldError(CmbEmploymentStatus, ErrEmploymentStatus);
 
         private void MarkError(Control ctrl, TextBlock lbl, string msg)
         {
@@ -1955,6 +1958,12 @@ namespace SOLUM_UI
                 missing.Add("Barangay");
                 ok = false;
             }
+
+            if (string.IsNullOrWhiteSpace(GetComboValue(CmbEducation)))
+            { MarkError(CmbEducation, ErrEducation, "Required."); missing.Add("Educational Attainment"); ok = false; }
+
+            if (string.IsNullOrWhiteSpace(GetComboValue(CmbEmploymentStatus)))
+            { MarkError(CmbEmploymentStatus, ErrEmploymentStatus, "Required."); missing.Add("Employment Status"); ok = false; }
 
             string contactDigits = Regex.Replace(TxtContact.Text ?? "", @"\D", "");
             if (string.IsNullOrWhiteSpace(contactDigits))
@@ -2387,6 +2396,14 @@ namespace SOLUM_UI
                 }
                 
                 ToastNotification.Show(toastTitle, toastMessage, toastType);
+
+                if (CloseImmediatelyOnSubmit)
+                {
+                    Result = preview;
+                    _savedSuccessfully = true;
+                    SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, true);
+                    return;
+                }
 
                 var prevSaveContent = BtnSave?.Content;
                 if (BtnSave != null)

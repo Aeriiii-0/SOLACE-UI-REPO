@@ -343,6 +343,18 @@ namespace SOLUM_UI.Views.Components
             MarkBadgeEdited(Badge_CivilStatus, TxtConf_CivilStatus);
         }
 
+        private void CmbEducation_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ClearFieldError(CmbEducation, ErrEducation);
+            MarkBadgeEdited(Badge_Education, TxtConf_Education);
+        }
+
+        private void CmbEmploymentStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ClearFieldError(CmbEmploymentStatus, ErrEmploymentStatus);
+            MarkBadgeEdited(Badge_EmploymentStatus, TxtConf_EmploymentStatus);
+        }
+
         private void CmbBarangay_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ClearFieldError(CmbBarangay, ErrBarangay);
@@ -466,6 +478,12 @@ namespace SOLUM_UI.Views.Components
             if (string.IsNullOrWhiteSpace(barangayValue))
             { MarkError(CmbBarangay, ErrBarangay, "Required."); missing.Add("Barangay"); ok = false; }
 
+            if (string.IsNullOrWhiteSpace(GetComboValue(CmbEducation)))
+            { MarkError(CmbEducation, ErrEducation, "Required."); missing.Add("Educational Attainment"); ok = false; }
+
+            if (string.IsNullOrWhiteSpace(GetComboValue(CmbEmploymentStatus)))
+            { MarkError(CmbEmploymentStatus, ErrEmploymentStatus, "Required."); missing.Add("Employment Status"); ok = false; }
+
             string contactDigits = Regex.Replace(TxtContact.Text ?? "", @"\D", "");
             if (string.IsNullOrWhiteSpace(contactDigits))
             { MarkError(TxtContact, ErrContact, "Required."); missing.Add("Contact Number"); ok = false; }
@@ -494,6 +512,8 @@ namespace SOLUM_UI.Views.Components
             if (string.IsNullOrWhiteSpace(TxtPlaceOfBirth.Text)) { TxtPlaceOfBirth.Focus(); TxtPlaceOfBirth.BringIntoView(); return; }
             if (string.IsNullOrWhiteSpace(TxtAddress.Text)) { TxtAddress.Focus(); TxtAddress.BringIntoView(); return; }
             if (string.IsNullOrWhiteSpace(GetComboValue(CmbBarangay))) { CmbBarangay.Focus(); CmbBarangay.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(GetComboValue(CmbEducation))) { CmbEducation.Focus(); CmbEducation.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(GetComboValue(CmbEmploymentStatus))) { CmbEmploymentStatus.Focus(); CmbEmploymentStatus.BringIntoView(); return; }
             string contactDigits = Regex.Replace(TxtContact.Text ?? "", @"\D", "");
             if (string.IsNullOrWhiteSpace(contactDigits) || contactDigits.Length != 11 || !contactDigits.StartsWith("09")) { TxtContact.Focus(); TxtContact.BringIntoView(); return; }
             string emergencyDigits = Regex.Replace(TxtEmergencyNumber.Text ?? "", @"\D", "");

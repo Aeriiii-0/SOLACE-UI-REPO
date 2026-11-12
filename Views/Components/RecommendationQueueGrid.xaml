@@ -412,7 +412,7 @@
                           VirtualizingPanel.ScrollUnit="Pixel"
                           ScrollViewer.CanContentScroll="True"
                           ScrollViewer.IsDeferredScrollingEnabled="False"
-                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"
                           ScrollViewer.ScrollChanged="QueueListView_ScrollChanged"
                           SizeChanged="QueueListView_SizeChanged">
                     <ListView.View>
