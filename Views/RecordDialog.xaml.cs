@@ -2368,34 +2368,10 @@ namespace SOLUM_UI
                 DialogShell.Visibility = Visibility.Visible;
                 return;
             }
-            DialogShell.Visibility = Visibility.Visible;
+            // Keep DialogShell hidden during save operation - will be restored on close or error
             if (SaveAsyncHandler != null)
             {
-                // Show toast notification with appropriate message and color based on operation
-                string toastTitle;
-                string toastMessage;
-                ToastType toastType;
-                
-                if (_isRenewal)
-                {
-                    toastTitle = "Renewing Record";
-                    toastMessage = "Processing renewal for solo parent record...";
-                    toastType = ToastType.Info; // Maroon color
-                }
-                else if (isEdit)
-                {
-                    toastTitle = "Editing Record";
-                    toastMessage = "Updating solo parent record in database...";
-                    toastType = ToastType.Warning; // Yellow-orange color
-                }
-                else
-                {
-                    toastTitle = "Adding Record";
-                    toastMessage = "Saving solo parent record to database...";
-                    toastType = ToastType.Success; // Green color
-                }
-                
-                ToastNotification.Show(toastTitle, toastMessage, toastType);
+                // Don't show "Processing..." toast to avoid stacking with success toast
 
                 if (CloseImmediatelyOnSubmit)
                 {
@@ -2422,12 +2398,14 @@ namespace SOLUM_UI
                         if (saveResult.StatusCode == 409 || (saveResult.Errors != null && saveResult.Errors.Any(err => err.IndexOf("PhilSys", StringComparison.OrdinalIgnoreCase) >= 0)))
                         {
                             string err = (saveResult.Errors != null && saveResult.Errors.Count > 0) ? saveResult.Errors[0] : "PhilSys ID is already registered to an existing record.";
+                            DialogShell.Visibility = Visibility.Visible;
                             SetPhilSysError(err);
                             return;
                         }
                         else
                         {
                             string err = (saveResult.Errors != null && saveResult.Errors.Count > 0) ? string.Join("\n", saveResult.Errors) : "Failed to save record on the server.";
+                            DialogShell.Visibility = Visibility.Visible;
                             Views.Dialogs.ActionConfirmDialog.Error("Save Failed", err);
                             return;
                         }
@@ -2435,6 +2413,7 @@ namespace SOLUM_UI
                 }
                 catch (Exception ex)
                 {
+                    DialogShell.Visibility = Visibility.Visible;
                     Views.Dialogs.ActionConfirmDialog.Error("Save Error", "An error occurred while saving: " + ex.Message);
                     return;
                 }
