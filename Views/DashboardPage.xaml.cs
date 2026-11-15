@@ -469,6 +469,9 @@ namespace SOLUM_UI
 
         private void ReviewExpiring_Click(object sender, RoutedEventArgs e)
         {
+            // Mark notification dot as reviewed
+            if (DataContext is DashboardViewModel dvm)
+                dvm.MarkExpiringReviewed();
             try
             {
                 System.Diagnostics.Debug.WriteLine("ReviewExpiring_Click: Starting navigation");

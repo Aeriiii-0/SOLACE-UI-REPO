@@ -209,11 +209,11 @@
 
                 <Grid.ColumnDefinitions>
 
-                    <ColumnDefinition Width="2.5*"/>
+                    <ColumnDefinition Width="*"/>
 
-                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="0"/>
 
-                    <ColumnDefinition Width="*" MinWidth="200" MaxWidth="320"/>
+                    <ColumnDefinition Width="0"/>
 
                 </Grid.ColumnDefinitions>
 
@@ -443,13 +443,13 @@
 
                         <RowDefinition Height="Auto"/>
 
-                        <RowDefinition Height="*"/>
-
                         <RowDefinition Height="Auto"/>
+
+                        <RowDefinition Height="*"/>
 
                     </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <Grid Grid.Row="1" Margin="0,0,0,16">
 
                         <Grid.ColumnDefinitions>
 
@@ -603,7 +603,7 @@
 
                     </Grid>
 
-                    <Border Grid.Row="1" Background="White" CornerRadius="20" Padding="24,20" Margin="0,0,0,16"
+                    <Border Grid.Row="2" Background="White" CornerRadius="20" Padding="24,20" Margin="0,0,0,16"
 
                             BorderBrush="#702943" BorderThickness="1" Effect="{StaticResource CardShadow}" UseLayoutRounding="True" SnapsToDevicePixels="True">
 
@@ -727,9 +727,9 @@
 
                     </Border>
 
-                    <Border Grid.Row="2" Background="White" CornerRadius="18" Padding="18,14"
-
-                            BorderBrush="#E8B04A" BorderThickness="1" UseLayoutRounding="True" SnapsToDevicePixels="True">
+                    <Border Grid.Row="0" Background="#FAEEDA" CornerRadius="999" Padding="10,0,10,0"
+                            BorderBrush="#EF9F27" BorderThickness="1" UseLayoutRounding="True" SnapsToDevicePixels="True"
+                            Margin="0,0,0,12" Height="52">
 
                         <Grid>
 
@@ -743,33 +743,72 @@
 
                             </Grid.ColumnDefinitions>
 
-                            <Border Grid.Column="0" Width="40" Height="40" Background="#FDEBC8" CornerRadius="12" Margin="0,0,14,0">
+                            <!-- Left: circular amber icon with notification dot + pulse ring -->
+                            <Grid Grid.Column="0" Width="40" Height="40" Margin="0,0,12,0">
 
-                                <Path Data="M6,2H18V8H18V8L14,12L18,16V16H18V22H6V16H6V16L10,12L6,8V8H6V2M16,16.5L12,12.5L8,16.5V20H16V16.5M12,11.5L16,7.5V4H8V7.5L12,11.5M10,6H14V6.75L12,8.75L10,6.75V6Z"
+                                <Border Width="40" Height="40" CornerRadius="20" Background="#FAEEDA">
 
-                                      Fill="#E8960C" Stretch="Uniform" Width="16" Height="16"/>
+                                    <Path Data="M6,2H18V8H18V8L14,12L18,16V16H18V22H6V16H6V16L10,12L6,8V8H6V2M16,16.5L12,12.5L8,16.5V20H16V16.5M12,11.5L16,7.5V4H8V7.5L12,11.5M10,6H14V6.75L12,8.75L10,6.75V6Z"
 
-                            </Border>
+                                          Fill="#E8960C" Stretch="Uniform" Width="18" Height="18"/>
 
+                                </Border>
+
+                                <!-- Pulse ring Ellipse (animates on Loaded) -->
+                                <Ellipse x:Name="PulseRing" Width="14" Height="14"
+                                         HorizontalAlignment="Right" VerticalAlignment="Top"
+                                         Margin="0,-2,-2,0"
+                                         Stroke="#E24B4A" StrokeThickness="1.5" Fill="Transparent"
+                                         RenderTransformOrigin="0.5,0.5" Opacity="0"
+                                         Visibility="{Binding ShowExpiringDot, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Ellipse.RenderTransform>
+                                        <ScaleTransform x:Name="PulseScale" ScaleX="1" ScaleY="1"/>
+                                    </Ellipse.RenderTransform>
+                                    <Ellipse.Triggers>
+                                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard RepeatBehavior="Forever">
+                                                    <DoubleAnimation Storyboard.TargetName="PulseScale" Storyboard.TargetProperty="ScaleX"
+                                                                     From="1" To="2.6" Duration="0:0:1.4" AutoReverse="False"/>
+                                                    <DoubleAnimation Storyboard.TargetName="PulseScale" Storyboard.TargetProperty="ScaleY"
+                                                                     From="1" To="2.6" Duration="0:0:1.4" AutoReverse="False"/>
+                                                    <DoubleAnimation Storyboard.TargetName="PulseRing" Storyboard.TargetProperty="Opacity"
+                                                                     From="0.8" To="0" Duration="0:0:1.4" AutoReverse="False"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Ellipse.Triggers>
+                                </Ellipse>
+
+                                <!-- Red notification dot -->
+                                <Ellipse Width="8" Height="8"
+                                         HorizontalAlignment="Right" VerticalAlignment="Top"
+                                         Margin="0,-1,-1,0"
+                                         Fill="#E24B4A"
+                                         Visibility="{Binding ShowExpiringDot, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                            </Grid>
+
+                            <!-- Middle: text info -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
 
-                                <TextBlock Text="Expiring this month"
+                                <TextBlock FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="#2A1B21">
+                                    <Run Text="{Binding RenewalsDueThisMonth}"/><Run Text=" records expiring this month"/>
+                                </TextBlock>
 
-                                           FontFamily="Segoe UI" FontSize="14" FontWeight="SemiBold" Foreground="#2A1B21"/>
-
-                                <TextBlock Text="{Binding ExpiringThisMonthCount}"
-
-                                           FontFamily="Segoe UI" FontSize="12" Foreground="#8E6F7B" Margin="0,3,0,0"/>
+                                <TextBlock Text="Renew before they turn inactive"
+                                           FontFamily="Segoe UI" FontSize="11" Foreground="#8E6F7B" Margin="0,2,0,0"/>
 
                             </StackPanel>
 
-                            <Button Grid.Column="2" Cursor="Hand" Click="ReviewExpiring_Click" VerticalAlignment="Center">
+                            <!-- Right: Review button -->
+                            <Button Grid.Column="2" Cursor="Hand" Click="ReviewExpiring_Click" VerticalAlignment="Center" Margin="12,0,0,0">
 
                                 <Button.Template>
 
                                     <ControlTemplate TargetType="Button">
 
-                                        <Border x:Name="Bg" Background="#E8960C" CornerRadius="12" Padding="18,10">
+                                        <Border x:Name="Bg" Background="#E8960C" CornerRadius="12" Padding="14,8">
 
                                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
@@ -789,229 +828,11 @@
 
                                 </Button.Template>
 
-                                <TextBlock Text="Review expiring records" FontFamily="Segoe UI" FontSize="12.5"
+                                <TextBlock Text="Review expiring records" FontFamily="Segoe UI" FontSize="12"
 
                                            FontWeight="SemiBold" Foreground="White"/>
 
                             </Button>
-
-                        </Grid>
-
-                    </Border>
-
-                </Grid>
-
-                <Grid Grid.Row="1" Grid.Column="2">
-
-                    <Grid.RowDefinitions>
-
-                        <RowDefinition Height="*"/>
-
-                    </Grid.RowDefinitions>
-
-                    <Border Grid.Row="0" Background="White" CornerRadius="20"
-
-                            BorderBrush="#702943" BorderThickness="1.5" Effect="{StaticResource CardShadow}">
-
-                        <Grid>
-
-                            <Grid.RowDefinitions>
-
-                                <RowDefinition Height="Auto"/>
-
-                                <RowDefinition Height="*"/>
-
-                                <RowDefinition Height="Auto"/>
-
-                            </Grid.RowDefinitions>
-
-                            <Grid Grid.Row="0" Margin="18,16,18,8">
-
-                                <TextBlock Text="Recent activity"
-
-                                           FontFamily="{StaticResource HeadingFont}" FontSize="17" FontWeight="Bold" Foreground="#702943"/>
-
-                                <Button Click="ViewAllLogs_Click" HorizontalAlignment="Right" VerticalAlignment="Center" Cursor="Hand">
-
-                                    <Button.Template>
-
-                                        <ControlTemplate TargetType="Button">
-
-                                            <ContentPresenter/>
-
-                                        </ControlTemplate>
-
-                                    </Button.Template>
-
-                                    <TextBlock Text="Audit logs" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold"
-
-                                               Foreground="#8E5A70"/>
-
-                                </Button>
-
-                            </Grid>
-
-                            <Grid Grid.Row="1">
-
-                                <ScrollViewer VerticalScrollBarVisibility="Auto"
-
-                                              HorizontalScrollBarVisibility="Disabled" Padding="10,6,10,0"
-
-                                              Visibility="{Binding HasRecentLogs, Converter={StaticResource BoolToVisibilityConverter}}">
-
-                                    <ItemsControl ItemsSource="{Binding RecentLogs}">
-
-                                    <ItemsControl.ItemTemplate>
-
-                                        <DataTemplate>
-
-                                            <Border CornerRadius="12" Padding="6,8" Margin="0,0,0,2"
-
-                                                    Cursor="Hand" ToolTip="{Binding TargetTooltip}">
-
-                                                <Border.InputBindings>
-
-                                                    <MouseBinding MouseAction="LeftClick"
-
-                                                                  Command="{Binding DataContext.SelectLogCommand,
-
-                                                                            RelativeSource={RelativeSource AncestorType=Page}}"
-
-                                                                  CommandParameter="{Binding}"/>
-
-                                                </Border.InputBindings>
-
-                                                <Border.Style>
-
-                                                    <Style TargetType="Border">
-
-                                                        <Setter Property="Background" Value="Transparent"/>
-
-                                                        <Style.Triggers>
-
-                                                            <Trigger Property="IsMouseOver" Value="True">
-
-                                                                <Setter Property="Background" Value="#FDF3F6"/>
-
-                                                            </Trigger>
-
-                                                        </Style.Triggers>
-
-                                                    </Style>
-
-                                                </Border.Style>
-
-                                                <Grid>
-
-                                                    <Grid.ColumnDefinitions>
-
-                                                        <ColumnDefinition Width="36"/>
-
-                                                        <ColumnDefinition Width="*"/>
-
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <Grid Width="36" Height="36" VerticalAlignment="Center">
-
-                                                        <Border CornerRadius="12" Background="{Binding DotColorBrush}" Opacity="0.16"/>
-
-                                                        <Viewbox Width="15" Height="15"
-
-                                                                 HorizontalAlignment="Center" VerticalAlignment="Center">
-
-                                                            <Path Data="{Binding DotIcon}" Fill="{Binding DotColorBrush}" Stretch="Uniform"/>
-
-                                                        </Viewbox>
-
-                                                    </Grid>
-
-                                                    <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
-
-                                                        <TextBlock Text="{Binding ActionTitle, Mode=OneWay}"
-
-                                                                   FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold"
-
-                                                                   Foreground="#2A1B21" TextTrimming="CharacterEllipsis"/>
-
-                                                        <TextBlock FontFamily="Segoe UI" FontSize="11.5" Foreground="#8E6F7B"
-
-                                                                   Margin="0,2,0,0" TextTrimming="CharacterEllipsis">
-
-                                                            <Run Text="{Binding PerformedByDisplay, Mode=OneWay}"/>
-
-                                                            <Run Text=" · "/>
-
-                                                            <Run Text="{Binding DateDisplay, Mode=OneWay}"/>
-
-                                                        </TextBlock>
-
-                                                    </StackPanel>
-
-                                                </Grid>
-
-                                            </Border>
-
-                                        </DataTemplate>
-
-                                    </ItemsControl.ItemTemplate>
-
-                                </ItemsControl>
-
-                                </ScrollViewer>
-
-                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="16"
-
-                                            Visibility="{Binding HasRecentLogs, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-
-                                    <TextBlock Text="No recent activity found"
-
-                                               FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold"
-
-                                               Foreground="#8E6F7B" HorizontalAlignment="Center"/>
-
-                                    <TextBlock Text="Your actions will appear here as you work."
-
-                                               FontFamily="Segoe UI" FontSize="11"
-
-                                               Foreground="#B09DA5" HorizontalAlignment="Center" Margin="0,4,0,0"/>
-
-                                </StackPanel>
-
-                            </Grid>
-
-                            <Border Grid.Row="2" Padding="16,12,16,16">
-
-                                <Button Click="ViewAllLogs_Click" Cursor="Hand" HorizontalAlignment="Stretch">
-
-                                    <Button.Template>
-
-                                        <ControlTemplate TargetType="Button">
-
-                                            <Border x:Name="Bg" Background="#702943" CornerRadius="20" Padding="0,12">
-
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
-                                            </Border>
-
-                                            <ControlTemplate.Triggers>
-
-                                                <Trigger Property="IsMouseOver" Value="True">
-
-                                                    <Setter TargetName="Bg" Property="Background" Value="#9B3060"/>
-
-                                                </Trigger>
-
-                                            </ControlTemplate.Triggers>
-
-                                        </ControlTemplate>
-
-                                    </Button.Template>
-
-                                    <TextBlock Text="View all logs" FontFamily="Segoe UI" FontSize="13.5" FontWeight="SemiBold" Foreground="White"/>
-
-                                </Button>
-
-                            </Border>
 
                         </Grid>
 

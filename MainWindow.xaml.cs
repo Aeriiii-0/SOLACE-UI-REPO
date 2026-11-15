@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 
 
@@ -1909,6 +1909,31 @@ namespace SOLUM_UI
                     HideDimOverlay();
                 }
             }
+        }
+
+        // ── MY ACTIVITY (Encoder) ─────────────────────────────────────────────
+
+        private readonly SOLUM_UI.ViewModels.AuditLogViewModel _myActivityVm
+            = new SOLUM_UI.ViewModels.AuditLogViewModel();
+
+        private void TopBarControl_MyActivityRequested(object sender, RoutedEventArgs e)
+        {
+            ShowMyActivityOverlay();
+        }
+
+        private void ShowMyActivityOverlay()
+        {
+            if (!_myActivityVm.IsInitialized)
+                _ = _myActivityVm.LoadAsync();
+            MyActivityOverlay.DataContext = _myActivityVm;
+            MyActivityOverlayRoot.Visibility = Visibility.Visible;
+            ShowDimOverlay(fullWindow: true);
+        }
+
+        private void MyActivityOverlay_CloseRequested(object sender, RoutedEventArgs e)
+        {
+            MyActivityOverlayRoot.Visibility = Visibility.Collapsed;
+            HideDimOverlay();
         }
         #endregion
     }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
+using SOLUM_UI.ViewModels;
 using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI
@@ -327,6 +329,10 @@ namespace SOLUM_UI
         private bool _hasLoadedData = false;
         private bool _isLoading = false;
         private bool _isUpdatingFilters = false;
+
+        // Audit logs drawer
+        private readonly AuditLogViewModel _adminLogsVm = new AuditLogViewModel();
+        private bool _logsDrawerOpen = false;
 
         // Icon paths used by the row "more options" menu
         private const string ResetPasswordIconData = "M7,14A2,2 0 0,1 5,12A2,2 0 0,1 7,10A2,2 0 0,1 9,12A2,2 0 0,1 7,14M12.65,10C11.83,7.67 9.61,6 7,6A6,6 0 0,0 1,12A6,6 0 0,0 7,18C9.61,18 11.83,16.33 12.65,14H17V18H21V14H23V10H12.65Z";
@@ -1640,6 +1646,122 @@ namespace SOLUM_UI
             {
                 e.CancelCommand();
             }
+        }
+
+        // ── AUDIT LOGS DRAWER ─────────────────────────────────────────────────
+
+        private void BtnAuditLogs_Click(object sender, RoutedEventArgs e)
+        {
+            if (_logsDrawerOpen) CloseLogsDrawer();
+            else OpenLogsDrawer();
+        }
+
+        private void OpenLogsDrawer()
+        {
+            _logsDrawerOpen = true;
+            UsersRootGrid.ColumnDefinitions[2].Width = new GridLength(290);
+            if (!_adminLogsVm.IsInitialized)
+                _ = _adminLogsVm.LoadAsync();
+            _adminLogsVm.PropertyChanged -= AdminLogsVm_PropertyChanged;
+            _adminLogsVm.PropertyChanged += AdminLogsVm_PropertyChanged;
+            RefreshDrawerList();
+        }
+
+        private void AdminLogsVm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "PagedLogs" || e.PropertyName == "IsLoading")
+                Dispatcher.BeginInvoke(new Action(RefreshDrawerList));
+        }
+
+        private void RefreshDrawerList()
+        {
+            DrawerLogsList.Children.Clear();
+            foreach (var log in _adminLogsVm.PagedLogs.Take(15))
+            {
+                var row = new Border
+                {
+                    CornerRadius = new CornerRadius(10),
+                    Padding = new Thickness(8, 6, 8, 6),
+                    Margin = new Thickness(0, 0, 0, 4),
+                    Background = Brushes.White,
+                    BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E5D8DC")),
+                    BorderThickness = new Thickness(1)
+                };
+                var g = new Grid();
+                g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(32) });
+                g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                var iconBorder = new Border
+                {
+                    Width = 28, Height = 28, CornerRadius = new CornerRadius(9),
+                    Background = log.DotColorBrush, VerticalAlignment = VerticalAlignment.Center
+                };
+                try
+                {
+                    iconBorder.Child = new System.Windows.Shapes.Path
+                    {
+                        Data = Geometry.Parse(log.DotIcon ?? ""),
+                        Fill = Brushes.White, Stretch = Stretch.Uniform,
+                        Width = 13, Height = 13,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                }
+                catch { }
+                Grid.SetColumn(iconBorder, 0);
+                g.Children.Add(iconBorder);
+                var stack = new StackPanel { Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
+                stack.Children.Add(new TextBlock
+                {
+                    Text = log.ActionTitle,
+                    FontFamily = new FontFamily("Segoe UI"), FontSize = 11.5, FontWeight = FontWeights.SemiBold,
+                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A1B21")),
+                    TextTrimming = TextTrimming.CharacterEllipsis
+                });
+                var meta = new TextBlock
+                {
+                    FontFamily = new FontFamily("Segoe UI"), FontSize = 10.5,
+                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943")),
+                    Margin = new Thickness(0, 1, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis
+                };
+                meta.Inlines.Add(new Run(log.PerformedByDisplay ?? "") { FontWeight = FontWeights.SemiBold });
+                meta.Inlines.Add(new Run(" · "));
+                meta.Inlines.Add(new Run(log.DateDisplay ?? ""));
+                stack.Children.Add(meta);
+                Grid.SetColumn(stack, 1);
+                g.Children.Add(stack);
+                row.Child = g;
+                DrawerLogsList.Children.Add(row);
+            }
+            if (!_adminLogsVm.PagedLogs.Any() && !_adminLogsVm.IsLoading)
+                DrawerLogsList.Children.Add(new TextBlock
+                {
+                    Text = "No logs found",
+                    FontFamily = new FontFamily("Segoe UI"), FontSize = 12, Foreground = Brushes.Gray,
+                    HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 16, 0, 0)
+                });
+        }
+
+        private void CloseLogsDrawer()
+        {
+            _logsDrawerOpen = false;
+            UsersRootGrid.ColumnDefinitions[2].Width = new GridLength(0);
+            _adminLogsVm.PropertyChanged -= AdminLogsVm_PropertyChanged;
+        }
+
+        private void CloseLogsDrawer_Click(object sender, RoutedEventArgs e) => CloseLogsDrawer();
+
+        private void ExpandLogsDrawer_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_adminLogsVm.IsInitialized)
+                _ = _adminLogsVm.LoadAsync();
+            LogsFullOverlay.Visibility = Visibility.Visible;
+            MainWindow.ShowDimOverlay(fullWindow: true);
+        }
+
+        private void AdminLogsOverlay_CloseRequested(object sender, RoutedEventArgs e)
+        {
+            LogsFullOverlay.Visibility = Visibility.Collapsed;
+            MainWindow.HideDimOverlay();
         }
     }
 }

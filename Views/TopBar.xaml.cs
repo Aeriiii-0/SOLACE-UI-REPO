@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -34,6 +34,16 @@ namespace SOLUM_UI.Controls
         {
             add => AddHandler(LogoutRequestedEvent, value);
             remove => RemoveHandler(LogoutRequestedEvent, value);
+        }
+
+        public static readonly RoutedEvent MyActivityRequestedEvent =
+            EventManager.RegisterRoutedEvent("MyActivityRequested", RoutingStrategy.Bubble,
+                typeof(RoutedEventHandler), typeof(TopBar));
+
+        public event RoutedEventHandler MyActivityRequested
+        {
+            add => AddHandler(MyActivityRequestedEvent, value);
+            remove => RemoveHandler(MyActivityRequestedEvent, value);
         }
 
         public static readonly DependencyProperty PageTitleProperty =
@@ -110,7 +120,11 @@ namespace SOLUM_UI.Controls
             MenuUserName.Text    = name;
             MenuUserRole.Text    = role;
             UserInitial.Text     = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "U";
-        }
+
+            if (MyActivityItem != null)
+                MyActivityItem.Visibility = string.Equals(SOLUM_UI.MainWindow.CurrentUserRole, "ENCODER",
+                    System.StringComparison.OrdinalIgnoreCase)
+                    ? Visibility.Visible : Visibility.Collapsed;        }
 
         private void ProfilePill_Click(object sender, MouseButtonEventArgs e)
         {
@@ -133,6 +147,12 @@ namespace SOLUM_UI.Controls
         {
             ProfileMenu.IsOpen = false;
             RaiseEvent(new RoutedEventArgs(LogoutRequestedEvent));
+        }
+
+        private void Menu_MyActivity(object sender, MouseButtonEventArgs e)
+        {
+            ProfileMenu.IsOpen = false;
+            RaiseEvent(new RoutedEventArgs(MyActivityRequestedEvent));
         }
 
         private void Notification_Click(object sender, RoutedEventArgs e)

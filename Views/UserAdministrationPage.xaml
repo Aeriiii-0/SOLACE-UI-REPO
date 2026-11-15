@@ -1,8 +1,9 @@
-<Page x:Class="SOLUM_UI.UserAdministrationPage"
+﻿<Page x:Class="SOLUM_UI.UserAdministrationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
-      xmlns:behaviors="clr-namespace:SOLUM_UI.Behaviors"
+      xmlns:behaviors="clr-namespace:SOLUM_UI.Behaviors"
+      xmlns:local="clr-namespace:SOLUM_UI"
       Title="User Administration"
       Background="#FFFFFF">
     <Page.Resources>
@@ -583,6 +584,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition x:Name="ColPanel" Width="0"/>
+            <ColumnDefinition x:Name="ColLogsDrawer" Width="0"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
@@ -1194,6 +1196,94 @@
                 </Border>
             </Grid>
         </Border>
+
+        <!-- AUDIT LOGS DRAWER (Col 2) -->
+        <Border x:Name="LogsDrawerPanel" Grid.Column="2" Background="White"
+                BorderBrush="#702943" BorderThickness="1,0,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <!-- Drawer Header -->
+                <Border Grid.Row="0" Background="#702943" Padding="16,14,12,14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Audit logs"
+                                   FontFamily="Georgia" FontSize="16" FontWeight="Bold" Foreground="White"
+                                   VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" Width="28" Height="28" Cursor="Hand" Margin="0,0,6,0"
+                                ToolTip="View full logs" Click="ExpandLogsDrawer_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="14">
+                                        <Path Data="M5,5H10V7H7V10H5V5M14,5H19V10H17V7H14V5M17,14H19V19H14V17H17V14M10,17V19H5V14H7V17H10Z"
+                                              Fill="White" Stretch="Uniform" Width="14" Height="14"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#9B3060"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <Button Grid.Column="2" Width="28" Height="28" Cursor="Hand"
+                                Click="CloseLogsDrawer_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="14">
+                                        <TextBlock Text="&#x2715;" FontSize="13" Foreground="White"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#9B3060"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Border>
+                <!-- Log List -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="DrawerLogsList" Margin="10,8,10,8"/>
+                </ScrollViewer>
+                <!-- View All button -->
+                <Border Grid.Row="2" Padding="12,10">
+                    <Button Click="ExpandLogsDrawer_Click" Cursor="Hand" HorizontalAlignment="Stretch">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bg" Background="#702943" CornerRadius="20" Padding="0,10">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="#9B3060"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <TextBlock Text="View all logs" FontFamily="Segoe UI" FontSize="13"
+                                   FontWeight="SemiBold" Foreground="White"/>
+                    </Button>
+                </Border>
+            </Grid>
+        </Border>
+        <!-- Full-screen logs overlay -->
+        <Grid x:Name="LogsFullOverlay" Grid.ColumnSpan="3" Visibility="Collapsed" Panel.ZIndex="999">
+            <Rectangle Fill="{DynamicResource ModalOverlayBrush}"/>
+            <local:ViewAllLogsOverlay x:Name="AdminLogsOverlay"
+                                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                      Margin="60,40,60,40"
+                                      CloseRequested="AdminLogsOverlay_CloseRequested"/>
+        </Grid>
 
         <components:LoaderOverlay x:Name="UsersLoadingOverlay"
                                   BlurTarget="{Binding ElementName=UsersRootGrid}"

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -220,7 +220,24 @@ namespace SOLUM_UI.ViewModels
 
         public ObservableCollection<MonthBar> MonthlyBars { get; } = new ObservableCollection<MonthBar>();
         public ObservableCollection<AuditLog> RecentLogs  { get; } = new ObservableCollection<AuditLog>();
-        public bool HasRecentLogs => RecentLogs != null && RecentLogs.Count > 0;
+        public bool HasRecentLogs => RecentLogs != null && RecentLogs.Count > 0;
+        // ── Expiring-dot notification state ──────────────────────────────────
+        private bool _showExpiringDot = false;
+        public bool ShowExpiringDot
+        {
+            get => _showExpiringDot;
+            private set { if (_showExpiringDot == value) return; _showExpiringDot = value; OnPropertyChanged(); }
+        }
+        public void MarkExpiringReviewed()
+        {
+            ShowExpiringDot = false;
+            try
+            {
+                var key = "ExpiringDotReviewed_" + (MainWindow.CurrentUserId ?? "default");
+                System.Windows.Application.Current.Properties[key] = _renewalsDueThisMonth;
+            }
+            catch { }
+        }
 
         private AuditLog _selectedLog;
         public AuditLog SelectedLog
@@ -462,7 +479,19 @@ namespace SOLUM_UI.ViewModels
             RegisteredDelta = $"+{d.RegisteredThisMonth:N0} added this quarter";
             RegisteredQuarterDelta = $"+{d.RegisteredThisMonth:N0} added this quarter";
             // Card 2: Expiring this month (using RenewalsDueThisMonth as proxy for expiring)
-            ExpiringThisMonthCount = $"⚠ {d.RenewalsDueThisMonth:N0} expiring this month";
+            ExpiringThisMonthCount = $"⚠ {d.RenewalsDueThisMonth:N0} expiring this month";
+            // Update notification dot: show if count > 0 and user hasn't reviewed the current batch
+            if (d.RenewalsDueThisMonth > 0)
+            {
+                var key = "ExpiringDotReviewed_" + (MainWindow.CurrentUserId ?? "default");
+                bool alreadyReviewed = System.Windows.Application.Current.Properties.Contains(key)
+                    && (int)System.Windows.Application.Current.Properties[key] >= d.RenewalsDueThisMonth;
+                ShowExpiringDot = !alreadyReviewed;
+            }
+            else
+            {
+                ShowExpiringDot = false;
+            }
             // Card 3: Inactive subtext
             InactiveSubtext = "Requires review";
             // Original Active delta for backward compatibility
