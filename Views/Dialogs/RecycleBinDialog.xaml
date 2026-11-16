@@ -96,8 +96,8 @@
                     </Border>
 
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="Recycle Bin" FontFamily="Segoe UI" FontSize="17" FontWeight="Bold" Foreground="#111111"/>
-                        <TextBlock Text="Deleted records pending permanent archival"
+                        <TextBlock Text="Deleted Records" FontFamily="Segoe UI" FontSize="17" FontWeight="Bold" Foreground="#111111"/>
+                        <TextBlock Text="Records in 30-day grace period pending permanent archival"
                                    FontFamily="Segoe UI" FontSize="11.5" Foreground="#666666" Margin="0,1,0,0"/>
                     </StackPanel>
 
@@ -157,7 +157,7 @@
                     </Border>
 
                     <!-- Refresh Button -->
-                    <Button Grid.Column="1" Width="34" Height="34" Margin="8,0,0,0" Cursor="Hand" Click="BtnRefresh_Click" ToolTip="Refresh Recycle Bin">
+                    <Button Grid.Column="1" Width="34" Height="34" Margin="8,0,0,0" Cursor="Hand" Click="BtnRefresh_Click" ToolTip="Refresh Deleted Records">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="Bg" Background="#FFFFFF" BorderBrush="#702943" BorderThickness="1.2" CornerRadius="17">
@@ -307,8 +307,8 @@
                                 <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
                                       Fill="#702943" Stretch="Uniform" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <TextBlock Text="Recycle Bin is empty" FontFamily="Segoe UI" FontSize="13.5" FontWeight="Bold" Foreground="#333333" HorizontalAlignment="Center"/>
-                            <TextBlock Text="No solo parent records are currently in deletion grace period."
+                            <TextBlock Text="No deleted records" FontFamily="Segoe UI" FontSize="13.5" FontWeight="Bold" Foreground="#333333" HorizontalAlignment="Center"/>
+                            <TextBlock Text="No solo parent records are currently in the 30-day deletion grace period."
                                        FontFamily="Segoe UI" FontSize="11.5" Foreground="#777777" Margin="0,2,0,0" HorizontalAlignment="Center"/>
                         </StackPanel>
 
@@ -343,7 +343,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock x:Name="TxtFooterCount" Grid.Column="0" Text="0 records in Recycle Bin"
+                    <TextBlock x:Name="TxtFooterCount" Grid.Column="0" Text="0 records in grace period"
                                FontFamily="Segoe UI" FontSize="11.5" Foreground="#666666" VerticalAlignment="Center"/>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">

@@ -43,6 +43,9 @@ namespace SOLUM_UI
                 catch { }
             };
 
+            // Force WPF Popups and ContextMenus to align left-to-right (fixes Windows MenuDropAlignment tablet setting shifting popups far away)
+            EnsureStandardMenuDropAlignment();
+
             // Enable PDFsharp to use Windows fonts (Arial, etc.)
             GlobalFontSettings.UseWindowsFontsUnderWindows = true;
             // Configure en-PH culture so that all WPF controls (DatePicker, formatting) use form standard MM/dd/yyyy
@@ -113,6 +116,19 @@ namespace SOLUM_UI
                     dlg.ShowDialog();
                 });
             }
+        }
+
+        private static void EnsureStandardMenuDropAlignment()
+        {
+            try
+            {
+                if (SystemParameters.MenuDropAlignment)
+                {
+                    var field = typeof(SystemParameters).GetField("_menuDropAlignment", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                    field?.SetValue(null, false);
+                }
+            }
+            catch { }
         }
 
         protected override void OnExit(ExitEventArgs e)

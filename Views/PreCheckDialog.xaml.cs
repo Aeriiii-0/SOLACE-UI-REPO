@@ -32,6 +32,7 @@ namespace SOLUM_UI
         // ── Private state ────────────────────────────────────────────────────────
         private SoloParentRecord _foundRecord;   // cached search result
         private bool _searching;
+        private bool _isPhilsysBlocked;
 
         private static readonly SolidColorBrush ErrorBrush   = new SolidColorBrush(Color.FromRgb(0xE5, 0x39, 0x35));
         private static readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(0xC0, 0xA0, 0xAA));
@@ -194,6 +195,7 @@ namespace SOLUM_UI
         private async void Continue_Click(object sender, RoutedEventArgs e)
         {
             if (_searching) return;
+            if (_isPhilsysBlocked) return;
             if (!Validate()) return;
             // If a duplicate was already found and the user clicked "Add as New Anyway", proceed
             if (_foundRecord != null && BannerPanel.Visibility == Visibility.Visible)
@@ -284,84 +286,96 @@ namespace SOLUM_UI
             HideBanner();
             try
             {
-                string firstName = TxtFirstName.Text.Trim();
-                string lastName  = TxtLastName.Text.Trim();
-                string fullName  = lastName + " " + firstName;
-                string philsys   = TxtPhilSys.Text.Trim();
-                BaseResponse<PagedResult<SoloParentSummaryDto>> response = null;
-                // 1. Check PhilSys ID if provided
+                string firstName  = TxtFirstName.Text.Trim();
+                string middleName = TxtMiddleName.Text.Trim();
+                string lastName   = TxtLastName.Text.Trim();
+                string suffix     = (CmbExtension.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty;
+                DateTime? birthdate = DpBirthdate.SelectedDate;
+                string philsys    = TxtPhilSys.Text.Trim();
+
+                SoloParentRecord foundDuplicate = null;
+                bool isPhilsysDuplicate = false;
+
+                // 1. Check PhilSys ID if provided (strictly unique)
                 if (!string.IsNullOrWhiteSpace(philsys))
                 {
+                    string rawPhilsys = Regex.Replace(philsys, @"\D", "");
                     var philsysReq = new GetSoloParentRequest
                     {
                         PhilsysId = philsys,
                         Page      = 1,
                         PageSize  = 5
                     };
-                    response = await SoloParentApiService.Instance.GetSoloParentsAsync(philsysReq);
-                    // If not found with raw input, try with stripped digits
-                    string philsysDigits = Regex.Replace(philsys, @"\D", "");
-                    if ((response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
-                        && philsysDigits != philsys && !string.IsNullOrWhiteSpace(philsysDigits))
+                    var pResp = await SoloParentApiService.Instance.GetSoloParentsAsync(philsysReq);
+                    if (pResp.Succeeded && pResp.Data?.Items != null && pResp.Data.Items.Count > 0)
                     {
-                        var philsysDigitsReq = new GetSoloParentRequest
+                        foreach (var item in pResp.Data.Items)
                         {
-                            PhilsysId = philsysDigits,
-                            Page      = 1,
-                            PageSize  = 5
-                        };
-                        response = await SoloParentApiService.Instance.GetSoloParentsAsync(philsysDigitsReq);
+                            var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
+                            if (detailResp.Succeeded && detailResp.Data != null)
+                            {
+                                var rec = SoloParentApiService.Instance.MapToRecord(detailResp.Data);
+                                string recPhilsys = Regex.Replace(rec.PhilSysNumber ?? "", @"\D", "");
+                                if (rawPhilsys == recPhilsys || (rawPhilsys.Length >= 12 && recPhilsys.Contains(rawPhilsys)))
+                                {
+                                    foundDuplicate = rec;
+                                    isPhilsysDuplicate = true;
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
-                // 2. Search by First Name AND Last Name (GET /api/soloparent?firstName=Juana&lastName=Dela Cruz)
-                if (response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
+
+                // 2. Check Full Name ("firstname middlename lastname suffix") AND Birthday
+                if (foundDuplicate == null && !string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(lastName))
                 {
+                    string inputCanonical = FormatCanonicalFullName(firstName, middleName, lastName, suffix);
+                    string inputNormalized = NormalizeFullName(inputCanonical);
+
                     var nameReq = new GetSoloParentRequest
                     {
                         FirstName = firstName,
                         LastName  = lastName,
+                        Birthdate = birthdate,
                         Page      = 1,
-                        PageSize  = 5
+                        PageSize  = 10
                     };
-                    response = await SoloParentApiService.Instance.GetSoloParentsAsync(nameReq);
-                }
-                // 3. Fallback: Search by Fullname ("FirstName LastName" and "LastName FirstName")
-                if (response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
-                {
-                    string standardFullName = $"{firstName} {lastName}".Trim();
-                    var request = new GetSoloParentRequest
+                    var nameResp = await SoloParentApiService.Instance.GetSoloParentsAsync(nameReq);
+                    if (nameResp.Succeeded && nameResp.Data?.Items != null && nameResp.Data.Items.Count > 0)
                     {
-                        Fullname = standardFullName,
-                        Page     = 1,
-                        PageSize = 5
-                    };
-                    response = await SoloParentApiService.Instance.GetSoloParentsAsync(request);
+                        foreach (var item in nameResp.Data.Items)
+                        {
+                            var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
+                            if (detailResp.Succeeded && detailResp.Data != null)
+                            {
+                                var rec = SoloParentApiService.Instance.MapToRecord(detailResp.Data);
+                                string recCanonical = FormatCanonicalFullName(rec.FirstName, rec.MiddleName, rec.Surname, rec.ExtensionName);
+                                string recNormalized = NormalizeFullName(recCanonical);
+
+                                bool nameMatches = string.Equals(recNormalized, inputNormalized, StringComparison.OrdinalIgnoreCase);
+                                bool dobMatches = birthdate.HasValue && rec.DateOfBirth.Date == birthdate.Value.Date;
+
+                                if (nameMatches && dobMatches)
+                                {
+                                    foundDuplicate = rec;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
-                if (response == null || !response.Succeeded || response.Data?.Items == null || response.Data.Items.Count == 0)
+
+                if (foundDuplicate != null)
                 {
-                    string reversedFullName = $"{lastName} {firstName}".Trim();
-                    var request = new GetSoloParentRequest
+                    _foundRecord = foundDuplicate;
+                    if (isPhilsysDuplicate)
                     {
-                        Fullname = reversedFullName,
-                        Page     = 1,
-                        PageSize = 5
-                    };
-                    response = await SoloParentApiService.Instance.GetSoloParentsAsync(request);
-                }
-                if (response.Succeeded && response.Data?.Items != null && response.Data.Items.Count > 0)
-                {
-                    // Fetch the full record for the first match
-                    var summary = response.Data.Items[0];
-                    var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(summary.Id);
-                    if (detailResp.Succeeded && detailResp.Data != null)
-                    {
-                        _foundRecord = SoloParentApiService.Instance.MapToRecord(detailResp.Data);
-                        ShowDuplicateBanner(_foundRecord);
+                        ShowPhilsysDuplicateBanner(_foundRecord, philsys);
                     }
                     else
                     {
-                        // Summary exists but detail fetch failed — treat as not-found and proceed
-                        ProceedWithForm();
+                        ShowDuplicateBanner(_foundRecord);
                     }
                 }
                 else
@@ -380,12 +394,30 @@ namespace SOLUM_UI
             finally
             {
                 _searching = false;
-                if (BtnContinue.IsEnabled == false)
+                if (!_isPhilsysBlocked && !BtnContinue.IsEnabled)
                 {
                     BtnContinue.IsEnabled = true;
                     BtnContinueText.Text  = "Check & Continue";
                 }
             }
+        }
+
+        private static string FormatCanonicalFullName(string first, string middle, string last, string suffix)
+        {
+            var parts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(first)) parts.Add(first.Trim());
+            if (!string.IsNullOrWhiteSpace(middle)) parts.Add(middle.Trim());
+            if (!string.IsNullOrWhiteSpace(last)) parts.Add(last.Trim());
+            if (!string.IsNullOrWhiteSpace(suffix) && !string.Equals(suffix.Trim(), "NONE", StringComparison.OrdinalIgnoreCase))
+                parts.Add(suffix.Trim());
+            return string.Join(" ", parts);
+        }
+
+        private static string NormalizeFullName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+            var trimmed = name.Trim().Replace(".", "");
+            return System.Text.RegularExpressions.Regex.Replace(trimmed, @"\s+", " ").ToLowerInvariant();
         }
 
         private void ProceedWithForm()
@@ -410,11 +442,14 @@ namespace SOLUM_UI
 
         private void ShowDuplicateBanner(SoloParentRecord record)
         {
+            _isPhilsysBlocked        = false;
             BannerPanel.Background   = new SolidColorBrush(Color.FromRgb(0xB7, 0x1C, 0x1C));
-            BannerIcon.Text          = "⚠";
+            BannerIcon.Text          = "!";
             BannerTitle.Text         = "Existing Record Found";
-            BannerText.Text          = $"A record matching \"{record.FirstName} {record.Surname}\" "
-                                     + $"(DOB: {record.DateOfBirth:MMMM d, yyyy}) already exists in the system. "
+            string fullName          = FormatCanonicalFullName(record.FirstName, record.MiddleName, record.Surname, record.ExtensionName);
+            string dobStr            = record.DateOfBirth != DateTime.MinValue ? record.DateOfBirth.ToString("MMMM d, yyyy") : "N/A";
+            BannerText.Text          = $"A record matching \"{fullName}\" "
+                                     + $"(DOB: {dobStr}) already exists in the system. "
                                      + $"You may view the existing record or add as a new entry anyway.";
             BtnViewRecord.Visibility = Visibility.Visible;
             BannerPanel.Visibility   = Visibility.Visible;
@@ -422,10 +457,24 @@ namespace SOLUM_UI
             BtnContinue.IsEnabled    = true;
         }
 
+        private void ShowPhilsysDuplicateBanner(SoloParentRecord record, string philsys)
+        {
+            _isPhilsysBlocked        = true;
+            BannerPanel.Background   = new SolidColorBrush(Color.FromRgb(0xB7, 0x1C, 0x1C));
+            BannerIcon.Text          = "!";
+            BannerTitle.Text         = "Duplicate PhilSys ID — Registration Blocked";
+            string fullName          = FormatCanonicalFullName(record.FirstName, record.MiddleName, record.Surname, record.ExtensionName);
+            BannerText.Text          = $"The PhilSys Card Number '{philsys}' is already assigned to '{fullName}'. PhilSys ID must be strictly unique. You cannot proceed with a duplicate PhilSys ID.";
+            BtnViewRecord.Visibility = Visibility.Visible;
+            BannerPanel.Visibility   = Visibility.Visible;
+            BtnContinueText.Text     = "Check & Continue";
+            BtnContinue.IsEnabled    = false;
+        }
+
         private void ShowErrorBanner(string message)
         {
             BannerPanel.Background   = new SolidColorBrush(Color.FromRgb(0xE6, 0x5C, 0x00));
-            BannerIcon.Text          = "⚡";
+            BannerIcon.Text          = "!";
             BannerTitle.Text         = "Connection Error";
             BannerText.Text          = message;
             BtnViewRecord.Visibility = Visibility.Collapsed;
@@ -434,11 +483,13 @@ namespace SOLUM_UI
 
         private void HideBanner()
         {
+            _isPhilsysBlocked = false;
             if (BannerPanel != null && BannerPanel.Visibility != Visibility.Collapsed)
             {
                 BannerPanel.Visibility   = Visibility.Collapsed;
                 BtnViewRecord.Visibility = Visibility.Collapsed;
                 BtnContinueText.Text     = "Check & Continue";
+                BtnContinue.IsEnabled    = true;
             }
         }
         // ── Field error helpers ───────────────────────────────────────────────────

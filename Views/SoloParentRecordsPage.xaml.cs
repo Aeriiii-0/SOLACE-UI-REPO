@@ -1035,8 +1035,17 @@ namespace SOLUM_UI
             }
         }
 
+        private void BtnKebabMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (KebabPopup != null)
+            {
+                KebabPopup.IsOpen = !KebabPopup.IsOpen;
+            }
+        }
+
         private async void BtnRecycleBin_Click(object sender, RoutedEventArgs e)
         {
+            if (KebabPopup != null) KebabPopup.IsOpen = false;
             var dialog = new Views.Dialogs.RecycleBinDialog { Owner = Application.Current.MainWindow };
             bool? result;
             using (MainWindow.ModalScope(true))
@@ -1054,6 +1063,7 @@ namespace SOLUM_UI
 
         private void BtnArchives_Click(object sender, RoutedEventArgs e)
         {
+            if (KebabPopup != null) KebabPopup.IsOpen = false;
             (Application.Current.MainWindow as MainWindow)?.NavigateTo("MunicipalArchives");
         }
 
@@ -1082,8 +1092,15 @@ namespace SOLUM_UI
             if (BtnRecycleBin != null)
             {
                 BtnRecycleBin.ToolTip = count > 0
-                    ? $"Recycle Bin ({count} soft-deleted record{(count == 1 ? "" : "s")})"
-                    : "Recycle Bin (0 records)";
+                    ? $"Deleted Records ({count} soft-deleted record{(count == 1 ? "" : "s")})"
+                    : "Deleted Records (0 records)";
+            }
+
+            if (BtnKebabMenu != null)
+            {
+                BtnKebabMenu.ToolTip = count > 0
+                    ? $"More actions ({count} deleted record{(count == 1 ? "" : "s")} in grace period)"
+                    : "More record actions";
             }
         }
 
@@ -1770,7 +1787,7 @@ namespace SOLUM_UI
                     return;
 
                 }
-                ShowNotification("Record Moved to Recycle Bin", $"{recordName} was moved to the Recycle Bin (30-day grace period).", true);
+                ShowNotification("Record Moved to Deleted Records", $"{recordName} was moved to Deleted Records (30-day grace period).", true);
                 AuditLogService.Instance.LogSoftDelete(id, recordName, GetCurrentUser(), CurrentUserRole, deletionReason);
                 await LoadRecordsAsync();
                 await RefreshRecycleBinBadgeAsync();
@@ -1787,6 +1804,8 @@ namespace SOLUM_UI
 
         private async void BtnExportMasterlist_Click(object sender, RoutedEventArgs e)
         {
+            if (KebabPopup != null) KebabPopup.IsOpen = false;
+
             if (!IsAdmin)
             {
                 ShowNotification("Access Denied", "Only administrators can export the masterlist.", false);

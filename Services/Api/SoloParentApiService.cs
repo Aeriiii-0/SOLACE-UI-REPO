@@ -80,6 +80,8 @@ namespace SOLUM_UI.Services.Api
                 queryParams.Add($"fullname={Uri.EscapeDataString(request.Fullname.Trim())}");
             if (!string.IsNullOrWhiteSpace(request.PhilsysId))
                 queryParams.Add($"philsysId={Uri.EscapeDataString(request.PhilsysId.Trim())}");
+            if (request.Birthdate.HasValue)
+                queryParams.Add($"birthdate={request.Birthdate.Value:yyyy-MM-dd}");
             if (!string.IsNullOrWhiteSpace(request.Sex) && !request.Sex.Equals("All", StringComparison.OrdinalIgnoreCase))
                 queryParams.Add($"sex={Uri.EscapeDataString(request.Sex.Trim())}");
             if (!string.IsNullOrWhiteSpace(request.Barangay) && !request.Barangay.Equals("All", StringComparison.OrdinalIgnoreCase))

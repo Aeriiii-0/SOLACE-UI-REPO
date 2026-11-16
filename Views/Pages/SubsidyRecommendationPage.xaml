@@ -89,8 +89,8 @@
                                   SelectedItem="{Binding SelectedFiscalCycle, Mode=TwoWay}" 
                                   DisplayMemberPath="DisplayName" 
                                   ToolTip="{Binding SelectedFiscalCycle.DisplayName}"
-                                  MinWidth="180"
-                                  MaxWidth="380"
+                                  MinWidth="240"
+                                  MaxWidth="460"
                                   Height="32" 
                                   FontSize="12" 
                                   FontWeight="SemiBold" 
@@ -157,8 +157,8 @@
                                                 </Grid.ColumnDefinitions>
                                                 <ContentPresenter Grid.Column="0" Content="{TemplateBinding SelectionBoxItem}" 
                                                                   ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
-                                                                  IsHitTestVisible="False" Margin="0" 
-                                                                  HorizontalAlignment="Center"
+                                                                  IsHitTestVisible="False" Margin="10,0,4,0" 
+                                                                  HorizontalAlignment="Left"
                                                                   VerticalAlignment="Center"/>
                                                 <Path Grid.Column="1" Data="M0,0 L4,4 L8,0 Z" Fill="#5C1D38" Stretch="Uniform" 
                                                       Width="7" Height="5" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,6,0"/>

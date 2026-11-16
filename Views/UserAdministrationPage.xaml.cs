@@ -1684,8 +1684,10 @@ namespace SOLUM_UI
 
         private void BtnAuditLogs_Click(object sender, RoutedEventArgs e)
         {
-            if (_logsDrawerOpen) CloseLogsDrawer();
-            else OpenLogsDrawer();
+            if (!_adminLogsVm.IsInitialized)
+                _ = _adminLogsVm.LoadAsync();
+            LogsFullOverlay.Visibility = Visibility.Visible;
+            MainWindow.ShowDimOverlay(fullWindow: true);
         }
 
         private void OpenLogsDrawer()

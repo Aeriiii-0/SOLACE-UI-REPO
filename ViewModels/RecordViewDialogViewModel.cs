@@ -38,7 +38,7 @@ namespace SOLUM_UI.ViewModels
         public bool OpenedEdit    { get; private set; }
         public bool Renewed       { get; private set; }   // kept for compat
         public bool OpenedRenew   { get; set; }
-        public bool OpenedDelete  { get; private set; }
+        public bool OpenedDelete  { get; set; }
         public SoloParentRecord RenewalResult { get; private set; }
         // ── Colour palette (presentation constants) ──────────────────────────
         // Declared internal so the code-behind card-builder helpers can still
@@ -322,6 +322,17 @@ namespace SOLUM_UI.ViewModels
                 "The solo parent record has been permanently removed.", false,
                 closeDelaySecs: 1.2, dialogResult: true);
         }
+        /// <summary>
+        /// Direct request to delete the record: flags OpenedDelete and immediately closes the dialog
+        /// so the primary deletion flow with reason prompt can take over.
+        /// </summary>
+        public void RequestDeleteDirectly()
+        {
+            IsDeleteOverlayVisible = false;
+            OpenedDelete = true;
+            RequestClose?.Invoke(true);
+        }
+
         /// <summary>
         /// Closes the dialog without any action
         /// (<c>DialogResult = false</c>).

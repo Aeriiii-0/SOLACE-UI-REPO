@@ -197,7 +197,7 @@
                     <!-- Title & Subtitle -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="Delete Solo Parent Record" FontFamily="Georgia" FontSize="19" FontWeight="Bold" Foreground="#702943"/>
-                        <TextBlock Text="Move record to the 30-day reinstatement Recycle Bin"
+                        <TextBlock Text="Move record to the 30-day grace period Deleted Records"
                                    FontFamily="Segoe UI" FontSize="12" Foreground="#666666" Margin="0,2,0,0"/>
                     </StackPanel>
 
@@ -292,7 +292,7 @@
                             </Button.Template>
                         </Button>
 
-                        <!-- Move to Recycle Bin Button -->
+                        <!-- Move to Deleted Records Button -->
                         <Button x:Name="BtnDelete" Grid.Column="2" Height="40" Cursor="Hand" Click="BtnDelete_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
@@ -300,7 +300,7 @@
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
                                                   Fill="White" Stretch="Uniform" Width="14" Height="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="Move to Recycle Bin" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Move to Deleted Records" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
                                     <ControlTemplate.Triggers>

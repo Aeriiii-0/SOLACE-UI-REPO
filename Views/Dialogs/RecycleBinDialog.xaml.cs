@@ -59,7 +59,7 @@ namespace SOLUM_UI.Views.Dialogs
             }
             catch (Exception ex)
             {
-                ActionConfirmDialog.Error("Load Error", $"Failed to load Recycle Bin items: {ex.Message}", this);
+                ActionConfirmDialog.Error("Load Error", $"Failed to load deleted records: {ex.Message}", this);
             }
             finally
             {
@@ -89,8 +89,8 @@ namespace SOLUM_UI.Views.Dialogs
             RecycleList.Visibility = isEmpty ? Visibility.Collapsed : Visibility.Visible;
 
             TxtFooterCount.Text = _allItems.Count == 1
-                ? "1 record in Recycle Bin"
-                : $"{_allItems.Count} records in Recycle Bin";
+                ? "1 record in grace period"
+                : $"{_allItems.Count} records in grace period";
         }
 
         private void TxtSearchFilter_TextChanged(object sender, TextChangedEventArgs e)

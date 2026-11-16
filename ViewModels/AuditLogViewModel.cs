@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -77,7 +77,7 @@ namespace SOLUM_UI.ViewModels
         public string HeaderSubtitle => IsEncoder
             ? "Double-click any entry to view change details."
             : "Double-click any entry to view full change details.";
-        public string SearchPlaceholder => IsEncoder ? "Viewing your activity logs (read-only)" : "Search by citizen name or user ID…";
+        public string SearchPlaceholder => IsEncoder ? "Viewing your activity logs (read-only)" : "Search full name: First Middle Last Suffix…";
         // ── Filter properties ──────────────────────────────────────────────────
         private string _searchText = string.Empty;
         public string SearchText
@@ -321,7 +321,7 @@ namespace SOLUM_UI.ViewModels
                     ? (!string.IsNullOrWhiteSpace(currentUserId) ? currentUserId : null)
                     : (isGuid ? trimmedSearch : null);
 
-                string searchName = (!isEncoder && !isGuid && !string.IsNullOrWhiteSpace(trimmedSearch))
+                string searchName = (!isGuid && !string.IsNullOrWhiteSpace(trimmedSearch))
                     ? trimmedSearch
                     : null;
                 var result = await AuditLogApiService.Instance.GetLogsAsync(

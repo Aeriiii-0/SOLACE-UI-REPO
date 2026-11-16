@@ -179,39 +179,32 @@
         <!-- ── Top Action Header ── -->
         <Grid Grid.Row="0" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button x:Name="BtnBackToRecords" Height="36" Cursor="Hand" Click="BtnBackToRecords_Click" Margin="0,0,16,0" VerticalAlignment="Center">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bg" Background="#FFFFFF" BorderBrush="#702943" BorderThickness="1.2" CornerRadius="18" Padding="14,0">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Path Data="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"
-                                          Fill="#702943" Stretch="Uniform" Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Back to Records" FontFamily="Segoe UI" FontSize="12.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#FBF1F4"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Municipal Historical Archives" FontFamily="Segoe UI" FontSize="22" FontWeight="Bold" Foreground="#111111"/>
-                    <TextBlock Text="Statutory 10-Year Cold Storage &amp; Crypto-Shredding Engine (R.A. 11861 &amp; R.A. 10173)"
-                               FontFamily="Segoe UI" FontSize="12.5" Foreground="#666666" Margin="0,3,0,0"/>
-                </StackPanel>
-            </StackPanel>
+            <Button x:Name="BtnBackToRecords" Grid.Column="0" Height="36" Cursor="Hand" Click="BtnBackToRecords_Click" VerticalAlignment="Center">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="#FFFFFF" BorderBrush="#702943" BorderThickness="1.2" CornerRadius="18" Padding="14,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Data="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"
+                                      Fill="#702943" Stretch="Uniform" Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Back to Records" FontFamily="Segoe UI" FontSize="12.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#FBF1F4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
 
             <!-- Admin Action: Run Retention Pipeline -->
-            <Button x:Name="BtnRunPipeline" Grid.Column="1" Height="40" Padding="18,0" Cursor="Hand" Click="BtnRunPipeline_Click" VerticalAlignment="Center">
+            <Button x:Name="BtnRunPipeline" Grid.Column="2" Height="40" Padding="18,0" Cursor="Hand" Click="BtnRunPipeline_Click" VerticalAlignment="Center">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Bg" Background="#FFFFFF" BorderBrush="#702943" BorderThickness="1.2" CornerRadius="20" Padding="{TemplateBinding Padding}">

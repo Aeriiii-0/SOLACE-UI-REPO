@@ -2043,7 +2043,10 @@ namespace SOLUM_UI
                 try
                 {
                     string fName = TxtFirstName.Text.Trim();
+                    string mName = TxtMiddleName.Text.Trim();
                     string lName = TxtLastName.Text.Trim();
+                    string ext = GetComboValue(CmbExtension);
+                    DateTime? bDate = DpBirthdate.SelectedDate;
                     string philsys = TxtPhilSys.Text.Trim();
                     var matches = new List<SoloParentRecord>();
                     SoloParentRecord philsysDuplicate = null;
@@ -2075,18 +2078,29 @@ namespace SOLUM_UI
                     if (philsysDuplicate != null)
                     {
                         _foundRecord = philsysDuplicate;
-                        MarkError(TxtPhilSys, ErrPhilSys, $"PhilSys ID is already registered to '{_foundRecord.Name}'. PhilSys ID must be unique.");
+                        string duplicateCanonicalName = FormatCanonicalFullName(_foundRecord.FirstName, _foundRecord.MiddleName, _foundRecord.Surname, _foundRecord.ExtensionName);
+                        MarkError(TxtPhilSys, ErrPhilSys, $"PhilSys ID is already registered to '{duplicateCanonicalName}'. PhilSys ID must be unique.");
                         DuplicateBannerTitle.Text = "Duplicate PhilSys ID — Registration Blocked";
-                        DuplicateBannerText.Text = $"The PhilSys Card Number '{philsys}' is already assigned to '{_foundRecord.Name}'. PhilSys ID must be strictly unique. You cannot proceed with a duplicate PhilSys ID.";
+                        DuplicateBannerText.Text = $"The PhilSys Card Number '{philsys}' is already assigned to '{duplicateCanonicalName}'. PhilSys ID must be strictly unique. You cannot proceed with a duplicate PhilSys ID.";
                         DuplicateBannerPanel.Visibility = Visibility.Visible;
                         if (BtnContinueAnyway != null) BtnContinueAnyway.Visibility = Visibility.Collapsed;
                         TxtPhilSys.Focus();
                         return;
                     }
-                    // 2. Check First Name and Last Name
+                    // 2. Check Full Name ("firstname middlename lastname suffix") AND Birthday
                     if (!string.IsNullOrWhiteSpace(fName) && !string.IsNullOrWhiteSpace(lName))
                     {
-                        var nameResp = await SoloParentApiService.Instance.GetSoloParentsAsync(new GetSoloParentRequest { FirstName = fName, LastName = lName, PageSize = 5 });
+                        string inputCanonical = FormatCanonicalFullName(fName, mName, lName, ext);
+                        string inputNormalized = NormalizeFullName(inputCanonical);
+
+                        var nameReq = new GetSoloParentRequest
+                        {
+                            FirstName = fName,
+                            LastName = lName,
+                            Birthdate = bDate,
+                            PageSize = 10
+                        };
+                        var nameResp = await SoloParentApiService.Instance.GetSoloParentsAsync(nameReq);
                         if (nameResp.Succeeded && nameResp.Data?.Items != null)
                         {
                             foreach (var item in nameResp.Data.Items)
@@ -2098,7 +2112,17 @@ namespace SOLUM_UI
                                     var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id);
                                     if (detailResp.Succeeded && detailResp.Data != null)
                                     {
-                                        matches.Add(SoloParentApiService.Instance.MapToRecord(detailResp.Data));
+                                        var rec = SoloParentApiService.Instance.MapToRecord(detailResp.Data);
+                                        string recCanonical = FormatCanonicalFullName(rec.FirstName, rec.MiddleName, rec.Surname, rec.ExtensionName);
+                                        string recNormalized = NormalizeFullName(recCanonical);
+
+                                        bool nameMatches = string.Equals(recNormalized, inputNormalized, StringComparison.OrdinalIgnoreCase);
+                                        bool dobMatches = bDate.HasValue && rec.DateOfBirth.Date == bDate.Value.Date;
+
+                                        if (nameMatches && dobMatches)
+                                        {
+                                            matches.Add(rec);
+                                        }
                                     }
                                 }
                             }
@@ -2107,8 +2131,10 @@ namespace SOLUM_UI
                     if (matches.Count > 0)
                     {
                         _foundRecord = matches[0];
+                        string recFullName = FormatCanonicalFullName(_foundRecord.FirstName, _foundRecord.MiddleName, _foundRecord.Surname, _foundRecord.ExtensionName);
+                        string dobStr = _foundRecord.DateOfBirth != DateTime.MinValue ? _foundRecord.DateOfBirth.ToString("MMMM d, yyyy") : "N/A";
                         DuplicateBannerTitle.Text = $"Duplicate Found ({matches.Count} matching record{(matches.Count > 1 ? "s" : "")})";
-                        DuplicateBannerText.Text = $"An existing record exists for '{_foundRecord.Name}'" +
+                        DuplicateBannerText.Text = $"An existing record exists for '{recFullName}' (DOB: {dobStr})" +
                             (!string.IsNullOrWhiteSpace(_foundRecord.PhilSysNumber) ? $" with PhilSys ID {_foundRecord.PhilSysNumber}." : ".") +
                             " You can view the existing record or continue adding this record.";
                         DuplicateBannerPanel.Visibility = Visibility.Visible;
@@ -2160,6 +2186,24 @@ namespace SOLUM_UI
             _duplicateCheckPassed = true;
             DuplicateBannerPanel.Visibility = Visibility.Collapsed;
             GoToStep(2);
+        }
+
+        private static string FormatCanonicalFullName(string first, string middle, string last, string suffix)
+        {
+            var parts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(first)) parts.Add(first.Trim());
+            if (!string.IsNullOrWhiteSpace(middle)) parts.Add(middle.Trim());
+            if (!string.IsNullOrWhiteSpace(last)) parts.Add(last.Trim());
+            if (!string.IsNullOrWhiteSpace(suffix) && !string.Equals(suffix.Trim(), "NONE", StringComparison.OrdinalIgnoreCase))
+                parts.Add(suffix.Trim());
+            return string.Join(" ", parts);
+        }
+
+        private static string NormalizeFullName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+            var trimmed = name.Trim().Replace(".", "");
+            return System.Text.RegularExpressions.Regex.Replace(trimmed, @"\s+", " ").ToLowerInvariant();
         }
 
         private void GoToStep(int step)

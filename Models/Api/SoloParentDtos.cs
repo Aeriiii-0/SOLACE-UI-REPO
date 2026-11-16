@@ -215,9 +215,12 @@ namespace SOLUM_UI.Models.Api
     {
         public Guid? Id { get; set; }
         public string FirstName { get; set; }
+        public string MiddleName { get; set; }
         public string LastName { get; set; }
+        public string ExtensionName { get; set; }
         public string Fullname { get; set; }
         public string PhilsysId { get; set; }
+        public DateTime? Birthdate { get; set; }
         public string Sex { get; set; }
         public string Barangay { get; set; }
         public bool? IsActive { get; set; }

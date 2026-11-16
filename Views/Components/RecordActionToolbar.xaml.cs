@@ -89,7 +89,7 @@ namespace SOLUM_UI.Views.Components
             // VM sets OpenedEdit = true and fires RequestClose(true).
             Vm?.HandleEdit();
         }
-        // ── Delete (shows overlay) ────────────────────────────────────────────
+        // ── Delete ────────────────────────────────────────────
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             bool isAdmin = MainWindow.CurrentUserRole != null &&
@@ -98,9 +98,7 @@ namespace SOLUM_UI.Views.Components
                             MainWindow.CurrentUserRole.Equals("SuperAdmin", System.StringComparison.OrdinalIgnoreCase) ||
                             AuthApiService.Instance.IsAdmin);
             if (!isAdmin) return;
-            // VM sets IsDeleteOverlayVisible = true.
-            // The overlay's Visibility is bound to that property in the parent XAML.
-            Vm?.HandleDeleteRequest();
+            Vm?.RequestDeleteDirectly();
         }
     }
 }

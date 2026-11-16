@@ -1126,7 +1126,7 @@ namespace SOLUM_UI
                     break;
 
                 case "MunicipalArchives":
-                    TopBarControl.PageTitle = "Municipal Historical Archives";
+                    TopBarControl.PageTitle = "City Historical Archives";
                     break;
 
 

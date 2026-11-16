@@ -96,7 +96,11 @@ namespace SOLUM_UI.Views.Dialogs
             Dispatcher.BeginInvoke(new Action(async () => await HandleCancelAsync()), DispatcherPriority.Background);
         }
 
-        private void MenuDelete_Click(object sender, RoutedEventArgs e) => RunToolbarAction("delete", "trash", "remove");
+        private void MenuDelete_Click(object sender, RoutedEventArgs e)
+        {
+            BtnActions.IsChecked = false;
+            _vm?.RequestDeleteDirectly();
+        }
 
         private void RunToolbarAction(params string[] keys)
         {

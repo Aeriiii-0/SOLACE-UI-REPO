@@ -733,9 +733,11 @@ namespace SOLUM_UI
                 }
             }
 
+            bool isFirstPage = _vm == null || _vm.CurrentBarangayPage <= 1;
+
             for (int i = 0; i < n; i++)
             {
-                bool isTop = i < topHighlightCount && data[i].Value > 0;
+                bool isTop = isFirstPage && i < topHighlightCount && data[i].Value > 0;
                 double value = data[i].Value;
                 double barH = value > 0 ? Math.Max(4, ph * value / niceMax) : 2;
                 double centerX = left + slot * i + slot / 2;
@@ -805,7 +807,10 @@ namespace SOLUM_UI
             }
 
             // Footer note
-            var note = MakeText("Each block = 5 solo parents. Top 3 barangays are highlighted.", 11, textBrush, FontWeights.Normal);
+            string noteText = isFirstPage
+                ? "Each block = 5 solo parents. Top 3 barangays are highlighted."
+                : "Each block = 5 solo parents. Ranked by solo parent count.";
+            var note = MakeText(noteText, 11, textBrush, FontWeights.Normal);
             Canvas.SetLeft(note, left - 20 < 0 ? 0 : left - 20);
             Canvas.SetTop(note, h - note.DesiredSize.Height - 2);
             c.Children.Add(note);
