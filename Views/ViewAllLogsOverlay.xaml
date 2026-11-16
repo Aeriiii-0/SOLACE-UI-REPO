@@ -3,7 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:SOLUM_UI"
              xmlns:components="clr-namespace:SOLUM_UI.Views.Components"
-             xmlns:converters="clr-namespace:SOLUM_UI.Converters">
+             xmlns:converters="clr-namespace:SOLUM_UI.Converters"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             TextOptions.TextFormattingMode="Display"
+             TextOptions.TextRenderingMode="ClearType">
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
@@ -23,33 +27,34 @@
             <Setter Property="Foreground" Value="#1A1A1A"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
-        <!-- ── Nav / action button style ─────────────────────────── -->
+        <!-- ── Nav button: outlined pill (First / Previous / Next) ── -->
         <Style x:Key="NavBtn" TargetType="Button">
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="#702943"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="38"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bg" Background="Transparent" BorderBrush="#D0B8C0"
-                                BorderThickness="1.5" CornerRadius="8" Padding="20,9">
+                        <Border x:Name="Bg" Background="White" BorderBrush="#702943"
+                                BorderThickness="1.5" CornerRadius="19" Padding="20,0">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#FDF5F7"/>
+                                <Setter TargetName="Bg" Property="Background" Value="#FAF0F3"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Bg" Property="Opacity" Value="0.35"/>
+                                <Setter TargetName="Bg" Property="Opacity" Value="0.4"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-        <!-- ── Refresh / icon button style ───────────────────────── -->
+        <!-- ── Outlined pill (Clear / Retry) ─────────────────────── -->
         <Style x:Key="IconBtn" TargetType="Button">
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="13"/>
@@ -59,14 +64,42 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bg" Background="#F5ECEE" CornerRadius="8"
-                                BorderBrush="#D0B8C0" BorderThickness="1.5"
+                        <Border x:Name="Bg" Background="White" CornerRadius="20"
+                                BorderBrush="#702943" BorderThickness="1.5"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#EDD8DF"/>
+                                <Setter TargetName="Bg" Property="Background" Value="#FAF0F3"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bg" Property="Opacity" Value="0.40"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- ── Filled maroon pill (Search) ───────────────────────── -->
+        <Style x:Key="PillFilledBtn" TargetType="Button">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="#702943" CornerRadius="20"
+                                BorderBrush="#702943" BorderThickness="1.5"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#9B3060"/>
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#9B3060"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="Bg" Property="Opacity" Value="0.40"/>
@@ -79,8 +112,8 @@
         <!-- ── Shared ComboBox template ──────────────────────────── -->
         <ControlTemplate x:Key="StyledComboTemplate" TargetType="ComboBox">
             <Grid>
-                <Border x:Name="CbBg" Background="White" BorderBrush="#D0B8C0"
-                        BorderThickness="1.5" CornerRadius="8">
+                <Border x:Name="CbBg" Background="White" BorderBrush="#702943"
+                        BorderThickness="1.5" CornerRadius="12">
                     <Grid Margin="12,0,32,0">
                         <ContentPresenter Content="{TemplateBinding SelectionBoxItem}"
                                           VerticalAlignment="Center"/>
@@ -96,22 +129,26 @@
                       Fill="#702943" Stretch="Uniform" Width="12" Height="12" IsHitTestVisible="False"/>
                 <Popup Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
                        AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                    <Border Background="White" CornerRadius="8" BorderBrush="#D0B8C0"
-                            BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}"
+                    <Border Background="White" CornerRadius="12" BorderBrush="#702943"
+                            BorderThickness="1.5" MinWidth="{TemplateBinding ActualWidth}"
                             MaxHeight="200" Margin="0,2,0,0">
                         <Border.Effect>
                             <DropShadowEffect Color="#C0A0AA" BlurRadius="10" ShadowDepth="2" Opacity="0.12"/>
                         </Border.Effect>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto"><ItemsPresenter/></ScrollViewer>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsPresenter/>
+                        </ScrollViewer>
                     </Border>
                 </Popup>
             </Grid>
             <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter TargetName="CbBg" Property="BorderBrush" Value="#702943"/>
+                    <Setter TargetName="CbBg" Property="Background" Value="#FAF2F5"/>
                 </Trigger>
                 <Trigger Property="IsDropDownOpen" Value="True">
                     <Setter TargetName="CbBg" Property="BorderBrush" Value="#702943"/>
+                    <Setter TargetName="CbBg" Property="Background" Value="#FAF2F5"/>
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
@@ -127,8 +164,8 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="DatePicker">
                         <Border x:Name="DpBorder" Background="White"
-                                BorderBrush="#D0B8C0" BorderThickness="1.5"
-                                CornerRadius="8" Height="40">
+                                BorderBrush="#702943" BorderThickness="1.5"
+                                CornerRadius="12" Height="40">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -188,7 +225,7 @@
                                                     Width="28" Height="28" CornerRadius="6">
                                                 <!-- Calendar icon (MDI path) -->
                                                 <Path Data="M19,4H18V2H16V4H8V2H6V4H5C3.9,4 3,4.9 3,6V20C3,21.1 3.9,22 5,22H19C20.1,22 21,21.1 21,20V6C21,4.9 20.1,4 19,4M19,20H5V10H19V20M19,8H5V6H19V8Z"
-                                                      Fill="#B090A0" Stretch="Uniform"
+                                                      Fill="#702943" Stretch="Uniform"
                                                       Width="13" Height="13"/>
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -245,7 +282,8 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    <Border Background="White" CornerRadius="16">
+    <Border Background="White" CornerRadius="16" BorderBrush="#702943" BorderThickness="1.5"
+            SnapsToDevicePixels="True" UseLayoutRounding="True">
         <Border.Effect>
             <DropShadowEffect Color="#000000" BlurRadius="40" ShadowDepth="4" Opacity="0.26" Direction="270"/>
         </Border.Effect>
@@ -262,19 +300,19 @@
                     <!-- Pagination footer -->
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <!-- ── Header ─────────────────────────────────────────────── -->
-                <Border Grid.Row="0" Background="#702943" CornerRadius="16,16,0,0" Padding="28,20,28,18">
+                <!-- ── Header (clean, no filled band, rounded top corners) ── -->
+                <Border Grid.Row="0" Background="White" CornerRadius="14,14,0,0" Padding="28,22,24,14">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding HeaderTitle}"
-                                       FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                                       FontFamily="Georgia" FontSize="22" FontWeight="Bold" Foreground="#702943"/>
                             <TextBlock Text="{Binding HeaderSubtitle}"
-                                       FontFamily="Segoe UI" FontSize="12" Foreground="#E8C0D0" Margin="0,4,0,0"/>
+                                       FontFamily="Segoe UI" FontSize="12" Foreground="#993556" Margin="0,3,0,0"/>
                         </StackPanel>
                         <!-- Refresh button -->
                         <Button Grid.Column="1" Command="{Binding RefreshCommand}"
@@ -282,16 +320,17 @@
                                 ToolTip="Refresh logs">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="RefBg" Background="Transparent" CornerRadius="18">
+                                    <Border x:Name="RefBg" Background="White" BorderBrush="#702943"
+                                            BorderThickness="1.5" CornerRadius="18">
                                         <!-- ↻ refresh icon using Path -->
                                         <Path Data="M12,4V1L8,5L12,9V6C15.31,6 18,8.69 18,12C18,13.01 17.75,13.97 17.3,14.8L18.76,16.26C19.54,15.03 20,13.57 20,12C20,7.58 16.42,4 12,4M12,18C8.69,18 6,15.31 6,12C6,10.99 6.25,10.03 6.7,9.2L5.24,7.74C4.46,8.97 4,10.43 4,12C4,16.42 7.58,20 12,20V23L16,19L12,15V18Z"
-                                              Fill="White" Stretch="Uniform"
-                                              Width="18" Height="18"
+                                              Fill="#702943" Stretch="Uniform"
+                                              Width="16" Height="16"
                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="RefBg" Property="Background" Value="#9B3060"/>
+                                            <Setter TargetName="RefBg" Property="Background" Value="#F0E0E6"/>
                                         </Trigger>
                                         <Trigger Property="IsEnabled" Value="False">
                                             <Setter TargetName="RefBg" Property="Opacity" Value="0.45"/>
@@ -302,16 +341,17 @@
                         </Button>
                         <!-- Close button -->
                         <Button Grid.Column="2" x:Name="CloseBtn" Click="CloseBtn_Click"
-                                Width="36" Height="36" Cursor="Hand">
+                                Width="36" Height="36" Cursor="Hand" ToolTip="Close">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="18">
-                                        <TextBlock Text="✕" FontSize="15" Foreground="White"
+                                    <Border x:Name="Bg" Background="White" BorderBrush="#702943"
+                                            BorderThickness="1.5" CornerRadius="18">
+                                        <TextBlock Text="✕" FontSize="14" Foreground="#702943"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#9B3060"/>
+                                            <Setter TargetName="Bg" Property="Background" Value="#F0E0E6"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -323,7 +363,7 @@
                 <Border Grid.Row="1" Background="White" BorderBrush="#E8D8DE"
                         BorderThickness="0,0,0,1" Padding="22,12">
                     <StackPanel>
-                        <!-- Row 1: Search + Action filter + Clear -->
+                        <!-- Row 1: Search + Action filter + Search + Clear -->
                         <Grid Margin="0,0,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -335,15 +375,15 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <!-- Search box -->
-                            <Border Grid.Column="0" Background="#F7F5F6" CornerRadius="22"
-                                    BorderBrush="#D0B8C0" BorderThickness="1.5" Height="40">
+                            <Border Grid.Column="0" Background="White" CornerRadius="22"
+                                    BorderBrush="#702943" BorderThickness="1.5" Height="40">
                                 <Grid Margin="12,0,12,0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <Path Grid.Column="0" Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"
-                                          Fill="#C0A0AA" Stretch="Uniform" Width="13" Height="13" Margin="0,0,8,0"/>
+                                          Fill="#993556" Stretch="Uniform" Width="13" Height="13" Margin="0,0,8,0"/>
                                     <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                              IsEnabled="{Binding IsEncoder, Converter={StaticResource InverseBoolConverter}}"
                                              BorderThickness="0" Background="Transparent"
@@ -392,15 +432,15 @@
                                       FontFamily="Segoe UI" FontSize="13"
                                       Template="{StaticResource StyledComboTemplate}"
                                       ItemContainerStyle="{StaticResource StyledComboItem}"/>
-                            <!-- Search button -->
-                            <Button Grid.Column="4" Height="40" Padding="14,0" Cursor="Hand"
-                                    Command="{Binding SearchCommand}" Style="{StaticResource IconBtn}"
+                            <!-- Search button (filled) -->
+                            <Button Grid.Column="4" Height="40" Padding="20,0" Cursor="Hand"
+                                    Command="{Binding SearchCommand}" Style="{StaticResource PillFilledBtn}"
                                     ToolTip="Apply filters">
                                 <TextBlock Text="Search" FontFamily="Segoe UI" FontSize="13"
-                                           FontWeight="SemiBold" Foreground="#702943"/>
+                                           FontWeight="SemiBold" Foreground="White"/>
                             </Button>
-                            <!-- Clear button -->
-                            <Button Grid.Column="6" Height="40" Padding="14,0" Cursor="Hand"
+                            <!-- Clear button (outlined) -->
+                            <Button Grid.Column="6" Height="40" Padding="20,0" Cursor="Hand"
                                     Command="{Binding ClearFiltersCommand}" Style="{StaticResource IconBtn}"
                                     ToolTip="Clear all filters">
                                 <TextBlock Text="Clear" FontFamily="Segoe UI" FontSize="13"
@@ -411,43 +451,33 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="6"/>
-                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
                                 <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <!-- From pill -->
-                            <Border Grid.Column="0" Background="#F5ECEE" CornerRadius="6"
-                                    Padding="12,0" Height="40" VerticalAlignment="Center">
-                                <TextBlock Text="From" FontFamily="Segoe UI" FontSize="12"
-                                           FontWeight="SemiBold" Foreground="#702943"
-                                           VerticalAlignment="Center"/>
-                            </Border>
+                            <TextBlock Grid.Column="0" Text="From" FontFamily="Segoe UI" FontSize="12"
+                                       FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
                             <DatePicker Grid.Column="2"
                                         SelectedDate="{Binding StartDate, Mode=TwoWay}"
                                         Style="{StaticResource BrandDatePicker}"/>
-                            <!-- Arrow separator -->
                             <TextBlock Grid.Column="4" Text="→" FontSize="14"
-                                       Foreground="#C0A0AA" VerticalAlignment="Center"
+                                       Foreground="#993556" VerticalAlignment="Center"
                                        HorizontalAlignment="Center"/>
-                            <!-- To pill -->
-                            <Border Grid.Column="4" Background="#F5ECEE" CornerRadius="6"
-                                    Padding="12,0" Height="40" VerticalAlignment="Center"
-                                    HorizontalAlignment="Right" Margin="0,0,-38,0">
-                                <TextBlock Text="To" FontFamily="Segoe UI" FontSize="12"
-                                           FontWeight="SemiBold" Foreground="#702943"
-                                           VerticalAlignment="Center"/>
-                            </Border>
-                            <DatePicker Grid.Column="6"
+                            <TextBlock Grid.Column="6" Text="To" FontFamily="Segoe UI" FontSize="12"
+                                       FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                            <DatePicker Grid.Column="8"
                                         SelectedDate="{Binding EndDate, Mode=TwoWay}"
                                         Style="{StaticResource BrandDatePicker}"/>
                         </Grid>
-                     </StackPanel>
+                    </StackPanel>
                 </Border>
                 <!-- ── Content area: loading / error / list ────────────────── -->
-                <Grid Grid.Row="2" x:Name="LogsContentGrid" Background="#F7F5F6">
+                <Grid Grid.Row="2" x:Name="LogsContentGrid" Background="White">
                     <!-- Loading overlay -->
                     <components:LoaderOverlay IsActive="{Binding IsLoading}"
                                               Message="Loading logs..."
@@ -481,9 +511,9 @@
                             <ItemsControl ItemsSource="{Binding PagedLogs}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="White" CornerRadius="8"
-                                                BorderBrush="#E5D8DC" BorderThickness="1"
+                                        <Border CornerRadius="12" BorderThickness="1.5"
                                                 Padding="18,12" Margin="0,0,0,8" Cursor="Hand"
+                                                SnapsToDevicePixels="True" UseLayoutRounding="True"
                                                 ToolTip="Click to view details">
                                             <Border.Style>
                                                 <Style TargetType="Border">
@@ -508,14 +538,15 @@
                                                     <ColumnDefinition Width="44"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <!-- Action type icon & color -->
-                                                <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" VerticalAlignment="Center"
-                                                        Background="{Binding DotColorBrush}">
-                                                    <Viewbox Width="17" Height="17"
+                                                <!-- Action type icon: tinted rounded tile + colored glyph (matches the drawer) -->
+                                                <Grid Grid.Column="0" Width="36" Height="36" VerticalAlignment="Center"
+                                                      SnapsToDevicePixels="True">
+                                                    <Border CornerRadius="10" Background="{Binding DotColorBrush}" Opacity="0.14"/>
+                                                    <Viewbox Width="16" Height="16"
                                                              HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                        <Path Data="{Binding DotIcon}" Fill="White" Stretch="Uniform"/>
+                                                        <Path Data="{Binding DotIcon}" Fill="{Binding DotColorBrush}" Stretch="Uniform"/>
                                                     </Viewbox>
-                                                </Border>
+                                                </Grid>
                                                 <!-- Content Grid: 2 rows x 2 columns -->
                                                 <Grid Grid.Column="1" Margin="14,0,0,0">
                                                     <Grid.RowDefinitions>
@@ -566,8 +597,8 @@
                     </ScrollViewer>
                 </Grid>
                 <!-- ── Pagination footer ───────────────────────────────────── -->
-                <Border Grid.Row="3" Padding="28,16,28,20" Background="White" CornerRadius="0,0,16,16"
-                        BorderBrush="#F0E4E8" BorderThickness="0,1,0,0">
+                <Border Grid.Row="3" Padding="28,16,28,20" Background="White" CornerRadius="0,0,14,14"
+                        BorderBrush="#E5D8DC" BorderThickness="0,1,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -595,7 +626,8 @@
             <!-- ═══════════════════════ Detail overlay ══════════════════════════ -->
             <Grid Visibility="{Binding IsDetailVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Rectangle Fill="{DynamicResource ModalOverlayBrush}"/>
-                <Border Background="White" CornerRadius="16" Padding="36,30"
+                <Border Background="White" CornerRadius="16" Padding="32,26"
+                        BorderBrush="#5C1D38" BorderThickness="1.5"
                         Width="600" HorizontalAlignment="Center" VerticalAlignment="Center"
                         MaxHeight="700">
                     <Border.Effect>
@@ -610,18 +642,20 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="Audit Log Detail"
-                                           FontFamily="Segoe UI" FontSize="18" FontWeight="Bold" Foreground="#702943"/>
+                                           FontFamily="Georgia" FontSize="22" FontWeight="Bold" Foreground="#702943"
+                                           VerticalAlignment="Center"/>
                                 <Button Grid.Column="1" Command="{Binding CloseDetailCommand}"
-                                        Width="34" Height="34" Cursor="Hand">
+                                        Width="34" Height="34" Cursor="Hand" ToolTip="Close">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border x:Name="Bg" Background="Transparent" CornerRadius="17">
-                                                <TextBlock Text="✕" FontSize="15" Foreground="#702943"
+                                            <Border x:Name="Bg" Background="White" BorderBrush="#702943"
+                                                    BorderThickness="1.5" CornerRadius="17">
+                                                <TextBlock Text="✕" FontSize="14" Foreground="#702943"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Bg" Property="Background" Value="#F5E8EC"/>
+                                                    <Setter TargetName="Bg" Property="Background" Value="#F0E0E6"/>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -630,7 +664,7 @@
                             </Grid>
                             <!-- Action type badge + record name -->
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <Border CornerRadius="8" Padding="12,5" Margin="0,0,10,0" Background="{Binding SelectedLog.DotColorBrush}">
+                                <Border CornerRadius="14" Padding="14,5" Margin="0,0,10,0" Background="{Binding SelectedLog.DotColorBrush}">
                                     <TextBlock Text="{Binding SelectedLog.ActionLabel}"
                                                FontFamily="Segoe UI" FontSize="13" FontWeight="Bold" Foreground="White"/>
                                 </Border>
@@ -638,7 +672,7 @@
                                            FontFamily="Segoe UI" FontSize="15" FontWeight="Bold"
                                            Foreground="#1A1A1A" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <Rectangle Height="1" Fill="#F0E4E4" Margin="0,0,0,16"/>
+                            <Rectangle Height="1" Fill="#E5D8DC" Margin="0,0,0,16"/>
                             <!-- ── Who ──────────────────────────────────────────── -->
                             <Grid Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
@@ -651,7 +685,7 @@
                                         <TextBlock Text="{Binding SelectedLog.PerformedByDisplay}"
                                                    FontFamily="Segoe UI" FontSize="13" FontWeight="Normal"
                                                    Foreground="#1A1A1A" VerticalAlignment="Center"/>
-                                        <Border CornerRadius="5" Background="#F0E8EC" Padding="8,3"
+                                        <Border CornerRadius="10" Background="#F0E8EC" Padding="10,3"
                                                 Margin="8,0,0,0" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding SelectedLog.PerformedByRole}"
                                                        FontFamily="Segoe UI" FontSize="10"
@@ -676,7 +710,7 @@
                                         <TextBlock Text="{Binding SelectedLog.TargetDisplay}"
                                                    FontFamily="Segoe UI" FontSize="13" FontWeight="Normal"
                                                    Foreground="#1A1A1A" VerticalAlignment="Center"/>
-                                        <Border CornerRadius="5" Background="#EEF2FF" Padding="8,3"
+                                        <Border CornerRadius="10" Background="#EEF2FF" Padding="10,3"
                                                 Margin="8,0,0,0" VerticalAlignment="Center"
                                                 Visibility="{Binding SelectedLog.HasTargetType, Converter={StaticResource BoolToVisibilityConverter}}">
                                             <TextBlock Text="{Binding SelectedLog.TargetType}"
@@ -696,7 +730,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="Status" Style="{StaticResource MetaLabel}"/>
-                                <Border Grid.Column="1" CornerRadius="6" Padding="10,4"
+                                <Border Grid.Column="1" CornerRadius="12" Padding="12,4"
                                         HorizontalAlignment="Left">
                                     <Border.Style>
                                         <Style TargetType="Border">
@@ -752,7 +786,8 @@
                                            Style="{StaticResource MetaValue}"/>
                             </Grid>
                             <!-- ── Changes Recorded (diff table) ─────────────────── -->
-                            <Border Background="#FDF5F7" CornerRadius="12" Padding="20,16" Margin="0,0,0,4">
+                            <Border Background="#FDF5F7" BorderBrush="#E5D8DC" BorderThickness="1"
+                                    CornerRadius="14" Padding="20,16" Margin="0,0,0,4">
                                 <StackPanel>
                                     <TextBlock Text="CHANGES RECORDED"
                                                FontFamily="Segoe UI" FontSize="11" FontWeight="Bold"
@@ -792,7 +827,7 @@
                                                         </Grid.ColumnDefinitions>
                                                         <!-- Field name -->
                                                         <Border Grid.Column="0" Background="White"
-                                                                CornerRadius="6" Padding="8,6" Margin="0,0,3,0">
+                                                                CornerRadius="8" Padding="8,6" Margin="0,0,3,0">
                                                             <TextBlock Text="{Binding DisplayFieldName}"
                                                                        FontFamily="Segoe UI" FontSize="12"
                                                                        FontWeight="SemiBold" Foreground="#1A1A1A"
@@ -800,7 +835,7 @@
                                                         </Border>
                                                         <!-- Previous value -->
                                                         <Border Grid.Column="1" Background="#FFE8E8"
-                                                                CornerRadius="6" Padding="8,6" Margin="3,0,3,0">
+                                                                CornerRadius="8" Padding="8,6" Margin="3,0,3,0">
                                                             <TextBlock Text="{Binding DisplayOldValue, TargetNullValue='—', FallbackValue='—'}"
                                                                        FontFamily="Segoe UI" FontSize="12"
                                                                        Foreground="#DC3545" TextWrapping="Wrap"
@@ -808,7 +843,7 @@
                                                         </Border>
                                                         <!-- New value -->
                                                         <Border Grid.Column="2" Background="#E8F5E9"
-                                                                CornerRadius="6" Padding="8,6" Margin="3,0,0,0">
+                                                                CornerRadius="8" Padding="8,6" Margin="3,0,0,0">
                                                             <TextBlock Text="{Binding DisplayNewValue, TargetNullValue='—', FallbackValue='—'}"
                                                                        FontFamily="Segoe UI" FontSize="12"
                                                                        FontWeight="SemiBold" Foreground="#27AE60"
@@ -828,21 +863,21 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Border Grid.Column="0" Background="White"
-                                                    CornerRadius="6" Padding="8,6" Margin="0,0,3,0">
+                                                    CornerRadius="8" Padding="8,6" Margin="0,0,3,0">
                                                 <TextBlock Text="{Binding SelectedLog.DisplayFieldChanged, TargetNullValue='—'}"
                                                            FontFamily="Segoe UI" FontSize="12"
                                                            FontWeight="SemiBold" Foreground="#1A1A1A"
                                                            TextWrapping="Wrap" VerticalAlignment="Center"/>
                                             </Border>
                                             <Border Grid.Column="1" Background="#FFE8E8"
-                                                    CornerRadius="6" Padding="8,6" Margin="3,0,3,0">
+                                                    CornerRadius="8" Padding="8,6" Margin="3,0,3,0">
                                                 <TextBlock Text="{Binding SelectedLog.DisplayOldValue, TargetNullValue='—'}"
                                                            FontFamily="Segoe UI" FontSize="12"
                                                            Foreground="#DC3545" TextWrapping="Wrap"
                                                            VerticalAlignment="Center"/>
                                             </Border>
                                             <Border Grid.Column="2" Background="#E8F5E9"
-                                                    CornerRadius="6" Padding="8,6" Margin="3,0,0,0">
+                                                    CornerRadius="8" Padding="8,6" Margin="3,0,0,0">
                                                 <TextBlock Text="{Binding SelectedLog.DisplayNewValue, TargetNullValue='—'}"
                                                            FontFamily="Segoe UI" FontSize="12"
                                                            FontWeight="SemiBold" Foreground="#27AE60"

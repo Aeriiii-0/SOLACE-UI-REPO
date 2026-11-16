@@ -301,6 +301,9 @@ namespace SOLUM_UI
                 RecordsClipGrid.Visibility = Visibility.Visible;
                 PagingRow.Visibility = Visibility.Visible;
 
+                // Show export masterlist button for admins only
+                if (BtnExportMasterlist != null)
+                    BtnExportMasterlist.Visibility = IsAdmin ? Visibility.Visible : Visibility.Collapsed;
             }
             // Hide delete buttons for non-admin users
             HideDeleteButtonsIfNotAdmin();
@@ -1074,6 +1077,9 @@ namespace SOLUM_UI
 
         private async Task RunBackgroundCreateAsync(SoloParentRecord rec)
         {
+            ToastNotification.Show("Adding Record",
+                $"Saving {rec.Name}'s record to the database…",
+                ToastType.Info, durationSeconds: 10);
             try
             {
                 var saveResult = await CreateSoloParentRecordAsync(rec);
@@ -1252,6 +1258,9 @@ namespace SOLUM_UI
 
             }
             if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
+            ToastNotification.Show("Renewing Record",
+                $"Extending {record.Name}'s validity by 1 year…",
+                ToastType.Info, durationSeconds: 10);
             try
             {
                 var resp = await SoloParentApiService.Instance.RenewSoloParentRecordAsync(guid, null);
@@ -1346,6 +1355,9 @@ namespace SOLUM_UI
             
             System.Diagnostics.Debug.WriteLine("[RenewRecordAsync] Eligibility check passed");
             if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
+            ToastNotification.Show("Renewing Record",
+                $"Processing renewal for {original.Name}…",
+                ToastType.Info, durationSeconds: 10);
             try
             {
                 if (existingDto == null)
@@ -1521,6 +1533,9 @@ namespace SOLUM_UI
 
         private async Task RunBackgroundUpdateAsync(SoloParentRecord rawRecord, SoloParentRecord updatedRecord, SoloParentDto existingDto)
         {
+            ToastNotification.Show("Updating Record",
+                $"Saving changes to {updatedRecord.Name}'s record…",
+                ToastType.Info, durationSeconds: 10);
             try
             {
                 var saveResult = await UpdateSoloParentRecordAsync(rawRecord, updatedRecord, existingDto);
@@ -1682,6 +1697,9 @@ namespace SOLUM_UI
             
             // Show skeleton loader
             if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
+            ToastNotification.Show("Deleting Record",
+                $"Removing {recordName} from the database…",
+                ToastType.Info, durationSeconds: 10);
             try
             {
                 var deleteResp = await SoloParentApiService.Instance.DeleteSoloParentAsync(guid);
@@ -1711,6 +1729,234 @@ namespace SOLUM_UI
 
         }
 
+        private async void BtnExportMasterlist_Click(object sender, RoutedEventArgs e)
+        {
+            if (!IsAdmin)
+            {
+                ShowNotification("Access Denied", "Only administrators can export the masterlist.", false);
+                return;
+            }
+
+            string timeStamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            var saveDialog = new System.Windows.Forms.SaveFileDialog
+            {
+                Filter = "Excel Files (*.xlsx)|*.xlsx|All Files (*.*)|*.*",
+                DefaultExt = "xlsx",
+                FileName = $"SOLO_PARENT_MASTERLIST_{timeStamp}.xlsx",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+            };
+
+            if (saveDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                return;
+
+            // Reuse the ExportOptionsDialog (set password modal)
+            var owner = Window.GetWindow(this) ?? Application.Current.MainWindow;
+            var optDialog = new ExportOptionsDialog(saveDialog.FileName, owner);
+            optDialog.ShowDialog();
+
+            if (!optDialog.Confirmed)
+                return;
+
+            try
+            {
+                // Show loading toast
+                ToastNotification.Show("Exporting", "Fetching all solo parent records from database...", ToastType.Info);
+
+                // ── Step 1: Fetch page 1 to discover TotalCount, then page through
+                //            all remaining pages. This handles server-side page caps
+                //            and guarantees every record in the database is included.
+                const int fetchPageSize = 200;
+
+                var firstPageReq = new GetSoloParentRequest
+                {
+                    SortBy    = "datecreated",
+                    SortOrder = "desc",
+                    Page      = 1,
+                    PageSize  = fetchPageSize
+                };
+                var firstPageResp = await SoloParentApiService.Instance.GetSoloParentsAsync(firstPageReq);
+
+                if (!firstPageResp.Succeeded || firstPageResp.Data == null
+                    || firstPageResp.Data.Items == null || firstPageResp.Data.Items.Count == 0)
+                {
+                    Views.Dialogs.ActionConfirmDialog.Warning("No Records",
+                        "No solo parent records found in the database to export.");
+                    return;
+                }
+
+                // Collect all summary items across every page
+                var summaryItems = new List<SOLUM_UI.Models.Api.SoloParentSummaryDto>(
+                    firstPageResp.Data.Items);
+
+                // Derive totalPages from TotalCount + the actual number of items
+                // the server returned on page 1 — never trust the echoed PageSize
+                // field, which some servers leave at 0 or return incorrectly.
+                int totalCount     = firstPageResp.Data.TotalCount;
+                int itemsOnPage1   = firstPageResp.Data.Items.Count;
+                int effectiveSize  = itemsOnPage1 > 0 ? itemsOnPage1 : fetchPageSize;
+                int totalPages     = (int)Math.Ceiling((double)totalCount / effectiveSize);
+                // Safety: always at least 1 page; cap at a sane maximum so a bad
+                // TotalCount from the server cannot trigger an infinite loop.
+                totalPages = Math.Max(1, Math.Min(totalPages, 500));
+
+                // Fetch remaining pages with retry logic for robustness
+                int consecutiveFailures = 0;
+                const int maxConsecutiveFailures = 3;
+
+                for (int p = 2; p <= totalPages; p++)
+                {
+                    var pageReq = new GetSoloParentRequest
+                    {
+                        SortBy    = "datecreated",
+                        SortOrder = "desc",
+                        Page      = p,
+                        PageSize  = fetchPageSize
+                    };
+                    var pageResp = await SoloParentApiService.Instance.GetSoloParentsAsync(pageReq);
+                    
+                    if (pageResp.Succeeded && pageResp.Data?.Items != null
+                        && pageResp.Data.Items.Count > 0)
+                    {
+                        summaryItems.AddRange(pageResp.Data.Items);
+                        consecutiveFailures = 0; // reset on success
+                    }
+                    else
+                    {
+                        consecutiveFailures++;
+                        // Only break if we hit too many consecutive failures
+                        // This prevents a single transient error from losing data
+                        if (consecutiveFailures >= maxConsecutiveFailures)
+                            break;
+                        // Otherwise continue to next page
+                    }
+                }
+
+                // ── Step 2: Fetch full details for each record in parallel batches
+                //            with retry logic to ensure no records are lost to transient errors
+                var records = new List<SOLUM_UI.Models.SoloParentRecord>();
+                var failedIds = new List<Guid>();
+                const int batchSize = 20;
+                const int maxRetries = 2;
+
+                for (int i = 0; i < summaryItems.Count; i += batchSize)
+                {
+                    var batch       = summaryItems.Skip(i).Take(batchSize);
+                    var detailTasks = batch.Select(item =>
+                        SoloParentApiService.Instance.GetSoloParentByIdAsync(item.Id)).ToList();
+                    var detailResponses = await Task.WhenAll(detailTasks);
+
+                    for (int j = 0; j < detailResponses.Length; j++)
+                    {
+                        var detailResp = detailResponses[j];
+                        if (detailResp.Succeeded && detailResp.Data != null)
+                        {
+                            records.Add(SoloParentApiService.Instance.MapToRecord(detailResp.Data));
+                        }
+                        else
+                        {
+                            // Track failed ID for retry
+                            var item = batch.ElementAt(j);
+                            failedIds.Add(item.Id);
+                        }
+                    }
+                }
+
+                // ── Step 3: Retry failed detail fetches individually
+                if (failedIds.Count > 0)
+                {
+                    for (int retry = 0; retry < maxRetries; retry++)
+                    {
+                        var retryIds = new List<Guid>(failedIds);
+                        failedIds.Clear();
+
+                        foreach (var id in retryIds)
+                        {
+                            var detailResp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(id);
+                            if (detailResp.Succeeded && detailResp.Data != null)
+                            {
+                                records.Add(SoloParentApiService.Instance.MapToRecord(detailResp.Data));
+                            }
+                            else
+                            {
+                                failedIds.Add(id); // still failed
+                            }
+                        }
+
+                        if (failedIds.Count == 0)
+                            break; // all retries succeeded
+                    }
+                }
+
+                // Log any permanent failures
+                if (failedIds.Count > 0)
+                {
+                    string failedIdList = string.Join(", ", failedIds.Take(5)) + (failedIds.Count > 5 ? "..." : "");
+                    AuditLogService.Instance.LogSystem(
+                        $"Export masterlist: {failedIds.Count} records could not be retrieved after retries: {failedIdList}");
+                }
+
+                if (records.Count == 0)
+                {
+                    Views.Dialogs.ActionConfirmDialog.Warning("No Records", "Could not retrieve record details for export.");
+                    return;
+                }
+
+                // Warn user if some records could not be exported
+                string summaryMessage;
+                if (failedIds.Count > 0)
+                {
+                    summaryMessage = $"Exported {records.Count} of {summaryItems.Count} records. " +
+                                     $"{failedIds.Count} record(s) could not be retrieved and were skipped.";
+                }
+                else
+                {
+                    summaryMessage = $"Successfully exported all {records.Count} records.";
+                }
+
+                // Run the export on a background thread to keep UI responsive
+                await Task.Run(() =>
+                {
+                    SOLUM_UI.Services.SoloParentMasterlistExportService.ExportMasterlist(
+                        saveDialog.FileName,
+                        records,
+                        CurrentUserName,
+                        optDialog.Password);
+                });
+
+                // Log the export
+                AuditLogService.Instance.LogSystem(
+                    $"Solo parent masterlist exported ({records.Count} of {summaryItems.Count} records) by {CurrentUserName}");
+
+                ToastNotification.Show(
+                    "Export Complete",
+                    summaryMessage,
+                    failedIds.Count > 0 ? ToastType.Warning : ToastType.Success);
+
+                // Reuse the OpenFilePromptDialog (prompt to open file after export)
+                var openDialog = new Views.Dialogs.OpenFilePromptDialog("Would you like to open the exported masterlist now?")
+                {
+                    Owner = Window.GetWindow(this)
+                };
+
+                if (openDialog.ShowDialog() == true && openDialog.ShouldOpenFile)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(
+                            new System.Diagnostics.ProcessStartInfo(saveDialog.FileName)
+                            { UseShellExecute = true });
+                    }
+                    catch { }
+                }
+            }
+            catch (Exception ex)
+            {
+                Views.Dialogs.ActionConfirmDialog.Error(
+                    "Export Failed",
+                    $"An error occurred while exporting the masterlist:\n\n{ex.Message}");
+            }
+        }
+
         private void ExportRecord_Click(object sender, RoutedEventArgs e)
         {
 
@@ -1725,6 +1971,9 @@ namespace SOLUM_UI
 
             };
             if (dlg.ShowDialog() != true) return;
+            ToastNotification.Show("Exporting Record",
+                $"Generating PDF for {vm.Name}…",
+                ToastType.Info, durationSeconds: 10);
             try
             {
                 SOLUM_UI.Services.SoloParentExportService.ExportToPdf(dlg.FileName, vm.RawModel);

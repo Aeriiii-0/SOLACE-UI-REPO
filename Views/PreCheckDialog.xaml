@@ -140,6 +140,11 @@
                                         <Setter Property="Foreground" Value="#702943"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" Value="#B09098"/>
+                                        <Setter Property="FontStyle" Value="Italic"/>
+                                        <Setter Property="Opacity" Value="0.6"/>
+                                    </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
                         </Setter.Value>
@@ -449,9 +454,9 @@
                                     <TextBlock Text="Extension (Optional)" Style="{StaticResource FieldLabel}"/>
                                     <ComboBox x:Name="CmbExtension" Style="{StaticResource FormCombo}"
                                               SelectionChanged="Extension_Changed">
-                                        <ComboBoxItem Content=""/>
-                                        <ComboBoxItem Content="Jr."/>
-                                        <ComboBoxItem Content="Sr."/>
+                                        <ComboBoxItem Content="NONE" IsSelected="True" IsEnabled="False"/>
+                                        <ComboBoxItem Content="JR."/>
+                                        <ComboBoxItem Content="SR."/>
                                         <ComboBoxItem Content="III"/>
                                         <ComboBoxItem Content="IV"/>
                                         <ComboBoxItem Content="V"/>

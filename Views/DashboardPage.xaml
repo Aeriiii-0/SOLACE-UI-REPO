@@ -1,4 +1,4 @@
-<Page x:Class="SOLUM_UI.DashboardPage"
+﻿<Page x:Class="SOLUM_UI.DashboardPage"
 
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 
@@ -727,9 +727,9 @@
 
                     </Border>
 
-                    <Border Grid.Row="0" Background="#FAEEDA" CornerRadius="999" Padding="10,0,10,0"
-                            BorderBrush="#EF9F27" BorderThickness="1" UseLayoutRounding="True" SnapsToDevicePixels="True"
-                            Margin="0,0,0,12" Height="52">
+                    <Border Grid.Row="0" Background="#FAEEDA" CornerRadius="33" Padding="10,0,10,0"
+                            BorderBrush="#EF9F27" BorderThickness="2" UseLayoutRounding="True" SnapsToDevicePixels="True"
+                            Margin="0,0,0,12" Height="70">
 
                         <Grid>
 
@@ -783,7 +783,7 @@
                                 <!-- Red notification dot -->
                                 <Ellipse Width="8" Height="8"
                                          HorizontalAlignment="Right" VerticalAlignment="Top"
-                                         Margin="0,-1,-1,0"
+                                         Margin="0,1,1,0"
                                          Fill="#E24B4A"
                                          Visibility="{Binding ShowExpiringDot, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
@@ -793,7 +793,7 @@
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
 
                                 <TextBlock FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="#2A1B21">
-                                    <Run Text="{Binding RenewalsDueThisMonth}"/><Run Text=" records expiring this month"/>
+                                    <Run Text="{Binding RenewalsDueThisMonth, Mode=OneWay}"/><Run Text=" records expiring this month"/>
                                 </TextBlock>
 
                                 <TextBlock Text="Renew before they turn inactive"
@@ -802,13 +802,13 @@
                             </StackPanel>
 
                             <!-- Right: Review button -->
-                            <Button Grid.Column="2" Cursor="Hand" Click="ReviewExpiring_Click" VerticalAlignment="Center" Margin="12,0,0,0">
+                            <Button Grid.Column="2" Cursor="Hand" Click="ReviewExpiring_Click" VerticalAlignment="Center" Margin="12,0,7,0">
 
                                 <Button.Template>
 
                                     <ControlTemplate TargetType="Button">
 
-                                        <Border x:Name="Bg" Background="#E8960C" CornerRadius="12" Padding="14,8">
+                                        <Border x:Name="Bg" Background="#E8960C" CornerRadius="20" Padding="12,10">
 
                                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -327,6 +327,9 @@ namespace SOLUM_UI.ViewModels
                 _lastRefreshTime = DateTime.UtcNow;
             IsLoading    = true;
             ErrorMessage = null;
+            // Guarantee skeleton shows for at least 600 ms so it doesn't flash
+            // away before the user can register it on fast cached refreshes.
+            var minimumDisplayTask = Task.Delay(600);
             try
             {
                 var (isEncoder, currentUserId) = GetEncoderContext();
@@ -453,6 +456,7 @@ namespace SOLUM_UI.ViewModels
             }
             finally
             {
+                await minimumDisplayTask;
                 IsLoading = false;
             }
         }

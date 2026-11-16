@@ -20,7 +20,7 @@ namespace SOLUM_UI
 
         public event RoutedEventHandler CloseRequested
         {
-            add    => AddHandler(CloseRequestedEvent, value);
+            add => AddHandler(CloseRequestedEvent, value);
             remove => RemoveHandler(CloseRequestedEvent, value);
         }
 

@@ -402,8 +402,12 @@ namespace SOLUM_UI
         private void InitRolePermissions()
         {
             bool isSuperAdmin = IsCurrentUserSuperAdmin();
-            if (BtnAddAdmin != null)
-                BtnAddAdmin.Visibility = isSuperAdmin ? Visibility.Visible : Visibility.Collapsed;
+            // Audit logs button: visible for Admin and SuperAdmin
+            bool canSeeAuditLogs = AuthApiService.Instance.IsAdmin || AuthApiService.Instance.IsSuperAdmin;
+            if (BtnAuditLogs != null)
+                BtnAuditLogs.Visibility = canSeeAuditLogs ? Visibility.Visible : Visibility.Collapsed;
+            if (AdminLogsOverlay != null)
+                AdminLogsOverlay.DataContext = _adminLogsVm;
             _isUpdatingFilters = true;
             try
             {
@@ -1650,6 +1654,34 @@ namespace SOLUM_UI
 
         // ── AUDIT LOGS DRAWER ─────────────────────────────────────────────────
 
+        private static readonly Color DrawerFallbackAccent = Color.FromRgb(0x70, 0x29, 0x43);
+        private static readonly SolidColorBrush DrawerRowBorder = FrozenBrush(Color.FromRgb(0xE8, 0xD4, 0xDA));
+        private static readonly SolidColorBrush DrawerRowBorderHover = FrozenBrush(Color.FromRgb(0xC9, 0x9A, 0xAE));
+        private static readonly SolidColorBrush DrawerRowBg = FrozenBrush(Colors.White);
+        private static readonly SolidColorBrush DrawerRowBgHover = FrozenBrush(Color.FromRgb(0xFD, 0xF6, 0xF8));
+        private static readonly SolidColorBrush DrawerTitleBrush = FrozenBrush(Color.FromRgb(0x1A, 0x10, 0x20));
+        private static readonly SolidColorBrush DrawerMetaBrush = FrozenBrush(Color.FromRgb(0x7A, 0x6A, 0x72));
+        private static readonly FontFamily DrawerFont = new FontFamily("Segoe UI");
+
+        private static SolidColorBrush FrozenBrush(Color c)
+        {
+            var b = new SolidColorBrush(c);
+            b.Freeze();
+            return b;
+        }
+
+        private static Color AccentFromBrush(Brush brush)
+        {
+            if (brush is SolidColorBrush s) return s.Color;
+            return DrawerFallbackAccent;
+        }
+
+        private static Color TintOver(Color c, double amount)
+        {
+            byte Mix(byte v) => (byte)Math.Round(255 + (v - 255) * amount);
+            return Color.FromRgb(Mix(c.R), Mix(c.G), Mix(c.B));
+        }
+
         private void BtnAuditLogs_Click(object sender, RoutedEventArgs e)
         {
             if (_logsDrawerOpen) CloseLogsDrawer();
@@ -1659,7 +1691,7 @@ namespace SOLUM_UI
         private void OpenLogsDrawer()
         {
             _logsDrawerOpen = true;
-            UsersRootGrid.ColumnDefinitions[2].Width = new GridLength(290);
+            UsersRootGrid.ColumnDefinitions[2].Width = new GridLength(314);
             if (!_adminLogsVm.IsInitialized)
                 _ = _adminLogsVm.LoadAsync();
             _adminLogsVm.PropertyChanged -= AdminLogsVm_PropertyChanged;
@@ -1676,57 +1708,112 @@ namespace SOLUM_UI
         private void RefreshDrawerList()
         {
             DrawerLogsList.Children.Clear();
+            DrawerLogsList.UseLayoutRounding = true;
+            DrawerLogsList.SnapsToDevicePixels = true;
+            TextOptions.SetTextFormattingMode(DrawerLogsList, TextFormattingMode.Display);
+            TextOptions.SetTextRenderingMode(DrawerLogsList, TextRenderingMode.ClearType);
+
             foreach (var log in _adminLogsVm.PagedLogs.Take(15))
             {
+                Color accent = AccentFromBrush(log.DotColorBrush);
+                var tintBrush = FrozenBrush(TintOver(accent, 0.14));
+                var accentBrush = FrozenBrush(accent);
+
                 var row = new Border
                 {
-                    CornerRadius = new CornerRadius(10),
-                    Padding = new Thickness(8, 6, 8, 6),
-                    Margin = new Thickness(0, 0, 0, 4),
-                    Background = Brushes.White,
-                    BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E5D8DC")),
-                    BorderThickness = new Thickness(1)
+                    Padding = new Thickness(12, 11, 12, 11),
+                    Margin = new Thickness(0, 0, 0, 8),
+                    Background = DrawerRowBg,
+                    BorderBrush = DrawerRowBorder,
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(12),
+                    Cursor = Cursors.Hand,
+                    SnapsToDevicePixels = true,
+                    UseLayoutRounding = true,
+                    ToolTip = "Double-click to view details"
                 };
+
+                row.MouseEnter += (s, args) =>
+                {
+                    row.Background = DrawerRowBgHover;
+                    row.BorderBrush = DrawerRowBorderHover;
+                };
+                row.MouseLeave += (s, args) =>
+                {
+                    row.Background = DrawerRowBg;
+                    row.BorderBrush = DrawerRowBorder;
+                };
+                row.MouseLeftButtonDown += (s, args) =>
+                {
+                    if (args.ClickCount == 2)
+                    {
+                        args.Handled = true;
+                        ExpandLogsDrawer_Click(s, null);
+                    }
+                };
+
                 var g = new Grid();
-                g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(32) });
+                g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(36) });
                 g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
                 var iconBorder = new Border
                 {
-                    Width = 28, Height = 28, CornerRadius = new CornerRadius(9),
-                    Background = log.DotColorBrush, VerticalAlignment = VerticalAlignment.Center
+                    Width = 36,
+                    Height = 36,
+                    CornerRadius = new CornerRadius(10),
+                    Background = tintBrush,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    SnapsToDevicePixels = true
                 };
                 try
                 {
+                    var geo = Geometry.Parse(log.DotIcon ?? "");
+                    geo.Freeze();
                     iconBorder.Child = new System.Windows.Shapes.Path
                     {
-                        Data = Geometry.Parse(log.DotIcon ?? ""),
-                        Fill = Brushes.White, Stretch = Stretch.Uniform,
-                        Width = 13, Height = 13,
+                        Data = geo,
+                        Fill = accentBrush,
+                        Stretch = Stretch.Uniform,
+                        Width = 16,
+                        Height = 16,
                         HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
+                        VerticalAlignment = VerticalAlignment.Center,
+                        SnapsToDevicePixels = true
                     };
                 }
                 catch { }
                 Grid.SetColumn(iconBorder, 0);
                 g.Children.Add(iconBorder);
-                var stack = new StackPanel { Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
+
+                var stack = new StackPanel
+                {
+                    Margin = new Thickness(12, 0, 0, 0),
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+
                 stack.Children.Add(new TextBlock
                 {
                     Text = log.ActionTitle,
-                    FontFamily = new FontFamily("Segoe UI"), FontSize = 11.5, FontWeight = FontWeights.SemiBold,
-                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A1B21")),
-                    TextTrimming = TextTrimming.CharacterEllipsis
+                    FontFamily = DrawerFont,
+                    FontSize = 13,
+                    FontWeight = FontWeights.SemiBold,
+                    Foreground = DrawerTitleBrush,
+                    TextTrimming = TextTrimming.CharacterEllipsis,
+                    Margin = new Thickness(0, 0, 0, 3)
                 });
+
                 var meta = new TextBlock
                 {
-                    FontFamily = new FontFamily("Segoe UI"), FontSize = 10.5,
-                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#702943")),
-                    Margin = new Thickness(0, 1, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis
+                    FontFamily = DrawerFont,
+                    FontSize = 10.5,
+                    Foreground = DrawerMetaBrush,
+                    TextTrimming = TextTrimming.CharacterEllipsis
                 };
-                meta.Inlines.Add(new Run(log.PerformedByDisplay ?? "") { FontWeight = FontWeights.SemiBold });
-                meta.Inlines.Add(new Run(" · "));
+                meta.Inlines.Add(new Run((log.PerformedByDisplay ?? "").ToUpper()));
+                meta.Inlines.Add(new Run("  ·  "));
                 meta.Inlines.Add(new Run(log.DateDisplay ?? ""));
                 stack.Children.Add(meta);
+
                 Grid.SetColumn(stack, 1);
                 g.Children.Add(stack);
                 row.Child = g;
@@ -1735,9 +1822,12 @@ namespace SOLUM_UI
             if (!_adminLogsVm.PagedLogs.Any() && !_adminLogsVm.IsLoading)
                 DrawerLogsList.Children.Add(new TextBlock
                 {
-                    Text = "No logs found",
-                    FontFamily = new FontFamily("Segoe UI"), FontSize = 12, Foreground = Brushes.Gray,
-                    HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 16, 0, 0)
+                    Text = "No activity logged yet",
+                    FontFamily = DrawerFont,
+                    FontSize = 12,
+                    Foreground = DrawerMetaBrush,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(0, 24, 0, 0)
                 });
         }
 

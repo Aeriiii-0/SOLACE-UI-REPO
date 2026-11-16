@@ -436,6 +436,7 @@
     <Compile Include="Services\AnalyticsExportService.cs" />
     <Compile Include="Services\AnalyticsExcelExportService.cs" />
     <Compile Include="Services\SoloParentExportService.cs" />
+    <Compile Include="Services\SoloParentMasterlistExportService.cs" />
     <Compile Include="Services\AuditLogService.cs" />
     <Compile Include="Services\ChangeTrackingService.cs" />
     <Compile Include="Services\OcrService.cs" />

@@ -490,6 +490,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="21"
                     BorderBrush="#702943" BorderThickness="1.2"
@@ -647,7 +648,31 @@
                     </StackPanel>
                 </Button>
             </Border>
-            <Button Grid.Column="4" Height="42" Padding="22,0" Cursor="Hand"
+            <!-- Export Masterlist Button (Admin only) -->
+            <Button x:Name="BtnExportMasterlist" Grid.Column="4" Height="42" Padding="18,0" Cursor="Hand"
+                    VerticalAlignment="Center" Margin="0,0,12,0"
+                    Click="BtnExportMasterlist_Click"
+                    ToolTip="Export complete masterlist of all solo parent records (Admin only)"
+                    Visibility="Collapsed">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ExportBg" Background="White" CornerRadius="21"
+                                BorderBrush="#702943" BorderThickness="1.2" Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Data="M14,2H6C4.89,2 4,2.9 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,12L8,16H11V20H13V16H16L12,12Z"
+                                      Fill="#702943" Stretch="Uniform" Width="13" Height="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Export Masterlist" FontSize="12.5" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ExportBg" Property="Background" Value="#FBF1F4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            <Button Grid.Column="5" Height="42" Padding="22,0" Cursor="Hand"
                     VerticalAlignment="Center" Click="AddNewRecord_Click">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">

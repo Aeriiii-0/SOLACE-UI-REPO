@@ -8,11 +8,20 @@
         ShowInTaskbar="False"
         Width="320"
         SizeToContent="Height"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType">
     <Border x:Name="RootBorder"
             Background="White"
-            CornerRadius="12"
-            Margin="6,4,6,4">
+            BorderBrush="#702943"
+            BorderThickness="1.5"
+            CornerRadius="14"
+            Padding="12,12,8,12"
+            Margin="6,4,6,4"
+            SnapsToDevicePixels="True"
+            UseLayoutRounding="True">
         <Border.RenderTransform>
             <TranslateTransform x:Name="SlideTransform" X="340" Y="0"/>
         </Border.RenderTransform>
@@ -38,63 +47,64 @@
         </Border.Triggers>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="42"/>
+                <ColumnDefinition Width="36"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="28"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Border x:Name="AccentBar"
+
+            <Border x:Name="IconTile"
                     Grid.Column="0"
-                    CornerRadius="12,0,0,12"
-                    Background="#702943"/>
-            <Border Grid.Column="1"
-                    Width="28" Height="28"
-                    CornerRadius="14"
+                    Width="36" Height="36"
+                    CornerRadius="10"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center"
-                    x:Name="IconCircle"
-                    Background="#702943">
-                <TextBlock x:Name="TxtIcon"
-                           Text="✓"
-                           FontSize="13"
-                           FontWeight="Bold"
-                           Foreground="White"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
+                    Background="#F5E2E8"
+                    SnapsToDevicePixels="True">
+                <Viewbox Width="17" Height="17"
+                         HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Path x:Name="IconPath"
+                          Width="24" Height="24"
+                          Stretch="Uniform"
+                          Fill="#702943"
+                          SnapsToDevicePixels="True"/>
+                </Viewbox>
             </Border>
-            <StackPanel Grid.Column="2" Margin="10,12,4,12" VerticalAlignment="Center">
+
+            <StackPanel Grid.Column="1" Margin="12,0,6,0" VerticalAlignment="Center">
                 <TextBlock x:Name="TxtTitle"
                            FontFamily="Segoe UI"
                            FontSize="13"
                            FontWeight="SemiBold"
-                           Foreground="#1A1A1A"
+                           Foreground="#1A1020"
                            TextTrimming="CharacterEllipsis"/>
                 <TextBlock x:Name="TxtMessage"
                            FontFamily="Segoe UI"
-                           FontSize="11"
-                           Foreground="#555555"
+                           FontSize="11.5"
+                           Foreground="#6B5A62"
                            TextWrapping="Wrap"
                            Margin="0,3,0,0"/>
             </StackPanel>
-            <Button Grid.Column="3"
+
+            <Button Grid.Column="2"
                     Width="24" Height="24"
                     VerticalAlignment="Top"
-                    Margin="0,6,4,0"
                     Cursor="Hand"
+                    Focusable="False"
                     Click="CloseBtn_Click">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="Transparent" CornerRadius="4">
+                        <Border x:Name="CloseBg" Background="Transparent" CornerRadius="12">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" Value="0.6"/>
+                                <Setter TargetName="CloseBg" Property="Background" Value="#F3E8EC"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Button.Template>
-                <TextBlock Text="✕" FontSize="10" Foreground="#888888"/>
+                <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"
+                      Fill="#9B8A92" Stretch="Uniform" Width="9" Height="9"/>
             </Button>
         </Grid>
     </Border>
