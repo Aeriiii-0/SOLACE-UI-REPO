@@ -125,25 +125,31 @@ namespace SOLUM_UI.Views.Components
             if (totalWidth <= 0) return;
 
             double scrollMargin = GetScrollMargin();
+            double safetyPadding = 6.0;
             double selW = ColSelect != null ? ColSelect.Width : 0;
-            double rankW = ColRank != null ? ColRank.Width : 56;
-            double scoreW = ColScore != null ? ColScore.Width : 78;
-            double depW = ColDependents != null ? ColDependents.Width : 95;
-            double cardStatusW = ColCardStatus != null ? ColCardStatus.Width : 90;
-            double validUntilW = ColValidUntil != null ? ColValidUntil.Width : 95;
-            double actionW = 177;
+            double rankW = 46;
+            if (ColRank != null) ColRank.Width = rankW;
+            double scoreW = 66;
+            if (ColScore != null) ColScore.Width = scoreW;
+            double depW = 76;
+            if (ColDependents != null) ColDependents.Width = depW;
+            double cardStatusW = 76;
+            if (ColCardStatus != null) ColCardStatus.Width = cardStatusW;
+            double validUntilW = 80;
+            if (ColValidUntil != null) ColValidUntil.Width = validUntilW;
+            double actionW = 135;
             if (ColAction != null) ColAction.Width = actionW;
 
             double fixedWidth = selW + rankW + scoreW + depW + cardStatusW + validUntilW + actionW;
-            double minFlexible = 420;
-            double availableFlexible = totalWidth - fixedWidth - scrollMargin;
+            double minFlexible = 350;
+            double availableFlexible = totalWidth - fixedWidth - scrollMargin - safetyPadding;
             double flexibleWidth = Math.Max(minFlexible, availableFlexible);
 
-            double wName = Math.Max(110, Math.Floor(flexibleWidth * 0.22));
-            double wIncome = Math.Max(85, Math.Floor(flexibleWidth * 0.17));
-            double wCare = Math.Max(95, Math.Floor(flexibleWidth * 0.19));
-            double wCirc = Math.Max(95, Math.Floor(flexibleWidth * 0.20));
-            double wNeeds = Math.Max(95, flexibleWidth - (wName + wIncome + wCare + wCirc));
+            double wName = Math.Max(100, Math.Floor(flexibleWidth * 0.23));
+            double wIncome = Math.Max(80, Math.Floor(flexibleWidth * 0.17));
+            double wCare = Math.Max(90, Math.Floor(flexibleWidth * 0.20));
+            double wCirc = Math.Max(90, Math.Floor(flexibleWidth * 0.20));
+            double wNeeds = Math.Max(90, flexibleWidth - (wName + wIncome + wCare + wCirc));
             if (ColName != null) ColName.Width = wName;
             if (ColIncome != null) ColIncome.Width = wIncome;
             if (ColCare != null) ColCare.Width = wCare;

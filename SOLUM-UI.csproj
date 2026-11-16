@@ -316,6 +316,9 @@
     <Compile Include="Views\Dialogs\ArchivedDossierDialog.xaml.cs">
       <DependentUpon>ArchivedDossierDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\ViewAllLogsDialog.xaml.cs">
+      <DependentUpon>ViewAllLogsDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\ReactivateCitizenDialog.xaml.cs">
       <DependentUpon>ReactivateCitizenDialog.xaml</DependentUpon>
     </Compile>
@@ -647,6 +650,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Dialogs\ViewAllLogsDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Dialogs\ReactivateCitizenDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -855,6 +862,9 @@
     <Resource Include="Assets\bg.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Templates\CSWDO-066-2-Solo-Parent-Application-Form-REVISED.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Templates\SOLO-PARENTS-APPLICATION-FORM-TEMPLATE.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

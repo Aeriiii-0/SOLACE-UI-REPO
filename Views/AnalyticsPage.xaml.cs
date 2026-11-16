@@ -24,6 +24,7 @@ namespace SOLUM_UI
         private AnalyticsViewModel _vm;
         private bool _redrawPending;
         private INotifyCollectionChanged _hookedBarangay;
+        private INotifyCollectionChanged _hookedTopCases;
 
         private static readonly TimeSpan DataFreshnessTtl = TimeSpan.FromMinutes(2);
         private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
@@ -105,6 +106,7 @@ namespace SOLUM_UI
                 DataContext = _vm;
                 _vm.PropertyChanged += OnVmPropertyChanged;
                 HookBarangayCollection();
+                HookTopCasesCollection();
                 Loaded += async (s, e) =>
                 {
                     InitFilterControls();
@@ -152,6 +154,8 @@ namespace SOLUM_UI
             }
             if (e.PropertyName == nameof(AnalyticsViewModel.BarangayData))
                 HookBarangayCollection();
+            if (e.PropertyName == nameof(AnalyticsViewModel.TopCasesData))
+                HookTopCasesCollection();
             ScheduleRedraw();
         }
 
@@ -168,6 +172,23 @@ namespace SOLUM_UI
         }
 
         private void OnBarangayCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            ScheduleRedraw();
+        }
+
+        private void HookTopCasesCollection()
+        {
+            var current = (object)_vm.TopCasesData as INotifyCollectionChanged;
+            if (ReferenceEquals(current, _hookedTopCases))
+                return;
+            if (_hookedTopCases != null)
+                _hookedTopCases.CollectionChanged -= OnTopCasesCollectionChanged;
+            _hookedTopCases = current;
+            if (_hookedTopCases != null)
+                _hookedTopCases.CollectionChanged += OnTopCasesCollectionChanged;
+        }
+
+        private void OnTopCasesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             ScheduleRedraw();
         }
@@ -462,9 +483,9 @@ namespace SOLUM_UI
                 var breakdownRes = await breakdownTask;
                 if (breakdownRes != null && breakdownRes.Succeeded && breakdownRes.Data != null)
                     _vm.LoadBarangayBreakdownDto(breakdownRes.Data);
-                else
+                else if (monthRes == null || !monthRes.Succeeded)
                 {
-                    // Clear demographics gracefully if not returned for this custom/aggregated period
+                    // Clear demographics gracefully only if monthly data was not returned
                     _vm.ClearDemographicCharts();
                     if (_vm.IsFilterActive)
                     {
@@ -491,6 +512,7 @@ namespace SOLUM_UI
                 }
                 _vm.UpdateActiveFilterSummary();
                 HookBarangayCollection();
+                HookTopCasesCollection();
                 ScheduleRedraw();
                 _lastLoadedTime = DateTime.UtcNow;
                 _hasLoadedData = true;
@@ -573,6 +595,77 @@ namespace SOLUM_UI
             return tb;
         }
 
+        private static ToolTip CreateChartTooltip(string title, string primaryStat, string secondaryNote = null, Brush accent = null)
+        {
+            accent = accent ?? new SolidColorBrush(Color.FromRgb(0x7D, 0x22, 0x45));
+            var sp = new StackPanel();
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                sp.Children.Add(new TextBlock
+                {
+                    Text = title,
+                    FontWeight = FontWeights.Bold,
+                    FontSize = 12,
+                    Foreground = accent,
+                    FontFamily = new FontFamily("Segoe UI")
+                });
+            }
+            if (!string.IsNullOrWhiteSpace(primaryStat))
+            {
+                sp.Children.Add(new TextBlock
+                {
+                    Text = primaryStat,
+                    FontSize = 12,
+                    FontWeight = FontWeights.SemiBold,
+                    Foreground = new SolidColorBrush(Color.FromRgb(0x11, 0x18, 0x27)),
+                    Margin = new Thickness(0, string.IsNullOrWhiteSpace(title) ? 0 : 3, 0, 0),
+                    FontFamily = new FontFamily("Segoe UI")
+                });
+            }
+            if (!string.IsNullOrWhiteSpace(secondaryNote))
+            {
+                sp.Children.Add(new TextBlock
+                {
+                    Text = secondaryNote,
+                    FontSize = 10.5,
+                    Foreground = new SolidColorBrush(Color.FromRgb(0x8A, 0x6A, 0x75)),
+                    Margin = new Thickness(0, 3, 0, 0),
+                    TextWrapping = TextWrapping.Wrap,
+                    MaxWidth = 260,
+                    FontFamily = new FontFamily("Segoe UI")
+                });
+            }
+
+            var border = new Border
+            {
+                Background = new SolidColorBrush(Color.FromRgb(254, 247, 250)),
+                BorderBrush = accent,
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(10, 7, 10, 7),
+                Child = sp
+            };
+
+            return new ToolTip
+            {
+                Content = border,
+                Background = Brushes.Transparent,
+                BorderBrush = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                Padding = new Thickness(0)
+            };
+        }
+
+        private static void AttachQuickTooltip(FrameworkElement element, ToolTip tooltip)
+        {
+            if (element == null) return;
+            element.ToolTip = tooltip;
+            element.Cursor = System.Windows.Input.Cursors.Hand;
+            ToolTipService.SetInitialShowDelay(element, 50);
+            ToolTipService.SetBetweenShowDelay(element, 50);
+            ToolTipService.SetShowDuration(element, 15000);
+        }
+
         private void RedrawCharts()
         {
             if (_vm == null)
@@ -584,10 +677,10 @@ namespace SOLUM_UI
 
                 double female = N("FemaleCount");
                 double male = N("MaleCount");
-                DrawDonut(FindName("CvSexDonut") as Canvas, 20, female + male, new List<(double, Brush)>
+                DrawDonut(FindName("CvSexDonut") as Canvas, 20, female + male, new List<(double, Brush, string)>
                 {
-                    (female, B("#C9536E")),  // Brand pink - nice cool tone
-                    (male, B("#3B9FC9"))     // Brand blue - nice cool tone
+                    (female, B("#C9536E"), "Female"),
+                    (male, B("#3B9FC9"), "Male")
                 });
                 var ageBars = new List<(string, double, Brush)>();
                 for (int i = 0; i < AgeLabels.Length; i++)
@@ -599,11 +692,11 @@ namespace SOLUM_UI
                 double employed = N("EmployedPercent");
                 double selfEmployed = N("SelfEmployedPercent");
                 double notEmployed = N("NotEmployedPercent");
-                DrawDonut(FindName("CvEmployDonut") as Canvas, 20, Math.Max(100, employed + selfEmployed + notEmployed), new List<(double, Brush)>
+                DrawDonut(FindName("CvEmployDonut") as Canvas, 20, Math.Max(100, employed + selfEmployed + notEmployed), new List<(double, Brush, string)>
                 {
-                    (employed, B("#7D2245")),
-                    (selfEmployed, B("#E3BF2E")),
-                    (notEmployed, B("#A89AA0"))
+                    (employed, B("#7D2245"), "Employed"),
+                    (selfEmployed, B("#E3BF2E"), "Self-Employed"),
+                    (notEmployed, B("#A89AA0"), "Not Employed")
                 });
                 double sepAnn = N("SeparatedAnnulledCount");
                 if (sepAnn == 0 && (N("SeparatedCount") > 0 || N("AnnulledCount") > 0))
@@ -628,14 +721,24 @@ namespace SOLUM_UI
             double a = N("AgeGroup0_5"), b = N("AgeGroup6_12"), c = N("AgeGroup13_17");
             double total = a + b + c;
 
-            void Set(ProgressBar bar, TextBlock pct, double v)
+            void Set(ProgressBar bar, TextBlock pct, double v, string title, string note)
             {
-                if (bar != null) { bar.Maximum = Math.Max(1, total); bar.Value = v; }
+                if (bar != null)
+                {
+                    bar.Maximum = Math.Max(1, total);
+                    bar.Value = v;
+                    double p = total > 0 ? (v / total * 100.0) : 0;
+                    var tip = CreateChartTooltip(title, $"{v:N0} children ({p:F1}%)", note, B("#8A6A00"));
+                    AttachQuickTooltip(bar, tip);
+                }
                 if (pct != null) pct.Text = total > 0 ? $"{v / total * 100:0.#}%" : "0%";
             }
-            Set(FindName("PbChild0") as ProgressBar, FindName("TxtChildPct0") as TextBlock, a);
-            Set(FindName("PbChild1") as ProgressBar, FindName("TxtChildPct1") as TextBlock, b);
-            Set(FindName("PbChild2") as ProgressBar, FindName("TxtChildPct2") as TextBlock, c);
+            Set(FindName("PbChild0") as ProgressBar, FindName("TxtChildPct0") as TextBlock, a,
+                "Early Childhood (0–6 yrs)", "Daycare age. Prioritized for immunization, ECCD day care centers, and infant nutrition support.");
+            Set(FindName("PbChild1") as ProgressBar, FindName("TxtChildPct1") as TextBlock, b,
+                "School & Youth (7–21 yrs)", "Basic to tertiary education. Eligible for educational assistance, book stipends, and DepEd/CHED programs.");
+            Set(FindName("PbChild2") as ProgressBar, FindName("TxtChildPct2") as TextBlock, c,
+                "Adult / Special (22+ yrs)", "Dependent adult children who are incapacitated or have physical/mental disability.");
         }
 
         /// <summary>
@@ -701,7 +804,7 @@ namespace SOLUM_UI
             Brush white = Brushes.White;
 
             // Axis label helper (main name + smaller "(…)" sub line, like the inspiration)
-            void AddAxisLabel(string label, double centerX, double y, bool emphasize)
+            void AddAxisLabel(string label, double centerX, double y, bool emphasize, ToolTip tipObj)
             {
                 string main = label ?? string.Empty;
                 string sub = null;
@@ -717,6 +820,7 @@ namespace SOLUM_UI
                 mainTb.MaxWidth = Math.Max(20, slot - 6);
                 mainTb.TextTrimming = TextTrimming.CharacterEllipsis;
                 mainTb.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                AttachQuickTooltip(mainTb, tipObj);
                 Canvas.SetLeft(mainTb, centerX - mainTb.DesiredSize.Width / 2);
                 Canvas.SetTop(mainTb, y);
                 c.Children.Add(mainTb);
@@ -727,6 +831,7 @@ namespace SOLUM_UI
                     subTb.MaxWidth = Math.Max(20, slot - 6);
                     subTb.TextTrimming = TextTrimming.CharacterEllipsis;
                     subTb.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    AttachQuickTooltip(subTb, tipObj);
                     Canvas.SetLeft(subTb, centerX - subTb.DesiredSize.Width / 2);
                     Canvas.SetTop(subTb, y + mainTb.DesiredSize.Height);
                     c.Children.Add(subTb);
@@ -734,6 +839,7 @@ namespace SOLUM_UI
             }
 
             bool isFirstPage = _vm == null || _vm.CurrentBarangayPage <= 1;
+            double totalCitywide = _vm?.TotalSoloParents > 0 ? _vm.TotalSoloParents : (data.Count > 0 ? data.Sum(d => d.Value) : 0);
 
             for (int i = 0; i < n; i++)
             {
@@ -743,6 +849,25 @@ namespace SOLUM_UI
                 double centerX = left + slot * i + slot / 2;
                 double x = centerX - barW / 2;
                 double y = top + ph - barH;
+
+                double pct = totalCitywide > 0 ? (value / totalCitywide * 100.0) : 0;
+                int blocks = (int)Math.Ceiling(value / blockSize);
+                string rankPrefix = isFirstPage ? $"#{i + 1} Ranked • " : "";
+                string primaryStat = $"{rankPrefix}{value:N0} solo parents ({pct:F1}% of citywide)";
+                string blockNote = $"{blocks} block{(blocks == 1 ? "" : "s")} (1 block = 5 solo parents)";
+                var tip = CreateChartTooltip(data[i].Label, primaryStat, blockNote, isTop ? maroon : B("#8A6A75"));
+
+                // Column slot hit-rect for effortless hover anywhere across the column
+                var slotHit = new Rectangle
+                {
+                    Width = slot,
+                    Height = ph + top,
+                    Fill = Brushes.Transparent
+                };
+                AttachQuickTooltip(slotHit, tip);
+                Canvas.SetLeft(slotHit, left + slot * i);
+                Canvas.SetTop(slotHit, 0);
+                c.Children.Add(slotHit);
 
                 Brush fill = isTop
                     ? new LinearGradientBrush(Color.FromRgb(0xB8, 0x48, 0x6D), Color.FromRgb(0x7D, 0x22, 0x45), 90)
@@ -755,9 +880,14 @@ namespace SOLUM_UI
                     Height = barH,
                     Background = fill,
                     ClipToBounds = true,
-                    Clip = new RectangleGeometry(new Rect(0, 0, barW, barH), 10, 10),
-                    ToolTip = $"{data[i].Label}: {value:N0} solo parents"
+                    Clip = new RectangleGeometry(new Rect(0, 0, barW, barH), 10, 10)
                 };
+                AttachQuickTooltip(host, tip);
+
+                slotHit.MouseEnter += (s, e) => host.Opacity = 0.82;
+                slotHit.MouseLeave += (s, e) => host.Opacity = 1.0;
+                host.MouseEnter += (s, e) => host.Opacity = 0.82;
+                host.MouseLeave += (s, e) => host.Opacity = 1.0;
 
                 if (blockH >= 5)
                 {
@@ -775,6 +905,7 @@ namespace SOLUM_UI
 
                 // Value label above bar
                 var valueLabel = MakeText(value.ToString("N0"), 13, isTop ? maroon : darkBrush, FontWeights.Bold);
+                AttachQuickTooltip(valueLabel, tip);
                 double valueTop = y - valueLabel.DesiredSize.Height - 3;
                 Canvas.SetLeft(valueLabel, centerX - valueLabel.DesiredSize.Width / 2);
                 Canvas.SetTop(valueLabel, valueTop);
@@ -797,13 +928,14 @@ namespace SOLUM_UI
                             FontFamily = new FontFamily("Segoe UI")
                         }
                     };
+                    AttachQuickTooltip(pill, tip);
                     pill.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                     Canvas.SetLeft(pill, centerX - pill.DesiredSize.Width / 2);
                     Canvas.SetTop(pill, valueTop - pill.DesiredSize.Height - 2);
                     c.Children.Add(pill);
                 }
 
-                AddAxisLabel(data[i].Label, centerX, top + ph + 8, isTop);
+                AddAxisLabel(data[i].Label, centerX, top + ph + 8, isTop, tip);
             }
 
             // Footer note
@@ -836,6 +968,7 @@ namespace SOLUM_UI
             if (max <= 0)
                 max = 1;
 
+            double totalCivil = items.Sum(i => i.Value);
             double slot = pw / items.Count;
             double barW = Math.Min(64, slot * 0.6);
             var textBrush = B("#8A6A75");
@@ -851,25 +984,52 @@ namespace SOLUM_UI
             });
             for (int i = 0; i < items.Count; i++)
             {
-                double barH = items[i].Value > 0 ? Math.Max(3, ph * items[i].Value / max) : 2;
+                double valNum = items[i].Value;
+                double pct = totalCivil > 0 ? (valNum / totalCivil * 100.0) : 0;
+                string cleanLabel = items[i].Label.Replace("\n", " ");
+                var tip = CreateChartTooltip(cleanLabel, $"{valNum:N0} solo parents ({pct:F1}%)", null, items[i].Fill);
+
+                double barH = valNum > 0 ? Math.Max(3, ph * valNum / max) : 2;
                 double x = side + slot * i + (slot - barW) / 2;
                 double y = top + ph - barH;
+
+                var slotHit = new Rectangle
+                {
+                    Width = slot,
+                    Height = ph + top,
+                    Fill = Brushes.Transparent
+                };
+                AttachQuickTooltip(slotHit, tip);
+                Canvas.SetLeft(slotHit, side + slot * i);
+                Canvas.SetTop(slotHit, 0);
+                c.Children.Add(slotHit);
+
                 var bar = new Border
                 {
                     Width = barW,
                     Height = barH,
                     Background = items[i].Fill,
-                    CornerRadius = new CornerRadius(6, 6, 0, 0),
-                    ToolTip = $"{items[i].Label.Replace("\n", " ")}: {items[i].Value:N0}"
+                    CornerRadius = new CornerRadius(6, 6, 0, 0)
                 };
+                AttachQuickTooltip(bar, tip);
+
+                slotHit.MouseEnter += (s, e) => bar.Opacity = 0.82;
+                slotHit.MouseLeave += (s, e) => bar.Opacity = 1.0;
+                bar.MouseEnter += (s, e) => bar.Opacity = 0.82;
+                bar.MouseLeave += (s, e) => bar.Opacity = 1.0;
+
                 Canvas.SetLeft(bar, x);
                 Canvas.SetTop(bar, y);
                 c.Children.Add(bar);
-                var val = MakeText(items[i].Value.ToString("N0"), 12, darkBrush, FontWeights.Bold);
+
+                var val = MakeText(valNum.ToString("N0"), 12, darkBrush, FontWeights.Bold);
+                AttachQuickTooltip(val, tip);
                 Canvas.SetLeft(val, x + (barW - val.DesiredSize.Width) / 2);
                 Canvas.SetTop(val, y - val.DesiredSize.Height - 3);
                 c.Children.Add(val);
+
                 var lbl = MakeText(items[i].Label, 9.5, textBrush, FontWeights.Normal, TextAlignment.Center);
+                AttachQuickTooltip(lbl, tip);
                 Canvas.SetLeft(lbl, side + slot * i + (slot - lbl.DesiredSize.Width) / 2);
                 Canvas.SetTop(lbl, top + ph + 6);
                 c.Children.Add(lbl);
@@ -884,8 +1044,13 @@ namespace SOLUM_UI
             if (canvas == null) return;
             canvas.Children.Clear();
 
-            double w = canvas.ActualWidth, h = canvas.ActualHeight;
-            if (w <= 0 || h <= 0) return;
+            double w = canvas.ActualWidth;
+            if (w <= 0 && canvas.Parent is FrameworkElement p && p.ActualWidth > 0)
+                w = p.ActualWidth - 40;
+            if (w <= 0) w = 500;
+
+            double h = canvas.ActualHeight;
+            if (h <= 0) h = canvas.Height > 0 ? canvas.Height : (canvas.MinHeight > 0 ? canvas.MinHeight : 320);
 
             var textBrush = B("#8A6A75");
             var dark = B("#7D2245");
@@ -893,26 +1058,27 @@ namespace SOLUM_UI
             var topBar = B("#7D2245");
             var otherBar = B("#D9A3B8");
 
-            if (categories.Count == 0)
+            if (categories == null || categories.Count == 0)
             {
                 var empty = MakeText("No category data for the selected filter", 12, textBrush, FontWeights.Normal);
-                Canvas.SetLeft(empty, (w - empty.DesiredSize.Width) / 2);
-                Canvas.SetTop(empty, (h - empty.DesiredSize.Height) / 2);
+                Canvas.SetLeft(empty, Math.Max(0, (w - empty.DesiredSize.Width) / 2));
+                Canvas.SetTop(empty, Math.Max(0, (h - empty.DesiredSize.Height) / 2));
                 canvas.Children.Add(empty);
                 return;
             }
 
             var labels = categories
-                .Select(c => MakeText(c.Label.Length > 26 ? c.Label.Substring(0, 25) + "…" : c.Label, 11, textBrush, FontWeights.Normal))
+                .Select(c => MakeText(string.IsNullOrEmpty(c.Label) ? "Unknown" : (c.Label.Length > 26 ? c.Label.Substring(0, 25) + "…" : c.Label), 11, textBrush, FontWeights.Normal))
                 .ToList();
             var values = categories
                 .Select(c => MakeText(c.Value.ToString("N0"), 11, dark, FontWeights.Bold))
                 .ToList();
 
-            double left = Math.Min(200, labels.Max(l => l.DesiredSize.Width) + 14);
-            double right = values.Max(v => v.DesiredSize.Width) + 14;
-            double pw = w - left - right;
-            if (pw <= 0) return;
+            double maxLabelW = labels.Count > 0 ? labels.Max(l => l.DesiredSize.Width) : 60;
+            double left = Math.Min(180, maxLabelW + 14);
+            double maxValueW = values.Count > 0 ? values.Max(v => v.DesiredSize.Width) : 30;
+            double right = maxValueW + 14;
+            double pw = Math.Max(120, w - left - right);
 
             // Highest count = 100% of the track; everything else is relative to it.
             double max = categories.Max(c => c.Value);
@@ -924,12 +1090,61 @@ namespace SOLUM_UI
             for (int i = 0; i < categories.Count; i++)
             {
                 double y = slot * i + (slot - barH) / 2;
+                string fullName = GetFullCategoryName(categories[i].Label);
 
+                var tipBorder = new Border
+                {
+                    Background = new SolidColorBrush(Color.FromRgb(254, 247, 250)),
+                    BorderBrush = dark,
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(6),
+                    Padding = new Thickness(10, 6, 10, 6),
+                    Child = new StackPanel
+                    {
+                        Children =
+                        {
+                            new TextBlock { Text = fullName, FontWeight = FontWeights.Bold, FontSize = 12, Foreground = dark },
+                            new TextBlock { Text = $"{categories[i].Value:N0} cases", FontSize = 11, Foreground = textBrush, Margin = new Thickness(0, 2, 0, 0) }
+                        }
+                    }
+                };
+                var toolTipObj = new ToolTip
+                {
+                    Content = tipBorder,
+                    Background = Brushes.Transparent,
+                    BorderBrush = Brushes.Transparent,
+                    BorderThickness = new Thickness(0),
+                    Padding = new Thickness(0)
+                };
+
+                var rowHit = new Rectangle
+                {
+                    Width = w,
+                    Height = slot,
+                    Fill = Brushes.Transparent,
+                    ToolTip = toolTipObj,
+                    Cursor = System.Windows.Input.Cursors.Hand
+                };
+                ToolTipService.SetInitialShowDelay(rowHit, 50);
+                ToolTipService.SetBetweenShowDelay(rowHit, 50);
+                ToolTipService.SetShowDuration(rowHit, 15000);
+                Canvas.SetLeft(rowHit, 0);
+                Canvas.SetTop(rowHit, slot * i);
+                canvas.Children.Add(rowHit);
+
+                labels[i].ToolTip = toolTipObj;
+                labels[i].Cursor = System.Windows.Input.Cursors.Hand;
+                ToolTipService.SetInitialShowDelay(labels[i], 50);
+                ToolTipService.SetBetweenShowDelay(labels[i], 50);
+                ToolTipService.SetShowDuration(labels[i], 15000);
                 Canvas.SetLeft(labels[i], left - 10 - labels[i].DesiredSize.Width);
                 Canvas.SetTop(labels[i], y + (barH - labels[i].DesiredSize.Height) / 2);
                 canvas.Children.Add(labels[i]);
 
-                var track = new Border { Width = pw, Height = barH, Background = trackBrush, CornerRadius = new CornerRadius(barH / 2) };
+                var track = new Border { Width = pw, Height = barH, Background = trackBrush, CornerRadius = new CornerRadius(barH / 2), ToolTip = toolTipObj, Cursor = System.Windows.Input.Cursors.Hand };
+                ToolTipService.SetInitialShowDelay(track, 50);
+                ToolTipService.SetBetweenShowDelay(track, 50);
+                ToolTipService.SetShowDuration(track, 15000);
                 Canvas.SetLeft(track, left); Canvas.SetTop(track, y);
                 canvas.Children.Add(track);
 
@@ -942,19 +1157,73 @@ namespace SOLUM_UI
                         Height = barH,
                         Background = i == 0 ? topBar : otherBar,
                         CornerRadius = new CornerRadius(barH / 2),
-                        ToolTip = $"{categories[i].Label}: {categories[i].Value:N0} cases"
+                        ToolTip = toolTipObj,
+                        Cursor = System.Windows.Input.Cursors.Hand
                     };
+                    ToolTipService.SetInitialShowDelay(bar, 50);
+                    ToolTipService.SetBetweenShowDelay(bar, 50);
+                    ToolTipService.SetShowDuration(bar, 15000);
                     Canvas.SetLeft(bar, left); Canvas.SetTop(bar, y);
                     canvas.Children.Add(bar);
                 }
 
+                values[i].ToolTip = toolTipObj;
+                values[i].Cursor = System.Windows.Input.Cursors.Hand;
+                ToolTipService.SetInitialShowDelay(values[i], 50);
+                ToolTipService.SetBetweenShowDelay(values[i], 50);
+                ToolTipService.SetShowDuration(values[i], 15000);
                 Canvas.SetLeft(values[i], w - values[i].DesiredSize.Width - 2);
                 Canvas.SetTop(values[i], y + (barH - values[i].DesiredSize.Height) / 2);
                 canvas.Children.Add(values[i]);
             }
         }
 
-        private void DrawDonut(Canvas c, double thickness, double total, List<(double Value, Brush Fill)> parts)
+        private static string GetFullCategoryName(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return "Unknown Category";
+            string s = raw.Trim();
+
+            // A1
+            if (s.Equals("A1", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A1.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A1:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A1 -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A1 ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("rape", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "A1: Gives birth as a result of rape (Consequence of rape)";
+            // A2
+            if (s.Equals("A2", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A2.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A2:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A2 -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A2 ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("widow", StringComparison.OrdinalIgnoreCase) >= 0 || s.IndexOf("death of spouse", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "A2: Death of spouse (Widow / Widower)";
+            // A3
+            if (s.Equals("A3", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A3.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A3:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A3 -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A3 ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("pdl", StringComparison.OrdinalIgnoreCase) >= 0 || s.IndexOf("detention", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "A3: Detention of spouse (Spouse of PDL)";
+            // A4
+            if (s.Equals("A4", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A4.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A4:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A4 -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A4 ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("pwd", StringComparison.OrdinalIgnoreCase) >= 0 || s.IndexOf("incapacity", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "A4: Physical & mental incapacity of spouse (Spouse of PWD)";
+            // A5
+            if (s.Equals("A5", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A5.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A5:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A5 -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A5 ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("separation", StringComparison.OrdinalIgnoreCase) >= 0 || s.IndexOf("separated", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "A5: Legal or de facto separation (at least 6 months)";
+            // A6
+            if (s.Equals("A6", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A6.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A6:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A6 -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A6 ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("annul", StringComparison.OrdinalIgnoreCase) >= 0 || s.IndexOf("nullity", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "A6: Declaration of nullity or annulment of marriage";
+            // A7
+            if (s.Equals("A7", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A7.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A7:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A7 -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("A7 ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("abandon", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "A7: Abandonment of spouse for at least 6 months";
+            // B
+            if (s.Equals("B", StringComparison.OrdinalIgnoreCase) || s.StartsWith("B.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("B:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("B -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("B ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("ofw", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "B: Spouse or family member of an OFW";
+            // C
+            if (s.Equals("C", StringComparison.OrdinalIgnoreCase) || s.StartsWith("C.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("C:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("C -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("C ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("unmarried", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "C: Unmarried mother or father";
+            // D
+            if (s.Equals("D", StringComparison.OrdinalIgnoreCase) || s.StartsWith("D.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("D:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("D -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("D ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("guardian", StringComparison.OrdinalIgnoreCase) >= 0 || s.IndexOf("adopt", StringComparison.OrdinalIgnoreCase) >= 0 || s.IndexOf("foster", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "D: Legal guardian, adoptive parent, or foster parent";
+            // E
+            if (s.Equals("E", StringComparison.OrdinalIgnoreCase) || s.StartsWith("E.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("E:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("E -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("E ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("relative", StringComparison.OrdinalIgnoreCase) >= 0 || s.IndexOf("adolescent", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "E: Relative within 4th degree of consanguinity or affinity / Adolescent parent";
+            // F
+            if (s.Equals("F", StringComparison.OrdinalIgnoreCase) || s.StartsWith("F.", StringComparison.OrdinalIgnoreCase) || s.StartsWith("F:", StringComparison.OrdinalIgnoreCase) || s.StartsWith("F -", StringComparison.OrdinalIgnoreCase) || s.StartsWith("F ", StringComparison.OrdinalIgnoreCase) || s.IndexOf("pregnant", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "F: Pregnant woman";
+
+            return s;
+        }
+
+        private void DrawDonut(Canvas c, double thickness, double total, List<(double Value, Brush Fill, string Label)> parts)
         {
             if (c == null)
                 return;
@@ -981,6 +1250,8 @@ namespace SOLUM_UI
             if (total <= 0)
                 return;
 
+            bool isEmployDonut = c.Name == "CvEmployDonut";
+
             double angle = -90;
             foreach (var part in parts)
             {
@@ -989,6 +1260,10 @@ namespace SOLUM_UI
                     continue;
 
                 double sweep = Math.Min(360, value / total * 360);
+                double pct = total > 0 ? (value / total * 100.0) : 0;
+                string stat = isEmployDonut ? $"{value:F1}% share" : $"{value:N0} solo parents ({pct:F1}%)";
+                var tip = CreateChartTooltip(part.Label, stat, null, part.Fill);
+
                 if (sweep >= 359.9)
                 {
                     var ring = new Ellipse
@@ -999,6 +1274,7 @@ namespace SOLUM_UI
                         StrokeThickness = thickness,
                         Fill = Brushes.Transparent
                     };
+                    AttachQuickTooltip(ring, tip);
                     Canvas.SetLeft(ring, cx - radius);
                     Canvas.SetTop(ring, cy - radius);
                     c.Children.Add(ring);
@@ -1013,14 +1289,29 @@ namespace SOLUM_UI
                 figure.Segments.Add(new ArcSegment(endPoint, new Size(radius, radius), 0, sweep > 180, SweepDirection.Clockwise, true));
                 var geometry = new PathGeometry();
                 geometry.Figures.Add(figure);
-                c.Children.Add(new System.Windows.Shapes.Path
+                var path = new System.Windows.Shapes.Path
                 {
                     Data = geometry,
                     Stroke = part.Fill,
                     StrokeThickness = thickness,
                     StrokeStartLineCap = PenLineCap.Flat,
                     StrokeEndLineCap = PenLineCap.Flat
-                });
+                };
+                AttachQuickTooltip(path, tip);
+
+                double origThick = thickness;
+                path.MouseEnter += (s, e) =>
+                {
+                    path.StrokeThickness = origThick + 4;
+                    Panel.SetZIndex(path, 10);
+                };
+                path.MouseLeave += (s, e) =>
+                {
+                    path.StrokeThickness = origThick;
+                    Panel.SetZIndex(path, 0);
+                };
+
+                c.Children.Add(path);
                 angle += sweep;
             }
         }

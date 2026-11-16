@@ -11,9 +11,22 @@ namespace SOLUM_UI.Services
 {
     public static class SoloParentExportService
     {
+        static SoloParentExportService()
+        {
+            try
+            {
+                PdfSharp.Fonts.GlobalFontSettings.UseWindowsFontsUnderWindows = true;
+            }
+            catch { }
+        }
+
         // New PDF template first, old name kept as a fallback.
         private static readonly string[] TemplateNames =
         {
+            "CSWDO-066-2-Solo-Parent-Application-Form-REVISED.pdf",
+            "CSWDO-066-Solo-Parent-Application-Form-REVISED.pdf",
+            "CSWDO-066-2.pdf",
+            "CSWDO-066.pdf",
             "SP-TEMPLATE.pdf",
             "SOLO-PARENTS-APPLICATION-FORM-TEMPLATE.pdf"
         };
@@ -71,10 +84,22 @@ namespace SOLUM_UI.Services
                 var page = doc.Pages[0];
                 using (var gfx = XGraphics.FromPdfPage(page))
                 {
-                    // Compensate for a MediaBox that doesn't start at y = 0 (this template: 8.04).
-                    gfx.TranslateTransform(0, -page.MediaBox.Y1);
-                    var p = new Painter(gfx, page.Width.Point / RefW, page.Height.Point / RefH, debugBoxes);
-                    Fill(p, r);
+                    bool isRevised = page.Width.Point < 700 ||
+                                     Path.GetFileName(templatePath).IndexOf("CSWDO", StringComparison.OrdinalIgnoreCase) >= 0;
+                    double refW = isRevised ? 612.0 : RefW;
+                    double refH = isRevised ? 936.0 : RefH;
+
+                    // Compensate for a MediaBox that doesn't start at y = 0 (legacy template: 8.04).
+                    if (page.MediaBox.Y1 != 0)
+                    {
+                        gfx.TranslateTransform(0, -page.MediaBox.Y1);
+                    }
+
+                    var p = new Painter(gfx, page.Width.Point / refW, page.Height.Point / refH, debugBoxes, isRevised ? 4.0 : 15.0);
+                    if (isRevised)
+                        FillRevised(p, r);
+                    else
+                        Fill(p, r);
                 }
                 doc.Save(outputPath);
             }
@@ -98,11 +123,11 @@ namespace SOLUM_UI.Services
         private static readonly Row R4 = new Row(337.0, 353.0);
         private static readonly Row R5 = new Row(370.0, 389.5);
         /// <summary>Value box for a cell between two vertical dividers.</summary>
-        private static void Cell(Painter p, string text, double x0, double x1, Row row, double maxPt = 10)
+        private static void Cell(Painter p, string text, double x0, double x1, Row row, double maxPt = 10, Align align = Align.Left)
         {
             double y = row.LabelBottom + 1.0;
             double h = (row.Bottom - 1.5) - y;
-            p.Text(text, x0, y, x1 - x0, h, maxPt);
+            p.Text(text, x0, y, x1 - x0, h, maxPt, align);
         }
         // ------------------------------------------------------------------
         // Field placement
@@ -179,8 +204,8 @@ namespace SOLUM_UI.Services
                 double y = rowLines[i] + 1.0;
                 double h = rowLines[i + 1] - rowLines[i] - 2.0;
                 p.Text(m.MemberName, 31.2, y, 261.2 - 31.2, h, 10);
-                p.Text(m.Sex, 261.2, y, 305.5 - 261.2, h, 10, Align.Center);
-                p.Text(FamilyAge(m.Birthdate), 305.5, y, 348.8 - 305.5, h, 10, Align.Center);
+                p.Text(FormatSex(m.Sex), 261.2, y, 305.5 - 261.2, h, 10, Align.Center);
+                p.Text(FamilyAge(m), 305.5, y, 348.8 - 305.5, h, 10, Align.Center);
                 p.Text(m.Birthdate, 348.8, y, 440.0 - 348.8, h, 9, Align.Center);
                 p.Text(m.CivilStatus, 440.0, y, 520.5 - 440.0, h, 9, Align.Center);
                 p.Text(m.Relationship, 520.5, y, 616.2 - 520.5, h, 9, Align.Center);
@@ -192,6 +217,122 @@ namespace SOLUM_UI.Services
             p.Wrapped(r.NeedsAndProblems, 31.2, 746.0, 814.0, 35.5, 10);
             p.Wrapped(r.OtherIncomeSource, 31.2, 811.5, 814.0, 35.5, 10);
         }
+
+        /// <summary>
+        /// Field placement calibrated specifically for the official 8.5 x 13 inch (612 x 936 pt)
+        /// CSWDO-066-2-Solo-Parent-Application-Form-REVISED.pdf document.
+        /// </summary>
+        private static void FillRevised(Painter p, SoloParentRecord r)
+        {
+            // ---- header -------------------------------------------------
+            bool isNew = r.IsNewApplicant || (!r.IsRenewal && r.ApplicationType?.IndexOf("New", StringComparison.OrdinalIgnoreCase) >= 0);
+            bool isRenew = r.IsRenewal || r.ApplicationType?.IndexOf("Renew", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (isNew) p.Check(24.5, 99.0, 3.5);
+            if (isRenew) p.Check(125.5, 99.0, 3.5);
+            if (isRenew)
+            {
+                p.OnLine("RENEWAL", 208.0, 315.0, 102.5, 9.0, Align.Center);
+            }
+            DateTime appDate = r.DateOfApplication != DateTime.MinValue ? r.DateOfApplication : r.DateCreated;
+            p.OnLine(Date(appDate, "MM/dd/yyyy"), 470.0, 585.0, 102.5, 9.0, Align.Center);
+
+            // ---- I. Identifying information, row 1 ----------------------
+            // Cell bounds: y 152.8 .. 177.6, label bottom ~ 162.3
+            Row revR1 = new Row(162.3, 177.6);
+            Cell(p, r.Surname, 21.8, 156.0, revR1, 9.5);
+            Cell(p, r.FirstName, 156.6, 290.7, revR1, 9.5);
+            Cell(p, r.MiddleName, 291.3, 410.8, revR1, 9.5);
+            Cell(p, r.ExtensionName, 411.3, 466.9, revR1, 8.5, Align.Center);
+            Cell(p, r.CivilStatus, 467.5, 527.7, revR1, 8.5, Align.Center);
+            Cell(p, r.Sex, 528.2, 588.5, revR1, 8.5, Align.Center);
+
+            // ---- row 2 --------------------------------------------------
+            // Cell bounds: y 178.1 .. 200.1, label bottom ~ 187.7
+            Row revR2 = new Row(187.7, 200.1);
+            Cell(p, Date(r.DateOfBirth, "MM/dd/yyyy"), 21.8, 131.7, revR2, 8.5, Align.Center);
+            Cell(p, r.PlaceOfBirth, 132.1, 253.5, revR2, 8.5);
+            Cell(p, Age(r.DateOfBirth), 254.0, 304.9, revR2, 8.5, Align.Center);
+            Cell(p, r.EducationalAttainment, 305.4, 446.7, revR2, 8.5);
+            Cell(p, r.PhilSysNumber, 447.2, 588.5, revR2, 8.5, Align.Center);
+
+            // ---- row 3 --------------------------------------------------
+            // Cell bounds: y 200.5 .. 225.5, label bottom ~ 210.5
+            Row revR3 = new Row(210.5, 225.5);
+            Cell(p, r.Religion, 21.8, 131.7, revR3, 8.5);
+            Cell(p, r.Occupation, 132.1, 276.5, revR3, 8.5);
+            Cell(p, r.MonthlyIncome, 277.0, 368.7, revR3, 8.5, Align.Center);
+            // Checkboxes: Employed, Self-Employed, Not Employed
+            bool isEmp = r.IsEmployed || (!r.IsSelfEmployed && !r.IsNotEmployed && string.Equals(r.EmploymentStatusDisplay, "Employed", StringComparison.OrdinalIgnoreCase));
+            bool isSelfEmp = r.IsSelfEmployed || (!r.IsEmployed && !r.IsNotEmployed && string.Equals(r.EmploymentStatusDisplay, "Self-Employed", StringComparison.OrdinalIgnoreCase));
+            bool isNotEmp = r.IsNotEmployed || (!r.IsEmployed && !r.IsSelfEmployed && string.Equals(r.EmploymentStatusDisplay, "Not Employed", StringComparison.OrdinalIgnoreCase));
+            if (isEmp) p.Check(376.5, 219.5, 3.0);
+            if (isSelfEmp) p.Check(434.5, 219.5, 3.0);
+            if (isNotEmp) p.Check(510.5, 219.5, 3.0);
+
+            // ---- row 4 --------------------------------------------------
+            // Cell bounds: y 226.1 .. 248.4, label bottom ~ 235.6
+            Row revR4 = new Row(235.6, 248.4);
+            Cell(p, r.Address, 21.8, 255.3, revR4, 8.0);
+            Cell(p, r.Barangay, 255.8, 410.7, revR4, 8.5);
+            Cell(p, r.ContactNumber, 411.3, 588.5, revR4, 8.5, Align.Center);
+
+            // ---- row 5 --------------------------------------------------
+            // Cell bounds: y 248.9 .. 273.6, label bottom ~ 258.5
+            Row revR5 = new Row(258.5, 273.6);
+            Cell(p, r.EmergencyContactName, 21.8, 205.7, revR5, 8.5);
+            Cell(p, r.EmergencyRelationship, 206.2, 304.9, revR5, 8.5, Align.Center);
+            Cell(p, r.EmergencyAddress, 305.4, 460.9, revR5, 8.0);
+            Cell(p, r.EmergencyContactNumber, 461.4, 588.5, revR5, 8.5, Align.Center);
+
+            // ---- II. Circumstance code(s): draw a circle around them ----
+            foreach (var code in SplitCodes(BuildCircumstanceCodes(r)))
+                if (_revisedCodeCenters.TryGetValue(code, out var c))
+                    p.Circle(c.X, c.Y, code.Length > 1 ? 9.5 : 8.0);
+
+            // ---- II. "Specify" blanks (text sits on each underline) ------
+            p.OnLineWrapped(Prop(r, CauseOfDeathNames), 118.0, 160.0, 343.0, 6.5);
+            p.OnLine(Prop(r, DateOfDeathNames), 188.0, 225.0, 343.0, 6.5, Align.Center);
+            p.OnLine(Prop(r, DisabilityNames), 125.0, 225.0, 390.0, 6.5, Align.Center);
+            p.OnLine(Prop(r, SeparationNames), 340.0, 422.0, 320.0, 6.5, Align.Center);
+            p.OnLine(Prop(r, StayAbroadNames), 352.0, 422.0, 390.0, 6.5, Align.Center);
+
+            if (Flag(r, NullityNames)) p.Check(263.5, 334.0, 2.5);
+            if (Flag(r, AnnulmentNames)) p.Check(326.0, 334.0, 2.5);
+
+            // ---- III. Family composition (5 rows) ------------------------
+            double[] rowLines = { 430.5, 444.4, 458.4, 472.3, 486.2, 500.0 };
+            var members = r.FamilyMembers ?? new List<FamilyMember>();
+            for (int i = 0; i < 5 && i < members.Count; i++)
+            {
+                var m = members[i];
+                double y = rowLines[i] + 1.0;
+                double h = rowLines[i + 1] - rowLines[i] - 2.0;
+                p.Text(m.MemberName, 21.8, y, 182.2 - 21.8, h, 8.5);
+                p.Text(FormatSex(m.Sex), 182.8, y, 212.8 - 182.8, h, 8.5, Align.Center);
+                p.Text(FamilyAge(m), 213.3, y, 242.7 - 213.3, h, 8.5, Align.Center);
+                p.Text(m.Birthdate, 243.3, y, 306.4 - 243.3, h, 8.0, Align.Center);
+                p.Text(m.CivilStatus, 306.9, y, 362.7 - 306.9, h, 8.0, Align.Center);
+                p.Text(m.Relationship, 363.2, y, 429.7 - 363.2, h, 8.5, Align.Center);
+                p.Text(m.EducationEmployment, 430.1, y, 534.1 - 430.1, h, 8.0);
+                p.Text(m.Income, 534.6, y, 589.3 - 534.6, h, 8.5, Align.Center);
+            }
+
+            // ---- IV / V. Free-text boxes (wrap + shrink to fit) ----------
+            p.Wrapped(r.NeedsAndProblems, 22.1, 518.5, 566.0, 25.0, 8.0);
+            p.Wrapped(r.OtherIncomeSource, 22.1, 564.0, 566.0, 25.0, 8.0);
+        }
+
+        // Centre of each code in Section II for Revised Template (612 x 936 pt)
+        private static readonly Dictionary<string, XPoint> _revisedCodeCenters =
+            new Dictionary<string, XPoint>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "A1", new XPoint(34.5,  305.5) }, { "A2", new XPoint(34.5,  328.5) },
+            { "A3", new XPoint(34.5,  351.5) }, { "A4", new XPoint(34.5,  375.5) },
+            { "A5", new XPoint(241.5, 305.5) }, { "A6", new XPoint(241.5, 328.5) },
+            { "A7", new XPoint(241.5, 351.5) }, { "B",  new XPoint(241.5, 375.5) },
+            { "C",  new XPoint(436.5, 305.5) }, { "D",  new XPoint(436.5, 328.5) },
+            { "E",  new XPoint(436.5, 351.5) }, { "F",  new XPoint(436.5, 375.5) },
+        };
         // Centre of each code in Section II (points)
         private static readonly Dictionary<string, XPoint> _codeCenters =
             new Dictionary<string, XPoint>(StringComparer.OrdinalIgnoreCase)
@@ -261,8 +402,24 @@ namespace SOLUM_UI.Services
             return age.ToString();
         }
 
+        private static string FamilyAge(FamilyMember m)
+        {
+            if (m == null) return "";
+            if (!string.IsNullOrWhiteSpace(m.Age)) return m.Age;
+            return FamilyAge(m.Birthdate);
+        }
+
         private static string FamilyAge(string birthdate) =>
             DateTime.TryParse(birthdate, out var d) ? Age(d) : "";
+
+        private static string FormatSex(string sex)
+        {
+            if (string.IsNullOrWhiteSpace(sex)) return "";
+            string s = sex.Trim();
+            if (s.StartsWith("F", StringComparison.OrdinalIgnoreCase)) return "F";
+            if (s.StartsWith("M", StringComparison.OrdinalIgnoreCase)) return "M";
+            return s.Length > 0 ? s.Substring(0, 1).ToUpperInvariant() : "";
+        }
         /// <summary>
         /// Reads the first property of the record that exists under one of the given names
         /// (so this compiles even if your model uses a slightly different name).
@@ -305,28 +462,53 @@ namespace SOLUM_UI.Services
         {
             string exeDir = Path.GetDirectoryName(
                 System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-            string[] folders = { "Assets", "Templates" };
-            foreach (var f in folders)
-                foreach (var n in TemplateNames)
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string[] subfolders = { "Templates", "Assets", "" };
+
+            // Check each template by priority (CSWDO-066 revised template first).
+            // Outer loop iterates through template names in order of preference so that
+            // a higher-priority template in any location takes precedence over a fallback template.
+            foreach (var n in TemplateNames)
+            {
+                // 1. Output directory
+                foreach (var f in subfolders)
                 {
-                    string candidate = Path.Combine(exeDir, f, n);
+                    string candidate = string.IsNullOrEmpty(f) ? Path.Combine(exeDir, n) : Path.Combine(exeDir, f, n);
                     if (File.Exists(candidate)) return candidate;
                 }
 
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            for (int up = 0; up < 5; up++)
-            {
-                foreach (var f in folders)
-                    foreach (var n in TemplateNames)
+                // 2. Base directory and parent directories (source / repo directory when running under VS/debugger)
+                string probeDir = baseDir;
+                for (int up = 0; up < 5 && !string.IsNullOrEmpty(probeDir); up++)
+                {
+                    foreach (var f in subfolders)
                     {
-                        string probe = Path.Combine(baseDir, f, n);
+                        string probe = string.IsNullOrEmpty(f) ? Path.Combine(probeDir, n) : Path.Combine(probeDir, f, n);
                         if (File.Exists(probe)) return probe;
                     }
-                baseDir = Path.GetDirectoryName(baseDir.TrimEnd(Path.DirectorySeparatorChar)) ?? baseDir;
+                    probeDir = Path.GetDirectoryName(probeDir.TrimEnd(Path.DirectorySeparatorChar));
+                }
             }
+
+            // 3. Fallback: match any file containing CSWDO and 066
+            foreach (var folder in new[] { "Templates", "Assets" })
+            {
+                string probeDir = baseDir;
+                for (int up = 0; up < 5 && !string.IsNullOrEmpty(probeDir); up++)
+                {
+                    string dir = Path.Combine(probeDir, folder);
+                    if (Directory.Exists(dir))
+                    {
+                        var match = Directory.GetFiles(dir, "*CSWDO*066*.pdf", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                        if (match != null) return match;
+                    }
+                    probeDir = Path.GetDirectoryName(probeDir.TrimEnd(Path.DirectorySeparatorChar));
+                }
+            }
+
             throw new FileNotFoundException(
                 $"Template not found: {TemplateNames[0]}. " +
-                "Put it in Assets\\ and set 'Copy to Output Directory' = 'Copy if newer'.");
+                "Put it in Templates\\ or Assets\\ and set 'Copy to Output Directory' = 'Copy if newer'.");
         }
 
         private enum Align { Left, Center }
@@ -339,7 +521,7 @@ namespace SOLUM_UI.Services
         private sealed class Painter
         {
             private const double MinPt = 6.0;
-            private const double PadLeft = 15.0;   // left-aligned text starts this far inside the cell
+            private readonly double PadLeft = 15.0;   // left-aligned text starts this far inside the cell
             private const double PadRight = 3.0;
             private const double CapHalf = 0.36;   // Arial cap-height / 2, as a fraction of font size
             private static readonly XColor InkColor = XColors.Black;
@@ -350,13 +532,13 @@ namespace SOLUM_UI.Services
             private readonly XPen _markPen = new XPen(InkColor, 1.4);
             private readonly XPen _dbgPen = new XPen(XColors.Red, 0.3);
 
-            public Painter(XGraphics g, double sx, double sy, bool debug)
-            { _g = g; _sx = sx; _sy = sy; _debug = debug; }
+            public Painter(XGraphics g, double sx, double sy, bool debug, double padLeft = 15.0)
+            { _g = g; _sx = sx; _sy = sy; _debug = debug; PadLeft = padLeft; }
 
             private XRect Rect(double x, double y, double w, double h) =>
                 new XRect(x * _sx, y * _sy, w * _sx, h * _sy);
 
-            private static XFont Font(double pt) => new XFont("Arial", pt, XFontStyleEx.Bold);
+            private static XFont Font(double pt) => new XFont("Arial", pt, XFontStyleEx.Regular);
             /// <summary>Shrinks the font until the text fits, then trims with an ellipsis if still too wide.</summary>
             private XFont Fit(ref string text, double startPt, double avail)
             {

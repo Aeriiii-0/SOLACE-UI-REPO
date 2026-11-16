@@ -423,15 +423,15 @@
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColSelect}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,10"><CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Click="RowCheckBox_Click"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 1: Clean Rank -->
-                            <GridViewColumn x:Name="ColRank" Header="RANK" Width="56">
+                            <GridViewColumn x:Name="ColRank" Header="RANK" Width="46">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColRank}" Margin="-6,0,-6,0" BorderBrush="#EDE2E6" BorderThickness="0" Padding="0,10"><TextBlock Text="{Binding Rank, StringFormat='#{0}'}" FontSize="12" FontWeight="Bold" Foreground="#1A1A1A" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 2: Solo Parent Details -->
-                            <GridViewColumn x:Name="ColName" Header="SOLO PARENT" Width="150">
+                            <GridViewColumn x:Name="ColName" Header="SOLO PARENT" Width="130">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderBrush="#EDE2E6" BorderThickness="0" Padding="10,10"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Barangay}" FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" FontWeight="Normal"/></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 3: Vulnerability Score (Transparent cell, clean score, top-right '!' signal for concern/fallback) -->
-                            <GridViewColumn x:Name="ColScore" Header="SCORE" Width="78">
+                            <GridViewColumn x:Name="ColScore" Header="SCORE" Width="66">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColScore}" Margin="-6,0,-6,0"
@@ -454,7 +454,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col Dependents (Dedicated count column) -->
-                            <GridViewColumn x:Name="ColDependents" Header="DEPENDENTS" Width="95">
+                            <GridViewColumn x:Name="ColDependents" Header="DEPENDENTS" Width="76">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColDependents}" Margin="-6,0,-6,0" BorderBrush="#EDE2E6" BorderThickness="0" Padding="4,10">
@@ -464,23 +464,23 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 4: Income -->
-                            <GridViewColumn x:Name="ColIncome" Header="INCOME" Width="145">
+                            <GridViewColumn x:Name="ColIncome" Header="INCOME" Width="110">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColIncome}" Margin="-6,0,-6,0" BorderBrush="#EDE2E6" BorderThickness="0" Padding="10,10"><TextBlock Text="{Binding IncomeLabel}" FontSize="11" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" HorizontalAlignment="Left"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 5: Care Burden & Dependents -->
-                            <GridViewColumn x:Name="ColCare" Header="CARE &amp; DEPENDENTS" Width="135">
+                            <GridViewColumn x:Name="ColCare" Header="CARE &amp; DEPENDENTS" Width="110">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColCare}" Margin="-6,0,-6,0" BorderBrush="#EDE2E6" BorderThickness="0" Padding="10,10"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding MinorsLabel}" FontSize="11" FontWeight="SemiBold" Foreground="#1A1A1A"/><TextBlock Text="{Binding ToddlersLabel}" FontSize="10" FontWeight="SemiBold" Foreground="{Binding ToddlersFg}" Margin="0,2,0,0"/><Border Visibility="{Binding HasSpecialNeedsDependent, Converter={StaticResource BoolToVis}}" Background="#EFF6FF" BorderBrush="#93C5FD" BorderThickness="1" CornerRadius="3" Padding="4,1" Margin="0,3,0,0" HorizontalAlignment="Left"><TextBlock Text="{Binding SpecialNeedsBadgeText}" FontSize="8.5" FontWeight="Bold" Foreground="#1D4ED8"/></Border></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 6: Circumstance -->
-                            <GridViewColumn x:Name="ColCircumstance" Header="CIRCUMSTANCE" Width="140">
+                            <GridViewColumn x:Name="ColCircumstance" Header="CIRCUMSTANCE" Width="110">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColCircumstance}" Margin="-6,0,-6,0" BorderBrush="#EDE2E6" BorderThickness="0" Padding="10,10"><TextBlock Text="{Binding CircumstanceDisplay}" FontSize="11" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Circumstance}" HorizontalAlignment="Left"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 7: Needs and Problems -->
-                            <GridViewColumn x:Name="ColNeeds" Header="NEEDS &amp; PROBLEMS" Width="140">
+                            <GridViewColumn x:Name="ColNeeds" Header="NEEDS &amp; PROBLEMS" Width="110">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColNeeds}" Margin="-6,0,-6,0" BorderBrush="#EDE2E6" BorderThickness="0" Padding="10,10"><TextBlock Text="{Binding NeedsAndProblemsDisplay}" FontSize="11" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding NeedsAndProblems}" HorizontalAlignment="Left"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col Card Validity Status (Clean text, no pill) -->
-                            <GridViewColumn x:Name="ColCardStatus" Header="VALIDITY" Width="90">
+                            <GridViewColumn x:Name="ColCardStatus" Header="VALIDITY" Width="76">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColCardStatus}" Margin="-6,0,-6,0" BorderBrush="#EDE2E6" BorderThickness="0" Padding="4,10">
@@ -490,7 +490,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col Valid Until (Record validity date instead of subsidy status) -->
-                            <GridViewColumn x:Name="ColValidUntil" Header="VALID UNTIL" Width="95">
+                            <GridViewColumn x:Name="ColValidUntil" Header="VALID UNTIL" Width="80">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColValidUntil}" Margin="-6,0,-6,0" BorderBrush="#EDE2E6" BorderThickness="0" Padding="4,10">
@@ -500,10 +500,10 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 8: Quick Action Buttons (Final Column - No right vertical divider line) -->
-                            <GridViewColumn x:Name="ColAction" Header="ACTIONS" Width="177">
+                            <GridViewColumn x:Name="ColAction" Header="ACTIONS" Width="135">
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColAction}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,10"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Button Height="26" Padding="12,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Approve candidate and move to Shortlist &amp; Audit" IsEnabled="{Binding DataContext.CanModifyGrantees, RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.QuickShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="Transparent" BorderBrush="#5C1D38" BorderThickness="1.5" CornerRadius="12" Padding="{TemplateBinding Padding}"><TextBlock Text="Shortlist" FontSize="10.5" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
-                                    <Button Height="26" Padding="10,0" Cursor="Hand" ToolTip="Disqualify candidate and remove from queue" IsEnabled="{Binding DataContext.CanModifyGrantees, RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.QuickRejectRowCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="Transparent" BorderBrush="#000000" BorderThickness="1.5" CornerRadius="12" Padding="{TemplateBinding Padding}"><TextBlock Text="Reject" FontSize="10.5" FontWeight="SemiBold" Foreground="#000000" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
+                                    <Button Height="26" Padding="10,0" Margin="0,0,6,0" Cursor="Hand" ToolTip="Approve candidate and move to Shortlist &amp; Audit" IsEnabled="{Binding DataContext.CanModifyGrantees, RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.QuickShortlistCandidateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="Transparent" BorderBrush="#5C1D38" BorderThickness="1.5" CornerRadius="12" Padding="{TemplateBinding Padding}"><TextBlock Text="Shortlist" FontSize="10.5" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
+                                    <Button Height="26" Padding="8,0" Cursor="Hand" ToolTip="Disqualify candidate and remove from queue" IsEnabled="{Binding DataContext.CanModifyGrantees, RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.QuickRejectRowCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"><Button.Template><ControlTemplate TargetType="Button"><Border x:Name="Bg" Background="Transparent" BorderBrush="#000000" BorderThickness="1.5" CornerRadius="12" Padding="{TemplateBinding Padding}"><TextBlock Text="Reject" FontSize="10.5" FontWeight="SemiBold" Foreground="#000000" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Bg" Property="Opacity" Value="0.45"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bg" Property="Background" Value="#F5F5F5"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Button.Template></Button>
                                 </StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                         </GridView>

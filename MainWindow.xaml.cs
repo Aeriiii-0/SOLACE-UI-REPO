@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 
 
@@ -1915,9 +1915,7 @@ namespace SOLUM_UI
         {
             if (!_myActivityVm.IsInitialized)
                 _ = _myActivityVm.LoadAsync();
-            MyActivityOverlay.DataContext = _myActivityVm;
-            MyActivityOverlayRoot.Visibility = Visibility.Visible;
-            ShowDimOverlay(fullWindow: true);
+            Views.Dialogs.ViewAllLogsDialog.Show(_myActivityVm, this);
         }
 
         private void MyActivityOverlay_CloseRequested(object sender, RoutedEventArgs e)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -1686,8 +1686,7 @@ namespace SOLUM_UI
         {
             if (!_adminLogsVm.IsInitialized)
                 _ = _adminLogsVm.LoadAsync();
-            LogsFullOverlay.Visibility = Visibility.Visible;
-            MainWindow.ShowDimOverlay(fullWindow: true);
+            Views.Dialogs.ViewAllLogsDialog.Show(_adminLogsVm, Window.GetWindow(this));
         }
 
         private void OpenLogsDrawer()
@@ -1846,8 +1845,7 @@ namespace SOLUM_UI
         {
             if (!_adminLogsVm.IsInitialized)
                 _ = _adminLogsVm.LoadAsync();
-            LogsFullOverlay.Visibility = Visibility.Visible;
-            MainWindow.ShowDimOverlay(fullWindow: true);
+            Views.Dialogs.ViewAllLogsDialog.Show(_adminLogsVm, Window.GetWindow(this));
         }
 
         private void AdminLogsOverlay_CloseRequested(object sender, RoutedEventArgs e)

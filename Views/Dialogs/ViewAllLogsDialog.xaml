@@ -1,0 +1,16 @@
+<Window x:Class="SOLUM_UI.Views.Dialogs.ViewAllLogsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SOLUM_UI"
+        WindowStyle="None" AllowsTransparency="True"
+        Background="Transparent" WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False" ResizeMode="NoResize"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType">
+    <Grid Background="{DynamicResource ModalOverlayBrush}" MouseLeftButtonDown="Backdrop_MouseLeftButtonDown">
+        <local:ViewAllLogsOverlay x:Name="LogsView"
+                                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                  Margin="60,40,60,40"
+                                  CloseRequested="LogsView_CloseRequested"/>
+    </Grid>
+</Window>
