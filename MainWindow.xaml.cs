@@ -1122,13 +1122,11 @@ namespace SOLUM_UI
 
 
                 case "SoloParentRecords":
-
-
-
                     TopBarControl.PageTitle = "Solo Parent Records";
+                    break;
 
-
-
+                case "MunicipalArchives":
+                    TopBarControl.PageTitle = "Municipal Historical Archives";
                     break;
 
 
@@ -1218,25 +1216,17 @@ namespace SOLUM_UI
 
 
                 case "SoloParentRecords":
-
-
-
                     SoloParentRecordsPage.CurrentUserName = CurrentUserName;
-
-
-
                     SoloParentRecordsPage.CurrentUserRole = CurrentUserRole;
-
-
-
                     SoloParentRecordsPage.CurrentUserBarangay = CurrentUserBarangay;
-
-
-
                     NavigatePage(GetOrCreatePage("SoloParentRecords", () => new SoloParentRecordsPage())); // CHANGED
+                    break;
 
-
-
+                case "MunicipalArchives":
+                    SOLUM_UI.Views.Pages.MunicipalArchivesPage.CurrentUserName = CurrentUserName;
+                    SOLUM_UI.Views.Pages.MunicipalArchivesPage.CurrentUserRole = CurrentUserRole;
+                    SOLUM_UI.Views.Pages.MunicipalArchivesPage.CurrentUserBarangay = CurrentUserBarangay;
+                    NavigatePage(GetOrCreatePage("MunicipalArchives", () => new SOLUM_UI.Views.Pages.MunicipalArchivesPage()));
                     break;
 
 

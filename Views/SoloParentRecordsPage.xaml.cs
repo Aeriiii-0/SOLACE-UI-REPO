@@ -191,6 +191,7 @@ namespace SOLUM_UI
                     }
                 }
                 _ = Task.Run(() => OcrService.EnsureServerRunningAsync(25));
+                _ = RefreshRecycleBinBadgeAsync();
 
             };
             InitDynamicPaging();
@@ -618,6 +619,7 @@ namespace SOLUM_UI
                     BtnRefreshRecords.ToolTip = $"Refresh records (Last updated: {DateTime.Now:h:mm:ss tt})";
                 // Ensure delete is hidden for non-admin roles after every data load
                 HideDeleteButtonsIfNotAdmin();
+                _ = RefreshRecycleBinBadgeAsync();
 
             }
             catch (Exception ex)
@@ -1030,6 +1032,58 @@ namespace SOLUM_UI
             if (view.OpenedDelete)
             {
                 await DeleteRecordAsync(recordToView.Id, recordToView.Name, skipConfirmation: true);
+            }
+        }
+
+        private async void BtnRecycleBin_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Views.Dialogs.RecycleBinDialog { Owner = Application.Current.MainWindow };
+            bool? result;
+            using (MainWindow.ModalScope(true))
+            {
+                result = dialog.ShowDialog();
+            }
+
+            UpdateRecycleBinBadge(dialog.RemainingItemCount);
+
+            if (dialog.WasRecordReinstated || result == true)
+            {
+                await LoadRecordsAsync();
+            }
+        }
+
+        private void BtnArchives_Click(object sender, RoutedEventArgs e)
+        {
+            (Application.Current.MainWindow as MainWindow)?.NavigateTo("MunicipalArchives");
+        }
+
+        private async Task RefreshRecycleBinBadgeAsync()
+        {
+            try
+            {
+                var response = await Services.Api.ArchiveApiService.Instance.GetRecycleBinAsync();
+                if (response != null && response.Succeeded && response.Data != null)
+                {
+                    UpdateRecycleBinBadge(response.Data.Count);
+                }
+                else
+                {
+                    UpdateRecycleBinBadge(0);
+                }
+            }
+            catch
+            {
+                UpdateRecycleBinBadge(0);
+            }
+        }
+
+        private void UpdateRecycleBinBadge(int count)
+        {
+            if (BtnRecycleBin != null)
+            {
+                BtnRecycleBin.ToolTip = count > 0
+                    ? $"Recycle Bin ({count} soft-deleted record{(count == 1 ? "" : "s")})"
+                    : "Recycle Bin (0 records)";
             }
         }
 
@@ -1682,27 +1736,28 @@ namespace SOLUM_UI
 
             }
 
-            // Only show confirmation dialog if not already confirmed (e.g., from RecordViewDialog)
-            if (!skipConfirmation)
+            // Look up citizen details for subtitle
+            var recVm = _allRecords?.Find(r => r.Id == id);
+            string subInfo = recVm != null && !string.IsNullOrWhiteSpace(recVm.Barangay)
+                ? $"Barangay: {recVm.Barangay}  ·  Status: {(string.IsNullOrWhiteSpace(recVm.Status) ? "Active" : recVm.Status)}"
+                : "Solo Parent Case File";
+
+            // Prompt for the reason for deletion
+            var deleteDialog = new Views.Dialogs.DeleteRecordDialog(recordName, subInfo)
             {
-                bool isConfirmed = ActionConfirmDialog.Show(
-                    title: "Delete Record",
-                    message: $"Are you sure you want to permanently delete the record for {recordName}? This action cannot be undone.",
-                    confirmText: "Delete Record",
-                    cancelText: "Cancel",
-                    theme: ConfirmThemeType.Danger,
-                    owner: Window.GetWindow(this));
-                if (!isConfirmed) return;
-            }
+                Owner = Window.GetWindow(this)
+            };
+            if (deleteDialog.ShowDialog() != true) return;
+            string deletionReason = deleteDialog.DeletionReason;
             
             // Show skeleton loader
             if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
-            ToastNotification.Show("Deleting Record",
-                $"Removing {recordName} from the database…",
-                ToastType.Info, durationSeconds: 10);
+            ToastNotification.Show("Moving to Recycle Bin",
+                $"Moving {recordName} to the 30-day Recycle Bin…",
+                ToastType.Info, durationSeconds: 5);
             try
             {
-                var deleteResp = await SoloParentApiService.Instance.DeleteSoloParentAsync(guid);
+                var deleteResp = await SoloParentApiService.Instance.DeleteSoloParentAsync(guid, deletionReason);
                 if (!deleteResp.Succeeded)
                 {
 
@@ -1715,9 +1770,10 @@ namespace SOLUM_UI
                     return;
 
                 }
-                ShowNotification("Record Deleted", $"{recordName} was removed successfully.", true);
-                AuditLogService.Instance.LogDelete(id, recordName, GetCurrentUser(), CurrentUserRole);
+                ShowNotification("Record Moved to Recycle Bin", $"{recordName} was moved to the Recycle Bin (30-day grace period).", true);
+                AuditLogService.Instance.LogSoftDelete(id, recordName, GetCurrentUser(), CurrentUserRole, deletionReason);
                 await LoadRecordsAsync();
+                await RefreshRecycleBinBadgeAsync();
 
             }
             finally

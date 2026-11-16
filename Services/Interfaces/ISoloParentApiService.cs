@@ -17,7 +17,7 @@ namespace SOLUM_UI.Services.Interfaces
         // ── Commands ─────────────────────────────────────────────────────────
         Task<BaseResponse<Guid>> CreateSoloParentAsync(CreateSoloParentRequest request);
         Task<BaseResponse<bool>> UpdateSoloParentAsync(Guid id, UpdateSoloParentRequest request);
-        Task<BaseResponse<bool>> DeleteSoloParentAsync(Guid id);
+        Task<BaseResponse<bool>> DeleteSoloParentAsync(Guid id, string reason = null);
         Task<BaseResponse<RenewSoloParentResponse>> RenewSoloParentRecordAsync(Guid id, RenewSoloParentRequest request = null);
         Task<BaseResponse<bool>> CancelSoloParentAsync(Guid id, string reason, string remarks = null);
         void InvalidateDetailCache(Guid id);

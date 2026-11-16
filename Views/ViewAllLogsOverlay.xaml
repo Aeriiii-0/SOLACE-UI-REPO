@@ -713,7 +713,7 @@
                                         <Border CornerRadius="10" Background="#EEF2FF" Padding="10,3"
                                                 Margin="8,0,0,0" VerticalAlignment="Center"
                                                 Visibility="{Binding SelectedLog.HasTargetType, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <TextBlock Text="{Binding SelectedLog.TargetType}"
+                                            <TextBlock Text="{Binding SelectedLog.TargetTypeDisplay}"
                                                        FontFamily="Segoe UI" FontSize="10"
                                                        FontWeight="SemiBold" Foreground="#4F46E5"/>
                                         </Border>

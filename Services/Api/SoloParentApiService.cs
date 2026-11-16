@@ -143,11 +143,15 @@ namespace SOLUM_UI.Services.Api
 
         }
 
-        public async Task<BaseResponse<bool>> DeleteSoloParentAsync(Guid id)
+        public async Task<BaseResponse<bool>> DeleteSoloParentAsync(Guid id, string reason = null)
         {
             _soloParentDetailCache.TryRemove(id, out _);
-            return await ApiClient.Instance.DeleteAsync<bool>($"api/soloparent/{id}");
-
+            string url = $"api/soloparent/{id}";
+            if (!string.IsNullOrWhiteSpace(reason))
+            {
+                url += $"?reason={Uri.EscapeDataString(reason.Trim())}";
+            }
+            return await ApiClient.Instance.DeleteAsync<bool>(url);
         }
 
                 public void InvalidateDetailCache(Guid id)

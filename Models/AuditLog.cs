@@ -73,14 +73,23 @@ namespace SOLUM_UI.Models
                 if (!string.IsNullOrWhiteSpace(RawActionType))
                 {
                     string raw = RawActionType.Trim().ToUpperInvariant();
-                    return raw == "LOGIN" || raw == "LOGOUT";
+                    return raw == "LOGIN" || raw == "LOGOUT" || raw.StartsWith("REFRESH_TOKEN");
                 }
                 return Action == AuditAction.Login || Action == AuditAction.Logout;
             }
         }
 
-        public bool HasTargetId => !IsAuthAction && !string.IsNullOrWhiteSpace(RecordId);
-        public bool HasTarget => !IsAuthAction && ((!string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, "—")) || !string.IsNullOrWhiteSpace(RecordId));
+        public bool HasTargetId => !IsAuthAction 
+            && !string.IsNullOrWhiteSpace(RecordId) 
+            && !IsRawGuid(RecordId)
+            && !string.Equals(RecordId, "SYSTEM", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(RecordId, "ALL", StringComparison.OrdinalIgnoreCase);
+
+        public bool HasTarget => !IsAuthAction && (
+            (!string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, "—")) ||
+            (!string.IsNullOrWhiteSpace(RecordId) && !IsRawGuid(RecordId) && !string.Equals(RecordId, "SYSTEM", StringComparison.OrdinalIgnoreCase)) ||
+            !string.IsNullOrWhiteSpace(TargetFallbackTitle)
+        );
 
         public bool IsSubsidyAction =>
             string.Equals(TargetType, "Subsidy", StringComparison.OrdinalIgnoreCase) ||
@@ -105,6 +114,22 @@ namespace SOLUM_UI.Models
             }
         }
 
+        public string TargetFallbackTitle
+        {
+            get
+            {
+                if (IsSubsidyAction) return SubsidyFallbackTitle;
+                string raw = (RawActionType ?? string.Empty).ToUpperInvariant();
+                string tt = (TargetType ?? string.Empty).ToUpperInvariant();
+
+                if (tt.Contains("ARCHIV") || raw.Contains("ARCHIV")) return "Archived Record";
+                if (tt.Contains("SOLOPARENT") || raw.Contains("SOLO_PARENT")) return "Solo Parent Record";
+                if (tt.Contains("USER") || raw.Contains("USER") || raw.Contains("PASSWORD")) return "User Account";
+                if (tt.Contains("SYSTEM") || raw.Contains("LIFECYCLE") || string.Equals(RecordId, "SYSTEM", StringComparison.OrdinalIgnoreCase)) return "Lifecycle Pipeline";
+                return "Record";
+            }
+        }
+
         public string TargetDisplay
         {
             get
@@ -113,27 +138,47 @@ namespace SOLUM_UI.Models
 
                 if (!string.IsNullOrWhiteSpace(RecordName) && !string.Equals(RecordName, "—"))
                 {
-                    if (IsRawGuid(RecordName) && IsSubsidyAction)
-                        return SubsidyFallbackTitle;
+                    if (IsRawGuid(RecordName))
+                        return TargetFallbackTitle;
                     return RecordName;
                 }
 
                 if (!string.IsNullOrWhiteSpace(RecordId))
                 {
-                    if (IsSubsidyAction)
-                        return SubsidyFallbackTitle;
+                    if (IsRawGuid(RecordId) ||
+                        string.Equals(RecordId, "SYSTEM", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(RecordId, "ALL", StringComparison.OrdinalIgnoreCase))
+                        return TargetFallbackTitle;
                     return RecordId;
                 }
 
-                return "—";
+                return TargetFallbackTitle;
             }
         }
 
-        public string TargetTooltip => !IsAuthAction && !string.IsNullOrWhiteSpace(RecordId) ? $"Target ID: {RecordId}" : null;
+        public string TargetTooltip => !IsAuthAction && !string.IsNullOrWhiteSpace(RecordId) && !IsRawGuid(RecordId) ? $"Target ID: {RecordId}" : null;
         public string TargetIdDisplay
         {
             get => (!IsAuthAction && HasTargetId) ? RecordId : "—";
             set { }
+        }
+
+        public string TargetTypeDisplay
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(TargetType)) return string.Empty;
+                switch (TargetType.Trim())
+                {
+                    case "SoloParent": return "Solo Parent";
+                    case "SoloParentArchive": return "Archived Record";
+                    case "ApplicationUser":
+                    case "User": return "User";
+                    case "Subsidy": return "Subsidy";
+                    case "System": return "System";
+                    default: return TargetType;
+                }
+            }
         }
 
         public bool HasTargetName => !IsAuthAction
@@ -145,6 +190,7 @@ namespace SOLUM_UI.Models
         public bool HasTargetType => !IsAuthAction && !string.IsNullOrWhiteSpace(TargetType);
 
         public bool HasPerformedByUserId => !string.IsNullOrWhiteSpace(PerformedByUserId)
+            && !IsRawGuid(PerformedByUserId)
             && !string.Equals(PerformedByName, PerformedByUserId, StringComparison.OrdinalIgnoreCase);
 
         public string TimeAgo
@@ -166,6 +212,10 @@ namespace SOLUM_UI.Models
             get
             {
                 string raw = (RawActionType ?? string.Empty).ToUpperInvariant();
+                if (raw.Contains("REINSTATE")) return "Record reinstated";
+                if (raw.Contains("REACTIVATE")) return "Record reactivated";
+                if (raw.Contains("RESTORE")) return "Record restored";
+                if (raw.Contains("LIFECYCLE")) return "Lifecycle pipeline executed";
                 if (raw.Contains("CREATE") || Action == AuditAction.Create) return "Record created";
                 if (raw.Contains("UPDATE") || raw.Contains("EDIT") || Action == AuditAction.Update) return "Record edited";
                 if (raw.Contains("CONFIRM") || raw.Contains("APPROVE") || raw.Contains("SHORTLIST")) return "Record approved";
@@ -255,6 +305,7 @@ namespace SOLUM_UI.Models
             get
             {
                 if (!string.IsNullOrWhiteSpace(PerformedByName) && !string.IsNullOrWhiteSpace(PerformedByUserId)
+                    && !IsRawGuid(PerformedByUserId)
                     && !string.Equals(PerformedByName, PerformedByUserId, StringComparison.OrdinalIgnoreCase))
                 {
                     return $"{PerformedByName} ({PerformedByUserId})";
@@ -368,7 +419,12 @@ namespace SOLUM_UI.Models
                 case "ADMIN_RESET_PASSWORD":             return "#F59E0B";   // Amber
                 case "CREATE_SOLO_PARENT":               return "#10B981";   // Green
                 case "UPDATE_SOLO_PARENT":               return "#14B8A6";   // Teal
-                case "DELETE_SOLO_PARENT":               return "#EF4444";   // Red
+                case "DELETE_SOLO_PARENT":               return "#DC2626";   // Red
+                case "REINSTATE_SOLO_PARENT":            return "#059669";   // Emerald Green
+                case "REACTIVATE_ARCHIVED_SOLO_PARENT":  return "#10B981";   // Green
+                case "ADMIN_RESTORE_ARCHIVED_RECORD":    return "#3B82F6";   // Blue
+                case "VIEW_ARCHIVED_RECORD":             return "#6B7280";   // Gray
+                case "LIFECYCLE_PIPELINE_RUN":           return "#702943";   // Burgundy / Plum
                 case "RENEW_SOLO_PARENT":
                 case "RENEW_SOLO_PARENT_RECORD":         return "#059669";   // Emerald Green
                 case "REVOKE_SOLO_PARENT_RECORD":        return "#DC2626";   // Dark Red
@@ -400,7 +456,12 @@ namespace SOLUM_UI.Models
                 case "ADMIN_RESET_PASSWORD":             return "🔑";
                 case "CREATE_SOLO_PARENT":               return "+";
                 case "UPDATE_SOLO_PARENT":               return "E";
-                case "DELETE_SOLO_PARENT":               return "X";
+                case "DELETE_SOLO_PARENT":               return "✕";
+                case "REINSTATE_SOLO_PARENT":            return "↺";
+                case "REACTIVATE_ARCHIVED_SOLO_PARENT":  return "✓";
+                case "ADMIN_RESTORE_ARCHIVED_RECORD":    return "↺";
+                case "VIEW_ARCHIVED_RECORD":             return "👁";
+                case "LIFECYCLE_PIPELINE_RUN":           return "⚙";
                 case "RENEW_SOLO_PARENT":
                 case "RENEW_SOLO_PARENT_RECORD":         return "R";
                 case "REVOKE_SOLO_PARENT_RECORD":        return "✕";
@@ -434,7 +495,12 @@ namespace SOLUM_UI.Models
                 case "ADMIN_RESET_PASSWORD":             return "Admin Reset Password";
                 case "CREATE_SOLO_PARENT":               return "Create Solo Parent";
                 case "UPDATE_SOLO_PARENT":               return "Update Solo Parent";
-                case "DELETE_SOLO_PARENT":               return "Delete Solo Parent";
+                case "DELETE_SOLO_PARENT":               return "Move to Recycle Bin";
+                case "REINSTATE_SOLO_PARENT":            return "Reinstate Record";
+                case "REACTIVATE_ARCHIVED_SOLO_PARENT":  return "Reactivate Archived Record";
+                case "ADMIN_RESTORE_ARCHIVED_RECORD":    return "Restore Archived Record";
+                case "VIEW_ARCHIVED_RECORD":             return "View Archived Dossier";
+                case "LIFECYCLE_PIPELINE_RUN":           return "Lifecycle Pipeline Run";
                 case "RENEW_SOLO_PARENT":
                 case "RENEW_SOLO_PARENT_RECORD":         return "Renew Solo Parent";
                 case "REVOKE_SOLO_PARENT_RECORD":        return "Revoke Solo Parent";
@@ -494,6 +560,11 @@ namespace SOLUM_UI.Models
                 case "CREATE_SOLO_PARENT":               return _iconAdd;
                 case "UPDATE_SOLO_PARENT":               return _iconEdit;
                 case "DELETE_SOLO_PARENT":               return _iconDelete;
+                case "REINSTATE_SOLO_PARENT":            return _iconRenew;
+                case "REACTIVATE_ARCHIVED_SOLO_PARENT":  return _iconRenew;
+                case "ADMIN_RESTORE_ARCHIVED_RECORD":    return _iconRenew;
+                case "VIEW_ARCHIVED_RECORD":             return _iconView;
+                case "LIFECYCLE_PIPELINE_RUN":           return _iconSystem;
                 case "RENEW_SOLO_PARENT":
                 case "RENEW_SOLO_PARENT_RECORD":         return _iconRenew;
                 case "REVOKE_SOLO_PARENT_RECORD":        return _iconDelete;

@@ -110,12 +110,17 @@ namespace SOLUM_UI.ViewModels
         public List<ActionFilterOption> ActionFilters { get; } = new List<ActionFilterOption>
         {
             new ActionFilterOption("All", "All Actions"),
-            // Solo Parent
+            // Solo Parent & Archiving
             new ActionFilterOption("CREATE_SOLO_PARENT", "Create Solo Parent"),
             new ActionFilterOption("UPDATE_SOLO_PARENT", "Update Solo Parent"),
-            new ActionFilterOption("DELETE_SOLO_PARENT", "Delete Solo Parent"),
+            new ActionFilterOption("DELETE_SOLO_PARENT", "Move to Recycle Bin"),
+            new ActionFilterOption("REINSTATE_SOLO_PARENT", "Reinstate Solo Parent"),
             new ActionFilterOption("RENEW_SOLO_PARENT_RECORD", "Renew Solo Parent"),
             new ActionFilterOption("REVOKE_SOLO_PARENT_RECORD", "Revoke Solo Parent"),
+            new ActionFilterOption("REACTIVATE_ARCHIVED_SOLO_PARENT", "Reactivate Archived Record"),
+            new ActionFilterOption("ADMIN_RESTORE_ARCHIVED_RECORD", "Restore Archived Record"),
+            new ActionFilterOption("VIEW_ARCHIVED_RECORD", "View Archived Dossier"),
+            new ActionFilterOption("LIFECYCLE_PIPELINE_RUN", "Lifecycle Pipeline Run"),
             // User Management
             new ActionFilterOption("ENABLE_USER", "Enable User"),
             new ActionFilterOption("DISABLE_USER", "Disable User"),
@@ -150,7 +155,8 @@ namespace SOLUM_UI.ViewModels
             new ActionFilterOption("All", "All Actions"),
             new ActionFilterOption("CREATE_SOLO_PARENT", "Create Solo Parent"),
             new ActionFilterOption("UPDATE_SOLO_PARENT", "Update Solo Parent"),
-            new ActionFilterOption("DELETE_SOLO_PARENT", "Delete Solo Parent"),
+            new ActionFilterOption("DELETE_SOLO_PARENT", "Move to Recycle Bin"),
+            new ActionFilterOption("REINSTATE_SOLO_PARENT", "Reinstate Solo Parent"),
             new ActionFilterOption("RENEW_SOLO_PARENT_RECORD", "Renew Solo Parent"),
             new ActionFilterOption("REVOKE_SOLO_PARENT_RECORD", "Revoke Solo Parent"),
             new ActionFilterOption("LOGIN", "Login"),
@@ -612,11 +618,32 @@ namespace SOLUM_UI.ViewModels
             {
                 recordName = GetSubsidyActionFallback(rawType);
             }
+            else if (string.Equals(targetType, "SoloParent", StringComparison.OrdinalIgnoreCase) ||
+                     rawType.IndexOf("SOLO_PARENT", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                recordName = "Solo Parent Record";
+            }
+            else if (string.Equals(targetType, "SoloParentArchive", StringComparison.OrdinalIgnoreCase) ||
+                     rawType.IndexOf("ARCHIV", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                recordName = "Archived Record";
+            }
+            else if (string.Equals(targetType, "User", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(targetType, "ApplicationUser", StringComparison.OrdinalIgnoreCase) ||
+                     rawType.IndexOf("USER", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                recordName = "User Account";
+            }
+            else if (string.Equals(targetId, "SYSTEM", StringComparison.OrdinalIgnoreCase) ||
+                     rawType.IndexOf("LIFECYCLE", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                recordName = "Lifecycle Pipeline";
+            }
             else
             {
-                recordName = !string.IsNullOrWhiteSpace(targetName) && !string.Equals(targetName, "—")
+                recordName = !string.IsNullOrWhiteSpace(targetName) && !IsGuid(targetName) && !string.Equals(targetName, "—")
                     ? targetName
-                    : (!string.IsNullOrWhiteSpace(targetId) ? targetId : (!string.IsNullOrWhiteSpace(targetType) ? targetType : "—"));
+                    : (!string.IsNullOrWhiteSpace(targetType) ? targetType : "Record");
             }
             string description = BuildDescription(rawType, displayName, recordName, status);
             var changesSource = (dto.Changes != null && dto.Changes.Count > 0)
@@ -656,7 +683,10 @@ namespace SOLUM_UI.ViewModels
         {
             string who    = !string.IsNullOrWhiteSpace(actor)  ? actor  : "Unknown";
             string suffix = !string.IsNullOrWhiteSpace(status) ? $" · {status}" : string.Empty;
-            string tgt    = !string.IsNullOrWhiteSpace(target) ? $" · {target}" : string.Empty;
+            string cleanTarget = (IsGuid(target) || string.Equals(target, "—") || string.Equals(target, "SYSTEM", StringComparison.OrdinalIgnoreCase))
+                ? string.Empty
+                : target;
+            string tgt    = !string.IsNullOrWhiteSpace(cleanTarget) ? $" · {cleanTarget}" : string.Empty;
             switch (rawActionType.ToUpperInvariant())
             {
                 case "LOGIN":                           return $"{who} logged in{suffix}";
@@ -673,7 +703,12 @@ namespace SOLUM_UI.ViewModels
                 case "ADMIN_RESET_PASSWORD":            return $"Admin reset user password{tgt}";
                 case "CREATE_SOLO_PARENT":              return $"Solo parent record created{tgt}";
                 case "UPDATE_SOLO_PARENT":              return $"Solo parent record updated{tgt}";
-                case "DELETE_SOLO_PARENT":              return $"Solo parent record deleted{tgt}";
+                case "DELETE_SOLO_PARENT":              return $"Solo parent record moved to Recycle Bin{tgt}";
+                case "REINSTATE_SOLO_PARENT":           return $"Solo parent record reinstated from Recycle Bin{tgt}";
+                case "REACTIVATE_ARCHIVED_SOLO_PARENT": return $"Archived record reactivated{tgt}";
+                case "ADMIN_RESTORE_ARCHIVED_RECORD":   return $"Archived record restored (Admin override){tgt}";
+                case "VIEW_ARCHIVED_RECORD":            return $"Archived dossier viewed{tgt}";
+                case "LIFECYCLE_PIPELINE_RUN":          return $"Statutory retention lifecycle pipeline executed";
                 case "RENEW_SOLO_PARENT":
                 case "RENEW_SOLO_PARENT_RECORD":        return $"Solo parent record renewed{tgt}";
                 case "REVOKE_SOLO_PARENT_RECORD":       return $"Solo parent record revoked{tgt}";
@@ -710,6 +745,9 @@ namespace SOLUM_UI.ViewModels
                 case "REFRESH_TOKEN":
                 case "SHORTLIST_SUBSIDY_CANDIDATES":
                 case "CONFIRM_SUBSIDY_GRANTEES":
+                case "REINSTATE_SOLO_PARENT":
+                case "REACTIVATE_ARCHIVED_SOLO_PARENT":
+                case "ADMIN_RESTORE_ARCHIVED_RECORD":
                     return AuditAction.Update;
                 case "DELETE_SOLO_PARENT":
                 case "REVOKE_SOLO_PARENT_RECORD":
@@ -718,10 +756,13 @@ namespace SOLUM_UI.ViewModels
                 case "REJECT_SUBSIDY_OUTLIER":
                 case "REVOKE_SUBSIDY_GRANT":
                     return AuditAction.Delete;
+                case "VIEW_ARCHIVED_RECORD":
+                    return AuditAction.View;
                 case "LOGIN":
                     return AuditAction.Login;
                 case "LOGOUT":
                     return AuditAction.Logout;
+                case "LIFECYCLE_PIPELINE_RUN":
                 case "REFRESH_TOKEN_FAILED":
                 case "GENERATE_SUBSIDY_RECOMMENDATIONS":
                 default:

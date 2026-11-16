@@ -45,15 +45,15 @@ namespace SOLUM_UI.Services
 
         public void LogCreate(string recordId, string recordName, string by, string role = "")
             => Log(AuditAction.Create,
-                   $"Created record: {recordName} [{recordId}]",
+                   $"Created solo parent record for {recordName}",
                    by, role, recordId, recordName);
 
         public void LogUpdate(string recordId, string recordName, string by, string role = "",
             string field = "", string oldVal = "", string newVal = "")
         {
             string desc = string.IsNullOrWhiteSpace(field)
-                ? $"Updated record: {recordName} [{recordId}]"
-                : $"Updated {recordName} [{recordId}] — {field}";
+                ? $"Updated record for {recordName}"
+                : $"Updated {recordName} — {field}";
             Log(AuditAction.Update, desc, by, role, recordId, recordName, field, oldVal, newVal);
         }
         /// <summary>
@@ -64,8 +64,8 @@ namespace SOLUM_UI.Services
         {
             var changeCount = changes?.Count ?? 0;
             string desc = changeCount == 0
-                ? $"Updated record: {recordName} [{recordId}]"
-                : $"Updated record: {recordName} [{recordId}] — {changeCount} field(s) changed";
+                ? $"Updated record for {recordName}"
+                : $"Updated record for {recordName} — {changeCount} field(s) changed";
             var log = new AuditLog
             {
                 Id              = _nextId++,
@@ -83,12 +83,97 @@ namespace SOLUM_UI.Services
 
         public void LogDelete(string recordId, string recordName, string by, string role = "")
             => Log(AuditAction.Delete,
-                   $"Deleted record: {recordName} [{recordId}]",
+                   $"Deleted record for {recordName}",
                    by, role, recordId, recordName);
+
+        public void LogSoftDelete(string recordId, string recordName, string by, string role = "", string reason = "")
+        {
+            string desc = string.IsNullOrWhiteSpace(reason)
+                ? $"Moved record for {recordName} to Recycle Bin"
+                : $"Moved record for {recordName} to Recycle Bin (Reason: {reason})";
+            var changes = !string.IsNullOrWhiteSpace(reason)
+                ? new List<ChangeDetail> { new ChangeDetail("DeletionReason", string.Empty, reason) }
+                : new List<ChangeDetail>();
+            var log = new AuditLog
+            {
+                Id              = _nextId++,
+                Action          = AuditAction.Delete,
+                RawActionType   = "DELETE_SOLO_PARENT",
+                Description     = desc,
+                PerformedBy     = by,
+                PerformedByRole = role,
+                RecordId        = recordId,
+                RecordName      = recordName,
+                TargetType      = "SoloParent",
+                Timestamp       = DateTime.Now,
+                Changes         = changes
+            };
+            Logs.Insert(0, log);
+        }
+
+        public void LogReinstate(string recordId, string recordName, string by, string role = "")
+        {
+            var log = new AuditLog
+            {
+                Id              = _nextId++,
+                Action          = AuditAction.Update,
+                RawActionType   = "REINSTATE_SOLO_PARENT",
+                Description     = $"Reinstated record for {recordName} from Recycle Bin",
+                PerformedBy     = by,
+                PerformedByRole = role,
+                RecordId        = recordId,
+                RecordName      = recordName,
+                TargetType      = "SoloParent",
+                Timestamp       = DateTime.Now
+            };
+            Logs.Insert(0, log);
+        }
+
+        public void LogReactivate(string recordId, string recordName, string by, string role = "", string notes = "")
+        {
+            var changes = !string.IsNullOrWhiteSpace(notes)
+                ? new List<ChangeDetail> { new ChangeDetail("Justification", string.Empty, notes) }
+                : new List<ChangeDetail>();
+            var log = new AuditLog
+            {
+                Id              = _nextId++,
+                Action          = AuditAction.Update,
+                RawActionType   = "REACTIVATE_ARCHIVED_SOLO_PARENT",
+                Description     = $"Reactivated archived record for {recordName}",
+                PerformedBy     = by,
+                PerformedByRole = role,
+                RecordId        = recordId,
+                RecordName      = recordName,
+                TargetType      = "SoloParentArchive",
+                Timestamp       = DateTime.Now,
+                Changes         = changes
+            };
+            Logs.Insert(0, log);
+        }
+
+        public void LogArchive(string recordId, string recordName, string by, string role = "", string reason = "")
+        {
+            var log = new AuditLog
+            {
+                Id              = _nextId++,
+                Action          = AuditAction.System,
+                RawActionType   = "ARCHIVE_SOLO_PARENT",
+                Description     = string.IsNullOrWhiteSpace(reason)
+                    ? $"Archived record for {recordName} to Municipal Archives"
+                    : $"Archived record for {recordName} ({reason})",
+                PerformedBy     = by,
+                PerformedByRole = role,
+                RecordId        = recordId,
+                RecordName      = recordName,
+                TargetType      = "SoloParentArchive",
+                Timestamp       = DateTime.Now
+            };
+            Logs.Insert(0, log);
+        }
 
         public void LogView(string recordId, string recordName, string by, string role = "")
             => Log(AuditAction.View,
-                   $"Viewed record: {recordName} [{recordId}]",
+                   $"Viewed profile of {recordName}",
                    by, role, recordId, recordName);
 
         public void LogLogin(string by, string role = "")

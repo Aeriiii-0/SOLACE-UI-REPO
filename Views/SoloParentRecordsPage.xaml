@@ -491,6 +491,8 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="21"
                     BorderBrush="#702943" BorderThickness="1.2"
@@ -672,7 +674,52 @@
                     </ControlTemplate>
                 </Button.Template>
             </Button>
-            <Button Grid.Column="5" Height="42" Padding="22,0" Cursor="Hand"
+
+            <!-- Discrete Municipal Archives Button -->
+            <Button x:Name="BtnArchives" Grid.Column="5"
+                    Width="42" Height="42" Margin="0,0,12,0" VerticalAlignment="Center"
+                    Cursor="Hand" ToolTip="Municipal Historical Archives"
+                    Click="BtnArchives_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ArchBg" Background="#FFFFFF" CornerRadius="21"
+                                BorderBrush="#702943" BorderThickness="1.2">
+                            <Path Data="M3,3H21V7H3V3M4,8H20V21H4V8M9.5,11A1.5,1.5 0 0,0 8,12.5A1.5,1.5 0 0,0 9.5,14H14.5A1.5,1.5 0 0,0 16,12.5A1.5,1.5 0 0,0 14.5,11H9.5Z"
+                                  Fill="#702943" Stretch="Uniform" Width="15" Height="15"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ArchBg" Property="Background" Value="#FBF1F4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <!-- Recycle Bin Button (Icon Only) -->
+            <Button x:Name="BtnRecycleBin" Grid.Column="6"
+                    Width="42" Height="42" Margin="0,0,12,0" VerticalAlignment="Center"
+                    Cursor="Hand" ToolTip="Recycle Bin"
+                    Click="BtnRecycleBin_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="BtnBg" Background="#FFFFFF" CornerRadius="21"
+                                BorderBrush="#702943" BorderThickness="1.2">
+                            <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
+                                  Fill="#702943" Stretch="Uniform" Width="15" Height="15"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BtnBg" Property="Background" Value="#FBF1F4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <Button Grid.Column="7" Height="42" Padding="22,0" Cursor="Hand"
                     VerticalAlignment="Center" Click="AddNewRecord_Click">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">

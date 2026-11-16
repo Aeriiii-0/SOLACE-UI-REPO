@@ -194,6 +194,7 @@
     <Compile Include="Models\Api\UserDtos.cs" />
     <Compile Include="Models\Api\BarangayBreakdownDtos.cs" />
     <Compile Include="Services\Api\AnalyticsApiService.cs" />
+    <Compile Include="Services\Api\ArchiveApiService.cs" />
     <Compile Include="Services\Api\UserApiService.cs" />
     <Compile Include="Views\Components\LoadingOverlay.xaml.cs">
       <DependentUpon>LoadingOverlay.xaml</DependentUpon>
@@ -215,6 +216,9 @@
     </Compile>
     <Compile Include="Views\Components\SubsidyTableSkeletonLoader.xaml.cs">
       <DependentUpon>SubsidyTableSkeletonLoader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Components\ArchiveTableSkeletonLoader.xaml.cs">
+      <DependentUpon>ArchiveTableSkeletonLoader.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Components\NotificationCardComponent.xaml.cs">
       <DependentUpon>NotificationCardComponent.xaml</DependentUpon>
@@ -306,6 +310,21 @@
     <Compile Include="Views\Dialogs\ActionConfirmDialog.xaml.cs">
       <DependentUpon>ActionConfirmDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\RecycleBinDialog.xaml.cs">
+      <DependentUpon>RecycleBinDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\ArchivedDossierDialog.xaml.cs">
+      <DependentUpon>ArchivedDossierDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\ReactivateCitizenDialog.xaml.cs">
+      <DependentUpon>ReactivateCitizenDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\DeleteRecordDialog.xaml.cs">
+      <DependentUpon>DeleteRecordDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Pages\MunicipalArchivesPage.xaml.cs">
+      <DependentUpon>MunicipalArchivesPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\CancelRecordDialog.xaml.cs">
       <DependentUpon>CancelRecordDialog.xaml</DependentUpon>
     </Compile>
@@ -386,6 +405,13 @@
     <Compile Include="DTOs\SubsidyCycleDto.cs" />
     <Compile Include="DTOs\GranteeDto.cs" />
     <Compile Include="DTOs\SubsidyRequests.cs" />
+    <Compile Include="DTOs\Archive\AdminRestoreArchiveRequest.cs" />
+    <Compile Include="DTOs\Archive\ArchivedSoloParentDetailDto.cs" />
+    <Compile Include="DTOs\Archive\ArchivedSoloParentSummaryDto.cs" />
+    <Compile Include="DTOs\Archive\ArchiveSearchRequest.cs" />
+    <Compile Include="DTOs\Archive\LifecyclePipelineResultDto.cs" />
+    <Compile Include="DTOs\Archive\ReactivateArchivedRecordRequest.cs" />
+    <Compile Include="DTOs\Archive\RecycleBinItemDto.cs" />
     <Compile Include="Models\SubsidyItem.cs" />
     <Compile Include="Models\SelectionRow.cs" />
     <Compile Include="Models\DisqualifiedCandidateItem.cs" />
@@ -482,6 +508,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Components\SubsidyTableSkeletonLoader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\ArchiveTableSkeletonLoader.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -606,6 +636,26 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\ActionConfirmDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\RecycleBinDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\ArchivedDossierDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\ReactivateCitizenDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\DeleteRecordDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Pages\MunicipalArchivesPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

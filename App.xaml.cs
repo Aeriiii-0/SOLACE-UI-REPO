@@ -17,6 +17,32 @@ namespace SOLUM_UI
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // Log any unhandled UI or background exceptions
+            DispatcherUnhandledException += (s, args) =>
+            {
+                try
+                {
+                    string logDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
+                    System.IO.Directory.CreateDirectory(logDir);
+                    string logFile = System.IO.Path.Combine(logDir, "crash.log");
+                    System.IO.File.AppendAllText(logFile, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] DispatcherUnhandledException:\n{args.Exception}\n\n");
+                    MessageBox.Show($"Application Error:\n\n{args.Exception.Message}\n\nStack:\n{args.Exception.StackTrace}", "SOLACE Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch { }
+            };
+            AppDomain.CurrentDomain.UnhandledException += (s, args) =>
+            {
+                try
+                {
+                    string logDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
+                    System.IO.Directory.CreateDirectory(logDir);
+                    string logFile = System.IO.Path.Combine(logDir, "crash.log");
+                    System.IO.File.AppendAllText(logFile, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] AppDomain UnhandledException:\n{args.ExceptionObject}\n\n");
+                }
+                catch { }
+            };
+
             // Enable PDFsharp to use Windows fonts (Arial, etc.)
             GlobalFontSettings.UseWindowsFontsUnderWindows = true;
             // Configure en-PH culture so that all WPF controls (DatePicker, formatting) use form standard MM/dd/yyyy

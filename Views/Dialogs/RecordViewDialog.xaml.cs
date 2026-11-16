@@ -962,7 +962,47 @@ namespace SOLUM_UI.Views.Dialogs
             Color dotColor = Color.FromRgb(0x64, 0x74, 0x8B);
 
             string dotSymbol = "●";
-            if (actionType.IndexOf("CREATE", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (actionType.IndexOf("REINSTATE", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                title = "Record Reinstated from Recycle Bin";
+                badgeText = "REINSTATED";
+                badgeBgColor = Color.FromRgb(0xDC, 0xFC, 0xE7);
+                badgeFgColor = Color.FromRgb(0x15, 0x80, 0x3D);
+                badgeBdrColor = Color.FromRgb(0x86, 0xEF, 0xAC);
+                dotColor = Color.FromRgb(0x10, 0xB9, 0x81);
+                dotSymbol = "↺";
+            }
+            else if (actionType.IndexOf("REACTIVATE", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                title = "Record Reactivated from Municipal Archives";
+                badgeText = "REACTIVATED";
+                badgeBgColor = Color.FromRgb(0xDC, 0xFC, 0xE7);
+                badgeFgColor = Color.FromRgb(0x05, 0x96, 0x69);
+                badgeBdrColor = Color.FromRgb(0x6E, 0xE7, 0xB7);
+                dotColor = Color.FromRgb(0x05, 0x96, 0x69);
+                dotSymbol = "✓";
+            }
+            else if (actionType.IndexOf("RESTORE", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                title = "Record Restored (Admin Override)";
+                badgeText = "RESTORED";
+                badgeBgColor = Color.FromRgb(0xDB, 0xEA, 0xFE);
+                badgeFgColor = Color.FromRgb(0x1D, 0x4E, 0xD8);
+                badgeBdrColor = Color.FromRgb(0x93, 0xC5, 0xFD);
+                dotColor = Color.FromRgb(0x3B, 0x82, 0xF6);
+                dotSymbol = "↺";
+            }
+            else if (actionType.IndexOf("ARCHIVE", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                title = "Transferred to Municipal Cold Archives";
+                badgeText = "ARCHIVED";
+                badgeBgColor = Color.FromRgb(0xFA, 0xEE, 0xF2);
+                badgeFgColor = Color.FromRgb(0x70, 0x29, 0x43);
+                badgeBdrColor = Color.FromRgb(0xDF, 0x9B, 0xB1);
+                dotColor = Color.FromRgb(0x70, 0x29, 0x43);
+                dotSymbol = "📁";
+            }
+            else if (actionType.IndexOf("CREATE", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 title = "Record Created / Registered";
                 badgeText = "CREATED";
@@ -992,10 +1032,20 @@ namespace SOLUM_UI.Views.Dialogs
                 dotColor = Color.FromRgb(0x70, 0x29, 0x43);
                 dotSymbol = "↻";
             }
+            else if (actionType.IndexOf("REVOKE", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                title = "Solo Parent Record Revoked";
+                badgeText = "REVOKED";
+                badgeBgColor = Color.FromRgb(0xFE, 0xE2, 0xE2);
+                badgeFgColor = Color.FromRgb(0xB9, 0x1C, 0x1C);
+                badgeBdrColor = Color.FromRgb(0xFC, 0xA5, 0xA5);
+                dotColor = Color.FromRgb(0xDC, 0x26, 0x26);
+                dotSymbol = "✕";
+            }
             else if (actionType.IndexOf("DELETE", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                title = "Record Archived / Deleted";
-                badgeText = "DELETED";
+                title = "Record Moved to Recycle Bin";
+                badgeText = "RECYCLED";
                 badgeBgColor = Color.FromRgb(0xFE, 0xE2, 0xE2);
                 badgeFgColor = Color.FromRgb(0xB9, 0x1C, 0x1C);
                 badgeBdrColor = Color.FromRgb(0xFC, 0xA5, 0xA5);
@@ -1105,7 +1155,7 @@ namespace SOLUM_UI.Views.Dialogs
                 ? log.PerformedBy.Name
                 : (!string.IsNullOrWhiteSpace(log.PerformedBy?.Email)
                     ? log.PerformedBy.Email
-                    : (!string.IsNullOrWhiteSpace(actorUserId) ? actorUserId : "System"));
+                    : (!string.IsNullOrWhiteSpace(actorUserId) && !Guid.TryParse(actorUserId, out _) ? actorUserId : "Authorized Staff"));
             var metaSp = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
             metaSp.Children.Add(new TextBlock
             {
