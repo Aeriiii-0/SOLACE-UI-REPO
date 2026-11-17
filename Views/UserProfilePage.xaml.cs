@@ -322,6 +322,11 @@ namespace SOLUM_UI
                 PopulateProfile();
                 (Application.Current.MainWindow as MainWindow)?.RefreshUserHeader();
 
+                ToastNotification.Show(
+                    "Profile Updated",
+                    "Your profile details have been updated successfully.",
+                    ToastType.Success);
+
                 // Re-sync with backend
                 await LoadCurrentUserProfileAsync();
             }

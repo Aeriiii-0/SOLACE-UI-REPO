@@ -240,12 +240,6 @@ namespace SOLUM_UI.Views.Dialogs
 
                     SetLoading(false);
                     
-                    // Show success message
-                    ActionConfirmDialog.Success(
-                        "Profile Updated",
-                        "Your profile has been updated successfully.",
-                        this);
-                    
                     DialogResult = true;
                     Close();
                 }
