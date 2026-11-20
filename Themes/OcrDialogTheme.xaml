@@ -30,7 +30,6 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="8">
                         <ScrollViewer x:Name="PART_ContentHost"
-                                      Margin="{TemplateBinding Padding}"
                                       VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>

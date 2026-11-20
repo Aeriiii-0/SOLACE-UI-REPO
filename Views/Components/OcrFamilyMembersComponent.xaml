@@ -28,13 +28,22 @@
                     <Grid Margin="0,8,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="14"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="14"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <!-- Column 1: A1, A2, A3, A4 -->
-                        <StackPanel Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Row 0: A1, A5, C -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12" VerticalAlignment="Top">
                             <RadioButton x:Name="ChkA1" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a1" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top"
+                                      VerticalContentAlignment="Top"
                                       Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                 <RadioButton.Content>
                                     <TextBlock FontSize="11">
@@ -42,8 +51,40 @@
                                     </TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,12" VerticalAlignment="Top">
+                            <RadioButton x:Name="ChkA5" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a5" GotFocus="Field_GotFocus"
+                                      VerticalContentAlignment="Top"
+                                      Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                <RadioButton.Content>
+                                    <TextBlock FontSize="11">
+                                        <Run Text="A5. " FontWeight="Bold"/><Run Text="Separation (6+ mos)"/>
+                                    </TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                            <StackPanel x:Name="PnlA5" Visibility="Collapsed" Margin="18,0,0,12">
+                                <TextBlock Text="Period of separation" Style="{StaticResource FieldLabelSm}"/>
+                                <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}" Tag="circ_a5_period" GotFocus="Field_GotFocus" CharacterCasing="Upper"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="4" Margin="0,0,0,12" VerticalAlignment="Top">
+                            <RadioButton x:Name="ChkC" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_c" GotFocus="Field_GotFocus"
+                                      VerticalContentAlignment="Top"
+                                      Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                <RadioButton.Content>
+                                    <TextBlock FontSize="11">
+                                        <Run Text="C. " FontWeight="Bold"/><Run Text="Unmarried Mother/Father"/>
+                                    </TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                        </StackPanel>
+
+                        <!-- Row 1: A2, A6, D -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,12" VerticalAlignment="Top">
                             <RadioButton x:Name="ChkA2" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a2" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top"
+                                      VerticalContentAlignment="Top"
                                       Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                 <RadioButton.Content>
                                     <TextBlock FontSize="11">
@@ -76,45 +117,11 @@
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>
-                            <RadioButton x:Name="ChkA3" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a3" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top">
-                                <RadioButton.Content>
-                                    <TextBlock FontSize="11">
-                                        <Run Text="A3. " FontWeight="Bold"/><Run Text="Detention of Spouse"/>
-                                    </TextBlock>
-                                </RadioButton.Content>
-                            </RadioButton>
-                            <RadioButton x:Name="ChkA4" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a4" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top"
-                                      Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
-                                <RadioButton.Content>
-                                    <TextBlock FontSize="11">
-                                        <Run Text="A4. " FontWeight="Bold"/><Run Text="Physical/Mental Incapacity"/>
-                                    </TextBlock>
-                                </RadioButton.Content>
-                            </RadioButton>
-                            <StackPanel x:Name="PnlA4" Visibility="Collapsed" Margin="18,0,0,12">
-                                <TextBlock Text="Type of disability" Style="{StaticResource FieldLabelSm}"/>
-                                <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBoxSm}" Tag="circ_a4_disability" GotFocus="Field_GotFocus" CharacterCasing="Upper"/>
-                            </StackPanel>
                         </StackPanel>
-                        <!-- Column 2: A5, A6, A7, B -->
-                        <StackPanel Grid.Column="1" Margin="0,0,8,0" VerticalAlignment="Top">
-                            <RadioButton x:Name="ChkA5" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a5" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top"
-                                      Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
-                                <RadioButton.Content>
-                                    <TextBlock FontSize="11">
-                                        <Run Text="A5. " FontWeight="Bold"/><Run Text="Separation from spouse"/>
-                                    </TextBlock>
-                                </RadioButton.Content>
-                            </RadioButton>
-                            <StackPanel x:Name="PnlA5" Visibility="Collapsed" Margin="18,0,0,12">
-                                <TextBlock Text="Period of separation" Style="{StaticResource FieldLabelSm}"/>
-                                <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}" Tag="circ_a5_period" GotFocus="Field_GotFocus" CharacterCasing="Upper"/>
-                            </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,12" VerticalAlignment="Top">
                             <RadioButton x:Name="ChkA6" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a6" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top"
+                                      VerticalContentAlignment="Top"
                                       Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                 <RadioButton.Content>
                                     <TextBlock FontSize="11">
@@ -130,16 +137,77 @@
                                     <ComboBoxItem Content="Annulment of marriage"/>
                                 </ComboBox>
                             </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="4" Margin="0,0,0,12" VerticalAlignment="Top">
+                            <RadioButton x:Name="ChkD" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_d" GotFocus="Field_GotFocus"
+                                      VerticalContentAlignment="Top"
+                                      Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                <RadioButton.Content>
+                                    <TextBlock FontSize="11">
+                                        <Run Text="D. " FontWeight="Bold"/><Run Text="Legal Guardian / Foster"/>
+                                    </TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                        </StackPanel>
+
+                        <!-- Row 2: A3, A7, E -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,12" VerticalAlignment="Top">
+                            <RadioButton x:Name="ChkA3" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a3" GotFocus="Field_GotFocus"
+                                      VerticalContentAlignment="Top"
+                                      Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                <RadioButton.Content>
+                                    <TextBlock FontSize="11">
+                                        <Run Text="A3. " FontWeight="Bold"/><Run Text="Detention of Spouse"/>
+                                    </TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,12" VerticalAlignment="Top">
                             <RadioButton x:Name="ChkA7" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a7" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top">
+                                      VerticalContentAlignment="Top"
+                                      Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                 <RadioButton.Content>
                                     <TextBlock FontSize="11">
                                         <Run Text="A7. " FontWeight="Bold"/><Run Text="Abandonment (6+ mos)"/>
                                     </TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="4" Margin="0,0,0,12" VerticalAlignment="Top">
+                            <RadioButton x:Name="ChkE" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_e" GotFocus="Field_GotFocus"
+                                      VerticalContentAlignment="Top"
+                                      Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                <RadioButton.Content>
+                                    <TextBlock TextWrapping="Wrap" FontSize="11">
+                                        <Run Text="E. " FontWeight="Bold"/><Run Text="Relative 4th degree"/>
+                                    </TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                        </StackPanel>
+
+                        <!-- Row 3: A4, B, F -->
+                        <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,0,12" VerticalAlignment="Top">
+                            <RadioButton x:Name="ChkA4" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_a4" GotFocus="Field_GotFocus"
+                                      VerticalContentAlignment="Top"
+                                      Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                <RadioButton.Content>
+                                    <TextBlock FontSize="11">
+                                        <Run Text="A4. " FontWeight="Bold"/><Run Text="Disability of Spouse"/>
+                                    </TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                            <StackPanel x:Name="PnlA4" Visibility="Collapsed" Margin="18,0,0,12">
+                                <TextBlock Text="Type of disability" Style="{StaticResource FieldLabelSm}"/>
+                                <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBoxSm}" Tag="circ_a4_disability" GotFocus="Field_GotFocus" CharacterCasing="Upper"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="3" Grid.Column="2" Margin="0,0,0,12" VerticalAlignment="Top">
                             <RadioButton x:Name="ChkB" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_b" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top"
+                                      VerticalContentAlignment="Top"
                                       Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                 <RadioButton.Content>
                                     <TextBlock FontSize="11">
@@ -152,34 +220,11 @@
                                 <TextBox x:Name="TxtBStayAbroad" Style="{StaticResource FormBoxSm}" Tag="circ_b_stay" GotFocus="Field_GotFocus" CharacterCasing="Upper"/>
                             </StackPanel>
                         </StackPanel>
-                        <!-- Column 3: C, D, E, F -->
-                        <StackPanel Grid.Column="2" VerticalAlignment="Top">
-                            <RadioButton x:Name="ChkC" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_c" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top">
-                                <RadioButton.Content>
-                                    <TextBlock FontSize="11">
-                                        <Run Text="C. " FontWeight="Bold"/><Run Text="Unmarried Mother/Father"/>
-                                    </TextBlock>
-                                </RadioButton.Content>
-                            </RadioButton>
-                            <RadioButton x:Name="ChkD" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_d" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top">
-                                <RadioButton.Content>
-                                    <TextBlock FontSize="11">
-                                        <Run Text="D. " FontWeight="Bold"/><Run Text="Legal Guardian / Foster"/>
-                                    </TextBlock>
-                                </RadioButton.Content>
-                            </RadioButton>
-                            <RadioButton x:Name="ChkE" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_e" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top">
-                                <RadioButton.Content>
-                                    <TextBlock TextWrapping="Wrap" FontSize="11">
-                                        <Run Text="E. " FontWeight="Bold"/><Run Text="Relative 4th degree"/>
-                                    </TextBlock>
-                                </RadioButton.Content>
-                            </RadioButton>
+
+                        <StackPanel Grid.Row="3" Grid.Column="4" Margin="0,0,0,12" VerticalAlignment="Top">
                             <RadioButton x:Name="ChkF" Style="{StaticResource FormCheck}" GroupName="Circumstance" Tag="circ_f" GotFocus="Field_GotFocus"
-                                      Margin="0,0,0,12" VerticalContentAlignment="Top">
+                                      VerticalContentAlignment="Top"
+                                      Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                 <RadioButton.Content>
                                     <TextBlock FontSize="11">
                                         <Run Text="F. " FontWeight="Bold"/><Run Text="Pregnant Woman"/>

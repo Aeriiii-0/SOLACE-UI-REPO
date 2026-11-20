@@ -55,7 +55,8 @@ namespace SOLUM_UI.Views.Components
         public bool IsSelfEmployed => GetComboValue(CmbEmploymentStatus) == "Self-Employed";
         public bool IsNotEmployed => GetComboValue(CmbEmploymentStatus) == "Not Employed";
         public string EmergencyContactName => TxtEmergencyContact.Text.Trim();
-        public string EmergencyRelationship => TxtRelationship.Text.Trim();
+        public string EmergencyRelationship => GetComboValue(CmbRelationship);
+        public event Action EmergencyContactChanged;
         public string EmergencyAddress => TxtEmergencyAddress.Text.Trim();
         public string EmergencyContactNumber => TxtEmergencyNumber.Text.Trim();
         public bool IsPantawidBeneficiary => ChkPantawid.IsChecked == true;
@@ -150,7 +151,7 @@ namespace SOLUM_UI.Views.Components
                 SetComboByContent(CmbBarangay, OcrService.FuzzyMatchBarangay(GetVal(resp, "barangay")));
                 TxtContact.Text = OcrService.FormatPhoneNumber(GetVal(resp, "contact_number"));
                 TxtEmergencyContact.Text = OcrService.CleanPersonName(GetVal(resp, "emergency_name"));
-                TxtRelationship.Text = OcrService.FuzzyMatchRelationship(GetVal(resp, "emergency_relationship"))?.ToUpperInvariant() ?? string.Empty;
+                SetComboByContent(CmbRelationship, OcrService.FuzzyMatchRelationship(GetVal(resp, "emergency_relationship")));
                 string emAddr = GetVal(resp, "emergency_address");
                 string cleanEmAddr = emAddr?.Trim();
                 if (!string.IsNullOrWhiteSpace(cleanEmAddr) &&
@@ -327,9 +328,28 @@ namespace SOLUM_UI.Views.Components
         private void TxtEmergencyContact_TextChanged(object sender, TextChangedEventArgs e)
         {
             ToUpperBox(TxtEmergencyContact);
+            ClearFieldError(TxtEmergencyContact, ErrEmergencyContact);
             MarkBadgeEdited(Badge_EmergencyContact, TxtConf_EmergencyContact);
+            EmergencyContactChanged?.Invoke();
         }
-        private void TxtEmergencyAddress_TextChanged(object sender, TextChangedEventArgs e) => ToUpperBox(TxtEmergencyAddress);
+
+        private void TxtEmergencyContact_LostFocus(object sender, RoutedEventArgs e)
+        {
+            EmergencyContactChanged?.Invoke();
+        }
+
+        private void CmbRelationship_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ClearFieldError(CmbRelationship, ErrRelationship);
+            MarkBadgeEdited(Badge_Relationship, TxtConf_Relationship);
+            EmergencyContactChanged?.Invoke();
+        }
+        private void TxtEmergencyAddress_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ToUpperBox(TxtEmergencyAddress);
+            ClearFieldError(TxtEmergencyAddress, ErrEmergencyAddress);
+            MarkBadgeEdited(Badge_EmergencyAddress, TxtConf_EmergencyAddress);
+        }
 
         private void CmbSex_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -492,15 +512,23 @@ namespace SOLUM_UI.Views.Components
             else if (!contactDigits.StartsWith("09"))
             { MarkError(TxtContact, ErrContact, "Must start with 09."); missing.Add("Contact Number (must start with 09)"); ok = false; }
 
-            // Validate emergency contact number if provided
+            // Validate emergency contact fields (all required)
+            if (string.IsNullOrWhiteSpace(TxtEmergencyContact.Text))
+            { MarkError(TxtEmergencyContact, ErrEmergencyContact, "Required."); missing.Add("Emergency Contact Person"); ok = false; }
+
+            if (string.IsNullOrWhiteSpace(GetComboValue(CmbRelationship)))
+            { MarkError(CmbRelationship, ErrRelationship, "Required."); missing.Add("Relationship"); ok = false; }
+
             string emergencyDigits = Regex.Replace(TxtEmergencyNumber.Text ?? "", @"\D", "");
-            if (!string.IsNullOrWhiteSpace(emergencyDigits))
-            {
-                if (emergencyDigits.Length != 11)
-                { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must be 11 digits."); missing.Add("Emergency Contact Number (11 digits)"); ok = false; }
-                else if (!emergencyDigits.StartsWith("09"))
-                { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must start with 09."); missing.Add("Emergency Contact Number (must start with 09)"); ok = false; }
-            }
+            if (string.IsNullOrWhiteSpace(emergencyDigits))
+            { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Required."); missing.Add("Emergency Contact Number"); ok = false; }
+            else if (emergencyDigits.Length != 11)
+            { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must be 11 digits."); missing.Add("Emergency Contact Number (11 digits)"); ok = false; }
+            else if (!emergencyDigits.StartsWith("09"))
+            { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must start with 09."); missing.Add("Emergency Contact Number (must start with 09)"); ok = false; }
+
+            if (string.IsNullOrWhiteSpace(TxtEmergencyAddress.Text))
+            { MarkError(TxtEmergencyAddress, ErrEmergencyAddress, "Required."); missing.Add("Emergency Contact Address"); ok = false; }
 
             return ok;
         }
@@ -516,8 +544,11 @@ namespace SOLUM_UI.Views.Components
             if (string.IsNullOrWhiteSpace(GetComboValue(CmbEmploymentStatus))) { CmbEmploymentStatus.Focus(); CmbEmploymentStatus.BringIntoView(); return; }
             string contactDigits = Regex.Replace(TxtContact.Text ?? "", @"\D", "");
             if (string.IsNullOrWhiteSpace(contactDigits) || contactDigits.Length != 11 || !contactDigits.StartsWith("09")) { TxtContact.Focus(); TxtContact.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(TxtEmergencyContact.Text)) { TxtEmergencyContact.Focus(); TxtEmergencyContact.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(GetComboValue(CmbRelationship))) { CmbRelationship.Focus(); CmbRelationship.BringIntoView(); return; }
             string emergencyDigits = Regex.Replace(TxtEmergencyNumber.Text ?? "", @"\D", "");
-            if (!string.IsNullOrWhiteSpace(emergencyDigits) && (emergencyDigits.Length != 11 || !emergencyDigits.StartsWith("09"))) { TxtEmergencyNumber.Focus(); TxtEmergencyNumber.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(emergencyDigits) || emergencyDigits.Length != 11 || !emergencyDigits.StartsWith("09")) { TxtEmergencyNumber.Focus(); TxtEmergencyNumber.BringIntoView(); return; }
+            if (string.IsNullOrWhiteSpace(TxtEmergencyAddress.Text)) { TxtEmergencyAddress.Focus(); TxtEmergencyAddress.BringIntoView(); return; }
         }
 
         private void MarkError(Control ctrl, TextBlock lbl, string msg)

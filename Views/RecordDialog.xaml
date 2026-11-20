@@ -27,7 +27,7 @@
         </Style>
         <Style x:Key="FormBox" TargetType="TextBox">
             <Setter Property="Height" Value="44"/>
-            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Padding" Value="12,0"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Foreground" Value="#111111"/>
             <Setter Property="BorderBrush" Value="#C0A0AA"/>
@@ -43,7 +43,6 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="6">
                             <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -66,7 +65,7 @@
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#C0A0AA"/>
             <Setter Property="BorderThickness" Value="1.2"/>
-            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Padding" Value="14,0,28,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -78,7 +77,7 @@
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="6">
-                                <Grid Margin="10,0,28,0">
+                                <Grid Margin="14,0,28,0">
                                     <ContentPresenter x:Name="ContentSite"
                                                       Content="{TemplateBinding SelectionBoxItem}"
                                                       ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
@@ -175,7 +174,7 @@
                             <Grid Grid.Column="0">
                                 <DatePickerTextBox x:Name="PART_TextBox"
                                                    Foreground="#111111" Background="Transparent"
-                                                   BorderThickness="0" Padding="10,0"
+                                                   BorderThickness="0" Padding="12,0"
                                                    VerticalAlignment="Center" FontSize="14">
                                     <DatePickerTextBox.Style>
                                         <Style TargetType="DatePickerTextBox">
@@ -198,7 +197,7 @@
                                 </DatePickerTextBox>
                                 <!-- Custom clean placeholder - only visible when input is empty -->
                                 <TextBlock Text="MM/DD/YYYY" Foreground="#999999" FontSize="14"
-                                           Padding="10,0" VerticalAlignment="Center"
+                                           Padding="14,0" VerticalAlignment="Center"
                                            IsHitTestVisible="False" Opacity="0.7">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -718,7 +717,7 @@
                                                 <TextBlock Text="Extension" Style="{StaticResource FieldLabel}"/>
                                                 <ComboBox x:Name="CmbExtension" Style="{StaticResource FormCombo}"
                                                           SelectionChanged="CmbExtension_SelectionChanged">
-                                                    <ComboBoxItem Content=""/>
+                                                    <ComboBoxItem Content="N/A" IsSelected="True"/>
                                                     <ComboBoxItem Content="Jr."/>
                                                     <ComboBoxItem Content="Sr."/>
                                                     <ComboBoxItem Content="II"/>
@@ -901,7 +900,6 @@
                                                 </TextBlock>
                                                 <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
                                                            SelectionChanged="CmbBarangay_SelectionChanged">
-                                                    <ComboBoxItem Content=""/>
                                                     <ComboBoxItem Content="Bi&#241;an (Poblacion)"/>
                                                     <ComboBoxItem Content="Bungahan"/>
                                                     <ComboBoxItem Content="Canlalay"/>
@@ -989,16 +987,12 @@
                                             </StackPanel>
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Style="{StaticResource FieldLabel}">Employment Status <Run Text="*" Foreground="#E53935"/></TextBlock>
-                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                    <ComboBox x:Name="CmbEmploymentStatus" Style="{StaticResource FormCombo}"
-                                                              BorderThickness="0" Background="Transparent"
-                                                              SelectionChanged="CmbEmploymentStatus_SelectionChanged">
-                                                        <ComboBoxItem Content=""/>
-                                                        <ComboBoxItem Content="Employed"/>
-                                                        <ComboBoxItem Content="Self-Employed"/>
-                                                        <ComboBoxItem Content="Not Employed"/>
-                                                    </ComboBox>
-                                                </Border>
+                                                <ComboBox x:Name="CmbEmploymentStatus" Style="{StaticResource FormCombo}"
+                                                          SelectionChanged="CmbEmploymentStatus_SelectionChanged">
+                                                    <ComboBoxItem Content="Employed"/>
+                                                    <ComboBoxItem Content="Self-Employed"/>
+                                                    <ComboBoxItem Content="Not Employed"/>
+                                                </ComboBox>
                                                 <TextBlock x:Name="ErrEmploymentStatus" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
                                         </Grid>
@@ -1012,48 +1006,58 @@
                                         </Border>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="2.2*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="1.5*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="2.3*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="1.6*"/>
                                             </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                                <TextBlock Text="Person to Contact in Case of Emergency" Style="{StaticResource FieldLabel}"/>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Person to Contact in Case of Emergency <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
                                                 <TextBox x:Name="TxtEmergencyContact" Style="{StaticResource FormBox}"
                                                          MaxLength="50"
                                                          PreviewTextInput="NameOnly_PreviewTextInput"
-                                                         TextChanged="TxtEmergencyContact_TextChanged"/>
+                                                         TextChanged="TxtEmergencyContact_TextChanged"
+                                                         LostFocus="TxtEmergencyContact_LostFocus"/>
+                                                <TextBlock x:Name="ErrEmergencyContact" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="1" Margin="0,0,10,0">
-                                                <TextBlock Text="Relationship" Style="{StaticResource FieldLabel}"/>
-                                                <Border BorderBrush="#C0A0AA" BorderThickness="1.2" CornerRadius="6" Background="White">
-                                                    <ComboBox x:Name="CmbRelationship" Style="{StaticResource FormCombo}"
-                                                              BorderThickness="0" Background="Transparent">
-                                                        <ComboBoxItem Content=""/>
-                                                        <ComboBoxItem Content="Child"/>
-                                                        <ComboBoxItem Content="Spouse"/>
-                                                        <ComboBoxItem Content="Parent"/>
-                                                        <ComboBoxItem Content="Sibling"/>
-                                                        <ComboBoxItem Content="Grandchild"/>
-                                                        <ComboBoxItem Content="Grandparent"/>
-                                                        <ComboBoxItem Content="Relative"/>
-                                                        <ComboBoxItem Content="Ward"/>
-                                                        <ComboBoxItem Content="Other"/>
-                                                    </ComboBox>
-                                                </Border>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Relationship <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
+                                                <ComboBox x:Name="CmbRelationship" Style="{StaticResource FormCombo}"
+                                                          SelectionChanged="CmbRelationship_SelectionChanged">
+                                                    <ComboBoxItem Content="Child"/>
+                                                    <ComboBoxItem Content="Spouse"/>
+                                                    <ComboBoxItem Content="Parent"/>
+                                                    <ComboBoxItem Content="Sibling"/>
+                                                    <ComboBoxItem Content="Grandchild"/>
+                                                    <ComboBoxItem Content="Grandparent"/>
+                                                    <ComboBoxItem Content="Relative"/>
+                                                    <ComboBoxItem Content="Ward"/>
+                                                    <ComboBoxItem Content="Other"/>
+                                                </ComboBox>
+                                                <TextBlock x:Name="ErrRelationship" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="2" Margin="0,0,10,0">
-                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                                    <TextBlock Text="Emergency Contact Address" Style="{StaticResource FieldLabel}"/>
-                                                </StackPanel>
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Emergency Contact Address <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
                                                 <TextBox x:Name="TxtEmergencyAddress" Style="{StaticResource FormBox}"
                                                          MaxLength="200"
                                                          TextChanged="TxtEmergencyAddress_TextChanged"/>
                                                 <CheckBox x:Name="ChkSameAsApplicant" Content="Same as Applicant"
                                                           FontSize="12" Foreground="#666666" Margin="0,4,0,0"/>
+                                                <TextBlock x:Name="ErrEmergencyAddress" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="3">
-                                                <TextBlock Text="Contact Number" Style="{StaticResource FieldLabel}"/>
+                                            <StackPanel Grid.Column="6">
+                                                <TextBlock Style="{StaticResource FieldLabel}">
+                                                    Contact Number <Run Text="*" Foreground="#E53935"/>
+                                                </TextBlock>
                                                 <TextBox x:Name="TxtEmergencyNumber" Style="{StaticResource FormBox}"
                                                          MaxLength="13"
                                                          PreviewTextInput="Phone_PreviewTextInput"
@@ -1156,32 +1160,76 @@
                                             <TextBlock Text="III. PROBLEM PRESENTED / CIRCUMSTANCE OF BEING SOLO PARENT"
                                                        Style="{StaticResource SectionLabel}"/>
                                         </Border>
-                                        <!-- 3-column circumstances: A1-A4 | A5-B | C-F -->
+                                        <!-- 4-row x 3-column grid layout for circumstances:
+                                             Row 0: A1 - A5 - C
+                                             Row 1: A2 - A6 - D
+                                             Row 2: A3 - A7 - E
+                                             Row 3: A4 - B  - F -->
                                         <Grid Margin="0,8,0,0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="14"/>
                                                 <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="14"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <!-- col 1: A1–A4 -->
-                                            <StackPanel Grid.Column="0" Margin="0,0,12,0" VerticalAlignment="Top">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Row 0: A1, A5, C -->
+                                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12" VerticalAlignment="Top">
                                                 <RadioButton x:Name="ChkA1" Style="{StaticResource FormCheck}" GroupName="Circumstance"
-                                                          Margin="0,0,0,12" VerticalContentAlignment="Top"
-                                                          Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                             VerticalContentAlignment="Top"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A1. " FontWeight="Bold"/>
                                                         <Run Text="Gives birth as a result of rape"/>
                                                     </TextBlock>
                                                 </RadioButton>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,12" VerticalAlignment="Top">
+                                                <RadioButton x:Name="ChkA5" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             VerticalContentAlignment="Top"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="A5. " FontWeight="Bold"/>
+                                                        <Run Text="Legal or de facto Separation (at least 6 mos.)"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                                <StackPanel x:Name="PnlA5" Visibility="Collapsed" Margin="22,6,0,4">
+                                                    <TextBlock Text="Period of separation (e.g., 8 mos, 2 yrs)" Style="{StaticResource FieldLabelSm}"/>
+                                                    <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}"
+                                                             TextChanged="TxtA5Period_TextChanged"/>
+                                                    <TextBlock Text="* Minimum 6 months continuous separation required"
+                                                               FontSize="10" Foreground="#888888" Margin="2,2,0,0"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="0" Grid.Column="4" Margin="0,0,0,12" VerticalAlignment="Top">
+                                                <RadioButton x:Name="ChkC" Style="{StaticResource FormCheck}" GroupName="Circumstance" VerticalContentAlignment="Top">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="C. " FontWeight="Bold"/>
+                                                        <Run Text="Unmarried Mother or Father"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                            </StackPanel>
+
+                                            <!-- Row 1: A2, A6, D -->
+                                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,12" VerticalAlignment="Top">
                                                 <RadioButton x:Name="ChkA2" Style="{StaticResource FormCheck}" GroupName="Circumstance"
-                                                          Margin="0,0,0,12" VerticalContentAlignment="Top"
-                                                          Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                             VerticalContentAlignment="Top"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A2. " FontWeight="Bold"/>
                                                         <Run Text="Death of Spouse"/>
                                                     </TextBlock>
                                                 </RadioButton>
-                                                <StackPanel x:Name="PnlA2" Visibility="Collapsed" Margin="22,2,0,12">
+                                                <StackPanel x:Name="PnlA2" Visibility="Collapsed" Margin="22,6,0,4">
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
@@ -1205,52 +1253,18 @@
                                                         </StackPanel>
                                                     </Grid>
                                                 </StackPanel>
-                                                <RadioButton x:Name="ChkA3" Style="{StaticResource FormCheck}" GroupName="Circumstance" Margin="0,0,0,12" VerticalContentAlignment="Top">
-                                                    <TextBlock TextWrapping="Wrap">
-                                                        <Run Text="A3. " FontWeight="Bold"/>
-                                                        <Run Text="Detention of Spouse"/>
-                                                    </TextBlock>
-                                                </RadioButton>
-                                                <RadioButton x:Name="ChkA4" Style="{StaticResource FormCheck}" GroupName="Circumstance"
-                                                          Margin="0,0,0,12" VerticalContentAlignment="Top"
-                                                          Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
-                                                    <TextBlock TextWrapping="Wrap">
-                                                        <Run Text="A4. " FontWeight="Bold"/>
-                                                        <Run Text="Physical &amp; Mental Incapacity of Spouse"/>
-                                                    </TextBlock>
-                                                </RadioButton>
-                                                <StackPanel x:Name="PnlA4" Visibility="Collapsed" Margin="22,2,0,12">
-                                                    <TextBlock Text="Type of disability" Style="{StaticResource FieldLabelSm}"/>
-                                                    <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBoxSm}"
-                                                             TextChanged="TxtA4Disability_TextChanged"/>
-                                                </StackPanel>
                                             </StackPanel>
-                                            <!-- col 2: A5–B -->
-                                            <StackPanel Grid.Column="1" Margin="0,0,12,0" VerticalAlignment="Top">
-                                                <RadioButton x:Name="ChkA5" Style="{StaticResource FormCheck}" GroupName="Circumstance"
-                                                          Margin="0,0,0,12" VerticalContentAlignment="Top"
-                                                          Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
-                                                    <TextBlock TextWrapping="Wrap">
-                                                        <Run Text="A5. " FontWeight="Bold"/>
-                                                        <Run Text="Legal or de facto Separation (at least 6 mos.)"/>
-                                                    </TextBlock>
-                                                </RadioButton>
-                                                <StackPanel x:Name="PnlA5" Visibility="Collapsed" Margin="22,2,0,12">
-                                                    <TextBlock Text="Period of separation (e.g., 8 mos, 2 yrs)" Style="{StaticResource FieldLabelSm}"/>
-                                                    <TextBox x:Name="TxtA5Period" Style="{StaticResource FormBoxSm}"
-                                                             TextChanged="TxtA5Period_TextChanged"/>
-                                                    <TextBlock Text="* Minimum 6 months continuous separation required"
-                                                               FontSize="10" Foreground="#888888" Margin="2,2,0,0"/>
-                                                </StackPanel>
+
+                                            <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,12" VerticalAlignment="Top">
                                                 <RadioButton x:Name="ChkA6" Style="{StaticResource FormCheck}" GroupName="Circumstance"
-                                                          Margin="0,0,0,12" VerticalContentAlignment="Top"
-                                                          Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                             VerticalContentAlignment="Top"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A6. " FontWeight="Bold"/>
                                                         <Run Text="Declaration of Nullity or Annulment of Marriage"/>
                                                     </TextBlock>
                                                 </RadioButton>
-                                                <StackPanel x:Name="PnlA6" Visibility="Collapsed" Margin="22,2,0,12">
+                                                <StackPanel x:Name="PnlA6" Visibility="Collapsed" Margin="22,6,0,4">
                                                     <TextBlock Text="Type of Declaration" Style="{StaticResource FieldLabelSm}"/>
                                                     <ComboBox x:Name="CmbA6Declaration" Style="{StaticResource FormCombo}" Height="36">
                                                         <ComboBoxItem Content=""/>
@@ -1258,21 +1272,72 @@
                                                         <ComboBoxItem Content="Annulment of marriage"/>
                                                     </ComboBox>
                                                 </StackPanel>
-                                                <RadioButton x:Name="ChkA7" Style="{StaticResource FormCheck}" GroupName="Circumstance" Margin="0,0,0,12" VerticalContentAlignment="Top">
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="1" Grid.Column="4" Margin="0,0,0,12" VerticalAlignment="Top">
+                                                <RadioButton x:Name="ChkD" Style="{StaticResource FormCheck}" GroupName="Circumstance" VerticalContentAlignment="Top">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="D. " FontWeight="Bold"/>
+                                                        <Run Text="Legal Guardian / Adoptive / Foster Parent"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                            </StackPanel>
+
+                                            <!-- Row 2: A3, A7, E -->
+                                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,12" VerticalAlignment="Top">
+                                                <RadioButton x:Name="ChkA3" Style="{StaticResource FormCheck}" GroupName="Circumstance" VerticalContentAlignment="Top">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="A3. " FontWeight="Bold"/>
+                                                        <Run Text="Detention of Spouse"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,12" VerticalAlignment="Top">
+                                                <RadioButton x:Name="ChkA7" Style="{StaticResource FormCheck}" GroupName="Circumstance" VerticalContentAlignment="Top">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="A7. " FontWeight="Bold"/>
                                                         <Run Text="Abandonment of spouse for at least 6 months"/>
                                                     </TextBlock>
                                                 </RadioButton>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="2" Grid.Column="4" Margin="0,0,0,12" VerticalAlignment="Top">
+                                                <RadioButton x:Name="ChkE" Style="{StaticResource FormCheck}" GroupName="Circumstance" VerticalContentAlignment="Top">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="E. " FontWeight="Bold"/>
+                                                        <Run Text="Relative within the fourth (4th) civil degree of consanguinity or affinity"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                            </StackPanel>
+
+                                            <!-- Row 3: A4, B, F -->
+                                            <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,0,12" VerticalAlignment="Top">
+                                                <RadioButton x:Name="ChkA4" Style="{StaticResource FormCheck}" GroupName="Circumstance"
+                                                             VerticalContentAlignment="Top"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run Text="A4. " FontWeight="Bold"/>
+                                                        <Run Text="Physical &amp; Mental Incapacity of Spouse"/>
+                                                    </TextBlock>
+                                                </RadioButton>
+                                                <StackPanel x:Name="PnlA4" Visibility="Collapsed" Margin="22,6,0,4">
+                                                    <TextBlock Text="Type of disability" Style="{StaticResource FieldLabelSm}"/>
+                                                    <TextBox x:Name="TxtA4Disability" Style="{StaticResource FormBoxSm}"
+                                                             TextChanged="TxtA4Disability_TextChanged"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="3" Grid.Column="2" Margin="0,0,0,12" VerticalAlignment="Top">
                                                 <RadioButton x:Name="ChkB" Style="{StaticResource FormCheck}" GroupName="Circumstance"
-                                                          Margin="0,0,0,12" VerticalContentAlignment="Top"
-                                                          Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
+                                                             VerticalContentAlignment="Top"
+                                                             Checked="Circumstance_Changed" Unchecked="Circumstance_Changed">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="B. " FontWeight="Bold"/>
                                                         <Run Text="Spouse or family member of an OFW (continuous stay abroad)"/>
                                                     </TextBlock>
                                                 </RadioButton>
-                                                <StackPanel x:Name="PnlB" Visibility="Collapsed" Margin="22,2,0,12">
+                                                <StackPanel x:Name="PnlB" Visibility="Collapsed" Margin="22,6,0,4">
                                                     <TextBlock Text="Length of Stay Abroad (e.g., in months or years)" Style="{StaticResource FieldLabelSm}"/>
                                                     <TextBox x:Name="TxtBStayAbroad" Style="{StaticResource FormBoxSm}"
                                                              TextChanged="TxtBStayAbroad_TextChanged"/>
@@ -1280,27 +1345,9 @@
                                                                FontSize="10" Foreground="#888888" Margin="2,2,0,0"/>
                                                 </StackPanel>
                                             </StackPanel>
-                                            <!-- col 3: C–F -->
-                                            <StackPanel Grid.Column="2" VerticalAlignment="Top">
-                                                <RadioButton x:Name="ChkC" Style="{StaticResource FormCheck}" GroupName="Circumstance" Margin="0,0,0,12" VerticalContentAlignment="Top">
-                                                    <TextBlock TextWrapping="Wrap">
-                                                        <Run Text="C. " FontWeight="Bold"/>
-                                                        <Run Text="Unmarried Mother or Father"/>
-                                                    </TextBlock>
-                                                </RadioButton>
-                                                <RadioButton x:Name="ChkD" Style="{StaticResource FormCheck}" GroupName="Circumstance" Margin="0,0,0,12" VerticalContentAlignment="Top">
-                                                    <TextBlock TextWrapping="Wrap">
-                                                        <Run Text="D. " FontWeight="Bold"/>
-                                                        <Run Text="Legal Guardian / Adoptive / Foster Parent"/>
-                                                    </TextBlock>
-                                                </RadioButton>
-                                                <RadioButton x:Name="ChkE" Style="{StaticResource FormCheck}" GroupName="Circumstance" Margin="0,0,0,12" VerticalContentAlignment="Top">
-                                                    <TextBlock TextWrapping="Wrap">
-                                                        <Run Text="E. " FontWeight="Bold"/>
-                                                        <Run Text="Relative within the fourth (4th) civil degree of consanguinity or affinity"/>
-                                                    </TextBlock>
-                                                </RadioButton>
-                                                <RadioButton x:Name="ChkF" Style="{StaticResource FormCheck}" GroupName="Circumstance" Margin="0,0,0,12" VerticalContentAlignment="Top">
+
+                                            <StackPanel Grid.Row="3" Grid.Column="4" Margin="0,0,0,12" VerticalAlignment="Top">
+                                                <RadioButton x:Name="ChkF" Style="{StaticResource FormCheck}" GroupName="Circumstance" VerticalContentAlignment="Top">
                                                     <TextBlock TextWrapping="Wrap">
                                                         <Run Text="F. " FontWeight="Bold"/>
                                                         <Run Text="Pregnant Woman"/>

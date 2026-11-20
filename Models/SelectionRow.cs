@@ -164,7 +164,15 @@ namespace SOLUM_UI.Models
         public string FullAddress => !string.IsNullOrWhiteSpace(Address) ? $"{Address}, {Barangay}" : (!string.IsNullOrWhiteSpace(Barangay) ? Barangay : "—");
         public string EmergencyContactName { get => !string.IsNullOrWhiteSpace(_emergencyContactName) ? _emergencyContactName : "—"; set { if (SetProperty(ref _emergencyContactName, value)) OnPropertyChanged(nameof(EmergencySummary)); } }
         public string EmergencyContactNumber { get => _emergencyContactNumber; set { if (SetProperty(ref _emergencyContactNumber, value)) { OnPropertyChanged(nameof(EmergencyContactFormatted)); OnPropertyChanged(nameof(EmergencySummary)); } } }
-        public string EmergencyContactFormatted => !string.IsNullOrWhiteSpace(EmergencyContactNumber) ? SOLUM_UI.Services.OcrService.FormatPhoneNumber(EmergencyContactNumber) : "—";
+        public string EmergencyContactFormatted
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(EmergencyContactNumber) || EmergencyContactNumber == "—") return "—";
+                string fmt = SOLUM_UI.Services.OcrService.FormatPhoneNumber(EmergencyContactNumber);
+                return !string.IsNullOrWhiteSpace(fmt) ? fmt : EmergencyContactNumber.Trim();
+            }
+        }
         public string EmergencySummary => !string.IsNullOrWhiteSpace(_emergencyContactName) ? (EmergencyContactFormatted != "—" ? $"{_emergencyContactName} ({EmergencyContactFormatted})" : _emergencyContactName) : "—";
         public string Sex { get; set; } = "Female";
         public string CivilStatus { get; set; } = "Single";

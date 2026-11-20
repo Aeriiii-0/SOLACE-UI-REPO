@@ -312,7 +312,7 @@ namespace SOLUM_UI.ViewModels
                     OnPropertyChanged(nameof(CanShowMLTriage));
                     if (value == 0) _ = LoadQueuePageAsync(QueueCurrentPage);
                     else if (value == 1) FilterShortlistRows();
-                    else if (value == 2) UpdateFinalPaged();
+                    else if (value == 2) { UpdateFinalPaged(); EnrichFinalGranteesAsync(); }
 
                 }
 
@@ -590,25 +590,28 @@ namespace SOLUM_UI.ViewModels
 
         public void RecalculateShortlistSelectionCounts() { OnPropertyChanged(nameof(IsAllShortlistSelected)); OnPropertyChanged(nameof(ShortlistSelectedCount)); OnPropertyChanged(nameof(HasShortlistSelection)); OnPropertyChanged(nameof(ShortlistBatchActionLabel)); OnPropertyChanged(nameof(SelectAllShortlistButtonText)); }
 
-                public SubsidyItem ActiveCandidate
+        public SubsidyItem ActiveCandidate
         {
             get => _activeCandidate;
             set
             {
                 if (SetProperty(ref _activeCandidate, value))
                 {
+                    OnPropertyChanged(nameof(SelectedItem));
                     OnPropertyChanged(nameof(CanReassessActiveCandidate));
                     OnPropertyChanged(nameof(ActiveCandidateReassessmentTooltip));
                     if (!CanReassessActiveCandidate)
                     {
                         EnsureCooldownTickerStarted();
-
                     }
-
                 }
-
             }
+        }
 
+        public SubsidyItem SelectedItem
+        {
+            get => _activeCandidate;
+            set => ActiveCandidate = value;
         }
 
         public static TimeSpan ReassessmentCooldown => TimeSpan.FromSeconds(

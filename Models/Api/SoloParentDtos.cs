@@ -20,10 +20,26 @@ namespace SOLUM_UI.Models.Api
 
     public class EmergencyContactInfo
     {
-        public string EmergencyPersonName { get; set; } = string.Empty;
-        public string RelationshipToEmergencyPerson { get; set; } = string.Empty;
-        public string EmergencyPersonContactAddress { get; set; } = string.Empty;
-        public string EmergencyPersonContactNumber { get; set; } = string.Empty;
+        private string _name = string.Empty;
+        public string EmergencyPersonName { get => _name; set => _name = value ?? string.Empty; }
+        public string Name { get => _name; set => _name = value ?? string.Empty; }
+        public string EmergencyContactName { get => _name; set => _name = value ?? string.Empty; }
+
+        private string _relationship = string.Empty;
+        public string RelationshipToEmergencyPerson { get => _relationship; set => _relationship = value ?? string.Empty; }
+        public string RelationshipToClient { get => _relationship; set => _relationship = value ?? string.Empty; }
+        public string Relationship { get => _relationship; set => _relationship = value ?? string.Empty; }
+
+        private string _address = string.Empty;
+        public string EmergencyPersonContactAddress { get => _address; set => _address = value ?? string.Empty; }
+        public string Address { get => _address; set => _address = value ?? string.Empty; }
+        public string EmergencyContactAddress { get => _address; set => _address = value ?? string.Empty; }
+
+        private string _number = string.Empty;
+        public string EmergencyPersonContactNumber { get => _number; set => _number = value ?? string.Empty; }
+        public string ContactNumber { get => _number; set => _number = value ?? string.Empty; }
+        public string EmergencyContactNumber { get => _number; set => _number = value ?? string.Empty; }
+        public string PhoneNumber { get => _number; set => _number = value ?? string.Empty; }
     }
 
     public class EmploymentInfo

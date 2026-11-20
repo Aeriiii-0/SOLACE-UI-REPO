@@ -83,15 +83,29 @@ namespace SOLUM_UI.Services
             ChildrenDetails = d.Children?.Select(c => new ChildDetailItem { Name = c.Name, Age = c.Age }).ToList() ?? new List<ChildDetailItem>()
         };
 
-        public static SelectionRow GranteeToRow(GranteeDto g, int rk) => new SelectionRow
+        public static SelectionRow GranteeToRow(GranteeDto g, int rk)
         {
-            Rank = rk, EvaluationId = g.EvaluationId, CycleId = g.CycleId, SoloParentId = g.SoloParentId,
-            SpId = g.SoloParentId != Guid.Empty ? "SP-" + g.SoloParentId.ToString().Substring(0, 8).ToUpper() : $"SP-{g.FiscalYear}-{rk:D4}",
-            Name = g.FullName, Barangay = g.Barangay, ContactNumber = g.ContactNumber, Priority = NormPrio(g.PredictedPriority), Score = (double)g.PriorityScore,
-            MonthlyIncome = (double)g.MonthlyIncome, IncomePerCapita = CalcCapita((double)g.MonthlyIncome, g.ChildrenTotal, 0),
-            Dependants = g.ChildrenTotal, MinorDependentsCount = g.ChildrenTotal,
-            IsFinalGrantee = true, IsWaitlisted = false
-        };
+            string emergencyName = !string.IsNullOrWhiteSpace(g.EmergencyContactName) ? g.EmergencyContactName :
+                                   (!string.IsNullOrWhiteSpace(g.EmergencyPersonName) ? g.EmergencyPersonName :
+                                   g.EmergencyContact?.EmergencyPersonName);
+
+            string emergencyNumber = !string.IsNullOrWhiteSpace(g.EmergencyContactNumber) ? g.EmergencyContactNumber :
+                                     (!string.IsNullOrWhiteSpace(g.EmergencyPersonContactNumber) ? g.EmergencyPersonContactNumber :
+                                     g.EmergencyContact?.EmergencyPersonContactNumber);
+
+            return new SelectionRow
+            {
+                Rank = rk, EvaluationId = g.EvaluationId, CycleId = g.CycleId, SoloParentId = g.SoloParentId,
+                SpId = g.SoloParentId != Guid.Empty ? "SP-" + g.SoloParentId.ToString().Substring(0, 8).ToUpper() : $"SP-{g.FiscalYear}-{rk:D4}",
+                Name = g.FullName, Barangay = g.Barangay, ContactNumber = g.ContactNumber, Priority = NormPrio(g.PredictedPriority), Score = (double)g.PriorityScore,
+                MonthlyIncome = (double)g.MonthlyIncome, IncomePerCapita = CalcCapita((double)g.MonthlyIncome, g.ChildrenTotal, 0),
+                Dependants = g.ChildrenTotal, MinorDependentsCount = g.ChildrenTotal,
+                Address = g.Address,
+                EmergencyContactName = emergencyName,
+                EmergencyContactNumber = emergencyNumber,
+                IsFinalGrantee = true, IsWaitlisted = false
+            };
+        }
 
         private static readonly HashSet<string> CircumstanceCategories = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -204,8 +218,17 @@ namespace SOLUM_UI.Services
             if (string.IsNullOrEmpty(row.ContactNumber)) row.ContactNumber = dto.ContactDetails?.ApplicantContactNumber;
             if (string.IsNullOrEmpty(row.Address)) row.Address = dto.AddressDetails?.Address;
             if (string.IsNullOrEmpty(row.Barangay) && !string.IsNullOrEmpty(dto.AddressDetails?.Barangay)) row.Barangay = dto.AddressDetails.Barangay;
-            row.EmergencyContactName = dto.EmergencyContact?.EmergencyPersonName;
-            row.EmergencyContactNumber = dto.EmergencyContact?.EmergencyPersonContactNumber;
+            
+            string emName = dto.EmergencyContact?.EmergencyPersonName;
+            if (string.IsNullOrWhiteSpace(emName)) emName = dto.EmergencyContact?.Name;
+            if (string.IsNullOrWhiteSpace(emName)) emName = dto.EmergencyContact?.EmergencyContactName;
+            if (!string.IsNullOrWhiteSpace(emName)) row.EmergencyContactName = emName;
+
+            string emNumber = dto.EmergencyContact?.EmergencyPersonContactNumber;
+            if (string.IsNullOrWhiteSpace(emNumber)) emNumber = dto.EmergencyContact?.ContactNumber;
+            if (string.IsNullOrWhiteSpace(emNumber)) emNumber = dto.EmergencyContact?.EmergencyContactNumber;
+            if (string.IsNullOrWhiteSpace(emNumber)) emNumber = dto.EmergencyContact?.PhoneNumber;
+            if (!string.IsNullOrWhiteSpace(emNumber)) row.EmergencyContactNumber = emNumber;
             if (dto.FamilyMembers != null && dto.FamilyMembers.Count > 0)
             {
                 var children = dto.FamilyMembers

@@ -75,7 +75,6 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="6">
                             <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -98,7 +97,7 @@
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#C0A0AA"/>
             <Setter Property="BorderThickness" Value="1.2"/>
-            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Padding" Value="14,0,32,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -111,7 +110,7 @@
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="6">
-                                <Grid Margin="12,0,32,0">
+                                <Grid Margin="14,0,32,0">
                                     <ContentPresenter x:Name="ContentSite"
                                                       Content="{TemplateBinding SelectionBoxItem}"
                                                       ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"

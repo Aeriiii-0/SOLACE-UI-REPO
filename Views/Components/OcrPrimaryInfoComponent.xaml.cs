@@ -52,7 +52,7 @@ namespace SOLUM_UI.Views.Components
         public string LastName => TxtLastName.Text.Trim();
         public string FirstName => TxtFirstName.Text.Trim();
         public string MiddleName => TxtMiddleName.Text.Trim();
-        public string ExtensionName => TxtExtension.Text.Trim();
+        public string ExtensionName => GetComboValue(CmbExtension) == "N/A" ? string.Empty : GetComboValue(CmbExtension);
         public DateTime? Birthdate => DpBirthdate.SelectedDate;
         public string Age => TxtAge.Text;
         public string PhilSysNumber => TxtPhilSys.Text.Trim();
@@ -147,7 +147,8 @@ namespace SOLUM_UI.Views.Components
                 TxtLastName.Text = OcrService.CleanPersonName(GetVal(resp, "last_name"));
                 TxtFirstName.Text = OcrService.CleanPersonName(GetVal(resp, "first_name"));
                 TxtMiddleName.Text = OcrService.CleanPersonName(GetVal(resp, "middle_name"));
-                TxtExtension.Text = OcrService.FuzzyMatchExtension(GetVal(resp, "ext_name"))?.ToUpperInvariant() ?? string.Empty;
+                string extMatched = OcrService.FuzzyMatchExtension(GetVal(resp, "ext_name"));
+                SetComboByContent(CmbExtension, !string.IsNullOrWhiteSpace(extMatched) ? extMatched : "N/A");
 
                 string dobRaw = GetVal(resp, "birthdate");
                 if (OcrService.TryParseOcrDate(dobRaw, out DateTime parsedDob))
@@ -287,9 +288,9 @@ namespace SOLUM_UI.Views.Components
             MarkBadgeEdited(Badge_MiddleName, TxtConf_MiddleName);
         }
 
-        private void TxtExtension_TextChanged(object sender, TextChangedEventArgs e)
+        private void CmbExtension_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ToUpperBox(TxtExtension);
+            MarkBadgeEdited(Badge_Extension, TxtConf_Extension);
         }
 
         private void TxtPhilSys_TextChanged(object sender, TextChangedEventArgs e)
@@ -465,7 +466,7 @@ namespace SOLUM_UI.Views.Components
                 string fName = TxtFirstName.Text.Trim();
                 string mName = TxtMiddleName.Text.Trim();
                 string lName = TxtLastName.Text.Trim();
-                string ext = TxtExtension.Text.Trim();
+                string ext = ExtensionName;
                 DateTime? bDate = DpBirthdate.SelectedDate;
                 string philsys = TxtPhilSys.Text.Trim();
                 var matches = new List<SoloParentRecord>();
@@ -694,6 +695,31 @@ namespace SOLUM_UI.Views.Components
                     ctrl.BorderThickness = DefaultThickness;
                 }
             }
+        }
+
+        private void SetComboByContent(ComboBox combo, string value)
+        {
+            if (combo == null) return;
+            if (combo == CmbExtension && (string.IsNullOrWhiteSpace(value) || string.Equals(value, "N/A", StringComparison.OrdinalIgnoreCase)))
+            {
+                value = "N/A";
+            }
+            if (string.IsNullOrWhiteSpace(value)) return;
+            string val = value.Trim();
+            foreach (ComboBoxItem item in combo.Items)
+            {
+                if (string.Equals(item.Content?.ToString(), val, StringComparison.OrdinalIgnoreCase))
+                {
+                    combo.SelectedItem = item;
+                    return;
+                }
+            }
+        }
+
+        private string GetComboValue(ComboBox combo)
+        {
+            ComboBoxItem sel = combo?.SelectedItem as ComboBoxItem;
+            return sel?.Content?.ToString() ?? string.Empty;
         }
         #endregion
     }

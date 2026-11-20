@@ -37,12 +37,12 @@
                             <ComboBox x:Name="CmbCivilStatus" Style="{StaticResource FormCombo}"
                                       Tag="civil_status" GotFocus="Field_GotFocus"
                                       SelectionChanged="CmbCivilStatus_SelectionChanged">
-                                <ComboBoxItem Content="SINGLE"/>
-                                <ComboBoxItem Content="MARRIED"/>
-                                <ComboBoxItem Content="WIDOWED"/>
-                                <ComboBoxItem Content="SEPARATED"/>
-                                <ComboBoxItem Content="DIVORCED"/>
-                                <ComboBoxItem Content="ANNULLED"/>
+                                <ComboBoxItem Content="Single"/>
+                                <ComboBoxItem Content="Married"/>
+                                <ComboBoxItem Content="Widowed"/>
+                                <ComboBoxItem Content="Separated"/>
+                                <ComboBoxItem Content="Divorced"/>
+                                <ComboBoxItem Content="Annulled"/>
                             </ComboBox>
                             <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
@@ -60,8 +60,8 @@
                             <ComboBox x:Name="CmbSex" Style="{StaticResource FormCombo}"
                                       Tag="sex" GotFocus="Field_GotFocus"
                                       SelectionChanged="CmbSex_SelectionChanged">
-                                <ComboBoxItem Content="MALE"/>
-                                <ComboBoxItem Content="FEMALE"/>
+                                <ComboBoxItem Content="Male"/>
+                                <ComboBoxItem Content="Female"/>
                             </ComboBox>
                             <TextBlock x:Name="ErrSex" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
@@ -278,7 +278,6 @@
                             <ComboBox x:Name="CmbEmploymentStatus" Style="{StaticResource FormCombo}"
                                       Tag="employment_status" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
                                       SelectionChanged="CmbEmploymentStatus_SelectionChanged">
-                                <ComboBoxItem Content="SELECT STATUS" IsSelected="True" IsEnabled="False"/>
                                 <ComboBoxItem Content="Employed"/>
                                 <ComboBoxItem Content="Self-Employed"/>
                                 <ComboBoxItem Content="Not Employed"/>
@@ -297,9 +296,9 @@
                     <!-- ROW 1: Contact Person | Relationship | Phone -->
                     <Grid Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.4*"/>
+                            <ColumnDefinition Width="1.05*"/>
                             <ColumnDefinition Width="1.5*"/>
-                            <ColumnDefinition Width="1.1*"/>
-                            <ColumnDefinition Width="1.2*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
@@ -307,7 +306,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Emergency Contact Person" Style="{StaticResource FieldLabel}"/>
+                                <TextBlock Style="{StaticResource FieldLabel}">Emergency Contact Person <Run Text="*" Foreground="#E53935"/></TextBlock>
                                 <Border x:Name="Badge_EmergencyContact" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
                                     <TextBlock x:Name="TxtConf_EmergencyContact" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
@@ -317,7 +316,9 @@
                                      CharacterCasing="Upper"
                                      MaxLength="50"
                                      PreviewTextInput="NameOnly_PreviewTextInput"
-                                     TextChanged="TxtEmergencyContact_TextChanged"/>
+                                     TextChanged="TxtEmergencyContact_TextChanged"
+                                     LostFocus="TxtEmergencyContact_LostFocus"/>
+                            <TextBlock x:Name="ErrEmergencyContact" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
@@ -325,16 +326,25 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Relationship" Style="{StaticResource FieldLabel}"/>
+                                <TextBlock Style="{StaticResource FieldLabel}">Relationship <Run Text="*" Foreground="#E53935"/></TextBlock>
                                 <Border x:Name="Badge_Relationship" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
                                     <TextBlock x:Name="TxtConf_Relationship" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
-                            <TextBox x:Name="TxtRelationship" Style="{StaticResource FormBox}"
-                                     Tag="emergency_relationship" GotFocus="Field_GotFocus"
-                                     CharacterCasing="Upper"
-                                     MaxLength="50"
-                                     PreviewTextInput="NameOnly_PreviewTextInput"/>
+                            <ComboBox x:Name="CmbRelationship" Style="{StaticResource FormCombo}"
+                                      Tag="emergency_relationship" GotFocus="Field_GotFocus"
+                                      SelectionChanged="CmbRelationship_SelectionChanged">
+                                <ComboBoxItem Content="Child"/>
+                                <ComboBoxItem Content="Spouse"/>
+                                <ComboBoxItem Content="Parent"/>
+                                <ComboBoxItem Content="Sibling"/>
+                                <ComboBoxItem Content="Grandchild"/>
+                                <ComboBoxItem Content="Grandparent"/>
+                                <ComboBoxItem Content="Relative"/>
+                                <ComboBoxItem Content="Ward"/>
+                                <ComboBoxItem Content="Other"/>
+                            </ComboBox>
+                            <TextBlock x:Name="ErrRelationship" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <Grid Margin="0,0,0,2">
@@ -342,7 +352,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Emergency Phone Number" Style="{StaticResource FieldLabel}"/>
+                                <TextBlock Style="{StaticResource FieldLabel}">Emergency Phone Number <Run Text="*" Foreground="#E53935"/></TextBlock>
                                 <Border x:Name="Badge_EmergencyNumber" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
                                     <TextBlock x:Name="TxtConf_EmergencyNumber" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
@@ -364,7 +374,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Emergency Contact Address" Style="{StaticResource FieldLabel}"/>
+                                <TextBlock Style="{StaticResource FieldLabel}">Emergency Contact Address <Run Text="*" Foreground="#E53935"/></TextBlock>
                                 <Border x:Name="Badge_EmergencyAddress" Grid.Column="1" CornerRadius="3" Padding="4,1" Visibility="Collapsed">
                                     <TextBlock x:Name="TxtConf_EmergencyAddress" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
@@ -374,6 +384,7 @@
                                      CharacterCasing="Upper"
                                      MaxLength="200"
                                      TextChanged="TxtEmergencyAddress_TextChanged"/>
+                            <TextBlock x:Name="ErrEmergencyAddress" Text="Required." Style="{StaticResource ErrorText}"/>
                             <CheckBox x:Name="ChkSameAsApplicant" Content="Same as Applicant"
                                       FontSize="12" Foreground="#666666" Margin="0,6,0,0"
                                       Cursor="Hand"/>

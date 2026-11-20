@@ -36,6 +36,12 @@ namespace SOLUM_UI.Views.Dialogs
             SecondaryInfoSection.FieldFocused += tag => DocumentViewport.FocusOnField(tag);
             FamilyMembersSection.FieldFocused += tag => DocumentViewport.FocusOnField(tag);
             PrimaryInfoSection.DuplicateContinueRequested += () => GoToStep(2);
+            FamilyMembersSection.GetApplicantBirthdate = () => PrimaryInfoSection.Birthdate;
+            FamilyMembersSection.GetApplicantAge = () => int.TryParse(PrimaryInfoSection.Age, out int a) ? a : (int?)null;
+            SecondaryInfoSection.EmergencyContactChanged += () =>
+            {
+                FamilyMembersSection.SyncEmergencyChild(SecondaryInfoSection.EmergencyContactName, SecondaryInfoSection.EmergencyRelationship);
+            };
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -275,6 +281,11 @@ namespace SOLUM_UI.Views.Dialogs
                 GoToStep(2);
                 return;
             }
+            if (string.Equals(SecondaryInfoSection.EmergencyRelationship, "Child", StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrWhiteSpace(SecondaryInfoSection.EmergencyContactName))
+            {
+                FamilyMembersSection.SyncEmergencyChild(SecondaryInfoSection.EmergencyContactName, SecondaryInfoSection.EmergencyRelationship);
+            }
             GoToStep(3);
         }
 
@@ -299,6 +310,11 @@ namespace SOLUM_UI.Views.Dialogs
                     SetValidationMessage(missing);
                     SecondaryInfoSection.FocusFirstInvalidField();
                     return;
+                }
+                if (string.Equals(SecondaryInfoSection.EmergencyRelationship, "Child", StringComparison.OrdinalIgnoreCase) &&
+                    !string.IsNullOrWhiteSpace(SecondaryInfoSection.EmergencyContactName))
+                {
+                    FamilyMembersSection.SyncEmergencyChild(SecondaryInfoSection.EmergencyContactName, SecondaryInfoSection.EmergencyRelationship);
                 }
                 GoToStep(3);
             }

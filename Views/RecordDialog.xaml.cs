@@ -381,6 +381,75 @@ namespace SOLUM_UI
         private readonly ObservableCollection<FamilyMemberRow> _familyRowData = new ObservableCollection<FamilyMemberRow>();
         private readonly List<Guid> _removedFamilyMemberIds = new List<Guid>();
         private FamilyMemberRow _editingFamilyMember = null;
+        private FamilyMemberRow _autoEmergencyChildRow = null;
+
+        private static bool IsChildRelationship(string rel)
+        {
+            if (string.IsNullOrWhiteSpace(rel)) return false;
+            string r = rel.Trim();
+            return string.Equals(r, "Child", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(r, "Son", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(r, "Daughter", StringComparison.OrdinalIgnoreCase)
+                || r.IndexOf("Child", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private void SyncEmergencyChildToFamilyComposition()
+        {
+            if (_isPopulating) return;
+
+            string rel = GetComboValue(CmbRelationship);
+            string contactName = TxtEmergencyContact?.Text?.Trim()?.ToUpper();
+
+            if (string.Equals(rel, "Child", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(contactName))
+                    return;
+
+                if (_autoEmergencyChildRow != null && _familyRowData.Contains(_autoEmergencyChildRow))
+                {
+                    if (_autoEmergencyChildRow.MemberName != contactName)
+                    {
+                        _autoEmergencyChildRow.MemberName = contactName;
+                    }
+                    return;
+                }
+
+                var existing = _familyRowData.FirstOrDefault(m =>
+                    string.Equals(m.MemberName, contactName, StringComparison.OrdinalIgnoreCase));
+                if (existing != null)
+                {
+                    _autoEmergencyChildRow = existing;
+                    return;
+                }
+
+                _autoEmergencyChildRow = new FamilyMemberRow
+                {
+                    MemberName = contactName,
+                    Relationship = "Child",
+                    CivilStatus = "Single",
+                    IsNew = true
+                };
+                _familyRowData.Add(_autoEmergencyChildRow);
+                UpdateFamilyCardsEmptyState();
+                UpdateSaveButtonState();
+                ToastNotification.Show("Family Composition Updated", $"'{contactName}' was automatically added to household members as Child.", ToastType.Info);
+            }
+            else
+            {
+                if (_autoEmergencyChildRow != null && _familyRowData.Contains(_autoEmergencyChildRow))
+                {
+                    if (string.IsNullOrWhiteSpace(_autoEmergencyChildRow.Birthdate) &&
+                        !_autoEmergencyChildRow.BirthdateDate.HasValue &&
+                        string.IsNullOrWhiteSpace(_autoEmergencyChildRow.Sex))
+                    {
+                        _familyRowData.Remove(_autoEmergencyChildRow);
+                        UpdateFamilyCardsEmptyState();
+                        UpdateSaveButtonState();
+                    }
+                    _autoEmergencyChildRow = null;
+                }
+            }
+        }
         private System.Windows.Threading.DispatcherTimer _dirtyCheckTimer = null;
 
         private static readonly SolidColorBrush ErrorBrush   = new SolidColorBrush(Color.FromRgb(0xE5, 0x39, 0x35));
@@ -1199,6 +1268,30 @@ namespace SOLUM_UI
             int age = SOLUM_UI.Services.OcrService.CalculateAge(dob);
             if (age < 0 || age > 120) age = 0;
 
+            // Guard: children cannot be older than or equal to the applicant
+            if (IsChildRelationship(rel))
+            {
+                DateTime? applicantDob = DpBirthdate.SelectedDate ?? (_existing != null && _existing.DateOfBirth != DateTime.MinValue ? (DateTime?)_existing.DateOfBirth : null);
+                int applicantAge = 0;
+                if (!int.TryParse(TxtAge.Text, out applicantAge) && applicantDob.HasValue)
+                {
+                    applicantAge = SOLUM_UI.Services.OcrService.CalculateAge(applicantDob.Value);
+                }
+
+                if (applicantDob.HasValue && dob.Date <= applicantDob.Value.Date)
+                {
+                    ToastNotification.Show("Invalid Child Age", "A child cannot be older than or the same age as the applicant.", ToastType.Warning);
+                    DpMemberDob.Focus();
+                    return;
+                }
+                else if (applicantAge > 0 && age >= applicantAge)
+                {
+                    ToastNotification.Show("Invalid Child Age", $"Child's age ({age}) cannot be older than or equal to the applicant's age ({applicantAge}).", ToastType.Warning);
+                    DpMemberDob.Focus();
+                    return;
+                }
+            }
+
             string civil = (CmbMemberCivil.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (string.IsNullOrWhiteSpace(civil)) civil = "Single";
 
@@ -1259,6 +1352,26 @@ namespace SOLUM_UI
             {
                 int age = SOLUM_UI.Services.OcrService.CalculateAge(DpMemberDob.SelectedDate.Value);
                 TxtMemberAge.Text = (age >= 0 && age <= 120) ? age.ToString() : "0";
+
+                string rel = (CmbMemberRel.SelectedItem as ComboBoxItem)?.Content?.ToString();
+                if (IsChildRelationship(rel))
+                {
+                    DateTime? applicantDob = DpBirthdate.SelectedDate ?? (_existing != null && _existing.DateOfBirth != DateTime.MinValue ? (DateTime?)_existing.DateOfBirth : null);
+                    int applicantAge = 0;
+                    if (!int.TryParse(TxtAge.Text, out applicantAge) && applicantDob.HasValue)
+                    {
+                        applicantAge = SOLUM_UI.Services.OcrService.CalculateAge(applicantDob.Value);
+                    }
+
+                    if (applicantDob.HasValue && DpMemberDob.SelectedDate.Value.Date <= applicantDob.Value.Date)
+                    {
+                        ToastNotification.Show("Invalid Child Age", "A child cannot be older than or the same age as the applicant.", ToastType.Warning);
+                    }
+                    else if (applicantAge > 0 && age >= applicantAge)
+                    {
+                        ToastNotification.Show("Invalid Child Age", $"Child's age ({age}) cannot be older than or equal to the applicant's age ({applicantAge}).", ToastType.Warning);
+                    }
+                }
             }
             else
             {
@@ -1418,7 +1531,12 @@ namespace SOLUM_UI
 
         private void SetComboByContent(ComboBox combo, string value)
         {
-            if (string.IsNullOrWhiteSpace(value) || combo == null) return;
+            if (combo == null) return;
+            if (combo == CmbExtension && string.IsNullOrWhiteSpace(value))
+            {
+                value = "N/A";
+            }
+            if (string.IsNullOrWhiteSpace(value)) return;
             string val = value.Trim();
             foreach (ComboBoxItem item in combo.Items)
             {
@@ -1481,8 +1599,11 @@ namespace SOLUM_UI
 
         private string GetComboValue(ComboBox combo)
         {
-            ComboBoxItem sel = combo.SelectedItem as ComboBoxItem;
-            return sel?.Content?.ToString() ?? string.Empty;
+            ComboBoxItem sel = combo?.SelectedItem as ComboBoxItem;
+            string val = sel?.Content?.ToString() ?? string.Empty;
+            if (combo == CmbExtension && string.Equals(val, "N/A", StringComparison.OrdinalIgnoreCase))
+                return string.Empty;
+            return val;
         }
 
         private void UpdateAge(DateTime? dob)
@@ -1782,8 +1903,30 @@ namespace SOLUM_UI
         }
         private void TxtReligion_TextChanged(object sender, TextChangedEventArgs e)       { ToUpperBox(TxtReligion); }
         private void TxtOccupation_TextChanged(object sender, TextChangedEventArgs e)     { ToUpperBox(TxtOccupation); }
-        private void TxtEmergencyContact_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyContact); }
-        private void TxtEmergencyAddress_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyAddress); }
+        private void TxtEmergencyContact_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ToUpperBox(TxtEmergencyContact);
+            ClearFieldError(TxtEmergencyContact, ErrEmergencyContact);
+            if (!_isPopulating && _autoEmergencyChildRow != null && _familyRowData.Contains(_autoEmergencyChildRow))
+            {
+                string name = TxtEmergencyContact.Text.Trim().ToUpper();
+                if (!string.IsNullOrWhiteSpace(name))
+                    _autoEmergencyChildRow.MemberName = name;
+            }
+        }
+
+        private void TxtEmergencyContact_LostFocus(object sender, RoutedEventArgs e)
+        {
+            SyncEmergencyChildToFamilyComposition();
+        }
+
+        private void TxtEmergencyAddress_TextChanged(object sender, TextChangedEventArgs e) { ToUpperBox(TxtEmergencyAddress); ClearFieldError(TxtEmergencyAddress, ErrEmergencyAddress); }
+
+        private void CmbRelationship_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ClearFieldError(CmbRelationship, ErrRelationship);
+            SyncEmergencyChildToFamilyComposition();
+        }
 
         private void TxtA2Cause_TextChanged(object sender, TextChangedEventArgs e)        { }
         private void TxtA4Disability_TextChanged(object sender, TextChangedEventArgs e)   { }
@@ -1942,6 +2085,8 @@ namespace SOLUM_UI
         {
             bool ok = true;
             var missing = new List<string>();
+
+            SyncEmergencyChildToFamilyComposition();
             if (CmbCivilStatus.SelectedItem == null)
             { MarkError(CmbCivilStatus, ErrCivilStatus, "Required."); missing.Add("Civil Status"); ok = false; }
             if (CmbSex.SelectedItem == null)
@@ -1973,15 +2118,23 @@ namespace SOLUM_UI
             else if (!contactDigits.StartsWith("09"))
             { MarkError(TxtContact, ErrContact, "Must start with 09."); missing.Add("Contact Number (must start with 09)"); ok = false; }
 
-            // Validate emergency contact number if provided
+            // Emergency Contact Validation (Required)
+            if (string.IsNullOrWhiteSpace(TxtEmergencyContact.Text))
+            { MarkError(TxtEmergencyContact, ErrEmergencyContact, "Required."); missing.Add("Emergency Contact Person"); ok = false; }
+
+            if (string.IsNullOrWhiteSpace(GetComboValue(CmbRelationship)))
+            { MarkError(CmbRelationship, ErrRelationship, "Required."); missing.Add("Emergency Contact Relationship"); ok = false; }
+
+            if (string.IsNullOrWhiteSpace(TxtEmergencyAddress.Text))
+            { MarkError(TxtEmergencyAddress, ErrEmergencyAddress, "Required."); missing.Add("Emergency Contact Address"); ok = false; }
+
             string emergencyDigits = Regex.Replace(TxtEmergencyNumber.Text ?? "", @"\D", "");
-            if (!string.IsNullOrWhiteSpace(emergencyDigits))
-            {
-                if (emergencyDigits.Length != 11)
-                { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must be 11 digits."); missing.Add("Emergency Contact Number (11 digits)"); ok = false; }
-                else if (!emergencyDigits.StartsWith("09"))
-                { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must start with 09."); missing.Add("Emergency Contact Number (must start with 09)"); ok = false; }
-            }
+            if (string.IsNullOrWhiteSpace(emergencyDigits))
+            { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Required."); missing.Add("Emergency Contact Number"); ok = false; }
+            else if (emergencyDigits.Length != 11)
+            { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must be 11 digits."); missing.Add("Emergency Contact Number (11 digits)"); ok = false; }
+            else if (!emergencyDigits.StartsWith("09"))
+            { MarkError(TxtEmergencyNumber, ErrEmergencyNumber, "Must start with 09."); missing.Add("Emergency Contact Number (must start with 09)"); ok = false; }
 
             if (!ok)
                 SetValidationMessage(missing);
@@ -2009,6 +2162,27 @@ namespace SOLUM_UI
                 {
                     missing.Add($"Family member #{rowNum} ({row.MemberName}) — missing: {string.Join(", ", rowMissing)}");
                     ok = false;
+                }
+
+                if (IsChildRelationship(row.Relationship))
+                {
+                    DateTime? applicantDob = DpBirthdate.SelectedDate ?? (_existing != null && _existing.DateOfBirth != DateTime.MinValue ? (DateTime?)_existing.DateOfBirth : null);
+                    int applicantAge = 0;
+                    if (!int.TryParse(TxtAge.Text, out applicantAge) && applicantDob.HasValue)
+                    {
+                        applicantAge = SOLUM_UI.Services.OcrService.CalculateAge(applicantDob.Value);
+                    }
+
+                    if (row.BirthdateDate.HasValue && applicantDob.HasValue && row.BirthdateDate.Value.Date <= applicantDob.Value.Date)
+                    {
+                        missing.Add($"Child '{row.MemberName}' cannot be older than or equal to applicant (Child DOB: {row.BirthdateDate.Value:MM/dd/yyyy})");
+                        ok = false;
+                    }
+                    else if (int.TryParse(row.Age, out int childAge) && applicantAge > 0 && childAge >= applicantAge)
+                    {
+                        missing.Add($"Child '{row.MemberName}' (age {childAge}) cannot be older than or equal to applicant (age {applicantAge})");
+                        ok = false;
+                    }
                 }
             }
             if (!ok && missing.Count > 0)

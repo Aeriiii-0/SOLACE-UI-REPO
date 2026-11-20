@@ -202,6 +202,7 @@ namespace SOLUM_UI.ViewModels
             RecalculateSelectionCounts();
             NotifyQuotaMetricsChanged();
             EnrichVisibleCandidatesAsync();
+            EnrichFinalGranteesAsync();
             LastRefreshedText = $"Updated: {DateTime.Now:h:mm tt}";
             RefreshTooltip = $"Refresh subsidy recommendations (Last refreshed: {DateTime.Now:h:mm:ss tt})";
         }
@@ -368,8 +369,50 @@ namespace SOLUM_UI.ViewModels
                                     foreach (var row in PagedShortlistRows.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
                                     foreach (var row in ShortlistRows.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
                                     foreach (var row in FinalGranteesList.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
+                                    foreach (var row in PagedFinalGrantees.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
                                     foreach (var item in PagedRecommendations.Where(x => x.SoloParentId == id)) SubsidyModelMapper.EnrichItemFromRecord(item, resp.Data);
                                     if (ActiveCandidate?.SoloParentId == id) OnPropertyChanged(nameof(ActiveCandidate));
+                                }));
+                            }
+                        }
+                        catch { }
+                        finally { sem.Release(); }
+                    });
+                    await Task.WhenAll(tasks);
+                }
+            });
+        }
+
+        public void EnrichFinalGranteesAsync()
+        {
+            var targets = FinalGranteesList
+                .Where(x => x.SoloParentId != Guid.Empty && (string.IsNullOrWhiteSpace(x.EmergencyContactNumber) || x.EmergencyContactNumber == "—" || string.IsNullOrWhiteSpace(x.Address) || x.Address == "—"))
+                .Select(x => x.SoloParentId)
+                .Concat(PagedFinalGrantees.Where(x => x.SoloParentId != Guid.Empty && (string.IsNullOrWhiteSpace(x.EmergencyContactNumber) || x.EmergencyContactNumber == "—")).Select(x => x.SoloParentId))
+                .Distinct()
+                .ToList();
+            if (targets.Count == 0) return;
+
+            Task.Run(async () =>
+            {
+                using (var sem = new System.Threading.SemaphoreSlim(4))
+                {
+                    var tasks = targets.Select(async id =>
+                    {
+                        await sem.WaitAsync();
+                        try
+                        {
+                            var resp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(id);
+                            if (resp?.Data != null)
+                            {
+                                Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
+                                {
+                                    foreach (var row in FinalGranteesList.Where(x => x.SoloParentId == id))
+                                        SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
+                                    foreach (var row in PagedFinalGrantees.Where(x => x.SoloParentId == id))
+                                        SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
+                                    foreach (var row in ShortlistRows.Where(x => x.SoloParentId == id))
+                                        SubsidyModelMapper.EnrichRowFromRecord(row, resp.Data);
                                 }));
                             }
                         }

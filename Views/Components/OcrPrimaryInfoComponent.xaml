@@ -41,7 +41,7 @@
                             <ColumnDefinition Width="1.4*"/>
                             <ColumnDefinition Width="1.4*"/>
                             <ColumnDefinition Width="1.1*"/>
-                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="85"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,8,0">
                             <Grid Margin="0,0,0,2">
@@ -110,12 +110,18 @@
                                     <TextBlock x:Name="TxtConf_Extension" Text="—" FontSize="9" FontWeight="Bold"/>
                                 </Border>
                             </Grid>
-                            <TextBox x:Name="TxtExtension" Style="{StaticResource FormBox}"
-                                     Tag="ext_name" GotFocus="Field_GotFocus"
-                                     CharacterCasing="Upper"
-                                     MaxLength="10"
-                                     PreviewTextInput="NameOnly_PreviewTextInput"
-                                     TextChanged="TxtExtension_TextChanged"/>
+                            <ComboBox x:Name="CmbExtension" Style="{StaticResource FormCombo}"
+                                      Tag="ext_name" GotFocus="Field_GotFocus"
+                                      SelectionChanged="CmbExtension_SelectionChanged">
+                                <ComboBoxItem Content="N/A" IsSelected="True"/>
+                                <ComboBoxItem Content="Jr."/>
+                                <ComboBoxItem Content="Sr."/>
+                                <ComboBoxItem Content="II"/>
+                                <ComboBoxItem Content="III"/>
+                                <ComboBoxItem Content="IV"/>
+                                <ComboBoxItem Content="V"/>
+                                <ComboBoxItem Content="VI"/>
+                            </ComboBox>
                         </StackPanel>
                     </Grid>
                     <!-- ROW 2: Birthdate | Age | PhilSys Card Number -->

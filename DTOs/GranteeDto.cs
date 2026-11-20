@@ -15,6 +15,12 @@ namespace SOLUM_UI.DTOs
         public string FullName { get; set; } = string.Empty;
         public string Barangay { get; set; } = string.Empty;
         public string ContactNumber { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string EmergencyContactName { get; set; } = string.Empty;
+        public string EmergencyContactNumber { get; set; } = string.Empty;
+        public string EmergencyPersonName { get; set; } = string.Empty;
+        public string EmergencyPersonContactNumber { get; set; } = string.Empty;
+        public SOLUM_UI.Models.Api.EmergencyContactInfo EmergencyContact { get; set; }
 
         public decimal GranteeAmount { get; set; }
         public decimal PriorityScore { get; set; }

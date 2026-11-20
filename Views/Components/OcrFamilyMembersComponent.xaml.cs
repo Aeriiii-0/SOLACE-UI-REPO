@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -44,6 +45,68 @@ namespace SOLUM_UI.Views.Components
         }
 
         public ObservableCollection<FamilyMemberRow> FamilyRowData => _familyRowData;
+        public Func<DateTime?> GetApplicantBirthdate { get; set; }
+        public Func<int?> GetApplicantAge { get; set; }
+
+        private FamilyMemberRow _autoEmergencyChildRow;
+
+        public void SyncEmergencyChild(string contactName, string rel)
+        {
+            if (string.Equals(rel, "Child", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(contactName))
+                    return;
+
+                contactName = contactName.Trim().ToUpperInvariant();
+
+                if (_autoEmergencyChildRow != null && _familyRowData.Contains(_autoEmergencyChildRow))
+                {
+                    if (_autoEmergencyChildRow.MemberName != contactName)
+                    {
+                        _autoEmergencyChildRow.MemberName = contactName;
+                    }
+                    return;
+                }
+
+                var existing = _familyRowData.FirstOrDefault(m =>
+                    string.Equals(m.MemberName, contactName, StringComparison.OrdinalIgnoreCase));
+                if (existing != null)
+                {
+                    _autoEmergencyChildRow = existing;
+                    return;
+                }
+
+                _autoEmergencyChildRow = new FamilyMemberRow
+                {
+                    MemberName = contactName,
+                    Relationship = "Child",
+                    CivilStatus = "Single",
+                    IsNew = true
+                };
+                _familyRowData.Add(_autoEmergencyChildRow);
+                UpdateFamilyCardsEmptyState();
+                ToastNotification.Show("Family Composition Updated", $"'{contactName}' was automatically added to household members as Child.", ToastType.Info);
+            }
+            else
+            {
+                if (_autoEmergencyChildRow != null && _familyRowData.Contains(_autoEmergencyChildRow))
+                {
+                    if (string.IsNullOrWhiteSpace(_autoEmergencyChildRow.Birthdate) &&
+                        !_autoEmergencyChildRow.BirthdateDate.HasValue &&
+                        string.IsNullOrWhiteSpace(_autoEmergencyChildRow.Sex))
+                    {
+                        _familyRowData.Remove(_autoEmergencyChildRow);
+                        UpdateFamilyCardsEmptyState();
+                    }
+                    _autoEmergencyChildRow = null;
+                }
+            }
+        }
+
+        public void EnsureChildMember(string childName)
+        {
+            SyncEmergencyChild(childName, "Child");
+        }
 
         public bool CircumstanceA1 => ChkA1.IsChecked == true && ChkA1.IsEnabled;
         public bool CircumstanceA2 => ChkA2.IsChecked == true && ChkA2.IsEnabled;
@@ -549,6 +612,29 @@ namespace SOLUM_UI.Views.Components
                 return;
             }
 
+            // Guard: children cannot be older than or equal to the applicant
+            if (string.Equals(rel, "Child", StringComparison.OrdinalIgnoreCase) ||
+                (rel != null && (rel.IndexOf("Child", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 rel.IndexOf("Son", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 rel.IndexOf("Daughter", StringComparison.OrdinalIgnoreCase) >= 0)))
+            {
+                DateTime? applicantDob = GetApplicantBirthdate?.Invoke();
+                int? applicantAge = GetApplicantAge?.Invoke();
+
+                if (applicantDob.HasValue && dob.Date <= applicantDob.Value.Date)
+                {
+                    ActionConfirmDialog.Warning("Validation", "A child cannot be older than or the same age as the applicant.", window);
+                    DpMemberDob.Focus();
+                    return;
+                }
+                else if (applicantAge.HasValue && applicantAge.Value > 0 && age >= applicantAge.Value)
+                {
+                    ActionConfirmDialog.Warning("Validation", $"Child's age ({age}) cannot be older than or equal to the applicant's age ({applicantAge.Value}).", window);
+                    DpMemberDob.Focus();
+                    return;
+                }
+            }
+
             string civil = (CmbMemberCivil.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (string.IsNullOrWhiteSpace(civil)) civil = "Single";
 
@@ -609,6 +695,25 @@ namespace SOLUM_UI.Views.Components
             {
                 int age = OcrService.CalculateAge(DpMemberDob.SelectedDate.Value);
                 TxtMemberAge.Text = (age >= 0 && age <= 120) ? age.ToString() : "0";
+
+                string rel = (CmbMemberRel.SelectedItem as ComboBoxItem)?.Content?.ToString();
+                if (string.Equals(rel, "Child", StringComparison.OrdinalIgnoreCase) ||
+                    (rel != null && (rel.IndexOf("Child", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     rel.IndexOf("Son", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     rel.IndexOf("Daughter", StringComparison.OrdinalIgnoreCase) >= 0)))
+                {
+                    DateTime? applicantDob = GetApplicantBirthdate?.Invoke();
+                    int? applicantAge = GetApplicantAge?.Invoke();
+
+                    if (applicantDob.HasValue && DpMemberDob.SelectedDate.Value.Date <= applicantDob.Value.Date)
+                    {
+                        ToastNotification.Show("Invalid Child Age", "A child cannot be older than or the same age as the applicant.", ToastType.Warning);
+                    }
+                    else if (applicantAge.HasValue && applicantAge.Value > 0 && age >= applicantAge.Value)
+                    {
+                        ToastNotification.Show("Invalid Child Age", $"Child's age ({age}) cannot be older than or equal to the applicant's age ({applicantAge.Value}).", ToastType.Warning);
+                    }
+                }
             }
             else
             {
@@ -785,6 +890,27 @@ namespace SOLUM_UI.Views.Components
                 {
                     missing.Add($"Family member #{rowNum} ({row.MemberName}) — missing: {string.Join(", ", rowMissing)}");
                     ok = false;
+                }
+
+                // Guard: children cannot be older than applicant
+                if (string.Equals(row.Relationship, "Child", StringComparison.OrdinalIgnoreCase) ||
+                    (row.Relationship != null && (row.Relationship.IndexOf("Child", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     row.Relationship.IndexOf("Son", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     row.Relationship.IndexOf("Daughter", StringComparison.OrdinalIgnoreCase) >= 0)))
+                {
+                    DateTime? applicantDob = GetApplicantBirthdate?.Invoke();
+                    int? applicantAge = GetApplicantAge?.Invoke();
+
+                    if (row.BirthdateDate.HasValue && applicantDob.HasValue && row.BirthdateDate.Value.Date <= applicantDob.Value.Date)
+                    {
+                        missing.Add($"Child '{row.MemberName}' cannot be older than or equal to applicant (Child DOB: {row.BirthdateDate.Value:MM/dd/yyyy})");
+                        ok = false;
+                    }
+                    else if (int.TryParse(row.Age, out int childAge) && applicantAge.HasValue && applicantAge.Value > 0 && childAge >= applicantAge.Value)
+                    {
+                        missing.Add($"Child '{row.MemberName}' (age {childAge}) cannot be older than or equal to applicant (age {applicantAge.Value})");
+                        ok = false;
+                    }
                 }
             }
             return ok;
