@@ -37,25 +37,26 @@ namespace SOLUM_UI.Services
             item.Confidence = d.Confidence;
             item.MonthlyIncome = d.MonthlyIncome;
             item.IncomePerCapita = CalcCapita(d.MonthlyIncome, d.Dependants, d.IncomePerCapita);
-            item.EmploymentStatus = d.EmploymentStatus;
+            if (!string.IsNullOrWhiteSpace(d.EmploymentStatus)) item.EmploymentStatus = d.EmploymentStatus;
             item.Dependants = d.Dependants;
             item.MinorDependentsCount = d.MinorDependentsCount;
             item.ToddlersUnder5Count = d.ToddlersUnder5Count;
             item.CollegeAgeDependentsCount = d.CollegeAgeDependentsCount;
-            item.Circumstance = !string.IsNullOrEmpty(d.Circumstance) ? d.Circumstance : d.ProblemPresented;
-            item.ProblemPresented = d.ProblemPresented;
+            string newCirc = !string.IsNullOrEmpty(d.Circumstance) ? d.Circumstance : d.ProblemPresented;
+            if (!string.IsNullOrWhiteSpace(newCirc)) item.Circumstance = newCirc;
+            if (!string.IsNullOrWhiteSpace(d.ProblemPresented)) item.ProblemPresented = d.ProblemPresented;
             item.HasSpecialNeedsDependent = d.HasSpecialNeedsDependent;
             item.SpecialNeedsDependentsCount = d.SpecialNeedsDependentsCount;
-            item.CivilStatus = d.CivilStatus;
-            item.Sex = d.Sex;
-            item.OtherIncomeSource = d.OtherIncomeSource;
-            item.NeedsAndProblems = d.NeedsAndProblems;
+            if (!string.IsNullOrWhiteSpace(d.CivilStatus)) item.CivilStatus = d.CivilStatus;
+            if (!string.IsNullOrWhiteSpace(d.Sex)) item.Sex = d.Sex;
+            if (!string.IsNullOrWhiteSpace(d.OtherIncomeSource)) item.OtherIncomeSource = d.OtherIncomeSource;
+            if (!string.IsNullOrWhiteSpace(d.NeedsAndProblems)) item.NeedsAndProblems = d.NeedsAndProblems;
             item.EconomicStrainScore = d.EconomicStrainScore;
             item.DependencyBurdenScore = d.DependencyBurdenScore;
             item.CareBurdenScore = d.CareBurdenScore;
             item.ResourceAdequacyScore = d.ResourceAdequacyScore;
             item.IsPantawidBeneficiary = d.IsPantawidBeneficiary;
-            item.ModelVersion = d.ModelVersion;
+            if (!string.IsNullOrWhiteSpace(d.ModelVersion)) item.ModelVersion = d.ModelVersion;
             item.Children0To6Count = d.Children0To6;
             item.Children7To22Count = d.Children7To22;
             if (d.Children != null && d.Children.Count > 0)
@@ -182,7 +183,16 @@ namespace SOLUM_UI.Services
             {
                 var children = dto.FamilyMembers
                     .Where(f => !f.IsDeleted && (string.IsNullOrEmpty(f.Relationship) || f.Relationship.IndexOf("child", StringComparison.OrdinalIgnoreCase) >= 0 || f.Age <= 24))
-                    .Select(f => new ChildDetailItem { Name = f.Name, Age = f.Age, EducationalLevel = f.EducationalLevel ?? string.Empty }).ToList();
+                    .Select(f => new ChildDetailItem
+                    {
+                        Name = f.Name,
+                        Age = f.Age,
+                        Birthdate = f.Birthdate,
+                        Relationship = !string.IsNullOrWhiteSpace(f.Relationship) ? f.Relationship.Trim() : "Child",
+                        EducationalLevel = f.EducationalLevel ?? string.Empty,
+                        HasSpecialNeeds = f.HasSpecialNeeds,
+                        SpecialNeedsCategory = f.SpecialNeedsCategory ?? string.Empty
+                    }).ToList();
                 if (children.Count > 0)
                 {
                     item.ChildrenDetails = children;
@@ -191,6 +201,12 @@ namespace SOLUM_UI.Services
                     item.CollegeAgeDependentsCount = children.Count(c => c.Age >= 17 && c.Age <= 24);
                     item.Dependants = children.Count;
                     item.MinorDependentsCount = item.Children0To6Count + item.Children7To22Count;
+                    int snCount = children.Count(c => c.HasSpecialNeeds);
+                    if (snCount > 0)
+                    {
+                        item.HasSpecialNeedsDependent = true;
+                        item.SpecialNeedsDependentsCount = snCount;
+                    }
                 }
             }
             if (!string.IsNullOrWhiteSpace(dto.Employment?.EmploymentStatus) && string.IsNullOrWhiteSpace(item.EmploymentStatus))
@@ -215,6 +231,10 @@ namespace SOLUM_UI.Services
             }
             if (dto.PersonalInfo?.Birthdate != null && dto.PersonalInfo.Birthdate != DateTime.MinValue)
                 row.DateOfBirthFormatted = dto.PersonalInfo.Birthdate.ToString("yyyy-MM-dd");
+            if (!string.IsNullOrWhiteSpace(dto.PersonalInfo?.PhilsysCardNumber))
+                row.PhilSysCardNumber = dto.PersonalInfo.PhilsysCardNumber.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.PersonalInfo?.Sex))
+                row.Sex = dto.PersonalInfo.Sex.Trim();
             if (string.IsNullOrEmpty(row.ContactNumber)) row.ContactNumber = dto.ContactDetails?.ApplicantContactNumber;
             if (string.IsNullOrEmpty(row.Address)) row.Address = dto.AddressDetails?.Address;
             if (string.IsNullOrEmpty(row.Barangay) && !string.IsNullOrEmpty(dto.AddressDetails?.Barangay)) row.Barangay = dto.AddressDetails.Barangay;
@@ -233,7 +253,16 @@ namespace SOLUM_UI.Services
             {
                 var children = dto.FamilyMembers
                     .Where(f => !f.IsDeleted && (string.IsNullOrEmpty(f.Relationship) || f.Relationship.IndexOf("child", StringComparison.OrdinalIgnoreCase) >= 0 || f.Age <= 24))
-                    .Select(f => new ChildDetailItem { Name = f.Name, Age = f.Age, EducationalLevel = f.EducationalLevel ?? string.Empty }).ToList();
+                    .Select(f => new ChildDetailItem
+                    {
+                        Name = f.Name,
+                        Age = f.Age,
+                        Birthdate = f.Birthdate,
+                        Relationship = !string.IsNullOrWhiteSpace(f.Relationship) ? f.Relationship.Trim() : "Child",
+                        EducationalLevel = f.EducationalLevel ?? string.Empty,
+                        HasSpecialNeeds = f.HasSpecialNeeds,
+                        SpecialNeedsCategory = f.SpecialNeedsCategory ?? string.Empty
+                    }).ToList();
                 if (children.Count > 0)
                 {
                     row.ChildrenDetails = children;
@@ -241,6 +270,12 @@ namespace SOLUM_UI.Services
                     row.Children7To22Count = children.Count(c => c.Age >= 7 && c.Age <= 22);
                     row.Dependants = children.Count;
                     row.MinorDependentsCount = row.Children0To6Count + row.Children7To22Count;
+                    int snCount = children.Count(c => c.HasSpecialNeeds);
+                    if (snCount > 0)
+                    {
+                        row.HasSpecialNeedsDependent = true;
+                        row.SpecialNeedsDependentsCount = snCount;
+                    }
                     var college = children.Where(c => c.Age >= 17 && c.Age <= 24).ToList();
                     if (college.Count > 0) { row.CollegeAgeDependents = college; row.CollegeAgeDependentsCount = college.Count; row.HasCollegeAgeDependent = true; }
                 }

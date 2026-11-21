@@ -214,22 +214,35 @@ namespace SOLUM_UI
             ChartTip.Visibility = Visibility.Visible;
             ChartTip.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
-            double tw = ChartTip.DesiredSize.Width, th = ChartTip.DesiredSize.Height;
-            double cw = ChartCanvas.ActualWidth, ch = ChartCanvas.ActualHeight;
-            double left, top;
-            if (placeLeft)
+            double tw = ChartTip.DesiredSize.Width > 0 ? ChartTip.DesiredSize.Width : 160;
+            double th = ChartTip.DesiredSize.Height > 0 ? ChartTip.DesiredSize.Height : 110;
+            double cw = ChartCanvas.ActualWidth > 0 ? ChartCanvas.ActualWidth : 400;
+            double ch = ChartCanvas.ActualHeight > 0 ? ChartCanvas.ActualHeight : 230;
+
+            double left;
+            if (placeLeft || (p.X + tw / 2 > cw - 20))
             {
-                left = p.X - tw - 22;
-                if (left < 0) left = p.X + 22;
-                top = Math.Max(0, Math.Min(ch - th, p.Y - th / 2));
+                left = p.X - tw - 16;
+                if (left < 8) left = p.X + 16;
             }
             else
             {
-                left = Math.Max(0, Math.Min(cw - tw, p.X - tw / 2));
-                top = p.Y - th - 18;
-                if (top < 0) top = p.Y + 18;
+                left = p.X - tw / 2;
+                if (left < 8) left = 8;
+                if (left + tw > cw - 8) left = Math.Max(8, cw - tw - 8);
             }
-            ChartTip.Margin = new Thickness(left, top, 0, 0);
+
+            double top = p.Y - th - 14;
+            if (top < 8)
+            {
+                top = p.Y + 14;
+            }
+            if (top + th > ch - 6)
+            {
+                top = Math.Max(6, ch - th - 6);
+            }
+
+            ChartTip.Margin = new Thickness(Math.Max(6, left), Math.Max(6, top), 0, 0);
         }
 
         private void HideChartTip()

@@ -896,10 +896,12 @@ namespace SOLUM_UI.Services.Api
 
         private AddressInfo MapAddressInfo(SoloParentRecord r)
         {
+            string rawBrgy = !string.IsNullOrWhiteSpace(r.Barangay) ? r.Barangay.Trim() : "Biñan (Poblacion)";
+            string canonicalBrgy = OcrService.BinanBarangays.FirstOrDefault(b => b.Equals(rawBrgy, StringComparison.OrdinalIgnoreCase)) ?? rawBrgy;
             return new AddressInfo
             {
                 Address = !string.IsNullOrWhiteSpace(r.Address) ? r.Address.Trim() : "Biñan",
-                Barangay = !string.IsNullOrWhiteSpace(r.Barangay) ? r.Barangay.Trim() : "Biñan Poblacion"
+                Barangay = canonicalBrgy
 
             };
 

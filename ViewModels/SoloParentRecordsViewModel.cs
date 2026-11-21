@@ -363,7 +363,9 @@ namespace SOLUM_UI.ViewModels
                 {
                     string err = resp.Errors != null && resp.Errors.Count > 0
                         ? resp.Errors[0] : "Unable to load records from backend.";
-                    ToastNotification.Show("API Notice", err, ToastType.Warning);
+                    string title = ApiClient.IsNetworkOrConnectionError(err) ? "No Internet Connection" : "Unable to Load Records";
+                    string friendlyErr = ApiClient.HumanizeErrorMessage(err);
+                    ToastNotification.Show(title, friendlyErr, ToastType.Warning);
                     _allRecords = new List<SoloParentRecordViewModel>();
                     App.Current.Dispatcher.Invoke(() => { Records.Clear(); HasNoResults = Visibility.Visible; });
                     TotalPages = 1;

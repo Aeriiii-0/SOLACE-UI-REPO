@@ -265,6 +265,11 @@
                                       Margin="60,40,60,40"
                                       CloseRequested="MyActivityOverlay_CloseRequested"/>
         </Grid>
+        <!-- Full-window overlay host for in-app modals -->
+        <Grid x:Name="GlobalModalHost" Visibility="Collapsed" Panel.ZIndex="998">
+            <Rectangle Fill="{StaticResource ModalOverlayBrush}" MouseLeftButtonDown="GlobalModalBackdrop_MouseLeftButtonDown"/>
+            <ContentPresenter x:Name="GlobalModalContent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        </Grid>
         <!-- DEPRECATED: LogoutOverlay replaced with ActionConfirmDialog in HandleLogout() -->
         <Grid x:Name="LogoutOverlay" Visibility="Collapsed" Panel.ZIndex="50">
             <Rectangle Fill="{StaticResource ModalOverlayBrush}"/>

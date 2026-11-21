@@ -104,10 +104,6 @@ namespace SOLUM_UI.Services.Api
             {
                 queryParams.Add($"barangay={Uri.EscapeDataString(barangay.Trim())}");
             }
-            else if (!string.IsNullOrWhiteSpace(barangay))
-            {
-                queryParams.Add("barangay=ALL");
-            }
 
             string url = "api/analytics/barangay-breakdown" + (queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "");
             return await ApiClient.Instance.GetAsync<BarangayAnalyticsResponseDto>(url);

@@ -115,22 +115,22 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <!-- Search Bar -->
-                <Border Grid.Column="0" Background="White" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1" Height="30" Margin="0,0,14,0" VerticalAlignment="Center">
+                <Border Grid.Column="0" Background="White" CornerRadius="20" BorderBrush="#D4B6C2" BorderThickness="1.2" Height="34" Margin="0,0,10,0" VerticalAlignment="Center">
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                        <Path Grid.Column="0" Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.29,20.42L13.03,15.15C11.9,16 10.46,16.5 9.5,16.5A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" Fill="#A06080" Stretch="Uniform" Width="12" Height="12" Margin="8,0,5,0" VerticalAlignment="Center"/>
-                        <TextBox Grid.Column="1" Text="{Binding ShortlistSearchText, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" BorderThickness="0" Background="Transparent" FontSize="11" Foreground="#1F2937" Padding="0,0,6,0" ToolTip="Search shortlist by name, 4Ps, or college-age keywords"/>
+                        <Path Grid.Column="0" Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.29,20.42L13.03,15.15C11.9,16 10.46,16.5 9.5,16.5A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" Fill="#A06080" Stretch="Uniform" Width="13" Height="13" Margin="12,0,5,0" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" Text="{Binding ShortlistSearchText, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" BorderThickness="0" Background="Transparent" FontFamily="Segoe UI" FontSize="12.5" Foreground="#333333" Padding="4,0,8,0" ToolTip="Search shortlist by name, 4Ps, or college-age keywords"/>
                     </Grid>
                 </Border>
                 <!-- Right: Filters, Status & Export -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <!-- Filter Dropdown -->
                     <Grid Margin="0,0,8,0" VerticalAlignment="Center">
-                        <Button x:Name="FilterDropBtn" Height="30" Padding="10,0" Cursor="Hand" Click="FilterDropBtn_Click">
-                            <Button.Template><ControlTemplate TargetType="Button"><Border Background="White" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
+                        <Button x:Name="FilterDropBtn" Height="34" Padding="12,0" Cursor="Hand" Click="FilterDropBtn_Click">
+                            <Button.Template><ControlTemplate TargetType="Button"><Border Background="White" BorderBrush="#5C1D38" BorderThickness="1.2" CornerRadius="16" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="#5C1D38" Stretch="Uniform" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                <TextBlock Text="{Binding ShortlistAuditFilterLabel}" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                <TextBlock Text="{Binding ShortlistAuditFilterLabel}" FontSize="11.5" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Popup x:Name="FilterPopup" PlacementTarget="{Binding ElementName=FilterDropBtn}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
@@ -183,14 +183,14 @@
                             </Border>
                         </Popup>
                     </Grid>
-                    <!-- Export Dropdown (Clean White & Maroon Border to match Export Queue) -->
+                    <!-- Export Dropdown -->
                     <Grid>
-                        <Border Background="#FFFFFF" CornerRadius="8" BorderBrush="#5C1D38" BorderThickness="1">
-                            <Button x:Name="ExportDropBtn" Background="Transparent" BorderThickness="0" Height="30" Padding="12,0" Cursor="Hand" Click="ExportDropBtn_Click">
+                        <Border Background="#FFFFFF" CornerRadius="16" BorderBrush="#5C1D38" BorderThickness="1.2">
+                            <Button x:Name="ExportDropBtn" Background="Transparent" BorderThickness="0" Height="34" Padding="14,0" Cursor="Hand" Click="ExportDropBtn_Click">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
-                                        <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                                            <TextBlock Text="Export Rosters ▾" FontSize="11" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                        <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="16" Padding="{TemplateBinding Padding}">
+                                            <TextBlock Text="Export Rosters ▾" FontSize="11.5" FontWeight="SemiBold" Foreground="#5C1D38" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="BtnBorder" Property="Background" Value="#FDF2F4"/></Trigger>
@@ -275,9 +275,6 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn x:Name="ColCrossCheck" Header="COMPLIANCE FLAGS" Width="135">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColCrossCheck}" Margin="-6,0,-6,0" BorderThickness="0" Padding="8,10"><TextBlock Text="{Binding CrossCheckText}" FontSize="11" FontWeight="SemiBold" Foreground="#1A1A1A" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></Border></DataTemplate></GridViewColumn.CellTemplate>
-                            </GridViewColumn>
                             <!-- Col Dependents (Dedicated count column) -->
                             <GridViewColumn x:Name="ColDependents" Header="DEPENDENTS" Width="95">
                                 <GridViewColumn.CellTemplate>
@@ -288,12 +285,12 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <!-- Col Compliance: Specific flags only, otherwise empty/dash -->
-                            <GridViewColumn x:Name="ColCompliance" Header="AUDIT &amp; COMPLIANCE DETAIL" Width="230">
+                            <!-- Col Compliance: Unified Audit & Compliance Flags -->
+                            <GridViewColumn x:Name="ColCompliance" Header="AUDIT &amp; COMPLIANCE FLAGS" Width="280">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Width="{Binding ActualWidth, ElementName=ColCompliance}" Margin="-6,0,-6,0" BorderThickness="0" Padding="10,8">
-                                            <TextBlock Text="{Binding AuditFlagsSummary}" FontSize="10.5" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding AuditFlagsSummary}"/>
+                                        <Border Width="{Binding ActualWidth, ElementName=ColCompliance}" Margin="-6,0,-6,0" BorderThickness="0" Padding="8,10">
+                                            <TextBlock Text="{Binding AuditFlagsSummary}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding AuditFlagsFg}" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding AuditFlagsSummary}"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>

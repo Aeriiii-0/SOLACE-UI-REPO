@@ -80,13 +80,17 @@ namespace SOLUM_UI.ViewModels
             IsRosterLocked = cycle.IsFinalized || string.Equals(cycle.Status, "Finalized", StringComparison.OrdinalIgnoreCase) || !cycle.IsActive;
             GranteeSlots = cycle.AllocatedSlots > 0 ? cycle.AllocatedSlots : 100;
             GrantAmountPerRecipient = cycle.PerGranteeAmount > 0 ? (int)cycle.PerGranteeAmount : DefaultGrantAmount;
+            if (!IsActiveCycle && ActiveTabIndex != 2)
+            {
+                ActiveTabIndex = 2;
+            }
             // Fetch Grantees for this specific cycle and semester
             var granteesTask = _apiService.GetGranteesAsync(cycle.FiscalYear, cycle.CycleNumber, cycle.CycleId);
-            // Only fetch Shortlist, Queue, and Rejections if cycle is NOT locked
+            // Fetch Shortlist, Queue, and Rejections for this cycle
             Task<BaseResponse<List<SubsidyRecommendationDto>>> shortlistTask;
             Task<BaseResponse<PagedResult<SubsidyRecommendationDto>>> recsTask;
             Task<BaseResponse<List<SubsidyRecommendationDto>>> rejTask;
-            if (!IsRosterLocked && cycle.CycleId.HasValue)
+            if (cycle.CycleId.HasValue)
             {
                 shortlistTask = _apiService.GetShortlistAsync(cycle.CycleId);
                 recsTask = _apiService.GetRecommendationsPagedAsync(new SOLUM_UI.DTOs.GetSubsidyRecommendationsRequest
@@ -133,6 +137,7 @@ namespace SOLUM_UI.ViewModels
                     });
                 }
             }
+            _totalDisqualifiedCount = DisqualifiedCandidates.Count;
             FilterDisqualifiedCandidates();
             NotifyDisqualifiedMetricsChanged();
             FinalGranteesList.Clear();
@@ -232,30 +237,93 @@ namespace SOLUM_UI.ViewModels
             }
             if (dlgResult == true && dlg.ResultRequest != null)
             {
+                // 1. Immediately switch tab to Recommendations Queue (Tab 0) and close detail drawer
+                ActiveTabIndex = 0;
+                IsDrawerOpen = false;
+
+                // 2. Clear out previous cycle data so stale items do not linger under skeleton loader
+                _allItems.Clear();
+                FilteredRecommendations.Clear();
+                PagedRecommendations.Clear();
+                ShortlistRows.Clear();
+                PagedShortlistRows.Clear();
+                FinalGranteesList.Clear();
+                PagedFinalGrantees.Clear();
+                DisqualifiedCandidates.Clear();
+                _totalDisqualifiedCount = 0;
+                SelectedQueueItems.Clear();
+
+                // 3. Immediately reflect the new cycle in the UI state & metrics
+                _activeCycleFiscalYear = dlg.ResultRequest.FiscalYear;
+                GranteeSlots = dlg.ResultRequest.AllocatedSlots.HasValue && dlg.ResultRequest.AllocatedSlots.Value > 0 ? dlg.ResultRequest.AllocatedSlots.Value : 100;
+                GrantAmountPerRecipient = dlg.ResultRequest.PerGranteeAmount > 0 ? (int)dlg.ResultRequest.PerGranteeAmount : DefaultGrantAmount;
+                IsRosterLocked = false;
+
+                // Create an optimistic FiscalCycleOption so the dropdown & header update instantly
+                var optimisticCycle = new FiscalCycleOption
+                {
+                    CycleId = Guid.Empty,
+                    FiscalYear = dlg.ResultRequest.FiscalYear,
+                    CycleNumber = dlg.ResultRequest.CycleNumber ?? 1,
+                    Name = dlg.ResultRequest.Name,
+                    Status = "Active",
+                    AllocatedSlots = GranteeSlots,
+                    TotalBudget = dlg.ResultRequest.TotalBudget,
+                    PerGranteeAmount = GrantAmountPerRecipient
+                };
+
+                AvailableFiscalCycles.Insert(0, optimisticCycle);
+                _selectedFiscalCycle = optimisticCycle;
+                OnPropertyChanged(nameof(SelectedFiscalCycle));
+                NotifyCycleProperties();
+                NotifyQuotaMetricsChanged();
+                OnPropertyChanged(nameof(ActiveCycleFiscalYear));
+                OnPropertyChanged(nameof(ActiveCycleHeaderBadgeText));
+                OnPropertyChanged(nameof(GranteeSlots));
+                OnPropertyChanged(nameof(RemainingSlots));
+                OnPropertyChanged(nameof(ConfirmedGranteesCount));
+                OnPropertyChanged(nameof(DisqualifiedCount));
+                OnPropertyChanged(nameof(QuotaProgressText));
+
+                // 4. Show initial progress toast and activate skeleton loader
+                ToastNotification.Show("Creating New Fiscal Year", $"Initializing FY {dlg.ResultRequest.FiscalYear} (Semester {dlg.ResultRequest.CycleNumber ?? 1}) and assessing records...", ToastType.Info);
+                IsLoading = true;
                 try
                 {
                     var resp = await _apiService.CreateCycleAsync(dlg.ResultRequest);
                     if (resp != null && resp.Succeeded)
                     {
-                        var newCycleId = resp.Data?.Id;
-                        if (newCycleId.HasValue && newCycleId.Value != Guid.Empty)
+                        var newCycleId = resp.Data?.Id ?? Guid.Empty;
+                        optimisticCycle.CycleId = newCycleId;
+                        _activeCycleId = newCycleId;
+
+                        if (newCycleId != Guid.Empty)
                         {
-                            await _apiService.GenerateRecommendationsAsync(newCycleId.Value);
+                            await _apiService.GenerateRecommendationsAsync(newCycleId);
                         }
-                        IsRosterLocked = false;
-                        await RefreshDataAsync(forceReloadCycles: true);
+
+                        // Load fresh cycle list and load all recommendation records for the new cycle
+                        await ReloadCyclesAndSelectAsync(newCycleId);
                         ActiveTabIndex = 0;
-                        ToastNotification.Show("New Cycle Active", $"Fiscal Year {dlg.ResultRequest.FiscalYear} (Semester {dlg.ResultRequest.CycleNumber ?? 1}) cycle started successfully. Fresh candidate recommendations generated.", ToastType.Success);
+                        ToastNotification.Show("Fiscal Year Created", $"Fiscal Year {dlg.ResultRequest.FiscalYear} created and candidate records reassessed successfully.", ToastType.Success);
                     }
                     else
                     {
+                        AvailableFiscalCycles.Remove(optimisticCycle);
                         string err = resp?.Errors != null ? string.Join(", ", resp.Errors) : "Failed to create cycle.";
                         ToastNotification.Show("Error", err, ToastType.Error);
+                        await LoadFiscalCyclesAsync();
                     }
                 }
                 catch (Exception ex)
                 {
+                    AvailableFiscalCycles.Remove(optimisticCycle);
                     ToastNotification.Show("Cycle Creation Error", ex.Message, ToastType.Error);
+                    await LoadFiscalCyclesAsync();
+                }
+                finally
+                {
+                    IsLoading = false;
                 }
             }
         }
@@ -473,6 +541,12 @@ namespace SOLUM_UI.ViewModels
                         });
                     }
                 }
+                bool isUnfiltered = string.IsNullOrWhiteSpace(_disqualifiedSearchText) &&
+                                    (string.IsNullOrWhiteSpace(_disqualifiedReasonFilter) || _disqualifiedReasonFilter == "All Reasons");
+                if (isUnfiltered)
+                {
+                    _totalDisqualifiedCount = DisqualifiedCandidates.Count;
+                }
                 FilterDisqualifiedCandidates();
                 NotifyDisqualifiedMetricsChanged();
             }
@@ -492,6 +566,12 @@ namespace SOLUM_UI.ViewModels
                 if (SelectedFiscalCycle == null)
                 {
                     ToastNotification.Show("No Cycle Selected", "Please select a fiscal cycle first.", ToastType.Warning);
+                    return;
+                }
+
+                if (!CanEditCycleSettings)
+                {
+                    ToastNotification.Show("Historical Cycle", "Completed historical cycles cannot be modified.", ToastType.Warning);
                     return;
                 }
 
@@ -628,9 +708,12 @@ namespace SOLUM_UI.ViewModels
                     return;
                 }
 
-                // Show view details modal/dialog with cycle metadata
-                // This would integrate with a dialog service or modal component
-                ToastNotification.Show("Cycle Details", $"View details for FY {SelectedFiscalCycle.FiscalYear}: Status={SelectedFiscalCycle.Status}, Allocated Slots={SelectedFiscalCycle.AllocatedSlots}.", ToastType.Info);
+                var modal = new Views.Components.ModalCycleDetails(
+                    SelectedFiscalCycle,
+                    ConfirmedGranteesCount,
+                    RemainingSlots,
+                    DisqualifiedCount);
+                MainWindow.ShowGlobalModal(modal, () => MainWindow.HideGlobalModal());
             }
             catch (Exception ex)
             {

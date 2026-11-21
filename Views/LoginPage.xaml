@@ -8,8 +8,8 @@
         mc:Ignorable="d"
         Title="Solace"
         Icon="/Assets/app.ico"
-        MinHeight="420" MinWidth="680"
-        Height="450" Width="800"
+        MinHeight="640" MinWidth="1024"
+        Height="760" Width="1200"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         ResizeMode="CanResize"
@@ -62,7 +62,8 @@
         <Viewbox Stretch="Uniform"
                  HorizontalAlignment="Center"
                  VerticalAlignment="Center"
-                 Margin="48,44,48,36"
+                 MaxWidth="1440" MaxHeight="1000"
+                 Margin="32,24,32,20"
                  SnapsToDevicePixels="True"
                  UseLayoutRounding="True">
             <Grid Width="1360" Height="980" SnapsToDevicePixels="True" UseLayoutRounding="True">

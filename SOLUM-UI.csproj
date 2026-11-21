@@ -38,7 +38,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-        <Reference Include="AutoUpdater.NET, Version=1.9.3.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
+    <Reference Include="AutoUpdater.NET, Version=1.9.3.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
       <HintPath>packages\Autoupdater.NET.Official.1.9.3\lib\net462\AutoUpdater.NET.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.WebView2.Core, Version=1.0.4078.44, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
@@ -50,7 +50,7 @@
     <Reference Include="Microsoft.Web.WebView2.Wpf, Version=1.0.4078.44, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Web.WebView2.1.0.4078.44\lib\net462\Microsoft.Web.WebView2.Wpf.dll</HintPath>
     </Reference>
-<Reference Include="EPPlus, Version=8.7.1.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+    <Reference Include="EPPlus, Version=8.7.1.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
       <HintPath>packages\EPPlus.8.7.1\lib\net462\EPPlus.dll</HintPath>
     </Reference>
     <Reference Include="EPPlus.Interfaces, Version=8.6.2.0, Culture=neutral, PublicKeyToken=a694d7f3b0907a61, processorArchitecture=MSIL">
@@ -343,7 +343,7 @@
     <Compile Include="Views\Dialogs\ConfirmCreateUserDialog.xaml.cs">
       <DependentUpon>ConfirmCreateUserDialog.xaml</DependentUpon>
     </Compile>
-        <Compile Include="Views\Dialogs\ForceChangePasswordDialog.xaml.cs">
+    <Compile Include="Views\Dialogs\ForceChangePasswordDialog.xaml.cs">
       <DependentUpon>ForceChangePasswordDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\ReviewAlertPopoutDialog.xaml.cs">
@@ -389,6 +389,9 @@
     <Compile Include="Views\Components\ModalOutlierRejection.xaml.cs">
       <DependentUpon>ModalOutlierRejection.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Components\ModalCycleDetails.xaml.cs">
+      <DependentUpon>ModalCycleDetails.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Components\ModalDisqualifiedCandidates.xaml.cs">
       <DependentUpon>ModalDisqualifiedCandidates.xaml</DependentUpon>
     </Compile>
@@ -422,6 +425,8 @@
     <Compile Include="Services\Interfaces\ISubsidyApiService.cs" />
     <Compile Include="Services\Implementations\SubsidyApiService.cs" />
     <Compile Include="Services\SubsidyModelMapper.cs" />
+    <Compile Include="Services\SubsidyPdfExportService.cs" />
+    <Compile Include="Services\SubsidyExcelExportService.cs" />
     <Compile Include="ViewModels\SubsidyRecommendationViewModel.cs" />
     <Compile Include="ViewModels\SubsidyRecommendationViewModel.Commands.cs" />
     <Compile Include="ViewModels\SubsidyRecommendationViewModel.Actions.cs" />
@@ -686,7 +691,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-        <Page Include="Views\Dialogs\ForceChangePasswordDialog.xaml">
+    <Page Include="Views\Dialogs\ForceChangePasswordDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -739,6 +744,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Components\ModalOutlierRejection.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\ModalCycleDetails.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

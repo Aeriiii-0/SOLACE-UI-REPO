@@ -274,14 +274,14 @@ namespace SOLUM_UI
                 }
                 if (cmbPeriodType != null && cmbPeriodType.SelectedIndex < 0)
                     cmbPeriodType.SelectedIndex = 0;
-                // If Barangay Secretary, lock barangay filter to assigned barangay
-                if (SOLUM_UI.Services.Api.AuthApiService.Instance.IsBarangaySecretary &&
-                    !string.IsNullOrWhiteSpace(SOLUM_UI.Services.Api.AuthApiService.Instance.CurrentUserBarangay))
+                var cmbFilterBarangay = this.FindName("CmbFilterBarangay") as ComboBox;
+                if (cmbFilterBarangay != null)
                 {
-                    string userBrgy = SOLUM_UI.Services.Api.AuthApiService.Instance.CurrentUserBarangay;
-                    var cmbFilterBarangay = this.FindName("CmbFilterBarangay") as ComboBox;
-                    if (cmbFilterBarangay != null)
+                    // If Barangay Secretary, lock barangay filter to assigned barangay
+                    if (SOLUM_UI.Services.Api.AuthApiService.Instance.IsBarangaySecretary &&
+                        !string.IsNullOrWhiteSpace(SOLUM_UI.Services.Api.AuthApiService.Instance.CurrentUserBarangay))
                     {
+                        string userBrgy = SOLUM_UI.Services.Api.AuthApiService.Instance.CurrentUserBarangay;
                         foreach (var item in cmbFilterBarangay.Items)
                         {
                             if (item is ComboBoxItem cbItem && string.Equals(cbItem.Content?.ToString(), userBrgy, StringComparison.OrdinalIgnoreCase))
@@ -292,10 +292,19 @@ namespace SOLUM_UI
                         }
                         cmbFilterBarangay.IsEnabled = false;
                         cmbFilterBarangay.ToolTip = $"Scoped to your assigned barangay ({userBrgy})";
+                        if (_vm != null)
+                        {
+                            _vm.SelectedBarangay = userBrgy;
+                        }
                     }
-                    if (_vm != null)
+                    else
                     {
-                        _vm.SelectedBarangay = userBrgy;
+                        if (cmbFilterBarangay.SelectedIndex < 0)
+                            cmbFilterBarangay.SelectedIndex = 0;
+                        if (_vm != null)
+                        {
+                            _vm.SelectedBarangay = "ALL";
+                        }
                     }
                 }
             }
@@ -481,6 +490,15 @@ namespace SOLUM_UI
                     _vm.LoadFromAnalyticsDto(monthRes.Data);
                 }
                 var breakdownRes = await breakdownTask;
+                if (breakdownRes == null || !breakdownRes.Succeeded || breakdownRes.Data == null)
+                {
+                    // Fallback to cumulative citywide breakdown if filtered request fails or returns null
+                    var fallbackRes = await AnalyticsApiService.Instance.GetBarangayBreakdownAsync(barangay: barangay);
+                    if (fallbackRes != null && fallbackRes.Succeeded && fallbackRes.Data != null)
+                    {
+                        breakdownRes = fallbackRes;
+                    }
+                }
                 if (breakdownRes != null && breakdownRes.Succeeded && breakdownRes.Data != null)
                     _vm.LoadBarangayBreakdownDto(breakdownRes.Data);
                 else if (monthRes == null || !monthRes.Succeeded)
@@ -507,7 +525,9 @@ namespace SOLUM_UI
                             errorMsg = string.Join("\n", breakdownRes.Errors);
                         else if (monthRes?.Errors != null && monthRes.Errors.Count > 0)
                             errorMsg = string.Join("\n", monthRes.Errors);
-                        ToastNotification.Show("Filter Result", errorMsg, ToastType.Warning);
+                        string title = ApiClient.IsNetworkOrConnectionError(errorMsg) ? "No Internet Connection" : "Filter Result";
+                        string friendlyMsg = ApiClient.HumanizeErrorMessage(errorMsg);
+                        ToastNotification.Show(title, friendlyMsg, ToastType.Warning);
                     }
                 }
                 _vm.UpdateActiveFilterSummary();
@@ -661,9 +681,9 @@ namespace SOLUM_UI
             if (element == null) return;
             element.ToolTip = tooltip;
             element.Cursor = System.Windows.Input.Cursors.Hand;
-            ToolTipService.SetInitialShowDelay(element, 50);
-            ToolTipService.SetBetweenShowDelay(element, 50);
-            ToolTipService.SetShowDuration(element, 15000);
+            ToolTipService.SetInitialShowDelay(element, 350);
+            ToolTipService.SetBetweenShowDelay(element, 150);
+            ToolTipService.SetShowDuration(element, 10000);
         }
 
         private void RedrawCharts()
@@ -673,6 +693,7 @@ namespace SOLUM_UI
             try
             {
                 UpdateChildBars();
+                UpdateAgeAndIncomeTooltips();
                 DrawBarangayBarChart(FindName("CvBarangay") as Canvas, ReadSeries((object)_vm.BarangayData as IEnumerable));
 
                 double female = N("FemaleCount");
@@ -739,6 +760,41 @@ namespace SOLUM_UI
                 "School & Youth (7–21 yrs)", "Basic to tertiary education. Eligible for educational assistance, book stipends, and DepEd/CHED programs.");
             Set(FindName("PbChild2") as ProgressBar, FindName("TxtChildPct2") as TextBlock, c,
                 "Adult / Special (22+ yrs)", "Dependent adult children who are incapacitated or have physical/mental disability.");
+        }
+
+        private void UpdateAgeAndIncomeTooltips()
+        {
+            if (_vm == null) return;
+
+            void SetAge(string pbName, string txtName, double count, double pct, string title, string note, string hexColor)
+            {
+                var tip = CreateChartTooltip(title, $"{count:N0} solo parents ({pct:F1}%)", note, B(hexColor));
+                if (FindName(pbName) is FrameworkElement pb) AttachQuickTooltip(pb, tip);
+                if (FindName(txtName) is FrameworkElement txt) AttachQuickTooltip(txt, tip);
+            }
+
+            SetAge("PbAge19Below", "TxtAge19Below", _vm.ParentAge19Below, _vm.ParentAge19BelowPercent,
+                "Age 19 & Below", "Adolescent and youth solo parents under statutory protection (RA 11861).", "#16A085");
+            SetAge("PbAge20_39", "TxtAge20_39", _vm.ParentAge20_39, _vm.ParentAge20_39Percent,
+                "Age 20–39", "Prime working-age solo parents supporting young dependents.", "#16A085");
+            SetAge("PbAge40_59", "TxtAge40_59", _vm.ParentAge40_59, _vm.ParentAge40_59Percent,
+                "Age 40–59", "Mature solo parents balancing adolescent/college-age dependents.", "#16A085");
+            SetAge("PbAge60Above", "TxtAge60Above", _vm.ParentAge60Above, _vm.ParentAge60AbovePercent,
+                "Age 60 & Above", "Senior citizen solo parents with heightened social pension eligibility.", "#16A085");
+
+            void SetIncome(string pbName, string txtName, double count, double pct, string title, string note, string hexColor)
+            {
+                var tip = CreateChartTooltip(title, $"{count:N0} solo parents ({pct:F1}%)", note, B(hexColor));
+                if (FindName(pbName) is FrameworkElement pb) AttachQuickTooltip(pb, tip);
+                if (FindName(txtName) is FrameworkElement txt) AttachQuickTooltip(txt, tip);
+            }
+
+            SetIncome("PbIncomeBelowMin", "TxtIncomeBelowMin", _vm.IncomeBelowMinCount, _vm.IncomeBelowMinPercent,
+                "Below Minimum Wage", "Monthly income under statutory minimum wage (< ₱610/day). Priority subsidy tier under RA 11861.", "#2E7D32");
+            SetIncome("PbIncomeMinWage", "TxtIncomeMinWage", _vm.IncomeMinWageCount, _vm.IncomeMinWagePercent,
+                "Min. Wage to ₱20,833", "Moderate income bracket (₱610/day to ₱20,833/mo). Eligible for supplemental social services.", "#7D2245");
+            SetIncome("PbIncomeAboveMin", "TxtIncomeAboveMin", _vm.IncomeAboveMinCount, _vm.IncomeAboveMinPercent,
+                "₱20,834 and Above", "Higher income bracket above ₱20,833/mo. Statutory discounts and leave benefits apply.", "#1E88E5");
         }
 
         /// <summary>
@@ -820,7 +876,6 @@ namespace SOLUM_UI
                 mainTb.MaxWidth = Math.Max(20, slot - 6);
                 mainTb.TextTrimming = TextTrimming.CharacterEllipsis;
                 mainTb.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                AttachQuickTooltip(mainTb, tipObj);
                 Canvas.SetLeft(mainTb, centerX - mainTb.DesiredSize.Width / 2);
                 Canvas.SetTop(mainTb, y);
                 c.Children.Add(mainTb);
@@ -831,7 +886,6 @@ namespace SOLUM_UI
                     subTb.MaxWidth = Math.Max(20, slot - 6);
                     subTb.TextTrimming = TextTrimming.CharacterEllipsis;
                     subTb.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                    AttachQuickTooltip(subTb, tipObj);
                     Canvas.SetLeft(subTb, centerX - subTb.DesiredSize.Width / 2);
                     Canvas.SetTop(subTb, y + mainTb.DesiredSize.Height);
                     c.Children.Add(subTb);
@@ -857,14 +911,13 @@ namespace SOLUM_UI
                 string blockNote = $"{blocks} block{(blocks == 1 ? "" : "s")} (1 block = 5 solo parents)";
                 var tip = CreateChartTooltip(data[i].Label, primaryStat, blockNote, isTop ? maroon : B("#8A6A75"));
 
-                // Column slot hit-rect for effortless hover anywhere across the column
+                // Column slot hit-rect for bar hover highlighting
                 var slotHit = new Rectangle
                 {
                     Width = slot,
                     Height = ph + top,
                     Fill = Brushes.Transparent
                 };
-                AttachQuickTooltip(slotHit, tip);
                 Canvas.SetLeft(slotHit, left + slot * i);
                 Canvas.SetTop(slotHit, 0);
                 c.Children.Add(slotHit);
@@ -873,14 +926,24 @@ namespace SOLUM_UI
                     ? new LinearGradientBrush(Color.FromRgb(0xB8, 0x48, 0x6D), Color.FromRgb(0x7D, 0x22, 0x45), 90)
                     : new LinearGradientBrush(Color.FromRgb(0xE8, 0xC9, 0xD4), Color.FromRgb(0xD9, 0xA3, 0xB8), 90);
 
-                // Bar host: rounded clip + gradient fill + white separators => stacked "blocks"
+                // Bar host: top rounded corners only (radius 8), bottom straight (radius 0)
+                double r = Math.Min(8, Math.Min(barW / 2, barH));
+                var barFig = new PathFigure { StartPoint = new Point(0, barH), IsClosed = true, IsFilled = true };
+                barFig.Segments.Add(new LineSegment(new Point(0, r), true));
+                barFig.Segments.Add(new ArcSegment(new Point(r, 0), new Size(r, r), 0, false, SweepDirection.Clockwise, true));
+                barFig.Segments.Add(new LineSegment(new Point(barW - r, 0), true));
+                barFig.Segments.Add(new ArcSegment(new Point(barW, r), new Size(r, r), 0, false, SweepDirection.Clockwise, true));
+                barFig.Segments.Add(new LineSegment(new Point(barW, barH), true));
+                var barClip = new PathGeometry();
+                barClip.Figures.Add(barFig);
+
                 var host = new Canvas
                 {
                     Width = barW,
                     Height = barH,
                     Background = fill,
                     ClipToBounds = true,
-                    Clip = new RectangleGeometry(new Rect(0, 0, barW, barH), 10, 10)
+                    Clip = barClip
                 };
                 AttachQuickTooltip(host, tip);
 
@@ -905,7 +968,6 @@ namespace SOLUM_UI
 
                 // Value label above bar
                 var valueLabel = MakeText(value.ToString("N0"), 13, isTop ? maroon : darkBrush, FontWeights.Bold);
-                AttachQuickTooltip(valueLabel, tip);
                 double valueTop = y - valueLabel.DesiredSize.Height - 3;
                 Canvas.SetLeft(valueLabel, centerX - valueLabel.DesiredSize.Width / 2);
                 Canvas.SetTop(valueLabel, valueTop);
@@ -928,7 +990,6 @@ namespace SOLUM_UI
                             FontFamily = new FontFamily("Segoe UI")
                         }
                     };
-                    AttachQuickTooltip(pill, tip);
                     pill.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                     Canvas.SetLeft(pill, centerX - pill.DesiredSize.Width / 2);
                     Canvas.SetTop(pill, valueTop - pill.DesiredSize.Height - 2);
@@ -999,7 +1060,6 @@ namespace SOLUM_UI
                     Height = ph + top,
                     Fill = Brushes.Transparent
                 };
-                AttachQuickTooltip(slotHit, tip);
                 Canvas.SetLeft(slotHit, side + slot * i);
                 Canvas.SetTop(slotHit, 0);
                 c.Children.Add(slotHit);
@@ -1023,13 +1083,11 @@ namespace SOLUM_UI
                 c.Children.Add(bar);
 
                 var val = MakeText(valNum.ToString("N0"), 12, darkBrush, FontWeights.Bold);
-                AttachQuickTooltip(val, tip);
                 Canvas.SetLeft(val, x + (barW - val.DesiredSize.Width) / 2);
                 Canvas.SetTop(val, y - val.DesiredSize.Height - 3);
                 c.Children.Add(val);
 
                 var lbl = MakeText(items[i].Label, 9.5, textBrush, FontWeights.Normal, TextAlignment.Center);
-                AttachQuickTooltip(lbl, tip);
                 Canvas.SetLeft(lbl, side + slot * i + (slot - lbl.DesiredSize.Width) / 2);
                 Canvas.SetTop(lbl, top + ph + 6);
                 c.Children.Add(lbl);
@@ -1117,34 +1175,11 @@ namespace SOLUM_UI
                     Padding = new Thickness(0)
                 };
 
-                var rowHit = new Rectangle
-                {
-                    Width = w,
-                    Height = slot,
-                    Fill = Brushes.Transparent,
-                    ToolTip = toolTipObj,
-                    Cursor = System.Windows.Input.Cursors.Hand
-                };
-                ToolTipService.SetInitialShowDelay(rowHit, 50);
-                ToolTipService.SetBetweenShowDelay(rowHit, 50);
-                ToolTipService.SetShowDuration(rowHit, 15000);
-                Canvas.SetLeft(rowHit, 0);
-                Canvas.SetTop(rowHit, slot * i);
-                canvas.Children.Add(rowHit);
-
-                labels[i].ToolTip = toolTipObj;
-                labels[i].Cursor = System.Windows.Input.Cursors.Hand;
-                ToolTipService.SetInitialShowDelay(labels[i], 50);
-                ToolTipService.SetBetweenShowDelay(labels[i], 50);
-                ToolTipService.SetShowDuration(labels[i], 15000);
                 Canvas.SetLeft(labels[i], left - 10 - labels[i].DesiredSize.Width);
                 Canvas.SetTop(labels[i], y + (barH - labels[i].DesiredSize.Height) / 2);
                 canvas.Children.Add(labels[i]);
 
-                var track = new Border { Width = pw, Height = barH, Background = trackBrush, CornerRadius = new CornerRadius(barH / 2), ToolTip = toolTipObj, Cursor = System.Windows.Input.Cursors.Hand };
-                ToolTipService.SetInitialShowDelay(track, 50);
-                ToolTipService.SetBetweenShowDelay(track, 50);
-                ToolTipService.SetShowDuration(track, 15000);
+                var track = new Border { Width = pw, Height = barH, Background = trackBrush, CornerRadius = new CornerRadius(barH / 2) };
                 Canvas.SetLeft(track, left); Canvas.SetTop(track, y);
                 canvas.Children.Add(track);
 
@@ -1160,18 +1195,13 @@ namespace SOLUM_UI
                         ToolTip = toolTipObj,
                         Cursor = System.Windows.Input.Cursors.Hand
                     };
-                    ToolTipService.SetInitialShowDelay(bar, 50);
-                    ToolTipService.SetBetweenShowDelay(bar, 50);
-                    ToolTipService.SetShowDuration(bar, 15000);
+                    ToolTipService.SetInitialShowDelay(bar, 350);
+                    ToolTipService.SetBetweenShowDelay(bar, 150);
+                    ToolTipService.SetShowDuration(bar, 10000);
                     Canvas.SetLeft(bar, left); Canvas.SetTop(bar, y);
                     canvas.Children.Add(bar);
                 }
 
-                values[i].ToolTip = toolTipObj;
-                values[i].Cursor = System.Windows.Input.Cursors.Hand;
-                ToolTipService.SetInitialShowDelay(values[i], 50);
-                ToolTipService.SetBetweenShowDelay(values[i], 50);
-                ToolTipService.SetShowDuration(values[i], 15000);
                 Canvas.SetLeft(values[i], w - values[i].DesiredSize.Width - 2);
                 Canvas.SetTop(values[i], y + (barH - values[i].DesiredSize.Height) / 2);
                 canvas.Children.Add(values[i]);

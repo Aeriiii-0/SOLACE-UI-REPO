@@ -665,11 +665,11 @@
 
                             </Grid>
 
-                            <Grid Grid.Row="1">
+                            <Grid Grid.Row="1" ClipToBounds="False">
 
                                 <Canvas x:Name="ChartCanvas" Background="Transparent"
-
-                                        SizeChanged="ChartCanvas_SizeChanged" MinHeight="200"/>
+                                        ClipToBounds="False"
+                                        SizeChanged="ChartCanvas_SizeChanged" MinHeight="230"/>
 
                                 <Border x:Name="ChartTip" Visibility="Collapsed" IsHitTestVisible="False"
 
@@ -677,7 +677,7 @@
 
                                         Background="#702943" CornerRadius="12" Padding="14,10" MinWidth="140"
 
-                                        Panel.ZIndex="10">
+                                        Panel.ZIndex="100">
 
                                     <Border.Effect>
 

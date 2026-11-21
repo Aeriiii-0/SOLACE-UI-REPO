@@ -35,7 +35,6 @@ namespace SOLUM_UI.Services.Interfaces
         // CSV Roster Exporters
         Task<string> ExportCityEducRosterCsvAsync(List<SelectionRow> items);
         Task<string> ExportPantawid4PsRosterCsvAsync(List<SelectionRow> items);
-        Task<string> ExportFinalLedgerCsvAsync(List<SelectionRow> items, int fiscalYear);
-        Task<string> ExportAllQueueCsvAsync(List<SubsidyItem> items);
+        Task<string> ExportFinalLedgerCsvAsync(List<SelectionRow> items, int fiscalYear, decimal grantAmount = 1000m);
     }
 }

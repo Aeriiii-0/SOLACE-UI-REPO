@@ -18,13 +18,22 @@ namespace SOLUM_UI.ViewModels
         {
             SwitchTabCommand = new RelayCommand(p =>
             {
+                if (IsLoading) return;
                 if (int.TryParse(p?.ToString(), out int tab))
                 {
+                    if ((tab == 0 || tab == 1) && !IsActiveCycle)
+                    {
+                        ToastNotification.Show("Historical Fiscal Year",
+                            $"Candidate triage and audit pipeline are only accessible for the operational fiscal cycle (FY {ActiveCycleFiscalYear}).",
+                            ToastType.Info);
+                        return;
+                    }
                     ActiveTabIndex = tab;
                 }
-            });
+            }, _ => !IsLoading);
             ToggleBatchModeCommand = new RelayCommand(_ =>
             {
+                if (!CanModifyGrantees) return;
                 if (TabRecommendationsVisible)
                 {
                     IsBatchMode = !IsBatchMode;
@@ -35,11 +44,12 @@ namespace SOLUM_UI.ViewModels
                 }
                 OnPropertyChanged(nameof(IsActiveTabBatchMode));
             });
-            SelectTopNCommand = new RelayCommand(_ => SelectTopN());
-            ToggleShortlistBatchModeCommand = new RelayCommand(_ => IsShortlistBatchMode = !IsShortlistBatchMode);
-            ShortlistSelectedCommand = new RelayCommand(_ => MoveSelectedToShortlist());
+            SelectTopNCommand = new RelayCommand(_ => { if (!CanModifyGrantees) return; SelectTopN(); });
+            ToggleShortlistBatchModeCommand = new RelayCommand(_ => { if (!CanModifyGrantees) return; IsShortlistBatchMode = !IsShortlistBatchMode; });
+            ShortlistSelectedCommand = new RelayCommand(_ => { if (!CanModifyGrantees) return; MoveSelectedToShortlist(); });
             QuickShortlistCandidateCommand = new RelayCommand(p =>
             {
+                if (!CanModifyGrantees) return;
                 if (IsBatchMode && (FilteredRecommendations.Any(x => x.IsSelected) || p is SubsidyItem))
                 {
                     if (p is SubsidyItem it && !it.IsSelected)
@@ -58,6 +68,7 @@ namespace SOLUM_UI.ViewModels
             ApproveCandidateCommand = QuickShortlistCandidateCommand;
             QuickRejectRowCommand = new RelayCommand(p =>
             {
+                if (!CanModifyGrantees) return;
                 if (IsBatchMode && (FilteredRecommendations.Any(x => x.IsSelected) || p is SubsidyItem))
                 {
                     if (p is SubsidyItem it && !it.IsSelected)
@@ -87,6 +98,7 @@ namespace SOLUM_UI.ViewModels
             });
             BatchRejectQueueCommand = new RelayCommand(_ =>
             {
+                if (!CanModifyGrantees) return;
                 var selected = SelectedQueueItems;
                 if (selected.Count == 0)
                 {
@@ -112,6 +124,9 @@ namespace SOLUM_UI.ViewModels
                         IncomePerCapita = r.IncomePerCapita, MinorDependentsCount = r.MinorDependentsCount,
                         ToddlersUnder5Count = r.ToddlersUnder5Count, Circumstance = r.Circumstance,
                         CollegeAgeDependentsCount = r.CollegeAgeDependentsCount,
+                        HasSpecialNeedsDependent = r.HasSpecialNeedsDependent,
+                        SpecialNeedsDependentsCount = r.SpecialNeedsDependentsCount,
+                        CardExpiresAt = r.CardExpiresAt,
                         IsPantawidBeneficiary = r.IsPantawidBeneficiary, ModelVersion = r.ModelVersion,
                         Children0To6Count = r.Children0To6Count, Children7To22Count = r.Children7To22Count,
                         OtherIncomeSource = r.OtherIncomeSource, NeedsAndProblems = r.NeedsAndProblems,
@@ -121,10 +136,27 @@ namespace SOLUM_UI.ViewModels
                 if (item != null) { ActiveCandidate = item; IsDrawerOpen = true; _ = FetchRecordForDrawerAsync(item); }
             });
             CloseExplainDrawerCommand = new RelayCommand(_ => IsDrawerOpen = false);
-            DrawerShortlistCommand = new RelayCommand(_ => { if (ActiveCandidate != null) { ShortlistCandidate(ActiveCandidate); IsDrawerOpen = false; } });
-            OpenOutlierModalCommand = new RelayCommand(p => { OutlierTarget = p as SubsidyItem ?? ActiveCandidate; if (OutlierTarget != null) { _shortlistRevokeTargets = null; OutlierModalTitle = "Disqualify Candidate"; OutlierTargetNameAndId = null; IsOutlierModalOpen = true; } });
+            DrawerShortlistCommand = new RelayCommand(_ =>
+            {
+                if (!CanModifyGrantees) return;
+                if (ActiveCandidate != null)
+                {
+                    bool alreadyInShortlist = ShortlistRows.Any(x => (x.SoloParentId != Guid.Empty && x.SoloParentId == ActiveCandidate.SoloParentId)
+                                                                 || (!string.IsNullOrEmpty(x.SpId) && x.SpId == ActiveCandidate.SpId));
+                    if (alreadyInShortlist)
+                    {
+                        ToastNotification.Show("Already in Shortlist", $"{ActiveCandidate.Name} is already in the Approved Selection.", ToastType.Info);
+                    }
+                    else
+                    {
+                        ShortlistCandidate(ActiveCandidate);
+                    }
+                    IsDrawerOpen = false;
+                }
+            });
+            OpenOutlierModalCommand = new RelayCommand(p => { if (!CanModifyGrantees) return; OutlierTarget = p as SubsidyItem ?? ActiveCandidate; if (OutlierTarget != null) { _shortlistRevokeTargets = null; OutlierModalTitle = "Disqualify Candidate"; OutlierTargetNameAndId = null; IsOutlierModalOpen = true; } });
             CloseOutlierModalCommand = new RelayCommand(_ => { IsOutlierModalOpen = false; _shortlistRevokeTargets = null; });
-            ConfirmOutlierRejectionCommand = new RelayCommand(_ => _ = ConfirmOutlierRejectionAsync());
+            ConfirmOutlierRejectionCommand = new RelayCommand(_ => { if (!CanModifyGrantees) return; _ = ConfirmOutlierRejectionAsync(); });
             OpenDisqualifiedModalCommand = new RelayCommand(_ => {
                 DisqualifiedSearchText = string.Empty;
                 DisqualifiedReasonFilter = "All Reasons";
@@ -139,47 +171,32 @@ namespace SOLUM_UI.ViewModels
             DisqualifiedNextPageCommand = new RelayCommand(_ => { if (CanDisqualifiedNextPage) DisqualifiedCurrentPage++; });
             ExportDisqualifiedCsvCommand = new RelayCommand(async _ => await ExportDisqualifiedCsvAsync());
             ReinstateCandidateCommand = new RelayCommand(p => {
+                if (!CanModifyGrantees) return;
                 if (p is DisqualifiedCandidateItem item)
                     _ = ReinstateCandidateAsync(item);
             });
             ApplyDisqualifiedReasonFilterCommand = new RelayCommand(p => {
                 DisqualifiedReasonFilter = p?.ToString() ?? "All Reasons";
             });
-            ConfirmGranteeCommand = new RelayCommand(p => ToggleGrantee(p as SelectionRow, true));
-            RevokeGranteeCommand = new RelayCommand(p => ToggleGrantee(p as SelectionRow, false));
-            ConfirmShortlistCandidateCommand = new RelayCommand(p => { if (p is SelectionRow r) ToggleGrantee(r, !r.IsFinalGrantee); });
-            RevokeShortlistCandidateCommand = new RelayCommand(p => PromptRevokeShortlist(p as SelectionRow));
-            BatchConfirmShortlistCommand = new RelayCommand(_ => BatchConfirmShortlist());
-            BatchRevertShortlistCommand = new RelayCommand(_ => BatchRevertShortlist());
-            BatchRevokeShortlistCommand = new RelayCommand(_ => BatchRevokeShortlist());
+            ConfirmGranteeCommand = new RelayCommand(p => { if (!CanModifyGrantees) return; ToggleGrantee(p as SelectionRow, true); });
+            RevokeGranteeCommand = new RelayCommand(p => { if (!CanModifyGrantees) return; ToggleGrantee(p as SelectionRow, false); });
+            ConfirmShortlistCandidateCommand = new RelayCommand(p => { if (!CanModifyGrantees) return; if (p is SelectionRow r) ToggleGrantee(r, !r.IsFinalGrantee); });
+            RevokeShortlistCandidateCommand = new RelayCommand(p => { if (!CanModifyGrantees) return; PromptRevokeShortlist(p as SelectionRow); });
+            BatchConfirmShortlistCommand = new RelayCommand(_ => { if (!CanModifyGrantees) return; BatchConfirmShortlist(); });
+            BatchRevertShortlistCommand = new RelayCommand(_ => { if (!CanModifyGrantees) return; BatchRevertShortlist(); });
+            BatchRevokeShortlistCommand = new RelayCommand(_ => { if (!CanModifyGrantees) return; BatchRevokeShortlist(); });
             SelectAllShortlistCommand = new RelayCommand(_ => { bool all = FilteredShortlistRows.Count > 0 && FilteredShortlistRows.All(x => x.IsSelected); foreach (var r in FilteredShortlistRows) r.IsSelected = !all; RecalculateShortlistSelectionCounts(); });
-            ExportCityEducCommand = new RelayCommand(async _ => {
-                var c = ShortlistRows.Where(i => i.HasCollegeAgeDependent).ToList();
-                if (c.Count == 0) { Views.Dialogs.ActionConfirmDialog.Warning("No Flagged Records", "No applicants have college-age dependents."); return; }
-                await ExportCsvAsync($"CityEduc_College_Dependents_{DateTime.Now:yyyy}", _apiService.ExportCityEducRosterCsvAsync(ShortlistRows.ToList()), $"{c.Count} candidate(s) exported for City Educ cross-check.");
-            });
-            ExportPantawid4PsCommand = new RelayCommand(async _ => {
-                var list = ShortlistRows.Where(i => i.IsPantawidBeneficiary).ToList();
-                if (list.Count == 0) list = _allItems.Where(i => i.IsPantawidBeneficiary).Select(it => new SelectionRow { Rank = it.Rank, SpId = it.SpId, Name = it.Name, Barangay = it.Barangay, MonthlyIncome = it.MonthlyIncome, IncomePerCapita = it.IncomePerCapita, Dependants = it.Dependants, MinorDependentsCount = it.MinorDependentsCount, Circumstance = it.Circumstance, IsPantawidBeneficiary = true }).ToList();
-                if (list.Count == 0) { Views.Dialogs.ActionConfirmDialog.Warning("No Records", "No applicants are tagged as 4Ps beneficiaries."); return; }
-                await ExportCsvAsync($"Pantawid_4Ps_Beneficiaries_{DateTime.Now:yyyyMMdd}", _apiService.ExportPantawid4PsRosterCsvAsync(list), $"{list.Count} 4Ps candidate(s) exported successfully.");
-            });
-            ExportFinalLedgerCommand = new RelayCommand(async _ => {
-                if (FinalGranteesList.Count == 0) { Views.Dialogs.ActionConfirmDialog.Warning("Ledger Empty", "No confirmed grantees to export."); return; }
-                int yr = SelectedFiscalCycle?.FiscalYear ?? ActiveCycleFiscalYear;
-                await ExportCsvAsync($"Final_Grantee_Ledger_FY{yr}", _apiService.ExportFinalLedgerCsvAsync(FinalGranteesList.ToList(), yr), $"Final grantee ledger for FY {yr} exported successfully.");
-            });
+            ExportCityEducCommand = new RelayCommand(async _ => await ExportCityEducRosterAsync());
+            ExportPantawid4PsCommand = new RelayCommand(async _ => await ExportPantawid4PsRosterAsync());
+            ExportFinalLedgerCommand = new RelayCommand(async _ => await ExportFinalLedgerRosterAsync());
             ViewFullRecordCommand = new RelayCommand(async p => await OpenFullRecordViewAsync(p as SubsidyItem ?? ActiveCandidate));
             ExecuteQueueBackendSearchCommand = new RelayCommand(async _ => await ExecuteQueueBackendSearchAsync());
-            QuickPredictCandidateCommand = new RelayCommand(async p => await RunQuickPredictAsync(p as SubsidyItem ?? ActiveCandidate));
-            OpenReassessmentFormCommand = new RelayCommand(async p => await OpenReassessmentFormAsync(p as SubsidyItem ?? ActiveCandidate));
-            RefreshCommand = new RelayCommand(async _ => { InvalidateCache(); await RefreshDataAsync(true); }, _ => !IsLoading); GenerateRecommendationsCommand = new RelayCommand(async _ => await GenerateAndRefreshAsync(), _ => !IsLoading);
+            QuickPredictCandidateCommand = new RelayCommand(async p => { if (!CanModifyGrantees) return; await RunQuickPredictAsync(p as SubsidyItem ?? ActiveCandidate); });
+            OpenReassessmentFormCommand = new RelayCommand(async p => { if (!CanModifyGrantees) return; await OpenReassessmentFormAsync(p as SubsidyItem ?? ActiveCandidate); });
+            RefreshCommand = new RelayCommand(async _ => { InvalidateCache(); await RefreshDataAsync(true); }, _ => !IsLoading); GenerateRecommendationsCommand = new RelayCommand(async _ => { if (!CanModifyGrantees) return; await GenerateAndRefreshAsync(); }, _ => !IsLoading && CanModifyGrantees);
             EditCycleCommand = new RelayCommand(_ => OpenEditCycleDialog());
             ViewDetailsCommand = new RelayCommand(_ => OpenViewDetailsDialog());
-            ToggleRosterLockCommand = new RelayCommand(_ => ToggleRosterLock()); StartNewCycleCommand = new RelayCommand(async _ => await StartNewCycleAsync()); SaveQuotaCommand = new RelayCommand(async _ => await SaveQuotaAsync());
-            ExportAllQueueCommand = new RelayCommand(async _ => await ExportRecommendationsQueueAsync());
-            // Add missing command aliases for UI consistency
-            ExportQueueCommand = ExportAllQueueCommand;
+            ToggleRosterLockCommand = new RelayCommand(_ => ToggleRosterLock()); StartNewCycleCommand = new RelayCommand(async _ => await StartNewCycleAsync(), _ => !IsLoading && CanStartNewCycle); SaveQuotaCommand = new RelayCommand(async _ => { if (!CanModifyGrantees) return; await SaveQuotaAsync(); }, _ => CanModifyGrantees);
             RunMLTriageCommand = GenerateRecommendationsCommand;
         }
 

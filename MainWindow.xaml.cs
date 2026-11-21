@@ -1923,6 +1923,47 @@ namespace SOLUM_UI
             MyActivityOverlayRoot.Visibility = Visibility.Collapsed;
             HideDimOverlay();
         }
+
+        private Action _globalModalBackdropAction;
+
+        public static void ShowGlobalModal(UIElement content, Action onBackdropClick = null)
+        {
+            if (Application.Current?.MainWindow is MainWindow main)
+            {
+                Action doShow = () =>
+                {
+                    main._globalModalBackdropAction = onBackdropClick;
+                    if (main.GlobalModalContent != null) main.GlobalModalContent.Content = content;
+                    if (main.GlobalModalHost != null) main.GlobalModalHost.Visibility = Visibility.Visible;
+                };
+                if (main.Dispatcher.CheckAccess()) doShow();
+                else main.Dispatcher.Invoke(doShow);
+            }
+        }
+
+        public static void HideGlobalModal()
+        {
+            if (Application.Current?.MainWindow is MainWindow main)
+            {
+                Action doHide = () =>
+                {
+                    main._globalModalBackdropAction = null;
+                    if (main.GlobalModalHost != null) main.GlobalModalHost.Visibility = Visibility.Collapsed;
+                    if (main.GlobalModalContent != null) main.GlobalModalContent.Content = null;
+                };
+                if (main.Dispatcher.CheckAccess()) doHide();
+                else main.Dispatcher.Invoke(doHide);
+            }
+        }
+
+        private void GlobalModalBackdrop_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var action = _globalModalBackdropAction;
+            if (action != null)
+                action.Invoke();
+            else
+                HideGlobalModal();
+        }
         #endregion
     }
 

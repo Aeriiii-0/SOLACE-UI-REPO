@@ -398,6 +398,7 @@ namespace SOLUM_UI.ViewModels
 
         public async Task RefreshQueueWithRetainedCountAsync()
         {
+            var previousActive = ActiveCandidate;
             int loadedCount = PagedRecommendations != null && PagedRecommendations.Count > 0
                 ? PagedRecommendations.Count
                 : QueuePageSize;
@@ -455,6 +456,25 @@ namespace SOLUM_UI.ViewModels
                         foreach (var item in newItems)
                             PagedRecommendations.Add(item);
 
+                        if (previousActive != null)
+                        {
+                            var matched = PagedRecommendations.FirstOrDefault(x =>
+                                (previousActive.SoloParentId != Guid.Empty && x.SoloParentId == previousActive.SoloParentId) ||
+                                (!string.IsNullOrEmpty(previousActive.SpId) && x.SpId == previousActive.SpId));
+                            if (matched != null)
+                            {
+                                if ((matched.ChildrenDetails == null || matched.ChildrenDetails.Count == 0) && previousActive.ChildrenDetails != null && previousActive.ChildrenDetails.Count > 0)
+                                    matched.ChildrenDetails = previousActive.ChildrenDetails;
+                                if (!matched.CardExpiresAt.HasValue && previousActive.CardExpiresAt.HasValue)
+                                    matched.CardExpiresAt = previousActive.CardExpiresAt;
+                                ActiveCandidate = matched;
+                            }
+                            else
+                            {
+                                ActiveCandidate = previousActive;
+                            }
+                        }
+
                         OnPropertyChanged(nameof(QueuePageSummary));
                         OnPropertyChanged(nameof(RecommendationsSummary));
                         OnPropertyChanged(nameof(CanQueueLoadMore));
@@ -475,6 +495,12 @@ namespace SOLUM_UI.ViewModels
             {
                 foreach (var item in FilteredRecommendations.Take(countToTake))
                     PagedRecommendations.Add(item);
+            }
+            if (previousActive != null && ActiveCandidate == null)
+            {
+                ActiveCandidate = PagedRecommendations.FirstOrDefault(x =>
+                    (previousActive.SoloParentId != Guid.Empty && x.SoloParentId == previousActive.SoloParentId) ||
+                     (!string.IsNullOrEmpty(previousActive.SpId) && x.SpId == previousActive.SpId)) ?? previousActive;
             }
             OnPropertyChanged(nameof(QueuePageSummary));
             OnPropertyChanged(nameof(RecommendationsSummary));

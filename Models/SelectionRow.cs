@@ -54,7 +54,7 @@ namespace SOLUM_UI.Models
             {
                 double val = Score;
                 if (val > 0 && val <= 1.0) val *= 100.0;
-                return val.ToString("0") + "%";
+                return val.ToString("0.0") + "%";
             }
         }
 
@@ -75,7 +75,7 @@ namespace SOLUM_UI.Models
         public string PerCapitaLabel => $"₱{IncomePerCapita:N0} / capita";
         public string MinorsLabel => Dependants == 1 ? "1 Dependent" : $"{Dependants} Dependents";
         public string ToddlersLabel => Children0To6Count > 0 ? (Children0To6Count == 1 ? "1 Dependent (0–6y)" : $"{Children0To6Count} Dependents (0–6y)") : "0 Dependents (0–6y)";
-        public SolidColorBrush ToddlersFg => Children0To6Count >= 2 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Children0To6Count == 1 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")));
+        public SolidColorBrush ToddlersFg => Children0To6Count >= 2 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C1D38")) : (Children0To6Count == 1 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4B5563")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")));
 
         public bool HasCollegeAgeDependent { get; set; }
         public bool HasSpecialNeedsDependent { get; set; }
@@ -117,13 +117,15 @@ namespace SOLUM_UI.Models
                 if (HasCollegeAgeDependent) flags.Add($"College Scholarship ({CollegeStudentSummary})");
                 if (HasSpecialNeedsDependent) flags.Add(SpecialNeedsDependentsCount > 1 ? $"{SpecialNeedsDependentsCount} Special Needs Dependents" : "Special Needs Dependent");
                 if (IsPantawidBeneficiary) flags.Add("4Ps Beneficiary");
-                return flags.Count > 0 ? string.Join(" • ", flags) : "—";
+                return flags.Count > 0 ? string.Join(" • ", flags) : "Cleared";
             }
         }
         public bool HasAuditFlags => IsCardExpired || HasCollegeAgeDependent || HasSpecialNeedsDependent || IsPantawidBeneficiary;
         public SolidColorBrush AuditFlagsFg => IsCardExpired
-            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626"))
-            : (HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")));
+            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#881337"))
+            : (HasAuditFlags
+                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C1D38"))
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#16A34A")));
 
         public string ComplianceRemark
         {
@@ -174,6 +176,7 @@ namespace SOLUM_UI.Models
             }
         }
         public string EmergencySummary => !string.IsNullOrWhiteSpace(_emergencyContactName) ? (EmergencyContactFormatted != "—" ? $"{_emergencyContactName} ({EmergencyContactFormatted})" : _emergencyContactName) : "—";
+        public string PhilSysCardNumber { get; set; } = "—";
         public string Sex { get; set; } = "Female";
         public string CivilStatus { get; set; } = "Single";
         public string DateOfBirthFormatted { get; set; } = "1988-05-14";
@@ -229,8 +232,8 @@ namespace SOLUM_UI.Models
 
         public SolidColorBrush CardStatusFg =>
             !CardExpiresAt.HasValue ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#166534")) :
-            IsCardExpired ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626")) :
-            IsCardExpiringSoon ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) :
+            IsCardExpired ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#881337")) :
+            IsCardExpiringSoon ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")) :
             new SolidColorBrush((Color)ColorConverter.ConvertFromString("#166534"));
 
         public SolidColorBrush CardStatusBorder =>

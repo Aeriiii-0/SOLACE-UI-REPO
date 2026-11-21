@@ -34,7 +34,7 @@ namespace SOLUM_UI.Models
             {
                 double val = Score;
                 if (val > 0 && val <= 1.0) val *= 100.0;
-                return val.ToString("0") + "%";
+                return val.ToString("0.0") + "%";
             }
         }
 
@@ -74,7 +74,24 @@ namespace SOLUM_UI.Models
         public bool HasSpecialNeedsDependent { get; set; }
         public int SpecialNeedsDependentsCount { get; set; }
         public string SpecialNeedsBadgeText => HasSpecialNeedsDependent ? $"{SpecialNeedsDependentsCount} Special Needs Dependent(s)" : "None";
+        public string SpecialNeedsNoticeDesc => $"Applicant has {(SpecialNeedsDependentsCount > 0 ? SpecialNeedsDependentsCount : 1)} dependent(s) with special needs requiring ongoing care. Under RA 11861, qualified solo parents with PWD/special needs dependents receive priority consideration.";
+        public string SpecialNeedsSummaryDisplay
+        {
+            get
+            {
+                if (!HasSpecialNeedsDependent) return "None";
+                var specialKids = ChildrenDetails?.Where(c => c.HasSpecialNeeds).ToList();
+                if (specialKids != null && specialKids.Count > 0)
+                {
+                    var details = specialKids.Select(k => !string.IsNullOrEmpty(k.SpecialNeedsCategory) ? $"{k.Name} ({k.SpecialNeedsCategory})" : k.Name);
+                    return string.Join(", ", details);
+                }
+                int count = SpecialNeedsDependentsCount > 0 ? SpecialNeedsDependentsCount : 1;
+                return count == 1 ? "1 Dependent with Special Needs" : $"{count} Dependents with Special Needs";
+            }
+        }
         public string ProblemPresented { get; set; } = string.Empty;
+        public string ProblemPresentedDisplay => !string.IsNullOrWhiteSpace(ProblemPresented) && !ProblemPresented.Equals("None", StringComparison.OrdinalIgnoreCase) ? ProblemPresented : CircumstanceDisplay;
         private string _circumstance = string.Empty;
         public string Circumstance { get => _circumstance; set { if (SetProperty(ref _circumstance, value)) { OnPropertyChanged(nameof(DepSecondaryMetric)); OnPropertyChanged(nameof(CircumstanceDisplay)); } } }
         private string _otherIncomeSource = string.Empty;
@@ -126,7 +143,7 @@ namespace SOLUM_UI.Models
         public SolidColorBrush PerCapitaFg => IncomePerCapita < 1500 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (IncomePerCapita < 2500 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4B5563")));
         public string MinorsLabel => Dependants == 1 ? "1 Dependent" : $"{Dependants} Dependents";
         public string ToddlersLabel => Children0To6Count > 0 ? (Children0To6Count == 1 ? "1 Dependent (0–6y)" : $"{Children0To6Count} Dependents (0–6y)") : "0 Dependents (0–6y)";
-        public SolidColorBrush ToddlersFg => Children0To6Count >= 2 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC3545")) : (Children0To6Count == 1 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")));
+        public SolidColorBrush ToddlersFg => Children0To6Count >= 2 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C1D38")) : (Children0To6Count == 1 ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4B5563")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")));
         // Prominent Metrics for the 4 Dimensions
         public string EconomicStrainPercentLabel => $"{EconomicStrainScore * 100:0}%";
         public string DependencyBurdenPercentLabel => $"{DependencyBurdenScore * 100:0}%";
@@ -195,11 +212,11 @@ namespace SOLUM_UI.Models
         public bool HasCollegeAgeDependent => CollegeAgeDependentsCount > 0;
         public bool IsPantawidBeneficiary { get; set; }
         public string CrossCheckText => HasCollegeAgeDependent ? "College Scholarship" : "None";
-        public SolidColorBrush CrossCheckFg => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9CA3AF"));
+        public SolidColorBrush CrossCheckFg => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C1D38")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280"));
         public string AuditBadgeText => CrossCheckText;
-        public SolidColorBrush AuditBadgeBg => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFBEB")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0FDF4"));
+        public SolidColorBrush AuditBadgeBg => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FBF5F7")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F0FDF4"));
         public SolidColorBrush AuditBadgeFg => CrossCheckFg;
-        public SolidColorBrush AuditBadgeBorder => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FDE68A")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BBF7D0"));
+        public SolidColorBrush AuditBadgeBorder => HasCollegeAgeDependent ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E8D5DB")) : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BBF7D0"));
 
         public bool IsDisqualified { get; set; }
         public string DisqualificationReason { get; set; }
@@ -258,8 +275,8 @@ namespace SOLUM_UI.Models
 
         public SolidColorBrush CardStatusFg =>
             !CardExpiresAt.HasValue ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#166534")) :
-            IsCardExpired ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626")) :
-            IsCardExpiringSoon ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")) :
+            IsCardExpired ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#881337")) :
+            IsCardExpiringSoon ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")) :
             new SolidColorBrush((Color)ColorConverter.ConvertFromString("#166534"));
 
         public SolidColorBrush CardStatusBorder =>
@@ -289,7 +306,13 @@ namespace SOLUM_UI.Models
     {
         public string Name { get; set; }
         public int Age { get; set; }
+        public string Relationship { get; set; } = "Child";
+        public DateTime Birthdate { get; set; }
+        public string BirthdateFormatted => Birthdate != DateTime.MinValue ? Birthdate.ToString("yyyy-MM-dd") : "—";
         public string EducationalLevel { get; set; } = string.Empty;
+        public bool HasSpecialNeeds { get; set; }
+        public string SpecialNeedsCategory { get; set; } = string.Empty;
+        public string SpecialNeedsTag => !string.IsNullOrEmpty(SpecialNeedsCategory) ? $"Special Needs ({SpecialNeedsCategory})" : "Special Needs";
         public string AgeDisplay => $"{Age} yr" + (Age == 1 ? " old" : "s old");
         public SolidColorBrush BadgeBg => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F3F4F6"));
         public SolidColorBrush BadgeFg => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4B5563"));

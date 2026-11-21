@@ -533,7 +533,9 @@ namespace SOLUM_UI
                     string err = resp.Errors != null && resp.Errors.Count > 0
                         ? resp.Errors[0]
                         : "Unable to load records from backend.";
-                    ShowNotification("API Notice", err, false);
+                    string title = ApiClient.IsNetworkOrConnectionError(err) ? "No Internet Connection" : "Unable to Load Records";
+                    string friendlyErr = ApiClient.HumanizeErrorMessage(err);
+                    ShowNotification(title, friendlyErr, false);
                     _allRecords = new List<SoloParentRecordViewModel>();
                     _filteredRecords = new List<SoloParentRecordViewModel>();
                     RecordsList.ItemsSource = null;

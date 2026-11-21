@@ -163,6 +163,7 @@ namespace SOLUM_UI.ViewModels
                     DisqualifiedAt = DateTime.Now
                 };
                 DisqualifiedCandidates.Insert(0, item);
+                _totalDisqualifiedCount++;
             }
             FilterDisqualifiedCandidates();
         }
@@ -224,6 +225,7 @@ namespace SOLUM_UI.ViewModels
                 }
                 DisqualifiedCandidates.Remove(item);
                 FilteredDisqualifiedCandidates.Remove(item);
+                if (_totalDisqualifiedCount > 0) _totalDisqualifiedCount--;
                 UpdateDisqualifiedPaged();
                 NotifyDisqualifiedMetricsChanged();
                 var orig = _allItems.FirstOrDefault(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId) || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId));
@@ -277,25 +279,38 @@ namespace SOLUM_UI.ViewModels
             }
             var dlg = new Microsoft.Win32.SaveFileDialog
             {
-                FileName = $"Disqualified_Candidates_Audit_FY{_activeCycleFiscalYear}_{DateTime.Now:yyyyMMdd}.csv",
-                DefaultExt = ".csv",
-                Filter = "CSV file (*.csv)|*.csv"
+                FileName = $"Disqualified_Candidates_Audit_FY{_activeCycleFiscalYear}_{DateTime.Now:yyyyMMdd}",
+                DefaultExt = ".xlsx",
+                Filter = "Excel Workbook (*.xlsx)|*.xlsx|CSV file (*.csv)|*.csv"
             };
             if (dlg.ShowDialog() == true)
             {
-                var sb = new System.Text.StringBuilder();
-                sb.AppendLine("Solo Parent ID,Full Name,Barangay,Monthly Income,Vulnerability Score,Priority Level,Dependents,Disqualification Reason,Audit Justification Notes,Disqualified By,Timestamp");
-                foreach (var c in itemsToExport)
-                {
-                    sb.AppendLine($"{FormHelper.SanitizeCsvField(c.SpId)},{FormHelper.SanitizeCsvField(c.FullName)},{FormHelper.SanitizeCsvField(c.Barangay)},\"{c.MonthlyIncome:F2}\",\"{c.PriorityScore:F2}\",{FormHelper.SanitizeCsvField(c.Priority)},\"{c.Dependents}\",{FormHelper.SanitizeCsvField(c.RejectionReason)},{FormHelper.SanitizeCsvField(c.RejectionNotes)},{FormHelper.SanitizeCsvField(c.DisqualifiedBy)},{FormHelper.SanitizeCsvField(c.FormattedDisqualifiedAt)}");
-                }
                 try
                 {
-                    System.IO.File.WriteAllText(dlg.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
+                    bool isExcel = dlg.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase);
+                    if (isExcel)
+                    {
+                        SubsidyExcelExportService.ExportDisqualifiedToExcel(dlg.FileName, itemsToExport, _activeCycleFiscalYear);
+                    }
+                    else
+                    {
+                        var sb = new System.Text.StringBuilder();
+                        sb.AppendLine("No.,Full Name,Barangay,Monthly Income,Vulnerability Score,Priority Level,Dependents,Disqualification Reason,Audit Justification Notes,Disqualified By,Timestamp");
+                        int dqCount = 0;
+                        foreach (var c in itemsToExport)
+                        {
+                            sb.AppendLine($"{++dqCount},{FormHelper.SanitizeCsvField(c.FullName)},{FormHelper.SanitizeCsvField(c.Barangay)},\"{c.MonthlyIncome:F2}\",\"{c.PriorityScore:F2}\",{FormHelper.SanitizeCsvField(c.Priority)},\"{c.Dependents}\",{FormHelper.SanitizeCsvField(c.RejectionReason)},{FormHelper.SanitizeCsvField(c.RejectionNotes)},{FormHelper.SanitizeCsvField(c.DisqualifiedBy)},{FormHelper.SanitizeCsvField(c.FormattedDisqualifiedAt)}");
+                        }
+                        System.IO.File.WriteAllText(dlg.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
+                    }
+
+                    string fileType = isExcel ? "Excel" : "CSV";
                     ToastNotification.Show(
                         "Export Complete",
-                        $"Exported {itemsToExport.Count} disqualified candidate record(s) to CSV: {System.IO.Path.GetFileName(dlg.FileName)}",
+                        $"Exported {itemsToExport.Count} disqualified candidate record(s) to {fileType}: {System.IO.Path.GetFileName(dlg.FileName)}",
                         ToastType.Success);
+
+                    PromptToOpenFile(dlg.FileName, fileType);
                 }
                 catch (Exception ex)
                 {
@@ -343,72 +358,234 @@ namespace SOLUM_UI.ViewModels
             if (confirm) ToastNotification.Show("Confirmed", $"{row.Name} confirmed as final grantee.", ToastType.Success); else ToastNotification.Show("Unconfirmed", $"{row.Name} reverted to pending shortlist.", ToastType.Info);
         }
 
-        private async Task ExportCsvAsync(string name, Task<string> generator, string msg)
+        public async Task ExportCityEducRosterAsync()
         {
-            var dlg = new SaveFileDialog { FileName = name, DefaultExt = ".csv", Filter = "CSV file (*.csv)|*.csv" };
-            if (dlg.ShowDialog() == true)
+            var flagged = ShortlistRows.Where(i => i.HasCollegeAgeDependent).ToList();
+            if (flagged.Count == 0)
             {
-                try
-                {
-                    File.WriteAllText(dlg.FileName, await generator, new System.Text.UTF8Encoding(true));
-                    ToastNotification.Show(
-                        "Export Complete",
-                        $"{msg} Saved to: {System.IO.Path.GetFileName(dlg.FileName)}",
-                        ToastType.Success);
+                Views.Dialogs.ActionConfirmDialog.Warning("No Flagged Records", "No applicants in the shortlist have college-age dependents (17–24 yrs).");
+                return;
+            }
 
-                    // Ask user if they want to open the file
-                    var openDialog = new Views.Dialogs.OpenFilePromptDialog("Would you like to open the exported CSV file now?")
-                    {
-                        Owner = Application.Current.MainWindow
-                    };
-                    
-                    if (openDialog.ShowDialog() == true && openDialog.ShouldOpenFile)
+            int yr = SelectedFiscalCycle?.FiscalYear ?? ActiveCycleFiscalYear;
+            var dlg = new SaveFileDialog
+            {
+                FileName = $"CityEduc_College_Dependents_FY{yr}_{DateTime.Now:yyyyMMdd}",
+                DefaultExt = ".pdf",
+                Filter = "PDF Document (*.pdf)|*.pdf|Excel Workbook (*.xlsx)|*.xlsx"
+            };
+
+            if (dlg.ShowDialog() != true) return;
+
+            IsActionProcessing = true;
+            ActionProcessingMessage = "Preparing City Educ roster export...";
+            try
+            {
+                // Ensure profile enrichment for any un-enriched flagged candidates
+                foreach (var r in flagged.Where(i => i.CollegeAgeDependents == null || i.CollegeAgeDependents.Count == 0))
+                {
+                    if (r.SoloParentId != Guid.Empty)
                     {
                         try
                         {
-                            System.Diagnostics.Process.Start(
-                                new System.Diagnostics.ProcessStartInfo(dlg.FileName)
-                                { UseShellExecute = true });
+                            var resp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(r.SoloParentId);
+                            if (resp?.Data != null) SubsidyModelMapper.EnrichRowFromRecord(r, resp.Data);
                         }
                         catch { }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Views.Dialogs.ActionConfirmDialog.Error("Export Error", "Export failed:\n" + ex.Message);
-                }
-            }
-        }
 
-        public async Task ExportRecommendationsQueueAsync()
-        {
-            IsActionProcessing = true;
-            ActionProcessingMessage = "Exporting recommendations queue...";
-            try
-            {
-                var resp = await _apiService.GetAllRecommendationsAsync(new GetSubsidyRecommendationsRequest { CycleId = _activeCycleId });
-                if (resp?.Data == null || resp.Data.Count == 0)
+                bool isPdf = dlg.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase);
+                if (isPdf)
                 {
-                    Views.Dialogs.ActionConfirmDialog.Warning("No Records", "No recommendations found to export.");
-                    return;
+                    SubsidyPdfExportService.ExportCityEducRosterToPdf(dlg.FileName, ShortlistRows.ToList(), yr);
                 }
-                var items = resp.Data.Select((d, idx) =>
+                else
                 {
-                    var item = SubsidyModelMapper.ToItem(d);
-                    item.Rank = idx + 1;
-                    return item;
-                }).ToList();
+                    SubsidyExcelExportService.ExportCityEducRosterToExcel(dlg.FileName, ShortlistRows.ToList(), yr);
+                }
 
-                int yr = SelectedFiscalCycle?.FiscalYear ?? ActiveCycleFiscalYear;
-                await ExportCsvAsync($"Recommendations_Queue_FY{yr}_{DateTime.Now:yyyyMMdd}", _apiService.ExportAllQueueCsvAsync(items), $"{items.Count} candidate recommendations exported successfully.");
+                ToastNotification.Show(
+                    "Export Complete",
+                    $"{flagged.Count} candidate(s) exported for City Educ cross-check. Saved to: {Path.GetFileName(dlg.FileName)}",
+                    ToastType.Success);
+
+                PromptToOpenFile(dlg.FileName, isPdf ? "PDF" : "Excel");
             }
             catch (Exception ex)
             {
-                Views.Dialogs.ActionConfirmDialog.Error("Export Error", ex.Message);
+                Views.Dialogs.ActionConfirmDialog.Error("Export Error", "Export failed:\n" + ex.Message);
             }
             finally
             {
                 IsActionProcessing = false;
+            }
+        }
+
+        public async Task ExportPantawid4PsRosterAsync()
+        {
+            var list = ShortlistRows.Where(i => i.IsPantawidBeneficiary).ToList();
+            if (list.Count == 0)
+            {
+                list = _allItems.Where(i => i.IsPantawidBeneficiary).Select(it => new SelectionRow
+                {
+                    Rank = it.Rank,
+                    SoloParentId = it.SoloParentId,
+                    SpId = it.SpId,
+                    Name = it.Name,
+                    Barangay = it.Barangay,
+                    MonthlyIncome = it.MonthlyIncome,
+                    IncomePerCapita = it.IncomePerCapita,
+                    Dependants = it.Dependants,
+                    MinorDependentsCount = it.MinorDependentsCount,
+                    Circumstance = it.Circumstance,
+                    IsPantawidBeneficiary = true
+                }).ToList();
+            }
+
+            if (list.Count == 0)
+            {
+                Views.Dialogs.ActionConfirmDialog.Warning("No Records", "No applicants are tagged as 4Ps beneficiaries.");
+                return;
+            }
+
+            int yr = SelectedFiscalCycle?.FiscalYear ?? ActiveCycleFiscalYear;
+            var dlg = new SaveFileDialog
+            {
+                FileName = $"DSWD_4Ps_Beneficiaries_FY{yr}_{DateTime.Now:yyyyMMdd}",
+                DefaultExt = ".pdf",
+                Filter = "PDF Document (*.pdf)|*.pdf|Excel Workbook (*.xlsx)|*.xlsx"
+            };
+
+            if (dlg.ShowDialog() != true) return;
+
+            IsActionProcessing = true;
+            ActionProcessingMessage = "Preparing DSWD 4Ps roster export...";
+            try
+            {
+                // Ensure profile enrichment for any un-enriched 4Ps candidates
+                foreach (var r in list)
+                {
+                    if (r.SoloParentId != Guid.Empty && (string.IsNullOrEmpty(r.Address) || string.IsNullOrEmpty(r.ContactNumber) || string.IsNullOrEmpty(r.DateOfBirthFormatted) || r.DateOfBirthFormatted == "—" || string.IsNullOrEmpty(r.PhilSysCardNumber) || r.PhilSysCardNumber == "—"))
+                    {
+                        try
+                        {
+                            var resp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(r.SoloParentId);
+                            if (resp?.Data != null) SubsidyModelMapper.EnrichRowFromRecord(r, resp.Data);
+                        }
+                        catch { }
+                    }
+                }
+
+                bool isPdf = dlg.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase);
+                if (isPdf)
+                {
+                    SubsidyPdfExportService.ExportPantawid4PsRosterToPdf(dlg.FileName, list, yr);
+                }
+                else
+                {
+                    SubsidyExcelExportService.ExportPantawid4PsRosterToExcel(dlg.FileName, list, yr);
+                }
+
+                ToastNotification.Show(
+                    "Export Complete",
+                    $"{list.Count} 4Ps candidate(s) exported successfully. Saved to: {Path.GetFileName(dlg.FileName)}",
+                    ToastType.Success);
+
+                PromptToOpenFile(dlg.FileName, isPdf ? "PDF" : "Excel");
+            }
+            catch (Exception ex)
+            {
+                Views.Dialogs.ActionConfirmDialog.Error("Export Error", "Export failed:\n" + ex.Message);
+            }
+            finally
+            {
+                IsActionProcessing = false;
+            }
+        }
+
+        public async Task ExportFinalLedgerRosterAsync()
+        {
+            if (FinalGranteesList.Count == 0)
+            {
+                Views.Dialogs.ActionConfirmDialog.Warning("Ledger Empty", "No confirmed grantees to export.");
+                return;
+            }
+
+            int yr = SelectedFiscalCycle?.FiscalYear ?? ActiveCycleFiscalYear;
+            decimal grantAmount = GrantAmountPerRecipient > 0 ? (decimal)GrantAmountPerRecipient : 1000m;
+
+            var dlg = new SaveFileDialog
+            {
+                FileName = $"Final_Grantee_Disbursement_Ledger_FY{yr}_{DateTime.Now:yyyyMMdd}",
+                DefaultExt = ".pdf",
+                Filter = "PDF Document (*.pdf)|*.pdf|Excel Workbook (*.xlsx)|*.xlsx"
+            };
+
+            if (dlg.ShowDialog() != true) return;
+
+            IsActionProcessing = true;
+            ActionProcessingMessage = "Preparing final grantee disbursement ledger export...";
+            try
+            {
+                var items = FinalGranteesList.ToList();
+                // Ensure profile enrichment
+                foreach (var r in items)
+                {
+                    if (r.SoloParentId != Guid.Empty && (string.IsNullOrEmpty(r.Address) || string.IsNullOrEmpty(r.ContactNumber) || string.IsNullOrEmpty(r.DateOfBirthFormatted) || r.DateOfBirthFormatted == "—" || string.IsNullOrEmpty(r.PhilSysCardNumber) || r.PhilSysCardNumber == "—"))
+                    {
+                        try
+                        {
+                            var resp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(r.SoloParentId);
+                            if (resp?.Data != null) SubsidyModelMapper.EnrichRowFromRecord(r, resp.Data);
+                        }
+                        catch { }
+                    }
+                }
+
+                bool isPdf = dlg.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase);
+                if (isPdf)
+                {
+                    SubsidyPdfExportService.ExportFinalLedgerToPdf(dlg.FileName, items, yr, grantAmount);
+                }
+                else
+                {
+                    SubsidyExcelExportService.ExportFinalLedgerToExcel(dlg.FileName, items, yr, grantAmount);
+                }
+
+                ToastNotification.Show(
+                    "Export Complete",
+                    $"Final grantee disbursement ledger for FY {yr} exported successfully. Saved to: {Path.GetFileName(dlg.FileName)}",
+                    ToastType.Success);
+
+                PromptToOpenFile(dlg.FileName, isPdf ? "PDF" : "Excel");
+            }
+            catch (Exception ex)
+            {
+                Views.Dialogs.ActionConfirmDialog.Error("Export Error", "Export failed:\n" + ex.Message);
+            }
+            finally
+            {
+                IsActionProcessing = false;
+            }
+        }
+
+        private static void PromptToOpenFile(string filePath, string fileType)
+        {
+            var openDialog = new Views.Dialogs.OpenFilePromptDialog($"Would you like to open the exported {fileType} file now?")
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            if (openDialog.ShowDialog() == true && openDialog.ShouldOpenFile)
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(
+                        new System.Diagnostics.ProcessStartInfo(filePath)
+                        { UseShellExecute = true });
+                }
+                catch { }
             }
         }
 
@@ -465,20 +642,71 @@ namespace SOLUM_UI.ViewModels
             try
             {
                 var resp = await _apiService.PredictCandidateAsync(targetId);
-                if (resp != null && resp.Succeeded && resp.Data != null)
+                if (resp != null && resp.Succeeded && resp.Data != null && resp.Data.SoloParentId != Guid.Empty)
                 {
+                    // Record cooldown timestamp
+                    RecordReassessment(targetId);
+
+                    if (string.Equals(resp.Data.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+                    {
+                        IsDrawerOpen = false;
+                        ActiveCandidate = null;
+                        await RefreshQueueWithRetainedCountAsync();
+                        string dqReason = !string.IsNullOrWhiteSpace(resp.Data.RejectionReason)
+                            ? resp.Data.RejectionReason
+                            : "Statutory Disqualification";
+                        ToastNotification.Show(
+                            "Moved to Disqualified",
+                            $"{item.Name} was deterministically disqualified during reassessment ({dqReason}).",
+                            ToastType.Warning);
+                        return;
+                    }
+
                     SubsidyModelMapper.UpdateItemFromDto(item, resp.Data);
                     item.RefreshVisuals();
                     // Re-enrich with details like children items
                     await FetchRecordForDrawerAsync(item);
-                    if (ActiveCandidate == item)
+
+                    // Check if candidate is currently in ShortlistRows (Approved Selection)
+                    var shortlistRow = ShortlistRows.FirstOrDefault(x => (x.SoloParentId != Guid.Empty && x.SoloParentId == targetId)
+                                                                      || (!string.IsNullOrEmpty(x.SpId) && x.SpId == item.SpId));
+                    if (shortlistRow != null)
                     {
+                        shortlistRow.Score = item.Score;
+                        shortlistRow.Priority = item.Priority;
+                        shortlistRow.Circumstance = item.Circumstance;
+                        shortlistRow.MonthlyIncome = item.MonthlyIncome;
+                        shortlistRow.IncomePerCapita = item.IncomePerCapita;
+                        shortlistRow.Dependants = item.Dependants;
+                        shortlistRow.MinorDependentsCount = item.MinorDependentsCount;
+                        shortlistRow.ToddlersUnder5Count = item.ToddlersUnder5Count;
+                        shortlistRow.HasSpecialNeedsDependent = item.HasSpecialNeedsDependent;
+                        shortlistRow.SpecialNeedsDependentsCount = item.SpecialNeedsDependentsCount;
+                        shortlistRow.HasCollegeAgeDependent = item.HasCollegeAgeDependent;
+                        shortlistRow.CollegeAgeDependentsCount = item.CollegeAgeDependentsCount;
+                        shortlistRow.IsPantawidBeneficiary = item.IsPantawidBeneficiary;
+                        shortlistRow.ModelVersion = item.ModelVersion;
+                        shortlistRow.NeedsAndProblems = item.NeedsAndProblems;
+                        shortlistRow.OtherIncomeSource = item.OtherIncomeSource;
+                        if (item.ChildrenDetails != null && item.ChildrenDetails.Count > 0)
+                            shortlistRow.ChildrenDetails = item.ChildrenDetails;
+                        UpdateShortlistAndFinalCollections(enrich: false);
+                        ActiveCandidate = item;
                         OnPropertyChanged(nameof(ActiveCandidate));
                     }
-                    // Record cooldown timestamp
-                    RecordReassessment(targetId);
-                    // Refresh queue with retained count so rankings are restarted from #1 and user stays at their loaded depth
-                    await RefreshQueueWithRetainedCountAsync();
+                    else
+                    {
+                        // Refresh queue with retained count so rankings are restarted from #1 and user stays at their loaded depth
+                        await RefreshQueueWithRetainedCountAsync();
+                        if (ActiveCandidate != null && ActiveCandidate.SoloParentId == targetId)
+                        {
+                            item.Rank = ActiveCandidate.Rank;
+                            await FetchRecordForDrawerAsync(ActiveCandidate);
+                            ActiveCandidate.RefreshVisuals();
+                            OnPropertyChanged(nameof(ActiveCandidate));
+                        }
+                    }
+
                     ToastNotification.Show("Prediction Updated",
                         $"{item.Name} re-scored: {item.Score:F1} ({item.Priority}) via {resp.Data.ModelVersion}. Current rank: #{item.Rank}.",
                         ToastType.Success);

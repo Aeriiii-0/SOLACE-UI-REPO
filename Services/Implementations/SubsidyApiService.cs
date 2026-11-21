@@ -302,42 +302,69 @@ namespace SOLUM_UI.Services.Implementations
                 }
             }
             var sb = new StringBuilder("\uFEFF");
-            sb.AppendLine($"City Educ Scholarship Cross-Check Roster - {DateTime.Now:yyyy}");
-            sb.AppendLine("No.,Name of Solo Parent,Name of Dependent,Age of Dependent,Education of Dependent");
+            sb.AppendLine("No.,Solo Parent Full Name,Barangay,Contact Number,Dependent Student Name,Relationship,Age,Date of Birth,Educational Attainment / Year Level,City Educ Verification Remarks");
 
             int count = 0;
             foreach (var r in items.Where(i => i.HasCollegeAgeDependent))
             {
+                string contact = !string.IsNullOrWhiteSpace(r.ContactNumberFormatted) && r.ContactNumberFormatted != "—" ? r.ContactNumberFormatted : (!string.IsNullOrWhiteSpace(r.ContactNumber) ? r.ContactNumber : "—");
                 if (r.CollegeAgeDependents != null && r.CollegeAgeDependents.Count > 0)
                 {
                     foreach (var child in r.CollegeAgeDependents)
                     {
                         string edu = !string.IsNullOrWhiteSpace(child.EducationalLevel) ? child.EducationalLevel : "—";
-                        sb.AppendLine($"{++count},{FormHelper.SanitizeCsvField(r.Name)},{FormHelper.SanitizeCsvField(child.Name)},{child.Age},{FormHelper.SanitizeCsvField(edu)}");
+                        string rel = !string.IsNullOrWhiteSpace(child.Relationship) ? child.Relationship : "Child";
+                        string bday = child.BirthdateFormatted;
+                        sb.AppendLine($"{++count},{FormHelper.SanitizeCsvField(r.Name)},{FormHelper.SanitizeCsvField(r.Barangay)},{FormHelper.SanitizeCsvField(contact)},{FormHelper.SanitizeCsvField(child.Name)},{FormHelper.SanitizeCsvField(rel)},{child.Age},{FormHelper.SanitizeCsvField(bday)},{FormHelper.SanitizeCsvField(edu)},\"\"");
                     }
                 }
                 else
                 {
-                    sb.AppendLine($"{++count},{FormHelper.SanitizeCsvField(r.Name)},\"Dependent (Age 17–24)\",18,\"College Level\"");
+                    sb.AppendLine($"{++count},{FormHelper.SanitizeCsvField(r.Name)},{FormHelper.SanitizeCsvField(r.Barangay)},{FormHelper.SanitizeCsvField(contact)},\"Dependent (Age 17–24)\",\"Child\",18,\"—\",\"College Level\",\"\"");
                 }
             }
             return sb.ToString();
         }
 
-        public Task<string> ExportPantawid4PsRosterCsvAsync(List<SelectionRow> items)
+        public async Task<string> ExportPantawid4PsRosterCsvAsync(List<SelectionRow> items)
         {
+            var targets = items.Where(i => i.IsPantawidBeneficiary).ToList();
+            foreach (var r in targets)
+            {
+                if (r.SoloParentId != Guid.Empty && (string.IsNullOrEmpty(r.Address) || string.IsNullOrEmpty(r.ContactNumber) || string.IsNullOrEmpty(r.DateOfBirthFormatted) || r.DateOfBirthFormatted == "—" || string.IsNullOrEmpty(r.PhilSysCardNumber) || r.PhilSysCardNumber == "—"))
+                {
+                    try
+                    {
+                        var resp = await SoloParentApiService.Instance.GetSoloParentByIdAsync(r.SoloParentId);
+                        if (resp?.Data != null) SubsidyModelMapper.EnrichRowFromRecord(r, resp.Data);
+                    }
+                    catch { }
+                }
+            }
+
             var sb = new StringBuilder("\uFEFF");
-            sb.AppendLine("Rank,SP ID,Solo Parent Name,Barangay,Monthly Income,Income Per Capita,Total Dependents,Minor Dependents,Circumstance,4Ps Status,Export Timestamp");
-            foreach (var r in items.Where(i => i.IsPantawidBeneficiary))
-                sb.AppendLine($"{r.Rank},{FormHelper.SanitizeCsvField(r.SpId)},{FormHelper.SanitizeCsvField(r.Name)},{FormHelper.SanitizeCsvField(r.Barangay)},{FormHelper.SanitizeCsvField(r.IncomeLabel)},{FormHelper.SanitizeCsvField(r.PerCapitaLabel)},{r.Dependants},{r.MinorDependentsCount},{FormHelper.SanitizeCsvField(r.Circumstance)},Enrolled (DSWD 4Ps),{DateTime.Now:yyyy-MM-dd HH:mm}");
-            return Task.FromResult(sb.ToString());
+            sb.AppendLine("No.,PhilSys Card Number,Solo Parent Full Name,Sex,Date of Birth,Barangay,Complete Address,Contact Number,Monthly Income,Minor Dependents (0–18 yrs),Solo Parent Classification,4Ps Tag in SOLACE,DSWD Pantawid Verification Status");
+
+            int count = 0;
+            foreach (var r in targets)
+            {
+                string philsys = !string.IsNullOrWhiteSpace(r.PhilSysCardNumber) && r.PhilSysCardNumber != "—" ? r.PhilSysCardNumber : "—";
+                string contact = !string.IsNullOrWhiteSpace(r.ContactNumberFormatted) && r.ContactNumberFormatted != "—" ? r.ContactNumberFormatted : (!string.IsNullOrWhiteSpace(r.ContactNumber) ? r.ContactNumber : "—");
+                string addr = !string.IsNullOrWhiteSpace(r.Address) ? r.Address.Trim() : (!string.IsNullOrWhiteSpace(r.Barangay) ? r.Barangay : "—");
+                string bday = !string.IsNullOrWhiteSpace(r.DateOfBirthFormatted) ? r.DateOfBirthFormatted : "—";
+                string sex = !string.IsNullOrWhiteSpace(r.Sex) ? r.Sex : "Female";
+                string circ = !string.IsNullOrWhiteSpace(r.Circumstance) ? r.Circumstance : "—";
+
+                sb.AppendLine($"{++count},{FormHelper.SanitizeCsvField(philsys)},{FormHelper.SanitizeCsvField(r.Name)},{FormHelper.SanitizeCsvField(sex)},{FormHelper.SanitizeCsvField(bday)},{FormHelper.SanitizeCsvField(r.Barangay)},{FormHelper.SanitizeCsvField(addr)},{FormHelper.SanitizeCsvField(contact)},{FormHelper.SanitizeCsvField(r.IncomeLabel)},{r.MinorDependentsCount},{FormHelper.SanitizeCsvField(circ)},\"Enrolled (DSWD 4Ps)\",\"\"");
+            }
+            return sb.ToString();
         }
 
-        public async Task<string> ExportFinalLedgerCsvAsync(List<SelectionRow> items, int fiscalYear)
+        public async Task<string> ExportFinalLedgerCsvAsync(List<SelectionRow> items, int fiscalYear, decimal grantAmount = 1000m)
         {
             foreach (var r in items)
             {
-                if (r.SoloParentId != Guid.Empty && (string.IsNullOrEmpty(r.Address) || string.IsNullOrEmpty(r.ContactNumber) || string.IsNullOrEmpty(r.DateOfBirthFormatted) || r.DateOfBirthFormatted == "—"))
+                if (r.SoloParentId != Guid.Empty && (string.IsNullOrEmpty(r.Address) || string.IsNullOrEmpty(r.ContactNumber) || string.IsNullOrEmpty(r.DateOfBirthFormatted) || r.DateOfBirthFormatted == "—" || string.IsNullOrEmpty(r.PhilSysCardNumber) || r.PhilSysCardNumber == "—"))
                 {
                     try
                     {
@@ -349,28 +376,18 @@ namespace SOLUM_UI.Services.Implementations
                 }
             }
             var sb = new StringBuilder("\uFEFF");
-            sb.AppendLine($"Fiscal Year {fiscalYear} - Final Grantee Ledger");
-            sb.AppendLine("No.,Full Name,Contact Number,Barangay,Address,Birthday,Status,Grant Amount");
+            sb.AppendLine("No.,PhilSys / Valid ID No.,Grantee Full Name,Barangay,Complete Address,Contact Number,Date of Birth,Grant Amount (₱),Status,Date Received,Signature,Disbursing Officer Remarks");
 
             int count = 0;
             foreach (var r in items)
             {
+                string philsys = !string.IsNullOrWhiteSpace(r.PhilSysCardNumber) && r.PhilSysCardNumber != "—" ? r.PhilSysCardNumber : "—";
                 string contact = !string.IsNullOrWhiteSpace(r.ContactNumberFormatted) && r.ContactNumberFormatted != "—" ? r.ContactNumberFormatted : (!string.IsNullOrWhiteSpace(r.ContactNumber) ? r.ContactNumber : "—");
-                string addr = !string.IsNullOrWhiteSpace(r.FullAddress) && r.FullAddress != "—" ? r.FullAddress : (!string.IsNullOrWhiteSpace(r.Address) ? r.Address : "—");
+                string addr = !string.IsNullOrWhiteSpace(r.Address) ? r.Address.Trim() : (!string.IsNullOrWhiteSpace(r.Barangay) ? r.Barangay : "—");
                 string bday = !string.IsNullOrWhiteSpace(r.DateOfBirthFormatted) ? r.DateOfBirthFormatted : "—";
-                string status = r.IsFinalGrantee ? "Confirmed" : "Pending";
-                sb.AppendLine($"{++count},{FormHelper.SanitizeCsvField(r.Name)},{FormHelper.SanitizeCsvField(contact)},{FormHelper.SanitizeCsvField(r.Barangay)},{FormHelper.SanitizeCsvField(addr)},{FormHelper.SanitizeCsvField(bday)},{FormHelper.SanitizeCsvField(status)},\"₱1,000.00\"");
+                sb.AppendLine($"{++count},{FormHelper.SanitizeCsvField(philsys)},{FormHelper.SanitizeCsvField(r.Name)},{FormHelper.SanitizeCsvField(r.Barangay)},{FormHelper.SanitizeCsvField(addr)},{FormHelper.SanitizeCsvField(contact)},{FormHelper.SanitizeCsvField(bday)},\"₱{grantAmount:N2}\",\"Confirmed Grantee\",,,");
             }
             return sb.ToString();
-        }
-
-        public Task<string> ExportAllQueueCsvAsync(List<SubsidyItem> items)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("Rank,SP ID,Name,Barangay,Score,Status,Circumstance,Income");
-            foreach (var item in items)
-                sb.AppendLine($"{item.Rank},{FormHelper.SanitizeCsvField(item.SpId)},{FormHelper.SanitizeCsvField(item.Name)},{FormHelper.SanitizeCsvField(item.Barangay)},{FormHelper.SanitizeCsvField(item.ScoreLabel)},{FormHelper.SanitizeCsvField(item.Status)},{FormHelper.SanitizeCsvField(item.Circumstance)},{FormHelper.SanitizeCsvField(item.IncomeLabel)}");
-            return Task.FromResult(sb.ToString());
         }
     }
 }

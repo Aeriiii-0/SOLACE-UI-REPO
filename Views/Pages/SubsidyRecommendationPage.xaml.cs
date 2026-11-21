@@ -31,6 +31,9 @@ namespace SOLUM_UI.Views.Pages
             // Clean up overlays when navigating away from this page
             Unloaded += (s, e) =>
             {
+                if (DataContext is SubsidyRecommendationViewModel activeVm)
+                    activeVm.IsDisqualifiedModalOpen = false;
+                MainWindow.HideGlobalModal();
                 MainWindow.HideDimOverlay();
             };
             
@@ -58,6 +61,20 @@ namespace SOLUM_UI.Views.Pages
                     {
                         if (SubsidySkeleton != null)
                             SubsidySkeleton.Visibility = vm.IsLoading ? Visibility.Visible : Visibility.Collapsed;
+                    }
+
+                    // Show/hide Disqualified Modal in full-window overlay host
+                    if (e.PropertyName == nameof(SubsidyRecommendationViewModel.IsDisqualifiedModalOpen))
+                    {
+                        if (vm.IsDisqualifiedModalOpen)
+                        {
+                            var modal = new Components.ModalDisqualifiedCandidates { DataContext = vm };
+                            MainWindow.ShowGlobalModal(modal, () => vm.IsDisqualifiedModalOpen = false);
+                        }
+                        else
+                        {
+                            MainWindow.HideGlobalModal();
+                        }
                     }
                 };
             }        }

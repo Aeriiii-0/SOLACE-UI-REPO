@@ -465,9 +465,7 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Total registered -->
-                    <Border Grid.Column="0" Style="{StaticResource Card}" Cursor="Hand"
-                            ToolTip="Total solo parents registered under the active date and barangay filter scope."
-                            ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50">
+                    <Border Grid.Column="0" Style="{StaticResource Card}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <Border BorderBrush="#7D2245" BorderThickness="1" CornerRadius="8" Width="26" Height="26" Margin="0,0,8,0">
@@ -490,9 +488,7 @@
                     </Border>
 
                     <!-- Active -->
-                    <Border Grid.Column="2" Style="{StaticResource Card}" Cursor="Hand"
-                            ToolTip="Active records with valid solo parent identification status."
-                            ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50">
+                    <Border Grid.Column="2" Style="{StaticResource Card}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <Border BorderBrush="#7D2245" BorderThickness="1" CornerRadius="8" Width="26" Height="26" Margin="0,0,8,0">
@@ -509,9 +505,7 @@
                     </Border>
 
                     <!-- Inactive -->
-                    <Border Grid.Column="4" Style="{StaticResource Card}" Cursor="Hand"
-                            ToolTip="Inactive, expired, or waitlisted solo parent records requiring reassessment."
-                            ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50">
+                    <Border Grid.Column="4" Style="{StaticResource Card}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <Border BorderBrush="#7D2245" BorderThickness="1" CornerRadius="8" Width="26" Height="26" Margin="0,0,8,0">
@@ -528,9 +522,7 @@
                     </Border>
 
                     <!-- Top barangay -->
-                    <Border Grid.Column="6" Style="{StaticResource Card}" Cursor="Hand"
-                            ToolTip="Highest density barangay by solo parent count in Biñan City."
-                            ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50">
+                    <Border Grid.Column="6" Style="{StaticResource Card}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <Border BorderBrush="#7D2245" BorderThickness="1" CornerRadius="8" Width="26" Height="26" Margin="0,0,8,0">
@@ -607,53 +599,49 @@
                                 <TextBlock Text="Solo parents by statutory age bracket (RA 11861)" Style="{StaticResource PanelSubtitle}"/>
                                 <StackPanel Margin="0,4,0,0">
 
-                                    <Grid Margin="0,0,0,12" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                          ToolTip="Age 19 &amp; Below: Adolescent / young solo parents recognized under RA 11861 statutory protections.">
+                                    <Grid Margin="0,0,0,12">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="86"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="44"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="19 &amp; below" FontFamily="Segoe UI" FontSize="11" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
-                                        <ProgressBar Grid.Column="1" Style="{StaticResource MeterBar}" Height="8" Margin="0,0,10,0"
+                                        <ProgressBar x:Name="PbAge19Below" Grid.Column="1" Style="{StaticResource MeterBar}" Height="8" Margin="0,0,10,0"
                                                  Maximum="{Binding TotalSoloParents, Mode=OneWay}" Value="{Binding ParentAge19Below, Mode=OneWay}" Background="#E6F4F1" Foreground="#16A085" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding ParentAge19Below, Mode=OneWay}" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Right" VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="TxtAge19Below" Grid.Column="2" Text="{Binding ParentAge19Below, Mode=OneWay}" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Right" VerticalAlignment="Center"/>
                                     </Grid>
-                                    <Grid Margin="0,0,0,12" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                          ToolTip="Age 20–39: Prime working-age solo parents balancing livelihood and child-rearing responsibilities.">
+                                    <Grid Margin="0,0,0,12">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="86"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="44"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="20–39" FontFamily="Segoe UI" FontSize="11" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
-                                        <ProgressBar Grid.Column="1" Style="{StaticResource MeterBar}" Height="8" Margin="0,0,10,0"
+                                        <ProgressBar x:Name="PbAge20_39" Grid.Column="1" Style="{StaticResource MeterBar}" Height="8" Margin="0,0,10,0"
                                                  Maximum="{Binding TotalSoloParents, Mode=OneWay}" Value="{Binding ParentAge20_39, Mode=OneWay}" Background="#E6F4F1" Foreground="#16A085" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding ParentAge20_39, Mode=OneWay}" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Right" VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="TxtAge20_39" Grid.Column="2" Text="{Binding ParentAge20_39, Mode=OneWay}" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Right" VerticalAlignment="Center"/>
                                     </Grid>
-                                    <Grid Margin="0,0,0,12" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                          ToolTip="Age 40–59: Mature solo parents; focus on stable employment, adolescent children, and secondary education.">
+                                    <Grid Margin="0,0,0,12">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="86"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="44"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="40–59" FontFamily="Segoe UI" FontSize="11" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
-                                        <ProgressBar Grid.Column="1" Style="{StaticResource MeterBar}" Height="8" Margin="0,0,10,0"
+                                        <ProgressBar x:Name="PbAge40_59" Grid.Column="1" Style="{StaticResource MeterBar}" Height="8" Margin="0,0,10,0"
                                                  Maximum="{Binding TotalSoloParents, Mode=OneWay}" Value="{Binding ParentAge40_59, Mode=OneWay}" Background="#E6F4F1" Foreground="#16A085" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding ParentAge40_59, Mode=OneWay}" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Right" VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="TxtAge40_59" Grid.Column="2" Text="{Binding ParentAge40_59, Mode=OneWay}" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Right" VerticalAlignment="Center"/>
                                     </Grid>
-                                    <Grid Margin="0,0,0,12" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                          ToolTip="Age 60 &amp; Above: Senior solo parents; eligible for combined senior citizen discounts and expanded solo parent benefits.">
+                                    <Grid Margin="0,0,0,12">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="86"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="44"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="60 &amp; above" FontFamily="Segoe UI" FontSize="11" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
-                                        <ProgressBar Grid.Column="1" Style="{StaticResource MeterBar}" Height="8" Margin="0,0,10,0"
+                                        <ProgressBar x:Name="PbAge60Above" Grid.Column="1" Style="{StaticResource MeterBar}" Height="8" Margin="0,0,10,0"
                                                  Maximum="{Binding TotalSoloParents, Mode=OneWay}" Value="{Binding ParentAge60Above, Mode=OneWay}" Background="#E6F4F1" Foreground="#16A085" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding ParentAge60Above, Mode=OneWay}" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Right" VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="TxtAge60Above" Grid.Column="2" Text="{Binding ParentAge60Above, Mode=OneWay}" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextDark}" TextAlignment="Right" VerticalAlignment="Center"/>
                                     </Grid>
                                 </StackPanel>
                                 <!-- Canvas kept (hidden) so code-behind chart hooks stay intact -->
@@ -669,8 +657,7 @@
                                         <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <StackPanel Grid.Column="0" Margin="0,0,12,0" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                                ToolTip="Early Childhood (0–6 yrs): Daycare age. Prioritized for immunization, ECCD day care centers, and infant nutrition support.">
+                                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
                                         <TextBlock Text="{Binding AgeGroup0_5}" FontSize="30" FontWeight="Bold" FontFamily="Segoe UI" Foreground="{StaticResource TextDark}"/>
                                         <TextBlock Text="0–6 yrs" FontSize="12" FontWeight="SemiBold" FontFamily="Segoe UI" Foreground="{StaticResource TextDark}"/>
                                         <TextBlock Text="Daycare age" FontSize="10" FontFamily="Segoe UI" Foreground="{StaticResource SecondaryText}"/>
@@ -678,8 +665,7 @@
                                         <TextBlock x:Name="TxtChildPct0" FontSize="11" FontWeight="Bold" FontFamily="Segoe UI" Foreground="#8A6A00" Margin="0,4,0,0"/>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="1" Margin="0,0,12,0" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                                ToolTip="School &amp; Youth (7–21 yrs): Basic to tertiary education. Eligible for educational assistance, book stipends, and DepEd/CHED programs.">
+                                    <StackPanel Grid.Column="1" Margin="0,0,12,0">
                                         <TextBlock Text="{Binding AgeGroup6_12}" FontSize="30" FontWeight="Bold" FontFamily="Segoe UI" Foreground="{StaticResource TextDark}"/>
                                         <TextBlock Text="7–21 yrs" FontSize="12" FontWeight="SemiBold" FontFamily="Segoe UI" Foreground="{StaticResource TextDark}"/>
                                         <TextBlock Text="School and youth" FontSize="10" FontFamily="Segoe UI" Foreground="{StaticResource SecondaryText}"/>
@@ -687,8 +673,7 @@
                                         <TextBlock x:Name="TxtChildPct1" FontSize="11" FontWeight="Bold" FontFamily="Segoe UI" Foreground="#8A6A00" Margin="0,4,0,0"/>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="2" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                                ToolTip="Adult / Special (22+ yrs): Dependent adult children who are incapacitated or have physical/mental disability.">
+                                    <StackPanel Grid.Column="2">
                                         <TextBlock Text="{Binding AgeGroup13_17}" FontSize="30" FontWeight="Bold" FontFamily="Segoe UI" Foreground="{StaticResource TextDark}"/>
                                         <TextBlock Text="22+ yrs" FontSize="12" FontWeight="SemiBold" FontFamily="Segoe UI" Foreground="{StaticResource TextDark}"/>
                                         <TextBlock Text="Adult / special" FontSize="10" FontFamily="Segoe UI" Foreground="{StaticResource SecondaryText}"/>
@@ -723,7 +708,10 @@
                             <TextBlock Grid.Row="1" Text="Distribution of solo parents" Style="{StaticResource PanelSubtitle}"/>
                             <StackPanel Grid.Row="2" VerticalAlignment="Center">
                                 <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
                                     <Grid Width="150" Height="150" Margin="0,0,22,0" VerticalAlignment="Center">
                                         <Canvas x:Name="CvSexDonut" Width="150" Height="150"/>
                                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -732,11 +720,17 @@
                                         </StackPanel>
                                     </Grid>
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <Grid Margin="0,0,0,18" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                              ToolTip="Female Solo Parents: Represents mothers raising children independently.">
-                                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="8"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                        <Grid Margin="0,0,0,18">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="8"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
                                             <Grid>
-                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
                                                 <TextBlock Text="Female" FontSize="13" FontFamily="Segoe UI" Foreground="{StaticResource SecondaryText}"/>
                                                 <TextBlock Grid.Column="1" FontSize="14" FontWeight="Bold" FontFamily="Segoe UI" Foreground="#C9536E">
                                                     <Run Text="{Binding FemaleCount, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding FemalePercent, StringFormat=F1, Mode=OneWay}"/><Run Text="%"/>
@@ -744,11 +738,17 @@
                                             </Grid>
                                             <ProgressBar Grid.Row="2" Style="{StaticResource MeterBar}" Height="10" Value="{Binding FemalePercent, Mode=OneWay}" Background="#FBE9EE" Foreground="#C9536E"/>
                                         </Grid>
-                                        <Grid Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                              ToolTip="Male Solo Parents: Represents fathers raising children independently.">
-                                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="8"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="8"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
                                             <Grid>
-                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
                                                 <TextBlock Text="Male" FontSize="13" FontFamily="Segoe UI" Foreground="{StaticResource SecondaryText}"/>
                                                 <TextBlock Grid.Column="1" FontSize="14" FontWeight="Bold" FontFamily="Segoe UI" Foreground="#3B9FC9">
                                                     <Run Text="{Binding MaleCount, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding MalePercent, StringFormat=F1, Mode=OneWay}"/><Run Text="%"/>
@@ -758,8 +758,6 @@
                                         </Grid>
                                     </StackPanel>
                                 </Grid>
-                                <TextBlock Text="{Binding FemalePercentText}" FontSize="11" FontWeight="SemiBold" FontFamily="Segoe UI"
-                                           Foreground="{StaticResource SecondaryText}" TextAlignment="Center" Margin="0,18,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -782,7 +780,7 @@
                                     </StackPanel>
                                 </Grid>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <Grid Margin="0,0,0,18" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50" ToolTip="{Binding EmployedText}">
+                                    <Grid Margin="0,0,0,18">
                                         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="8"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                                         <Grid>
                                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
@@ -791,7 +789,7 @@
                                         </Grid>
                                         <ProgressBar Grid.Row="2" Style="{StaticResource MeterBar}" Height="10" Value="{Binding EmployedPercent, Mode=OneWay}" Background="#F3E4EA" Foreground="#7D2245"/>
                                     </Grid>
-                                    <Grid Margin="0,0,0,18" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50" ToolTip="{Binding SelfEmployedText}">
+                                    <Grid Margin="0,0,0,18">
                                         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="8"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                                         <Grid>
                                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
@@ -800,7 +798,7 @@
                                         </Grid>
                                         <ProgressBar Grid.Row="2" Style="{StaticResource MeterBar}" Height="10" Value="{Binding SelfEmployedPercent, Mode=OneWay}" Background="#FFF6D0" Foreground="#E3BF2E"/>
                                     </Grid>
-                                    <Grid Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50" ToolTip="{Binding NotEmployedText}">
+                                    <Grid>
                                         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="8"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                                         <Grid>
                                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
@@ -828,8 +826,7 @@
                         <StackPanel>
                             <TextBlock Text="Monthly income" Style="{StaticResource PanelTitle}"/>
                             <TextBlock Text="Poverty threshold and subsidy classification (RA 11861)" Style="{StaticResource PanelSubtitle}" TextWrapping="Wrap"/>
-                            <Grid Margin="0,4,0,18" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                  ToolTip="Below Minimum Wage (&lt; ₱12,000 / mo): Highest economic vulnerability. Priority 1 for local government cash subsidy and emergency relief assistance.">
+                            <Grid Margin="0,4,0,18">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="8"/>
@@ -841,12 +838,11 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Below minimum wage" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" FontFamily="Segoe UI"/>
-                                    <TextBlock Grid.Column="1" FontSize="11" FontWeight="Bold" Foreground="{StaticResource StatCard3Border}" FontFamily="Segoe UI"><Run Text="{Binding IncomeBelowMinCount, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding IncomeBelowMinPercent, StringFormat=N1, Mode=OneWay}"/><Run Text="%"/></TextBlock>
+                                    <TextBlock x:Name="TxtIncomeBelowMin" Grid.Column="1" FontSize="11" FontWeight="Bold" Foreground="{StaticResource StatCard3Border}" FontFamily="Segoe UI"><Run Text="{Binding IncomeBelowMinCount, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding IncomeBelowMinPercent, StringFormat=N1, Mode=OneWay}"/><Run Text="%"/></TextBlock>
                                 </Grid>
-                                <ProgressBar Grid.Row="2" Style="{StaticResource MeterBar}" Value="{Binding IncomeBelowMinPercent, Mode=OneWay}" Background="#F2FAEA" Foreground="{StaticResource GreenPrimary}"/>
+                                <ProgressBar x:Name="PbIncomeBelowMin" Grid.Row="2" Style="{StaticResource MeterBar}" Value="{Binding IncomeBelowMinPercent, Mode=OneWay}" Background="#F2FAEA" Foreground="{StaticResource GreenPrimary}"/>
                             </Grid>
-                            <Grid Margin="0,0,0,18" Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                  ToolTip="Minimum Wage to ₱20,833 / mo: Low-income earners. Priority 2 for social pensions, PhilHealth coverage, and educational stipends.">
+                            <Grid Margin="0,0,0,18">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="8"/>
@@ -858,12 +854,11 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Min. wage to ₱20,833" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" FontFamily="Segoe UI"/>
-                                    <TextBlock Grid.Column="1" FontSize="11" FontWeight="Bold" Foreground="{StaticResource MaroonPrimary}" FontFamily="Segoe UI"><Run Text="{Binding IncomeMinWageCount, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding IncomeMinWagePercent, StringFormat=N1, Mode=OneWay}"/><Run Text="%"/></TextBlock>
+                                    <TextBlock x:Name="TxtIncomeMinWage" Grid.Column="1" FontSize="11" FontWeight="Bold" Foreground="{StaticResource MaroonPrimary}" FontFamily="Segoe UI"><Run Text="{Binding IncomeMinWageCount, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding IncomeMinWagePercent, StringFormat=N1, Mode=OneWay}"/><Run Text="%"/></TextBlock>
                                 </Grid>
-                                <ProgressBar Grid.Row="2" Style="{StaticResource MeterBar}" Value="{Binding IncomeMinWagePercent, Mode=OneWay}" Background="#FCE4E8" Foreground="{StaticResource MaroonPrimary}"/>
+                                <ProgressBar x:Name="PbIncomeMinWage" Grid.Row="2" Style="{StaticResource MeterBar}" Value="{Binding IncomeMinWagePercent, Mode=OneWay}" Background="#FCE4E8" Foreground="{StaticResource MaroonPrimary}"/>
                             </Grid>
-                            <Grid Cursor="Hand" ToolTipService.InitialShowDelay="50" ToolTipService.BetweenShowDelay="50"
-                                  ToolTip="₱20,834 and Above: Moderate to middle income. Eligible for statutory 7-day parental leave, tax exemptions, and flexible work benefits under RA 11861.">
+                            <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="8"/>
@@ -875,9 +870,9 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="₱20,834 and above" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextDark}" FontFamily="Segoe UI"/>
-                                    <TextBlock Grid.Column="1" FontSize="11" FontWeight="Bold" Foreground="{StaticResource StatCard4Border}" FontFamily="Segoe UI"><Run Text="{Binding IncomeAboveMinCount, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding IncomeAboveMinPercent, StringFormat=N1, Mode=OneWay}"/><Run Text="%"/></TextBlock>
+                                    <TextBlock x:Name="TxtIncomeAboveMin" Grid.Column="1" FontSize="11" FontWeight="Bold" Foreground="{StaticResource StatCard4Border}" FontFamily="Segoe UI"><Run Text="{Binding IncomeAboveMinCount, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding IncomeAboveMinPercent, StringFormat=N1, Mode=OneWay}"/><Run Text="%"/></TextBlock>
                                 </Grid>
-                                <ProgressBar Grid.Row="2" Style="{StaticResource MeterBar}" Value="{Binding IncomeAboveMinPercent, Mode=OneWay}" Background="#EAF6FE" Foreground="{StaticResource BluePrimary}"/>
+                                <ProgressBar x:Name="PbIncomeAboveMin" Grid.Row="2" Style="{StaticResource MeterBar}" Value="{Binding IncomeAboveMinPercent, Mode=OneWay}" Background="#EAF6FE" Foreground="{StaticResource BluePrimary}"/>
                             </Grid>
                         </StackPanel>
                     </Border>

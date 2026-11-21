@@ -38,7 +38,9 @@ namespace SOLUM_UI.Views.Components
             double totalWidth = FinalGranteesListView.ActualWidth;
             if (totalWidth <= 0) return;
 
-            double scrollMargin = 5.0;
+            double scrollMargin = GetScrollMargin();
+            double safetyPadding = 8.0;
+
             double wContact = 135.0;
             double wEmergencyPhone = 145.0;
             double wStatus = 100.0;
@@ -47,17 +49,27 @@ namespace SOLUM_UI.Views.Components
             if (ColStatus != null) ColStatus.Width = wStatus;
 
             double fixedWidth = wContact + wEmergencyPhone + wStatus;
-            double availableFlexible = Math.Max(360.0, totalWidth - fixedWidth - scrollMargin);
+            double minFlexible = 360.0;
+            double availableFlexible = totalWidth - fixedWidth - scrollMargin - safetyPadding;
+            double flexibleWidth = Math.Max(minFlexible, availableFlexible);
 
-            double wName = Math.Floor(availableFlexible * 0.28);
-            double wBarangay = Math.Floor(availableFlexible * 0.18);
-            double wAddress = Math.Floor(availableFlexible * 0.30);
-            double wEmergencyName = Math.Max(20.0, availableFlexible - (wName + wBarangay + wAddress));
+            double wName = Math.Max(100.0, Math.Floor(flexibleWidth * 0.28));
+            double wBarangay = Math.Max(70.0, Math.Floor(flexibleWidth * 0.18));
+            double wAddress = Math.Max(100.0, Math.Floor(flexibleWidth * 0.30));
+            double wEmergencyName = Math.Max(20.0, flexibleWidth - (wName + wBarangay + wAddress));
 
             if (ColName != null) ColName.Width = wName;
             if (ColBarangay != null) ColBarangay.Width = wBarangay;
             if (ColAddress != null) ColAddress.Width = wAddress;
             if (ColEmergencyName != null) ColEmergencyName.Width = wEmergencyName;
+        }
+
+        private double GetScrollMargin()
+        {
+            var sv = FindVisualChild<ScrollViewer>(FinalGranteesListView);
+            return (sv != null && sv.ComputedVerticalScrollBarVisibility == Visibility.Visible)
+                ? SystemParameters.VerticalScrollBarWidth
+                : 2.0;
         }
 
         private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject

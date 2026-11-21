@@ -89,6 +89,7 @@
                                   SelectedItem="{Binding SelectedFiscalCycle, Mode=TwoWay}" 
                                   DisplayMemberPath="DisplayName" 
                                   ToolTip="{Binding SelectedFiscalCycle.DisplayName}"
+                                  IsEnabled="{Binding IsNotLoading}"
                                   MinWidth="240"
                                   MaxWidth="460"
                                   Height="32" 
@@ -222,7 +223,7 @@
                 <!-- RIGHT: Action Buttons -->
                 <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <!-- Start New Cycle Button -->
-                    <Button Height="36" Padding="16,0" Margin="0,0,8,0" Cursor="Hand" ToolTip="Initialize next fiscal year cycle" Command="{Binding StartNewCycleCommand}" Visibility="{Binding IsRosterLocked, Converter={StaticResource BoolToVis}}">
+                    <Button Height="36" Padding="16,0" Margin="0,0,8,0" Cursor="Hand" ToolTip="Initialize next fiscal year cycle" Command="{Binding StartNewCycleCommand}" Visibility="{Binding CanStartNewCycle, Converter={StaticResource BoolToVis}}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="Bg" Background="White" BorderBrush="#5C1D38" BorderThickness="1.5" CornerRadius="18" Padding="{TemplateBinding Padding}">
@@ -279,7 +280,7 @@
                                 <Border CornerRadius="12" ClipToBounds="True">
                                     <StackPanel>
                                         <!-- Edit Cycle Option with Icon -->
-                                        <Border Padding="12,12" Cursor="Hand" MouseLeftButtonDown="MenuOption_Click" Tag="EditCycle">
+                                        <Border Padding="12,12" Cursor="Hand" MouseLeftButtonDown="MenuOption_Click" Tag="EditCycle" Visibility="{Binding CanEditCycleSettings, Converter={StaticResource BoolToVis}}">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="Transparent"/>
@@ -302,7 +303,7 @@
                                         </Border>
                                         
                                         <!-- Divider -->
-                                        <Border Height="1" Background="#EDE2E6" Margin="0,4,0,4"/>
+                                        <Border Height="1" Background="#EDE2E6" Margin="0,4,0,4" Visibility="{Binding CanEditCycleSettings, Converter={StaticResource BoolToVis}}"/>
                                         
                                         <!-- View Details Option with Icon -->
                                         <Border Padding="12,12" Cursor="Hand" MouseLeftButtonDown="MenuOption_Click" Tag="ViewDetails">
@@ -379,6 +380,11 @@
                                     <Border Background="Transparent" BorderThickness="0">
                                         <ContentPresenter/>
                                     </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.35"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
                             <Button.ToolTip>
@@ -411,6 +417,11 @@
                                     <Border Background="Transparent" BorderThickness="0">
                                         <ContentPresenter/>
                                     </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.35"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
                             <Button.ToolTip>
@@ -436,12 +447,17 @@
                     
                     <!-- Tab 2: Final Grantees -->
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                        <Button Command="{Binding SwitchTabCommand}" CommandParameter="2" Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0" VerticalAlignment="Stretch" FocusVisualStyle="{x:Null}">
+                        <Button Command="{Binding SwitchTabCommand}" CommandParameter="2" IsEnabled="{Binding IsNotLoading}" Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0" VerticalAlignment="Stretch" FocusVisualStyle="{x:Null}">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="Transparent" BorderThickness="0">
                                         <ContentPresenter/>
                                     </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.35"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
                             <TextBlock x:Name="Tab2Text" Text="Final Grantees" FontSize="13" FontWeight="SemiBold">
@@ -661,8 +677,6 @@
         </Grid>
         <!-- Outlier Rejection Modal Overlay (Spans all rows) -->
         <c:ModalOutlierRejection Grid.RowSpan="3"/>
-        <!-- Disqualified Candidates Audit Log Modal Overlay (Spans all rows) -->
-        <c:ModalDisqualifiedCandidates Grid.RowSpan="3"/>
         <!-- Loading Overlay for action operations (export, generate, etc.) -->
         <c:LoaderOverlay Grid.RowSpan="5"
                          x:Name="SubsidyActionLoader"

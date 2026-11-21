@@ -327,10 +327,10 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="{DynamicResource ModalOverlayBrush}" Visibility="{Binding IsDisqualifiedModalOpen, Converter={StaticResource BoolToVis}}" Panel.ZIndex="1000">
+    <Grid Background="Transparent">
         <Border Background="White" CornerRadius="20" BorderBrush="{StaticResource Maroon}" BorderThickness="1.5"
-                MinWidth="960" MaxWidth="1040" MaxHeight="720" Margin="24"
-                VerticalAlignment="Center" HorizontalAlignment="Stretch" Padding="30,26,30,26"
+                MaxWidth="1220" MaxHeight="780" Margin="36,24"
+                VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="28,22,28,22"
                 UseLayoutRounding="True" SnapsToDevicePixels="True">
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="6" Opacity="0.28"/>
@@ -358,7 +358,6 @@
 
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
                         <TextBlock Text="Disqualified &amp; Rejected Candidates Audit Log" FontSize="19" FontWeight="Bold" Foreground="{StaticResource Ink}"/>
-                        <TextBlock Text="Review statutory disqualifications, reviewer justifications, and audit trails for this cycle." FontSize="12.5" Foreground="{StaticResource Muted}" Margin="0,3,0,0"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
@@ -438,12 +437,12 @@
                                 UseLayoutRounding="True" SnapsToDevicePixels="True">
                             <Grid VerticalAlignment="Center">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="175"/>
-                                    <ColumnDefinition Width="150"/>
-                                    <ColumnDefinition Width="70"/>
-                                    <ColumnDefinition Width="200"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="118"/>
+                                    <ColumnDefinition Width="1.2*"/>
+                                    <ColumnDefinition Width="1.1*"/>
+                                    <ColumnDefinition Width="68"/>
+                                    <ColumnDefinition Width="1.4*"/>
+                                    <ColumnDefinition Width="2.0*"/>
+                                    <ColumnDefinition Width="112"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="CANDIDATE &amp; ID" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource Maroon}"/>
                                 <TextBlock Grid.Column="1" Text="DEMOGRAPHICS" FontSize="10.5" FontWeight="Bold" Foreground="{StaticResource Maroon}"/>
@@ -454,7 +453,7 @@
                             </Grid>
                         </Border>
 
-                        <Grid Grid.Row="1" MinHeight="200" MaxHeight="340">
+                        <Grid Grid.Row="1" MinHeight="180">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <ScrollViewer.Resources>
                                     <Style TargetType="ScrollBar" BasedOn="{StaticResource SlimScrollBar}"/>
@@ -465,17 +464,16 @@
                                             <Border x:Name="RowBd" BorderBrush="{StaticResource Hairline}" BorderThickness="0,0,0,1" Padding="22,12" Background="Transparent" MinHeight="76">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="175"/>
-                                                        <ColumnDefinition Width="150"/>
-                                                        <ColumnDefinition Width="70"/>
-                                                        <ColumnDefinition Width="200"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="118"/>
+                                                        <ColumnDefinition Width="1.2*"/>
+                                                        <ColumnDefinition Width="1.1*"/>
+                                                        <ColumnDefinition Width="68"/>
+                                                        <ColumnDefinition Width="1.4*"/>
+                                                        <ColumnDefinition Width="2.0*"/>
+                                                        <ColumnDefinition Width="112"/>
                                                     </Grid.ColumnDefinitions>
 
                                                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,0">
                                                         <TextBlock Text="{Binding FullName}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Ink}" TextTrimming="CharacterEllipsis"/>
-                                                        <TextBlock Text="{Binding SpId}" FontSize="10.5" FontFamily="Consolas" Foreground="#888888" Margin="0,3,0,0"/>
                                                     </StackPanel>
 
                                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0">
@@ -502,12 +500,6 @@
 
                                                     <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,10,0">
                                                         <TextBlock Text="{Binding DisplayNotes}" FontSize="11.5" Foreground="#222222" TextWrapping="Wrap" MaxHeight="34" TextTrimming="CharacterEllipsis" ToolTip="{Binding DisplayNotes}"/>
-                                                        <TextBlock FontSize="10" Foreground="#888888" Margin="0,4,0,0">
-                                                            <Run Text="By: "/>
-                                                            <Run Text="{Binding DisqualifiedBy, Mode=OneWay}"/>
-                                                            <Run Text=" • "/>
-                                                            <Run Text="{Binding FormattedDisqualifiedAt, Mode=OneWay}"/>
-                                                        </TextBlock>
                                                     </StackPanel>
 
                                                     <Button Grid.Column="5"

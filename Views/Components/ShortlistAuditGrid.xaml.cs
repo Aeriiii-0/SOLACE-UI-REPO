@@ -124,7 +124,6 @@ namespace SOLUM_UI.Views.Components
             double selW = ColSelect != null ? ColSelect.Width : 0;
             double rankW = ColRank != null ? ColRank.Width : 56;
             double scoreW = ColScore != null ? ColScore.Width : 78;
-            double crossW = ColCrossCheck != null ? ColCrossCheck.Width : 135;
             double depW = ColDependents != null ? ColDependents.Width : 95;
             double validW = ColValidUntil != null ? ColValidUntil.Width : 95;
             double cardStatusW = ColCardStatus != null ? ColCardStatus.Width : 90;
@@ -132,7 +131,7 @@ namespace SOLUM_UI.Views.Components
             double actionW = 150;
             if (ColAction != null) ColAction.Width = actionW;
 
-            double fixedWidth = selW + rankW + scoreW + crossW + depW + validW + cardStatusW + subStatusW + actionW;
+            double fixedWidth = selW + rankW + scoreW + depW + validW + cardStatusW + subStatusW + actionW;
             double minFlexible = 260;
             double availableFlexible = totalWidth - fixedWidth - scrollMargin;
             double flexibleWidth = Math.Max(minFlexible, availableFlexible);
