@@ -474,7 +474,7 @@ namespace SOLUM_UI
             {
                 FormSubtitle.Text = string.IsNullOrEmpty(_existing.Id)
                     ? "Add New Record (OCR Pre-Populated — Please Verify)"
-                    : "Edit Record — " + _existing.Id;
+                    : "Edit Record";
                 PopulateFields(_existing);
                 // Amber stripe for edit mode (only when editing an existing saved record)
                 if (!string.IsNullOrEmpty(_existing.Id))
