@@ -427,7 +427,7 @@
                             </Button.Template>
                         </Button>
 
-                        <Button Height="38" Padding="20,0" Cursor="Hand" Click="BtnReactivate_Click">
+                        <Button x:Name="BtnReactivateRecord" Height="38" Padding="20,0" Cursor="Hand" Click="BtnReactivate_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border x:Name="Bg" Background="#702943" CornerRadius="10" Padding="{TemplateBinding Padding}">

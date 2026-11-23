@@ -51,9 +51,11 @@ namespace SOLUM_UI.Views.Dialogs
 
         private void ConfigureRoleBasedVisibility()
         {
-            // Hide delete and cancel buttons for Encoders and Caseworkers
+            // Hide delete and cancel buttons, and activity history / timeline for Encoders and Caseworkers
             bool isEncoder = SOLUM_UI.Services.Api.AuthApiService.Instance.IsCaseworker || 
-                           SOLUM_UI.Services.Api.AuthApiService.Instance.IsEncoder;
+                           SOLUM_UI.Services.Api.AuthApiService.Instance.IsEncoder ||
+                           string.Equals(MainWindow.CurrentUserRole, "Encoder", StringComparison.OrdinalIgnoreCase) ||
+                           string.Equals(MainWindow.CurrentUserRole, "BasicUser", StringComparison.OrdinalIgnoreCase);
             
             if (isEncoder)
             {
@@ -65,6 +67,15 @@ namespace SOLUM_UI.Views.Dialogs
                     MenuCancelBtn.Visibility = Visibility.Collapsed;
                 if (CancelSeparator != null)
                     CancelSeparator.Visibility = Visibility.Collapsed;
+                if (TabTimeline != null)
+                    TabTimeline.Visibility = Visibility.Collapsed;
+                if (TimelineContainer != null)
+                    TimelineContainer.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                if (TabTimeline != null)
+                    TabTimeline.Visibility = Visibility.Visible;
             }
         }
 

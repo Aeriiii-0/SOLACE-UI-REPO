@@ -57,6 +57,8 @@ namespace SOLUM_UI
 
         private bool _isLoading = false;
 
+        public static bool ForceRefreshOnLoad { get; set; } = false;
+
         private static readonly TimeSpan DataFreshnessTtl = TimeSpan.FromMinutes(2);
 
         private static readonly TimeSpan RefreshCooldown = TimeSpan.FromSeconds(2);
@@ -183,9 +185,11 @@ namespace SOLUM_UI
                 else
                 {
                     // No filter requested, load records normally (but not for Encoders - they must search first)
-                    bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
+                    bool isStale = ForceRefreshOnLoad || !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
                     if (isStale && !IsEncoder)
                     {
+                        ForceRefreshOnLoad = false;
+                        _lastLoadedTime = DateTime.MinValue;
                         if (RecordsSkeletonLoader != null) RecordsSkeletonLoader.Visibility = Visibility.Visible;
                         _ = LoadRecordsAsync();
                     }
@@ -302,9 +306,9 @@ namespace SOLUM_UI
                 RecordsClipGrid.Visibility = Visibility.Visible;
                 PagingRow.Visibility = Visibility.Visible;
 
-                // Show export masterlist button for admins only
+                // Export masterlist button is collapsed as requested
                 if (BtnExportMasterlist != null)
-                    BtnExportMasterlist.Visibility = IsAdmin ? Visibility.Visible : Visibility.Collapsed;
+                    BtnExportMasterlist.Visibility = Visibility.Collapsed;
             }
             // Hide delete buttons for non-admin users
             HideDeleteButtonsIfNotAdmin();

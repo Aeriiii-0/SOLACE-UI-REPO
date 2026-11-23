@@ -215,7 +215,8 @@
                         <Button x:Name="BtnScanHardware" Content="Scan Document" Click="ScanHardware_Click"
                                 Style="{StaticResource PillPrimary}" Height="36" Padding="18,0" FontSize="12" Tag="{StaticResource R18}"/>
                         <Button x:Name="BtnSelectImage" Content="Upload File" Click="SelectImage_Click"
-                                Style="{StaticResource PillOutline}" Height="36" Padding="18,0" FontSize="12" Tag="{StaticResource R18}" Margin="8,0,0,0"/>
+                                Style="{StaticResource PillOutline}" Height="36" Padding="18,0" FontSize="12" Tag="{StaticResource R18}" Margin="8,0,0,0"
+                                Visibility="Collapsed"/>
                     </StackPanel>
                     <Grid Grid.Column="2" HorizontalAlignment="Right">
                         <Button x:Name="BtnOcrSettings" Click="BtnOcrSettings_Click" Style="{StaticResource RingButton}"
@@ -354,14 +355,15 @@
                                         </Viewbox>
                                     </Border>
                                     <TextBlock Text="Ready to scan" FontSize="18" FontWeight="Bold" Foreground="#2B1B20" HorizontalAlignment="Center" Margin="0,0,0,6"/>
-                                    <TextBlock Text="Place the application form on the scanner glass and click Scan Document, or select an existing file."
+                                    <TextBlock Text="Place the application form on the scanner glass and click Scan Document."
                                                FontSize="12.5" Foreground="#7A6068" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,14"/>
                                     <Border Background="#F8ECEF" Height="28" CornerRadius="14" Padding="14,0" Margin="0,0,0,16" HorizontalAlignment="Center">
                                         <TextBlock x:Name="TxtScannerStatusBadge" Text="Status: Scanner Ready (300 DPI)" FontSize="11" FontWeight="Bold" Foreground="#702943" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                                     </Border>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Content="Scan Document" Click="ScanHardware_Click" Style="{StaticResource PillPrimary}" Height="38" Padding="22,0" Tag="{StaticResource R19}" Margin="0,0,8,0"/>
-                                        <Button Content="Upload File" Click="SelectImage_Click" Style="{StaticResource PillOutline}" Height="38" Padding="22,0" Tag="{StaticResource R19}"/>
+                                        <Button Content="Scan Document" Click="ScanHardware_Click" Style="{StaticResource PillPrimary}" Height="38" Padding="24,0" Tag="{StaticResource R19}"/>
+                                        <Button Content="Upload File" Click="SelectImage_Click" Style="{StaticResource PillOutline}" Height="38" Padding="22,0" Tag="{StaticResource R19}"
+                                                Visibility="Collapsed"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>

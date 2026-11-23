@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using SOLUM_UI.DTOs.Archive;
 using SOLUM_UI.Models.Api;
 using SOLUM_UI.Services.Api;
+using SOLUM_UI.Views;
 
 namespace SOLUM_UI.Views.Dialogs
 {
@@ -22,8 +23,8 @@ namespace SOLUM_UI.Views.Dialogs
         private async void BtnSubmit_Click(object sender, RoutedEventArgs e)
         {
             string status = (CmbEmploymentStatus.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Employed";
-            string occupation = TxtOccupation.Text?.Trim();
-            string notes = TxtReactivationNotes.Text?.Trim();
+            string occupation = TxtOccupation.Text?.Trim().ToUpperInvariant();
+            string notes = TxtReactivationNotes.Text?.Trim().ToUpperInvariant();
 
             if (string.IsNullOrWhiteSpace(occupation))
             {
@@ -47,8 +48,8 @@ namespace SOLUM_UI.Views.Dialogs
                     Occupation = occupation,
                     MonthlyIncome = income
                 },
-                NeedsAndProblems = TxtNeedsAndProblems.Text?.Trim(),
-                OtherSourcesOfIncome = TxtOtherIncome.Text?.Trim(),
+                NeedsAndProblems = TxtNeedsAndProblems.Text?.Trim().ToUpperInvariant(),
+                OtherSourcesOfIncome = TxtOtherIncome.Text?.Trim().ToUpperInvariant(),
                 Notes = notes
             };
 
@@ -72,6 +73,11 @@ namespace SOLUM_UI.Views.Dialogs
                         MainWindow.CurrentUserName,
                         MainWindow.CurrentUserRole,
                         notes);
+
+                    SoloParentRecordsPage.ForceRefreshOnLoad = true;
+                    (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SoloParentRecords");
+                    (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
+                    (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
 
                     DialogResult = true;
                     Close();

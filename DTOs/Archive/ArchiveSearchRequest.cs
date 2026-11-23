@@ -7,6 +7,7 @@ namespace SOLUM_UI.DTOs.Archive
         public string ArchiveReason { get; set; }
         public int? YearArchived { get; set; }
         public bool? IncludeShredded { get; set; } = false;
+        public bool? IncludeReactivated { get; set; } = false;
 
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 20;

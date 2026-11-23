@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using SOLUM_UI.DTOs.Archive;
 using SOLUM_UI.Services.Api;
+using SOLUM_UI.Views;
 using SOLUM_UI.Views.Dialogs;
 
 namespace SOLUM_UI.Views.Pages
@@ -129,6 +130,8 @@ namespace SOLUM_UI.Views.Pages
                     {
                         foreach (var item in paged.Items)
                         {
+                            if (item.IsReactivated) continue;
+
                             _items.Add(new ArchivedSoloParentRowViewModel
                             {
                                 Id = item.Id,
@@ -302,6 +305,18 @@ namespace SOLUM_UI.Views.Pages
             var dialog = new ArchivedDossierDialog(id) { Owner = Window.GetWindow(this) };
             if (dialog.ShowDialog() == true && dialog.WasReactivated)
             {
+                var item = _items.FirstOrDefault(x => x.Id == id);
+                if (item != null)
+                {
+                    _items.Remove(item);
+                    _totalCount = Math.Max(0, _totalCount - 1);
+                    UpdatePaginationUI();
+                }
+
+                SoloParentRecordsPage.ForceRefreshOnLoad = true;
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SoloParentRecords");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
                 _ = LoadArchivesAsync();
             }
         }
@@ -313,6 +328,18 @@ namespace SOLUM_UI.Views.Pages
             var dialog = new ReactivateCitizenDialog(id, citizenName) { Owner = Window.GetWindow(this) };
             if (dialog.ShowDialog() == true)
             {
+                var item = _items.FirstOrDefault(x => x.Id == id);
+                if (item != null)
+                {
+                    _items.Remove(item);
+                    _totalCount = Math.Max(0, _totalCount - 1);
+                    UpdatePaginationUI();
+                }
+
+                SoloParentRecordsPage.ForceRefreshOnLoad = true;
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("SoloParentRecords");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Dashboard");
+                (Application.Current.MainWindow as MainWindow)?.ClearPageCache("Analytics");
                 _ = LoadArchivesAsync();
             }
         }

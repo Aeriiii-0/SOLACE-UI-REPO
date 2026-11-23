@@ -27,6 +27,7 @@
             <Setter Property="BorderBrush" Value="#C0A0AA"/>
             <Setter Property="BorderThickness" Value="1.2"/>
             <Setter Property="Background" Value="White"/>
+            <Setter Property="CharacterCasing" Value="Upper"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">

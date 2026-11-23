@@ -246,6 +246,7 @@
                           Fill="#702943" Stretch="Uniform" Width="13" Height="13" VerticalAlignment="Center" Margin="14,0,8,0"/>
                     <TextBox x:Name="TxtSearchQuery" Grid.Column="1" BorderThickness="0" Background="Transparent"
                              FontSize="13.5" FontFamily="Segoe UI" Foreground="#111111" VerticalAlignment="Center"
+                             CharacterCasing="Upper"
                              KeyDown="TxtSearchQuery_KeyDown"/>
                     <TextBlock Grid.Column="1" Text="Encrypted Blind-Index Search (Citizen Name or PhilSys ID)..."
                                FontFamily="Segoe UI" FontSize="13.5" Foreground="#B098A0" VerticalAlignment="Center"

@@ -85,6 +85,11 @@ namespace SOLUM_UI.Views.Dialogs
 
             ListFamilyMembers.ItemsSource = _dossier.FamilyMembers;
             ListRecordTerms.ItemsSource = _dossier.RecordTerms;
+
+            if (_dossier.IsReactivated || _dossier.IsShredded)
+            {
+                if (BtnReactivateRecord != null) BtnReactivateRecord.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void Tab_Click(object sender, RoutedEventArgs e)
