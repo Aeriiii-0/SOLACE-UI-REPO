@@ -724,6 +724,7 @@
                                                     <ComboBoxItem Content="III"/>
                                                     <ComboBoxItem Content="IV"/>
                                                     <ComboBoxItem Content="V"/>
+                                                    <ComboBoxItem Content="VI"/>
                                                 </ComboBox>
                                             </StackPanel>
                                         </Grid>
@@ -851,9 +852,7 @@
                                                     <ComboBoxItem Content="Single"/>
                                                     <ComboBoxItem Content="Married"/>
                                                     <ComboBoxItem Content="Widowed"/>
-                                                    <ComboBoxItem Content="Separated"/>
-                                                    <ComboBoxItem Content="Divorced"/>
-                                                    <ComboBoxItem Content="Annulled"/>
+                                                    <ComboBoxItem Content="Annulled/Legally Separated"/>
                                                 </ComboBox>
                                                 <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
                                             </StackPanel>
@@ -900,6 +899,7 @@
                                                 </TextBlock>
                                                 <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
                                                            SelectionChanged="CmbBarangay_SelectionChanged">
+                                                    <ComboBoxItem Content="SELECT BARANGAY" IsEnabled="False"/>
                                                     <ComboBoxItem Content="Bi&#241;an (Poblacion)"/>
                                                     <ComboBoxItem Content="Bungahan"/>
                                                     <ComboBoxItem Content="Canlalay"/>
@@ -1440,9 +1440,7 @@
                                                                     <ComboBoxItem Content="Single"/>
                                                                     <ComboBoxItem Content="Married"/>
                                                                     <ComboBoxItem Content="Widowed"/>
-                                                                    <ComboBoxItem Content="Separated"/>
-                                                                    <ComboBoxItem Content="Divorced"/>
-                                                                    <ComboBoxItem Content="Annulled"/>
+                                                                    <ComboBoxItem Content="Annulled/Legally Separated"/>
                                                                 </ComboBox>
                                                             </StackPanel>
                                                         </Grid>

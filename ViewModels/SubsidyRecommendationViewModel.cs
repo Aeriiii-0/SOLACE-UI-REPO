@@ -21,6 +21,13 @@ namespace SOLUM_UI.ViewModels
 
         private readonly List<SubsidyItem> _allItems = new List<SubsidyItem>();
 
+        internal static bool IsSameCandidate(Guid evalA, Guid spGuidA, string spIdA, Guid evalB, Guid spGuidB, string spIdB)
+        {
+            if (evalA != Guid.Empty && evalB != Guid.Empty) return evalA == evalB;
+            if (spGuidA != Guid.Empty && spGuidB != Guid.Empty) return spGuidA == spGuidB;
+            return !string.IsNullOrEmpty(spIdA) && string.Equals(spIdA, spIdB, StringComparison.OrdinalIgnoreCase);
+        }
+
         private List<SelectionRow> _shortlistRevokeTargets;
         private List<SubsidyItem> _batchRejectTargets;
 

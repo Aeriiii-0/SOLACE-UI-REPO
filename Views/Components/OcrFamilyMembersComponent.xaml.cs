@@ -68,8 +68,9 @@ namespace SOLUM_UI.Views.Components
                     return;
                 }
 
+                string normalizedContact = FormHelper.NormalizePersonName(contactName);
                 var existing = _familyRowData.FirstOrDefault(m =>
-                    string.Equals(m.MemberName, contactName, StringComparison.OrdinalIgnoreCase));
+                    string.Equals(FormHelper.NormalizePersonName(m.MemberName), normalizedContact, StringComparison.OrdinalIgnoreCase));
                 if (existing != null)
                 {
                     _autoEmergencyChildRow = existing;
@@ -651,6 +652,18 @@ namespace SOLUM_UI.Views.Components
                 return;
             }
             string snDesc = hasSn ? (TxtSpecialNeedsDescription.Text?.Trim() ?? string.Empty).ToUpperInvariant() : string.Empty;
+
+            string normalizedInputName = FormHelper.NormalizePersonName(name);
+            bool isDuplicateMember = _familyRowData.Any(m =>
+                m != _editingFamilyMember &&
+                string.Equals(FormHelper.NormalizePersonName(m.MemberName), normalizedInputName, StringComparison.OrdinalIgnoreCase));
+            if (isDuplicateMember)
+            {
+                ActionConfirmDialog.Warning("Duplicate Family Member", $"'{name}' is already listed in the family composition.", window);
+                TxtMemberName.Focus();
+                return;
+            }
+
             if (_editingFamilyMember != null)
             {
                 _editingFamilyMember.MemberName = name;
@@ -842,6 +855,22 @@ namespace SOLUM_UI.Views.Components
                 {
                     combo.SelectedItem = item;
                     return;
+                }
+            }
+
+            if (combo == CmbMemberCivil)
+            {
+                string matchedCiv = OcrService.FuzzyMatchCivilStatus(val);
+                if (!string.IsNullOrEmpty(matchedCiv))
+                {
+                    foreach (ComboBoxItem item in combo.Items)
+                    {
+                        if (string.Equals(item.Content?.ToString(), matchedCiv, StringComparison.OrdinalIgnoreCase))
+                        {
+                            combo.SelectedItem = item;
+                            return;
+                        }
+                    }
                 }
             }
 

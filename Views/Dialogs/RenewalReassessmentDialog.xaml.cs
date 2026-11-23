@@ -659,17 +659,8 @@ namespace SOLUM_UI.Views.Dialogs
         {
             // Civil Status
             string civ = _original.CivilStatus?.Trim() ?? "Single";
-            bool foundCiv = false;
-            foreach (ComboBoxItem item in CmbCivilStatus.Items)
-            {
-                if (string.Equals(item.Content?.ToString(), civ, StringComparison.OrdinalIgnoreCase))
-                {
-                    CmbCivilStatus.SelectedItem = item;
-                    foundCiv = true;
-                    break;
-                }
-            }
-            if (!foundCiv) CmbCivilStatus.SelectedIndex = 0;
+            SetComboByContent(CmbCivilStatus, civ);
+            if (CmbCivilStatus.SelectedItem == null) CmbCivilStatus.SelectedIndex = 0;
             // Employment Status
             if (_original.IsSelfEmployed)
                 CmbEmploymentStatus.SelectedIndex = 1;
@@ -1085,6 +1076,19 @@ namespace SOLUM_UI.Views.Dialogs
                 return;
             }
             string snDesc = hasSn ? (TxtChildSpecialNeedsDescription.Text?.Trim() ?? string.Empty) : string.Empty;
+
+            string normalizedInputName = SOLUM_UI.Services.FormHelper.NormalizePersonName(name);
+            bool isDuplicateMember = _dependents.Any(d =>
+                d != _editingDependent &&
+                !d.IsRemoved &&
+                string.Equals(SOLUM_UI.Services.FormHelper.NormalizePersonName(d.Name), normalizedInputName, StringComparison.OrdinalIgnoreCase));
+            if (isDuplicateMember)
+            {
+                ToastNotification.Show("Duplicate Dependent", $"'{name}' is already listed in the family composition.", ToastType.Warning);
+                TxtChildName.Focus();
+                return;
+            }
+
             if (_editingDependent != null)
             {
                 _editingDependent.Name = name;
@@ -1170,6 +1174,21 @@ namespace SOLUM_UI.Views.Dialogs
                 {
                     combo.SelectedItem = item;
                     return;
+                }
+            }
+            if (combo == CmbCivilStatus || combo == CmbChildCivil)
+            {
+                string matchedCiv = SOLUM_UI.Services.OcrService.FuzzyMatchCivilStatus(val);
+                if (!string.IsNullOrEmpty(matchedCiv))
+                {
+                    foreach (ComboBoxItem item in combo.Items)
+                    {
+                        if (string.Equals(item.Content?.ToString(), matchedCiv, StringComparison.OrdinalIgnoreCase))
+                        {
+                            combo.SelectedItem = item;
+                            return;
+                        }
+                    }
                 }
             }
             foreach (ComboBoxItem item in combo.Items)
@@ -1412,7 +1431,10 @@ namespace SOLUM_UI.Views.Dialogs
                 {
                     FieldName = $"Dependent ({d.Name})",
                     OldValue = GetOriginalDependentSummary(d),
-                    NewValue = $"{d.EducationalLevel}, {d.IncomeDisplay}{(d.HasSpecialNeeds ? $", {d.SpecialNeedsCategory}" : "")}",
+                    NewValue = FormatDependentSummary(
+                        d.Name, d.Relationship, d.Age, d.Sex, d.CivilStatus,
+                        d.Birthdate, d.EducationalLevel, d.Income,
+                        d.HasSpecialNeeds, d.SpecialNeedsCategory, d.SpecialNeedsDescription),
                     IsChanged = true
                 });
             }
@@ -1435,16 +1457,61 @@ namespace SOLUM_UI.Views.Dialogs
             BtnSubmitRenew.ToolTip = null;
         }
 
+        private static string FormatDependentSummary(
+            string name,
+            string relationship,
+            int age,
+            string sex,
+            string civilStatus,
+            DateTime? birthdate,
+            string educationalLevel,
+            decimal income,
+            bool hasSpecialNeeds,
+            string specialNeedsCategory,
+            string specialNeedsDescription)
+        {
+            string n = !string.IsNullOrWhiteSpace(name) ? name.Trim() : "Unnamed";
+            string rel = !string.IsNullOrWhiteSpace(relationship) ? $" ({relationship.Trim()})" : "";
+            string agePart = age > 0 ? $", Age {age}" : "";
+            string sexPart = !string.IsNullOrWhiteSpace(sex) ? $", {sex.Trim()}" : "";
+            string civPart = !string.IsNullOrWhiteSpace(civilStatus) ? $", {civilStatus.Trim()}" : "";
+            string dobPart = (birthdate.HasValue && birthdate.Value != DateTime.MinValue) ? $", DOB: {birthdate.Value:yyyy-MM-dd}" : "";
+            string eduPart = !string.IsNullOrWhiteSpace(educationalLevel) ? $", {educationalLevel.Trim()}" : "";
+            string incPart = $", ₱ {income:N2}";
+            string snPart = hasSpecialNeeds
+                ? $", Special Needs (PWD): {(!string.IsNullOrWhiteSpace(specialNeedsCategory) ? specialNeedsCategory.Trim() : "Yes")}" +
+                  (!string.IsNullOrWhiteSpace(specialNeedsDescription) ? $" ({specialNeedsDescription.Trim()})" : "")
+                : ", Special Needs: None";
+            return $"{n}{rel}{agePart}{sexPart}{civPart}{dobPart}{eduPart}{incPart}{snPart}";
+        }
+
         private string GetOriginalDependentSummary(DependentItemViewModel d)
         {
+            if (_dto?.FamilyMembers != null && _dto.FamilyMembers.Count > 0)
+            {
+                var origDto = _dto.FamilyMembers.FirstOrDefault(fm =>
+                    (d.Id.HasValue && fm.Id == d.Id.Value) ||
+                    string.Equals(fm.Name, d.Name, StringComparison.OrdinalIgnoreCase));
+                if (origDto != null)
+                {
+                    return FormatDependentSummary(
+                        origDto.Name, origDto.Relationship, origDto.Age, origDto.Sex, origDto.CivilStatus,
+                        origDto.Birthdate, origDto.EducationalLevel, origDto.Income,
+                        origDto.HasSpecialNeeds, origDto.SpecialNeedsCategory, origDto.SpecialNeedsDescription);
+                }
+            }
             if (_original?.FamilyMembers != null)
             {
                 var orig = _original.FamilyMembers.FirstOrDefault(fm => (fm.Id.HasValue && fm.Id == d.Id) || string.Equals(fm.MemberName, d.Name, StringComparison.OrdinalIgnoreCase));
                 if (orig != null)
                 {
-                    string inc = decimal.TryParse(orig.Income, out var oi) ? $"₱ {oi:N2}" : orig.Income;
-                    string sn = orig.HasSpecialNeeds ? $", {orig.SpecialNeedsCategory}" : "";
-                    return $"{orig.EducationEmployment}, {inc}{sn}";
+                    int.TryParse(orig.Age, out int origAge);
+                    DateTime? origDob = DateTime.TryParse(orig.Birthdate, out var parsedDob) ? parsedDob : (DateTime?)null;
+                    decimal.TryParse(orig.Income, out decimal origInc);
+                    return FormatDependentSummary(
+                        orig.MemberName, orig.Relationship, origAge, orig.Sex, orig.CivilStatus,
+                        origDob, orig.EducationEmployment, origInc,
+                        orig.HasSpecialNeeds, orig.SpecialNeedsCategory, orig.SpecialNeedsDescription);
                 }
             }
             return "Previous details";
@@ -1461,6 +1528,7 @@ namespace SOLUM_UI.Views.Dialogs
                     return !string.Equals((orig.Name ?? "").Trim(), (d.Name ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
                         || !string.Equals((orig.Relationship ?? "").Trim(), (d.Relationship ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
                         || !string.Equals((orig.Sex ?? "").Trim(), (d.Sex ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
+                        || !string.Equals((orig.CivilStatus ?? "").Trim(), (d.CivilStatus ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
                         || orig.Birthdate.Date != d.Birthdate.Date
                         || !string.Equals((orig.EducationalLevel ?? "").Trim(), (d.EducationalLevel ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
                         || orig.Income != d.Income
@@ -1480,6 +1548,7 @@ namespace SOLUM_UI.Views.Dialogs
                     return !string.Equals((orig.MemberName ?? "").Trim(), (d.Name ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
                         || !string.Equals((orig.Relationship ?? "").Trim(), (d.Relationship ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
                         || !string.Equals((orig.Sex ?? "").Trim(), (d.Sex ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
+                        || !string.Equals((orig.CivilStatus ?? "").Trim(), (d.CivilStatus ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
                         || (origDob != DateTime.MinValue && origDob.Date != d.Birthdate.Date)
                         || !string.Equals((orig.EducationEmployment ?? "").Trim(), (d.EducationalLevel ?? "").Trim(), StringComparison.OrdinalIgnoreCase)
                         || origInc != d.Income

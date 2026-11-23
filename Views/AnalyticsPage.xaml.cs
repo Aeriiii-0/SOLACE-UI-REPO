@@ -111,17 +111,6 @@ namespace SOLUM_UI
                 {
                     InitFilterControls();
                     HookChartCanvases();
-                    var filterOverlay = this.FindName("FilterModalOverlay") as Grid;
-                    if (filterOverlay != null)
-                    {
-                        filterOverlay.IsVisibleChanged += (fs, fe) =>
-                        {
-                            if (filterOverlay.Visibility == Visibility.Visible)
-                                MainWindow.ShowDimOverlay(fullWindow: false);
-                            else
-                                MainWindow.HideDimOverlay();
-                        };
-                    }
 
                     bool isStale = !_hasLoadedData || (DateTime.UtcNow - _lastLoadedTime) > DataFreshnessTtl;
                     if (isStale)
@@ -135,6 +124,7 @@ namespace SOLUM_UI
                 // Clean up overlays when navigating away from this page
                 Unloaded += (s, e) =>
                 {
+                    CloseFilterModal();
                     MainWindow.HideDimOverlay();
                 };
             }
@@ -1358,13 +1348,42 @@ namespace SOLUM_UI
             ScheduleRedraw();
         }
 
+        private bool _isFilterModalOpen = false;
+
+        private void OpenFilterModal()
+        {
+            var overlay = this.FindName("FilterModalOverlay") as Grid;
+            var card = this.FindName("FilterModalCard") as Border;
+            if (overlay != null && card != null)
+            {
+                if (overlay.Children.Contains(card))
+                    overlay.Children.Remove(card);
+                _isFilterModalOpen = true;
+                MainWindow.ShowGlobalModal(card, CloseFilterModal, blurBackground: false);
+            }
+        }
+
+        private void CloseFilterModal()
+        {
+            if (!_isFilterModalOpen) return;
+            _isFilterModalOpen = false;
+            MainWindow.HideGlobalModal();
+            var overlay = this.FindName("FilterModalOverlay") as Grid;
+            var card = this.FindName("FilterModalCard") as Border;
+            if (overlay != null && card != null && card.Parent == null && !overlay.Children.Contains(card))
+            {
+                overlay.Children.Add(card);
+            }
+        }
+
         private void FilterDrop_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                var overlay = this.FindName("FilterModalOverlay") as Grid;
-                if (overlay != null)
-                    overlay.Visibility = (overlay.Visibility == Visibility.Visible) ? Visibility.Collapsed : Visibility.Visible;
+                if (_isFilterModalOpen)
+                    CloseFilterModal();
+                else
+                    OpenFilterModal();
             }
             catch (Exception ex)
             {
@@ -1376,9 +1395,7 @@ namespace SOLUM_UI
         {
             if (e.OriginalSource == sender)
             {
-                var overlay = this.FindName("FilterModalOverlay") as Grid;
-                if (overlay != null)
-                    overlay.Visibility = Visibility.Collapsed;
+                CloseFilterModal();
             }
         }
 
@@ -1389,9 +1406,7 @@ namespace SOLUM_UI
 
         private void FilterModalClose_Click(object sender, RoutedEventArgs e)
         {
-            var overlay = this.FindName("FilterModalOverlay") as Grid;
-            if (overlay != null)
-                overlay.Visibility = Visibility.Collapsed;
+            CloseFilterModal();
         }
 
         private void FilterCombo_Changed(object sender, SelectionChangedEventArgs e)
@@ -1491,9 +1506,7 @@ namespace SOLUM_UI
                     _vm.SelectedBarangay = "ALL";
                     _vm.UpdateActiveFilterSummary();
                 }
-                var overlay = this.FindName("FilterModalOverlay") as Grid;
-                if (overlay != null)
-                    overlay.Visibility = Visibility.Collapsed;
+                CloseFilterModal();
                 _ = LoadDataAsync();
             }
             catch (Exception ex)
@@ -1595,9 +1608,7 @@ namespace SOLUM_UI
                         }
                     }
                 }
-                var overlay = this.FindName("FilterModalOverlay") as Grid;
-                if (overlay != null)
-                    overlay.Visibility = Visibility.Collapsed;
+                CloseFilterModal();
                 _ = ApplyFiltersAsync();
             }
             catch (Exception ex)

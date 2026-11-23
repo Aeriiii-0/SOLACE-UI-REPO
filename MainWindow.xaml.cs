@@ -1926,13 +1926,24 @@ namespace SOLUM_UI
 
         private Action _globalModalBackdropAction;
 
-        public static void ShowGlobalModal(UIElement content, Action onBackdropClick = null)
+        public static void ShowGlobalModal(UIElement content, Action onBackdropClick = null, bool blurBackground = false)
         {
             if (Application.Current?.MainWindow is MainWindow main)
             {
                 Action doShow = () =>
                 {
                     main._globalModalBackdropAction = onBackdropClick;
+                    if (main.MainContent != null)
+                    {
+                        main.MainContent.Effect = blurBackground
+                            ? new System.Windows.Media.Effects.BlurEffect
+                            {
+                                Radius = 8,
+                                RenderingBias = System.Windows.Media.Effects.RenderingBias.Quality,
+                                KernelType = System.Windows.Media.Effects.KernelType.Gaussian
+                            }
+                            : null;
+                    }
                     if (main.GlobalModalContent != null) main.GlobalModalContent.Content = content;
                     if (main.GlobalModalHost != null) main.GlobalModalHost.Visibility = Visibility.Visible;
                 };
@@ -1948,6 +1959,7 @@ namespace SOLUM_UI
                 Action doHide = () =>
                 {
                     main._globalModalBackdropAction = null;
+                    if (main.MainContent != null) main.MainContent.Effect = null;
                     if (main.GlobalModalHost != null) main.GlobalModalHost.Visibility = Visibility.Collapsed;
                     if (main.GlobalModalContent != null) main.GlobalModalContent.Content = null;
                 };

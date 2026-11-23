@@ -153,10 +153,7 @@ namespace SOLUM_UI.ViewModels
             {
                 foreach (var d in slResp.Data)
                 {
-                    bool inShortlist = ShortlistRows.Any(x => (!string.IsNullOrEmpty(d.SpId) && x.SpId == d.SpId)
-                                                           || (d.EvaluationId != Guid.Empty && x.EvaluationId == d.EvaluationId)
-                                                           || (d.SoloParentId != Guid.Empty && x.SoloParentId == d.SoloParentId)
-                                                           || (!string.IsNullOrEmpty(d.Name) && string.Equals(x.Name, d.Name, StringComparison.OrdinalIgnoreCase)));
+                    bool inShortlist = ShortlistRows.Any(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, d.EvaluationId, d.SoloParentId, d.SpId));
                     if (!inShortlist) ShortlistRows.Add(SubsidyModelMapper.ToRow(d, rk++));
                 }
             }

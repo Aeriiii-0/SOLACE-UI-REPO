@@ -1737,7 +1737,7 @@ namespace SOLUM_UI.ViewModels
             WidowedCount = GetDictValue(civilStatus, "Widowed", "widowed", "Widow");
             SeparatedCount = GetDictValue(civilStatus, "Separated", "separated");
             AnnulledCount = GetDictValue(civilStatus, "Annulled", "annulled", "Divorced", "divorced");
-            int sepAnnCombined = GetDictValue(civilStatus, "Legally Separated / Annulled", "Separated / Annulled", "Separated/Annulled");
+            int sepAnnCombined = GetDictValue(civilStatus, "Annulled/Legally Separated", "Annulled / Legally Separated", "Legally Separated / Annulled", "Separated / Annulled", "Separated/Annulled");
             SeparatedAnnulledCount = sepAnnCombined > 0 ? sepAnnCombined : (SeparatedCount + AnnulledCount);
             // Load employment status simple text counts (null-safe & case-insensitive)
             var employment = dto.EmploymentStatus ?? new System.Collections.Generic.Dictionary<string, int>();

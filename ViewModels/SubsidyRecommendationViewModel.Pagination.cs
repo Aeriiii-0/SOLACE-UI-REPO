@@ -459,8 +459,7 @@ namespace SOLUM_UI.ViewModels
                         if (previousActive != null)
                         {
                             var matched = PagedRecommendations.FirstOrDefault(x =>
-                                (previousActive.SoloParentId != Guid.Empty && x.SoloParentId == previousActive.SoloParentId) ||
-                                (!string.IsNullOrEmpty(previousActive.SpId) && x.SpId == previousActive.SpId));
+                                IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, previousActive.EvaluationId, previousActive.SoloParentId, previousActive.SpId));
                             if (matched != null)
                             {
                                 if ((matched.ChildrenDetails == null || matched.ChildrenDetails.Count == 0) && previousActive.ChildrenDetails != null && previousActive.ChildrenDetails.Count > 0)
@@ -499,8 +498,7 @@ namespace SOLUM_UI.ViewModels
             if (previousActive != null && ActiveCandidate == null)
             {
                 ActiveCandidate = PagedRecommendations.FirstOrDefault(x =>
-                    (previousActive.SoloParentId != Guid.Empty && x.SoloParentId == previousActive.SoloParentId) ||
-                     (!string.IsNullOrEmpty(previousActive.SpId) && x.SpId == previousActive.SpId)) ?? previousActive;
+                    IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, previousActive.EvaluationId, previousActive.SoloParentId, previousActive.SpId)) ?? previousActive;
             }
             OnPropertyChanged(nameof(QueuePageSummary));
             OnPropertyChanged(nameof(RecommendationsSummary));

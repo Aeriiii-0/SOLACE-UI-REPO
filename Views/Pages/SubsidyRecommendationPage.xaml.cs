@@ -32,7 +32,10 @@ namespace SOLUM_UI.Views.Pages
             Unloaded += (s, e) =>
             {
                 if (DataContext is SubsidyRecommendationViewModel activeVm)
+                {
                     activeVm.IsDisqualifiedModalOpen = false;
+                    activeVm.IsOutlierModalOpen = false;
+                }
                 MainWindow.HideGlobalModal();
                 MainWindow.HideDimOverlay();
             };
@@ -70,6 +73,20 @@ namespace SOLUM_UI.Views.Pages
                         {
                             var modal = new Components.ModalDisqualifiedCandidates { DataContext = vm };
                             MainWindow.ShowGlobalModal(modal, () => vm.IsDisqualifiedModalOpen = false);
+                        }
+                        else
+                        {
+                            MainWindow.HideGlobalModal();
+                        }
+                    }
+
+                    // Show/hide Outlier Rejection Modal in full-window overlay host
+                    if (e.PropertyName == nameof(SubsidyRecommendationViewModel.IsOutlierModalOpen))
+                    {
+                        if (vm.IsOutlierModalOpen)
+                        {
+                            var modal = new Components.ModalOutlierRejection { DataContext = vm };
+                            MainWindow.ShowGlobalModal(modal, () => vm.IsOutlierModalOpen = false);
                         }
                         else
                         {

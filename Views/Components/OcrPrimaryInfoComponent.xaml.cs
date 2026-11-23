@@ -719,7 +719,11 @@ namespace SOLUM_UI.Views.Components
         private string GetComboValue(ComboBox combo)
         {
             ComboBoxItem sel = combo?.SelectedItem as ComboBoxItem;
-            return sel?.Content?.ToString() ?? string.Empty;
+            if (sel == null || !sel.IsEnabled) return string.Empty;
+            string val = sel.Content?.ToString() ?? string.Empty;
+            if (combo == CmbExtension && string.Equals(val, "N/A", StringComparison.OrdinalIgnoreCase))
+                return string.Empty;
+            return val;
         }
         #endregion
     }

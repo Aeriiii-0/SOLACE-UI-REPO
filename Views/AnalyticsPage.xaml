@@ -884,7 +884,7 @@
               Background="{DynamicResource ModalOverlayBrush}"
               Panel.ZIndex="100"
               MouseDown="FilterModalOverlay_MouseDown">
-            <Border Background="White" CornerRadius="16"
+            <Border x:Name="FilterModalCard" Background="White" CornerRadius="16"
                     BorderBrush="#E8D4DA" BorderThickness="1.5"
                     Padding="26,22"
                     Width="440" HorizontalAlignment="Center" VerticalAlignment="Center"

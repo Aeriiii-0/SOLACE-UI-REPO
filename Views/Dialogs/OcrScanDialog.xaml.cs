@@ -517,7 +517,8 @@ namespace SOLUM_UI.Views.Dialogs
                 "Confirm & Save",
                 fields,
                 screenW: Width, screenH: Height,
-                screenLeft: Left, screenTop: Top
+                screenLeft: Left, screenTop: Top,
+                familyMembers: preview.FamilyMembers
             );
             try
             {

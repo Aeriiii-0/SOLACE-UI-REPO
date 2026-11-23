@@ -1,3 +1,5 @@
+using System;
+using System.Text.RegularExpressions;
 using System.Windows.Controls;
 
 namespace SOLUM_UI.Services
@@ -39,6 +41,15 @@ namespace SOLUM_UI.Services
                     }
                 }
             };
+        }
+
+        /// <summary>
+        /// Normalizes a person name for duplicate comparison (trims, collapses whitespace, upper-cases).
+        /// </summary>
+        public static string NormalizePersonName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+            return Regex.Replace(name.Trim(), @"\s+", " ").ToUpperInvariant();
         }
 
         /// <summary>

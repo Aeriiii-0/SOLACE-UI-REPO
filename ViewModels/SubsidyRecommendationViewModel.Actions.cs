@@ -19,7 +19,7 @@ namespace SOLUM_UI.ViewModels
         {
             if (r == null) return;
             _shortlistRevokeTargets = new List<SelectionRow> { r };
-            OutlierTarget = _allItems.FirstOrDefault(x => x.SpId == r.SpId);
+            OutlierTarget = _allItems.FirstOrDefault(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, r.EvaluationId, r.SoloParentId, r.SpId));
             OutlierModalTitle = "Revoke Candidate";
             OutlierTargetNameAndId = $"Candidate: {r.Name}";
             OnPropertyChanged(nameof(OutlierModalConfirmButtonText));
@@ -28,51 +28,145 @@ namespace SOLUM_UI.ViewModels
 
         private async Task ConfirmOutlierRejectionAsync()
         {
-            if (_shortlistRevokeTargets != null && _shortlistRevokeTargets.Count > 0)
+            try
             {
-                int count = _shortlistRevokeTargets.Count;
-                foreach (var r in _shortlistRevokeTargets)
+                if (_shortlistRevokeTargets != null && _shortlistRevokeTargets.Count > 0)
                 {
-                    ShortlistRows.Remove(r);
-                    FinalGranteesList.Remove(r);
-                    var orig = _allItems.FirstOrDefault(x => x.SpId == r.SpId);
-                    if (orig != null) { orig.IsDisqualified = true; orig.DisqualificationReason = OutlierRejectionReason; orig.Status = "Rejected"; }
-                    if (r.EvaluationId != Guid.Empty)
-                        _ = _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = r.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = false });
-                    AddDisqualifiedCandidateRecord(
-                        r.EvaluationId,
-                        r.SoloParentId,
-                        r.SpId,
-                        r.Name,
-                        r.Barangay,
-                        r.MonthlyIncome,
-                        r.Score,
-                        r.Priority,
-                        r.MinorDependentsCount,
-                        OutlierRejectionReason,
-                        OutlierNotes,
-                        "Admin / Reviewer"
-                    );
+                    var targets = _shortlistRevokeTargets.ToList();
+                    _shortlistRevokeTargets = null;
+                    IsOutlierModalOpen = false;
+                    IsDrawerOpen = false;
+                    ActiveCandidate = null;
+
+                    int count = targets.Count;
+                    var apiTasks = new List<Task<Models.Api.BaseResponse<SubsidyRecommendationDto>>>();
+                    foreach (var r in targets)
+                    {
+                        ShortlistRows.Remove(r);
+                        FinalGranteesList.Remove(r);
+                        var orig = _allItems.FirstOrDefault(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, r.EvaluationId, r.SoloParentId, r.SpId));
+                        if (orig != null)
+                        {
+                            orig.IsDisqualified = true;
+                            orig.DisqualificationReason = OutlierRejectionReason;
+                            orig.Status = "Rejected";
+                            _allItems.Remove(orig);
+                        }
+                        if (r.EvaluationId != Guid.Empty)
+                        {
+                            apiTasks.Add(_apiService.RejectOutlierAsync(new RejectOutlierRequest
+                            {
+                                EvaluationId = r.EvaluationId,
+                                RejectionReason = OutlierRejectionReason,
+                                RejectionNotes = OutlierNotes,
+                                AutoPromote = false
+                            }));
+                        }
+                        AddDisqualifiedCandidateRecord(
+                            r.EvaluationId,
+                            r.SoloParentId,
+                            r.SpId,
+                            r.Name,
+                            r.Barangay,
+                            r.MonthlyIncome,
+                            r.Score,
+                            r.Priority,
+                            r.MinorDependentsCount,
+                            OutlierRejectionReason,
+                            OutlierNotes,
+                            "Admin / Reviewer"
+                        );
+                    }
+                    UpdateShortlistAndFinalCollections();
+                    RecalculateQuotaAndFilter();
+                    IsShortlistBatchMode = false;
+                    RecalculateShortlistSelectionCounts();
+                    NotifyDisqualifiedMetricsChanged();
+                    ToastNotification.Show("Revocation Complete", $"{count} candidate(s) revoked ({OutlierRejectionReason}).", ToastType.Warning);
+
+                    if (apiTasks.Count > 0)
+                    {
+                        var results = await Task.WhenAll(apiTasks);
+                        var failed = results.FirstOrDefault(res => res != null && !res.Succeeded);
+                        if (failed != null)
+                        {
+                            string err = failed.Errors != null && failed.Errors.Count > 0 ? string.Join(", ", failed.Errors) : "Server rejected revocation.";
+                            ToastNotification.Show("Sync Warning", err, ToastType.Error);
+                        }
+                    }
                 }
-                _shortlistRevokeTargets = null;
-                IsOutlierModalOpen = false;
-                UpdateShortlistAndFinalCollections();
-                RecalculateQuotaAndFilter();
-                IsShortlistBatchMode = false;
-                RecalculateShortlistSelectionCounts();
-                NotifyDisqualifiedMetricsChanged();
-                ToastNotification.Show("Revocation Complete", $"{count} candidate(s) revoked ({OutlierRejectionReason}).", ToastType.Warning);
-            }
-            else if (_batchRejectTargets != null && _batchRejectTargets.Count > 0)
-            {
-                int count = _batchRejectTargets.Count;
-                foreach (var target in _batchRejectTargets)
+                else if (_batchRejectTargets != null && _batchRejectTargets.Count > 0)
                 {
+                    var targets = _batchRejectTargets.ToList();
+                    _batchRejectTargets = null;
+                    IsOutlierModalOpen = false;
+                    IsDrawerOpen = false;
+                    ActiveCandidate = null;
+
+                    int count = targets.Count;
+                    var apiTasks = new List<Task<Models.Api.BaseResponse<SubsidyRecommendationDto>>>();
+                    foreach (var target in targets)
+                    {
+                        target.IsDisqualified = true;
+                        target.DisqualificationReason = OutlierRejectionReason;
+                        target.Status = "Rejected";
+                        if (target.EvaluationId != Guid.Empty)
+                        {
+                            apiTasks.Add(_apiService.RejectOutlierAsync(new RejectOutlierRequest
+                            {
+                                EvaluationId = target.EvaluationId,
+                                RejectionReason = OutlierRejectionReason,
+                                RejectionNotes = OutlierNotes,
+                                AutoPromote = false
+                            }));
+                        }
+                        AddDisqualifiedCandidateRecord(
+                            target.EvaluationId,
+                            target.SoloParentId,
+                            target.SpId,
+                            target.Name,
+                            target.Barangay,
+                            target.MonthlyIncome,
+                            target.Score,
+                            target.Priority,
+                            target.Dependants,
+                            OutlierRejectionReason,
+                            OutlierNotes,
+                            "Admin / Reviewer"
+                        );
+                        _allItems.RemoveAll(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, target.EvaluationId, target.SoloParentId, target.SpId));
+                        PagedRecommendations.Remove(target);
+                        FilteredRecommendations.Remove(target);
+                    }
+                    IsBatchMode = false;
+                    RecalculateQuotaAndFilter();
+                    RecalculateSelectionCounts();
+                    NotifyDisqualifiedMetricsChanged();
+                    ToastNotification.Show("Candidates Disqualified", $"{count} candidate(s) disqualified from queue ({OutlierRejectionReason}).", ToastType.Warning);
+
+                    if (apiTasks.Count > 0)
+                    {
+                        var results = await Task.WhenAll(apiTasks);
+                        var failed = results.FirstOrDefault(res => res != null && !res.Succeeded);
+                        if (failed != null)
+                        {
+                            string err = failed.Errors != null && failed.Errors.Count > 0 ? string.Join(", ", failed.Errors) : "Server rejected disqualification.";
+                            ToastNotification.Show("Sync Warning", err, ToastType.Error);
+                        }
+                    }
+                }
+                else if (OutlierTarget != null)
+                {
+                    var target = OutlierTarget;
+                    OutlierTarget = null;
+                    IsOutlierModalOpen = false;
+                    IsDrawerOpen = false;
+                    ActiveCandidate = null;
+
                     target.IsDisqualified = true;
                     target.DisqualificationReason = OutlierRejectionReason;
                     target.Status = "Rejected";
-                    if (target.EvaluationId != Guid.Empty)
-                        _ = _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = target.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = false });
+
                     AddDisqualifiedCandidateRecord(
                         target.EvaluationId,
                         target.SoloParentId,
@@ -87,47 +181,35 @@ namespace SOLUM_UI.ViewModels
                         OutlierNotes,
                         "Admin / Reviewer"
                     );
-                    _allItems.Remove(target);
+                    _allItems.RemoveAll(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, target.EvaluationId, target.SoloParentId, target.SpId));
                     PagedRecommendations.Remove(target);
                     FilteredRecommendations.Remove(target);
+                    if (QueueTotalCount > 0) QueueTotalCount--;
+                    RecalculateQuotaAndFilter();
+                    NotifyDisqualifiedMetricsChanged();
+                    ToastNotification.Show("Candidate Disqualified", $"{target.Name} disqualified from queue ({OutlierRejectionReason}).", ToastType.Warning);
+
+                    if (target.EvaluationId != Guid.Empty)
+                    {
+                        var resp = await _apiService.RejectOutlierAsync(new RejectOutlierRequest
+                        {
+                            EvaluationId = target.EvaluationId,
+                            RejectionReason = OutlierRejectionReason,
+                            RejectionNotes = OutlierNotes,
+                            AutoPromote = false
+                        });
+                        if (resp != null && !resp.Succeeded)
+                        {
+                            string err = resp.Errors != null && resp.Errors.Count > 0 ? string.Join(", ", resp.Errors) : "Failed to persist disqualification on server.";
+                            ToastNotification.Show("Sync Warning", err, ToastType.Error);
+                        }
+                    }
                 }
-                _batchRejectTargets = null;
-                IsOutlierModalOpen = false;
-                IsBatchMode = false;
-                RecalculateQuotaAndFilter();
-                RecalculateSelectionCounts();
-                NotifyDisqualifiedMetricsChanged();
-                ToastNotification.Show("Candidates Disqualified", $"{count} candidate(s) disqualified from queue ({OutlierRejectionReason}).", ToastType.Warning);
             }
-            else if (OutlierTarget != null)
+            catch (Exception ex)
             {
-                var target = OutlierTarget;
-                target.IsDisqualified = true;
-                target.DisqualificationReason = OutlierRejectionReason;
-                target.Status = "Rejected";
-                if (target.EvaluationId != Guid.Empty)
-                    await _apiService.RejectOutlierAsync(new RejectOutlierRequest { EvaluationId = target.EvaluationId, RejectionReason = OutlierRejectionReason, RejectionNotes = OutlierNotes, AutoPromote = false });
-                AddDisqualifiedCandidateRecord(
-                    target.EvaluationId,
-                    target.SoloParentId,
-                    target.SpId,
-                    target.Name,
-                    target.Barangay,
-                    target.MonthlyIncome,
-                    target.Score,
-                    target.Priority,
-                    target.Dependants,
-                    OutlierRejectionReason,
-                    OutlierNotes,
-                    "Admin / Reviewer"
-                );
-                PagedRecommendations.Remove(target);
-                FilteredRecommendations.Remove(target);
-                if (QueueTotalCount > 0) QueueTotalCount--;
                 IsOutlierModalOpen = false;
-                RecalculateQuotaAndFilter();
-                NotifyDisqualifiedMetricsChanged();
-                ToastNotification.Show("Candidate Disqualified", $"{target.Name} disqualified from queue ({OutlierRejectionReason}).", ToastType.Warning);
+                ToastNotification.Show("Disqualification Error", ex.Message, ToastType.Error);
             }
         }
 
@@ -136,7 +218,7 @@ namespace SOLUM_UI.ViewModels
             double income, double score, string pri, int dep,
             string reason, string notes, string by)
         {
-            var existing = DisqualifiedCandidates.FirstOrDefault(x => (!string.IsNullOrEmpty(spNum) && x.SpId == spNum) || (evalId != Guid.Empty && x.EvaluationId == evalId));
+            var existing = DisqualifiedCandidates.FirstOrDefault(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, evalId, spId, spNum));
             if (existing != null)
             {
                 existing.RejectionReason = reason;
@@ -228,7 +310,7 @@ namespace SOLUM_UI.ViewModels
                 if (_totalDisqualifiedCount > 0) _totalDisqualifiedCount--;
                 UpdateDisqualifiedPaged();
                 NotifyDisqualifiedMetricsChanged();
-                var orig = _allItems.FirstOrDefault(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId) || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId));
+                var orig = _allItems.FirstOrDefault(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, item.EvaluationId, item.SoloParentId, item.SpId));
                 if (orig != null)
                 {
                     orig.IsDisqualified = false;
@@ -353,6 +435,8 @@ namespace SOLUM_UI.ViewModels
             row.IsFinalGrantee = confirm;
             if (confirm && row.EvaluationId != Guid.Empty)
                 await _apiService.ConfirmGranteesAsync(_activeCycleId, new List<Guid> { row.EvaluationId });
+            IsDrawerOpen = false;
+            ActiveCandidate = null;
             UpdateShortlistAndFinalCollections();
             NotifyQuotaMetricsChanged();
             if (confirm) ToastNotification.Show("Confirmed", $"{row.Name} confirmed as final grantee.", ToastType.Success); else ToastNotification.Show("Unconfirmed", $"{row.Name} reverted to pending shortlist.", ToastType.Info);
@@ -668,8 +752,7 @@ namespace SOLUM_UI.ViewModels
                     await FetchRecordForDrawerAsync(item);
 
                     // Check if candidate is currently in ShortlistRows (Approved Selection)
-                    var shortlistRow = ShortlistRows.FirstOrDefault(x => (x.SoloParentId != Guid.Empty && x.SoloParentId == targetId)
-                                                                      || (!string.IsNullOrEmpty(x.SpId) && x.SpId == item.SpId));
+                    var shortlistRow = ShortlistRows.FirstOrDefault(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, item.EvaluationId, targetId, item.SpId));
                     if (shortlistRow != null)
                     {
                         shortlistRow.Score = item.Score;

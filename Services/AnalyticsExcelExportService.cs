@@ -912,7 +912,7 @@ namespace SOLUM_UI.Services
             m.CivilWidowed = GetCount(data.CivilStatus, "Widowed", "widowed");
             int sep = GetCount(data.CivilStatus, "Separated", "separated", "Legally Separated");
             int ann = GetCount(data.CivilStatus, "Annulled", "annulled");
-            int sepAnn = GetCount(data.CivilStatus, "Legally Separated / Annulled", "Separated / Annulled");
+            int sepAnn = GetCount(data.CivilStatus, "Annulled/Legally Separated", "Annulled / Legally Separated", "Legally Separated / Annulled", "Separated / Annulled");
             m.CivilSeparatedAnnulled = sepAnn > 0 ? sepAnn : (sep + ann);
 
             // Employment Status

@@ -149,7 +149,7 @@ namespace SOLUM_UI.Services
 
         }
 
-        public static readonly string[] StandardExtensions = new[] { "Jr.", "Sr.", "II", "III", "IV", "V" };
+        public static readonly string[] StandardExtensions = new[] { "Jr.", "Sr.", "II", "III", "IV", "V", "VI" };
 
         public static string FuzzyMatchExtension(string raw)
         {
@@ -162,6 +162,7 @@ namespace SOLUM_UI.Services
             if (norm == "iii" || norm == "3rd" || norm == "three") return "III";
             if (norm == "iv" || norm == "4th" || norm == "four") return "IV";
             if (norm == "v" || norm == "5th" || norm == "five") return "V";
+            if (norm == "vi" || norm == "6th" || norm == "six") return "VI";
             foreach (var ext in StandardExtensions)
             {
 
@@ -295,9 +296,7 @@ namespace SOLUM_UI.Services
             "Single",
             "Married",
             "Widowed",
-            "Separated",
-            "Divorced",
-            "Annulled",
+            "Annulled/Legally Separated",
             "Common-law / Live-in",
             "Others"
 
@@ -318,14 +317,12 @@ namespace SOLUM_UI.Services
                 return "Single";
             if (alpha == "m" || alpha == "mar" || alpha == "marr" || alpha == "mared" || alpha == "marrd" || alpha == "mrd" || clean == "rn")
                 return "Married";
-            if (alpha == "d" || alpha == "div" || alpha == "dv")
-                return "Divorced";
             if (alpha == "a" || alpha == "ann" || alpha == "anl" || alpha == "anul" || alpha == "anulled" || alpha == "annul" || clean == "4")
-                return "Annulled";
+                return "Annulled/Legally Separated";
             if (alpha == "w" || alpha == "wid" || alpha == "wdw" || alpha == "balo" || alpha == "biyuda" || alpha == "biyudo")
                 return "Widowed";
             if (alpha == "sep" || alpha == "sp" || norm.Contains("s/p") || alpha == "hiwalay" || alpha == "separated")
-                return "Separated";
+                return "Annulled/Legally Separated";
             if (alpha == "c" || alpha == "live" || alpha == "livein" || alpha == "kinakasama")
                 return "Common-law / Live-in";
             // 2. Keyword containment
@@ -336,11 +333,9 @@ namespace SOLUM_UI.Services
             if (alpha.Contains("widow") || alpha.Contains("biyud") || alpha.Contains("balo"))
                 return "Widowed";
             if (alpha.Contains("sep") || alpha.Contains("hiwalay") || alpha.Contains("defacto"))
-                return "Separated";
-            if (alpha.Contains("divorc") || alpha.Contains("diborsyo"))
-                return "Divorced";
+                return "Annulled/Legally Separated";
             if (alpha.Contains("annul") || alpha.Contains("pawalang"))
-                return "Annulled";
+                return "Annulled/Legally Separated";
             if (alpha.Contains("live") || alpha.Contains("common") || alpha.Contains("kinakasama"))
                 return "Common-law / Live-in";
             foreach (var st in StandardCivilStatuses)
@@ -949,7 +944,7 @@ namespace SOLUM_UI.Services
                 Surname               = GetFieldValue(ocr, "last_name")?.ToUpperInvariant(),
                 FirstName             = GetFieldValue(ocr, "first_name")?.ToUpperInvariant(),
                 MiddleName            = GetFieldValue(ocr, "middle_name")?.ToUpperInvariant(),
-                ExtensionName         = GetFieldValue(ocr, "ext_name")?.ToUpperInvariant(),
+                ExtensionName         = FuzzyMatchExtension(GetFieldValue(ocr, "ext_name")),
                 CivilStatus           = GetFieldValue(ocr, "civil_status"),
                 Sex                   = GetFieldValue(ocr, "sex"),
                 PlaceOfBirth          = GetFieldValue(ocr, "birthplace")?.ToUpperInvariant(),

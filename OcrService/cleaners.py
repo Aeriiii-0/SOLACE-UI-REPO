@@ -177,14 +177,12 @@ def clean_civil_status(raw_text: str) -> str:
         return "Single"
     if t_alpha in ["m", "mar", "marr", "mared", "marrd", "mrd"] or t_clean in ["m", "rn"]:
         return "Married"
-    if t_alpha in ["d", "div", "dv"] or t_clean in ["d"]:
-        return "Divorced"
     if t_alpha in ["a", "ann", "anl", "anul", "anulled", "annul"] or t_clean in ["a", "4"]:
-        return "Annulled"
+        return "Annulled/Legally Separated"
     if t_alpha in ["w", "wid", "wdw"] or t in ["biyuda", "biyudo", "balo"] or t_clean in ["w", "vv"]:
         return "Widowed"
     if t_alpha in ["sep", "sp"] or "s/p" in t or t in ["hiwalay", "separated"] or t_clean in ["sep", "sp"]:
-        return "Separated"
+        return "Annulled/Legally Separated"
     if t_alpha in ["c", "live", "livein", "kinakasama"]:
         return "Common-law / Live-in"
 
@@ -196,16 +194,14 @@ def clean_civil_status(raw_text: str) -> str:
     if any(k in t for k in ["widow", "widower", "balo", "biyud"]):
         return "Widowed"
     if any(k in t for k in ["separat", "hiwalay"]):
-        return "Separated"
-    if any(k in t for k in ["divorc", "diborsyo"]):
-        return "Divorced"
+        return "Annulled/Legally Separated"
     if any(k in t for k in ["annul", "nullity", "pawalang"]):
-        return "Annulled"
+        return "Annulled/Legally Separated"
     if any(k in t for k in ["common", "live-in", "live in", "kinakasama"]):
         return "Common-law / Live-in"
 
     # 3. Fuzzy similarity
-    for standard in ["Single", "Married", "Widowed", "Separated", "Divorced", "Annulled"]:
+    for standard in ["Single", "Married", "Widowed", "Annulled/Legally Separated"]:
         if difflib.SequenceMatcher(None, t_alpha, standard.lower()).ratio() >= 0.65:
             return standard
 

@@ -22,6 +22,20 @@ namespace SOLUM_UI.Views.Dialogs
             {
                 PwdCurrent.Password = currentPassword;
                 TxtCurrentVisible.Text = currentPassword;
+                PwdCurrent.IsEnabled = false;
+                TxtCurrentVisible.IsReadOnly = true;
+                TxtCurrentVisible.Focusable = false;
+                TxtCurrentVisible.IsHitTestVisible = false;
+            }
+            else
+            {
+                BorderCurrent.Background = Brushes.White;
+                PwdCurrent.Foreground = Brushes.Black;
+                TxtCurrentVisible.Foreground = Brushes.Black;
+                PwdCurrent.IsEnabled = true;
+                TxtCurrentVisible.IsReadOnly = false;
+                TxtCurrentVisible.Focusable = true;
+                TxtCurrentVisible.IsHitTestVisible = true;
             }
         }
 

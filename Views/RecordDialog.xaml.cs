@@ -414,8 +414,9 @@ namespace SOLUM_UI
                     return;
                 }
 
+                string normalizedContact = SOLUM_UI.Services.FormHelper.NormalizePersonName(contactName);
                 var existing = _familyRowData.FirstOrDefault(m =>
-                    string.Equals(m.MemberName, contactName, StringComparison.OrdinalIgnoreCase));
+                    string.Equals(SOLUM_UI.Services.FormHelper.NormalizePersonName(m.MemberName), normalizedContact, StringComparison.OrdinalIgnoreCase));
                 if (existing != null)
                 {
                     _autoEmergencyChildRow = existing;
@@ -1050,7 +1051,7 @@ namespace SOLUM_UI
             if (!string.IsNullOrWhiteSpace(TxtFirstName.Text))  return true;
             if (!string.IsNullOrWhiteSpace(TxtMiddleName.Text)) return true;
             if (!string.IsNullOrWhiteSpace(TxtAddress.Text))    return true;
-            if (CmbBarangay.SelectedItem != null)               return true;
+            if (!string.IsNullOrWhiteSpace(GetComboValue(CmbBarangay))) return true;
             if (!string.IsNullOrWhiteSpace(TxtContact.Text))    return true;
             if (DpBirthdate.SelectedDate.HasValue)               return true;
             if (CmbSex.SelectedItem != null)                     return true;
@@ -1308,6 +1309,18 @@ namespace SOLUM_UI
                 return;
             }
             string snDesc = hasSn ? (TxtSpecialNeedsDescription.Text?.Trim() ?? string.Empty) : string.Empty;
+
+            string normalizedInputName = SOLUM_UI.Services.FormHelper.NormalizePersonName(name);
+            bool isDuplicateMember = _familyRowData.Any(m =>
+                m != _editingFamilyMember &&
+                string.Equals(SOLUM_UI.Services.FormHelper.NormalizePersonName(m.MemberName), normalizedInputName, StringComparison.OrdinalIgnoreCase));
+            if (isDuplicateMember)
+            {
+                ToastNotification.Show("Duplicate Family Member", $"'{name}' is already listed in the family composition.", ToastType.Warning);
+                TxtMemberName.Focus();
+                return;
+            }
+
             if (_editingFamilyMember != null)
             {
                 _editingFamilyMember.MemberName = name;
@@ -1540,6 +1553,7 @@ namespace SOLUM_UI
             string val = value.Trim();
             foreach (ComboBoxItem item in combo.Items)
             {
+                if (!item.IsEnabled) continue;
                 if (string.Equals(item.Content?.ToString(), val, StringComparison.OrdinalIgnoreCase))
                 {
                     combo.SelectedItem = item;
@@ -1562,8 +1576,8 @@ namespace SOLUM_UI
                     }
                 }
             }
-            // Specific matching for Civil Status if combo is CmbCivilStatus
-            if (combo == CmbCivilStatus)
+            // Specific matching for Civil Status if combo is CmbCivilStatus or CmbMemberCivil
+            if (combo == CmbCivilStatus || combo == CmbMemberCivil)
             {
                 string matchedCiv = SOLUM_UI.Services.OcrService.FuzzyMatchCivilStatus(val);
                 if (!string.IsNullOrEmpty(matchedCiv))
@@ -1582,6 +1596,7 @@ namespace SOLUM_UI
             string valNorm = System.Text.RegularExpressions.Regex.Replace(val.ToLowerInvariant(), @"[^a-z0-9]", "");
             foreach (ComboBoxItem item in combo.Items)
             {
+                if (!item.IsEnabled) continue;
                 string text = item.Content?.ToString() ?? "";
                 string textNorm = System.Text.RegularExpressions.Regex.Replace(text.ToLowerInvariant(), @"[^a-z0-9]", "");
                 if (string.IsNullOrEmpty(textNorm)) continue;
@@ -1600,8 +1615,11 @@ namespace SOLUM_UI
         private string GetComboValue(ComboBox combo)
         {
             ComboBoxItem sel = combo?.SelectedItem as ComboBoxItem;
-            string val = sel?.Content?.ToString() ?? string.Empty;
+            if (sel == null || !sel.IsEnabled) return string.Empty;
+            string val = sel.Content?.ToString() ?? string.Empty;
             if (combo == CmbExtension && string.Equals(val, "N/A", StringComparison.OrdinalIgnoreCase))
+                return string.Empty;
+            if (string.Equals(val, "SELECT BARANGAY", StringComparison.OrdinalIgnoreCase))
                 return string.Empty;
             return val;
         }
@@ -2572,7 +2590,8 @@ namespace SOLUM_UI
                 fields,
                 screenW: Width, screenH: Height,
                 screenLeft: Left, screenTop: Top,
-                mode: mode
+                mode: mode,
+                familyMembers: preview.FamilyMembers
             );
             try
             {
@@ -3026,10 +3045,20 @@ namespace SOLUM_UI
                 string rel  = !string.IsNullOrWhiteSpace(m.Relationship) ? $" ({m.Relationship.Trim()})" : "";
                 string age  = !string.IsNullOrWhiteSpace(m.Age) ? $", Age {m.Age.Trim()}" : "";
                 string sex  = !string.IsNullOrWhiteSpace(m.Sex) ? $", {m.Sex.Trim()}" : "";
+                string civ  = !string.IsNullOrWhiteSpace(m.CivilStatus) ? $", {m.CivilStatus.Trim()}" : "";
+                string normDob = SOLUM_UI.Services.OcrService.NormalizeDateString(m.Birthdate, out DateTime? parsedDob);
+                string dobStr = (parsedDob.HasValue && parsedDob.Value != DateTime.MinValue)
+                    ? parsedDob.Value.ToString("yyyy-MM-dd")
+                    : (!string.IsNullOrWhiteSpace(normDob) ? normDob : (m.Birthdate ?? "").Trim());
+                string dob  = !string.IsNullOrWhiteSpace(dobStr) ? $", DOB: {dobStr}" : "";
+                string edu  = !string.IsNullOrWhiteSpace(m.EducationEmployment) ? $", Educ/Work: {m.EducationEmployment.Trim()}" : "";
+                decimal incVal = 0m;
+                bool hasInc = decimal.TryParse(m.Income, out incVal);
+                string inc  = hasInc ? $", Income: ₱ {incVal:N2}" : (!string.IsNullOrWhiteSpace(m.Income) ? $", Income: {m.Income.Trim()}" : ", Income: ₱ 0.00");
                 string sn   = m.HasSpecialNeeds
-                    ? $", Special Needs (PWD): {(!string.IsNullOrWhiteSpace(m.SpecialNeedsCategory) ? m.SpecialNeedsCategory : "Yes")}" + (!string.IsNullOrWhiteSpace(m.SpecialNeedsDescription) ? $" ({m.SpecialNeedsDescription.Trim()})" : "")
+                    ? $", Special Needs (PWD): {(!string.IsNullOrWhiteSpace(m.SpecialNeedsCategory) ? m.SpecialNeedsCategory.Trim() : "Yes")}" + (!string.IsNullOrWhiteSpace(m.SpecialNeedsDescription) ? $" ({m.SpecialNeedsDescription.Trim()})" : "")
                     : ", Special Needs: None";
-                return $"{name}{rel}{age}{sex}{sn}";
+                return $"{name}{rel}{age}{sex}{civ}{dob}{edu}{inc}{sn}";
             }
 
             int newCount = r.FamilyMembers != null ? r.FamilyMembers.Count : 0;
@@ -3067,7 +3096,7 @@ namespace SOLUM_UI
                     {
                         if (m.Id.HasValue && m.Id.Value != Guid.Empty)
                             oldM = _existing.FamilyMembers.Find(x => x.Id == m.Id);
-                        else if (i < oldCount)
+                        else if (!m.IsNew && i < oldCount)
                             oldM = _existing.FamilyMembers[i];
                     }
 

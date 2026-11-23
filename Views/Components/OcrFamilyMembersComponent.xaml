@@ -323,9 +323,7 @@
                                                 <ComboBoxItem Content="Single"/>
                                                 <ComboBoxItem Content="Married"/>
                                                 <ComboBoxItem Content="Widowed"/>
-                                                <ComboBoxItem Content="Separated"/>
-                                                <ComboBoxItem Content="Divorced"/>
-                                                <ComboBoxItem Content="Annulled"/>
+                                                <ComboBoxItem Content="Annulled/Legally Separated"/>
                                             </ComboBox>
                                         </StackPanel>
                                     </Grid>

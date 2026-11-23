@@ -221,7 +221,7 @@ namespace SOLUM_UI.Services
             dataRow(ws, ref row, "Single",                       d.Count(r => r.CivilStatus == "Single"));
             dataRow(ws, ref row, "Married",                      d.Count(r => r.CivilStatus == "Married"));
             dataRow(ws, ref row, "Widowed",                      d.Count(r => r.CivilStatus == "Widowed"));
-            dataRow(ws, ref row, "Legally Separated / Annulled", d.Count(r => r.CivilStatus == "Separated" || r.CivilStatus == "Annulled"));
+            dataRow(ws, ref row, "Legally Separated / Annulled", d.Count(r => r.CivilStatus == "Separated" || r.CivilStatus == "Annulled" || r.CivilStatus == "Annulled/Legally Separated"));
             row++;
             sectionHeader(ws, ref row, "Employment Status", accent, light);
             dataRow(ws, ref row, "Employed (public & private)", d.Count(r => r.IsEmployed));
@@ -403,7 +403,7 @@ namespace SOLUM_UI.Services
                 CivilSingle      = d.Count(r => r.CivilStatus == "Single"),
                 CivilMarried     = d.Count(r => r.CivilStatus == "Married"),
                 CivilWidowed     = d.Count(r => r.CivilStatus == "Widowed"),
-                CivilSepAnnulled = d.Count(r => r.CivilStatus == "Separated" || r.CivilStatus == "Annulled"),
+                CivilSepAnnulled = d.Count(r => r.CivilStatus == "Separated" || r.CivilStatus == "Annulled" || r.CivilStatus == "Annulled/Legally Separated"),
                 EmpEmployed      = d.Count(r => r.IsEmployed),
                 EmpSelfEmployed  = d.Count(r => r.IsSelfEmployed),
                 EmpNotEmployed   = d.Count(r => r.IsNotEmployed),

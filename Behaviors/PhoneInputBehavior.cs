@@ -10,6 +10,13 @@ namespace SOLUM_UI.Behaviors
     /// </summary>
     public static class PhoneInputBehavior
     {
+        private static readonly DependencyProperty IsProcessingProperty =
+            DependencyProperty.RegisterAttached(
+                "IsProcessing",
+                typeof(bool),
+                typeof(PhoneInputBehavior),
+                new PropertyMetadata(false));
+
         public static readonly DependencyProperty IsEnabledProperty =
             DependencyProperty.RegisterAttached(
                 "IsEnabled",
@@ -77,10 +84,10 @@ namespace SOLUM_UI.Behaviors
             if (textBox == null) return;
 
             // Prevent recursive calls
-            if (textBox.Tag is bool processing && processing)
+            if ((bool)textBox.GetValue(IsProcessingProperty))
                 return;
 
-            textBox.Tag = true;
+            textBox.SetValue(IsProcessingProperty, true);
 
             try
             {
@@ -108,7 +115,7 @@ namespace SOLUM_UI.Behaviors
             }
             finally
             {
-                textBox.Tag = false;
+                textBox.SetValue(IsProcessingProperty, false);
             }
         }
 

@@ -40,9 +40,7 @@
                                 <ComboBoxItem Content="Single"/>
                                 <ComboBoxItem Content="Married"/>
                                 <ComboBoxItem Content="Widowed"/>
-                                <ComboBoxItem Content="Separated"/>
-                                <ComboBoxItem Content="Divorced"/>
-                                <ComboBoxItem Content="Annulled"/>
+                                <ComboBoxItem Content="Annulled/Legally Separated"/>
                             </ComboBox>
                             <TextBlock x:Name="ErrCivilStatus" Text="Required." Style="{StaticResource ErrorText}"/>
                         </StackPanel>
@@ -123,7 +121,7 @@
                             <ComboBox x:Name="CmbBarangay" Style="{StaticResource FormCombo}"
                                       Tag="barangay" GotFocus="Field_GotFocus" PreviewMouseLeftButtonDown="Field_PreviewMouseDown"
                                       SelectionChanged="CmbBarangay_SelectionChanged">
-                                    <ComboBoxItem Content="SELECT BARANGAY" IsSelected="True" IsEnabled="False"/>
+                                    <ComboBoxItem Content="SELECT BARANGAY" IsEnabled="False"/>
                                     <ComboBoxItem Content="Bi&#241;an (Poblacion)"/>
                                     <ComboBoxItem Content="Bungahan"/>
                                     <ComboBoxItem Content="Canlalay"/>

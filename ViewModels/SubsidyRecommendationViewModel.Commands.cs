@@ -117,7 +117,7 @@ namespace SOLUM_UI.ViewModels
                 if (p is SubsidyItem it) item = it;
                 else if (p is SelectionRow r)
                 {
-                    item = _allItems.FirstOrDefault(x => x.SpId == r.SpId) ?? new SubsidyItem
+                    item = _allItems.FirstOrDefault(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, r.EvaluationId, r.SoloParentId, r.SpId)) ?? new SubsidyItem
                     {
                         SoloParentId = r.SoloParentId, SpId = r.SpId, Name = r.Name, Barangay = r.Barangay,
                         Priority = r.Priority, Score = r.Score, MonthlyIncome = r.MonthlyIncome,
@@ -141,8 +141,7 @@ namespace SOLUM_UI.ViewModels
                 if (!CanModifyGrantees) return;
                 if (ActiveCandidate != null)
                 {
-                    bool alreadyInShortlist = ShortlistRows.Any(x => (x.SoloParentId != Guid.Empty && x.SoloParentId == ActiveCandidate.SoloParentId)
-                                                                 || (!string.IsNullOrEmpty(x.SpId) && x.SpId == ActiveCandidate.SpId));
+                    bool alreadyInShortlist = ShortlistRows.Any(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, ActiveCandidate.EvaluationId, ActiveCandidate.SoloParentId, ActiveCandidate.SpId));
                     if (alreadyInShortlist)
                     {
                         ToastNotification.Show("Already in Shortlist", $"{ActiveCandidate.Name} is already in the Approved Selection.", ToastType.Info);
@@ -274,10 +273,7 @@ namespace SOLUM_UI.ViewModels
                 if (_allItems != null && _allItems.Contains(item))
                     _allItems.Remove(item);
 
-                if (!ShortlistRows.Any(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId)
-                                         || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId)
-                                         || (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId)
-                                         || (!string.IsNullOrEmpty(item.Name) && string.Equals(x.Name, item.Name, StringComparison.OrdinalIgnoreCase))))
+                if (!ShortlistRows.Any(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, item.EvaluationId, item.SoloParentId, item.SpId)))
                 {
                     var collegeKids = item.ChildrenDetails?.Where(c => c.Age >= 17 && c.Age <= 24).ToList() ?? new List<ChildDetailItem>();
                     ShortlistRows.Add(new SelectionRow
@@ -314,14 +310,13 @@ namespace SOLUM_UI.ViewModels
                         ChildrenDetails = item.ChildrenDetails ?? new List<ChildDetailItem>()
                     });
                 }
-                _allItems.RemoveAll(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId)
-                                      || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId)
-                                      || (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId)
-                                      || (!string.IsNullOrEmpty(item.Name) && string.Equals(x.Name, item.Name, StringComparison.OrdinalIgnoreCase)));
+                _allItems.RemoveAll(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, item.EvaluationId, item.SoloParentId, item.SpId));
                 FilteredRecommendations.Remove(item);
                 PagedRecommendations.Remove(item);
             }
             IsBatchMode = false;
+            IsDrawerOpen = false;
+            ActiveCandidate = null;
             RecalculateQuotaAndFilter();
             UpdateShortlistAndFinalCollections();
             RecalculateSelectionCounts();
@@ -342,10 +337,7 @@ namespace SOLUM_UI.ViewModels
             {
                 try { await _apiService.ShortlistCandidatesAsync(_activeCycleId, new List<Guid> { item.EvaluationId }); } catch { }
             }
-            if (!ShortlistRows.Any(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId)
-                                     || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId)
-                                     || (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId)
-                                     || (!string.IsNullOrEmpty(item.Name) && string.Equals(x.Name, item.Name, StringComparison.OrdinalIgnoreCase))))
+            if (!ShortlistRows.Any(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, item.EvaluationId, item.SoloParentId, item.SpId)))
             {
                 var collegeKids = item.ChildrenDetails?.Where(c => c.Age >= 17 && c.Age <= 24).ToList() ?? new List<ChildDetailItem>();
                 ShortlistRows.Add(new SelectionRow
@@ -382,10 +374,7 @@ namespace SOLUM_UI.ViewModels
                     ChildrenDetails = item.ChildrenDetails ?? new List<ChildDetailItem>()
                 });
             }
-            _allItems.RemoveAll(x => (!string.IsNullOrEmpty(item.SpId) && x.SpId == item.SpId)
-                                  || (item.EvaluationId != Guid.Empty && x.EvaluationId == item.EvaluationId)
-                                  || (item.SoloParentId != Guid.Empty && x.SoloParentId == item.SoloParentId)
-                                  || (!string.IsNullOrEmpty(item.Name) && string.Equals(x.Name, item.Name, StringComparison.OrdinalIgnoreCase)));
+            _allItems.RemoveAll(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, item.EvaluationId, item.SoloParentId, item.SpId));
             FilteredRecommendations.Remove(item);
             PagedRecommendations.Remove(item);
             for (int i = 0; i < FilteredRecommendations.Count; i++)
@@ -394,6 +383,8 @@ namespace SOLUM_UI.ViewModels
                 FilteredRecommendations[i].IsWithinQuota = (i + 1 <= _granteeSlots);
             }
             QueueTotalCount = FilteredRecommendations.Count;
+            IsDrawerOpen = false;
+            ActiveCandidate = null;
             RecalculateQuotaAndFilter();
             UpdateShortlistAndFinalCollections();
             RecalculateSelectionCounts();
@@ -439,6 +430,8 @@ namespace SOLUM_UI.ViewModels
             foreach (var r in validTargets) { r.IsFinalGrantee = true; r.IsSelected = false; }
             foreach (var r in expiredTargets) { r.IsSelected = false; }
             IsShortlistBatchMode = false;
+            IsDrawerOpen = false;
+            ActiveCandidate = null;
             UpdateShortlistAndFinalCollections();
             RecalculateShortlistSelectionCounts();
             NotifyQuotaMetricsChanged();
@@ -476,6 +469,8 @@ namespace SOLUM_UI.ViewModels
                 r.IsSelected = false;
             }
             IsShortlistBatchMode = false;
+            IsDrawerOpen = false;
+            ActiveCandidate = null;
             UpdateShortlistAndFinalCollections();
             RecalculateShortlistSelectionCounts();
             NotifyQuotaMetricsChanged();

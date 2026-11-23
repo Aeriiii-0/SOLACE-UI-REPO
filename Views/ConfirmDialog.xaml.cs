@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using SOLUM_UI.Models;
 
 namespace SOLUM_UI
 {
@@ -40,7 +41,8 @@ namespace SOLUM_UI
                              List<ConfirmField> fields,
                              double screenW, double screenH,
                              double screenLeft, double screenTop,
-                             ConfirmMode mode = ConfirmMode.Add)
+                             ConfirmMode mode = ConfirmMode.Add,
+                             List<FamilyMember> familyMembers = null)
         {
             InitializeComponent();
             _mode = mode;
@@ -110,7 +112,7 @@ namespace SOLUM_UI
             IconCircle.Background = _accent;
             BtnConfirm.Background = _accent;
 
-            BuildContent(fields);
+            BuildContent(fields, familyMembers);
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -170,17 +172,22 @@ namespace SOLUM_UI
             return tb;
         }
 
-        private void BuildContent(List<ConfirmField> fields)
+        private void BuildContent(List<ConfirmField> fields, List<FamilyMember> familyMembers = null)
         {
             var summaryName = fields.Find(f => f.Label == "Last Name")?.NewValue ?? string.Empty;
             var summaryFirst = fields.Find(f => f.Label == "First Name")?.NewValue ?? string.Empty;
+            var summaryFull = fields.Find(f => f.Label == "Full Name")?.NewValue ?? string.Empty;
             var summarySex = fields.Find(f => f.Label == "Sex")?.NewValue ?? string.Empty;
             var summaryAge = fields.Find(f => f.Label == "Age")?.NewValue ?? string.Empty;
-            var summaryContact = fields.Find(f => f.Label == "Contact No.")?.NewValue ?? string.Empty;
+            var summaryContact = fields.Find(f => f.Label == "Contact No.")?.NewValue
+                              ?? fields.Find(f => f.Label == "Contact Number")?.NewValue
+                              ?? string.Empty;
 
-            string fullName = string.IsNullOrWhiteSpace(summaryName)
-                ? summaryFirst
-                : summaryName + (string.IsNullOrWhiteSpace(summaryFirst) ? "" : ", " + summaryFirst);
+            string fullName = !string.IsNullOrWhiteSpace(summaryName) || !string.IsNullOrWhiteSpace(summaryFirst)
+                ? (string.IsNullOrWhiteSpace(summaryName)
+                    ? summaryFirst
+                    : summaryName + (string.IsNullOrWhiteSpace(summaryFirst) ? "" : ", " + summaryFirst))
+                : summaryFull;
 
             // ── Summary header (name + sex / age / contact), like profile details ──
             var summaryGrid = new Grid { Margin = new Thickness(0, 18, 0, 18) };
@@ -305,6 +312,7 @@ namespace SOLUM_UI
                 }
                 else if (section == "Family Composition")
                 {
+                    bool hasTable = familyMembers != null;
                     foreach (var sf in sectionFields)
                     {
                         if (sf.IsChanged)
@@ -331,7 +339,7 @@ namespace SOLUM_UI
                                 Child = rowStack
                             });
                         }
-                        else
+                        else if (!hasTable)
                         {
                             var rowStack = new StackPanel();
                             var l = Tb(sf.Label, 12, FontWeights.Normal, _label);
@@ -347,6 +355,20 @@ namespace SOLUM_UI
                                 Margin = new Thickness(0, 0, 0, 8),
                                 Child = rowStack
                             });
+                        }
+                    }
+
+                    if (hasTable)
+                    {
+                        if (familyMembers.Count == 0)
+                        {
+                            var none = Tb("None registered", 14, FontWeights.Normal, _label);
+                            none.Margin = new Thickness(0, 0, 0, 10);
+                            cardStack.Children.Add(none);
+                        }
+                        else
+                        {
+                            cardStack.Children.Add(BuildFamilyMembersTable(familyMembers));
                         }
                     }
                 }
@@ -405,6 +427,96 @@ namespace SOLUM_UI
                 card.Child = outer;
                 ContentPanel.Children.Add(card);
             }
+        }
+
+        private Border BuildFamilyMembersTable(List<FamilyMember> members)
+        {
+            var tableBorder = new Border
+            {
+                BorderBrush = _divider,
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(8),
+                Margin = new Thickness(0, 0, 0, 10),
+                ClipToBounds = true
+            };
+
+            var grid = new Grid();
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(32) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.9, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0.55, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0.7, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0.9, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.05, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.3, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0.9, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.35, GridUnitType.Star) });
+
+            void AddCell(int row, int col, string text, bool isHeader, bool isBold = false)
+            {
+                var cell = new Border
+                {
+                    Padding = new Thickness(8, isHeader ? 9 : 8, 8, isHeader ? 9 : 8),
+                    Background = isHeader ? _bg : Brushes.Transparent,
+                    BorderBrush = _divider,
+                    BorderThickness = new Thickness(0, 0, 0, row == members.Count ? 0 : 1)
+                };
+                var tb = Tb(
+                    string.IsNullOrWhiteSpace(text) ? "—" : text,
+                    isHeader ? 11 : 12.5,
+                    isHeader || isBold ? FontWeights.SemiBold : FontWeights.Normal,
+                    isHeader ? _label : _value,
+                    wrap: true);
+                tb.VerticalAlignment = VerticalAlignment.Center;
+                cell.Child = tb;
+                Grid.SetRow(cell, row);
+                Grid.SetColumn(cell, col);
+                grid.Children.Add(cell);
+            }
+
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            AddCell(0, 0, "#", true);
+            AddCell(0, 1, "NAME", true);
+            AddCell(0, 2, "RELATIONSHIP", true);
+            AddCell(0, 3, "AGE", true);
+            AddCell(0, 4, "SEX", true);
+            AddCell(0, 5, "CIVIL STATUS", true);
+            AddCell(0, 6, "BIRTHDATE", true);
+            AddCell(0, 7, "EDUC. / WORK", true);
+            AddCell(0, 8, "INCOME", true);
+            AddCell(0, 9, "SPECIAL NEEDS", true);
+
+            for (int i = 0; i < members.Count; i++)
+            {
+                var m = members[i];
+                int r = i + 1;
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                string snText = m != null && m.HasSpecialNeeds
+                    ? (!string.IsNullOrWhiteSpace(m.SpecialNeedsCategory) ? m.SpecialNeedsCategory : "Yes")
+                      + (!string.IsNullOrWhiteSpace(m.SpecialNeedsDescription) ? $" ({m.SpecialNeedsDescription.Trim()})" : "")
+                    : "None";
+
+                string incText = "₱ 0.00";
+                if (m != null && !string.IsNullOrWhiteSpace(m.Income))
+                {
+                    incText = decimal.TryParse(m.Income, out decimal incVal) ? $"₱ {incVal:N2}" : m.Income.Trim();
+                }
+
+                AddCell(r, 0, r.ToString(), false);
+                AddCell(r, 1, m?.MemberName, false, isBold: true);
+                AddCell(r, 2, m?.Relationship, false);
+                AddCell(r, 3, m?.Age, false);
+                AddCell(r, 4, m?.Sex, false);
+                AddCell(r, 5, m?.CivilStatus, false);
+                AddCell(r, 6, m?.Birthdate, false);
+                AddCell(r, 7, m?.EducationEmployment, false);
+                AddCell(r, 8, incText, false);
+                AddCell(r, 9, snText, false);
+            }
+
+            tableBorder.Child = grid;
+            return tableBorder;
         }
 
         // Highlighted row for changed values in chip/row-style sections

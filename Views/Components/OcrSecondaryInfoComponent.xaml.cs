@@ -420,6 +420,7 @@ namespace SOLUM_UI.Views.Components
             string val = value.Trim();
             foreach (ComboBoxItem item in combo.Items)
             {
+                if (!item.IsEnabled) continue;
                 string text = item.Content?.ToString();
                 if (string.Equals(text, val, StringComparison.OrdinalIgnoreCase))
                 {
@@ -461,6 +462,7 @@ namespace SOLUM_UI.Views.Components
             string valNorm = Regex.Replace(val.ToLowerInvariant(), @"[^a-z0-9]", "");
             foreach (ComboBoxItem item in combo.Items)
             {
+                if (!item.IsEnabled) continue;
                 string text = item.Content?.ToString() ?? "";
                 string textNorm = Regex.Replace(text.ToLowerInvariant(), @"[^a-z0-9]", "");
                 if (string.IsNullOrEmpty(textNorm)) continue;
@@ -476,7 +478,11 @@ namespace SOLUM_UI.Views.Components
         private string GetComboValue(ComboBox combo)
         {
             ComboBoxItem sel = combo?.SelectedItem as ComboBoxItem;
-            return sel?.Content?.ToString() ?? string.Empty;
+            if (sel == null || !sel.IsEnabled) return string.Empty;
+            string val = sel.Content?.ToString() ?? string.Empty;
+            if (string.Equals(val, "SELECT BARANGAY", StringComparison.OrdinalIgnoreCase))
+                return string.Empty;
+            return val;
         }
         #endregion
         #region Validation
