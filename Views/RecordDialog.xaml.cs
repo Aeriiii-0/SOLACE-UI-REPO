@@ -525,7 +525,12 @@ namespace SOLUM_UI
         {
             if (!isRenewal) return;
             _isRenewal        = true;
-            FormSubtitle.Text = "Renew Record — " + (existing?.Id ?? string.Empty);
+            string idDisplay = existing?.Id ?? string.Empty;
+            if (Guid.TryParse(idDisplay.Trim(), out _) || System.Text.RegularExpressions.Regex.IsMatch(idDisplay, @"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"))
+            {
+                idDisplay = !string.IsNullOrWhiteSpace(existing?.Name) ? existing.Name : string.Empty;
+            }
+            FormSubtitle.Text = !string.IsNullOrWhiteSpace(idDisplay) ? $"Renew Record — {idDisplay}" : "Renew Record";
             FormStepHint.Text = "Renewal mode — update changeable fields only";
             Loaded           += (s, e) => { ApplyRenewalLocks(); ApplyModeStyle(isRenewal: true); };
         }

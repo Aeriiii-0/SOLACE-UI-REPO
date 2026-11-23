@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Windows.Media;
 
 namespace SOLUM_UI.Models
@@ -95,8 +96,12 @@ namespace SOLUM_UI.Models
             string.Equals(TargetType, "Subsidy", StringComparison.OrdinalIgnoreCase) ||
             (!string.IsNullOrWhiteSpace(RawActionType) && RawActionType.IndexOf("SUBSIDY", StringComparison.OrdinalIgnoreCase) >= 0);
 
-        private static bool IsRawGuid(string s) =>
-            !string.IsNullOrWhiteSpace(s) && Guid.TryParse(s.Trim(), out _);
+        private static bool IsRawGuid(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return false;
+            string clean = s.Trim().Trim('{', '}');
+            return Guid.TryParse(clean, out _) || Regex.IsMatch(clean, @"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+        }
 
         public string SubsidyFallbackTitle
         {

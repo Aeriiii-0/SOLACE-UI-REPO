@@ -535,8 +535,12 @@ namespace SOLUM_UI.ViewModels
             return string.Empty;
         }
 
-        private static bool IsGuid(string s) =>
-            !string.IsNullOrWhiteSpace(s) && Guid.TryParse(s.Trim(), out _);
+        private static bool IsGuid(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return false;
+            string clean = s.Trim().Trim('{', '}');
+            return Guid.TryParse(clean, out _) || System.Text.RegularExpressions.Regex.IsMatch(clean, @"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+        }
 
         private static string GetSubsidyActionFallback(string raw)
         {
