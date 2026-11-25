@@ -5,18 +5,18 @@
     <sys:Double x:Key="SolumTableRowHeight">58</sys:Double>
     <sys:Double x:Key="SolumButtonHeight">46</sys:Double>
 
-    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+    <Style TargetType="Button">
         <Setter Property="MinHeight" Value="44"/>
         <Setter Property="Padding" Value="18,10"/>
         <Setter Property="Margin" Value="4,0"/>
     </Style>
 
-    <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
+    <Style TargetType="ListViewItem">
         <Setter Property="MinHeight" Value="58"/>
         <Setter Property="Padding" Value="14,10"/>
     </Style>
 
-    <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+    <Style TargetType="DataGridRow">
         <Setter Property="MinHeight" Value="58"/>
     </Style>
 </ResourceDictionary>

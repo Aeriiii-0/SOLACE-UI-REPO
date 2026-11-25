@@ -33,17 +33,17 @@
     <SolidColorBrush x:Key="SolumTableRowSelectedBorderBrush" Color="#000000"/>
 
     <!-- Thick High-Contrast Input Borders -->
-    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+    <Style TargetType="TextBox">
         <Setter Property="BorderThickness" Value="2"/>
         <Setter Property="BorderBrush" Value="#000000"/>
     </Style>
 
-    <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+    <Style TargetType="ComboBox">
         <Setter Property="BorderThickness" Value="2"/>
         <Setter Property="BorderBrush" Value="#000000"/>
     </Style>
 
-    <Style TargetType="DatePicker" BasedOn="{StaticResource {x:Type DatePicker}}">
+    <Style TargetType="DatePicker">
         <Setter Property="BorderThickness" Value="2"/>
         <Setter Property="BorderBrush" Value="#000000"/>
     </Style>

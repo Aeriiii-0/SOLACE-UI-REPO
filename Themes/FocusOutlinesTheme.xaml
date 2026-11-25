@@ -9,7 +9,7 @@
     <SolidColorBrush x:Key="SolumTableRowHoverBorderBrush" Color="#702943"/>
     <SolidColorBrush x:Key="SolumTableRowSelectedBorderBrush" Color="#702943"/>
 
-    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+    <Style TargetType="TextBox">
         <Style.Triggers>
             <Trigger Property="IsFocused" Value="True">
                 <Setter Property="BorderBrush" Value="#702943"/>
@@ -18,7 +18,7 @@
         </Style.Triggers>
     </Style>
 
-    <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
+    <Style TargetType="ListViewItem">
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#FCEEF2"/>
