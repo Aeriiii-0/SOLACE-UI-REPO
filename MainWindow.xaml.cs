@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Effects;
+using System.Windows.Threading;
 
 
 
@@ -344,11 +347,20 @@ namespace SOLUM_UI
 
             InitializeComponent();
 
-
+            AppSettingsService.Instance.ApplySettings(this);
 
             RegisterNavButtons();
 
+            SetupIdleLockMonitor();
 
+            PreviewKeyDown += (s, e) =>
+            {
+                if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.L && !_isSessionLocked)
+                {
+                    LockSession();
+                    e.Handled = true;
+                }
+            };
 
             MainFrame.Navigated += MainFrame_Navigated;
 
@@ -1179,6 +1191,14 @@ namespace SOLUM_UI
 
 
 
+                case "Settings":
+
+                    TopBarControl.PageTitle = "System Settings";
+
+                    break;
+
+
+
                 default:
 
 
@@ -1357,7 +1377,7 @@ namespace SOLUM_UI
 
                 case "Settings":
 
-
+                    NavigatePage(GetOrCreatePage("Settings", () => new SettingsPage()));
 
                     break;
 
@@ -1522,6 +1542,212 @@ namespace SOLUM_UI
             this.Close();
 
         }
+
+        #region Session Idle Auto-Lock (RA 10173 Compliance)
+        private DispatcherTimer _idleTimer;
+        private DateTime _lastActivityUtc = DateTime.UtcNow;
+        private bool _isSessionLocked = false;
+        private bool _isUnlocking = false;
+        private bool _isLockPasswordVisible = false;
+
+        private void SetupIdleLockMonitor()
+        {
+            _lastActivityUtc = DateTime.UtcNow;
+            InputManager.Current.PreProcessInput += (s, e) =>
+            {
+                if (e.StagingItem.Input is MouseEventArgs || e.StagingItem.Input is KeyboardEventArgs)
+                {
+                    _lastActivityUtc = DateTime.UtcNow;
+                }
+            };
+
+            _idleTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(5)
+            };
+            _idleTimer.Tick += IdleTimer_Tick;
+            _idleTimer.Start();
+
+            Closed += (s, e) => _idleTimer?.Stop();
+        }
+
+        private void IdleTimer_Tick(object sender, EventArgs e)
+        {
+            if (_isSessionLocked || _isExiting) return;
+
+            int timeoutMinutes = AppSettingsService.Instance.AutoLockMinutes;
+            if (timeoutMinutes <= 0) return; // 0 = Never / Disabled
+
+            if (!AuthApiService.Instance.IsAuthenticated) return;
+
+            var idleSpan = DateTime.UtcNow - _lastActivityUtc;
+            if (idleSpan.TotalMinutes >= timeoutMinutes)
+            {
+                LockSession();
+            }
+        }
+
+        public void LockSession()
+        {
+            if (_isSessionLocked || _isExiting) return;
+
+            _isSessionLocked = true;
+
+            string name = !string.IsNullOrWhiteSpace(CurrentUserName) ? CurrentUserName : "Authorized Staff";
+            string role = !string.IsNullOrWhiteSpace(CurrentUserRole) ? CurrentUserRole : "Staff";
+            string email = !string.IsNullOrWhiteSpace(CurrentUserEmail) ? CurrentUserEmail : AuthApiService.Instance.CurrentUserEmail;
+
+            LockUserName.Text = name;
+            LockUserRole.Text = role;
+            LockUserEmail.Text = email;
+            LockUserInitial.Text = !string.IsNullOrWhiteSpace(name) ? name.Substring(0, 1).ToUpper() : "U";
+
+            TxtLockPassword.Password = string.Empty;
+            TxtLockPasswordVisible.Text = string.Empty;
+            _isLockPasswordVisible = false;
+            TxtLockPassword.Visibility = Visibility.Visible;
+            TxtLockPasswordVisible.Visibility = Visibility.Collapsed;
+            IconLockEye.Data = Geometry.Parse("M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z");
+            TxtLockError.Text = string.Empty;
+            TxtLockError.Visibility = Visibility.Collapsed;
+            BorderLockPassword.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D5C5CB"));
+
+            if (MainContent != null)
+            {
+                MainContent.Effect = new BlurEffect
+                {
+                    Radius = 14,
+                    RenderingBias = RenderingBias.Quality
+                };
+            }
+
+            SessionLockOverlay.Visibility = Visibility.Visible;
+            TxtLockPassword.Focus();
+        }
+
+        private async void AttemptUnlockSessionAsync()
+        {
+            if (_isUnlocking) return;
+
+            string password = _isLockPasswordVisible ? TxtLockPasswordVisible.Text : TxtLockPassword.Password;
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                ShowLockError("Please enter your account password to resume.");
+                return;
+            }
+
+            _isUnlocking = true;
+            BtnUnlockSession.IsEnabled = false;
+            IconUnlockSpin.Visibility = Visibility.Visible;
+            TxtUnlockBtnLabel.Text = "Verifying...";
+            TxtLockError.Visibility = Visibility.Collapsed;
+            BorderLockPassword.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D5C5CB"));
+
+            try
+            {
+                string email = !string.IsNullOrWhiteSpace(CurrentUserEmail)
+                    ? CurrentUserEmail
+                    : AuthApiService.Instance.CurrentUserEmail;
+
+                var result = await AuthApiService.Instance.LoginAsync(email, password);
+
+                if (result != null && result.Succeeded && result.Data != null && !string.IsNullOrWhiteSpace(result.Data.Token))
+                {
+                    UnlockSession();
+                    ToastNotification.Show("Session Resumed", "Welcome back! Your session has been unlocked.", ToastType.Success);
+                }
+                else
+                {
+                    string err = result?.Errors != null && result.Errors.Count > 0
+                        ? string.Join(" ", result.Errors)
+                        : "Incorrect password. Please try again.";
+                    ShowLockError(err);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowLockError($"Verification failed: {ex.Message}");
+            }
+            finally
+            {
+                _isUnlocking = false;
+                BtnUnlockSession.IsEnabled = true;
+                IconUnlockSpin.Visibility = Visibility.Collapsed;
+                TxtUnlockBtnLabel.Text = "Unlock Session";
+            }
+        }
+
+        private void UnlockSession()
+        {
+            _isSessionLocked = false;
+            _lastActivityUtc = DateTime.UtcNow;
+
+            if (MainContent != null)
+            {
+                MainContent.Effect = null;
+            }
+
+            TxtLockPassword.Password = string.Empty;
+            TxtLockPasswordVisible.Text = string.Empty;
+            TxtLockError.Text = string.Empty;
+            TxtLockError.Visibility = Visibility.Collapsed;
+            SessionLockOverlay.Visibility = Visibility.Collapsed;
+        }
+
+        private void ShowLockError(string msg)
+        {
+            TxtLockError.Text = msg;
+            TxtLockError.Visibility = Visibility.Visible;
+            BorderLockPassword.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC2626"));
+            if (_isLockPasswordVisible)
+                TxtLockPasswordVisible.Focus();
+            else
+                TxtLockPassword.Focus();
+        }
+
+        private void TxtLockPassword_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && !_isUnlocking)
+            {
+                AttemptUnlockSessionAsync();
+            }
+        }
+
+        private void BtnUnlockSession_Click(object sender, RoutedEventArgs e)
+        {
+            AttemptUnlockSessionAsync();
+        }
+
+        private void BtnLockTogglePassword_Click(object sender, RoutedEventArgs e)
+        {
+            _isLockPasswordVisible = !_isLockPasswordVisible;
+            if (_isLockPasswordVisible)
+            {
+                TxtLockPasswordVisible.Text = TxtLockPassword.Password;
+                TxtLockPassword.Visibility = Visibility.Collapsed;
+                TxtLockPasswordVisible.Visibility = Visibility.Visible;
+                IconLockEye.Data = Geometry.Parse("M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.95,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.23,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.09L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.27,4.78 8.06,5.27L9.77,6.97C10.47,6.35 11.2,6 12,7Z");
+                TxtLockPasswordVisible.Focus();
+                TxtLockPasswordVisible.CaretIndex = TxtLockPasswordVisible.Text.Length;
+            }
+            else
+            {
+                TxtLockPassword.Password = TxtLockPasswordVisible.Text;
+                TxtLockPasswordVisible.Visibility = Visibility.Collapsed;
+                TxtLockPassword.Visibility = Visibility.Visible;
+                IconLockEye.Data = Geometry.Parse("M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z");
+                TxtLockPassword.Focus();
+            }
+        }
+
+        private void LockSwitchUser_Click(object sender, RoutedEventArgs e)
+        {
+            if (MainContent != null) MainContent.Effect = null;
+            SessionLockOverlay.Visibility = Visibility.Collapsed;
+            _isSessionLocked = false;
+            PerformLogoutAsync();
+        }
+        #endregion
 
 
 

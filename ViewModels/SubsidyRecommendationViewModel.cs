@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Media;
 using SOLUM_UI.Core;
 using SOLUM_UI.Models;
 using SOLUM_UI.Services;
@@ -54,6 +55,7 @@ namespace SOLUM_UI.ViewModels
             DisqualifiedCandidates = new ObservableCollection<DisqualifiedCandidateItem>();
             FilteredDisqualifiedCandidates = new ObservableCollection<DisqualifiedCandidateItem>();
             PagedDisqualifiedCandidates = new ObservableCollection<DisqualifiedCandidateItem>();
+            AppSettingsService.Instance.SettingsChanged += (s, e) => RefreshAnonymizationVisuals();
             InitCommands();
             InitPagination();
             if (!AuthApiService.Instance.IsAdmin)
@@ -85,6 +87,55 @@ namespace SOLUM_UI.ViewModels
         private bool _isDisqualifiedModalOpen;
 
         public bool IsDisqualifiedModalOpen { get => _isDisqualifiedModalOpen; set => SetProperty(ref _isDisqualifiedModalOpen, value); }
+
+        public bool IsAnonymized
+        {
+            get => AppSettingsService.Instance.AnonymizeSubsidy;
+            set
+            {
+                if (AppSettingsService.Instance.AnonymizeSubsidy != value)
+                {
+                    AppSettingsService.Instance.AnonymizeSubsidy = value;
+                    OnPropertyChanged(nameof(IsAnonymized));
+                    RefreshAnonymizationVisuals();
+                }
+            }
+        }
+
+        public ICommand ToggleAnonymizeCommand => new RelayCommand(_ =>
+        {
+            IsAnonymized = !IsAnonymized;
+        });
+
+        public void RefreshAnonymizationVisuals()
+        {
+            System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+            {
+                if (PagedRecommendations != null)
+                {
+                    foreach (var it in PagedRecommendations) it.RefreshVisuals();
+                }
+                if (PagedShortlistRows != null)
+                {
+                    foreach (var it in PagedShortlistRows) it.RefreshVisuals();
+                }
+                if (ShortlistRows != null)
+                {
+                    foreach (var it in ShortlistRows) it.RefreshVisuals();
+                }
+                if (FinalGranteesList != null)
+                {
+                    foreach (var it in FinalGranteesList) it.RefreshVisuals();
+                }
+                if (DisqualifiedCandidates != null)
+                {
+                    foreach (var it in DisqualifiedCandidates) it.RefreshVisuals();
+                }
+                ActiveCandidate?.RefreshVisuals();
+                OnPropertyChanged(nameof(IsAnonymized));
+                OnPropertyChanged(nameof(ActiveCandidate));
+            });
+        }
 
         private System.Windows.Threading.DispatcherTimer _disqualifiedSearchDebounceTimer;
 
@@ -615,12 +666,54 @@ namespace SOLUM_UI.ViewModels
                     OnPropertyChanged(nameof(SelectedItem));
                     OnPropertyChanged(nameof(CanReassessActiveCandidate));
                     OnPropertyChanged(nameof(ActiveCandidateReassessmentTooltip));
+                    NotifyDrawerCandidateStateChanged();
                     if (!CanReassessActiveCandidate)
                     {
                         EnsureCooldownTickerStarted();
                     }
                 }
             }
+        }
+
+        public SelectionRow ActiveShortlistRow => ActiveCandidate != null && ShortlistRows != null
+            ? ShortlistRows.FirstOrDefault(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, ActiveCandidate.EvaluationId, ActiveCandidate.SoloParentId, ActiveCandidate.SpId))
+            : null;
+
+        public bool IsActiveCandidateInShortlist => ActiveShortlistRow != null;
+        public bool IsActiveCandidateFinalGrantee => ActiveShortlistRow?.IsFinalGrantee == true;
+
+        public string DrawerPrimaryButtonText
+        {
+            get
+            {
+                var sr = ActiveShortlistRow;
+                if (sr == null) return "Move to Shortlist";
+                return sr.IsFinalGrantee ? "Revert from Final List" : "Confirm to Final List";
+            }
+        }
+
+        public SolidColorBrush DrawerPrimaryButtonBg
+        {
+            get
+            {
+                var sr = ActiveShortlistRow;
+                if (sr == null) return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C1D38"));
+                return sr.IsFinalGrantee
+                    ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#475569"))
+                    : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#27AE60"));
+            }
+        }
+
+        public string DrawerSecondaryRejectButtonText => IsActiveCandidateInShortlist ? "Revoke Candidate" : "Disqualify Outlier";
+
+        public void NotifyDrawerCandidateStateChanged()
+        {
+            OnPropertyChanged(nameof(ActiveShortlistRow));
+            OnPropertyChanged(nameof(IsActiveCandidateInShortlist));
+            OnPropertyChanged(nameof(IsActiveCandidateFinalGrantee));
+            OnPropertyChanged(nameof(DrawerPrimaryButtonText));
+            OnPropertyChanged(nameof(DrawerPrimaryButtonBg));
+            OnPropertyChanged(nameof(DrawerSecondaryRejectButtonText));
         }
 
         public SubsidyItem SelectedItem
@@ -759,7 +852,7 @@ namespace SOLUM_UI.ViewModels
 
         public SubsidyItem OutlierTarget { get => _outlierTarget; set { SetProperty(ref _outlierTarget, value); OnPropertyChanged(nameof(OutlierTargetNameAndId)); } }
 
-        public string OutlierTargetNameAndId { get => _outlierTargetNameAndId ?? $"Candidate: {_outlierTarget?.Name}"; set { _outlierTargetNameAndId = value; OnPropertyChanged(); } }
+        public string OutlierTargetNameAndId { get => _outlierTargetNameAndId ?? $"Candidate: {_outlierTarget?.DisplayName}"; set { _outlierTargetNameAndId = value; OnPropertyChanged(); } }
 
         public string OutlierRejectionReason { get => _outlierRejectionReason; set => SetProperty(ref _outlierRejectionReason, value); } public string OutlierNotes { get => _outlierNotes; set => SetProperty(ref _outlierNotes, value); }
 

@@ -117,10 +117,12 @@ namespace SOLUM_UI.ViewModels
             DisqualifiedCandidates.Clear();
             if (rejResp?.Data != null && rejResp.Data.Count > 0)
             {
+                int rejIdx = 1;
                 foreach (var r in rejResp.Data)
                 {
                     DisqualifiedCandidates.Add(new DisqualifiedCandidateItem
                     {
+                        Index = rejIdx++,
                         EvaluationId = r.EvaluationId,
                         SoloParentId = r.SoloParentId,
                         SpId = r.SpId,
@@ -405,6 +407,7 @@ namespace SOLUM_UI.ViewModels
             UpdateFinalPaged();
             if (enrich) EnrichAllCandidatesFromRecordsAsync();
             FilterShortlistRows(); OnPropertyChanged(nameof(Tab2QuotaSummary)); OnPropertyChanged(nameof(ShortlistSummary)); OnPropertyChanged(nameof(FinalSummaryText));
+            NotifyDrawerCandidateStateChanged();
         }
 
         public void EnrichVisibleCandidatesAsync()
@@ -518,10 +521,12 @@ namespace SOLUM_UI.ViewModels
                 DisqualifiedCandidates.Clear();
                 if (rejResp?.Data != null && rejResp.Data.Count > 0)
                 {
+                    int rejIdx = 1;
                     foreach (var r in rejResp.Data)
                     {
                         DisqualifiedCandidates.Add(new DisqualifiedCandidateItem
                         {
+                            Index = rejIdx++,
                             EvaluationId = r.EvaluationId,
                             SoloParentId = r.SoloParentId,
                             SpId = r.SpId,

@@ -22,6 +22,9 @@ namespace SOLUM_UI.Views.Dialogs
         public bool CloseImmediatelyOnSubmit { get; set; } = false;
 
         private bool _savedSuccessfully = false;
+        private bool _step1LowConfConfirmed = false;
+        private bool _step2LowConfConfirmed = false;
+        private bool _step3LowConfConfirmed = false;
 
         public OcrScanDialog()
         {
@@ -36,6 +39,9 @@ namespace SOLUM_UI.Views.Dialogs
             SecondaryInfoSection.FieldFocused += tag => DocumentViewport.FocusOnField(tag);
             FamilyMembersSection.FieldFocused += tag => DocumentViewport.FocusOnField(tag);
             PrimaryInfoSection.DuplicateContinueRequested += () => GoToStep(2);
+            PrimaryInfoSection.LowConfidenceFieldsChanged += UpdateLowConfidenceIndicators;
+            SecondaryInfoSection.LowConfidenceFieldsChanged += UpdateLowConfidenceIndicators;
+            FamilyMembersSection.LowConfidenceFieldsChanged += UpdateLowConfidenceIndicators;
             FamilyMembersSection.GetApplicantBirthdate = () => PrimaryInfoSection.Birthdate;
             FamilyMembersSection.GetApplicantAge = () => int.TryParse(PrimaryInfoSection.Age, out int a) ? a : (int?)null;
             SecondaryInfoSection.EmergencyContactChanged += () =>
@@ -115,6 +121,9 @@ namespace SOLUM_UI.Views.Dialogs
             PrimaryInfoSection.Populate(resp);
             SecondaryInfoSection.Populate(resp);
             FamilyMembersSection.Populate(resp);
+            _step1LowConfConfirmed = false;
+            _step2LowConfConfirmed = false;
+            _step3LowConfConfirmed = false;
             ValidationMessage.Visibility = Visibility.Collapsed;
             GoToStep(1);
         }
@@ -263,6 +272,13 @@ namespace SOLUM_UI.Views.Dialogs
         private async void Step2Header_Click(object sender, MouseButtonEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
+            if (!PrimaryInfoSection.Validate(out var missing))
+            {
+                SetValidationMessage(missing);
+                PrimaryInfoSection.FocusFirstInvalidField();
+                return;
+            }
+            if (!CheckLowConfidenceBeforeProceeding(1)) return;
             if (!await VerifyPrimaryStepAsync()) return;
             GoToStep(2);
         }
@@ -270,6 +286,18 @@ namespace SOLUM_UI.Views.Dialogs
         private async void Step3Header_Click(object sender, MouseButtonEventArgs e)
         {
             ValidationMessage.Visibility = Visibility.Collapsed;
+            if (!PrimaryInfoSection.Validate(out var missing1))
+            {
+                SetValidationMessage(missing1);
+                PrimaryInfoSection.FocusFirstInvalidField();
+                GoToStep(1);
+                return;
+            }
+            if (!CheckLowConfidenceBeforeProceeding(1))
+            {
+                GoToStep(1);
+                return;
+            }
             if (!await VerifyPrimaryStepAsync())
             {
                 GoToStep(1);
@@ -278,6 +306,12 @@ namespace SOLUM_UI.Views.Dialogs
             if (!SecondaryInfoSection.Validate(out var missing2))
             {
                 SetValidationMessage(missing2);
+                SecondaryInfoSection.FocusFirstInvalidField();
+                GoToStep(2);
+                return;
+            }
+            if (!CheckLowConfidenceBeforeProceeding(2))
+            {
                 GoToStep(2);
                 return;
             }
@@ -300,6 +334,7 @@ namespace SOLUM_UI.Views.Dialogs
                     PrimaryInfoSection.FocusFirstInvalidField();
                     return;
                 }
+                if (!CheckLowConfidenceBeforeProceeding(1)) return;
                 if (!await VerifyPrimaryStepAsync()) return;
                 GoToStep(2);
             }
@@ -311,6 +346,7 @@ namespace SOLUM_UI.Views.Dialogs
                     SecondaryInfoSection.FocusFirstInvalidField();
                     return;
                 }
+                if (!CheckLowConfidenceBeforeProceeding(2)) return;
                 if (string.Equals(SecondaryInfoSection.EmergencyRelationship, "Child", StringComparison.OrdinalIgnoreCase) &&
                     !string.IsNullOrWhiteSpace(SecondaryInfoSection.EmergencyContactName))
                 {
@@ -429,6 +465,159 @@ namespace SOLUM_UI.Views.Dialogs
                 Step3DotLabel.Foreground = new SolidColorBrush(Colors.White);
                 Step3Title.Foreground    = new SolidColorBrush(Color.FromRgb(0x70, 0x29, 0x43));
             }
+            UpdateLowConfidenceIndicators();
+        }
+
+        private void UpdateLowConfidenceIndicators()
+        {
+            var step1Low = PrimaryInfoSection?.GetUnverifiedLowConfidenceFields() ?? new List<OcrLowConfidenceField>();
+            var step2Low = SecondaryInfoSection?.GetUnverifiedLowConfidenceFields() ?? new List<OcrLowConfidenceField>();
+            var step3Low = FamilyMembersSection?.GetUnverifiedLowConfidenceFields() ?? new List<OcrLowConfidenceField>();
+
+            if (Step1LowConfPill != null && TxtStep1LowConf != null)
+            {
+                if (step1Low.Count > 0 && !_step1LowConfConfirmed)
+                {
+                    TxtStep1LowConf.Text = $"⚠ {step1Low.Count}";
+                    Step1LowConfPill.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    Step1LowConfPill.Visibility = Visibility.Collapsed;
+                }
+            }
+
+            if (Step2LowConfPill != null && TxtStep2LowConf != null)
+            {
+                if (step2Low.Count > 0 && !_step2LowConfConfirmed)
+                {
+                    TxtStep2LowConf.Text = $"⚠ {step2Low.Count}";
+                    Step2LowConfPill.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    Step2LowConfPill.Visibility = Visibility.Collapsed;
+                }
+            }
+
+            if (Step3LowConfPill != null && TxtStep3LowConf != null)
+            {
+                if (step3Low.Count > 0 && !_step3LowConfConfirmed)
+                {
+                    TxtStep3LowConf.Text = $"⚠ {step3Low.Count}";
+                    Step3LowConfPill.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    Step3LowConfPill.Visibility = Visibility.Collapsed;
+                }
+            }
+
+            int currentLowCount = 0;
+            bool isConfirmed = false;
+            if (ViewModel.CurrentStep == 1)
+            {
+                currentLowCount = step1Low.Count;
+                isConfirmed = _step1LowConfConfirmed;
+            }
+            else if (ViewModel.CurrentStep == 2)
+            {
+                currentLowCount = step2Low.Count;
+                isConfirmed = _step2LowConfConfirmed;
+            }
+            else if (ViewModel.CurrentStep == 3)
+            {
+                currentLowCount = step3Low.Count;
+                isConfirmed = _step3LowConfConfirmed;
+            }
+
+            if (BadgeLowConfWarning != null && TxtLowConfWarning != null)
+            {
+                if (currentLowCount > 0 && !isConfirmed)
+                {
+                    TxtLowConfWarning.Text = $"{currentLowCount} field{(currentLowCount > 1 ? "s" : "")} need review";
+                    BadgeLowConfWarning.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    BadgeLowConfWarning.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+        private bool CheckLowConfidenceBeforeProceeding(int step)
+        {
+            List<OcrLowConfidenceField> lowFields = null;
+            string stepName = "";
+            if (step == 1)
+            {
+                if (_step1LowConfConfirmed) return true;
+                lowFields = PrimaryInfoSection?.GetUnverifiedLowConfidenceFields();
+                stepName = "Primary Info";
+            }
+            else if (step == 2)
+            {
+                if (_step2LowConfConfirmed) return true;
+                lowFields = SecondaryInfoSection?.GetUnverifiedLowConfidenceFields();
+                stepName = "Secondary Info";
+            }
+            else if (step == 3)
+            {
+                if (_step3LowConfConfirmed) return true;
+                lowFields = FamilyMembersSection?.GetUnverifiedLowConfidenceFields();
+                stepName = "Circumstances & Family";
+            }
+
+            if (lowFields == null || lowFields.Count == 0) return true;
+
+            var sb = new StringBuilder();
+            sb.AppendLine($"The following {lowFields.Count} field(s) in {stepName} were extracted with low confidence:\n");
+            foreach (var f in lowFields.Take(6))
+            {
+                sb.AppendLine($"• {f.FieldName}: \"{f.CurrentValue}\" ({f.ConfidencePercent}%)");
+            }
+            if (lowFields.Count > 6)
+            {
+                sb.AppendLine($"• ...and {lowFields.Count - 6} more field(s)");
+            }
+            sb.AppendLine("\nPlease review the extracted values against the physical document.");
+            sb.AppendLine("You can edit them before proceeding, or confirm that they are right.");
+
+            bool confirmed = ActionConfirmDialog.Show(
+                title: "Low Confidence OCR Fields",
+                message: sb.ToString().TrimEnd(),
+                confirmText: "Confirm It Is Right",
+                cancelText: "Edit Field",
+                theme: ConfirmThemeType.Warning,
+                owner: this);
+
+            if (!confirmed)
+            {
+                var first = lowFields[0];
+                if (first.TargetControl != null)
+                {
+                    first.TargetControl.BringIntoView();
+                    first.TargetControl.Focus();
+                    if (first.TargetControl is System.Windows.Controls.TextBox tb)
+                    {
+                        tb.SelectAll();
+                    }
+                }
+                return false;
+            }
+
+            if (step == 1) _step1LowConfConfirmed = true;
+            else if (step == 2) _step2LowConfConfirmed = true;
+            else if (step == 3) _step3LowConfConfirmed = true;
+
+            UpdateLowConfidenceIndicators();
+            return true;
+        }
+
+        private void BadgeLowConfWarning_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+            CheckLowConfidenceBeforeProceeding(ViewModel.CurrentStep);
         }
         #endregion
         #region Validation & Record Saving
@@ -492,6 +681,24 @@ namespace SOLUM_UI.Views.Dialogs
                 FamilyMembersSection.FocusFirstInvalidField();
                 return;
             }
+
+            // Low-confidence verification check across all steps before final confirmation
+            if (!CheckLowConfidenceBeforeProceeding(1))
+            {
+                GoToStep(1);
+                return;
+            }
+            if (!CheckLowConfidenceBeforeProceeding(2))
+            {
+                GoToStep(2);
+                return;
+            }
+            if (!CheckLowConfidenceBeforeProceeding(3))
+            {
+                GoToStep(3);
+                return;
+            }
+
             var preview = BuildRecord();
             if (preview.FamilyMembers == null || preview.FamilyMembers.Count == 0)
             {

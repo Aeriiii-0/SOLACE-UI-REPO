@@ -83,21 +83,33 @@
         </Style>
         <Style x:Key="SelRow" TargetType="ListViewItem">
             <EventSetter Event="PreviewMouseLeftButtonDown" Handler="Row_PreviewMouseLeftButtonDown"/>
+            <EventSetter Event="PreviewMouseLeftButtonUp" Handler="Row_PreviewMouseLeftButtonUp"/>
             <EventSetter Event="MouseDoubleClick" Handler="Row_MouseDoubleClick"/>
-            <Setter Property="Background" Value="White"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Setter Property="BorderBrush" Value="#EDE2E6"/><Setter Property="Padding" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Cursor" Value="Hand"/><Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListViewItem">
-                <Grid>
-                    <Border x:Name="RowBg" Background="White" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
-                                        <GridViewRowPresenter VerticalAlignment="Stretch" Margin="0"/>
-                </Grid>
-                <ControlTemplate.Triggers>
-                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                        <Setter TargetName="RowBg" Property="Background" Value="#F5E2E8"/>
-                    </DataTrigger>
-                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="RowBg" Property="Background" Value="#FDF6F8"/></Trigger>
-                    <Trigger Property="IsSelected" Value="True"><Setter TargetName="RowBg" Property="Background" Value="#F5E2E8"/></Trigger>
-                </ControlTemplate.Triggers>
-            </ControlTemplate></Setter.Value></Setter>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="MinHeight" Value="{DynamicResource SolumTableRowHeight}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#EDE2E6"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Grid>
+                            <Border x:Name="RowBg" Background="White" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
+                            <GridViewRowPresenter VerticalAlignment="Stretch" Margin="0"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="RowBg" Property="Background" Value="#F5E2E8"/>
+                            </DataTrigger>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="RowBg" Property="Background" Value="{DynamicResource SolumTableRowHoverBrush}"/><Setter TargetName="RowBg" Property="BorderBrush" Value="{DynamicResource SolumTableRowHoverBorderBrush}"/></Trigger>
+                            <Trigger Property="IsSelected" Value="True"><Setter TargetName="RowBg" Property="Background" Value="#F5E2E8"/><Setter TargetName="RowBg" Property="BorderBrush" Value="{DynamicResource SolumTableRowSelectedBorderBrush}"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="PagerBtn" TargetType="Button">
             <Setter Property="Height" Value="26"/><Setter Property="Padding" Value="10,0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Background" Value="White"/><Setter Property="Foreground" Value="#5C1D38"/>
@@ -250,7 +262,7 @@
                                 <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColRank}" Margin="-6,0,-6,0" BorderThickness="0" Padding="0,10"><TextBlock Text="{Binding Rank, StringFormat='#{0}'}" FontSize="12" FontWeight="Bold" Foreground="#1A1A1A" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn x:Name="ColName" Header="SOLO PARENT" Width="150">
-                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderThickness="0" Padding="10,10"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Barangay}" FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
+                                <GridViewColumn.CellTemplate><DataTemplate><Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderThickness="0" Padding="10,10"><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding DisplayName}" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Barangay}" FontSize="10" Foreground="#666666" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/></StackPanel></Border></DataTemplate></GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <!-- Col 3: Vulnerability Score (Transparent cell, clean score, top-right '!' signal for concern/fallback) -->
                             <GridViewColumn x:Name="ColScore" Header="SCORE" Width="78">

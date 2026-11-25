@@ -1,0 +1,35 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- ═══ STRONG HOVER & FOCUS OUTLINES THEME ═══ -->
+    <SolidColorBrush x:Key="DsFocusRingBrush" Color="#702943"/>
+    <SolidColorBrush x:Key="DsFocusGlowBrush" Color="#66702943"/>
+
+    <!-- Strong Row Hover and Outline Overrides -->
+    <SolidColorBrush x:Key="SolumTableRowHoverBrush" Color="#FCEEF2"/>
+    <SolidColorBrush x:Key="SolumTableRowHoverBorderBrush" Color="#702943"/>
+    <SolidColorBrush x:Key="SolumTableRowSelectedBorderBrush" Color="#702943"/>
+
+    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Style.Triggers>
+            <Trigger Property="IsFocused" Value="True">
+                <Setter Property="BorderBrush" Value="#702943"/>
+                <Setter Property="BorderThickness" Value="2.5"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#FCEEF2"/>
+                <Setter Property="BorderBrush" Value="#702943"/>
+                <Setter Property="BorderThickness" Value="0,1.5,0,1.5"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="#F8DCE4"/>
+                <Setter Property="BorderBrush" Value="#702943"/>
+                <Setter Property="BorderThickness" Value="0,2,0,2"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

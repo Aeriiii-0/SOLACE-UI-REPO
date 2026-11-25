@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Media;
 using SOLUM_UI.Core;
+using SOLUM_UI.Services;
 
 namespace SOLUM_UI.Models
 {
@@ -21,8 +22,11 @@ namespace SOLUM_UI.Models
         public Guid EvaluationId { get; set; }
         public Guid CycleId { get; set; }
         public Guid SoloParentId { get; set; }
+        public int Index { get; set; }
 
         public string FullName { get => _fullName; set => SetProperty(ref _fullName, value); }
+        public string AnonymousName => Index > 0 ? $"Candidate #{Index}" : "Candidate";
+        public string DisplayName => AppSettingsService.Instance.AnonymizeSubsidy ? AnonymousName : FullName;
         public string SpId { get => _spId; set => SetProperty(ref _spId, value); }
         public string Barangay { get => _barangay; set => SetProperty(ref _barangay, value); }
 
@@ -193,5 +197,7 @@ namespace SOLUM_UI.Models
                 return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B91C1C"));
             }
         }
+
+        public void RefreshVisuals() => OnPropertyChanged(string.Empty);
     }
 }

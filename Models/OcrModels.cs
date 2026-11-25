@@ -1,8 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Windows;
 
 namespace SOLUM_UI.Models
 {
+    public class OcrLowConfidenceField
+    {
+        public string FieldName { get; set; } = string.Empty;
+        public string CurrentValue { get; set; } = string.Empty;
+        public int ConfidencePercent { get; set; }
+        public FrameworkElement TargetControl { get; set; }
+    }
     public class OcrFieldResult
     {
         public string Value { get; set; } = string.Empty;

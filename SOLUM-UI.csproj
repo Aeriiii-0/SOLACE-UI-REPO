@@ -444,6 +444,9 @@
     <Compile Include="Views\UserProfilePage.xaml.cs">
       <DependentUpon>UserProfilePage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\SettingsPage.xaml.cs">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ViewAllLogsOverlay.xaml.cs">
       <DependentUpon>ViewAllLogsOverlay.xaml</DependentUpon>
     </Compile>
@@ -482,6 +485,7 @@
     <Compile Include="Services\PasswordGenerator.cs" />
     <Compile Include="Services\FormHelper.cs" />
     <Compile Include="Services\RecordSortingHelper.cs" />
+    <Compile Include="Services\AppSettingsService.cs" />
     <Compile Include="ViewModels\AnalyticsViewModel.cs" />
     <Compile Include="ViewModels\AuditLogViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />
@@ -771,6 +775,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\SettingsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ViewAllLogsOverlay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -780,6 +788,18 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Themes\SolumTheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\HighContrastTheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\SpaciousTheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\FocusOutlinesTheme.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

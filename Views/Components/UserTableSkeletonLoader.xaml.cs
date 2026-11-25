@@ -19,7 +19,7 @@ namespace SOLUM_UI.Views.Components
 
         private void UserTableSkeletonLoader_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Visibility == Visibility.Visible)
+            if (Visibility == Visibility.Visible && !SOLUM_UI.Services.AppSettingsService.Instance.ReduceMotion)
             {
                 _pulseStoryboard?.Begin(this, true);
             }
@@ -32,7 +32,7 @@ namespace SOLUM_UI.Views.Components
 
         private void UserTableSkeletonLoader_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (IsVisible)
+            if (IsVisible && !SOLUM_UI.Services.AppSettingsService.Instance.ReduceMotion)
             {
                 _pulseStoryboard?.Begin(this, true);
             }

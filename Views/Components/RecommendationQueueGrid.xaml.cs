@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 using SOLUM_UI.ViewModels;
 
@@ -264,6 +265,24 @@ namespace SOLUM_UI.Views.Components
                         }
                     }
                 }
+            }
+        }
+
+        private void Row_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (!SOLUM_UI.Services.AppSettingsService.Instance.SingleClickOpen) return;
+            if (e.OriginalSource is DependencyObject dep)
+            {
+                DependencyObject cur = dep;
+                while (cur != null && cur != sender)
+                {
+                    if (cur is Button || cur is CheckBox) return;
+                    cur = VisualTreeHelper.GetParent(cur);
+                }
+            }
+            if (sender is ListViewItem item && item.DataContext is Models.SubsidyItem candidate && DataContext is SubsidyRecommendationViewModel vm)
+            {
+                vm.OpenExplainDrawerCommand.Execute(candidate);
             }
         }
 

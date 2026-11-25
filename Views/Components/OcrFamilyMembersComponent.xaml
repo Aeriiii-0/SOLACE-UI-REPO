@@ -584,7 +584,8 @@
                              MaxLength="500"
                              Height="60" TextWrapping="Wrap" AcceptsReturn="True"
                              VerticalScrollBarVisibility="Auto"
-                             VerticalContentAlignment="Top" Padding="10,6"/>
+                             VerticalContentAlignment="Top" Padding="10,6"
+                             TextChanged="TxtNeeds_TextChanged"/>
                 </StackPanel>
             </Border>
             <!-- CARD: VI. OTHER SOURCES OF INCOME -->
@@ -608,7 +609,8 @@
                              MaxLength="500"
                              Height="50" TextWrapping="Wrap" AcceptsReturn="True"
                              VerticalScrollBarVisibility="Auto"
-                             VerticalContentAlignment="Top" Padding="10,6"/>
+                             VerticalContentAlignment="Top" Padding="10,6"
+                             TextChanged="TxtOtherIncome_TextChanged"/>
                 </StackPanel>
             </Border>
         </StackPanel>

@@ -40,7 +40,7 @@
         <!-- Table Row Style -->
         <Style x:Key="ArchiveTableRow" TargetType="ListViewItem">
             <Setter Property="Background" Value="White"/>
-            <Setter Property="Height" Value="48"/>
+            <Setter Property="MinHeight" Value="{DynamicResource SolumTableRowHeight}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="BorderBrush" Value="#F0E4E9"/>
             <Setter Property="Padding" Value="0"/>
@@ -54,10 +54,12 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="RowBg" Property="Background" Value="#FDF6F8"/>
+                                <Setter TargetName="RowBg" Property="Background" Value="{DynamicResource SolumTableRowHoverBrush}"/>
+                                <Setter TargetName="RowBg" Property="BorderBrush" Value="{DynamicResource SolumTableRowHoverBorderBrush}"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="RowBg" Property="Background" Value="#F8E9EE"/>
+                                <Setter TargetName="RowBg" Property="BorderBrush" Value="{DynamicResource SolumTableRowSelectedBorderBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

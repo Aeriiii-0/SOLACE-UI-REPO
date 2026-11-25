@@ -473,7 +473,7 @@
                                                     </Grid.ColumnDefinitions>
 
                                                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,0">
-                                                        <TextBlock Text="{Binding FullName}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Ink}" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding DisplayName}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Ink}" TextTrimming="CharacterEllipsis"/>
                                                     </StackPanel>
 
                                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0">

@@ -21,7 +21,7 @@ namespace SOLUM_UI.ViewModels
             _shortlistRevokeTargets = new List<SelectionRow> { r };
             OutlierTarget = _allItems.FirstOrDefault(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, r.EvaluationId, r.SoloParentId, r.SpId));
             OutlierModalTitle = "Revoke Candidate";
-            OutlierTargetNameAndId = $"Candidate: {r.Name}";
+            OutlierTargetNameAndId = $"Candidate: {r.DisplayName}";
             OnPropertyChanged(nameof(OutlierModalConfirmButtonText));
             IsOutlierModalOpen = true;
         }
@@ -187,7 +187,7 @@ namespace SOLUM_UI.ViewModels
                     if (QueueTotalCount > 0) QueueTotalCount--;
                     RecalculateQuotaAndFilter();
                     NotifyDisqualifiedMetricsChanged();
-                    ToastNotification.Show("Candidate Disqualified", $"{target.Name} disqualified from queue ({OutlierRejectionReason}).", ToastType.Warning);
+                    ToastNotification.Show("Candidate Disqualified", $"{target.DisplayName} disqualified from queue ({OutlierRejectionReason}).", ToastType.Warning);
 
                     if (target.EvaluationId != Guid.Empty)
                     {
@@ -230,6 +230,7 @@ namespace SOLUM_UI.ViewModels
             {
                 var item = new DisqualifiedCandidateItem
                 {
+                    Index = DisqualifiedCandidates.Count + 1,
                     EvaluationId = evalId,
                     SoloParentId = spId,
                     SpId = spNum,
@@ -294,7 +295,7 @@ namespace SOLUM_UI.ViewModels
 
             bool ok = ActionConfirmDialog.Show(
                 "Reinstate Candidate",
-                $"Are you sure you want to reinstate {item.FullName} ({item.SpId})?\n\nThis will remove their statutory disqualification and restore them to the active recommendations queue.",
+                $"Are you sure you want to reinstate {item.DisplayName}?\n\nThis will remove their statutory disqualification and restore them to the active recommendations queue.",
                 "Reinstate Candidate",
                 "Cancel",
                 ConfirmThemeType.Primary);
@@ -343,7 +344,7 @@ namespace SOLUM_UI.ViewModels
                 }
                 QueueTotalCount++;
                 RecalculateQuotaAndFilter();
-                ToastNotification.Show("Candidate Reinstated", $"{item.FullName} has been restored to the recommendations queue.", ToastType.Success);
+                ToastNotification.Show("Candidate Reinstated", $"{item.DisplayName} has been restored to the recommendations queue.", ToastType.Success);
             }
             catch (Exception ex)
             {
@@ -410,13 +411,13 @@ namespace SOLUM_UI.ViewModels
                 {
                     Views.Dialogs.ActionConfirmDialog.Error(
                         "Card Expired",
-                        $"Cannot confirm {row.Name} to Final Grantees because their Solo Parent ID expired on {row.CardValidityDisplay}. Please renew their card first.");
+                        $"Cannot confirm {row.DisplayName} to Final Grantees because their Solo Parent ID expired on {row.CardValidityDisplay}. Please renew their card first.");
                     return;
                 }
 
                 bool ok = ActionConfirmDialog.Show(
                     "Confirm Final Grantee",
-                    $"Confirm {row.Name} as an official Final Grantee for FY {ActiveCycleFiscalYear}?",
+                    $"Confirm {row.DisplayName} as an official Final Grantee for FY {ActiveCycleFiscalYear}?",
                     "Confirm Grantee",
                     "Cancel",
                     ConfirmThemeType.Success);
@@ -426,7 +427,7 @@ namespace SOLUM_UI.ViewModels
             {
                 bool ok = ActionConfirmDialog.Show(
                     "Revert Grantee",
-                    $"Revert {row.Name} back to pending selection audit?",
+                    $"Revert {row.DisplayName} back to pending selection audit?",
                     "Revert",
                     "Cancel",
                     ConfirmThemeType.Warning);
@@ -439,7 +440,7 @@ namespace SOLUM_UI.ViewModels
             ActiveCandidate = null;
             UpdateShortlistAndFinalCollections();
             NotifyQuotaMetricsChanged();
-            if (confirm) ToastNotification.Show("Confirmed", $"{row.Name} confirmed as final grantee.", ToastType.Success); else ToastNotification.Show("Unconfirmed", $"{row.Name} reverted to pending shortlist.", ToastType.Info);
+            if (confirm) ToastNotification.Show("Confirmed", $"{row.DisplayName} confirmed as final grantee.", ToastType.Success); else ToastNotification.Show("Unconfirmed", $"{row.DisplayName} reverted to pending shortlist.", ToastType.Info);
         }
 
         public async Task ExportCityEducRosterAsync()
@@ -718,7 +719,7 @@ namespace SOLUM_UI.ViewModels
                 if (elapsed < cd)
                 {
                     int rem = (int)Math.Ceiling((cd - elapsed).TotalSeconds);
-                    ToastNotification.Show("Re-assessment Cooldown", $"Please wait {rem}s before re-assessing {item.Name} again.", ToastType.Warning);
+                    ToastNotification.Show("Re-assessment Cooldown", $"Please wait {rem}s before re-assessing {item.DisplayName} again.", ToastType.Warning);
                     return;
                 }
             }
@@ -741,7 +742,7 @@ namespace SOLUM_UI.ViewModels
                             : "Statutory Disqualification";
                         ToastNotification.Show(
                             "Moved to Disqualified",
-                            $"{item.Name} was deterministically disqualified during reassessment ({dqReason}).",
+                            $"{item.DisplayName} was deterministically disqualified during reassessment ({dqReason}).",
                             ToastType.Warning);
                         return;
                     }
@@ -791,7 +792,7 @@ namespace SOLUM_UI.ViewModels
                     }
 
                     ToastNotification.Show("Prediction Updated",
-                        $"{item.Name} re-scored: {item.Score:F1} ({item.Priority}) via {resp.Data.ModelVersion}. Current rank: #{item.Rank}.",
+                        $"{item.DisplayName} re-scored: {item.Score:F1} ({item.Priority}) via {resp.Data.ModelVersion}. Current rank: #{item.Rank}.",
                         ToastType.Success);
                 }
                 else
@@ -822,7 +823,7 @@ namespace SOLUM_UI.ViewModels
                 if (elapsed < cd)
                 {
                     int rem = (int)Math.Ceiling((cd - elapsed).TotalSeconds);
-                    ToastNotification.Show("Re-assessment Cooldown", $"Please wait {rem}s before re-assessing {item.Name} again.", ToastType.Warning);
+                    ToastNotification.Show("Re-assessment Cooldown", $"Please wait {rem}s before re-assessing {item.DisplayName} again.", ToastType.Warning);
                     return;
                 }
             }
@@ -852,7 +853,7 @@ namespace SOLUM_UI.ViewModels
                     var saveResp = await SoloParentApiService.Instance.UpdateSoloParentAsync(targetId, updateReq);
                     if (saveResp != null && saveResp.Succeeded)
                     {
-                        ToastNotification.Show("Record Updated", $"{recordToReassess.Name} circumstances updated successfully.", ToastType.Success);
+                        ToastNotification.Show("Record Updated", $"{item.DisplayName} circumstances updated successfully.", ToastType.Success);
                     }
                     if (dialog.UpdatedRecord.CurrentTermExpiresAt.HasValue)
                     {

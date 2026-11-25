@@ -13,6 +13,7 @@ namespace SOLUM_UI.Views.Components
     public partial class OcrSecondaryInfoComponent : UserControl
     {
         public event Action<string> FieldFocused;
+        public event Action LowConfidenceFieldsChanged;
 
         private bool _isPopulating = false;
         private bool _isFormattingPhone = false;
@@ -247,6 +248,51 @@ namespace SOLUM_UI.Views.Components
             badge.Background = EditedBadgeBg;
             txt.Text = "Edited";
             txt.Foreground = EditedBadgeFg;
+            LowConfidenceFieldsChanged?.Invoke();
+        }
+
+        public List<OcrLowConfidenceField> GetUnverifiedLowConfidenceFields(int threshold = 80)
+        {
+            var list = new List<OcrLowConfidenceField>();
+
+            void Check(string name, Border badge, TextBlock txt, string val, FrameworkElement ctrl)
+            {
+                if (badge == null || txt == null) return;
+                if (badge.Visibility != Visibility.Visible) return;
+                string t = txt.Text?.Trim() ?? "";
+                if (string.Equals(t, "Edited", StringComparison.OrdinalIgnoreCase)) return;
+                if (t.EndsWith("%") && int.TryParse(t.TrimEnd('%'), out int pct))
+                {
+                    if (pct < threshold)
+                    {
+                        list.Add(new OcrLowConfidenceField
+                        {
+                            FieldName = name,
+                            CurrentValue = string.IsNullOrWhiteSpace(val) ? "(Empty)" : val,
+                            ConfidencePercent = pct,
+                            TargetControl = ctrl
+                        });
+                    }
+                }
+            }
+
+            Check("Civil Status", Badge_CivilStatus, TxtConf_CivilStatus, (CmbCivilStatus?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "", CmbCivilStatus);
+            Check("Sex", Badge_Sex, TxtConf_Sex, (CmbSex?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "", CmbSex);
+            Check("Place of Birth", Badge_Birthplace, TxtConf_Birthplace, TxtPlaceOfBirth?.Text ?? "", TxtPlaceOfBirth);
+            Check("Educational Attainment", Badge_Education, TxtConf_Education, (CmbEducation?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "", CmbEducation);
+            Check("Religion", Badge_Religion, TxtConf_Religion, TxtReligion?.Text ?? "", TxtReligion);
+            Check("Occupation", Badge_Occupation, TxtConf_Occupation, TxtOccupation?.Text ?? "", TxtOccupation);
+            Check("Monthly Income", Badge_MonthlyIncome, TxtConf_MonthlyIncome, TxtMonthlyIncome?.Text ?? "", TxtMonthlyIncome);
+            Check("Employment Status", Badge_EmploymentStatus, TxtConf_EmploymentStatus, (CmbEmploymentStatus?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "", CmbEmploymentStatus);
+            Check("Address", Badge_Address, TxtConf_Address, TxtAddress?.Text ?? "", TxtAddress);
+            Check("Barangay", Badge_Barangay, TxtConf_Barangay, (CmbBarangay?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "", CmbBarangay);
+            Check("Contact Number", Badge_Contact, TxtConf_Contact, TxtContact?.Text ?? "", TxtContact);
+            Check("Emergency Contact Person", Badge_EmergencyContact, TxtConf_EmergencyContact, TxtEmergencyContact?.Text ?? "", TxtEmergencyContact);
+            Check("Emergency Relationship", Badge_Relationship, TxtConf_Relationship, (CmbRelationship?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "", CmbRelationship);
+            Check("Emergency Contact Number", Badge_EmergencyNumber, TxtConf_EmergencyNumber, TxtEmergencyNumber?.Text ?? "", TxtEmergencyNumber);
+            Check("Emergency Address", Badge_EmergencyAddress, TxtConf_EmergencyAddress, TxtEmergencyAddress?.Text ?? "", TxtEmergencyAddress);
+
+            return list;
         }
         #endregion
         #region TextChanged, Formatting & ComboBox Helpers

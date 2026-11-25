@@ -19,6 +19,7 @@ namespace SOLUM_UI.Views.Components
     {
         public event Action<string> FieldFocused;
         public event Action DuplicateContinueRequested;
+        public event Action LowConfidenceFieldsChanged;
 
         public SoloParentRecord FoundRecord { get; private set; }
         public bool DuplicateCheckPassed { get; set; } = false;
@@ -226,6 +227,43 @@ namespace SOLUM_UI.Views.Components
             badge.Background = EditedBadgeBg;
             txt.Text = "Edited";
             txt.Foreground = EditedBadgeFg;
+            LowConfidenceFieldsChanged?.Invoke();
+        }
+
+        public List<OcrLowConfidenceField> GetUnverifiedLowConfidenceFields(int threshold = 80)
+        {
+            var list = new List<OcrLowConfidenceField>();
+
+            void Check(string name, Border badge, TextBlock txt, string val, FrameworkElement ctrl)
+            {
+                if (badge == null || txt == null) return;
+                if (badge.Visibility != Visibility.Visible) return;
+                string t = txt.Text?.Trim() ?? "";
+                if (string.Equals(t, "Edited", StringComparison.OrdinalIgnoreCase)) return;
+                if (t.EndsWith("%") && int.TryParse(t.TrimEnd('%'), out int pct))
+                {
+                    if (pct < threshold)
+                    {
+                        list.Add(new OcrLowConfidenceField
+                        {
+                            FieldName = name,
+                            CurrentValue = string.IsNullOrWhiteSpace(val) ? "(Empty)" : val,
+                            ConfidencePercent = pct,
+                            TargetControl = ctrl
+                        });
+                    }
+                }
+            }
+
+            Check("Date of Application", Badge_AppDate, TxtConf_AppDate, DpDateOfApplication?.SelectedDate?.ToString("MM/dd/yyyy") ?? "", DpDateOfApplication);
+            Check("Last Name", Badge_LastName, TxtConf_LastName, TxtLastName?.Text ?? "", TxtLastName);
+            Check("First Name", Badge_FirstName, TxtConf_FirstName, TxtFirstName?.Text ?? "", TxtFirstName);
+            Check("Middle Name", Badge_MiddleName, TxtConf_MiddleName, TxtMiddleName?.Text ?? "", TxtMiddleName);
+            Check("Name Extension", Badge_Extension, TxtConf_Extension, (CmbExtension?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "", CmbExtension);
+            Check("Birthdate", Badge_Birthdate, TxtConf_Birthdate, DpBirthdate?.SelectedDate?.ToString("MM/dd/yyyy") ?? "", DpBirthdate);
+            Check("PhilSys Card Number", Badge_PhilSys, TxtConf_PhilSys, TxtPhilSys?.Text ?? "", TxtPhilSys);
+
+            return list;
         }
         #endregion
         #region TextChanged & Formatting

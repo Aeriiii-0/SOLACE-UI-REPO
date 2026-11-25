@@ -67,6 +67,16 @@ namespace SOLUM_UI
             _ = OcrService.EnsureServerRunningAsync();
             // Initialize AutoUpdater in background with custom downloading UI
             InitializeAutoUpdater();
+            // Global window registration to ensure settings (bolder text, themes) apply to all windows and dialogs
+            EventManager.RegisterClassHandler(typeof(Window), Window.LoadedEvent, new RoutedEventHandler((sender, args) =>
+            {
+                if (sender is Window win)
+                {
+                    AppSettingsService.Instance.ApplyToWindow(win);
+                }
+            }));
+            AppSettingsService.Instance.ApplySettings();
+
             // Set shutdown mode so app closes when login closes (or MainWindow if authenticated)
             ShutdownMode = ShutdownMode.OnLastWindowClose;
             // Show login page as startup screen

@@ -291,7 +291,14 @@
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                                <TextBlock x:Name="Step1Title" Text="Primary Info" FontSize="12.5" FontWeight="Bold" Foreground="#702943"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock x:Name="Step1Title" Text="Primary Info" FontSize="12.5" FontWeight="Bold" Foreground="#702943"/>
+                                                    <Border x:Name="Step1LowConfPill" Background="#FEF3C7" BorderBrush="#F59E0B" BorderThickness="1"
+                                                            CornerRadius="8" Padding="5,1" Margin="6,0,0,0" Visibility="Collapsed"
+                                                            ToolTip="This step contains low-confidence OCR fields">
+                                                        <TextBlock x:Name="TxtStep1LowConf" Text="⚠ 0" FontSize="10" FontWeight="Bold" Foreground="#B45309"/>
+                                                    </Border>
+                                                </StackPanel>
                                                 <TextBlock Text="Identity &amp; verification" FontSize="10.5" Foreground="#9A8089"/>
                                             </StackPanel>
                                         </StackPanel>
@@ -302,7 +309,14 @@
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                                <TextBlock x:Name="Step2Title" Text="Secondary Info" FontSize="12.5" FontWeight="Bold" Foreground="#AAAAAA"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock x:Name="Step2Title" Text="Secondary Info" FontSize="12.5" FontWeight="Bold" Foreground="#AAAAAA"/>
+                                                    <Border x:Name="Step2LowConfPill" Background="#FEF3C7" BorderBrush="#F59E0B" BorderThickness="1"
+                                                            CornerRadius="8" Padding="5,1" Margin="6,0,0,0" Visibility="Collapsed"
+                                                            ToolTip="This step contains low-confidence OCR fields">
+                                                        <TextBlock x:Name="TxtStep2LowConf" Text="⚠ 0" FontSize="10" FontWeight="Bold" Foreground="#B45309"/>
+                                                    </Border>
+                                                </StackPanel>
                                                 <TextBlock Text="Address &amp; background" FontSize="10.5" Foreground="#AAAAAA"/>
                                             </StackPanel>
                                         </StackPanel>
@@ -313,7 +327,14 @@
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                                <TextBlock x:Name="Step3Title" Text="Circumstances" FontSize="12.5" FontWeight="Bold" Foreground="#AAAAAA"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock x:Name="Step3Title" Text="Circumstances" FontSize="12.5" FontWeight="Bold" Foreground="#AAAAAA"/>
+                                                    <Border x:Name="Step3LowConfPill" Background="#FEF3C7" BorderBrush="#F59E0B" BorderThickness="1"
+                                                            CornerRadius="8" Padding="5,1" Margin="6,0,0,0" Visibility="Collapsed"
+                                                            ToolTip="This step contains low-confidence OCR fields">
+                                                        <TextBlock x:Name="TxtStep3LowConf" Text="⚠ 0" FontSize="10" FontWeight="Bold" Foreground="#B45309"/>
+                                                    </Border>
+                                                </StackPanel>
                                                 <TextBlock Text="Family &amp; circumstance" FontSize="10.5" Foreground="#AAAAAA"/>
                                             </StackPanel>
                                         </StackPanel>
@@ -344,6 +365,15 @@
                                         Margin="8,0,0,0" Visibility="Collapsed"
                                         ToolTip="Total processing time taken by the OCR engine">
                                     <TextBlock x:Name="TxtOcrDuration" Text="0.0s" FontSize="12" Foreground="#334E68" FontWeight="Bold" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border x:Name="BadgeLowConfWarning" Background="#FFF7ED" BorderBrush="#FDBA74" BorderThickness="1.2"
+                                        Height="32" CornerRadius="16" Padding="14,0" Margin="8,0,0,0" Visibility="Collapsed"
+                                        Cursor="Hand" ToolTip="Click to review and confirm low-confidence fields in this step"
+                                        MouseLeftButtonUp="BadgeLowConfWarning_MouseLeftButtonUp">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="⚠ " FontSize="12" Foreground="#C2410C" FontWeight="Bold"/>
+                                        <TextBlock x:Name="TxtLowConfWarning" Text="Needs Review" FontSize="12" Foreground="#C2410C" FontWeight="SemiBold"/>
+                                    </StackPanel>
                                 </Border>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">

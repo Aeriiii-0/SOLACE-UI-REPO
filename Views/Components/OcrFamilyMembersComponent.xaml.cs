@@ -16,15 +16,20 @@ namespace SOLUM_UI.Views.Components
     public partial class OcrFamilyMembersComponent : UserControl
     {
         public event Action<string> FieldFocused;
+        public event Action LowConfidenceFieldsChanged;
 
         private readonly ObservableCollection<FamilyMemberRow> _familyRowData = new ObservableCollection<FamilyMemberRow>();
         private FamilyMemberRow _editingFamilyMember = null;
         private bool _isPopulating = false;
         public bool IsPopulating => _isPopulating;
+        private int _circumstanceConf = 100;
+        private bool _circumstanceModified = false;
 
         private static readonly SolidColorBrush ErrorBrush = new SolidColorBrush(Color.FromRgb(0xE5, 0x39, 0x35));
         private static readonly SolidColorBrush DefaultBrush = new SolidColorBrush(Color.FromRgb(0xD0, 0xB8, 0xC0));
         private static readonly Thickness DefaultThickness = new Thickness(1);
+        private static readonly SolidColorBrush EditedBadgeBg = new SolidColorBrush(Color.FromRgb(0xEB, 0xF5, 0xFB));
+        private static readonly SolidColorBrush EditedBadgeFg = new SolidColorBrush(Color.FromRgb(0x29, 0x80, 0xB9));
 
         private static readonly Regex NameRegex = new Regex(@"^[a-zA-ZñÑ\s\.\-']+$", RegexOptions.Compiled);
         private static readonly Regex NumberOnlyRegex = new Regex(@"^\d+$", RegexOptions.Compiled);
@@ -32,6 +37,8 @@ namespace SOLUM_UI.Views.Components
         {
             ErrorBrush.Freeze();
             DefaultBrush.Freeze();
+            EditedBadgeBg.Freeze();
+            EditedBadgeFg.Freeze();
         }
 
         public OcrFamilyMembersComponent()
@@ -233,6 +240,8 @@ namespace SOLUM_UI.Views.Components
         {
             if (resp == null) return;
             _isPopulating = true;
+            _circumstanceModified = false;
+            _circumstanceConf = (resp.Circumstance != null && resp.Circumstance.Detected) ? (int)(resp.Circumstance.Confidence * 100) : 100;
             try
             {
                 // Circumstances
@@ -425,11 +434,78 @@ namespace SOLUM_UI.Views.Components
                 badge.Visibility = Visibility.Collapsed;
             }
         }
+        private void MarkBadgeEdited(Border badge, TextBlock txt)
+        {
+            if (_isPopulating || badge == null || txt == null) return;
+            if (badge.Visibility == Visibility.Visible && txt.Text == "Edited") return;
+            badge.Visibility = Visibility.Visible;
+            badge.Background = EditedBadgeBg;
+            txt.Text = "Edited";
+            txt.Foreground = EditedBadgeFg;
+            LowConfidenceFieldsChanged?.Invoke();
+        }
+
+        private void TxtNeeds_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            MarkBadgeEdited(Badge_Needs, TxtConf_Needs);
+        }
+
+        private void TxtOtherIncome_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            MarkBadgeEdited(Badge_OtherIncome, TxtConf_OtherIncome);
+        }
+
+        public List<OcrLowConfidenceField> GetUnverifiedLowConfidenceFields(int threshold = 80)
+        {
+            var list = new List<OcrLowConfidenceField>();
+
+            void Check(string name, Border badge, TextBlock txt, string val, FrameworkElement ctrl)
+            {
+                if (badge == null || txt == null) return;
+                if (badge.Visibility != Visibility.Visible) return;
+                string t = txt.Text?.Trim() ?? "";
+                if (string.Equals(t, "Edited", StringComparison.OrdinalIgnoreCase)) return;
+                if (t.EndsWith("%") && int.TryParse(t.TrimEnd('%'), out int pct))
+                {
+                    if (pct < threshold)
+                    {
+                        list.Add(new OcrLowConfidenceField
+                        {
+                            FieldName = name,
+                            CurrentValue = string.IsNullOrWhiteSpace(val) ? "(Empty)" : val,
+                            ConfidencePercent = pct,
+                            TargetControl = ctrl
+                        });
+                    }
+                }
+            }
+
+            Check("Needs and Problems", Badge_Needs, TxtConf_Needs, TxtNeeds?.Text ?? "", TxtNeeds);
+            Check("Other Sources of Income", Badge_OtherIncome, TxtConf_OtherIncome, TxtOtherIncome?.Text ?? "", TxtOtherIncome);
+
+            if (!_circumstanceModified && _circumstanceConf < threshold && BadgeCircumstanceDetected?.Visibility == Visibility.Visible)
+            {
+                list.Add(new OcrLowConfidenceField
+                {
+                    FieldName = "Circumstance Code",
+                    CurrentValue = TxtCircumstanceBadge?.Text ?? "Detected Circumstance",
+                    ConfidencePercent = _circumstanceConf,
+                    TargetControl = ChkA1
+                });
+            }
+
+            return list;
+        }
         #endregion
         #region Circumstances Handling
 
         private void Circumstance_Changed(object sender, RoutedEventArgs e)
         {
+            if (!_isPopulating)
+            {
+                _circumstanceModified = true;
+                LowConfidenceFieldsChanged?.Invoke();
+            }
             if (PnlA2 != null) PnlA2.Visibility = ChkA2.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             if (PnlA4 != null) PnlA4.Visibility = ChkA4.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             if (PnlA5 != null) PnlA5.Visibility = ChkA5.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;

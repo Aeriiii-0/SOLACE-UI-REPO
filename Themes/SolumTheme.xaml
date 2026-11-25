@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <!-- ── SOLUM Brand Colors ── -->
     <Color x:Key="SolumPrimaryColor">#702943</Color>
     <Color x:Key="SolumPrimaryHoverColor">#8B3D56</Color>
@@ -26,6 +27,12 @@
     <SolidColorBrush x:Key="SolumCardBgBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="SolumCardAltBgBrush" Color="#FDFBFC"/>
     <SolidColorBrush x:Key="SolumRowAltBrush" Color="#F8FAFC"/>
+    <!-- ── Accessibility Dynamic Sizing & Colors ── -->
+    <sys:Double x:Key="SolumTableRowHeight">48</sys:Double>
+    <sys:Double x:Key="SolumButtonHeight">40</sys:Double>
+    <SolidColorBrush x:Key="SolumTableRowHoverBrush" Color="#FDF6F8"/>
+    <SolidColorBrush x:Key="SolumTableRowHoverBorderBrush" Color="Transparent"/>
+    <SolidColorBrush x:Key="SolumTableRowSelectedBorderBrush" Color="Transparent"/>
     <!-- ── Status Semantic Brushes ── -->
     <!-- Valid / Active (Green) -->
     <SolidColorBrush x:Key="StatusValidBg" Color="#DCFCE7"/>
@@ -54,7 +61,7 @@
     <!-- ── Standard Form Control Styles ── -->
     <!-- Primary Action Button -->
     <Style x:Key="SolumPrimaryButton" TargetType="Button">
-        <Setter Property="Height" Value="40"/>
+        <Setter Property="MinHeight" Value="{DynamicResource SolumButtonHeight}"/>
         <Setter Property="Padding" Value="16,0"/>
         <Setter Property="Background" Value="{StaticResource SolumPrimaryBrush}"/>
         <Setter Property="Foreground" Value="White"/>
@@ -90,7 +97,7 @@
     </Style>
     <!-- Secondary / Outline Button -->
     <Style x:Key="SolumSecondaryButton" TargetType="Button">
-        <Setter Property="Height" Value="40"/>
+        <Setter Property="MinHeight" Value="{DynamicResource SolumButtonHeight}"/>
         <Setter Property="Padding" Value="16,0"/>
         <Setter Property="Background" Value="White"/>
         <Setter Property="Foreground" Value="{StaticResource SolumTextBodyBrush}"/>

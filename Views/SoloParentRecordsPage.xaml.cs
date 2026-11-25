@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace SOLUM_UI
 {
@@ -961,6 +962,24 @@ namespace SOLUM_UI
         }
 
         private void RecordsList_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
+
+        private void RecordsList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (!AppSettingsService.Instance.SingleClickOpen) return;
+            if (e.OriginalSource is DependencyObject dep)
+            {
+                DependencyObject current = dep;
+                while (current != null && current != RecordsList)
+                {
+                    if (current is Button) return; // Don't trigger if clicked on an action button
+                    current = VisualTreeHelper.GetParent(current);
+                }
+            }
+            SoloParentRecordViewModel vm = RecordsList.SelectedItem as SoloParentRecordViewModel;
+            if (vm == null) return;
+            AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
+            OpenViewDialog(vm);
+        }
 
         private void RecordsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {

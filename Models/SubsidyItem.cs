@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
 using SOLUM_UI.Core;
+using SOLUM_UI.Services;
 
 namespace SOLUM_UI.Models
 {
@@ -19,6 +20,8 @@ namespace SOLUM_UI.Models
         public Guid SoloParentId { get; set; }
         public string SpId { get; set; }
         public string Name { get; set; }
+        public string AnonymousName => Rank > 0 ? $"Applicant #{Rank}" : "Applicant";
+        public string DisplayName => AppSettingsService.Instance.AnonymizeSubsidy ? AnonymousName : Name;
         public string Barangay { get; set; }
         public string SubsidyType { get; set; } = "Allowance";
         public string Priority { get; set; }
@@ -83,7 +86,9 @@ namespace SOLUM_UI.Models
                 var specialKids = ChildrenDetails?.Where(c => c.HasSpecialNeeds).ToList();
                 if (specialKids != null && specialKids.Count > 0)
                 {
-                    var details = specialKids.Select(k => !string.IsNullOrEmpty(k.SpecialNeedsCategory) ? $"{k.Name} ({k.SpecialNeedsCategory})" : k.Name);
+                    var details = AppSettingsService.Instance.AnonymizeSubsidy
+                        ? specialKids.Select(k => !string.IsNullOrEmpty(k.SpecialNeedsCategory) ? $"Dependent ({k.SpecialNeedsCategory})" : "Dependent with Special Needs")
+                        : specialKids.Select(k => !string.IsNullOrEmpty(k.SpecialNeedsCategory) ? $"{k.Name} ({k.SpecialNeedsCategory})" : k.Name);
                     return string.Join(", ", details);
                 }
                 int count = SpecialNeedsDependentsCount > 0 ? SpecialNeedsDependentsCount : 1;
@@ -305,6 +310,7 @@ namespace SOLUM_UI.Models
     public class ChildDetailItem
     {
         public string Name { get; set; }
+        public string DisplayName => AppSettingsService.Instance.AnonymizeSubsidy ? (!string.IsNullOrEmpty(Relationship) ? $"Dependent ({Relationship})" : "Dependent") : Name;
         public int Age { get; set; }
         public string Relationship { get; set; } = "Child";
         public DateTime Birthdate { get; set; }

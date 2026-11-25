@@ -90,6 +90,7 @@
         <Style x:Key="SelRow" TargetType="ListViewItem">
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="Background" Value="White"/>
+            <Setter Property="MinHeight" Value="{DynamicResource SolumTableRowHeight}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="BorderBrush" Value="#EDE2E6"/>
             <Setter Property="Padding" Value="0"/>
@@ -104,8 +105,8 @@
                             <GridViewRowPresenter VerticalAlignment="Stretch" Margin="0"/>
                         </Grid>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="RowBg" Property="Background" Value="#FDF6F8"/></Trigger>
-                            <Trigger Property="IsSelected" Value="True"><Setter TargetName="RowBg" Property="Background" Value="#F5E2E8"/></Trigger>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="RowBg" Property="Background" Value="{DynamicResource SolumTableRowHoverBrush}"/><Setter TargetName="RowBg" Property="BorderBrush" Value="{DynamicResource SolumTableRowHoverBorderBrush}"/></Trigger>
+                            <Trigger Property="IsSelected" Value="True"><Setter TargetName="RowBg" Property="Background" Value="#F5E2E8"/><Setter TargetName="RowBg" Property="BorderBrush" Value="{DynamicResource SolumTableRowSelectedBorderBrush}"/></Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -203,7 +204,7 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColName}" Margin="-6,0,-6,0" BorderBrush="#EDE2E6" BorderThickness="0" Padding="12,10">
-                                            <TextBlock Text="{Binding Name}" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding DisplayName}" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
@@ -243,7 +244,7 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="{Binding ActualWidth, ElementName=ColEmergencyName}" Margin="-6,0,-6,0" BorderBrush="#EDE2E6" BorderThickness="0" Padding="10,10">
-                                            <TextBlock Text="{Binding EmergencyContactName}" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding EmergencyContactName}"/>
+                                            <TextBlock Text="{Binding DisplayEmergencyContact}" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#1A1A1A" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding DisplayEmergencyContact}"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>

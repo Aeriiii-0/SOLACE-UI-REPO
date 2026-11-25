@@ -1,0 +1,362 @@
+<Page x:Class="SOLUM_UI.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:services="clr-namespace:SOLUM_UI.Services"
+      mc:Ignorable="d"
+      Title="System Settings"
+      Background="#FFFFFF">
+
+    <Page.Resources>
+        <!-- ═══ Colors ═══ -->
+        <SolidColorBrush x:Key="Maroon" Color="#702943"/>
+        <SolidColorBrush x:Key="MaroonDark" Color="#5A2035"/>
+        <SolidColorBrush x:Key="MaroonBorder" Color="#E5D3DA"/>
+        <SolidColorBrush x:Key="RoseTint" Color="#F5E8EC"/>
+        <SolidColorBrush x:Key="CardBg" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="RowHoverBg" Color="#FAF3F5"/>
+        <SolidColorBrush x:Key="MutedText" Color="#666666"/>
+        <SolidColorBrush x:Key="SubtleText" Color="#888888"/>
+        <SolidColorBrush x:Key="InkText" Color="#1E1418"/>
+
+        <!-- ═══ Section Card Style ═══ -->
+        <Style x:Key="SettingsCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBg}"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="BorderBrush" Value="{StaticResource MaroonBorder}"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="Padding" Value="24,20"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#702943" BlurRadius="14" ShadowDepth="2" Direction="270" Opacity="0.05"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ═══ Toggle Switch Style ═══ -->
+        <Style x:Key="ToggleSwitchStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="50"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <Border x:Name="Track" Background="#D5C5CB" CornerRadius="14"
+                                    BorderBrush="#C4B0B8" BorderThickness="1.2"/>
+                            <Ellipse x:Name="Thumb" Width="20" Height="20" Fill="White"
+                                     HorizontalAlignment="Left" Margin="4,0,0,0">
+                                <Ellipse.Effect>
+                                    <DropShadowEffect Color="#000000" BlurRadius="4" ShadowDepth="1" Opacity="0.2"/>
+                                </Ellipse.Effect>
+                            </Ellipse>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Track" Property="Background" Value="#702943"/>
+                                <Setter TargetName="Track" Property="BorderBrush" Value="#5A2035"/>
+                                <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/>
+                                <Setter TargetName="Thumb" Property="Margin" Value="0,0,4,0"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Track" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ═══ Segmented Scale Button Style ═══ -->
+        <Style x:Key="ScaleOptionButton" TargetType="Button">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="8"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#F6ECF0"/>
+                                <Setter Property="Foreground" Value="#702943"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="32,24,32,32">
+        <StackPanel MaxWidth="1020" HorizontalAlignment="Stretch">
+
+            <!-- ── Header Banner ── -->
+            <Grid Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Width="52" Height="52" CornerRadius="16" Background="{StaticResource RoseTint}" Margin="0,0,18,0">
+                    <Path Fill="{StaticResource Maroon}" Stretch="Uniform" Width="24" Height="24"
+                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                          Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
+                </Border>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="System Settings &amp; Accessibility" FontFamily="Segoe UI" FontSize="20" FontWeight="Bold" Foreground="{StaticResource InkText}"/>
+                    <TextBlock Text="Configure interface scaling, visual contrast, animation preferences, and input ergonomics." FontFamily="Segoe UI" FontSize="13" Foreground="{StaticResource MutedText}" Margin="0,3,0,0"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- ── SECTION 1: INTERFACE & DISPLAY ── -->
+            <Border Style="{StaticResource SettingsCard}">
+                <StackPanel>
+                    <TextBlock Text="INTERFACE &amp; DISPLAY" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Maroon}" Margin="0,0,0,16"/>
+
+                    <!-- Feature 1: Interface & Text Scale -->
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                            <TextBlock Text="Interface &amp; Text Scale" FontFamily="Segoe UI" FontSize="14.5" FontWeight="SemiBold" Foreground="{StaticResource InkText}"/>
+                            <TextBlock Text="Enlarge workspace typography and UI elements for high-DPI monitors or enhanced visibility." FontFamily="Segoe UI" FontSize="12" Foreground="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <!-- Segmented Scale Selector -->
+                        <Border Grid.Column="1" Background="#F4ECF0" CornerRadius="10" Padding="4" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="BtnScale100" Content="100% (Default)" Style="{StaticResource ScaleOptionButton}" Click="BtnScale_Click" Tag="1.0"/>
+                                <Button x:Name="BtnScale115" Content="115%" Style="{StaticResource ScaleOptionButton}" Click="BtnScale_Click" Tag="1.15"/>
+                                <Button x:Name="BtnScale130" Content="130%" Style="{StaticResource ScaleOptionButton}" Click="BtnScale_Click" Tag="1.30"/>
+                                <Button x:Name="BtnScale150" Content="150%" Style="{StaticResource ScaleOptionButton}" Click="BtnScale_Click" Tag="1.50"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Separator Background="{StaticResource MaroonBorder}" Margin="0,4,0,16"/>
+
+                    <!-- Feature 2: High-Contrast Mode -->
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                            <TextBlock Text="High-Contrast Mode" FontFamily="Segoe UI" FontSize="14.5" FontWeight="SemiBold" Foreground="{StaticResource InkText}"/>
+                            <TextBlock Text="Adds thick, prominent borders to buttons/inputs and maximizes text contrast." FontFamily="Segoe UI" FontSize="12" Foreground="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <ToggleButton x:Name="ToggleHighContrast" Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                      VerticalAlignment="Center" Click="ToggleSetting_Click"/>
+                    </Grid>
+
+                    <Separator Background="{StaticResource MaroonBorder}" Margin="0,4,0,16"/>
+
+                    <!-- Feature 3: Bolder Text -->
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                            <TextBlock Text="Bolder Text" FontFamily="Segoe UI" FontSize="14.5" FontWeight="SemiBold" Foreground="{StaticResource InkText}"/>
+                            <TextBlock Text="Increases font weight across tables, forms, and labels for easier scanning." FontFamily="Segoe UI" FontSize="12" Foreground="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <ToggleButton x:Name="ToggleBolderText" Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                      VerticalAlignment="Center" Click="ToggleSetting_Click"/>
+                    </Grid>
+
+                    <Separator Background="{StaticResource MaroonBorder}" Margin="0,4,0,16"/>
+
+                    <!-- Feature 4: Reduce Motion & Animations -->
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                            <TextBlock Text="Reduce Motion &amp; Animations" FontFamily="Segoe UI" FontSize="14.5" FontWeight="SemiBold" Foreground="{StaticResource InkText}"/>
+                            <TextBlock Text="Disables fade-ins, sliding panels, and hover transitions for instantaneous, static navigation." FontFamily="Segoe UI" FontSize="12" Foreground="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <ToggleButton x:Name="ToggleReduceMotion" Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                      VerticalAlignment="Center" Click="ToggleSetting_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ── SECTION 2: MOUSE & CONTROLS ── -->
+            <Border Style="{StaticResource SettingsCard}">
+                <StackPanel>
+                    <TextBlock Text="MOUSE &amp; CONTROLS" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Maroon}" Margin="0,0,0,16"/>
+
+                    <!-- Feature 5: Spacious Buttons & Table Rows -->
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                            <TextBlock Text="Spacious Buttons &amp; Table Rows" FontFamily="Segoe UI" FontSize="14.5" FontWeight="SemiBold" Foreground="{StaticResource InkText}"/>
+                            <TextBlock Text="Increases button heights to 44px+, widens table rows, and adds spacing between adjacent buttons." FontFamily="Segoe UI" FontSize="12" Foreground="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <ToggleButton x:Name="ToggleSpaciousTouch" Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                      VerticalAlignment="Center" Click="ToggleSetting_Click"/>
+                    </Grid>
+
+                    <Separator Background="{StaticResource MaroonBorder}" Margin="0,4,0,16"/>
+
+                    <!-- Feature 6: Single-Click to Open Records -->
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                            <TextBlock Text="Single-Click to Open Records" FontFamily="Segoe UI" FontSize="14.5" FontWeight="SemiBold" Foreground="{StaticResource InkText}"/>
+                            <TextBlock Text="Replaces double-click actions on table rows with a single click to inspect records directly." FontFamily="Segoe UI" FontSize="12" Foreground="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <ToggleButton x:Name="ToggleSingleClick" Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                      VerticalAlignment="Center" Click="ToggleSetting_Click"/>
+                    </Grid>
+
+                    <Separator Background="{StaticResource MaroonBorder}" Margin="0,4,0,16"/>
+
+                    <!-- Feature 7: Strong Hover & Focus Outlines -->
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                            <TextBlock Text="Strong Hover &amp; Focus Outlines" FontFamily="Segoe UI" FontSize="14.5" FontWeight="SemiBold" Foreground="{StaticResource InkText}"/>
+                            <TextBlock Text="Highlights active input fields and hovered table rows clearly with distinct outlines." FontFamily="Segoe UI" FontSize="12" Foreground="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <ToggleButton x:Name="ToggleFocusOutlines" Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                      VerticalAlignment="Center" Click="ToggleSetting_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ── SECTION 3: SECURITY & DATA PRIVACY ── -->
+            <Border Background="White" BorderBrush="{StaticResource MaroonBorder}" BorderThickness="1.2" CornerRadius="16" Padding="28,24" Margin="0,0,0,24">
+                <Border.Effect>
+                    <DropShadowEffect Color="#702943" BlurRadius="16" ShadowDepth="2" Opacity="0.04" Direction="270"/>
+                </Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="Security &amp; Data Privacy (RA 10173)" FontFamily="Segoe UI" FontSize="17" FontWeight="Bold" Foreground="{StaticResource Maroon}"/>
+                    <TextBlock Text="Safeguard citizen personal identifiable information (PII) and ensure fair, objective subsidy evaluations."
+                               FontFamily="Segoe UI" FontSize="12.5" Foreground="{StaticResource MutedText}" Margin="0,4,0,20"/>
+
+                    <!-- Feature 1: Session Idle Auto-Lock -->
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                            <TextBlock Text="Session Idle Auto-Lock" FontFamily="Segoe UI" FontSize="14.5" FontWeight="SemiBold" Foreground="{StaticResource InkText}"/>
+                            <TextBlock Text="Locks the screen during inactivity to prevent unauthorized access. Enter your password to resume. Press Ctrl+L to lock anytime." FontFamily="Segoe UI" FontSize="12" Foreground="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <!-- Segmented Auto-Lock Selector -->
+                        <Border Grid.Column="1" Background="#F4ECF0" CornerRadius="10" Padding="4" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="BtnLockNever" Content="Never" Style="{StaticResource ScaleOptionButton}" Click="BtnAutoLock_Click" Tag="0"/>
+                                <Button x:Name="BtnLock5Min" Content="5 Mins" Style="{StaticResource ScaleOptionButton}" Click="BtnAutoLock_Click" Tag="5"/>
+                                <Button x:Name="BtnLock15Min" Content="15 Mins (Default)" Style="{StaticResource ScaleOptionButton}" Click="BtnAutoLock_Click" Tag="15"/>
+                                <Button x:Name="BtnLock30Min" Content="30 Mins" Style="{StaticResource ScaleOptionButton}" Click="BtnAutoLock_Click" Tag="30"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Separator Background="{StaticResource MaroonBorder}" Margin="0,4,0,16"/>
+
+                    <!-- Feature 2: Anonymize Subsidy Candidates -->
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                            <TextBlock Text="Anonymize Subsidy Candidates (Blind Review)" FontFamily="Segoe UI" FontSize="14.5" FontWeight="SemiBold" Foreground="{StaticResource InkText}"/>
+                            <TextBlock Text="Hides applicant personal names and dependent names in Subsidy Recommendation (e.g. 'Applicant (SP-2024-001)'), ensuring allocations remain strictly merit and need-based." FontFamily="Segoe UI" FontSize="12" Foreground="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <ToggleButton x:Name="ToggleAnonymizeSubsidy" Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}"
+                                      VerticalAlignment="Center" Click="ToggleSetting_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ── SECTION 4: BOTTOM ACTION BAR ── -->
+            <Border Background="#FDF8FA" BorderBrush="{StaticResource MaroonBorder}" BorderThickness="1.2" CornerRadius="16" Padding="24,18" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                        <TextBlock Text="Reset System Preferences" FontFamily="Segoe UI" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource InkText}"/>
+                        <TextBlock Text="Restore all display scale, accessibility toggles, and interaction preferences to factory defaults." FontFamily="Segoe UI" FontSize="12" Foreground="{StaticResource MutedText}" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="1" Height="40" Padding="20,0" Cursor="Hand" Click="BtnRestoreDefaults_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="White" BorderBrush="{StaticResource Maroon}" BorderThickness="1.5" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <!-- Restore / Undo Icon -->
+                                        <Path Data="M12.5,8C9.85,8 7.45,9 5.6,10.6L2,7V16H11L7.38,12.38C8.77,11.22 10.54,10.5 12.5,10.5C16.04,10.5 19.05,12.81 20.1,16L22.47,15.22C21.08,11.03 17.15,8 12.5,8Z"
+                                              Fill="{StaticResource Maroon}" Stretch="Uniform" Width="15" Height="15" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Restore Default Settings" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Maroon}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="{StaticResource RoseTint}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#EAD4DC"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -986,52 +986,35 @@ namespace SOLUM_UI
 
 
 
+        private static readonly Geometry EyeOpenGeometry = Geometry.Parse("M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z");
+        private static readonly Geometry EyeClosedGeometry = Geometry.Parse("M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.09L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C20.87,15.39 21.89,13.78 22.46,12C20.73,7.61 16.47,4.5 12,4.5C10.5,4.5 9.09,4.75 7.79,5.2L9.64,7.05C10.37,6.69 11.16,7 12,7Z");
+
         private void BtnTogglePassword_Click(object sender, RoutedEventArgs e)
-
         {
-
             _isPasswordVisible = !_isPasswordVisible;
-
             if (_isPasswordVisible)
-
             {
-
                 TxtPasswordVisible.Text = TxtPassword.Password;
-
                 TxtPassword.Visibility = Visibility.Collapsed;
-
                 TxtPasswordVisible.Visibility = Visibility.Visible;
-
-                TxtToggleIcon.Text = "\uE7B3";
-
+                if (IconTogglePassword != null)
+                {
+                    IconTogglePassword.Data = EyeOpenGeometry;
+                }
                 TxtPasswordVisible.Focus();
-
                 TxtPasswordVisible.CaretIndex = TxtPasswordVisible.Text.Length;
-
-
-
             }
-
             else
-
             {
-
                 TxtPassword.Password = TxtPasswordVisible.Text;
-
                 TxtPasswordVisible.Visibility = Visibility.Collapsed;
-
                 TxtPassword.Visibility = Visibility.Visible;
-
-                TxtToggleIcon.Text = "\uED1A";
-
+                if (IconTogglePassword != null)
+                {
+                    IconTogglePassword.Data = EyeClosedGeometry;
+                }
                 TxtPassword.Focus();
-
-
-
             }
-
-
-
         }
 
 

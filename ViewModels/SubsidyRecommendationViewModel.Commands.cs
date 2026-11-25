@@ -141,19 +141,38 @@ namespace SOLUM_UI.ViewModels
                 if (!CanModifyGrantees) return;
                 if (ActiveCandidate != null)
                 {
-                    bool alreadyInShortlist = ShortlistRows.Any(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, ActiveCandidate.EvaluationId, ActiveCandidate.SoloParentId, ActiveCandidate.SpId));
-                    if (alreadyInShortlist)
+                    var sr = ActiveShortlistRow;
+                    if (sr != null)
                     {
-                        ToastNotification.Show("Already in Shortlist", $"{ActiveCandidate.Name} is already in the Approved Selection.", ToastType.Info);
+                        ToggleGrantee(sr, !sr.IsFinalGrantee);
                     }
                     else
                     {
                         ShortlistCandidate(ActiveCandidate);
                     }
-                    IsDrawerOpen = false;
                 }
             });
-            OpenOutlierModalCommand = new RelayCommand(p => { if (!CanModifyGrantees) return; OutlierTarget = p as SubsidyItem ?? ActiveCandidate; if (OutlierTarget != null) { _shortlistRevokeTargets = null; OutlierModalTitle = "Disqualify Candidate"; OutlierTargetNameAndId = null; IsOutlierModalOpen = true; } });
+            OpenOutlierModalCommand = new RelayCommand(p =>
+            {
+                if (!CanModifyGrantees) return;
+                var target = p as SubsidyItem ?? ActiveCandidate;
+                if (target != null)
+                {
+                    var sr = ShortlistRows?.FirstOrDefault(x => IsSameCandidate(x.EvaluationId, x.SoloParentId, x.SpId, target.EvaluationId, target.SoloParentId, target.SpId));
+                    if (sr != null)
+                    {
+                        PromptRevokeShortlist(sr);
+                    }
+                    else
+                    {
+                        _shortlistRevokeTargets = null;
+                        OutlierTarget = target;
+                        OutlierModalTitle = "Disqualify Candidate";
+                        OutlierTargetNameAndId = null;
+                        IsOutlierModalOpen = true;
+                    }
+                }
+            });
             CloseOutlierModalCommand = new RelayCommand(_ => { IsOutlierModalOpen = false; _shortlistRevokeTargets = null; });
             ConfirmOutlierRejectionCommand = new RelayCommand(_ => { if (!CanModifyGrantees) return; _ = ConfirmOutlierRejectionAsync(); });
             OpenDisqualifiedModalCommand = new RelayCommand(_ => {
@@ -329,7 +348,7 @@ namespace SOLUM_UI.ViewModels
             if (item == null) return;
             if (notify)
             {
-                bool ok = ActionConfirmDialog.Show("Shortlist Candidate", $"Move {item.Name} to Approved Selection & Audit for FY {ActiveCycleFiscalYear}?", "Shortlist", "Cancel", ConfirmThemeType.Primary);
+                bool ok = ActionConfirmDialog.Show("Shortlist Candidate", $"Move {item.DisplayName} to Approved Selection & Audit for FY {ActiveCycleFiscalYear}?", "Shortlist", "Cancel", ConfirmThemeType.Primary);
                 if (!ok) return;
             }
             item.Status = "Approved";
@@ -389,7 +408,7 @@ namespace SOLUM_UI.ViewModels
             UpdateShortlistAndFinalCollections();
             RecalculateSelectionCounts();
             NotifyQuotaMetricsChanged();
-            if (notify) ToastNotification.Show("Candidate Shortlisted", $"{item.Name} moved to Shortlist & Audit.", ToastType.Success);
+            if (notify) ToastNotification.Show("Candidate Shortlisted", $"{item.DisplayName} moved to Shortlist & Audit.", ToastType.Success);
         }
 
         private async void BatchConfirmShortlist()
