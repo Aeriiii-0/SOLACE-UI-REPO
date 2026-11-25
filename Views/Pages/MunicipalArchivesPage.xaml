@@ -353,6 +353,8 @@
                 <ListView x:Name="ArchivesList" BorderThickness="0" Background="Transparent"
                           HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                           ItemContainerStyle="{StaticResource ArchiveTableRow}"
+                          MouseDoubleClick="ArchivesList_MouseDoubleClick"
+                          PreviewMouseLeftButtonUp="ArchivesList_PreviewMouseLeftButtonUp"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                           ScrollViewer.VerticalScrollBarVisibility="Auto">
                     <ListView.View>
@@ -361,7 +363,7 @@
                             <GridViewColumn x:Name="ColName" Header="NAME" Width="260">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding FullName}" FontFamily="Segoe UI" FontSize="12.5" FontWeight="SemiBold" Foreground="#111111" VerticalAlignment="Center" Margin="12,0" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding FullName}" FontFamily="Segoe UI" FontSize="12.5" FontWeight="{DynamicResource SolumCellFontWeight}" Foreground="{DynamicResource SolumTextBodyBrush}" VerticalAlignment="Center" Margin="12,0" TextTrimming="CharacterEllipsis"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>

@@ -717,6 +717,18 @@ namespace SOLUM_UI
         private void ApplySize()
         {
             SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this, DialogShell);
+            if (DialogShell != null)
+            {
+                double scale = AppSettingsService.Instance.TextScale;
+                if (Math.Abs(scale - 1.0) < 0.01)
+                {
+                    DialogShell.LayoutTransform = Transform.Identity;
+                }
+                else
+                {
+                    DialogShell.LayoutTransform = new ScaleTransform(scale, scale);
+                }
+            }
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)

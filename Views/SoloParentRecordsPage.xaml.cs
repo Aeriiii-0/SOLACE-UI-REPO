@@ -215,6 +215,15 @@ namespace SOLUM_UI
 
             };
 
+            AppSettingsService.Instance.SettingsChanged += (s, e) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    UpdateDynamicPageSize();
+                    RecordsList?.Items.Refresh();
+                });
+            };
+
         }
 
         private void InitDynamicPaging()
@@ -240,16 +249,15 @@ namespace SOLUM_UI
 
         private void UpdateDynamicPageSize()
         {
-
             double availableHeight = RecordsList.ActualHeight;
             if (availableHeight <= 100) return;
             // GridView column header is 46px + 1px border. Leave 4px safety buffer.
-
             double rowsAvailable = availableHeight - 51;
             if (rowsAvailable <= 0) return;
-            // Each row is locked to 48px height.
 
-            int calculated = (int)Math.Floor(rowsAvailable / 48.0);
+            // Adapt row height dynamically if SpaciousTouch accessibility mode is enabled
+            double rowHeight = AppSettingsService.Instance.SpaciousTouch ? 58.0 : 48.0;
+            int calculated = (int)Math.Floor(rowsAvailable / rowHeight);
 
             int optimal = Math.Max(4, Math.Min(50, calculated));
             if (optimal != _pageSize)
@@ -259,11 +267,8 @@ namespace SOLUM_UI
                 {
                     _pageResizeDebounceTimer.Stop();
                     _pageResizeDebounceTimer.Start();
-
                 }
-
             }
-
         }
 
         private void ApplyRoleView()
@@ -974,20 +979,35 @@ namespace SOLUM_UI
                     if (current is Button) return; // Don't trigger if clicked on an action button
                     current = VisualTreeHelper.GetParent(current);
                 }
+
+                // Resolve clicked row directly to prevent race conditions on first click
+                var item = ItemsControl.ContainerFromElement(RecordsList, dep) as ListViewItem;
+                if (item?.DataContext is SoloParentRecordViewModel clickedVm)
+                {
+                    RecordsList.SelectedItem = clickedVm;
+                    AuditLogService.Instance.LogView(clickedVm.RawModel.Id, clickedVm.Name, GetCurrentUser(), CurrentUserRole);
+                    OpenViewDialog(clickedVm);
+                }
             }
-            SoloParentRecordViewModel vm = RecordsList.SelectedItem as SoloParentRecordViewModel;
-            if (vm == null) return;
-            AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
-            OpenViewDialog(vm);
         }
 
         private void RecordsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            if (e.OriginalSource is DependencyObject dep)
+            {
+                var item = ItemsControl.ContainerFromElement(RecordsList, dep) as ListViewItem;
+                if (item?.DataContext is SoloParentRecordViewModel clickedVm)
+                {
+                    AuditLogService.Instance.LogView(clickedVm.RawModel.Id, clickedVm.Name, GetCurrentUser(), CurrentUserRole);
+                    OpenViewDialog(clickedVm);
+                    return;
+                }
+            }
+
             SoloParentRecordViewModel vm = RecordsList.SelectedItem as SoloParentRecordViewModel;
             if (vm == null) return;
             AuditLogService.Instance.LogView(vm.RawModel.Id, vm.Name, GetCurrentUser(), CurrentUserRole);
             OpenViewDialog(vm);
-
         }
         /// <summary>Eye button in the Actions column: same as double-clicking the row.</summary>
 

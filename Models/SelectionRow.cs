@@ -19,7 +19,7 @@ namespace SOLUM_UI.Models
         public string SpId { get; set; }
         public string Name { get; set; }
         public string AnonymousName => Rank > 0 ? $"Applicant #{Rank}" : "Applicant";
-        public string DisplayName => AppSettingsService.Instance.AnonymizeSubsidy ? AnonymousName : Name;
+        public string DisplayName => !string.IsNullOrWhiteSpace(Name) ? Name : AnonymousName;
         public string Barangay { get; set; }
         public string SubsidyType { get; set; } = "Allowance";
         public string Priority { get; set; }
@@ -168,7 +168,7 @@ namespace SOLUM_UI.Models
         public string Address { get => _address; set { if (SetProperty(ref _address, value)) OnPropertyChanged(nameof(FullAddress)); } }
         public string FullAddress => !string.IsNullOrWhiteSpace(Address) ? $"{Address}, {Barangay}" : (!string.IsNullOrWhiteSpace(Barangay) ? Barangay : "—");
         public string EmergencyContactName { get => !string.IsNullOrWhiteSpace(_emergencyContactName) ? _emergencyContactName : "—"; set { if (SetProperty(ref _emergencyContactName, value)) OnPropertyChanged(nameof(EmergencySummary)); } }
-        public string DisplayEmergencyContact => AppSettingsService.Instance.AnonymizeSubsidy ? (!string.IsNullOrWhiteSpace(EmergencyContactName) && EmergencyContactName != "—" ? "Emergency Contact (Designated)" : "—") : EmergencyContactName;
+        public string DisplayEmergencyContact => !string.IsNullOrWhiteSpace(EmergencyContactName) ? EmergencyContactName : "—";
         public string EmergencyContactNumber { get => _emergencyContactNumber; set { if (SetProperty(ref _emergencyContactNumber, value)) { OnPropertyChanged(nameof(EmergencyContactFormatted)); OnPropertyChanged(nameof(EmergencySummary)); } } }
         public string EmergencyContactFormatted
         {

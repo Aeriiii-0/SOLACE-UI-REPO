@@ -26,7 +26,7 @@ namespace SOLUM_UI.Models
 
         public string FullName { get => _fullName; set => SetProperty(ref _fullName, value); }
         public string AnonymousName => Index > 0 ? $"Candidate #{Index}" : "Candidate";
-        public string DisplayName => AppSettingsService.Instance.AnonymizeSubsidy ? AnonymousName : FullName;
+        public string DisplayName => AnonymousName;
         public string SpId { get => _spId; set => SetProperty(ref _spId, value); }
         public string Barangay { get => _barangay; set => SetProperty(ref _barangay, value); }
 

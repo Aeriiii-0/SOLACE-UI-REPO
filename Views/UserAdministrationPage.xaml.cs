@@ -354,6 +354,11 @@ namespace SOLUM_UI
             DataObject.AddPastingHandler(TxtContactNumber, ContactPasteHandler);
             InitDynamicUserPaging();
             UpdatePagingControls();
+
+            SOLUM_UI.Services.AppSettingsService.Instance.SettingsChanged += (s, e) =>
+            {
+                Dispatcher.Invoke(() => UserList?.Items.Refresh());
+            };
         }
 
         private void InitDynamicUserPaging()

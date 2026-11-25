@@ -12,6 +12,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Text;
 using SOLUM_UI.Models;
+using SOLUM_UI.Services;
 using SOLUM_UI.ViewModels;
 
 namespace SOLUM_UI.Views.Dialogs
@@ -23,6 +24,20 @@ namespace SOLUM_UI.Views.Dialogs
         private static readonly SolidColorBrush Maroon = Hex("#702943");
         private static readonly SolidColorBrush BandBg = Hex("#F8ECF0");
         private static readonly SolidColorBrush RowLine = Hex("#EDE6EA");
+
+        private bool IsBolderText => AppSettingsService.Instance.BolderText;
+        private bool IsHighContrast => AppSettingsService.Instance.HighContrast;
+        private bool IsSpacious => AppSettingsService.Instance.SpaciousTouch;
+
+        private SolidColorBrush CurrentBorderBrush => IsHighContrast ? Brushes.Black : Maroon;
+        private SolidColorBrush CurrentHeaderBg => IsHighContrast ? Hex("#F0F0F0") : BandBg;
+        private SolidColorBrush CurrentDividerBrush => IsHighContrast ? Hex("#444444") : RowLine;
+        private SolidColorBrush CurrentLabelBrush => IsHighContrast ? Hex("#000000") : RecordViewDialogViewModel.BrLabel;
+        private SolidColorBrush CurrentValueBrush => IsHighContrast ? Hex("#000000") : RecordViewDialogViewModel.BrValue;
+        private FontWeight CurrentLabelFontWeight => IsBolderText ? FontWeights.SemiBold : FontWeights.Normal;
+        private FontWeight CurrentValueFontWeight => IsBolderText ? FontWeights.SemiBold : FontWeights.Normal;
+        private FontWeight CurrentHeaderFontWeight => IsBolderText ? FontWeights.ExtraBold : FontWeights.Bold;
+        private Thickness CurrentCellPadding => IsSpacious ? new Thickness(18, 12, 18, 12) : new Thickness(18, 8, 18, 9);
 
         public bool OpenedEdit => _vm.OpenedEdit;
 
@@ -42,11 +57,30 @@ namespace SOLUM_UI.Views.Dialogs
             _vm = new RecordViewDialogViewModel(record);
             DataContext = _vm;
             _vm.RequestClose += result => { SOLUM_UI.Core.WindowPositionHelper.SafeSetDialogResult(this, result); };
-            Loaded += (s, e) => { ApplySize(); BuildContent(); ConfigureRoleBasedVisibility(); };
-            
+            Loaded += (s, e) =>
+            {
+                ApplySize();
+                BuildContent();
+                ConfigureRoleBasedVisibility();
+                AppSettingsService.Instance.SettingsChanged += OnSettingsChanged;
+            };
+
             // Show dim overlay when profile details opens
             Loaded += (s, e) => MainWindow.ShowDimOverlay(fullWindow: true);
-            Closed += (s, e) => MainWindow.HideDimOverlay();
+            Closed += (s, e) =>
+            {
+                AppSettingsService.Instance.SettingsChanged -= OnSettingsChanged;
+                MainWindow.HideDimOverlay();
+            };
+        }
+
+        private void OnSettingsChanged(object sender, EventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                ApplySize();
+                BuildContent();
+            });
         }
 
         private void ConfigureRoleBasedVisibility()
@@ -179,8 +213,35 @@ namespace SOLUM_UI.Views.Dialogs
             SOLUM_UI.Core.WindowPositionHelper.CoverOwnerWindow(this);
             if (DialogShell != null)
             {
-                DialogShell.MaxHeight = Math.Floor(Math.Max(500, Math.Min(Height - 40, 840)));
-                DialogShell.Width = Math.Round(Math.Min(Math.Max(Width * 0.74, 950), 1040) - 70);
+                double scale = AppSettingsService.Instance.TextScale;
+                if (Math.Abs(scale - 1.0) < 0.01)
+                {
+                    DialogShell.LayoutTransform = Transform.Identity;
+                    DialogShell.MaxHeight = Math.Floor(Math.Max(500, Math.Min(Height - 40, 840)));
+                    DialogShell.Width = Math.Round(Math.Min(Math.Max(Width * 0.74, 950), 1040) - 70);
+                }
+                else
+                {
+                    DialogShell.LayoutTransform = new ScaleTransform(scale, scale);
+                    DialogShell.MaxHeight = Math.Floor(Math.Max(460, Math.Min((Height - 40) / scale, 860)));
+                    DialogShell.Width = Math.Round(Math.Min(Math.Max((Width * 0.74) / scale, 840), 1040) - 70);
+                }
+
+                if (IsHighContrast)
+                {
+                    DialogShell.BorderBrush = Brushes.Black;
+                    DialogShell.BorderThickness = new Thickness(2.5);
+                }
+                else
+                {
+                    DialogShell.BorderBrush = Maroon;
+                    DialogShell.BorderThickness = new Thickness(1.5);
+                }
+            }
+
+            if (BtnActions != null)
+            {
+                BtnActions.Height = IsSpacious ? 38 : 30;
             }
         }
 
@@ -189,6 +250,8 @@ namespace SOLUM_UI.Views.Dialogs
             var r = _vm.Record;
             if (r == null) return;
             TxtRecordName.Text = r.Name ?? string.Empty;
+            TxtRecordName.FontWeight = IsBolderText ? FontWeights.Bold : FontWeights.SemiBold;
+            TxtRecordName.Foreground = IsHighContrast ? Brushes.Black : Hex("#1B1722");
 
             int age = 0;
             if (r.DateOfBirth != DateTime.MinValue)
@@ -337,26 +400,26 @@ namespace SOLUM_UI.Views.Dialogs
             var outer = new Border
             {
                 Background = Brushes.White,
-                BorderBrush = Maroon,
-                BorderThickness = new Thickness(1.2),
+                BorderBrush = CurrentBorderBrush,
+                BorderThickness = new Thickness(IsHighContrast ? 2.0 : 1.2),
                 CornerRadius = new CornerRadius(14),
-                Margin = new Thickness(0, 0, 0, 18)
+                Margin = new Thickness(0, 0, 0, IsSpacious ? 24 : 18)
             };
             var root = new StackPanel();
             var header = new Border
             {
-                Background = BandBg,
-                BorderBrush = Maroon,
-                BorderThickness = new Thickness(0, 0, 0, 1),
+                Background = CurrentHeaderBg,
+                BorderBrush = CurrentBorderBrush,
+                BorderThickness = new Thickness(0, 0, 0, IsHighContrast ? 1.5 : 1),
                 CornerRadius = new CornerRadius(13, 13, 0, 0),
-                Padding = new Thickness(16, 10, 16, 10)
+                Padding = new Thickness(16, IsSpacious ? 14 : 10, 16, IsSpacious ? 14 : 10)
             };
             header.Child = new TextBlock
             {
                 Text = title.ToUpper(),
                 FontSize = 11,
-                FontWeight = FontWeights.Bold,
-                Foreground = Maroon,
+                FontWeight = CurrentHeaderFontWeight,
+                Foreground = CurrentBorderBrush,
                 FontFamily = new FontFamily("Segoe UI")
             };
             body = new StackPanel();
@@ -772,17 +835,18 @@ namespace SOLUM_UI.Views.Dialogs
         {
             var cell = new Border
             {
-                Padding = new Thickness(18, 8, 18, 9),
-                BorderBrush = RowLine,
-                BorderThickness = new Thickness(0, 0, 0, showDivider ? 1 : 0)
+                Padding = CurrentCellPadding,
+                BorderBrush = CurrentDividerBrush,
+                BorderThickness = new Thickness(0, 0, 0, showDivider ? (IsHighContrast ? 1.5 : 1) : 0)
             };
             var sp = new StackPanel();
             sp.Children.Add(new TextBlock
             {
                 Text = label,
                 FontSize = 11,
-                Foreground = RecordViewDialogViewModel.BrLabel,
-                Margin = new Thickness(0, 0, 0, 1),
+                FontWeight = CurrentLabelFontWeight,
+                Foreground = CurrentLabelBrush,
+                Margin = new Thickness(0, 0, 0, 2),
                 FontFamily = new FontFamily("Segoe UI")
             });
 
@@ -793,8 +857,8 @@ namespace SOLUM_UI.Views.Dialogs
             {
                 Text = displayVal,
                 FontSize = 14,
-                FontWeight = FontWeights.Normal,
-                Foreground = isBlank ? RecordViewDialogViewModel.BrMutedVal : RecordViewDialogViewModel.BrValue,
+                FontWeight = CurrentValueFontWeight,
+                Foreground = isBlank ? (IsHighContrast ? Hex("#555555") : RecordViewDialogViewModel.BrMutedVal) : CurrentValueBrush,
                 TextWrapping = TextWrapping.Wrap,
                 FontFamily = new FontFamily("Segoe UI")
             });

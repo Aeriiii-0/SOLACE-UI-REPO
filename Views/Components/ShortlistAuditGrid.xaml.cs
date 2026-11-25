@@ -33,6 +33,10 @@ namespace SOLUM_UI.Views.Components
                 UpdateBatchColumn();
                 AdjustColumnWidths();
             };
+            SOLUM_UI.Services.AppSettingsService.Instance.SettingsChanged += (s, e) =>
+            {
+                Dispatcher.Invoke(() => ShortlistListView?.Items.Refresh());
+            };
             IsVisibleChanged += (s, e) =>
             {
                 if (IsVisible)

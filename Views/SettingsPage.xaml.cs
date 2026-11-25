@@ -43,7 +43,6 @@ namespace SOLUM_UI
             ToggleSpaciousTouch.IsChecked = settings.SpaciousTouch;
             ToggleSingleClick.IsChecked = settings.SingleClickOpen;
             ToggleFocusOutlines.IsChecked = settings.StrongFocusOutlines;
-            ToggleAnonymizeSubsidy.IsChecked = settings.AnonymizeSubsidy;
         }
 
         private void UpdateScaleButtons(double scale)
@@ -154,10 +153,6 @@ namespace SOLUM_UI
             else if (sender == ToggleFocusOutlines)
             {
                 settings.StrongFocusOutlines = ToggleFocusOutlines.IsChecked == true;
-            }
-            else if (sender == ToggleAnonymizeSubsidy)
-            {
-                settings.AnonymizeSubsidy = ToggleAnonymizeSubsidy.IsChecked == true;
             }
         }
 

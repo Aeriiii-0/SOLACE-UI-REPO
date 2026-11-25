@@ -255,6 +255,26 @@ namespace SOLUM_UI.Services
                             mw.ContentArea.LayoutTransform = new ScaleTransform(_data.TextScale, _data.TextScale);
                     }
                 }
+                else
+                {
+                    // Generic dialog & window scaling (RecordViewDialog, RecordDialog, OcrScanDialog, ActionConfirmDialog, etc.)
+                    var shell = win.FindName("DialogShell") as FrameworkElement
+                             ?? win.FindName("Shell") as FrameworkElement;
+                    if (shell != null)
+                    {
+                        if (Math.Abs(_data.TextScale - 1.0) < 0.01)
+                            shell.LayoutTransform = Transform.Identity;
+                        else
+                            shell.LayoutTransform = new ScaleTransform(_data.TextScale, _data.TextScale);
+                    }
+                    else if (win.Content is FrameworkElement root)
+                    {
+                        if (Math.Abs(_data.TextScale - 1.0) < 0.01)
+                            root.LayoutTransform = Transform.Identity;
+                        else
+                            root.LayoutTransform = new ScaleTransform(_data.TextScale, _data.TextScale);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -350,6 +370,10 @@ namespace SOLUM_UI.Services
                 else if (!_data.StrongFocusOutlines && merged.Contains(_focusOutlinesDict))
                     merged.Remove(_focusOutlinesDict);
             }
+
+            // Dynamic Font Weights for Bolder Text
+            Application.Current.Resources["SolumCellFontWeight"] = _data.BolderText ? FontWeights.SemiBold : FontWeights.Normal;
+            Application.Current.Resources["SolumHeadingFontWeight"] = _data.BolderText ? FontWeights.Bold : FontWeights.SemiBold;
         }
 
         protected void OnPropertyChanged(string propertyName)

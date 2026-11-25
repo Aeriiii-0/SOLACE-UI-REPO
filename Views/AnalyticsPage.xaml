@@ -301,12 +301,6 @@
                             </Trigger>
                         </Style.Triggers>
                     </Style>
-                    <Style x:Key="PillBorder" TargetType="Border">
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="BorderBrush" Value="#7D2245"/>
-                        <Setter Property="BorderThickness" Value="1.5"/>
-                        <Setter Property="CornerRadius" Value="18"/>
-                    </Style>
                     <Style x:Key="KpiLabel" TargetType="TextBlock">
                         <Setter Property="FontFamily" Value="Segoe UI"/>
                         <Setter Property="FontSize" Value="11"/>
@@ -328,85 +322,132 @@
                 </StackPanel.Resources>
 
                 <!-- ===== Toolbar: controls ===== -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,18">
-                    <!-- Scope & date pill -->
-                    <Border Style="{StaticResource PillBorder}" Padding="12,6" Margin="0,0,8,0" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z"
-                                  Fill="#7D2245" Stretch="Uniform" Width="12" Height="12" Margin="0,0,7,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding ActiveFilterSummary}" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#7D2245" VerticalAlignment="Center"/>
+                <Grid Margin="0,0,0,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- LEFT: Active Filter Content View (Clean informational display, NOT a pill) -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z"
+                              Fill="#702943" Stretch="Uniform" Width="13" Height="13" Margin="0,0,7,0" VerticalAlignment="Center" Opacity="0.85"/>
+                        <TextBlock Text="Viewing: " FontFamily="Segoe UI" FontSize="13" FontWeight="Normal" Foreground="#6B7280" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding ActiveFilterSummary}" FontFamily="Segoe UI" FontSize="13" FontWeight="SemiBold" Foreground="#1F2937" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- RIGHT: Metadata & Action Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Last updated field (Clean informational metadata text, NOT a pill) -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,14,0">
+                            <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
+                                  Fill="#9CA3AF" Stretch="Uniform" Width="12" Height="12" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtAnalyticsLastRefreshed" Text="Updated: Just now" FontSize="11.5" FontFamily="Segoe UI" FontWeight="Normal" Foreground="#6B7280" VerticalAlignment="Center"/>
                         </StackPanel>
-                    </Border>
 
-                    <!-- Reset (only when filter active) -->
-                    <Button Visibility="{Binding IsFilterActive, Converter={StaticResource BoolToVisibilityConverter}}"
-                            Style="{StaticResource TextOnlyButtonStyle}" Click="FilterReset_Click" Cursor="Hand"
-                            ToolTip="Reset filter to Citywide &amp; Current Month" Margin="0,0,8,0">
-                        <Border Style="{StaticResource PillBorder}" BorderThickness="1" Padding="10,4">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="✕" FontSize="10" FontWeight="Bold" Foreground="#7D2245" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Reset" FontFamily="Segoe UI" FontSize="11" FontWeight="SemiBold" Foreground="#7D2245" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                    </Button>
-
-                    <!-- Filter -->
-                    <Border Style="{StaticResource PillBorder}" Margin="0,0,8,0">
-                        <Button x:Name="FilterDropBtn" Background="Transparent" BorderThickness="0" Cursor="Hand" Width="82" Height="34" Click="FilterDrop_Click">
+                        <!-- Reset button (only when filter active) -->
+                        <Button Visibility="{Binding IsFilterActive, Converter={StaticResource BoolToVisibilityConverter}}"
+                                Height="34" Padding="14,0" Margin="0,0,8,0" Cursor="Hand" Click="FilterReset_Click"
+                                ToolTip="Reset filter to Citywide &amp; Current Month">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border Background="Transparent" CornerRadius="18">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="#7D2245" Stretch="Uniform" Width="12" Height="12" Margin="0,0,6,0"/>
-                                <TextBlock Text="Filter" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#7D2245" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                    </Border>
-
-                    <!-- Export -->
-                    <Border Style="{StaticResource PillBorder}" Width="34" Height="34" Margin="0,0,8,0">
-                        <Button x:Name="ExportBtn" Background="Transparent" BorderThickness="0" Cursor="Hand" ToolTip="Export to Excel" Click="ExportBtn_Click">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="18">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Border x:Name="Bg" Background="#FEF2F2" BorderBrush="#EF4444" BorderThickness="1.2" CornerRadius="17" Padding="{TemplateBinding Padding}">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#EF4444" BlurRadius="6" ShadowDepth="1" Opacity="0.12"/>
+                                        </Border.Effect>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="✕" FontSize="10.5" FontWeight="Bold" Foreground="#DC2626" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Reset" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#DC2626" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#F5ECEE"/>
+                                            <Setter TargetName="Bg" Property="Background" Value="#FEE2E2"/>
+                                            <Setter TargetName="Bg" Property="BorderBrush" Value="#DC2626"/>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#FECACA"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
-                            <Path Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,19L8,15H11V12H13V15H16L12,19Z"
-                                  Fill="#7D2245" Stretch="Uniform" Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Button>
-                    </Border>
 
-                    <!-- Last updated -->
-                    <Border Style="{StaticResource PillBorder}" Padding="12,7" Margin="0,0,8,0" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Path Data="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"
-                                  Fill="#7D2245" Stretch="Uniform" Width="12" Height="12" Margin="0,0,6,0" Opacity="0.75"/>
-                            <TextBlock x:Name="TxtAnalyticsLastRefreshed" Text="Updated: Just now" FontSize="11" FontFamily="Segoe UI" FontWeight="Medium" Foreground="#7D2245"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Refresh -->
-                    <Border Style="{StaticResource PillBorder}" Width="34" Height="34">
-                        <Button x:Name="RefreshBtn" Background="Transparent" BorderThickness="0" Cursor="Hand" ToolTip="Refresh Analytics Data" Click="RefreshBtn_Click">
+                        <!-- Filter button -->
+                        <Button x:Name="FilterDropBtn" Height="34" Padding="16,0" Margin="0,0,8,0" Cursor="Hand" Click="FilterDrop_Click"
+                                ToolTip="Filter analytics by timeframe, date range, or barangay">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="Transparent" CornerRadius="18">
+                                    <Border x:Name="Bg" Background="#702943" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="17" Padding="{TemplateBinding Padding}">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#702943" BlurRadius="6" ShadowDepth="1" Opacity="0.22"/>
+                                        </Border.Effect>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Path Data="M3,2H21V4L14,11V20L10,18V11L3,4V2Z" Fill="White" Stretch="Uniform" Width="11" Height="11" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Filter" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                            <Path Data="M7,10L12,15L17,10H7Z" Fill="White" Stretch="Uniform" Width="9" Height="9" VerticalAlignment="Center" Opacity="0.85"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#8B2349"/>
+                                            <Setter TargetName="Bg" Property="BorderBrush" Value="#702943"/>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#5C1D38"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <!-- Export button -->
+                        <Button x:Name="ExportBtn" Height="34" Padding="14,0" Margin="0,0,8,0" Cursor="Hand" ToolTip="Export to Excel" Click="ExportBtn_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="White" BorderBrush="#702943" BorderThickness="1.2" CornerRadius="17" Padding="{TemplateBinding Padding}">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#000000" BlurRadius="4" ShadowDepth="1" Opacity="0.06"/>
+                                        </Border.Effect>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Path Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,19L8,15H11V12H13V15H16L12,19Z"
+                                                  Fill="#702943" Stretch="Uniform" Width="13" Height="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Export" FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="#702943" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                            <Setter TargetName="Bg" Property="BorderBrush" Value="#5C1D38"/>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#F5E4E9"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <!-- Refresh button -->
+                        <Button x:Name="RefreshBtn" Width="34" Height="34" Cursor="Hand" ToolTip="Refresh Analytics Data" Click="RefreshBtn_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Bg" Background="White" BorderBrush="#702943" BorderThickness="1.2" CornerRadius="17">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#000000" BlurRadius="4" ShadowDepth="1" Opacity="0.06"/>
+                                        </Border.Effect>
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bg" Property="Background" Value="#F5ECEE"/>
+                                            <Setter TargetName="Bg" Property="Background" Value="#FBF5F7"/>
+                                            <Setter TargetName="Bg" Property="BorderBrush" Value="#5C1D38"/>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="#F5E4E9"/>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="Bg" Property="Opacity" Value="0.45"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -414,11 +455,11 @@
                             <Grid>
                                 <Path x:Name="RefreshIcon"
                                       Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
-                                      Fill="#7D2245" Stretch="Uniform" Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                      Fill="#702943" Stretch="Uniform" Width="13" Height="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Grid>
                         </Button>
-                    </Border>
-                </StackPanel>
+                    </StackPanel>
+                </Grid>
 
                 <!-- No-data banner -->
                 <Border Margin="0,0,0,18" Background="#FFF8F0" CornerRadius="12" BorderBrush="#F59E0B" BorderThickness="1.5" Padding="20,14"
@@ -554,19 +595,54 @@
                                 <TextBlock Text="{Binding BarangayChartSubtitle, Mode=OneWay, FallbackValue='Ranked by solo parent count, 10 barangays per page. Hover a point for the count.'}" Style="{StaticResource PanelSubtitle}"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
-                                <TextBlock FontSize="11" FontFamily="Segoe UI" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="0,0,10,0">
+                                <TextBlock FontSize="11" FontFamily="Segoe UI" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="0,0,12,0">
                                     <Run Text="Page "/><Run Text="{Binding CurrentBarangayPage, Mode=OneWay}"/><Run Text=" of "/><Run Text="{Binding TotalBarangayPages, Mode=OneWay}"/>
                                 </TextBlock>
-                                <Border BorderBrush="#7D2245" BorderThickness="1" CornerRadius="12" Padding="12,3" Margin="0,0,6,0">
-                                    <Button x:Name="PreviousBarangayButton" Content="Previous" FontSize="11" FontWeight="SemiBold"
-                                            Foreground="#7D2245" IsEnabled="{Binding HasPreviousBarangayPage}"
-                                            Click="PreviousBarangayButton_Click" Cursor="Hand" Style="{StaticResource TextOnlyButtonStyle}"/>
-                                </Border>
-                                <Border Background="#7D2245" CornerRadius="12" Padding="16,3">
-                                    <Button x:Name="NextBarangayButton" Content="Next" FontSize="11" FontWeight="SemiBold"
-                                            Foreground="White" IsEnabled="{Binding HasNextBarangayPage}"
-                                            Click="NextBarangayButton_Click" Cursor="Hand" Style="{StaticResource TextOnlyButtonStyle}"/>
-                                </Border>
+                                <Button x:Name="PreviousBarangayButton" Height="28" Padding="12,0" Margin="0,0,6,0"
+                                        IsEnabled="{Binding HasPreviousBarangayPage}"
+                                        Click="PreviousBarangayButton_Click" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bd" Background="White" BorderBrush="#7D2245" BorderThickness="1.2" CornerRadius="14" Padding="{TemplateBinding Padding}">
+                                                <TextBlock Text="Previous" FontSize="11" FontWeight="SemiBold" Foreground="#7D2245" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#FBF5F7"/>
+                                                    <Setter TargetName="Bd" Property="BorderBrush" Value="#5C1D38"/>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#F5E4E9"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="Bd" Property="Opacity" Value="0.4"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button x:Name="NextBarangayButton" Height="28" Padding="14,0"
+                                        IsEnabled="{Binding HasNextBarangayPage}"
+                                        Click="NextBarangayButton_Click" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bd" Background="#7D2245" BorderBrush="#5C1D38" BorderThickness="1" CornerRadius="14" Padding="{TemplateBinding Padding}">
+                                                <TextBlock Text="Next" FontSize="11" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#8B2349"/>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#5C1D38"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="Bd" Property="Opacity" Value="0.4"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
                             </StackPanel>
                         </Grid>
                         <Canvas x:Name="CvBarangay" Height="290" Margin="0,16,0,0" ClipToBounds="True" Background="Transparent"/>
@@ -1077,7 +1153,7 @@
                                 Click="FilterReset_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="#F5EEF1" CornerRadius="10"
+                                    <Border x:Name="Bg" Background="#F5EEF1" CornerRadius="21"
                                             BorderBrush="#DCC8CE" BorderThickness="1.5">
                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
@@ -1095,7 +1171,7 @@
                                 Click="FilterApply_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Bg" Background="#702943" CornerRadius="10">
+                                    <Border x:Name="Bg" Background="#702943" CornerRadius="21">
                                         <Border.Effect>
                                             <DropShadowEffect Color="#702943" BlurRadius="8" ShadowDepth="2" Opacity="0.25"/>
                                         </Border.Effect>

@@ -37,6 +37,10 @@ namespace SOLUM_UI.Views.Components
                     AdjustColumnWidths();
                 }
             };
+            SOLUM_UI.Services.AppSettingsService.Instance.SettingsChanged += (s, e) =>
+            {
+                Dispatcher.Invoke(() => QueueListView?.Items.Refresh());
+            };
         }
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)

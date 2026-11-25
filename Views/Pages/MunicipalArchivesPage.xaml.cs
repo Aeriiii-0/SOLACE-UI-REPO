@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using SOLUM_UI.DTOs.Archive;
+using SOLUM_UI.Services;
 using SOLUM_UI.Services.Api;
 using SOLUM_UI.Views;
 using SOLUM_UI.Views.Dialogs;
@@ -43,6 +44,11 @@ namespace SOLUM_UI.Views.Pages
                 ApplyRolePermissions();
                 ResizeColumns();
                 await LoadArchivesAsync();
+            };
+
+            AppSettingsService.Instance.SettingsChanged += (s, e) =>
+            {
+                Dispatcher.Invoke(() => ArchivesList?.Items.Refresh());
             };
         }
 
@@ -282,6 +288,45 @@ namespace SOLUM_UI.Views.Pages
             finally
             {
                 if (ArchivesSkeletonLoader != null) ArchivesSkeletonLoader.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void ArchivesList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (!AppSettingsService.Instance.SingleClickOpen) return;
+            if (e.OriginalSource is DependencyObject dep)
+            {
+                DependencyObject cur = dep;
+                while (cur != null && cur != ArchivesList)
+                {
+                    if (cur is Button) return;
+                    cur = VisualTreeHelper.GetParent(cur);
+                }
+
+                var item = ItemsControl.ContainerFromElement(ArchivesList, dep) as ListViewItem;
+                if (item?.DataContext is ArchivedSoloParentRowViewModel row && row.Id != Guid.Empty)
+                {
+                    ArchivesList.SelectedItem = row;
+                    OpenDossierDialog(row.Id);
+                }
+            }
+        }
+
+        private void ArchivesList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is DependencyObject dep)
+            {
+                var item = ItemsControl.ContainerFromElement(ArchivesList, dep) as ListViewItem;
+                if (item?.DataContext is ArchivedSoloParentRowViewModel row && row.Id != Guid.Empty)
+                {
+                    OpenDossierDialog(row.Id);
+                    return;
+                }
+            }
+
+            if (ArchivesList.SelectedItem is ArchivedSoloParentRowViewModel sel && sel.Id != Guid.Empty)
+            {
+                OpenDossierDialog(sel.Id);
             }
         }
 

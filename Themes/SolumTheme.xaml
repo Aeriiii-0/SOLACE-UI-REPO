@@ -33,6 +33,8 @@
     <SolidColorBrush x:Key="SolumTableRowHoverBrush" Color="#FDF6F8"/>
     <SolidColorBrush x:Key="SolumTableRowHoverBorderBrush" Color="Transparent"/>
     <SolidColorBrush x:Key="SolumTableRowSelectedBorderBrush" Color="Transparent"/>
+    <FontWeight x:Key="SolumCellFontWeight">Normal</FontWeight>
+    <FontWeight x:Key="SolumHeadingFontWeight">SemiBold</FontWeight>
     <!-- ── Status Semantic Brushes ── -->
     <!-- Valid / Active (Green) -->
     <SolidColorBrush x:Key="StatusValidBg" Color="#DCFCE7"/>

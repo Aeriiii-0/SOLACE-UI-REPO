@@ -22,6 +22,10 @@ namespace SOLUM_UI.Views.Components
                     AdjustColumnWidths();
                 }
             };
+            SOLUM_UI.Services.AppSettingsService.Instance.SettingsChanged += (s, e) =>
+            {
+                Dispatcher.Invoke(() => FinalGranteesListView?.Items.Refresh());
+            };
         }
 
         private void FinalGranteesListView_SizeChanged(object sender, SizeChangedEventArgs e)
