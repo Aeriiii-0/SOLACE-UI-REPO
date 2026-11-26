@@ -299,12 +299,21 @@ namespace SOLUM_UI
             string currentEmail = _currentProfileDto?.Email ?? MainWindow.CurrentUserEmail ?? string.Empty;
             string currentContactNumber = _currentProfileDto?.ContactNumber ?? MainWindow.ContactNumber ?? string.Empty;
             
+            var owner = Window.GetWindow(this) ?? Application.Current?.MainWindow;
             var dialog = new Views.Dialogs.EditProfileDialog(currentFirstName, currentLastName, currentEmail, currentContactNumber)
             {
-                Owner = Window.GetWindow(this)
+                Owner = owner
             };
             
-            if (dialog.ShowDialog() == true && dialog.Confirmed)
+            SOLUM_UI.Core.WindowPositionHelper.CenterOnOwner(dialog, owner);
+            
+            bool? dialogResult;
+            using (MainWindow.ModalScope(fullWindow: true))
+            {
+                dialogResult = dialog.ShowDialog();
+            }
+            
+            if (dialogResult == true && dialog.Confirmed)
             {
                 // Update local DTO and MainWindow static session properties
                 if (_currentProfileDto != null)
