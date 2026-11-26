@@ -158,9 +158,11 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <!-- Search box -->
-                <Border Grid.Column="0" Background="White" CornerRadius="20"
-                        BorderBrush="#D4B6C2" BorderThickness="1.2" Height="34" Margin="0,0,10,0">
+
+                <!-- Search box (Collapsed: Candidate records are anonymized for blind review) -->
+                <Border Grid.Column="0" x:Name="QueueSearchBox" Background="White" CornerRadius="20"
+                        BorderBrush="#D4B6C2" BorderThickness="1.2" Height="34" Margin="0,0,10,0"
+                        Visibility="Collapsed">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -238,6 +240,7 @@
                         </Button>
                     </Grid>
                 </Border>
+
                 <!-- Filter pill button (bound label) -->
                 <Border Grid.Column="1" x:Name="FilterPillBtn" CornerRadius="16"
                         BorderBrush="#5C1D38" BorderThickness="1.2" Padding="12,0" Height="34"
